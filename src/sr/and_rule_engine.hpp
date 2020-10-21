@@ -64,7 +64,8 @@ public:
                                  set<Agent *> master_agents );
         void FilterKeyers( set<PatternLink> *possible_keyer_links );
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
-                                   Agent *agent );
+                                   set<PatternLink> *my_normal_links,
+                                   PatternLink link );
         void CreateVariousThings( const set<Agent *> &normal_agents, 
                                   const set<Agent *> &surrounding_agents );
  
@@ -75,6 +76,7 @@ public:
         TreePtr< MatchAll<Node> > closure_pattern;
         set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
+        set<PatternLink> my_normal_links;
         set< Agent *> my_evaluators;   
         map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
@@ -109,7 +111,7 @@ private:
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
                                 const CouplingKeys &external_combined_keys,
-                                const SolutionMap &internal_combined_solution );
+                                const SolutionMap &combined_solution );
     void CompareAfterPass();
     
 public:
@@ -129,15 +131,17 @@ private:
 
     // Keys are mapped agaist agents, even though one of the links into
     // the agent is the keyer. This is well-defined and avoids merging
-    // this instance's problem into master instance's problems.
+    // this instance's problem into master instance's problems. Note:
+    // couplings are not allowed to specify the MMAX node.
     const CouplingKeys *master_keys;
-    CouplingKeys internal_coupling_keys; 
+    CouplingKeys my_coupling_keys; 
     CouplingKeys external_keys; 
 
     // These are partial solutions, and are mapped against the links
-    // into the agents (half-link model).
-    SolutionMap master_coupling_candidates;
-    SolutionMap internal_solution; 
+    // into the agents (half-link model). Note: solutions can specify
+    // the MMAX node.
+    SolutionMap master_solution;
+    SolutionMap my_solution; 
 };
 
 #endif

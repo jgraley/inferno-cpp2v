@@ -45,7 +45,12 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     root_pattern_link = PatternLink( Agent::AsAgent(closure_pattern), &closure_pattern->patterns.front() );
     
     set<Agent *> normal_agents;
-    PopulateNormalAgents( &normal_agents, root_agent );    
+    set<PatternLink> normal_links;
+    PopulateNormalAgents( &normal_agents, &normal_links, root_pattern_link );    
+    for( PatternLink plink : normal_links )
+        if( master_agents.count( plink.GetChildAgent() ) == 0 )
+            my_normal_links.insert( plink );
+            
     my_normal_agents = SetDifference( normal_agents, master_agents );       
     if( my_normal_agents.empty() ) 
         return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
@@ -271,15 +276,26 @@ void AndRuleEngine::Plan::FilterKeyers(set<PatternLink> *possible_keyer_links)
 
 
 void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents, 
-                                                Agent *agent )
+                                                set<PatternLink> *normal_links,
+                                                PatternLink link )
 {
+    // Note that different links can point to the same agent, so 
+    // unique agents is the stronger condition
+    
+    if( normal_links->count(link) != 0 )
+        return; // Links must be uniquified (weaker condition)
+    normal_links->insert(link);
+    
+    Agent *agent = link.GetChildAgent();    
     if( normal_agents->count(agent) != 0 )
-        return; // Only act on couplings the first time they are reached
+        return; // Agents must be uniquified (stronger condition)
     normal_agents->insert(agent);
 
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
     FOREACH( PatternLink link, pq->GetNormalLinks() )
-        PopulateNormalAgents( normal_agents, link.GetChildAgent() );        
+    {
+        PopulateNormalAgents( normal_agents, normal_links, link );        
+    }
 }
 
 
@@ -359,7 +375,7 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
     if( !match )
         throw NoSolution();
 
-    // Recreate internal_coupling_keys
+    // Recreate my_coupling_keys
     for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
     {
         if( p.first == plan.root_agent ) 
@@ -367,8 +383,9 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
             // Constraint's self-variable is fixed because we're at root
             // TODO it would be nice to be able to do p.second->GetAllVariables()
             // and and obtain the force back from the constraint
-            internal_solution[plan.root_pattern_link] = start_x;
-            external_keys[plan.root_agent] = start_x;
+            InsertSolo(my_solution, make_pair(plan.root_pattern_link, start_x));
+            KeyCoupling(external_keys, make_pair(plan.root_pattern_link, start_x));
+            // TODO not sure if external_keys is right any more
         }
         else
         {
@@ -382,8 +399,10 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
             if( plan.my_normal_agents.count(vars.front()) )
             {
                 ASSERT(false); 
-                //internal_solution[vars.front()] = vals.front();    // TODO!! #171
+                //InsertSolo(my_solution, make_pair(vars.front(), vals.front()));       // TODO!! #171
+                //KeyCoupling(external_keys, make_pair(vars.front(), vals.front()));    // TODO!! #171
                 external_keys[vars.front()] = vals.front();    
+                // TODO not sure if external_keys is right any more
             }
         }            
     }
@@ -408,16 +427,16 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Are we at a residual coupling?
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
-            CompareCoupling( internal_coupling_keys, link );
-            TRACE("Accepted working coupling for ")(link)(" key=")(internal_coupling_keys.at(link.GetChildAgent()))("\n");
-            InsertSolo( internal_solution, link );       
+            CompareCoupling( my_coupling_keys, link );
+            TRACE("Accepted working coupling for ")(link)(" key=")(my_coupling_keys.at(link.GetChildAgent()))("\n");
+            InsertSolo( my_solution, link );       
             continue;
         }
         
         // Master couplings are now checked in a post-pass
         if( plan.master_boundary_links.count(link) > 0 )
         {
-            InsertSolo( master_coupling_candidates, link);
+            InsertSolo( master_solution, link);
             continue;
         }
 
@@ -427,7 +446,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( plan.coupling_keyer_links.count( link ) )
         {
             ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
-            KeyCoupling( internal_coupling_keys, link );
+            KeyCoupling( my_coupling_keys, link );
         }
 
         DecidedCompare(link);   
@@ -469,8 +488,9 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    InsertSolo( internal_solution, link );                
-    KeyCoupling( external_keys, link );
+    InsertSolo( my_solution, link );                
+    if( link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+        KeyCoupling( external_keys, link );
 }
 
 
@@ -538,13 +558,13 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 void AndRuleEngine::CompareAfterPassAgent( Agent *agent, 
                                            TreePtr<Node> x,
                                            const CouplingKeys &external_combined_keys,
-                                           const SolutionMap &internal_combined_solution )
+                                           const SolutionMap &combined_solution )
 {
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), internal_combined_solution );
+    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), combined_solution );
     TRACEC("Relocated links ")(ll)("\n");    
     
     // We will need a conjecture, so that we can iterate through multiple 
@@ -620,13 +640,13 @@ void AndRuleEngine::CompareAfterPass()
     const CouplingKeys external_combined_keys = MapUnion( *master_keys, external_keys );          
     TRACEC("External combined keys ")(external_combined_keys)("\n");    
 
-    const SolutionMap internal_combined_solution = MapUnion( master_coupling_candidates, internal_solution );      
-    TRACEC("Internal combined solution ")(internal_combined_solution)("\n");    
+    const SolutionMap combined_solution = MapUnion( master_solution, my_solution );      
+    TRACEC("Internal combined solution ")(combined_solution)("\n");    
 
-    for( auto agent : plan.my_normal_agents )
+    for( auto plink : plan.my_normal_links )
     {
-        TreePtr<Node> x = external_combined_keys.at(agent);
-        CompareAfterPassAgent( agent, x, external_combined_keys, internal_combined_solution );
+        TreePtr<Node> x = combined_solution.at(plink);
+        CompareAfterPassAgent( plink.GetChildAgent(), x, external_combined_keys, combined_solution );
     }
 }
 
@@ -654,7 +674,7 @@ void AndRuleEngine::CompareMasterKeys()
 {
     for( auto plink : plan.master_boundary_links )
     {
-        LocatedLink link(plink, master_coupling_candidates.at(plink));
+        LocatedLink link(plink, master_solution.at(plink));
         CompareCoupling( *master_keys, link );
         TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
     }
@@ -690,9 +710,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     //int i=0;
     while(1)
     {
-        internal_solution.clear();
+        my_solution.clear();
         external_keys.clear();
-        internal_coupling_keys.clear();
+        my_coupling_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         GetNextCSPSolution( start_x );
@@ -707,7 +727,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            master_coupling_candidates.clear();            
+            master_solution.clear();            
             DecidedCompare( root_link );            
             CompareMasterKeys();
 #endif
@@ -768,6 +788,8 @@ void AndRuleEngine::CompareCoupling( const CouplingKeys &keys, const LocatedLink
 
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
+    //TreePtr<Node> key_x = keys.at(agent);
+    //TreePtr<Node> residual_x = keys.at(agent);
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent) ) ); 
@@ -784,6 +806,10 @@ void AndRuleEngine::CompareCoupling( const CouplingKeys &keys, const LocatedLink
 
 void AndRuleEngine::KeyCoupling( CouplingKeys &keys, const LocatedLink &keyer_link )
 {
+    // A coupling keyed to Magic-Match-Anything-X would not be able to 
+    // restrict the residuals wrt to each other. 
+    ASSERT( keyer_link.GetChildX() != DecidedQueryCommon::MMAX_Node );
+    
     // A coupling relates the coupled agent to an X node, not the
     // link into the agent.
     InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), 
