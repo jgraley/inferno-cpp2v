@@ -212,7 +212,7 @@ void SCREngine::Compare( TreePtr<Node> start_x )
 }
 
 
-void SCREngine::KeyReplaceNodes( const CouplingKeys *coupling_keys ) const
+void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
 {
     INDENT("K");   
         
@@ -235,7 +235,7 @@ TreePtr<Node> SCREngine::Replace() const
 }
 
 
-void SCREngine::GatherCouplings( CouplingKeys *coupling_keys ) const
+void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 {
 	// Get couplings from agents into the supplied map if not there already
     FOREACH( Agent *a, *plan.my_agents )
@@ -245,7 +245,7 @@ void SCREngine::GatherCouplings( CouplingKeys *coupling_keys ) const
 
 
 void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
-                                      const CouplingKeys *master_keys ) 
+                                      const CouplingKeysMap *master_keys ) 
 {
     INDENT(">");
     TRACE("Cannonicalise\n");
@@ -266,7 +266,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
 
     if( !plan.my_engines.empty() )
     {
-		CouplingKeys coupling_keys = MapUnion( *master_keys, 
+		CouplingKeysMap coupling_keys = MapUnion( *master_keys, 
                                               plan.and_rule_engine->GetCouplingKeys() );    
 		
         for( const pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
@@ -287,7 +287,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
-                                        const CouplingKeys *master_keys )
+                                        const CouplingKeysMap *master_keys )
 {
     INDENT("}");
     TRACE("begin RCR\n");

@@ -195,7 +195,7 @@ void AgentCommon::ResetKey()
 }
 
 
-void AgentCommon::KeyReplace( const CouplingKeys *coupling_keys )
+void AgentCommon::KeyReplace( const CouplingKeysMap *coupling_keys )
 {   
     SetKey( coupling_keys->at(this) );  
 }

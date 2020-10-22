@@ -32,7 +32,7 @@ public:
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *blocks ) const;
     virtual void AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_scr_engine );
-    void SetMasterCouplingKeys( const CouplingKeys &keys );
+    void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
@@ -44,7 +44,7 @@ public:
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
     
-    CouplingKeys master_keys;
+    CouplingKeysMap master_keys;
 
 private:
     bool is_search;

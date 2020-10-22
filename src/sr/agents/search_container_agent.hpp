@@ -23,7 +23,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const;                  
-    virtual void KeyReplace( const CouplingKeys *coupling_keys ); 
+    virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};

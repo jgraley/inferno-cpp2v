@@ -32,7 +32,7 @@ public:
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
                     
 private:
-    typedef map< Agent *, TreePtr<Node> > CouplingKeys;
+    typedef map< Agent *, TreePtr<Node> > CouplingKeysMap;
     const struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
@@ -61,16 +61,16 @@ private:
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
 public:
-    void GatherCouplings( CouplingKeys *coupling_keys ) const;
+    void GatherCouplings( CouplingKeysMap *coupling_keys ) const;
     int RepeatingCompareReplace( TreePtr<Node> *proot,
-                                 const CouplingKeys *master_keys );
+                                 const CouplingKeysMap *master_keys );
     
     void SingleCompareReplace( TreePtr<Node> *proot,
-                               const CouplingKeys *master_keys );
+                               const CouplingKeysMap *master_keys );
     void Compare( TreePtr<Node> start_x );
 
 private:
-    void KeyReplaceNodes( const CouplingKeys *coupling_keys) const;
+    void KeyReplaceNodes( const CouplingKeysMap *coupling_keys) const;
     TreePtr<Node> Replace() const;
 
 public:

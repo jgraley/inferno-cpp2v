@@ -18,7 +18,7 @@ namespace SR
 class SpecialBase;
 class SCREngine;
 class Agent;
-typedef map< Agent *, TreePtr<Node> > CouplingKeys;
+typedef map< Agent *, TreePtr<Node> > CouplingKeysMap;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -51,7 +51,7 @@ public:
                                        const list<LocatedLink> &required_links ) const = 0;                                                
     virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
-    virtual void KeyReplace( const CouplingKeys *coupling_keys ) = 0;
+    virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
@@ -84,7 +84,7 @@ public:
     void SetKey( TreePtr<Node> x );
     TreePtr<Node> GetKey();                                  
     void ResetKey();    
-    virtual void KeyReplace( const CouplingKeys *coupling_keys );
+    virtual void KeyReplace( const CouplingKeysMap *coupling_keys );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
@@ -113,7 +113,7 @@ public:
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
     virtual void AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_engine ) = 0;
-    virtual void SetMasterCouplingKeys( const CouplingKeys &keys ) = 0;
+    virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
 };
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---

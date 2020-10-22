@@ -104,38 +104,38 @@ private:
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
     void CompareEvaluatorLinks( Agent *agent, 
-                                const CouplingKeys *combined_keys, 
+                                const CouplingKeysMap *combined_keys, 
                                 const SolutionMap *after_pass_keys );
     void CompareMultiplicityLinks( LocatedLink link, 
-                                   const CouplingKeys *combined_keys ); 
+                                   const CouplingKeysMap *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
-                                const CouplingKeys &external_combined_keys,
+                                const CouplingKeysMap &subordinate_keys,
                                 const SolutionMap &combined_solution );
     void CompareAfterPass();
     
 public:
     void Compare( TreePtr<Node> start_x,
-                  const CouplingKeys *master_keys );
+                  const CouplingKeysMap *master_keys );
     void CompareTrivialProblem( LocatedLink root_link );
     void CompareMasterKeys();
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
-    const CouplingKeys &GetCouplingKeys();
+    const CouplingKeysMap &GetCouplingKeys();
 
 private:    
-    void CompareCoupling( const CouplingKeys &keys, const LocatedLink &residual_link );
-    void KeyCoupling( CouplingKeys &keys, const LocatedLink &keyer_link );
-    void AssertNewCoupling( const CouplingKeys &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
+    void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
+    void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
+    void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
     // Keys are mapped agaist agents, even though one of the links into
     // the agent is the keyer. This is well-defined and avoids merging
     // this instance's problem into master instance's problems. Note:
     // couplings are not allowed to specify the MMAX node.
-    const CouplingKeys *master_keys;
-    CouplingKeys my_coupling_keys; 
-    CouplingKeys external_keys; 
+    const CouplingKeysMap *master_keys;
+    CouplingKeysMap my_coupling_keys; 
+    CouplingKeysMap external_keys; 
 
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
