@@ -266,7 +266,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 // Now take a copy. 
                 xremaining.clear();
                 FOREACH( TreePtr<Node> tp, *old_decision.container )
-                    xremaining.push_back(tp);
+                    xremaining.insert(tp);
                     
                 // re-submit the exact same decision.
                 xit = query.SkipDecision();
