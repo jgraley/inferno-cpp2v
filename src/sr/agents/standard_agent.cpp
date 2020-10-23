@@ -9,7 +9,7 @@
 
 using namespace SR;
 
-//#define ERASE_ITERATOR
+//#define ERASE_USING_ITERATOR
 //#define CHECK_ITERATOR_IN_CONTAINER
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
@@ -289,9 +289,9 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
             for( ContainerInterface::iterator checkit=xremaining.begin(); checkit != xremaining.end(); ++checkit )
                 if( checkit==xit )
                     found=true;
-            ASSERT( found );
+            ASSERT( found ); // If not found, we have a detached iterator, see #167
 #endif
-#ifdef ERASE_ITERATOR
+#ifdef ERASE_USING_ITERATOR
             xremaining.erase( xit );
 #else           
             int n = xremaining.erase( *xit );
