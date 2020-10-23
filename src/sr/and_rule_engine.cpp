@@ -555,7 +555,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 }
 
 
-void AndRuleEngine::CompareAfterPassAgent( Agent *agent, 
+void AndRuleEngine::RegenerationPassAgent( Agent *agent, 
                                            TreePtr<Node> x,
                                            const CouplingKeysMap &subordinate_keys,
                                            const SolutionMap &combined_solution )
@@ -634,7 +634,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
 }      
 
 
-void AndRuleEngine::CompareAfterPass()
+void AndRuleEngine::RegenerationPass()
 {
     INDENT("R");
     const CouplingKeysMap subordinate_keys = MapUnion( *master_keys, external_keys );          
@@ -646,7 +646,7 @@ void AndRuleEngine::CompareAfterPass()
     for( auto plink : plan.my_normal_links )
     {
         TreePtr<Node> x = combined_solution.at(plink);
-        CompareAfterPassAgent( plink.GetChildAgent(), x, subordinate_keys, combined_solution );
+        RegenerationPassAgent( plink.GetChildAgent(), x, subordinate_keys, combined_solution );
     }
 }
 
@@ -732,7 +732,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             CompareMasterKeys();
 #endif
 
-            CompareAfterPass();
+            RegenerationPass();
         }
         catch( const ::Mismatch& mismatch )
         {                

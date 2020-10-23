@@ -108,11 +108,11 @@ private:
                                 const SolutionMap *after_pass_keys );
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const CouplingKeysMap *combined_keys ); 
-    void CompareAfterPassAgent( Agent *agent, 
+    void RegenerationPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
                                 const CouplingKeysMap &subordinate_keys,
                                 const SolutionMap &combined_solution );
-    void CompareAfterPass();
+    void RegenerationPass();
     
 public:
     void Compare( TreePtr<Node> start_x,
