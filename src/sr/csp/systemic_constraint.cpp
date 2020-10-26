@@ -6,9 +6,10 @@
 
 using namespace CSP;
 
-SystemicConstraint::Plan::Plan( SR::Agent *agent_, 
+SystemicConstraint::Plan::Plan( SR::PatternLink root_link_, 
                                 VariableQueryLambda vql ) :
-    agent( agent_ ),
+    root_link( root_link_ ),
+    agent( root_link.GetChildAgent() ),
     pq( agent->GetPatternQuery() )
 {
     GetAllVariables();
@@ -25,9 +26,9 @@ SystemicConstraint::Plan::Plan( SR::Agent *agent_,
 }
 
 
-SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
+SystemicConstraint::SystemicConstraint( SR::PatternLink root_link, 
                                         VariableQueryLambda vql ) :
-    plan( agent_, vql )
+    plan( root_link, vql )
 {
 }
 
@@ -36,11 +37,11 @@ void SystemicConstraint::Plan::GetAllVariables()
 {
     all_variables.clear();
     
-    all_variables.push_back( agent ); // The me-variable
+    all_variables.push_back( root_link ); // The me-variable
     
     FOREACH( SR::PatternLink link, pq->GetNormalLinks() )
     {
-        VariableId var = link.GetChildAgent();
+        VariableId var = link;
         all_variables.push_back( var );  
     }
 }
@@ -123,7 +124,7 @@ void SystemicConstraint::TraceProblem() const
         }
         fit++;
         
-        TRACEC(*var)(scat)(sflags)("\n");
+        TRACEC(var)(scat)(sflags)("\n");
     }
     
 }

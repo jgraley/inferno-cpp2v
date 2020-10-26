@@ -5,6 +5,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
+#include "../link.hpp"
 
 #include <memory>
 #include <list>
@@ -50,7 +51,7 @@ struct ValueFlags
 };
 
 
-typedef SR::Agent * VariableId;
+typedef SR::PatternLink VariableId;
 
 struct VariableFlags
 {

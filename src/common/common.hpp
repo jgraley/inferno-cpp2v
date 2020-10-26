@@ -81,6 +81,19 @@ inline set<KEY> SetDifference( const set<KEY> &s1, const set<KEY> &s2 )
 }    
 
 
+template< typename T0, typename T1 >
+inline list< pair<typename T0::value_type, typename T1::value_type> > Zip( const T0 &x0, const T1 &x1 )
+{
+    ASSERT( x0.size() == x1.size() );
+    list< pair<typename T0::value_type, typename T1::value_type> > result;
+    typename T0::const_iterator it0 = x0.begin();
+    typename T1::const_iterator it1 = x1.begin();
+    while( it0 != x0.end() )
+        result.push_back( make_pair(*it0++, *it1++) );
+    return result;
+}    
+
+
 template< typename KEY >
 inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
 {

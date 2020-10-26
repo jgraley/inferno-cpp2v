@@ -1,3 +1,5 @@
+#include "and_rule_engine.hpp"
+
 #include "csp/systemic_constraint.hpp"
 #include "csp/simple_solver.hpp"
 #include "csp/solver_holder.hpp"
@@ -14,8 +16,6 @@
 #include "link.hpp"
 #include "tree/cpptree.hpp"
 #include "equivalence.hpp"
-
-#include "and_rule_engine.hpp"
 
 #include <list>
 
@@ -60,8 +60,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
         
     master_boundary_agents.clear();    
     master_boundary_links.clear();
-    reached.clear();
-    PopulateForSolver( root_agent, 
+    reached_agents.clear();
+    reached_links.clear();
+    PopulateForSolver( root_pattern_link, 
                        master_agents );
 
     set<PatternLink> possible_keyer_links; // maps from child to parent
@@ -71,42 +72,32 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     FilterKeyers(&possible_keyer_links);
 #ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
-    for( Agent *constraint_agent : my_normal_agents )
+    set<Agent *> check_we_got_the_right_agents;
+    for( PatternLink constraint_link : my_normal_links )
     {        
-        CSP::VariableQueryLambda vql = [&](Agent *link_agent) -> CSP::VariableFlags
+        if( coupling_residual_links.count(constraint_link) > 0 )
+            continue; // No contraint for a coupling residual link
+            
+        // Only one constraint per agent
+        ASSERT( check_we_got_the_right_agents.count( constraint_link.GetChildAgent() ) == 0 );
+        check_we_got_the_right_agents.insert( constraint_link.GetChildAgent() );            
+            
+        CSP::VariableQueryLambda vql = [&](PatternLink link) -> CSP::VariableFlags
         {
             CSP::VariableFlags flags;
-            
-            shared_ptr<PatternQuery> pq = constraint_agent->GetPatternQuery();
-            PatternLink link;
-            for( PatternLink cur_link : pq->GetNormalLinks() )
-            {
-                if( cur_link.GetChildAgent() == link_agent )
-                {
-                    ASSERT(!link);
-                    ASSERT(cur_link);
-                    link = cur_link; // Found a link the the agent the constaint mentioned: not safe! TODO could be parallel links!
-                }
-            }
-            // Link will be nullptr if this is the self-variable
-            ASSERT( link || link_agent==constraint_agent )
-                  ("Engine being queried via lambda about a non-normal linked agent\n")
-                  ("Constraint agent ")(constraint_agent)("\n")
-                  ("Linked agent ")(link_agent)("\n");
-            
-                    
-            if( !link ) // Self-variable must be by location
+ 
+            if( link == constraint_link ) // Self-variable must be by location
                 flags.compare_by = CSP::CompareBy::LOCATION;   
             else if( coupling_residual_links.count(link) > 0 ) // Coupling residuals are by value
                 flags.compare_by = CSP::CompareBy::EQUIVALENCE;
-            else if( master_boundary_agents.count(link_agent) > 0) // Couplings to master are by value
+            else if( master_boundary_links.count(link) > 0) // Couplings to master are by value
                 flags.compare_by = CSP::CompareBy::EQUIVALENCE;
             else
                 flags.compare_by = CSP::CompareBy::LOCATION;   
                                  
-            if( link_agent==root_agent ) // Root variable will be forced
+            if( link == root_pattern_link ) // Root variable will be forced
                 flags.freedom = CSP::Freedom::FORCED;
-            else if( master_boundary_agents.count(link_agent) > 0) // Couplings to master are forced
+            else if( master_boundary_links.count(link) > 0) // Couplings to master are forced
                 flags.freedom = CSP::Freedom::FORCED;
             else
                 flags.freedom = CSP::Freedom::FREE;
@@ -114,21 +105,24 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
             return flags;            
         };
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_agent, vql );
-        my_constraints[constraint_agent] = c;    
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_link, vql );
+        my_constraints[constraint_link] = c;    
         constraints.push_back(c);
     }
+
+    ASSERT( check_we_got_the_right_agents == my_normal_agents );
+
     // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
     // take the same route we do with DecidedCompare(). Need to remove FORCED agents
     // though.
-    list<Agent *> free_normal_agents_ordered;
-    for( Agent *agent : normal_agents_ordered )
+    list<PatternLink> free_normal_links_ordered;
+    for( PatternLink link : normal_links_ordered )
     {
-        if( agent != root_agent &&
-            master_boundary_agents.count(agent) == 0 )
-            free_normal_agents_ordered.push_back( agent );
+        if( link != root_pattern_link &&
+            master_boundary_agents.count(link.GetChildAgent()) == 0 )
+            free_normal_links_ordered.push_back( link );
     }
-    auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_agents_ordered);
+    auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_links_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
@@ -141,15 +135,19 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
 }
 
 
-void AndRuleEngine::Plan::PopulateForSolver( Agent *agent,
+void AndRuleEngine::Plan::PopulateForSolver( PatternLink link,
                                              const set<Agent *> &master_agents )
 {
-    // Ignore repeated hits
-    if( reached.count(agent) > 0 )    
+    if( reached_links.count(link) > 0 )    
         return; 
-    reached.insert(agent);
+    reached_links.insert(link);
 
-    normal_agents_ordered.push_back( agent );
+    normal_links_ordered.push_back( link );
+    Agent *agent = link.GetChildAgent();
+    
+    if( reached_agents.count(agent) > 0 )    
+        return; 
+    reached_agents.insert(agent);
 
     if( master_agents.count( agent ) > 0 )
     {
@@ -164,7 +162,7 @@ void AndRuleEngine::Plan::PopulateForSolver( Agent *agent,
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
     {
-        PopulateForSolver( link.GetChildAgent(), master_agents );        
+        PopulateForSolver( link, master_agents );        
         
         // Note: here, we won't see root if root is a master agent (i.e. trivial pattern)
         if( master_boundary_agents.count( link.GetChildAgent() ) )
@@ -339,9 +337,10 @@ void AndRuleEngine::ExpandDomain( set< TreePtr<Node> > &domain )
     // transformations occur in parent-then-child order. That's why this 
     // part is here and not in the CSP stuff: it exploits knowlege of 
     // the directedenss of the pattern trees.
-    for( Agent *agent : plan.normal_agents_ordered )
-        if( plan.master_boundary_agents.count(agent) == 0 )
-            plan.my_constraints.at(agent)->ExpandDomain( domain );  
+    for( PatternLink link : plan.normal_links_ordered )
+        if( plan.my_constraints.count(link) > 0 &&  // residual links don't have constraints
+            plan.master_boundary_agents.count(link.GetChildAgent()) == 0 ) // effectively a residual
+            plan.my_constraints.at(link)->ExpandDomain( domain );  
 }
 
 
@@ -354,12 +353,16 @@ void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
         domain.insert(*wx_it);
     
     // Determine the full set of forces 
-    CouplingKeysMap forces = *master_keys;
-    forces[plan.root_agent] = start_x;
+    for( PatternLink link : plan.normal_links_ordered )
+    {
+        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
+            solver_forces[link] = master_keys->at(link.GetChildAgent());
+    }
+    solver_forces[plan.root_pattern_link] = start_x;
     
     // Tell all the constraints about them
-    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
-        p.second->SetForces( forces );
+    for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
+        p.second->SetForces( solver_forces );
     
     // Expand the domain to include generated child y nodes.
     ExpandDomain( domain );
@@ -374,37 +377,55 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
     bool match = plan.solver->GetNextSolution( &values );        
     if( !match )
         throw NoSolution();
+    TRACEC("GetNextCSPSolution()\n");
 
     // Recreate my_coupling_keys
-    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
+    for( pair< PatternLink, shared_ptr<CSP::Constraint> > lcp : plan.my_constraints )
     {
-        if( p.first == plan.root_agent ) 
+        list< PatternLink > vars = lcp.second->GetFreeVariables();
+        list< TreePtr<Node> > &vals = values.at(lcp.second);
+        if( lcp.first == plan.root_pattern_link ) 
         {
-            // Constraint's self-variable is fixed because we're at root
-            // TODO it would be nice to be able to do p.second->GetAllVariables()
-            // and and obtain the force back from the constraint
-            InsertSolo(my_solution, make_pair(plan.root_pattern_link, start_x));
-            KeyCoupling(external_keys, make_pair(plan.root_pattern_link, start_x));
-            // TODO not sure if external_keys is right any more
+            // Constraint's self-variable is fixed because it's at root and
+            // yet we require it. This should ensure that vars and vals
+            // always begin eith self, followed by free normal links.
+            // TONOTDO it would be nice to be able to do p.second->GetAllVariables()
+            // and and obtain the force back from the constraint - NO, the idea
+            // is that forces can't be recovered from constraints because
+            // supporting that while splitting the constraints will be a 
+            // headache. 
+            vars.push_front(lcp.first);
+            vals.push_front(start_x);
         }
-        else
+
+        auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
+
+        // Resembles the bit at the bottom of DecidedQuery()
+        LocatedLink selflink(vvzip.front());
+        InsertSolo( my_solution, selflink );                
+        if( selflink.GetChildX() != DecidedQueryCommon::MMAX_Node )
+            KeyCoupling( external_keys, selflink );
+
+        // Now we wish to process the child links only
+        vvzip.pop_front();
+        
+        // Resembles DecidedQueryLinks() but with my_coupling_keys
+        // removed because solver should have sorted that stuff out.
+        // and master boundary links will not be suppleid to us
+        // because they are FORCED and we called GetFreeVariables()
+        for( auto vvp : vvzip ) 
         {
-            // Constraint's self-variable is free so grab it
-            list< TreePtr<Node> > &vals = values.at(p.second);
-            list< Agent * > vars = p.second->GetFreeVariables();
-            ASSERT( vars.front() == p.first )
-                  (vars)("\n")
-                  (p)("\n")
-                  (plan.root_agent)("\n");
-            if( plan.my_normal_agents.count(vars.front()) )
-            {
-                ASSERT(false); 
-                //InsertSolo(my_solution, make_pair(vars.front(), vals.front()));       // TODO!! #171
-                //KeyCoupling(external_keys, make_pair(vars.front(), vals.front()));    // TODO!! #171
-                external_keys[vars.front()] = vals.front();    
-                // TODO not sure if external_keys is right any more
-            }
-        }            
+            LocatedLink link(vvp);
+            if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
+                InsertSolo( my_solution, link );                         
+        }           
+    }
+    my_solution = MapUnion( my_solution, solver_forces );
+    
+    // Is the solution complete? TODO somewhere common in Compare() so it checks conjecture solver too?
+    for( auto plink : plan.my_normal_links )
+    {
+        ASSERT( my_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(my_solution)("\n");
     }
 }
 
@@ -564,6 +585,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     auto pq = agent->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
+    TRACEC("Combined solution ")(combined_solution)("\n");    
     list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), combined_solution );
     TRACEC("Relocated links ")(ll)("\n");    
     
@@ -713,6 +735,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         my_solution.clear();
         external_keys.clear();
         my_coupling_keys.clear();
+        master_solution.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         GetNextCSPSolution( start_x );
@@ -723,11 +746,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Try out the current conjecture. This will call RegisterDecision() once for each decision;
             // RegisterDecision() will return the current choice for that decision, if absent it will
             // add the decision and choose the first choice, if the decision reaches the end it
-            // will remove the decision.
-            
-            // Initialise keys to the ones inherited from master, keeping 
-            // none of our own from any previous unsuccessful attempt.
-            master_solution.clear();            
+            // will remove the decision.    
             DecidedCompare( root_link );            
             CompareMasterKeys();
 #endif

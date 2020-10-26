@@ -50,7 +50,7 @@ public:
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo, TreePtr<Node> root_pattern_, const set<Agent *> &master_agents);
-        void PopulateForSolver( Agent *agent,
+        void PopulateForSolver( PatternLink link,
                                 const set<Agent *> &master_agents );
         void DetermineKeyersModuloMatchAny( set<PatternLink> *possible_keyer_links,
                                             Agent *agent,
@@ -81,7 +81,7 @@ public:
         map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
+        map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         set<Agent *> master_boundary_agents;
         set<PatternLink> master_boundary_links;
         set<PatternLink> coupling_keyer_links;
@@ -89,9 +89,10 @@ public:
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
         set<PatternLink> by_equivalence_links;
-        list<Agent *> normal_agents_ordered;
-    private: // working varaibles in plan construction
-        set<Agent *> reached; 
+        list<PatternLink> normal_links_ordered;
+    private: // working variables in plan construction
+        set<Agent *> reached_agents;
+        set<PatternLink> reached_links; 
     } plan;
     
 private:    
@@ -140,6 +141,7 @@ private:
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
     // the MMAX node.
+    SolutionMap solver_forces;
     SolutionMap master_solution;
     SolutionMap my_solution; 
 };

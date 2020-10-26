@@ -32,7 +32,7 @@ public:
      * 
      * @param vql callback that requests information about variables
      */
-    explicit SystemicConstraint( SR::Agent *agent, 
+    explicit SystemicConstraint( SR::PatternLink root_link, 
                                  VariableQueryLambda vql );
     
 private:
@@ -51,12 +51,13 @@ private:
 
     const struct Plan
     {
-        explicit Plan( SR::Agent *agent, 
+        explicit Plan( SR::PatternLink root_link, 
                        VariableQueryLambda vql );
         void GetAllVariables();
         void RunVariableQueries( list<VariableId> vars, 
                                  VariableQueryLambda vql );
                                  
+        SR::PatternLink root_link;
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
         list<VariableId> all_variables;

@@ -234,8 +234,8 @@ void SimpleSolver::ShowBestAssignment()
     {
         if( best_assignments.count(var) > 0 )
         {
-            TRACEC("Variable ")(*var)(" assigned ")(*best_assignments.at(var));
-            if( var->IsLocalMatch(best_assignments.at(var).get()) )
+            TRACEC("Variable ")(var)(" assigned ")(*best_assignments.at(var));
+            if( var.GetChildAgent()->IsLocalMatch(best_assignments.at(var).get()) )
             {
                 TRACEC(" is a local match\n");
             }
@@ -252,7 +252,7 @@ void SimpleSolver::ShowBestAssignment()
         }
         else 
         {
-            TRACEC("Variable ")(*var)(" could not be assigned a consistent value.\n");
+            TRACEC("Variable ")(var)(" could not be assigned a consistent value.\n");
             break; // later ones won't even have been tried
         }
     }
