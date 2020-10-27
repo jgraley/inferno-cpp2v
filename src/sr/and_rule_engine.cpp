@@ -457,7 +457,9 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Master couplings are now checked in a post-pass
         if( plan.master_boundary_links.count(link) > 0 )
         {
-            InsertSolo( master_solution, link);
+            CompareCoupling( *master_keys, link );
+            TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
+            InsertSolo( my_solution, link );       
             continue;
         }
 
@@ -578,15 +580,14 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 void AndRuleEngine::RegenerationPassAgent( Agent *agent, 
                                            TreePtr<Node> x,
-                                           const CouplingKeysMap &subordinate_keys,
-                                           const SolutionMap &combined_solution )
+                                           const CouplingKeysMap &subordinate_keys )
 {
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-    TRACEC("Combined solution ")(combined_solution)("\n");    
-    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), combined_solution );
+    TRACEC("My solution ")(my_solution)("\n");    
+    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), my_solution );
     TRACEC("Relocated links ")(ll)("\n");    
     
     // We will need a conjecture, so that we can iterate through multiple 
@@ -660,15 +661,12 @@ void AndRuleEngine::RegenerationPass()
 {
     INDENT("R");
     const CouplingKeysMap subordinate_keys = MapUnion( *master_keys, external_keys );          
-    TRACEC("External combined keys ")(subordinate_keys)("\n");    
-
-    const SolutionMap combined_solution = MapUnion( master_solution, my_solution );      
-    TRACEC("Internal combined solution ")(combined_solution)("\n");    
+    TRACEC("External combined keys ")(subordinate_keys)("\n");       
 
     for( auto plink : plan.my_normal_links )
     {
-        TreePtr<Node> x = combined_solution.at(plink);
-        RegenerationPassAgent( plink.GetChildAgent(), x, subordinate_keys, combined_solution );
+        TreePtr<Node> x = my_solution.at(plink);
+        RegenerationPassAgent( plink.GetChildAgent(), x, subordinate_keys );
     }
 }
 
@@ -689,17 +687,6 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
         throw NoSolution();
     }
     return;
-}
-
-
-void AndRuleEngine::CompareMasterKeys()
-{
-    for( auto plink : plan.master_boundary_links )
-    {
-        LocatedLink link(plink, master_solution.at(plink));
-        CompareCoupling( *master_keys, link );
-        TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
-    }
 }
 
 
@@ -735,7 +722,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         my_solution.clear();
         external_keys.clear();
         my_coupling_keys.clear();
-        master_solution.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         GetNextCSPSolution( start_x );
@@ -748,7 +734,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.    
             DecidedCompare( root_link );            
-            CompareMasterKeys();
 #endif
 
             RegenerationPass();

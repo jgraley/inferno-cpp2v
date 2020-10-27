@@ -111,15 +111,13 @@ private:
                                    const CouplingKeysMap *combined_keys ); 
     void RegenerationPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
-                                const CouplingKeysMap &subordinate_keys,
-                                const SolutionMap &combined_solution );
+                                const CouplingKeysMap &subordinate_keys );
     void RegenerationPass();
     
 public:
     void Compare( TreePtr<Node> start_x,
                   const CouplingKeysMap *master_keys );
     void CompareTrivialProblem( LocatedLink root_link );
-    void CompareMasterKeys();
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
@@ -142,7 +140,6 @@ private:
     // into the agents (half-link model). Note: solutions can specify
     // the MMAX node.
     SolutionMap solver_forces;
-    SolutionMap master_solution;
     SolutionMap my_solution; 
 };
 
