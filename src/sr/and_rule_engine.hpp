@@ -104,13 +104,12 @@ private:
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
-    void CompareEvaluatorLinks( Agent *agent, 
+    void CompareEvaluatorLinks( PatternLink plink, 
                                 const CouplingKeysMap *combined_keys, 
                                 const SolutionMap *after_pass_keys );
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const CouplingKeysMap *combined_keys ); 
-    void RegenerationPassAgent( Agent *agent, 
-                                TreePtr<Node> x,
+    void RegenerationPassAgent( LocatedLink link,
                                 const CouplingKeysMap &subordinate_keys );
     void RegenerationPass();
     

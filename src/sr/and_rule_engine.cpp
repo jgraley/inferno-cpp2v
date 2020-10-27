@@ -517,12 +517,12 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 }
 
 
-void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
+void AndRuleEngine::CompareEvaluatorLinks( PatternLink plink, 
                                            const CouplingKeysMap *subordinate_keys, 
                                            const SolutionMap *solution ) 
 {
     INDENT("E");
-    auto pq = agent->GetPatternQuery();
+    auto pq = plink.GetChildAgent()->GetPatternQuery();
     shared_ptr<BooleanEvaluator> evaluator = pq->GetEvaluator();
 	ASSERT( evaluator );
 
@@ -578,13 +578,12 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 }
 
 
-void AndRuleEngine::RegenerationPassAgent( Agent *agent, 
-                                           TreePtr<Node> x,
+void AndRuleEngine::RegenerationPassAgent( LocatedLink link,
                                            const CouplingKeysMap &subordinate_keys )
 {
     // Get a list of the links we must supply to the agent for regeneration
-    auto pq = agent->GetPatternQuery();
-    TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
+    auto pq = link.GetChildAgent()->GetPatternQuery();
+    TRACE("In after-pass, trying to regenerate ")(link)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
     TRACEC("My solution ")(my_solution)("\n");    
     list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), my_solution );
@@ -593,7 +592,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     // We will need a conjecture, so that we can iterate through multiple 
     // potentially valid values for the abnormals and multiplicities.
     auto query = make_shared<DecidedQuery>(pq);
-    Conjecture conj(agent, query);            
+    Conjecture conj(link.GetChildAgent(), query);            
     conj.Start();
     
     int i=0;
@@ -601,7 +600,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     {
         // Query the agent: our conj will be used for the iteration and
         // therefore our query will hold the result 
-        agent->ResumeNormalLinkedQuery( conj, x, ll );
+        link.GetChildAgent()->ResumeNormalLinkedQuery( conj, link.GetChildX(), ll );
         i++;
 
         try
@@ -639,10 +638,10 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             }
 
             // Try matching the evaluator agents.
-            if( plan.my_evaluators.count( agent ) )
-                CompareEvaluatorLinks( agent, &subordinate_keys, &solution_for_evaluators );            
+            if( plan.my_evaluators.count( link.GetChildAgent() ) )
+                CompareEvaluatorLinks( link, &subordinate_keys, &solution_for_evaluators );            
             
-            // if we got here, we're done!
+            // If we got here, we're done!
             external_keys = MapUnion( provisional_external_keys, external_keys );      
             
             TRACE("Leaving while loop after %d tries\n", i);    
@@ -665,8 +664,8 @@ void AndRuleEngine::RegenerationPass()
 
     for( auto plink : plan.my_normal_links )
     {
-        TreePtr<Node> x = my_solution.at(plink);
-        RegenerationPassAgent( plink.GetChildAgent(), x, subordinate_keys );
+        LocatedLink link( plink, my_solution.at(plink) );
+        RegenerationPassAgent( link, subordinate_keys );
     }
 }
 
