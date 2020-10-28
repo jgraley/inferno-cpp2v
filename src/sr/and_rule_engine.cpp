@@ -483,14 +483,13 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     ASSERT( link.GetChildAgent() ); // Pattern must not be nullptr
     ASSERT( link.GetChildX() ); // Target must not be nullptr
     Agent * const agent = link.GetChildAgent();
-    TreePtr<Node> const x = link.GetChildX();
 
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)(" ?= ")(x)(" RunDecidedQuery()\n");     
-    agent->RunDecidedQuery( *query, x );
+    TRACE("RunDecidedQuery() with ")(link)("\n");     
+    agent->RunDecidedQuery( *query, link );
     TRACEC("Normal ")(query->GetNormalLinks())("\n")
           ("Abormal ")(query->GetAbnormalLinks())("\n")
           ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
@@ -600,7 +599,7 @@ void AndRuleEngine::RegenerationPassAgent( LocatedLink link,
     {
         // Query the agent: our conj will be used for the iteration and
         // therefore our query will hold the result 
-        link.GetChildAgent()->ResumeNormalLinkedQuery( conj, link.GetChildX(), ll );
+        link.GetChildAgent()->ResumeNormalLinkedQuery( conj, link, ll );
         i++;
 
         try
