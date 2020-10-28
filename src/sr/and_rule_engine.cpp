@@ -363,7 +363,7 @@ void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
     // Tell all the constraints about them
     for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
         p.second->SetForces( solver_forces );
-    
+        
     // Expand the domain to include generated child y nodes.
     ExpandDomain( domain );
     
@@ -401,10 +401,13 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
         auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
 
         // Resembles the bit at the bottom of DecidedQuery()
-        LocatedLink selflink(vvzip.front());
-        InsertSolo( my_solution, selflink );                
-        if( selflink.GetChildX() != DecidedQueryCommon::MMAX_Node )
-            KeyCoupling( external_keys, selflink );
+        if( lcp.first != plan.root_pattern_link ) 
+        {
+            LocatedLink selflink(vvzip.front());
+            InsertSolo( my_solution, selflink );                
+            if( selflink.GetChildX() != DecidedQueryCommon::MMAX_Node )
+                KeyCoupling( external_keys, selflink );
+        }
 
         // Now we wish to process the child links only
         vvzip.pop_front();
@@ -420,13 +423,8 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
                 InsertSolo( my_solution, link );                         
         }           
     }
+    solver_forces.erase(plan.root_pattern_link); // Compare() adds the root one
     my_solution = MapUnion( my_solution, solver_forces );
-    
-    // Is the solution complete? TODO somewhere common in Compare() so it checks conjecture solver too?
-    for( auto plink : plan.my_normal_links )
-    {
-        ASSERT( my_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(my_solution)("\n");
-    }
 }
 
 
@@ -732,12 +730,18 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.    
             DecidedCompare( root_link );            
-            
+           
+#endif
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             InsertSolo( my_solution, root_link );                
             if( root_link.GetChildX() != DecidedQueryCommon::MMAX_Node )
                 KeyCoupling( external_keys, root_link );            
-#endif
+
+            // Is the solution complete? 
+            for( auto plink : plan.my_normal_links )
+            {            
+                ASSERT( my_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(my_solution)("\n");
+            }
 
             RegenerationPass();
         }
