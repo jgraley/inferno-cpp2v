@@ -473,6 +473,11 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         }
 
         DecidedCompare(link);   
+        
+        // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+        InsertSolo( my_solution, link );                
+        if( link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+            KeyCoupling( external_keys, link );        
     }
 }
 
@@ -508,11 +513,6 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 #endif
                                           
     CompareLinks( agent, query );
-
-    // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    InsertSolo( my_solution, link );                
-    if( link.GetChildX() != DecidedQueryCommon::MMAX_Node )
-        KeyCoupling( external_keys, link );
 }
 
 
@@ -732,6 +732,11 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.    
             DecidedCompare( root_link );            
+            
+            // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+            InsertSolo( my_solution, root_link );                
+            if( root_link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+                KeyCoupling( external_keys, root_link );            
 #endif
 
             RegenerationPass();
