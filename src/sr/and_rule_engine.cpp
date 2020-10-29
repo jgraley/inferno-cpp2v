@@ -21,7 +21,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-#define USE_SOLVER
+//#define USE_SOLVER
 
 using namespace SR;
 
@@ -378,29 +378,12 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
         list< TreePtr<Node> > &vals = values.at(lcp.second);
         auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
 
-        // Resembles the bit at the bottom of DecidedQuery()
+        // Don't bother with the "self" link
         if( lcp.first != plan.root_pattern_link ) 
-        {
-            LocatedLink link(vvzip.front());
-            
-            // Now we wish to process the child links only
             vvzip.pop_front();
-        }
 
-        // Resembles DecidedQueryLinks() but with my_coupling_keys
-        // removed because solver should have sorted that stuff out.
-        // and master boundary links will not be suppleid to us
-        // because they are FORCED and we called GetFreeVariables()
         for( auto vvp : vvzip ) 
-        {
-            LocatedLink link(vvp);
-
-            // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-            InsertSolo( my_solution, link );                
-            if( plan.coupling_residual_links.count( link ) == 0 && 
-                link.GetChildX() != DecidedQueryCommon::MMAX_Node )
-                KeyCoupling( external_keys, link );        
-        }           
+            RecordLink( LocatedLink(vvp) );                        
     }
 }
 
@@ -410,47 +393,33 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 {    
     FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
-        TRACE("Comparing normal link ")(link)(" keyer? %d residual? %d master? %d\n", plan.coupling_keyer_links.count( link ), plan.coupling_residual_links.count( link ), plan.master_boundary_links.count(link) );
-        // Recurse normally 
-        // Get x for linked node
+        TRACE("Comparing normal link ")(link)
+             (" keyer? %d residual? %d master? %d\n", 
+             plan.coupling_keyer_links.count( link ), 
+             plan.coupling_residual_links.count( link ), 
+             plan.master_boundary_links.count(link) );
         ASSERT( link.GetChildX() );
         
-        // This is needed for decisionised MatchAny #75. Other schemes for
-        // RegisterAlwaysMatchingLink() could be deployed.
-        //if( x == DecidedQueryCommon::MMAX_Node )
-        //    continue; // Pattern nodes immediately match themselves
-        
-        // Are we at a residual coupling?
-        if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
+        // Check the link: we will either compare a coupling
+        // or recurse to DecidedCompare(). We never DC() after a
+        // coupling compare, because couplings are only keyed
+        // after a successful DC().  
+        if( plan.coupling_residual_links.count( link ) > 0 )
         {
             CompareCoupling( my_coupling_keys, link );
-            TRACE("Accepted working coupling for ")(link)(" key=")(my_coupling_keys.at(link.GetChildAgent()))("\n");
         }
         else if( plan.master_boundary_links.count(link) > 0 )
         {
             CompareCoupling( *master_keys, link );
-            TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
-            continue;
         }
         else
         {
             DecidedCompare(link);   
-        }            
-
-        // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-        InsertSolo( my_solution, link );                
-        if( plan.coupling_residual_links.count( link ) == 0 && 
-            link.GetChildX() != DecidedQueryCommon::MMAX_Node )
-            KeyCoupling( external_keys, link );        
-
-        // Remember the coupling before recursing, as we can hit the same node 
-        // (eg identifier) and we need to have coupled it. The "if" statement
-        // tests coupling_keyer_links as well as providing a small optimisation.
-        if( plan.coupling_keyer_links.count( link ) )
-        {
-            ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
-            KeyCoupling( my_coupling_keys, link );
+            if( plan.coupling_keyer_links.count( link ) > 0 )
+                KeyCoupling( my_coupling_keys, link );
         }
+
+        RecordLink( link );        
     }
 }
 
@@ -557,8 +526,8 @@ void AndRuleEngine::RegenerationPassAgent( LocatedLink link,
     auto pq = link.GetChildAgent()->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(link)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-    TRACEC("My solution ")(my_solution)("\n");    
-    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), my_solution );
+    TRACEC("My solution ")(basic_solution)("\n");    
+    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
     TRACEC("Relocated links ")(ll)("\n");    
     
     // We will need a conjecture, so that we can iterate through multiple 
@@ -636,7 +605,7 @@ void AndRuleEngine::RegenerationPass()
 
     for( auto plink : plan.my_normal_links )
     {
-        LocatedLink link( plink, my_solution.at(plink) );
+        LocatedLink link( plink, basic_solution.at(plink) );
         RegenerationPassAgent( link, subordinate_keys );
     }
 }
@@ -699,7 +668,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     //int i=0;
     while(1)
     {
-        my_solution.clear();
+        basic_solution.clear();
         external_keys.clear();
         my_coupling_keys.clear();
 #ifdef USE_SOLVER        
@@ -715,7 +684,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // will remove the decision.    
             DecidedCompare( root_link );            
 #endif
-            my_solution = MapUnion( my_solution, master_and_root_links );
+            basic_solution = MapUnion( basic_solution, master_and_root_links );
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             if( root_link.GetChildX() != DecidedQueryCommon::MMAX_Node )
                 KeyCoupling( external_keys, root_link );            
@@ -723,7 +692,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
             {            
-                ASSERT( my_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(my_solution)("\n");
+                ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
             }
 
             RegenerationPass();
@@ -771,6 +740,26 @@ void AndRuleEngine::EnsureChoicesHaveIterators()
 const CouplingKeysMap &AndRuleEngine::GetCouplingKeys()
 {
     return external_keys;
+}
+
+
+void AndRuleEngine::RecordLink( LocatedLink link )
+{
+    // Don't record anything for these: master_and_root_links is used
+    // instead
+    if( plan.master_boundary_links.count(link) > 0 ||
+        (PatternLink)link == plan.root_pattern_link )
+        return; 
+    
+    // All remaining go into the basic solution which is enough to
+    // regenerate a full solution.
+    InsertSolo( basic_solution, link );                
+    
+    // Keying for external use (subordinates, slaves and replace)
+    // We don't want residuals (which are unreliable) or MMAX
+    if( plan.coupling_residual_links.count( link ) == 0 && 
+        link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+        KeyCoupling( external_keys, link );        
 }
 
 

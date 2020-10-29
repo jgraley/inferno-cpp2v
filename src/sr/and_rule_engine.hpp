@@ -123,6 +123,7 @@ public:
     const CouplingKeysMap &GetCouplingKeys();
 
 private:    
+    void RecordLink( LocatedLink link );
     void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
     void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
@@ -139,7 +140,7 @@ private:
     // into the agents (half-link model). Note: solutions can specify
     // the MMAX node.
     SolutionMap master_and_root_links;
-    SolutionMap my_solution; 
+    SolutionMap basic_solution; 
 };
 
 #endif
