@@ -351,18 +351,10 @@ void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
 	Walk wx( start_x ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
         domain.insert(*wx_it);
-    
-    // Determine the full set of forces 
-    for( PatternLink link : plan.normal_links_ordered )
-    {
-        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
-            solver_forces[link] = master_keys->at(link.GetChildAgent());
-    }
-    solver_forces[plan.root_pattern_link] = start_x;
-    
+        
     // Tell all the constraints about them
     for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
-        p.second->SetForces( solver_forces );
+        p.second->SetForces( master_and_root_links );
         
     // Expand the domain to include generated child y nodes.
     ExpandDomain( domain );
@@ -423,8 +415,6 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
                 InsertSolo( my_solution, link );                         
         }           
     }
-    solver_forces.erase(plan.root_pattern_link); // Compare() adds the root one
-    my_solution = MapUnion( my_solution, solver_forces );
 }
 
 
@@ -457,7 +447,6 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         {
             CompareCoupling( *master_keys, link );
             TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
-            InsertSolo( my_solution, link );       
             continue;
         }
 
@@ -703,6 +692,15 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         CompareTrivialProblem( root_link );
         return;
     }
+
+    // Determine the full set of forces 
+    // TODO presumably doesn't need to be the ordered one
+    for( PatternLink link : plan.normal_links_ordered )
+    {
+        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
+            master_and_root_links[link] = master_keys->at(link.GetChildAgent());
+    }
+    master_and_root_links[plan.root_pattern_link] = start_x;
            
 #ifdef USE_SOLVER
     StartCSPSolver( start_x );
@@ -720,7 +718,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         my_coupling_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
-        GetNextCSPSolution( start_x );
+        GetNextCSPSolution( start_x );        
 #endif
         try
         {
@@ -730,10 +728,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.    
             DecidedCompare( root_link );            
-           
 #endif
+            my_solution = MapUnion( my_solution, master_and_root_links );
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-            InsertSolo( my_solution, root_link );                
             if( root_link.GetChildX() != DecidedQueryCommon::MMAX_Node )
                 KeyCoupling( external_keys, root_link );            
 

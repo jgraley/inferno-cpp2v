@@ -138,7 +138,7 @@ private:
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
     // the MMAX node.
-    SolutionMap solver_forces;
+    SolutionMap master_and_root_links;
     SolutionMap my_solution; 
 };
 
