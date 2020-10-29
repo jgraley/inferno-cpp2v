@@ -438,17 +438,23 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         {
             CompareCoupling( my_coupling_keys, link );
             TRACE("Accepted working coupling for ")(link)(" key=")(my_coupling_keys.at(link.GetChildAgent()))("\n");
-            InsertSolo( my_solution, link );       
-            continue;
         }
-        
-        // Master couplings are now checked in a post-pass
-        if( plan.master_boundary_links.count(link) > 0 )
+        else if( plan.master_boundary_links.count(link) > 0 )
         {
             CompareCoupling( *master_keys, link );
             TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
             continue;
         }
+        else
+        {
+            DecidedCompare(link);   
+        }            
+
+        // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+        InsertSolo( my_solution, link );                
+        if( plan.coupling_residual_links.count( link ) == 0 && 
+            link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+            KeyCoupling( external_keys, link );        
 
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. The "if" statement
@@ -458,13 +464,6 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
             KeyCoupling( my_coupling_keys, link );
         }
-
-        DecidedCompare(link);   
-        
-        // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-        InsertSolo( my_solution, link );                
-        if( link.GetChildX() != DecidedQueryCommon::MMAX_Node )
-            KeyCoupling( external_keys, link );        
     }
 }
 
