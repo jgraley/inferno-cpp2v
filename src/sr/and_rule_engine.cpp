@@ -21,7 +21,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-//#define USE_SOLVER
+#define USE_SOLVER
 
 using namespace SR;
 
@@ -376,34 +376,17 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
     {
         list< PatternLink > vars = lcp.second->GetFreeVariables();
         list< TreePtr<Node> > &vals = values.at(lcp.second);
-        if( lcp.first == plan.root_pattern_link ) 
-        {
-            // Constraint's self-variable is fixed because it's at root and
-            // yet we require it. This should ensure that vars and vals
-            // always begin eith self, followed by free normal links.
-            // TONOTDO it would be nice to be able to do p.second->GetAllVariables()
-            // and and obtain the force back from the constraint - NO, the idea
-            // is that forces can't be recovered from constraints because
-            // supporting that while splitting the constraints will be a 
-            // headache. 
-            vars.push_front(lcp.first);
-            vals.push_front(start_x);
-        }
-
         auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
 
         // Resembles the bit at the bottom of DecidedQuery()
         if( lcp.first != plan.root_pattern_link ) 
         {
-            LocatedLink selflink(vvzip.front());
-            InsertSolo( my_solution, selflink );                
-            if( selflink.GetChildX() != DecidedQueryCommon::MMAX_Node )
-                KeyCoupling( external_keys, selflink );
+            LocatedLink link(vvzip.front());
+            
+            // Now we wish to process the child links only
+            vvzip.pop_front();
         }
 
-        // Now we wish to process the child links only
-        vvzip.pop_front();
-        
         // Resembles DecidedQueryLinks() but with my_coupling_keys
         // removed because solver should have sorted that stuff out.
         // and master boundary links will not be suppleid to us
@@ -411,8 +394,12 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
         for( auto vvp : vvzip ) 
         {
             LocatedLink link(vvp);
-            if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
-                InsertSolo( my_solution, link );                         
+
+            // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+            InsertSolo( my_solution, link );                
+            if( plan.coupling_residual_links.count( link ) == 0 && 
+                link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+                KeyCoupling( external_keys, link );        
         }           
     }
 }
