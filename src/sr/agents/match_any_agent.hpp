@@ -43,6 +43,12 @@ class MatchAny : public Special<PRE_RESTRICTION>,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+    
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     // Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:

@@ -73,6 +73,11 @@ public:
         // node type and use that.
         return string("Agent<") + NODE_TYPE().GetTypeName() + string(">");        
     }
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }    
 };
 
 

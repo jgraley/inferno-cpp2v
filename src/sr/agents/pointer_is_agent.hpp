@@ -32,6 +32,12 @@ class PointerIs : public Special<PRE_RESTRICTION>,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     TreePtr<PRE_RESTRICTION> pointer;
     virtual const TreePtrInterface *GetPointer() const
     {

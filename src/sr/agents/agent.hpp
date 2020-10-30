@@ -58,7 +58,10 @@ public:
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
-	static Agent *AsAgent( TreePtr<Node> node );
+	static Agent *AsAgent( shared_ptr<Node> node );
+	static const Agent *AsAgentConst( shared_ptr<const Node> node );
+    // Note the constness: thou shalt not try to mutate the agent via this function
+    virtual shared_ptr<const Node> GetPatternPtr() const = 0;
 };
 
 

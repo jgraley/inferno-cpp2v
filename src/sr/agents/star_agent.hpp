@@ -44,6 +44,12 @@ class Star : public StarAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     TreePtr<PRE_RESTRICTION> restriction; 
     virtual const TreePtrInterface *GetRestriction() const
     {

@@ -11,6 +11,12 @@ namespace SR
 class PlaceholderAgent : public virtual AgentCommon 
 {
 public:
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        ASSERTFAIL("Don't do this");
+    }
+    
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  

@@ -47,6 +47,12 @@ class TransformOf : public TransformOfAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS	
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     TransformOf() {}    
     TransformOf( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) : 
         TransformOfAgent(t, p) 

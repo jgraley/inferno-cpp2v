@@ -37,6 +37,12 @@ class Overlay : public OverlayAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     TreePtr<PRE_RESTRICTION> through;
     TreePtr<PRE_RESTRICTION> overlay;
     virtual const TreePtrInterface *GetThrough() const 

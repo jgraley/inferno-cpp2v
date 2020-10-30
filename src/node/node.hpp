@@ -9,6 +9,8 @@
 #include "match.hpp"
 #include "renderable.hpp"
 
+#include <memory>
+
 #define FINAL_FUNCTION(F) virtual bool IsFinal() { return (F); }
 
 // Mix together the bounce classes for the benefit of the tree
@@ -40,7 +42,8 @@ struct NodeBases : Magic,
 // (we always want the set-restricting model of inheritance in
 // the inferno tree node hierarchy).
 /// The main base class for inferno nodes
-struct Node : NodeBases
+struct Node : NodeBases,
+              enable_shared_from_this<Node>
 {
     // C++11 fix
     Node& operator=(Node& other)

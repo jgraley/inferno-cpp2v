@@ -52,6 +52,12 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
                                       BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     BuildInstanceIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 private:
@@ -64,6 +70,12 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
                                   BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );       
@@ -74,6 +86,12 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
                                    BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     BuildLabelIdentifierAgent() : BuildIdentifierAgent("UNNAMED") {}
     BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
@@ -107,6 +125,11 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
 };
@@ -117,6 +140,11 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
 };
@@ -127,6 +155,11 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
 };
@@ -161,6 +194,12 @@ private:
 struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     virtual XLink Advance( XLink x, 
                            string *depth ) const;
 };
@@ -175,6 +214,12 @@ struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
 struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     virtual XLink Advance( XLink x, 
                            string *depth ) const;
 };
@@ -188,6 +233,12 @@ struct BuildContainerSizeAgent : public virtual InfernoAgent,
                                  Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     shared_ptr< StarAgent > container;
 private:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
@@ -206,6 +257,12 @@ struct IsLabelReachedAgent : public virtual InfernoAgent,
                              Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
 	virtual void FlushCache() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,

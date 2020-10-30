@@ -52,6 +52,11 @@ class AnyNode : public AnyNodeAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }    
 };
 
 //---------------------------------- Stuff ------------------------------------    
@@ -83,6 +88,11 @@ class Stuff : public StuffAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
 };
 
 };

@@ -31,6 +31,12 @@ class MatchAll : public Special<PRE_RESTRICTION>,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+    
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual CollectionInterface &GetPatterns() const

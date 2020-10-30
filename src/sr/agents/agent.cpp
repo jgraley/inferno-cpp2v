@@ -18,10 +18,19 @@ Agent& Agent::operator=(Agent& other)
 }
 
 
-Agent *Agent::AsAgent( TreePtr<Node> node )
+Agent *Agent::AsAgent( shared_ptr<Node> node )
 {
-    ASSERT( node )("Called AsAgent(")(node)(") with nullptr TreePtr");
+    ASSERT( node )("Called AsAgent(")(node)(") with null shared_ptr");
     Agent *agent = dynamic_cast<Agent *>(node.get());
+    ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
+    return agent;
+}
+
+
+const Agent *Agent::AsAgentConst( shared_ptr<const Node> node )
+{
+    ASSERT( node )("Called AsAgent(")(node)(") with null shared_ptr");
+    const Agent *agent = dynamic_cast<const Agent *>(node.get());
     ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
 }
@@ -326,6 +335,3 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
     
     return dest;
 }
-
-
-

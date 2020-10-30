@@ -60,6 +60,11 @@ class Slave : public SlaveAgent,
 public:
     SPECIAL_NODE_FUNCTIONS
 
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     // SlaveSearchReplace must be constructed using constructor
     Slave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
         through( t ),

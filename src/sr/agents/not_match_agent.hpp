@@ -37,6 +37,12 @@ class NotMatch : public Special<PRE_RESTRICTION>,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     // Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
     // is no type-correctness limitation with *excluding* a kind of node. Use the virtual
     // GetPattern() anyway, for consistency.
