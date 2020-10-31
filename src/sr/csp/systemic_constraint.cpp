@@ -192,7 +192,7 @@ bool SystemicConstraint::Test( list< Value > values )
     shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
     try
     {
-        plan.agent->RunNormalLinkedQuery( query, x, expanded_links );      
+        plan.agent->RunNormalLinkedQuery( query, &x, expanded_links );      
     }
     catch( ::Mismatch & )
     {

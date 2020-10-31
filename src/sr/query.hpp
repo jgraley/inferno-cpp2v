@@ -33,9 +33,9 @@ public:
     
     void RegisterDecision( bool inclusive ); 
     
-    void RegisterNormalLink( const TreePtrInterface *ppattern );
-    void RegisterAbnormalLink( const TreePtrInterface *ppattern );
-    void RegisterMultiplicityLink( const TreePtrInterface *ppattern );
+    void RegisterNormalLink( PatternLink plink );
+    void RegisterAbnormalLink( PatternLink plink );
+    void RegisterMultiplicityLink( PatternLink plink );
     
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
@@ -132,10 +132,10 @@ public:
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
-    virtual void RegisterNormalLink( const TreePtrInterface *ppattern, XLink xlink ) = 0; 
-    virtual void RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink xlink ) = 0; 
-    virtual void RegisterMultiplicityLink( const TreePtrInterface *ppattern, XLinkMultiplicity xlink ) = 0; 
-    virtual void RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern ) = 0; // Is a normal link
+    virtual void RegisterNormalLink( PatternLink plink, XLink xlink ) = 0; 
+    virtual void RegisterAbnormalLink( PatternLink plink, XLink xlink ) = 0; 
+    virtual void RegisterMultiplicityLink( PatternLink plink, XLinkMultiplicity xlink ) = 0; 
+    virtual void RegisterAlwaysMatchingLink( PatternLink plink ) = 0; // Is a normal link
     
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 
@@ -193,10 +193,10 @@ public:
     ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
-    void RegisterNormalLink( const TreePtrInterface *ppattern, XLink xlink ); 
-    void RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink xlink ); 
-    void RegisterMultiplicityLink( const TreePtrInterface *ppattern, XLinkMultiplicity xlink ); 
-    void RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern ); // Is a normal link
+    void RegisterNormalLink( PatternLink plink, XLink xlink ); 
+    void RegisterAbnormalLink( PatternLink plink, XLink xlink ); 
+    void RegisterMultiplicityLink( PatternLink plink, XLinkMultiplicity xlink ); 
+    void RegisterAlwaysMatchingLink( PatternLink plink ); // Is a normal link
 
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   

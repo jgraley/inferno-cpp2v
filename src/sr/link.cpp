@@ -32,6 +32,14 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
 }
 
 
+PatternLink::PatternLink(const Agent *parent_agent,
+                         const TreePtrInterface *ppattern, 
+                         void *whodat_) :
+    PatternLink( parent_agent->GetPatternPtr(), ppattern, whodat_ )
+{
+}
+
+
 PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
                          void *whodat_) :
     asp_pattern( ppattern )
@@ -111,9 +119,9 @@ XLink::XLink() :
 }
 
 
-XLink::XLink( const TreePtr<Node> &x_,
+XLink::XLink( const TreePtrInterface *px,
               void *whodat ) :
-    x( x_ )              
+    x( *px )              
 {
     ASSERT(x);
 

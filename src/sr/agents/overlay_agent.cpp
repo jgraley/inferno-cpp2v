@@ -8,7 +8,7 @@ using namespace SR;
 shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-	pq->RegisterNormalLink( GetThrough() );
+	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }
 
@@ -21,7 +21,7 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     // Check pre-restriction
     CheckLocalMatch(x.GetChildX().get());
 
-    query.RegisterNormalLink( GetThrough(), x ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, GetThrough()), x ); // Link into X
 }
 
 

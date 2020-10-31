@@ -21,7 +21,7 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
     for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
     {
         const TreePtrInterface *p = &*pit; 
-	    pq->RegisterNormalLink( p );
+	    pq->RegisterNormalLink( PatternLink(this, p) );
     }
     
     return pq;
@@ -47,14 +47,14 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         {
             // Yes, so supply the "real" x for this link. We'll really
             // test x against this pattern.
-            query.RegisterNormalLink( p, x ); // Link into X
+            query.RegisterNormalLink( PatternLink(this, p), x ); // Link into X
         }
         else
         {
             // No, so just make sure this link matches (overall AND-rule
             // applies, reducing the outcome to that of the normal 
             // link registered above).
-            query.RegisterAlwaysMatchingLink( p ); // Link into Pattern (alternative: Link to Singleton)
+            query.RegisterAlwaysMatchingLink( PatternLink(this, p) ); // Link into Pattern (alternative: Link to Singleton)
         }
     }
 }

@@ -7,7 +7,7 @@ using namespace SR;
 shared_ptr<PatternQuery> NotMatchAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-	pq->RegisterAbnormalLink( GetPattern() );
+	pq->RegisterAbnormalLink( PatternLink(this, GetPattern()) );
 	pq->RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return pq;
 }
@@ -24,7 +24,7 @@ void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     CheckLocalMatch(x.GetChildX().get());
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( GetPattern(), x ); // Link into X, abnormal
+    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), x ); // Link into X, abnormal
     query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 

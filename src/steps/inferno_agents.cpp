@@ -172,9 +172,9 @@ void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &que
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-	pq->RegisterNormalLink( &terminus );
+	pq->RegisterNormalLink( PatternLink(this, &terminus) );
 	if( depth )
-		pq->RegisterNormalLink( &depth ); // local
+		pq->RegisterNormalLink( PatternLink(this, &depth) ); // local
     return pq;
 }
 
@@ -195,7 +195,7 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     } 
             
     // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( &terminus, XLink(xt) ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), XLink(xt) ); // Link into X
     
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -203,11 +203,11 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         auto op = [&](XLink x) -> XLink
         {
             TreePtr<Node> cur_depth( new SpecificString(s) );
-            return XLink(cur_depth);
+            return XLink(&cur_depth);
         };
         // note: not caching the recursive algorithm because we
         // need terminus from it. See #153 for discussion
-        query.RegisterNormalLink( &depth, cache( XLink(x), op ) );  // Generated Link (string)
+        query.RegisterNormalLink( PatternLink(this, &depth), cache( XLink(x), op ) );  // Generated Link (string)
     }
 }    
 
@@ -216,7 +216,7 @@ XLink NestedArrayAgent::Advance( XLink x,
                                  string *depth ) const
 {
     if( auto a = dynamic_pointer_cast<Array>(x.GetChildX()) )         
-        return XLink(a->element); // TODO support depth string (or integer)
+        return XLink(&(a->element)); // TODO support depth string (or integer)
     else
         return XLink();
 }
@@ -228,12 +228,12 @@ XLink NestedSubscriptLookupAgent::Advance( XLink x,
     if( auto s = dynamic_pointer_cast<Subscript>(x.GetChildX()) )            
     {
         *depth += "S";
-        return XLink(s->operands.front()); // the base, not the index
+        return XLink(&(s->operands.front())); // the base, not the index
     }
     else if( auto l = dynamic_pointer_cast<Lookup>(x.GetChildX()) )            
     {
         *depth += "L";
-        return XLink(l->member); 
+        return XLink(&(l->member)); 
     }
     else
     {

@@ -12,7 +12,7 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>(this);
     
 	pq->RegisterDecision( false ); // Exclusive, please.
-	pq->RegisterNormalLink( &terminus );
+	pq->RegisterNormalLink( PatternLink(this, &terminus) );
     
     // Allow subclasses to further restrict
     PatternQueryRestrictions( pq );
@@ -47,7 +47,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( &terminus, XLink(*thistime) ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), XLink(&*thistime) ); // Link into X
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
@@ -105,7 +105,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink x ) cons
 void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 {
     if( recurse_restriction )
-        pq->RegisterMultiplicityLink( &recurse_restriction );
+        pq->RegisterMultiplicityLink( PatternLink(this, &recurse_restriction) );
 }
 
 
@@ -125,7 +125,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
             xpr_ss->push_back( n );
 
-        query.RegisterMultiplicityLink( &recurse_restriction, XLinkMultiplicity(xpr_ss) ); // Links into X     
+        query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), XLinkMultiplicity(&xpr_ss) ); // Links into X     
     }   
 }
 

@@ -93,7 +93,7 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
         for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterAlwaysMatchingLink( l.GetPatternPtr() );
+            query.RegisterAlwaysMatchingLink( PatternLink(this, l.GetPatternPtr()) );
     }   
     else
     {

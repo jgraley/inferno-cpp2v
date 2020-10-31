@@ -19,6 +19,9 @@ public:
     PatternLink( shared_ptr<const Node> parent_pattern,
                  const TreePtrInterface *ppattern, 
                  void *whodat=nullptr );
+    PatternLink( const Agent *parent_agent,
+                 const TreePtrInterface *ppattern, 
+                 void *whodat=nullptr );
     PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
                  void *whodat=nullptr );
     bool operator<(const PatternLink &other) const;
@@ -43,7 +46,7 @@ class XLink : public Traceable
 {
 public:
     XLink();
-    XLink( const TreePtr<Node> &x_,
+    XLink( const TreePtrInterface *px,
            void *whodat=nullptr );
     XLink( const LocatedLink &l );
     bool operator<(const XLink &other) const;

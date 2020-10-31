@@ -37,11 +37,11 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
                     if( num_stars>0 )
                         pq->RegisterDecision( true ); // Inclusive, please.
                     num_stars--;
-                    pq->RegisterAbnormalLink(pe);    
+                    pq->RegisterAbnormalLink(PatternLink(this, pe));    
                 }
                 else
                 {
-                    pq->RegisterNormalLink(pe);    
+                    pq->RegisterNormalLink(PatternLink(this, pe));    
                 }
             }
         }
@@ -58,18 +58,18 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 				else
                 {
                     pq->RegisterDecision( false ); // Exclusive, please
-				    pq->RegisterNormalLink(pe);    	     
+				    pq->RegisterNormalLink(PatternLink(this, pe));    	     
                 }
 		    }
             if( p_star )
             {
-                pq->RegisterAbnormalLink(p_star);   		                    
+                pq->RegisterAbnormalLink(PatternLink(this, p_star));   		                    
             }
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be nullptr meaning no restriction            
-                pq->RegisterNormalLink(pattern_ptr);
+                pq->RegisterNormalLink(PatternLink(this, pattern_ptr));
         }
         else
         {
@@ -121,7 +121,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr)("\n");
-                query.RegisterNormalLink(pattern_ptr, XLink(*p_x_ptr)); // Link into X
+                query.RegisterNormalLink(PatternLink(this, pattern_ptr), XLink(p_x_ptr)); // Link into X
             }
         }
         else
@@ -194,7 +194,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.RegisterAbnormalLink( &*pit, XLink(xss) ); // Link to Generated Subsequence
+            query.RegisterAbnormalLink( PatternLink(this, &*pit), XLink(&xss) ); // Link to Generated Subsequence
                    
             // Resume at the first element after the matched range
             xit = xit_star_end;
@@ -204,7 +204,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.RegisterNormalLink( &*pit, XLink(*xit) ); // Link into X
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(&*xit) ); // Link into X
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -281,7 +281,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 xit = query.RegisterDecision( x_decision, false );
             }
             
-            query.RegisterNormalLink( &*pit, XLink(*xit) ); // Link into X
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(&*xit) ); // Link into X
 
 	    	// Remove the chosen element from the remaineder collection. 
 #ifdef CHECK_ITERATOR_IN_CONTAINER
@@ -328,7 +328,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
-        query.RegisterAbnormalLink( p_star, XLink(x_subcollection) ); // Link to Generated Subcollection
+        query.RegisterAbnormalLink( PatternLink(this, p_star), XLink(&x_subcollection) ); // Link to Generated Subcollection
     }
     TRACE("matched\n");
 }

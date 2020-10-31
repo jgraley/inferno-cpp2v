@@ -18,7 +18,7 @@ using namespace SR;
 shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-	pq->RegisterNormalLink( GetPointer() );
+	pq->RegisterNormalLink( PatternLink(this, GetPointer()) );
     return pq;
 }
 
@@ -56,7 +56,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 // Make an architypical node matching the pointer's type
                 TreePtr<Node> ptr_arch = px->MakeValueArchitype();
                 // Stick that in your pipe + smoke it
-                return XLink(ptr_arch); // Generated Link (one-to-one with X)  
+                return XLink(&ptr_arch); // Generated Link (one-to-one with X)  
             }
         }
         if(!found_one_already)
@@ -65,14 +65,14 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // so simulate a link that allows anything (because in fact
             // you can replace the root node with anything).
             TreePtr<Node> node( new Node );
-            return node;	// Singular Link
+            return XLink(&node);	// Singular Link
         }
         ASSERTFAIL("Failed to generate a link\n");
 #endif
     };
     
     query.Reset();
-    query.RegisterNormalLink( GetPointer(), cache( x, op ) );
+    query.RegisterNormalLink( PatternLink(this, GetPointer()), cache( x, op ) );
 }
 
 
