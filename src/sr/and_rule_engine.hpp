@@ -73,7 +73,6 @@ public:
         TreePtr<Node> root_pattern;
         Agent *root_agent;
         PatternLink root_pattern_link;
-        TreePtr< MatchAll<Node> > closure_pattern;
         set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
         set<PatternLink> my_normal_links;

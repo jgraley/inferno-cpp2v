@@ -43,8 +43,7 @@ void PatternQuery::RegisterDecision( bool inclusive )
 void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 {
     shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
-    const Agent *ba = Agent::AsAgentConst(bpp);
-    PatternLink b( ba, ppattern, WHODAT() );
+    PatternLink b( bpp, ppattern, WHODAT() );
     normal_links.push_back( b );        
 }
 
@@ -52,8 +51,7 @@ void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 {
     shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
-    const Agent *ba = Agent::AsAgentConst(bpp);
-    PatternLink b( ba, ppattern, WHODAT() );
+    PatternLink b( bpp, ppattern, WHODAT() );
     abnormal_links.push_back( b );       
 }
 
@@ -61,8 +59,7 @@ void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 {
     shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
-    const Agent *ba = Agent::AsAgentConst(bpp);
-    PatternLink b( ba, ppattern, WHODAT() );
+    PatternLink b( bpp, ppattern, WHODAT() );
     multiplicity_links.push_back( b );       
 }
 
@@ -104,8 +101,8 @@ void DecidedQuery::Start()
 void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, XLink xlink )
 {
     shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
-    const Agent *ba = Agent::AsAgentConst(bpp);
-    LocatedLink link( ba, ppattern, xlink );
+    PatternLink plink( bpp, ppattern );
+    LocatedLink link( plink, xlink );
     normal_links.push_back( link );        
 }
 
@@ -113,8 +110,8 @@ void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, XLink x
 void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink xlink )
 {
     shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
-    const Agent *ba = Agent::AsAgentConst(bpp);
-    LocatedLink link( ba, ppattern, xlink );
+    PatternLink plink( bpp, ppattern );
+    LocatedLink link( plink, xlink );
     abnormal_links.push_back( link );
 }
 
@@ -122,15 +119,16 @@ void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink
 void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, XLinkMultiplicity xlink )
 {
     shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
-    const Agent *ba = Agent::AsAgentConst(bpp);
-    LocatedLink link( ba, ppattern, xlink );
+    PatternLink plink( bpp, ppattern );
+    LocatedLink link( plink, xlink );
     multiplicity_links.push_back( link );
 }
 
 
 void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern )
 { 
-    LocatedLink link( base_agent, ppattern, MMAX_Node, WHODAT() );
+    shared_ptr<const Node> bpp = base_agent->GetPatternPtr();
+    LocatedLink link( bpp, ppattern, MMAX_Node, WHODAT() );
     normal_links.push_back( link );      
 }
 

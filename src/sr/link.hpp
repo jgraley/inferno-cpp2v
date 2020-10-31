@@ -16,8 +16,10 @@ class PatternLink : public Traceable
 {
 public:
     PatternLink();
-    PatternLink( const Agent *parent_pattern,
+    PatternLink( shared_ptr<const Node> parent_pattern,
                  const TreePtrInterface *ppattern, 
+                 void *whodat=nullptr );
+    PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
                  void *whodat=nullptr );
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;
@@ -30,10 +32,7 @@ public:
     string GetTrace() const; // used for debug
     
 private: friend class LocatedLink;
-#ifdef LINKS_ENHANCED_TRACE
-    const Agent *parent_pattern;
-#endif    
-    const TreePtrInterface *ppattern;
+    shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
     void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
@@ -68,16 +67,16 @@ class LocatedLink : public Traceable
 {
 public:
     LocatedLink();
-    LocatedLink( const Agent *parent_pattern,
-                 const TreePtrInterface *ppattern_, 
+    LocatedLink( shared_ptr<const Node> parent_pattern,
+                 const TreePtrInterface *ppattern, 
                  const TreePtr<Node> &x_,
                  void *whodat=nullptr );
     LocatedLink( const PatternLink &plink, 
                  const TreePtr<Node> &x_);
     LocatedLink( const pair<PatternLink, TreePtr<Node>> &p ) :
         LocatedLink(p.first, p.second) {}
-    LocatedLink( const Agent *parent_pattern,
-                 const TreePtrInterface *ppattern_, 
+    LocatedLink( shared_ptr<const Node> parent_pattern,
+                 const TreePtrInterface *ppattern, 
                  const XLink &xlink );
     LocatedLink( const PatternLink &plink, 
                  const XLink &xlink);
@@ -93,14 +92,8 @@ public:
     string GetTrace() const; // used for debug
 
 private: friend class PatternLink; friend class XLink;
-#ifdef LINKS_ENHANCED_TRACE
-    const Agent *parent_pattern;
-#endif
-    const TreePtrInterface *ppattern;
+    PatternLink plink;
     TreePtr<Node> x; 
-#ifdef KEEP_WHODAT_INFO
-    void *whodat; // the gdb magic you require is eg "info line *b.whodat"
-#endif
 };
 
 bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );

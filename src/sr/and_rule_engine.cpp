@@ -39,10 +39,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     root_agent = Agent::AsAgent(root_pattern);
     master_agents = master_agents_;
     
-    // For closure under semi-link model, we need a link to root, and therefore a parent of root
-    closure_pattern = MakePatternPtr< MatchAll<Node> >();
-    closure_pattern->patterns = (root_pattern);
-    root_pattern_link = PatternLink( Agent::AsAgent(closure_pattern), &closure_pattern->patterns.front() );
+    // For closure under semi-link model, we need a link to root
+    auto root_ppattern = make_shared< TreePtr<Node> >( root_pattern ); 
+    root_pattern_link = PatternLink( root_ppattern );
     
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
