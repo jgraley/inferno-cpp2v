@@ -156,7 +156,7 @@ bool SystemicConstraint::Test( list< Value > values )
     
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
-    TreePtr<Node> x;
+    Value x;
     list<SR::LocatedLink> expanded_links;
     auto forceit = forces.begin();
     auto valit = values.begin();
@@ -192,7 +192,7 @@ bool SystemicConstraint::Test( list< Value > values )
     shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
     try
     {
-        plan.agent->RunNormalLinkedQuery( query, &x, expanded_links );      
+        plan.agent->RunNormalLinkedQuery( query, x, expanded_links );      
     }
     catch( ::Mismatch & )
     {

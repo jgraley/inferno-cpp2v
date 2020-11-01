@@ -134,7 +134,7 @@ public:
 
     virtual void RegisterNormalLink( PatternLink plink, XLink xlink ) = 0; 
     virtual void RegisterAbnormalLink( PatternLink plink, XLink xlink ) = 0; 
-    virtual void RegisterMultiplicityLink( PatternLink plink, XLinkMultiplicity xlink ) = 0; 
+    virtual void RegisterMultiplicityLink( PatternLink plink, XLink xlink ) = 0; 
     virtual void RegisterAlwaysMatchingLink( PatternLink plink ) = 0; // Is a normal link
     
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
@@ -195,7 +195,7 @@ public:
 
     void RegisterNormalLink( PatternLink plink, XLink xlink ); 
     void RegisterAbnormalLink( PatternLink plink, XLink xlink ); 
-    void RegisterMultiplicityLink( PatternLink plink, XLinkMultiplicity xlink ); 
+    void RegisterMultiplicityLink( PatternLink plink, XLink xlink ); 
     void RegisterAlwaysMatchingLink( PatternLink plink ); // Is a normal link
 
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 

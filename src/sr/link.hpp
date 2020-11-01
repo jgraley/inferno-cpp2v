@@ -4,7 +4,8 @@
 #include "common/common.hpp"
 #include "node/specialise_oostd.hpp"
 
-#define LINKS_ENHANCED_TRACE
+#define KEEP_WHODAT_INFO
+
 
 namespace SR
 { 
@@ -20,10 +21,8 @@ public:
                  const TreePtrInterface *ppattern, 
                  void *whodat=nullptr );
     PatternLink( const Agent *parent_agent,
-                 const TreePtrInterface *ppattern, 
-                 void *whodat=nullptr );
-    PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
-                 void *whodat=nullptr );
+                 const TreePtrInterface *ppattern );
+    static PatternLink CreateDistinct( const TreePtr<Node> &tp_pattern );
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;
@@ -35,74 +34,72 @@ public:
     string GetTrace() const; // used for debug
     
 private: friend class LocatedLink;
+    PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
+                 void *whodat=nullptr );
+
     shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
     void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
-};
+}; 
 
 
 class XLink : public Traceable
 {
 public:
     XLink();
-    XLink( const TreePtrInterface *px,
+    XLink( shared_ptr<const Node> parent_x,
+           const TreePtrInterface *px,
            void *whodat=nullptr );
     XLink( const LocatedLink &l );
+    static XLink CreateDistinct( const TreePtr<Node> &tp_x );
     bool operator<(const XLink &other) const;
     bool operator!=(const XLink &other) const;
     bool operator==(const XLink &other) const;
     explicit operator bool() const;
-    const TreePtr<Node> &GetChildX() const;
+    TreePtr<Node> GetChildX() const;
     string GetTrace() const; // used for debug
 
 private: friend class LocatedLink;
-    TreePtr<Node> x; 
+    XLink( shared_ptr<const TreePtrInterface> px,
+           void *whodat=nullptr );
+           
+    shared_ptr<const TreePtrInterface> asp_x;
 #ifdef KEEP_WHODAT_INFO
     void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
 };
-
-typedef XLink XLinkMultiplicity;
 
 
 class LocatedLink : public Traceable
 {
 public:
     LocatedLink();
-    LocatedLink( shared_ptr<const Node> parent_pattern,
-                 const TreePtrInterface *ppattern, 
-                 const TreePtr<Node> &x_,
-                 void *whodat=nullptr );
-    LocatedLink( const PatternLink &plink, 
-                 const TreePtr<Node> &x_);
-    LocatedLink( const pair<PatternLink, TreePtr<Node>> &p ) :
-        LocatedLink(p.first, p.second) {}
-    LocatedLink( shared_ptr<const Node> parent_pattern,
-                 const TreePtrInterface *ppattern, 
-                 const XLink &xlink );
     LocatedLink( const PatternLink &plink, 
                  const XLink &xlink);
+    LocatedLink( const pair<PatternLink, XLink> &p ) :
+        LocatedLink(p.first, p.second) {}
+    
     bool operator<(const LocatedLink &other) const;
     bool operator!=(const LocatedLink &other) const;
     bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
-    operator pair<const PatternLink, TreePtr<Node>>() const;
+    operator pair<const PatternLink, XLink>() const;
     Agent *GetChildAgent() const;
     const TreePtrInterface *GetPatternPtr() const;
-    const TreePtr<Node> &GetChildX() const;
+    TreePtr<Node> GetChildX() const;
     operator PatternLink() const;
     string GetTrace() const; // used for debug
 
 private: friend class PatternLink; friend class XLink;
     PatternLink plink;
-    TreePtr<Node> x; 
+    XLink xlink; 
 };
 
 bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 
 list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                      const map< PatternLink, TreePtr<Node> > &keys );
+                                      const map< PatternLink, XLink > &keys );
 };
 
 #endif

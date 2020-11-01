@@ -169,7 +169,10 @@ public:
 
     static void MaybePrintEndl();
 
+    static void SetStep( int s );
+
 private:    
+    void PrintPrefix();
     void MaybePrintBanner();
 
     const char * const file;
@@ -179,6 +182,7 @@ private:
     static bool require_endl;
     static bool require_banner;
     static bool enable;
+    static int current_step;
 };
 
 #define INFERNO_CURRENT_FUNCTION __func__

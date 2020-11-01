@@ -154,6 +154,7 @@ int main( int argc, char *argv[] )
     Tracer::Enable( ReadArgs::trace );
     HitCount::instance.SetStep(-1);
     SerialNumber::SetStep(-1);
+    Tracer::SetStep(-1);
     HitCount::Enable( ReadArgs::trace_hits );
 
     // Do self-tests (unit tests) if requested
@@ -201,6 +202,7 @@ int main( int argc, char *argv[] )
 
     HitCount::instance.SetStep(-3);
     SerialNumber::SetStep(-3);
+    Tracer::SetStep(-3);
 
     // Parse the input program
     TreePtr<Node> program = TreePtr<Node>();
@@ -230,6 +232,7 @@ int main( int argc, char *argv[] )
         {
             SerialNumber::SetStep(i);
             HitCount::instance.SetStep(i);
+            Tracer::SetStep(i);
             
             bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
             if( !ReadArgs::trace_quiet )
@@ -264,8 +267,9 @@ int main( int argc, char *argv[] )
     // Output either C source code or a graph, as requested
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
-    HitCount::instance.SetStep(-1);
+    HitCount::instance.SetStep(-2);
     SerialNumber::SetStep(-2);
+    Tracer::SetStep(-2);
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )

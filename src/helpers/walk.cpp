@@ -67,13 +67,13 @@ Walk_iterator::pointer Walk_iterator::operator->() const
 
 TreePtr<Node> Walk_iterator::GetCurrentParent() const
 {
-    return state.back().node;
+    return state.empty() ? nullptr : state.back().node;
 }
 
 
 const TreePtrInterface *Walk_iterator::GetCurrentParentPointer() const
 {
-    return &*(state.back().iterator);
+    return state.empty() ? nullptr : &*(state.back().iterator); 
 }
 
 

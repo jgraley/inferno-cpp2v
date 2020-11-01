@@ -26,7 +26,7 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         if( xt )
         {
             // Punt it back into the search/replace engine
-            return XLink(&xt);  // Link to Generated (could be elsewhere in x)
+            return XLink::CreateDistinct(xt);  // Cache will un-distinct
         }
         else
         {

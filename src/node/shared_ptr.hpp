@@ -195,6 +195,13 @@ inline bool operator==( const TreePtr<X> &x,
 	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
+template< typename X, typename Y >
+inline bool operator!=( const TreePtr<X> &x,
+		                const TreePtr<Y> &y)
+{
+	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+}
+
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
 inline bool operator==( const TreePtrInterface &x,
@@ -203,11 +210,16 @@ inline bool operator==( const TreePtrInterface &x,
 	return x.get() == y.get();
 }
 
-template< typename X, typename Y >
-inline bool operator!=( const TreePtr<X> &x,
-		                const TreePtr<Y> &y)
+inline bool operator!=( const TreePtrInterface &x,
+		                const TreePtrInterface &y)
 {
-	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+	return x.get() != y.get();
+}
+
+inline bool operator<( const TreePtrInterface &x,
+		               const TreePtrInterface &y)
+{
+	return x.get() < y.get();
 }
 
 #endif /* SHARED_PTR_HPP */

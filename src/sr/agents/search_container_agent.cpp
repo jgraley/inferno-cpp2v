@@ -47,7 +47,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( PatternLink(this, &terminus), XLink(&*thistime) ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), GetXLinkFromIterator(x, thistime) ); // Link into X
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
@@ -75,11 +75,17 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- AnyNode ------------------------------------    
 
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink x ) const
+shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink base_x ) const
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new FlattenNode( x.GetChildX() ) );
+    return shared_ptr<ContainerInterface>( new FlattenNode( base_x.GetChildX() ) );
+}
+
+
+XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const
+{
+    return XLink(base_x.GetChildX(), &*it);
 }
 
 
@@ -99,6 +105,15 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink x ) cons
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
     return shared_ptr<ContainerInterface>( new Walk( x.GetChildX(), nullptr, nullptr ) );
+}
+
+
+XLink StuffAgent::GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const
+{
+    const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(it.GetUnderlyingIterator());
+    TreePtr<Node> parent_x = pwtt->GetCurrentParent();
+    const TreePtrInterface *px = pwtt->GetCurrentParentPointer();
+    return parent_x ? XLink( parent_x, px ) : base_x;
 }
 
 
@@ -125,7 +140,8 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
             xpr_ss->push_back( n );
 
-        query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), XLinkMultiplicity(&xpr_ss) ); // Links into X     
+        XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
+        query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X     
     }   
 }
 

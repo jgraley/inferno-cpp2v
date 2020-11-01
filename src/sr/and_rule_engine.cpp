@@ -39,9 +39,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     root_agent = Agent::AsAgent(root_pattern);
     master_agents = master_agents_;
     
-    // For closure under semi-link model, we need a link to root
-    auto root_ppattern = make_shared< TreePtr<Node> >( root_pattern ); 
-    root_pattern_link = PatternLink( root_ppattern );
+    // For closure under full arrowhead model, we need a link to root
+    root_pattern_link = PatternLink::CreateDistinct( root_pattern );
     
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
@@ -329,7 +328,7 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
 }
 
 
-void AndRuleEngine::ExpandDomain( set< TreePtr<Node> > &domain )
+void AndRuleEngine::ExpandDomain( set< XLink > &domain )
 {
     INDENT("X");
     // It's important that this walk hits parents first because local node 
@@ -343,13 +342,17 @@ void AndRuleEngine::ExpandDomain( set< TreePtr<Node> > &domain )
 }
 
 
-void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
+void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 {
     // Put all the nodes in the X tree into the domain
-    set< TreePtr<Node> > domain;
-	Walk wx( start_x ); 
+    set< XLink > domain;
+	Walk wx( root_xlink.GetChildX() ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-        domain.insert(*wx_it);
+    {
+        TreePtr<Node> parent_x = wx_it.GetCurrentParent();
+        const TreePtrInterface *px = wx_it.GetCurrentParentPointer();
+        domain.insert( parent_x ? XLink( parent_x, px ) : root_xlink );
+    }
         
     // Tell all the constraints about them
     for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
@@ -364,7 +367,7 @@ void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
 
 void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
 {
-    map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
+    map< shared_ptr<CSP::Constraint>, list< XLink > > values;
     bool match = plan.solver->GetNextSolution( &values );        
     if( !match )
         throw NoSolution();
@@ -374,7 +377,7 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
     for( pair< PatternLink, shared_ptr<CSP::Constraint> > lcp : plan.my_constraints )
     {
         list< PatternLink > vars = lcp.second->GetFreeVariables();
-        list< TreePtr<Node> > &vals = values.at(lcp.second);
+        list< XLink > &vals = values.at(lcp.second);
         auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
 
         // Don't bother with the "self" link
@@ -474,7 +477,7 @@ void AndRuleEngine::CompareEvaluatorLinks( PatternLink plink,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        TreePtr<Node> x = solution->at(link);
+        TreePtr<Node> x = solution->at(link).GetChildX();
                                 
         try 
         {
@@ -552,6 +555,7 @@ void AndRuleEngine::RegenerationPassAgent( LocatedLink link,
             // Try matching the abnormal links (free and evaluator).
             FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
+                ASSERT( link );
                 // Actions if evaluator link
                 if( plan.my_evaluator_abnormal_engines.count(link) )                
                     InsertSolo( solution_for_evaluators, link );                
@@ -639,7 +643,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
            
     master_keys = master_keys_;    
     
-    LocatedLink root_link( plan.root_pattern_link, start_x );
+    // distinct OK because this only runs once per solve
+    XLink root_xlink = XLink::CreateDistinct(start_x);
+    LocatedLink root_link( plan.root_pattern_link, root_xlink );
 
     if( plan.my_normal_agents.empty() )
     {
@@ -652,12 +658,16 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     for( PatternLink link : plan.normal_links_ordered )
     {
         if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
-            master_and_root_links[link] = master_keys->at(link.GetChildAgent());
+        {
+            // distinct OK because this only runs once per solve
+            XLink xlink = XLink::CreateDistinct(master_keys->at(link.GetChildAgent())); 
+            master_and_root_links[link] = xlink;
+        }
     }
-    master_and_root_links[plan.root_pattern_link] = start_x;
+    master_and_root_links[plan.root_pattern_link] = root_xlink;
            
 #ifdef USE_SOLVER
-    StartCSPSolver( start_x );
+    StartCSPSolver( root_xlink );
 #else
     plan.conj->Start();
 #endif

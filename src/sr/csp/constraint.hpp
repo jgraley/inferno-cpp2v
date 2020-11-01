@@ -42,7 +42,7 @@ enum class Freedom
 };
 
 
-typedef TreePtr<Node> Value;
+typedef SR::XLink Value;
 
 struct ValueFlags
 {
@@ -118,7 +118,7 @@ public:
      *
      * @param domain [inout] The domain to expand
      */
-    void ExpandDomain( set< TreePtr<Node> > &domain ) { /* not yet implemented */ }
+    void ExpandDomain( set< Value > &domain ) { /* not yet implemented */ }
 };
 
 };

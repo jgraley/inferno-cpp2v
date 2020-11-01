@@ -24,10 +24,12 @@ public:
                                       XLink x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
-    void DecidedQuerySequence( DecidedQueryAgentInterface &query,
+    void DecidedQuerySequence( XLink base_x,
+                               DecidedQueryAgentInterface &query,
                                SequenceInterface *px,
     	                       SequenceInterface &pattern ) const;
-    void DecidedQueryCollection( DecidedQueryAgentInterface &query,
+    void DecidedQueryCollection( XLink base_x,
+                                 DecidedQueryAgentInterface &query,
                                  CollectionInterface *px,
     		                     CollectionInterface &pattern ) const;
 public:

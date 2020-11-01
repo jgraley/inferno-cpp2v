@@ -82,7 +82,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
 }
                         
 
-void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &initial_domain_ )
+void SimpleSolver::Run( ReportageObserver *holder_, const set< Value > &initial_domain_ )
 {
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
@@ -234,8 +234,8 @@ void SimpleSolver::ShowBestAssignment()
     {
         if( best_assignments.count(var) > 0 )
         {
-            TRACEC("Variable ")(var)(" assigned ")(*best_assignments.at(var));
-            if( var.GetChildAgent()->IsLocalMatch(best_assignments.at(var).get()) )
+            TRACEC("Variable ")(var)(" assigned ")(best_assignments.at(var));
+            if( var.GetChildAgent()->IsLocalMatch(best_assignments.at(var).GetChildX().get()) )
             {
                 TRACEC(" is a local match\n");
             }

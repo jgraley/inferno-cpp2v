@@ -64,7 +64,7 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) 
     {
         MaybePrintEndl();
         fprintf( stderr, "\n");
-        Descend::Indent();
+        PrintPrefix();
         fprintf( stderr, "----ASSERTION FAILED: %s\n", c);
         MaybePrintBanner();
     }
@@ -110,7 +110,7 @@ Tracer &Tracer::operator()(const char *fmt, ...)
     if( !require_endl ) 
     {    	
         MaybePrintBanner();
-        Descend::Indent();
+        PrintPrefix();
     }
     vfprintf( stderr, fmt, vl );
     va_end( vl );
@@ -166,17 +166,6 @@ void Tracer::MaybePrintEndl()
 }
 
 
-void Tracer::MaybePrintBanner()
-{
-    if( require_banner && (file != "" || line != 0 || function != "") )
-    {
-        Descend::Indent();
-        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
-        require_banner = false;
-    }    
-}
-
-
 Tracer::Descend::Descend( string s ) : 
     os(pre.size()) 
 { 
@@ -200,6 +189,44 @@ Tracer::Descend::~Descend()
         leftmost_pre = pre;
 }
 
+void Tracer::SetStep( int s )
+{
+    current_step = s;
+}
+
+
+void Tracer::PrintPrefix()
+{
+    switch( current_step )
+    {
+        case -4: // inputting
+            break;
+        case -3: // inputting
+            fprintf( stderr, "I  " );
+            break;
+        case -2: // outputting
+            fprintf( stderr, "O  " );
+            break;
+        case -1: // planning
+            fprintf( stderr, "P  " );  
+            break;
+        default: // during a step
+            fprintf( stderr, "%03d", current_step );  
+            break;
+    }
+    Descend::Indent();
+}
+
+
+void Tracer::MaybePrintBanner()
+{
+    if( require_banner && (file != "" || line != 0 || function != "") )
+    {
+        PrintPrefix();
+        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
+        require_banner = false;
+    }    
+}
 
 
 
@@ -211,5 +238,8 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
     Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n\n", expr );
     InfernoAbort();
 }
+
+
+int Tracer::current_step = -4; // -4 is disable
 
 

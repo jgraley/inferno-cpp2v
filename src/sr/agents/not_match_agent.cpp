@@ -21,7 +21,9 @@ void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
+    TRACE("NotMatch: local match check: ")(*this)(" vs ")(x)("\n");
     CheckLocalMatch(x.GetChildX().get());
+    TRACE("NotMatch: local match check OK\n");
     
     // Context is abnormal because patterns must not match
     query.RegisterAbnormalLink( PatternLink(this, GetPattern()), x ); // Link into X, abnormal

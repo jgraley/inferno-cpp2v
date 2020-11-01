@@ -18,9 +18,9 @@ resfile=test/results.csv
 
 if test $# -eq 0
 then
- echo Usage: $0 \<input program\> [\<arguments for inferno\>]
- echo from inferno-cpp2v/trunk/
- exit 1
+    echo Usage: $0 \<input program\> [\<arguments for inferno\>]
+    echo from inferno-cpp2v/trunk/
+    exit 1
 fi
 
 infile=$1
@@ -51,23 +51,29 @@ echo Transform...
 time $inferno -s -f -i$infile -o$outbase $iargs
 ires=$?
 
-if test $ires -eq 0
+dres=0
+for file in $(find $outdir -type f | sort); do 
+    if [[ $(diff --brief $file ${file/#$outdir/$refdir}) ]]; then  
+        printf "\n" 
+        echo "$file differs from reference (stopping here):"
+        diff $file ${file/#$outdir/$refdir}
+        printf "\n" 
+        dres=1
+        break
+    fi
+done
+
+if [ $dres -eq 0 ] && [ $ires -eq 0 ]
 then
- echo Compare output of each step...
- diff --recursive $refdir $outdir  # --brief
- dres=$?
- if test $dres -eq 0
- then
-  echo $infile PASSED
-  return_code=0
- fi
+    echo "$infile PASSED"
+    return_code=0
 fi
 
 if test -z $resfile
 then
- echo $fb "," $ires "," $d
+    echo $fb "," $ires "," $d
 else
- echo $fb "," $ires "," $dres >> $resfile
+    echo $fb "," $ires "," $dres >> $resfile
 fi
 
 exit $return_code

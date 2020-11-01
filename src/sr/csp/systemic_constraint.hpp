@@ -40,7 +40,7 @@ private:
     list<VariableId> GetFreeVariables() const;
     void TraceProblem() const;
     virtual void SetForces( const map<VariableId, Value> &forces );    
-    bool Test( list< TreePtr<Node> > values );
+    bool Test( list< Value > values );
         
     class ByLocationLinkMismatch : public ::Mismatch
     {

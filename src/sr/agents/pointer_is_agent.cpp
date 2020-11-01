@@ -3,6 +3,7 @@
 #include "agent.hpp"
 #include "../scr_engine.hpp"
 #include "link.hpp"
+#include "standard_agent.hpp"
 
 using namespace SR;
 //#define SPIKE
@@ -45,8 +46,10 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         Walk e( master_scr_engine->GetOverallMaster()->GetContext() ); 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
+            TRACE("PointerIs: ")(*this)(" comapres ")(*wit)(" with ")(x.GetChildX())("\n");
             if( *wit == x.GetChildX() ) // found ourself TODO use find()
             {            
+                TRACE("Match found_one_already=%d\n", found_one_already);
                 if(found_one_already)
                     throw Mismatch(); // X has multiple parents - ambiguous, so don't match
                 found_one_already = true;
@@ -55,8 +58,14 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 const TreePtrInterface *px = wit.GetCurrentParentPointer();         
                 // Make an architypical node matching the pointer's type
                 TreePtr<Node> ptr_arch = px->MakeValueArchitype();
+                TRACE("PointerIs: ")(*this)(" made architype ")(*ptr_arch)(" from ")(*px)("\n");
+
                 // Stick that in your pipe + smoke it
-                return XLink(&ptr_arch); // Generated Link (one-to-one with X)  
+                return XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
+            }
+            else
+            {
+                TRACE("Mismatch\n");
             }
         }
         if(!found_one_already)
@@ -65,14 +74,19 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // so simulate a link that allows anything (because in fact
             // you can replace the root node with anything).
             TreePtr<Node> node( new Node );
-            return XLink(&node);	// Singular Link
+            TRACE("PointerIs: ")(*this)(" made ")(*node)(" due no match\n");
+            return XLink::CreateDistinct(node);	// Cache will un-distinct
         }
         ASSERTFAIL("Failed to generate a link\n");
 #endif
     };
     
     query.Reset();
-    query.RegisterNormalLink( PatternLink(this, GetPointer()), cache( x, op ) );
+    auto cx = cache( x, op );
+    TRACE("PointerIs cache: ")(x)(" to ")(cx)("\n");
+    // Canary for cache malfunctions
+    ASSERT( cx.GetChildX()->IsLocalMatch(x.GetChildX().get()) );
+    query.RegisterNormalLink( PatternLink(this, GetPointer()), cx );
 }
 
 

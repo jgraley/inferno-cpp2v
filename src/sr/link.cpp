@@ -3,7 +3,13 @@
 
 using namespace SR;
 
-
+// For debugging
+#ifdef KEEP_WHODAT_INFO
+#define WHODAT() __builtin_extract_return_addr (__builtin_return_address (0))
+#else
+#define WHODAT() nullptr
+#endif
+ 
 void EnsureNotOnStack( const TreePtrInterface *p )
 {
     ASSERT( (((uint64_t)p & 0x7fff00000000ULL) != 0x7fff00000000ULL) )
@@ -15,7 +21,7 @@ void EnsureNotOnStack( const TreePtrInterface *p )
 PatternLink::PatternLink()
 {
 #ifdef KEEP_WHODAT_INFO
-    whodat = nullptr;
+    whodat = WHODAT();
 #endif
 }
 
@@ -27,29 +33,25 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
 {
     EnsureNotOnStack( ppattern );
 #ifdef KEEP_WHODAT_INFO
-    whodat = whodat_;
+    whodat = whodat_ ? whodat_ : WHODAT();
 #endif    
 }
 
 
 PatternLink::PatternLink(const Agent *parent_agent,
-                         const TreePtrInterface *ppattern, 
-                         void *whodat_) :
-    PatternLink( parent_agent->GetPatternPtr(), ppattern, whodat_ )
+                         const TreePtrInterface *ppattern) :
+    PatternLink( parent_agent->GetPatternPtr(), ppattern, WHODAT() )
 {
 }
 
 
-PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
-                         void *whodat_) :
-    asp_pattern( ppattern )
+PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = whodat_;
-#endif    
+    shared_ptr< TreePtr<Node> > sp_tp_pattern = make_shared< TreePtr<Node> >( tp_pattern ); 
+    return PatternLink(sp_tp_pattern, WHODAT());
 }
-
-
+              
+              
 bool PatternLink::operator<(const PatternLink &other) const
 {
     // PatternLink is unique across parent-child links in
@@ -108,125 +110,118 @@ string PatternLink::GetTrace() const
     return string("->") + GetChildAgent()->GetTrace();
 }
 
+
+PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
+                         void *whodat_) :
+    asp_pattern( ppattern )
+{
+#ifdef KEEP_WHODAT_INFO
+    whodat = whodat_ ? whodat_ : WHODAT();
+#endif    
+}
+
 //////////////////////////// XLink ///////////////////////////////
 
 XLink::XLink() :
-    x( nullptr )
+    asp_x( nullptr )
 {
 #ifdef KEEP_WHODAT_INFO
-    whodat = nullptr;
+    whodat = WHODAT();
 #endif
 }
 
 
-XLink::XLink( const TreePtrInterface *px,
-              void *whodat ) :
-    x( *px )              
+XLink::XLink( shared_ptr<const Node> parent_x,
+              const TreePtrInterface *px,
+              void *whodat_ ) :
+    asp_x( parent_x, px )              
 {
-    ASSERT(x);
+    ASSERT(asp_x);
+    ASSERT(*asp_x);
 
 #ifdef KEEP_WHODAT_INFO
-    whodat = whodat_;
+    whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
+}
+
+
+XLink::XLink( const LocatedLink &l ) :
+    XLink( l.xlink )              
+{
 }
 
               
-XLink::XLink( const LocatedLink &l ) :
-    x( l.x )              
+XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 {
-    ASSERT(x);
-
-#ifdef KEEP_WHODAT_INFO
-    whodat = l.whodat;
-#endif  
+    shared_ptr< TreePtr<Node> > sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 
+    return XLink(sp_tp_x, WHODAT());
 }
-
+              
               
 bool XLink::operator<(const XLink &other) const
 {
-    return x < other.x;    
+    TRACEC(*asp_x)(" < ")(*other.asp_x)(": ")(*asp_x < *other.asp_x)("\n");
+    TRACEC(*asp_x)(" == ")(*asp_x)(": ")(*asp_x == *asp_x)("\n");
+    TRACEC(*asp_x)(" != ")(*asp_x)(": ")(*asp_x != *asp_x)("\n");
+    return *asp_x < *other.asp_x;    
 }
 
     
 bool XLink::operator!=(const XLink &other) const
 {
-    return x != other.x;    
+    return *asp_x != *other.asp_x;    
 }
 
 
 bool XLink::operator==(const XLink &other) const
 {
-    return x == other.x;    
+    return *asp_x == *other.asp_x;    
 }
 
 
 XLink::operator bool() const
 {
-    return x != nullptr;
+    return asp_x != nullptr;
 }
 
 
-const TreePtr<Node> &XLink::GetChildX() const
+TreePtr<Node> XLink::GetChildX() const
 {
-    return x;
+    return *asp_x;
 }
 
 
 string XLink::GetTrace() const // used for debug
 {
-    return string("@") + x->GetTrace();
+    return string("@") + asp_x->GetTrace();
 }
 
+
+XLink::XLink( shared_ptr<const TreePtrInterface> px,
+              void *whodat_ ) :
+    asp_x( px )
+{
+    ASSERT(asp_x);
+    ASSERT(*asp_x);
+
+#ifdef KEEP_WHODAT_INFO
+    whodat = whodat_ ? whodat_ : WHODAT();
+#endif  
+}              
+              
 //////////////////////////// LocatedLink ///////////////////////////////
 
 LocatedLink::LocatedLink()  
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = nullptr;
-#endif
-}
-
-
-LocatedLink::LocatedLink( shared_ptr<const Node> parent_pattern_,
-                          const TreePtrInterface *ppattern_, 
-                          const TreePtr<Node> &x_,
-                          void *whodat_ ) :
-    plink( parent_pattern_, ppattern_, whodat_ ),
-    x( x_ )
-{
-    ASSERT(x);
 }
 
 
 LocatedLink::LocatedLink( const PatternLink &plink_, 
-                          const TreePtr<Node> &x_ ) :
+                          const XLink &xlink_) :
     plink( plink_ ),
-    x( x_ )                                                  
+    xlink( xlink_ )                                                  
 {
-    ASSERT(x);
-
-#ifdef KEEP_WHODAT_INFO
-    whodat = plink.whodat;
-#endif
-}
-
-
-LocatedLink::LocatedLink( shared_ptr<const Node> parent_pattern_,
-                          const TreePtrInterface *ppattern_, 
-                          const XLink &xlink ) :
-    plink( parent_pattern_, ppattern_ ),
-    x( xlink.x )
-{
-    ASSERT(x);
-}
-
-
-LocatedLink::LocatedLink( const PatternLink &plink_, 
-                          const XLink &xlink) :
-    plink( plink_ ),
-    x( xlink.x )                                                  
-{
-    ASSERT(x);
+    ASSERT( (bool)plink == (bool)xlink );
 }
 
 
@@ -237,31 +232,32 @@ bool LocatedLink::operator<(const LocatedLink &other) const
     if( plink != other.plink )
         return plink < other.plink;
         
-    return x < other.x;    
+    return xlink < other.xlink;    
 }
 
 
 bool LocatedLink::operator!=(const LocatedLink &other) const
 {
-    return plink != other.plink || x != other.x;
+    return plink != other.plink || xlink != other.xlink;
 }
 
 
 bool LocatedLink::operator==(const LocatedLink &other) const
 {
-    return plink == other.plink && x == other.x;
+    return plink == other.plink && xlink == other.xlink;
 }
 
 
 LocatedLink::operator bool() const
 {
+    ASSERT( (bool)plink == (bool)xlink );
     return (bool)plink;
 }
 
 
-LocatedLink::operator pair<const PatternLink, TreePtr<Node>>() const
+LocatedLink::operator pair<const PatternLink, XLink>() const
 {
-    return make_pair( plink, x );
+    return make_pair( plink, xlink );
 }
 
 
@@ -277,9 +273,9 @@ const TreePtrInterface *LocatedLink::GetPatternPtr() const
 }
 
 
-const TreePtr<Node> &LocatedLink::GetChildX() const
+TreePtr<Node> LocatedLink::GetChildX() const
 {
-    return x;
+    return xlink.GetChildX();
 }
 
 
@@ -291,9 +287,10 @@ LocatedLink::operator PatternLink() const
 
 string LocatedLink::GetTrace() const
 {
-    return plink.GetTrace() + string("@") + x->GetTrace();      
+    return plink.GetTrace() + string(":=") + xlink.GetTrace();      
 }
 
+//////////////////////////// free functions ///////////////////////////////
 
 bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &right )
 {
@@ -313,7 +310,7 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
 
 
 list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                          const map< PatternLink, TreePtr<Node> > &basic_solution )
+                                          const map< PatternLink, XLink > &basic_solution )
 {
     list<LocatedLink> llinks;
     for( PatternLink plink : plinks )

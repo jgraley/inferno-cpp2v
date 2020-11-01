@@ -8,15 +8,6 @@
 
 using namespace SR;
 
-//#define KEEP_WHODAT_INFO
-
-// For debugging
-#ifdef KEEP_WHODAT_INFO
-#define WHODAT() __builtin_extract_return_addr (__builtin_return_address (0))
-#else
-#define WHODAT() nullptr
-#endif
- 
 PatternQuery::PatternQuery( const Agent *base_agent_ ) :
     base_agent( base_agent_ )
 {
@@ -106,7 +97,7 @@ void DecidedQuery::RegisterAbnormalLink( PatternLink plink, XLink xlink )
 }
 
 
-void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLinkMultiplicity xlink )
+void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLink xlink )
 {
     LocatedLink link( plink, xlink );
     multiplicity_links.push_back( link );
@@ -115,7 +106,8 @@ void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLinkMultiplicit
 
 void DecidedQuery::RegisterAlwaysMatchingLink( PatternLink plink )
 { 
-    LocatedLink link( plink, MMAX_Node );
+    XLink MMAX_link = XLink::CreateDistinct( MMAX_Node ); // TODO distinct here is not OK!!! 
+    LocatedLink link( plink, MMAX_link );
     normal_links.push_back( link );      
 }
 

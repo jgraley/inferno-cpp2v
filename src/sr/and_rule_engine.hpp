@@ -95,10 +95,10 @@ public:
     } plan;
     
 private:    
-    typedef map< PatternLink, TreePtr<Node> > SolutionMap;
+    typedef map< PatternLink, XLink > SolutionMap;
 
-    void ExpandDomain( set< TreePtr<Node> > &domain );
-    void StartCSPSolver( TreePtr<Node> start_x );
+    void ExpandDomain( set< XLink > &domain );
+    void StartCSPSolver( XLink root_xlink );
     void GetNextCSPSolution( TreePtr<Node> start_x );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );

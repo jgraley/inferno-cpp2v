@@ -105,14 +105,14 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedQuerySequence( query, p_x_seq, *pattern_seq );
+            DecidedQuerySequence( x, query, p_x_seq, *pattern_seq );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( query, p_x_col, *pattern_col );
+            DecidedQueryCollection( x, query, p_x_col, *pattern_col );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -121,7 +121,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr)("\n");
-                query.RegisterNormalLink(PatternLink(this, pattern_ptr), XLink(p_x_ptr)); // Link into X
+                query.RegisterNormalLink(PatternLink(this, pattern_ptr), XLink(x.GetChildX(), p_x_ptr)); // Link into X
             }
         }
         else
@@ -132,7 +132,8 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     return;
 }
 
-void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
+void StandardAgent::DecidedQuerySequence( XLink base_x,
+                                          DecidedQueryAgentInterface &query,
                                           SequenceInterface *px,
 		                                  SequenceInterface &pattern ) const
 {
@@ -194,8 +195,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.RegisterAbnormalLink( PatternLink(this, &*pit), XLink(&xss) ); // Link to Generated Subsequence
-                   
+            query.RegisterAbnormalLink( PatternLink(this, &*pit), XLink::CreateDistinct(xss) ); // Only used in after-pass
+             
             // Resume at the first element after the matched range
             xit = xit_star_end;
         }
@@ -204,7 +205,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(&*xit) ); // Link into X
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_x.GetChildX(), &*xit) ); // Link into X
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -225,7 +226,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 }
 
 
-void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
+void StandardAgent::DecidedQueryCollection( XLink base_x,
+                                            DecidedQueryAgentInterface &query,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern ) const
 {
@@ -281,7 +283,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 xit = query.RegisterDecision( x_decision, false );
             }
             
-            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(&*xit) ); // Link into X
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_x.GetChildX(), &*xit) ); // Link into X
 
 	    	// Remove the chosen element from the remaineder collection. 
 #ifdef CHECK_ITERATOR_IN_CONTAINER
@@ -328,7 +330,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
-        query.RegisterAbnormalLink( PatternLink(this, p_star), XLink(&x_subcollection) ); // Link to Generated Subcollection
+        query.RegisterAbnormalLink( PatternLink(this, p_star), XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
     }
     TRACE("matched\n");
 }

@@ -25,7 +25,8 @@ public:
                                       XLink x ) const;                  
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink x ) const = 0;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const = 0;
+    virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime ) const {};
 
@@ -40,7 +41,8 @@ public:
 /// being bypassed.
 class AnyNodeAgent : public SearchContainerAgent
 {
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink x ) const;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const;
+    virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 };
 
@@ -74,7 +76,8 @@ public:
 class StuffAgent : public SearchContainerAgent
 {
 public:
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink x ) const;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const;
+    virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;

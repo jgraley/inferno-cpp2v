@@ -195,7 +195,7 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     } 
             
     // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( PatternLink(this, &terminus), XLink(xt) ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), xt ); // Link into X
     
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -203,11 +203,11 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         auto op = [&](XLink x) -> XLink
         {
             TreePtr<Node> cur_depth( new SpecificString(s) );
-            return XLink(&cur_depth);
+            return XLink::CreateDistinct(cur_depth); // cache will un-distinct
         };
         // note: not caching the recursive algorithm because we
         // need terminus from it. See #153 for discussion
-        query.RegisterNormalLink( PatternLink(this, &depth), cache( XLink(x), op ) );  // Generated Link (string)
+        query.RegisterNormalLink( PatternLink(this, &depth), cache( x, op ) );  // Generated Link (string)
     }
 }    
 
@@ -216,7 +216,7 @@ XLink NestedArrayAgent::Advance( XLink x,
                                  string *depth ) const
 {
     if( auto a = dynamic_pointer_cast<Array>(x.GetChildX()) )         
-        return XLink(&(a->element)); // TODO support depth string (or integer)
+        return XLink(a, &(a->element)); // TODO support depth string (or integer)
     else
         return XLink();
 }
@@ -228,12 +228,12 @@ XLink NestedSubscriptLookupAgent::Advance( XLink x,
     if( auto s = dynamic_pointer_cast<Subscript>(x.GetChildX()) )            
     {
         *depth += "S";
-        return XLink(&(s->operands.front())); // the base, not the index
+        return XLink(s, &(s->operands.front())); // the base, not the index
     }
     else if( auto l = dynamic_pointer_cast<Lookup>(x.GetChildX()) )            
     {
         *depth += "L";
-        return XLink(&(l->member)); 
+        return XLink(l, &(l->member)); 
     }
     else
     {
