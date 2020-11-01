@@ -351,6 +351,8 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     {
         TreePtr<Node> parent_x = wx_it.GetCurrentParent();
         const TreePtrInterface *px = wx_it.GetCurrentParentPointer();
+        if( parent_x )
+            ASSERT( px );
         domain.insert( parent_x ? XLink( parent_x, px ) : root_xlink );
     }
         
