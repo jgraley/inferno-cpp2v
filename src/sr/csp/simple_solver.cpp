@@ -94,8 +94,18 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< Value > &initial_
     best_assignments.clear();
     best_num_assignments = 0;
 #endif    
-    
-    TryVariable( plan.variables.begin() );    
+
+    if( plan.variables.empty() )
+    {
+        // TODO re-organise (and rename) TryVariable() so we don't need this bit
+        bool ok = Test( assignments );
+        if( ok )
+            ReportSolution( assignments );
+    }
+    else
+    {
+        TryVariable( plan.variables.begin() );    
+    }
 
 #ifdef TRACK_BEST_ASSIGNMENT    
     ShowBestAssignment();
@@ -107,6 +117,8 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< Value > &initial_
 
 bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 {
+    ASSERT( current != plan.variables.end() );
+    
     list<VariableId>::const_iterator next = current;
     ++next;
     bool complete = (next == plan.variables.end());
@@ -115,7 +127,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
     {
         assignments[*current] = v;
      
-        bool ok = Test( assignments, *current );
+        bool ok = Test( assignments );
         
         if( !ok )
         {
@@ -143,8 +155,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 }
 
 
-bool SimpleSolver::Test( const Assignments &assigns, 
-                         VariableId variable_of_interest )
+bool SimpleSolver::Test( const Assignments &assigns )
 {
     bool ok = true; // AND-rule
     for( shared_ptr<Constraint> c : plan.constraints )

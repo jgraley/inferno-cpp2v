@@ -49,8 +49,7 @@ private:
     typedef map<VariableId, Value> Assignments;
 
     bool TryVariable( list<VariableId>::const_iterator current );
-    bool Test( const Assignments &assigns, 
-               VariableId variable_of_interest );
+    bool Test( const Assignments &assigns );
     list<Value> GetValuesForConstraint( shared_ptr<Constraint> c, const Assignments &a );    
     void ReportSolution( const Assignments &assignments );
     void TraceProblem() const;

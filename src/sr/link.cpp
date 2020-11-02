@@ -160,9 +160,6 @@ XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
               
 bool XLink::operator<(const XLink &other) const
 {
-    TRACEC(*asp_x)(" < ")(*other.asp_x)(": ")(*asp_x < *other.asp_x)("\n");
-    TRACEC(*asp_x)(" == ")(*asp_x)(": ")(*asp_x == *asp_x)("\n");
-    TRACEC(*asp_x)(" != ")(*asp_x)(": ")(*asp_x != *asp_x)("\n");
     return *asp_x < *other.asp_x;    
 }
 

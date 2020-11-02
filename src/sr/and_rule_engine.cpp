@@ -54,7 +54,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
         return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
 
     set<Agent *> surrounding_agents = SetUnion( master_agents, my_normal_agents );         
-    CreateVariousThings( normal_agents, surrounding_agents );    
+    CreateSubordniateEngines( normal_agents, surrounding_agents );    
         
     master_boundary_agents.clear();    
     master_boundary_links.clear();
@@ -295,8 +295,8 @@ void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents,
 }
 
 
-void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents, 
-                                               const set<Agent *> &surrounding_agents )
+void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
+                                                    const set<Agent *> &surrounding_agents )
 {
     for( auto agent : normal_agents )
     {

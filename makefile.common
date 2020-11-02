@@ -29,7 +29,7 @@ OPTIONS += -Wfatal-errors
 
 # Optimisation level. -O2 is considerably slower to compile, beware
 # Update: what decade are you living in?!! Oh, right.
-OPTIONS += -O2
+OPTIONS += -Og
 
 # JSG I need this to get the boost includes in a cygwin setup. This also
 # fixes the boost verison.

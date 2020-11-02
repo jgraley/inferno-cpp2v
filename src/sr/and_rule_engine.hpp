@@ -66,8 +66,8 @@ public:
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
                                    set<PatternLink> *my_normal_links,
                                    PatternLink link );
-        void CreateVariousThings( const set<Agent *> &normal_agents, 
-                                  const set<Agent *> &surrounding_agents );
+        void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
+                                       const set<Agent *> &surrounding_agents );
  
         AndRuleEngine * const algo;
         TreePtr<Node> root_pattern;
