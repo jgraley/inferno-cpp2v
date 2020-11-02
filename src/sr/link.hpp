@@ -72,6 +72,12 @@ private: friend class LocatedLink;
 #ifdef KEEP_WHODAT_INFO
     void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
+
+    struct MMAX : virtual Node { NODE_FUNCTIONS_FINAL }; 
+    
+public:
+    // Magic Match Anything X node: 
+    static const XLink MMAX_Link;
 };
 
 
@@ -100,7 +106,7 @@ private: friend class PatternLink; friend class XLink;
     XLink xlink; 
 };
 
-bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
+//bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 
 list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
                                       const map< PatternLink, XLink > &keys );

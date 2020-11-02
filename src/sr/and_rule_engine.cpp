@@ -658,8 +658,8 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
         if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
         {
             // distinct OK because this only runs once per solve
-            XLink xlink = XLink::CreateDistinct(master_keys->at(link.GetChildAgent())); 
-            master_and_root_links[link] = xlink;
+            TreePtr<Node> node = master_keys->at(link.GetChildAgent());
+            master_and_root_links[link] = XLink::CreateDistinct(node);
         }
     }
     master_and_root_links[plan.root_link] = root_xlink;
@@ -693,7 +693,7 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
 #endif
             basic_solution = MapUnion( basic_solution, master_and_root_links );
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-            if( root_link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+            if( (XLink)root_link != XLink::MMAX_Link )
                 KeyCoupling( external_keys, root_link );            
 
             // Is the solution complete? 
@@ -765,7 +765,7 @@ void AndRuleEngine::RecordLink( LocatedLink link )
     // Keying for external use (subordinates, slaves and replace)
     // We don't want residuals (which are unreliable) or MMAX
     if( plan.coupling_residual_links.count( link ) == 0 && 
-        link.GetChildX() != DecidedQueryCommon::MMAX_Node )
+        (XLink)link != XLink::MMAX_Link )
         KeyCoupling( external_keys, link );        
 }
 
@@ -773,7 +773,7 @@ void AndRuleEngine::RecordLink( LocatedLink link )
 void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link )
 {
     // Allow Magic Match Anything 
-    if( residual_link.GetChildX() == DecidedQueryCommon::MMAX_Node )
+    if( (XLink)residual_link == XLink::MMAX_Link )
         return;
 
     Agent *agent = residual_link.GetChildAgent();
@@ -796,7 +796,7 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
 {
     // A coupling keyed to Magic-Match-Anything-X would not be able to 
     // restrict the residuals wrt to each other. 
-    ASSERT( keyer_link.GetChildX() != DecidedQueryCommon::MMAX_Node );
+    ASSERT( (XLink)keyer_link != XLink::MMAX_Link );
     
     // A coupling relates the coupled agent to an X node, not the
     // link into the agent.

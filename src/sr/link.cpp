@@ -3,6 +3,8 @@
 
 using namespace SR;
 
+#define XLINK_BY_ARROWHEAD
+
 // For debugging
 #ifdef KEEP_WHODAT_INFO
 #define WHODAT() __builtin_extract_return_addr (__builtin_return_address (0))
@@ -169,19 +171,31 @@ XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
               
 bool XLink::operator<(const XLink &other) const
 {
+#ifdef XLINK_BY_ARROWHEAD
+    return asp_x < other.asp_x;    
+#else
     return *asp_x < *other.asp_x;    
+#endif    
 }
 
     
 bool XLink::operator!=(const XLink &other) const
 {
+#ifdef XLINK_BY_ARROWHEAD
+    return asp_x != other.asp_x;    
+#else
     return *asp_x != *other.asp_x;    
+#endif
 }
 
 
 bool XLink::operator==(const XLink &other) const
 {
+#ifdef XLINK_BY_ARROWHEAD
+    return asp_x == other.asp_x;    
+#else
     return *asp_x == *other.asp_x;    
+#endif
 }
 
 
@@ -199,7 +213,7 @@ TreePtr<Node> XLink::GetChildX() const
 
 string XLink::GetTrace() const // used for debug
 {
-    return string("@") + asp_x->GetTrace();
+    return string("->") + asp_x->GetTrace();
 }
 
 
@@ -214,6 +228,9 @@ XLink::XLink( shared_ptr<const TreePtrInterface> px,
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
 }              
+
+
+const XLink XLink::MMAX_Link = XLink::CreateDistinct( MakeTreePtr<XLink::MMAX>() );
               
 //////////////////////////// LocatedLink ///////////////////////////////
 
@@ -298,8 +315,13 @@ string LocatedLink::GetTrace() const
 
 //////////////////////////// free functions ///////////////////////////////
 
+/*
+ * Not too sure about the use of GetChildAgent() in content compare. Also
+ * has no callers.
+ 
 bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &right )
 {
+    ASSERT(false);
     auto left_it = left.begin();
     auto right_it = right.begin();
     while( left_it != left.end() || right_it != right.end() )         
@@ -313,7 +335,7 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
     }
     return true;
 }
-
+*/
 
 list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
                                           const map< PatternLink, XLink > &basic_solution )

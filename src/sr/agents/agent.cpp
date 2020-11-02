@@ -86,14 +86,14 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     
-    if( x.GetChildX() == DecidedQueryCommon::MMAX_Node )
+    if( x == XLink::MMAX_Link )
     {
         query.Reset();
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
         for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterAlwaysMatchingLink( PatternLink(this, l.GetPatternPtr()) );
+            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), x );
     }   
     else
     {
@@ -138,7 +138,7 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
                     break;
                 }
                 ASSERT( alit->GetChildAgent() == rlit->GetChildAgent() );
-                if( alit->GetChildX() == DecidedQueryCommon::MMAX_Node )
+                if( (XLink)*alit == XLink::MMAX_Link )
                     continue;
                 // Compare by location
                 if( alit->GetChildX() != rlit->GetChildX() )

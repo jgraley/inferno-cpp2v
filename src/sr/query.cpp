@@ -62,9 +62,6 @@ PatternQuery::Links PatternQuery::GetAllLinks() const
 }
 
 
-const TreePtr<DecidedQueryCommon::MMAX> DecidedQueryCommon::MMAX_Node = MakeTreePtr<DecidedQueryCommon::MMAX>();
-
-
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
     base_agent( pq->GetBaseAgent() ),
     decisions( pq->GetDecisions().size() ),
@@ -101,14 +98,6 @@ void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLink xlink )
 {
     LocatedLink link( plink, xlink );
     multiplicity_links.push_back( link );
-}
-
-
-void DecidedQuery::RegisterAlwaysMatchingLink( PatternLink plink )
-{ 
-    XLink MMAX_link = XLink::CreateDistinct( MMAX_Node ); // TODO distinct here is not OK!!! 
-    LocatedLink link( plink, MMAX_link );
-    normal_links.push_back( link );      
 }
 
 

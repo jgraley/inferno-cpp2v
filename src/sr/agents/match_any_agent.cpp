@@ -54,7 +54,7 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // No, so just make sure this link matches (overall AND-rule
             // applies, reducing the outcome to that of the normal 
             // link registered above).
-            query.RegisterAlwaysMatchingLink( PatternLink(this, p) ); // Link into Pattern (alternative: Link to Singleton)
+            query.RegisterNormalLink( PatternLink(this, p), XLink::MMAX_Link ); // Link into MMAX
         }
     }
 }
