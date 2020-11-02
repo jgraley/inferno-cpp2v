@@ -137,11 +137,13 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
                     match = false;
                     break;
                 }
-                ASSERT( alit->GetChildAgent() == rlit->GetChildAgent() );
-                if( (XLink)*alit == XLink::MMAX_Link )
+                LocatedLink alink = *alit;
+                LocatedLink rlink = *rlit;
+                ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
+                if( (XLink)alink == XLink::MMAX_Link )
                     continue;
                 // Compare by location
-                if( alit->GetChildX() != rlit->GetChildX() )
+                if( (XLink)alink != (XLink)rlink )
                 {
                     match = false;
                     // TODO break?

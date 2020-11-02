@@ -3,7 +3,7 @@
 
 using namespace SR;
 
-#define XLINK_BY_ARROWHEAD
+//#define XLINK_BY_ARROWHEAD
 
 // For debugging
 #ifdef KEEP_WHODAT_INFO
