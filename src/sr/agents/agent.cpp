@@ -4,11 +4,15 @@
 #include "agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
+// Temporary
+#include "tree/cpptree.hpp"
+#include "transform_of_agent.hpp"
 
 #include <stdexcept>
 
-using namespace SR;
+//#define CHECK_LINKS_COMPARISON
 
+using namespace SR;
 
 // C++11 fix
 Agent& Agent::operator=(Agent& other)
@@ -143,11 +147,36 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
                 if( (XLink)alink == XLink::MMAX_Link )
                     continue;
                 // Compare by location
+#ifdef CHECK_LINKS_COMPARISON
+                if( alink.GetChildX() == rlink.GetChildX() )
+                {
+                    if( !TreePtr<CPPTree::Identifier>::DynamicCast( alink.GetChildX() ) )
+                    {
+                        if( auto tp = dynamic_cast<const TransformOfAgent *>(this) )
+                        {
+                            ASSERT( (XLink)alink == (XLink)rlink )
+                                  ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
+                                  ("Actual   ")(alink)("\n")
+                                  ("Required ")(rlink)("\n")
+                                  ("TransformOfAgent's cache ")(tp->cache.cache)("\n");
+                        }
+                        else
+                        {
+                            ASSERT( (XLink)alink == (XLink)rlink )
+                                  ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
+                                  ("Actual   ")(alink)("\n")
+                                  ("Required ")(rlink)("\n");
+                        }
+                    }
+                }
+                else
+#else                
                 if( (XLink)alink != (XLink)rlink )
+#endif                
                 {
                     match = false;
                     // TODO break?
-                }                                
+                }                 
             }
             
             if( match )

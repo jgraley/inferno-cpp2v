@@ -35,7 +35,7 @@ public:
      */
     Value operator()( Key key, CannonicalOperation op );
         
-private:
+public:
     map< Key, Value > cache;
 };
 

@@ -283,7 +283,17 @@ void StandardAgent::DecidedQueryCollection( XLink base_x,
                 xit = query.RegisterDecision( x_decision, false );
             }
             
-            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_x.GetChildX(), &*xit) ); // Link into X
+            // Find the TreePtr in our collection that points to the same
+            // node as *xit, in order to preservew uniqueness properties of links.
+            // TODO #167 should remove the ened for this
+            const TreePtrInterface *my_real_ppx = nullptr;
+            FOREACH( const TreePtrInterface &ppx, *px )
+            {
+                if( ppx == *xit )
+                    my_real_ppx = &ppx;
+            }
+            ASSERT( my_real_ppx );            
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_x.GetChildX(), my_real_ppx) ); // Link into X
 
 	    	// Remove the chosen element from the remaineder collection. 
 #ifdef CHECK_ITERATOR_IN_CONTAINER

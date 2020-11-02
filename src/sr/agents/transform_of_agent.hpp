@@ -35,7 +35,7 @@ public:
 protected: 
     TransformOfAgent() {}    
     
-private:
+public:
     mutable CacheByLocation cache;    
 };
 

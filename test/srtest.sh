@@ -55,8 +55,10 @@ dres=0
 for file in $(find $outdir -type f | sort); do 
     if [[ $(diff --brief $file ${file/#$outdir/$refdir}) ]]; then  
         printf "\n" 
-        echo "$file differs from reference (stopping here):"
-        diff $file ${file/#$outdir/$refdir}
+        echo "${file/#$outdir\//} differs from reference (stopping here):"
+        set -x
+        diff --color $file ${file/#$outdir/$refdir}
+        set +x
         printf "\n" 
         dres=1
         break

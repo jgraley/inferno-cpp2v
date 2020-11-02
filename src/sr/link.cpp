@@ -109,7 +109,11 @@ const TreePtrInterface *PatternLink::GetPatternPtr() const
 
 string PatternLink::GetTrace() const
 {
-    return string("->") + GetChildAgent()->GetTrace();
+    string s = SSPrintf("%p->", asp_pattern.get()) + GetChildAgent()->GetTrace();
+#ifdef KEEP_WHODAT_INFO    
+    s += SSPrintf("@%lX", (unsigned long)whodat);
+#endif
+    return s;
 }
 
 
@@ -213,7 +217,11 @@ TreePtr<Node> XLink::GetChildX() const
 
 string XLink::GetTrace() const // used for debug
 {
-    return string("->") + asp_x->GetTrace();
+    string s = SSPrintf("%p~>", asp_x.get()) + GetChildX()->GetTrace();
+#ifdef KEEP_WHODAT_INFO    
+    s += SSPrintf("@%lX", (unsigned long)whodat);
+#endif
+    return s;
 }
 
 
