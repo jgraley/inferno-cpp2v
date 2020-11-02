@@ -206,9 +206,9 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void SCREngine::Compare( TreePtr<Node> start_x )
+void SCREngine::Compare( TreePtr<Node> root_xnode )
 {
-    plan.and_rule_engine->Compare( start_x );
+    plan.and_rule_engine->Compare( root_xnode );
 }
 
 

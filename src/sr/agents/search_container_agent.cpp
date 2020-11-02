@@ -111,9 +111,8 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink x ) cons
 XLink StuffAgent::GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const
 {
     const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(it.GetUnderlyingIterator());
-    TreePtr<Node> parent_x = pwtt->GetCurrentParent();
-    const TreePtrInterface *px = pwtt->GetCurrentParentPointer();
-    return parent_x ? XLink( parent_x, px ) : base_x;
+    ASSERT( pwtt );
+    return XLink::FromWalkIterator( *pwtt, base_x );
 }
 
 

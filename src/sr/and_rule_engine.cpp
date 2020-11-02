@@ -40,11 +40,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     master_agents = master_agents_;
     
     // For closure under full arrowhead model, we need a link to root
-    root_pattern_link = PatternLink::CreateDistinct( root_pattern );
+    root_link = PatternLink::CreateDistinct( root_pattern );
     
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
-    PopulateNormalAgents( &normal_agents, &normal_links, root_pattern_link );    
+    PopulateNormalAgents( &normal_agents, &normal_links, root_link );    
     for( PatternLink plink : normal_links )
         if( master_agents.count( plink.GetChildAgent() ) == 0 )
             my_normal_links.insert( plink );
@@ -60,7 +60,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     master_boundary_links.clear();
     reached_agents.clear();
     reached_links.clear();
-    PopulateForSolver( root_pattern_link, 
+    PopulateForSolver( root_link, 
                        master_agents );
 
     set<PatternLink> possible_keyer_links; // maps from child to parent
@@ -93,7 +93,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
             else
                 flags.compare_by = CSP::CompareBy::LOCATION;   
                                  
-            if( link == root_pattern_link ) // Root variable will be forced
+            if( link == root_link ) // Root variable will be forced
                 flags.freedom = CSP::Freedom::FORCED;
             else if( master_boundary_links.count(link) > 0) // Couplings to master are forced
                 flags.freedom = CSP::Freedom::FORCED;
@@ -116,7 +116,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     list<PatternLink> free_normal_links_ordered;
     for( PatternLink link : normal_links_ordered )
     {
-        if( link != root_pattern_link &&
+        if( link != root_link &&
             master_boundary_agents.count(link.GetChildAgent()) == 0 )
             free_normal_links_ordered.push_back( link );
     }
@@ -349,11 +349,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 	Walk wx( root_xlink.GetChildX() ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
     {
-        TreePtr<Node> parent_x = wx_it.GetCurrentParent();
-        const TreePtrInterface *px = wx_it.GetCurrentParentPointer();
-        if( parent_x )
-            ASSERT( px );
-        domain.insert( parent_x ? XLink( parent_x, px ) : root_xlink );
+        domain.insert( XLink::FromWalkIterator( wx_it, root_xlink ) );
     }
         
     // Tell all the constraints about them
@@ -367,7 +363,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 }
 
 
-void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
+void AndRuleEngine::GetNextCSPSolution()
 {
     map< shared_ptr<CSP::Constraint>, list< XLink > > values;
     bool match = plan.solver->GetNextSolution( &values );        
@@ -383,7 +379,7 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
         auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
 
         // Don't bother with the "self" link
-        if( lcp.first != plan.root_pattern_link ) 
+        if( lcp.first != plan.root_link ) 
             vvzip.pop_front();
 
         for( auto vvp : vvzip ) 
@@ -479,11 +475,12 @@ void AndRuleEngine::CompareEvaluatorLinks( PatternLink plink,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        TreePtr<Node> x = solution->at(link).GetChildX();
+        XLink xlink = solution->at(link);
                                 
         try 
         {
-            plan.my_evaluator_abnormal_engines.at(link)->Compare( x, subordinate_keys );
+            shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
+            e->Compare( xlink.GetChildX(), subordinate_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -509,16 +506,15 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
     shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at(link);
     TRACE("Checking multiplicity ")(link)("\n");
-    TreePtr<Node> x = link.GetChildX();
         
-    ASSERT( x );
-    ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
+    ASSERT( link );
+    ContainerInterface *xc = dynamic_cast<ContainerInterface *>(link.GetChildX().get());
     ASSERT(xc)("Multiplicity x must implement ContainerInterface");
     
-    FOREACH( TreePtr<Node> xe, *xc )
+    FOREACH( TreePtr<Node> xe_node, *xc )
     {
-        TRACE("Comparing ")(xe)("\n");
-        e->Compare( xe, combined_keys );
+        TRACE("Comparing ")(xe_node)("\n");
+        e->Compare( xe_node, combined_keys );
     }
 }
 
@@ -636,18 +632,18 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
-void AndRuleEngine::Compare( TreePtr<Node> start_x,
+void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
                              const CouplingKeysMap *master_keys_ )
 {
     INDENT("C");
-    ASSERT( start_x );
-    TRACE("Compare x=")(start_x)(" pattern=")(plan.root_pattern_link)("\n");
+    ASSERT( root_xnode );
+    TRACE("Compare x=")(root_xnode)(" pattern=")(plan.root_link)("\n");
            
     master_keys = master_keys_;    
     
     // distinct OK because this only runs once per solve
-    XLink root_xlink = XLink::CreateDistinct(start_x);
-    LocatedLink root_link( plan.root_pattern_link, root_xlink );
+    XLink root_xlink = XLink::CreateDistinct(root_xnode);
+    LocatedLink root_link( plan.root_link, root_xlink );
 
     if( plan.my_normal_agents.empty() )
     {
@@ -666,7 +662,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             master_and_root_links[link] = xlink;
         }
     }
-    master_and_root_links[plan.root_pattern_link] = root_xlink;
+    master_and_root_links[plan.root_link] = root_xlink;
            
 #ifdef USE_SOLVER
     StartCSPSolver( root_xlink );
@@ -684,7 +680,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         my_coupling_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
-        GetNextCSPSolution( start_x );        
+        GetNextCSPSolution();        
 #endif
         try
         {
@@ -733,10 +729,10 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void AndRuleEngine::Compare( TreePtr<Node> start_x )
+void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
     CouplingKeysMap master_keys;
-    Compare( start_x, &master_keys );
+    Compare( root_xnode, &master_keys );
 }
 
 
@@ -759,7 +755,7 @@ void AndRuleEngine::RecordLink( LocatedLink link )
     // Don't record anything for these: master_and_root_links is used
     // instead
     if( plan.master_boundary_links.count(link) > 0 ||
-        (PatternLink)link == plan.root_pattern_link )
+        (PatternLink)link == plan.root_link )
         return; 
     
     // All remaining go into the basic solution which is enough to
@@ -782,8 +778,6 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
-    //TreePtr<Node> key_x = keys.at(agent);
-    //TreePtr<Node> residual_x = keys.at(agent);
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent) ) ); 
@@ -811,36 +805,36 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
 }                                                       
 
 
-void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )
+void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *new_agent, TreePtr<Node> new_xnode, Agent *parent_agent )
 {
     ASSERT( extracted.count(new_agent) == 1 );
-    if( TreePtr<SubContainer>::DynamicCast(new_x) )
+    if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
-        bool same  = equivalence_relation( extracted.at(new_agent), new_x );
+        bool same  = equivalence_relation( extracted.at(new_agent), new_xnode );
         if( !same )
         {
-            FTRACE("New x ")(new_x)(" mismatches extracted x ")(extracted.at(new_agent))
+            FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted.at(new_agent))
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
-            if( TreePtr<SubSequence>::DynamicCast(new_x) && TreePtr<SubSequence>::DynamicCast(extracted.at(new_agent)))
+            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted.at(new_agent)))
                 FTRACEC("SubSequence\n");
-            else if( TreePtr<SubSequenceRange>::DynamicCast(new_x) && TreePtr<SubSequenceRange>::DynamicCast(extracted.at(new_agent)))
+            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted.at(new_agent)))
                 FTRACEC("SubSequenceRange\n");
-            else if( TreePtr<SubCollection>::DynamicCast(new_x) && TreePtr<SubCollection>::DynamicCast(extracted.at(new_agent)))
+            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted.at(new_agent)))
                 FTRACEC("SubCollections\n");
             else
                 FTRACEC("Container types don't match\n");
             ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted.at(new_agent).get());
-            FOREACH( TreePtr<Node> n, *xc )
-                FTRACEC("ext: ")( n )("\n");
-            xc = dynamic_cast<ContainerInterface *>(new_x.get());
-            FOREACH( TreePtr<Node> n, *xc )
-                FTRACEC("new: ")( n )("\n");
+            FOREACH( TreePtr<Node> node, *xc )
+                FTRACEC("ext: ")( node )("\n");
+            xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
+            FOREACH( TreePtr<Node> node, *xc )
+                FTRACEC("new: ")( node )("\n");
             ASSERTFAIL("AssertNewCoupling() failure");                                                
         }
     }
     else
     {
-        ASSERT( extracted.at(new_agent) == new_x );
+        ASSERT( extracted.at(new_agent) == new_xnode );
     }
 }

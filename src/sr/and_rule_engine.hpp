@@ -72,7 +72,7 @@ public:
         AndRuleEngine * const algo;
         TreePtr<Node> root_pattern;
         Agent *root_agent;
-        PatternLink root_pattern_link;
+        PatternLink root_link;
         set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
         set<PatternLink> my_normal_links;
@@ -99,7 +99,7 @@ private:
 
     void ExpandDomain( set< XLink > &domain );
     void StartCSPSolver( XLink root_xlink );
-    void GetNextCSPSolution( TreePtr<Node> start_x );
+    void GetNextCSPSolution();
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
@@ -113,10 +113,10 @@ private:
     void RegenerationPass();
     
 public:
-    void Compare( TreePtr<Node> start_x,
+    void Compare( TreePtr<Node> root_xnode,
                   const CouplingKeysMap *master_keys );
     void CompareTrivialProblem( LocatedLink root_link );
-    void Compare( TreePtr<Node> start_x );
+    void Compare( TreePtr<Node> root_xnode );
     void EnsureChoicesHaveIterators();
 
     const CouplingKeysMap &GetCouplingKeys();

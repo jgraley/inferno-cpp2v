@@ -3,6 +3,7 @@
 
 #include "common/common.hpp"
 #include "node/specialise_oostd.hpp"
+#include "helpers/walk.hpp"
 
 #define KEEP_WHODAT_INFO
 
@@ -52,7 +53,10 @@ public:
            const TreePtrInterface *px,
            void *whodat=nullptr );
     XLink( const LocatedLink &l );
-    static XLink CreateDistinct( const TreePtr<Node> &tp_x );
+    // Make link from walk iterator; if at root (i.e. Walk::begin()) substitute root link
+    static XLink FromWalkIterator( const Walk::iterator &wit, XLink root = XLink() );
+    // Make a copy of tp_x which acts as a new, distinct value 
+    static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
     bool operator<(const XLink &other) const;
     bool operator!=(const XLink &other) const;
     bool operator==(const XLink &other) const;

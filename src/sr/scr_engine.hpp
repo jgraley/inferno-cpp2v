@@ -67,7 +67,7 @@ public:
     
     void SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingKeysMap *master_keys );
-    void Compare( TreePtr<Node> start_x );
+    void Compare( TreePtr<Node> root_xnode );
 
 private:
     void KeyReplaceNodes( const CouplingKeysMap *coupling_keys) const;
