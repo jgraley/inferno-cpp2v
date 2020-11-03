@@ -352,7 +352,21 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
         domain.insert( XLink::FromWalkIterator( wx_it, root_xlink ) );
     }
         
-    // Tell all the constraints about them
+    // Determine the full set of forces 
+    // TODO presumably doesn't need to be the ordered one
+    SolutionMap master_and_root_links;
+    for( PatternLink link : plan.normal_links_ordered )
+    {
+        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
+        {
+            // distinct OK because this only runs once per solve
+            TreePtr<Node> node = master_keys->at(link.GetChildAgent());
+            master_and_root_links[link] = XLink::CreateDistinct(node);
+        }
+    }
+    master_and_root_links[plan.root_link] = root_xlink;
+
+    // Tell all the constraints about the forces
     for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
         p.second->SetForces( master_and_root_links );
         
@@ -500,7 +514,7 @@ void AndRuleEngine::CompareEvaluatorLinks( PatternLink plink,
 
 
 void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link, 
-                                              const CouplingKeysMap *combined_keys ) 
+                                              const CouplingKeysMap *subordinate_keys ) 
 {
     INDENT("M");
 
@@ -514,7 +528,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
     FOREACH( TreePtr<Node> xe_node, *xc )
     {
         TRACE("Comparing ")(xe_node)("\n");
-        e->Compare( xe_node, combined_keys );
+        e->Compare( xe_node, subordinate_keys );
     }
 }
 
@@ -650,19 +664,6 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
         CompareTrivialProblem( root_link );
         return;
     }
-
-    // Determine the full set of forces 
-    // TODO presumably doesn't need to be the ordered one
-    for( PatternLink link : plan.normal_links_ordered )
-    {
-        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
-        {
-            // distinct OK because this only runs once per solve
-            TreePtr<Node> node = master_keys->at(link.GetChildAgent());
-            master_and_root_links[link] = XLink::CreateDistinct(node);
-        }
-    }
-    master_and_root_links[plan.root_link] = root_xlink;
            
 #ifdef USE_SOLVER
     StartCSPSolver( root_xlink );
@@ -691,9 +692,9 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
             // will remove the decision.    
             DecidedCompare( root_link );            
 #endif
-            basic_solution = MapUnion( basic_solution, master_and_root_links );
+            basic_solution[plan.root_link] = root_xlink;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-            if( (XLink)root_link != XLink::MMAX_Link )
+            if( root_xlink != XLink::MMAX_Link )
                 KeyCoupling( external_keys, root_link );            
 
             // Is the solution complete? 
@@ -752,19 +753,15 @@ const CouplingKeysMap &AndRuleEngine::GetCouplingKeys()
 
 void AndRuleEngine::RecordLink( LocatedLink link )
 {
-    // Don't record anything for these: master_and_root_links is used
-    // instead
-    if( plan.master_boundary_links.count(link) > 0 ||
-        (PatternLink)link == plan.root_link )
-        return; 
-    
-    // All remaining go into the basic solution which is enough to
+    // All go into the basic solution which is enough to
     // regenerate a full solution.
     InsertSolo( basic_solution, link );                
     
     // Keying for external use (subordinates, slaves and replace)
     // We don't want residuals (which are unreliable) or MMAX
-    if( plan.coupling_residual_links.count( link ) == 0 && 
+    if( (PatternLink)link != plan.root_link &&
+        plan.master_boundary_links.count(link) == 0 &&
+        plan.coupling_residual_links.count( link ) == 0 && 
         (XLink)link != XLink::MMAX_Link )
         KeyCoupling( external_keys, link );        
 }
