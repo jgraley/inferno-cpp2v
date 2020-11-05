@@ -618,8 +618,18 @@ void AndRuleEngine::RegenerationPass()
     const CouplingKeysMap subordinate_keys = MapUnion( *master_keys, external_keys );          
     TRACEC("External combined keys ")(subordinate_keys)("\n");       
 
+    set<Agent *> reached;
+
     for( auto plink : plan.my_normal_links )
     {
+        // No need for residuals, we can reconstruct from keyer links
+        if( plan.coupling_residual_links.count(plink) != 0 )
+            continue;
+            
+        // We should reach each agent exactly once
+        ASSERT( reached.count( plink.GetChildAgent() ) == 0 );
+        reached.insert( plink.GetChildAgent() );
+        
         LocatedLink link( plink, basic_solution.at(plink) );
         RegenerationPassAgent( link, subordinate_keys );
     }
