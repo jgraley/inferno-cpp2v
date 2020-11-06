@@ -176,6 +176,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternLink> *coupl
 {
     if( senior_agents->count( plink.GetChildAgent() ) > 0 )
         return; // will be fixed values for our solver
+    senior_agents->insert( plink.GetChildAgent() );
 
     // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
     for( PatternLink l : *coupling_keyer_links )        
@@ -189,8 +190,6 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternLink> *coupl
         matchany_agents->insert( plink.GetChildAgent() );
         return;
     }
-
-    senior_agents->insert( plink.GetChildAgent() );
 
     shared_ptr<PatternQuery> pq = plink.GetChildAgent()->GetPatternQuery();
     FOREACH( PatternLink plink, pq->GetNormalLinks() )
@@ -208,8 +207,7 @@ void AndRuleEngine::Plan::DetermineKeyers( set<PatternLink> *coupling_keyer_link
     // region up to and including a MatchAny; junior is the region under each of its
     // links.
     set<Agent *> my_matchany_agents;
-    set<Agent *> my_senior_agents = senior_agents;
-    DetermineKeyersModuloMatchAny( coupling_keyer_links, plink, &my_senior_agents, &my_matchany_agents );
+    DetermineKeyersModuloMatchAny( coupling_keyer_links, plink, &senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
@@ -223,7 +221,7 @@ void AndRuleEngine::Plan::DetermineKeyers( set<PatternLink> *coupling_keyer_link
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
         FOREACH( PatternLink link, pq->GetNormalLinks() )
         {
-            DetermineKeyers( coupling_keyer_links, link, my_senior_agents );        
+            DetermineKeyers( coupling_keyer_links, link, senior_agents );        
         }
     }
 }
