@@ -46,6 +46,7 @@ public:
     Tracer &operator()(const Traceable &s); 
     Tracer &operator()(bool b); 
     Tracer &operator()(int i); 
+    Tracer &operator()(size_t i); 
     Tracer &operator()(const exception &e); 
 
     template<typename T>

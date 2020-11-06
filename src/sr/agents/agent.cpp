@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-#define CHECK_LINKS_COMPARISON
+//#define CHECK_LINKS_COMPARISON
 
 using namespace SR;
 

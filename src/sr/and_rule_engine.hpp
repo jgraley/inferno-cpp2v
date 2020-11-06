@@ -52,17 +52,17 @@ public:
         Plan( AndRuleEngine *algo, TreePtr<Node> root_pattern_, const set<Agent *> &master_agents);
         void PopulateForSolver( PatternLink link,
                                 const set<Agent *> &master_agents );
-        void DetermineKeyersModuloMatchAny( set<PatternLink> *possible_keyer_links,
-                                            Agent *agent,
+        void DetermineKeyersModuloMatchAny( set<PatternLink> *coupling_keyer_links,
+                                            PatternLink plink,
                                             set<Agent *> *master_agents,
                                             set<Agent *> *match_any_agents ) const;
-        void DeterminePossibleKeyers( set<PatternLink> *possible_keyer_links,
-                                      Agent *agent,
-                                      set<Agent *> master_agents ) const;
-        void DetermineResiduals( set<PatternLink> *possible_keyer_links,
+        void DetermineKeyers( set<PatternLink> *coupling_keyer_links,
+                              PatternLink plink,
+                              set<Agent *> master_agents ) const;
+        void DetermineResiduals( set<PatternLink> *coupling_keyer_links,
                                  Agent *agent,
                                  set<Agent *> master_agents );
-        void FilterKeyers( set<PatternLink> *possible_keyer_links );
+        void DetermineNontrivialKeyers( set<PatternLink> *coupling_keyer_links );
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
                                    set<PatternLink> *my_normal_links,
                                    PatternLink link );
@@ -85,10 +85,12 @@ public:
         set<PatternLink> master_boundary_links;
         set<PatternLink> coupling_keyer_links;
         set<PatternLink> coupling_residual_links;
+        set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
         set<PatternLink> by_equivalence_links;
         list<PatternLink> normal_links_ordered;
+        
     private: // working variables in plan construction
         set<Agent *> reached_agents;
         set<PatternLink> reached_links; 
@@ -103,12 +105,13 @@ private:
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
-    void CompareEvaluatorLinks( PatternLink plink, 
+    void CompareEvaluatorLinks( Agent *agent, 
                                 const CouplingKeysMap *combined_keys, 
                                 const SolutionMap *after_pass_keys );
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const CouplingKeysMap *combined_keys ); 
-    void RegenerationPassAgent( LocatedLink link,
+    void RegenerationPassAgent( Agent *agent,
+                                XLink xlink,
                                 const CouplingKeysMap &subordinate_keys );
     void RegenerationPass();
     

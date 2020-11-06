@@ -144,6 +144,12 @@ Tracer &Tracer::operator()(int i)
 }
 
 
+Tracer &Tracer::operator()(size_t i)
+{    
+    return operator()( to_string(i) );
+}
+
+
 Tracer &Tracer::operator()(const exception &e)
 {
     return operator()( e.what() );
