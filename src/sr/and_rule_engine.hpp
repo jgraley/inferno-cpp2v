@@ -10,6 +10,7 @@
 #include "agents/match_all_agent.hpp"
 #include "link.hpp"
 #include <set>
+#include <map>
 
 namespace CSP
 {
@@ -52,17 +53,14 @@ public:
         Plan( AndRuleEngine *algo, TreePtr<Node> root_pattern_, const set<Agent *> &master_agents);
         void PopulateForSolver( PatternLink link,
                                 const set<Agent *> &master_agents );
-        void DetermineKeyersModuloMatchAny( set<PatternLink> *coupling_keyer_links,
-                                            PatternLink plink,
+        void DetermineKeyersModuloMatchAny( PatternLink plink,
                                             set<Agent *> *master_agents,
-                                            set<Agent *> *match_any_agents ) const;
-        void DetermineKeyers( set<PatternLink> *coupling_keyer_links,
-                              PatternLink plink,
-                              set<Agent *> master_agents ) const;
-        void DetermineResiduals( set<PatternLink> *coupling_keyer_links,
-                                 Agent *agent,
+                                            set<Agent *> *match_any_agents );
+        void DetermineKeyers( PatternLink plink,
+                              set<Agent *> master_agents );
+        void DetermineResiduals( Agent *agent,
                                  set<Agent *> master_agents );
-        void DetermineNontrivialKeyers( set<PatternLink> *coupling_keyer_links );
+        void DetermineNontrivialKeyers();
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
                                    set<PatternLink> *my_normal_links,
                                    PatternLink link );
@@ -90,6 +88,7 @@ public:
         shared_ptr<CSP::SolverHolder> solver;
         set<PatternLink> by_equivalence_links;
         list<PatternLink> normal_links_ordered;
+        map<Agent *, PatternLink> agent_to_keyer;
         
     private: // working variables in plan construction
         set<Agent *> reached_agents;

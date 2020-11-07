@@ -63,10 +63,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     PopulateForSolver( root_link, 
                        master_agents );
 
-    DetermineKeyers( &coupling_keyer_links, root_link, master_agents );
-    coupling_residual_links.clear();
-    DetermineResiduals( &coupling_keyer_links, root_agent, master_agents );
-    DetermineNontrivialKeyers(&coupling_keyer_links);
+    DetermineKeyers( root_link, master_agents );
+    DetermineResiduals( root_agent, master_agents );
+    DetermineNontrivialKeyers();
         
 #ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
@@ -169,22 +168,22 @@ void AndRuleEngine::Plan::PopulateForSolver( PatternLink link,
 }
 
         
-void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternLink> *coupling_keyer_links,
-                                                         PatternLink plink,
+void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
                                                          set<Agent *> *senior_agents,
-                                                         set<Agent *> *matchany_agents ) const
+                                                         set<Agent *> *matchany_agents )
 {
     if( senior_agents->count( plink.GetChildAgent() ) > 0 )
         return; // will be fixed values for our solver
     senior_agents->insert( plink.GetChildAgent() );
 
     // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
-    for( PatternLink l : *coupling_keyer_links )        
+    for( PatternLink l : coupling_keyer_links )        
         ASSERT( l.GetChildAgent() != plink.GetChildAgent() )
               ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
 
-    coupling_keyer_links->insert(plink);
-        
+    coupling_keyer_links.insert(plink);
+    agent_to_keyer[plink.GetChildAgent()] = plink;
+
     if( dynamic_cast<MatchAnyAgent *>(plink.GetChildAgent()) )
     {
         matchany_agents->insert( plink.GetChildAgent() );
@@ -194,20 +193,19 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternLink> *coupl
     shared_ptr<PatternQuery> pq = plink.GetChildAgent()->GetPatternQuery();
     FOREACH( PatternLink plink, pq->GetNormalLinks() )
     {
-        DetermineKeyersModuloMatchAny( coupling_keyer_links, plink, senior_agents, matchany_agents );        
+        DetermineKeyersModuloMatchAny( plink, senior_agents, matchany_agents );        
     }
 }
         
         
-void AndRuleEngine::Plan::DetermineKeyers( set<PatternLink> *coupling_keyer_links,
-                                           PatternLink plink,
-                                           set<Agent *> senior_agents ) const
+void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
+                                           set<Agent *> senior_agents ) 
 {
     // Scan the senior region. We wish to break off at MatchAny nodes. Senior is the
     // region up to and including a MatchAny; junior is the region under each of its
     // links.
     set<Agent *> my_matchany_agents;
-    DetermineKeyersModuloMatchAny( coupling_keyer_links, plink, &senior_agents, &my_matchany_agents );
+    DetermineKeyersModuloMatchAny( plink, &senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
@@ -221,21 +219,20 @@ void AndRuleEngine::Plan::DetermineKeyers( set<PatternLink> *coupling_keyer_link
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
         FOREACH( PatternLink link, pq->GetNormalLinks() )
         {
-            DetermineKeyers( coupling_keyer_links, link, senior_agents );        
+            DetermineKeyers( link, senior_agents );        
         }
     }
 }
         
         
-void AndRuleEngine::Plan::DetermineResiduals( set<PatternLink> *coupling_keyer_links,
-                                              Agent *agent,
+void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
                                               set<Agent *> master_agents ) 
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
     {            
         PatternLink keyer;
-        for( PatternLink l : *coupling_keyer_links )
+        for( PatternLink l : coupling_keyer_links )
         {
             if( l.GetChildAgent() == link.GetChildAgent() )
                 keyer = l; // keyer keys the same child node that we're looking at
@@ -248,27 +245,29 @@ void AndRuleEngine::Plan::DetermineResiduals( set<PatternLink> *coupling_keyer_l
             continue; // Coupling residuals do not recurse (keyer does that and it only needs to be done once)
         }
         
-        DetermineResiduals( coupling_keyer_links, link.GetChildAgent(), master_agents );        
+        DetermineResiduals( link.GetChildAgent(), master_agents );        
     }
 }
 
 
-void AndRuleEngine::Plan::DetermineNontrivialKeyers(set<PatternLink> *coupling_keyer_links)
+void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 {
     coupling_nontrivial_keyer_links.clear();
-    for( PatternLink keyer_l : *coupling_keyer_links )
+    for( PatternLink keyer_plink : coupling_keyer_links )
     {
         bool found_residual_on_same_child_node = false;
-        for( PatternLink residual_l : coupling_residual_links )
+        for( PatternLink residual_plink : coupling_residual_links )
         {
-            if( residual_l.GetChildAgent() == keyer_l.GetChildAgent() )
+            if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
             {
                 found_residual_on_same_child_node = true;
                 break;
             }
         }
         if( found_residual_on_same_child_node )
-            coupling_nontrivial_keyer_links.insert( keyer_l );
+        {
+            coupling_nontrivial_keyer_links.insert( keyer_plink );
+        }
     }
 }
 

@@ -215,13 +215,15 @@ void SCREngine::Compare( TreePtr<Node> root_xnode )
 void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
 {
     INDENT("K");   
+    
+    ReplaceKeysMap replace_keys = ReplaceKeysFromCouplingKeys(*coupling_keys);
         
     FOREACH( Agent *a, *plan.my_agents )
     {
-        TRACE(*a)(coupling_keys->count( a )?" is in coupling_keys ":" is not in coupling_keys")
+        TRACE(*a)(replace_keys.count( a )?" is in coupling_keys ":" is not in coupling_keys")
              (a->GetKey()?" and is self-coupled\n":" and is not self-coupled\n");
-        if( coupling_keys->count( a ) > 0 && !a->GetKey() )
-            a->KeyReplace(coupling_keys);
+        if( replace_keys.count( a ) > 0 && !a->GetKey() )
+            a->KeyReplace(&replace_keys);
     }
 }
 
@@ -267,7 +269,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     if( !plan.my_engines.empty() )
     {
 		CouplingKeysMap coupling_keys = MapUnion( *master_keys, 
-                                              plan.and_rule_engine->GetCouplingKeys() );    
+                                                  plan.and_rule_engine->GetCouplingKeys() );    
 		
         for( const pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );
@@ -341,3 +343,11 @@ shared_ptr<ContainerInterface> SCREngine::VisibleWalk_iterator::GetChildContaine
 	return Agent::AsAgent(n)->GetVisibleChildren(); 
 }
 
+
+SCREngine::ReplaceKeysMap SCREngine::ReplaceKeysFromCouplingKeys( const CouplingKeysMap &cm ) const 
+{ 
+    ReplaceKeysMap rm;
+    for( auto p : cm )
+        rm.insert( make_pair(p.first, p.second) );
+    return rm;
+}

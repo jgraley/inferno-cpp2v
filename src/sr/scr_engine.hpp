@@ -33,6 +33,7 @@ public:
                     
 private:
     typedef map< Agent *, TreePtr<Node> > CouplingKeysMap;
+    typedef map< Agent *, TreePtr<Node> > ReplaceKeysMap;
     const struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
@@ -72,6 +73,7 @@ public:
 private:
     void KeyReplaceNodes( const CouplingKeysMap *coupling_keys) const;
     TreePtr<Node> Replace() const;
+    ReplaceKeysMap ReplaceKeysFromCouplingKeys( const CouplingKeysMap &cm ) const;
 
 public:
     virtual void GetGraphInfo( vector<string> *labels, 

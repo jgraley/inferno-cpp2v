@@ -85,7 +85,10 @@ public:
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
+protected:
     void SetKey( TreePtr<Node> x );
+
+public:
     TreePtr<Node> GetKey();                                  
     void ResetKey();    
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys );
