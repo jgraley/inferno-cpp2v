@@ -6,14 +6,18 @@
 
 using namespace CSP;
 
-SystemicConstraint::Plan::Plan( SR::PatternLink root_link_, 
+SystemicConstraint::Plan::Plan( SR::PatternLink keyer_plink_, 
+                                set<SR::PatternLink> residual_plinks_,
                                 VariableQueryLambda vql ) :
-    root_link( root_link_ ),
-    agent( root_link.GetChildAgent() ),
+    keyer_plink( keyer_plink_ ),
+    residual_plinks( residual_plinks_ ),
+    agent( keyer_plink.GetChildAgent() ),
     pq( agent->GetPatternQuery() )
 {
-    GetAllVariables();
-    RunVariableQueries( all_variables, vql );
+    for( SR::PatternLink residual_plink : residual_plinks )
+        ASSERT( residual_plink.GetChildAgent() == agent );
+    
+    RunVariableQueries( vql );
 
     // Configure our embedded Conjecture object
     set<SR::Agent *> my_agents;
@@ -22,44 +26,43 @@ SystemicConstraint::Plan::Plan( SR::PatternLink root_link_,
 }
 
 
-SystemicConstraint::SystemicConstraint( SR::PatternLink root_link, 
+SystemicConstraint::SystemicConstraint( SR::PatternLink keyer_plink, 
+                                        set<SR::PatternLink> residual_plinks,
                                         VariableQueryLambda vql ) :
-    plan( root_link, vql )
+    plan( keyer_plink, residual_plinks, vql )
 {
 }
 
-    
-void SystemicConstraint::Plan::GetAllVariables()
-{
+
+void SystemicConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
+{ 
     all_variables.clear();
     
-    all_variables.push_back( root_link ); // The me-variable
+    // The keyer
+    all_variables.push_back( VariableRecord{ Kind::KEYER, 
+                                             keyer_plink, 
+                                             vql(keyer_plink) } ); 
     
-    FOREACH( SR::PatternLink link, pq->GetNormalLinks() )
-    {
-        VariableId var = link;
-        all_variables.push_back( var );  
-    }
-}
-
-
-void SystemicConstraint::Plan::RunVariableQueries( list<VariableId> vars, VariableQueryLambda vql )
-{ 
-    flags.clear();
-    for( VariableId v : vars )
-    {
-        VariableFlags r = vql( v );
-        flags.push_back( r );
-    }
+    // The residuals
+    for( VariableId residual_plink : residual_plinks )
+        all_variables.push_back( VariableRecord{ Kind::RESIDUAL, 
+                                                 residual_plink, 
+                                                 vql(residual_plink) } );     
+    
+    // The children
+    FOREACH( SR::PatternLink child_plink, pq->GetNormalLinks() )
+        all_variables.push_back( VariableRecord{ Kind::CHILD, 
+                                                 child_plink, 
+                                                 vql(child_plink) } );      
 }
 
 
 int SystemicConstraint::GetFreeDegree() const
 {
     int free_degree = 0;
-    for( auto f : plan.flags )
+    for( auto var : plan.all_variables )
     {
-        if( f.freedom == Freedom::FREE )
+        if( var.flags.freedom == Freedom::FREE )
             free_degree++;
     }
     return free_degree;
@@ -69,12 +72,10 @@ int SystemicConstraint::GetFreeDegree() const
 list<VariableId> SystemicConstraint::GetFreeVariables() const
 { 
     list<VariableId> free_vars;
-    auto fit = plan.flags.begin();
     for( auto var : plan.all_variables )
     {
-        if( fit->freedom == Freedom::FREE )
-            free_vars.push_back( var );
-        fit++;
+        if( var.flags.freedom == Freedom::FREE )
+            free_vars.push_back( var.id );
     }
     return free_vars;
 }
@@ -82,21 +83,27 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 
 void SystemicConstraint::TraceProblem() const
 {
-    TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.flags.size(), GetFreeDegree());
-    INDENT("T");
-    auto fit = plan.flags.begin();
-    bool first = true;
+    TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.all_variables.size(), GetFreeDegree());
     for( auto var : plan.all_variables )
     {
-        string scat = " ";
-        if( first )
-            scat += "(base)";
-        else
-            scat += "(link)";
-        first = false;    
+        string scat;
+        switch( var.kind )
+        {
+        case Kind::KEYER:
+            scat = "KEYER ";
+            break;
         
+        case Kind::RESIDUAL:
+            scat = "RESIDUAL ";
+            break;
+            
+        case Kind::CHILD:
+            scat = "CHILD ";
+            break;
+        }
+
         string sflags = "; is ";
-        switch( fit->freedom )
+        switch( var.flags.freedom )
         {
         case Freedom::FREE:
             sflags += "FREE";
@@ -106,30 +113,26 @@ void SystemicConstraint::TraceProblem() const
             sflags += "FORCED";
             break;
         }
-        fit++;
         
-        TRACEC(var)(scat)(sflags)("\n");
-    }
-    
+        TRACEC(scat)(var.id)(sflags)("\n");
+    }    
 }
 
 
 void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_ )
 {
     forces.clear();
-    auto fit = plan.flags.begin();
     for( auto var : plan.all_variables )
     {
-        switch( fit->freedom )
+        switch( var.flags.freedom )
         {
         case Freedom::FREE:
             break;
             
         case Freedom::FORCED:
-            forces.push_back( forces_.at( var ) );
+            forces.push_back( forces_.at( var.id ) );
             break;
         }
-        fit++;
     }    
 }   
 
@@ -141,42 +144,50 @@ bool SystemicConstraint::Test( list< Value > values )
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
     Value x;
-    list<SR::LocatedLink> expanded_links;
-    auto forceit = forces.begin();
-    auto valit = values.begin();
-    auto patit = plan.pq->GetNormalLinks().begin();
-    bool first = true; // First flag refers to the self-variable
-    for( const VariableFlags &f : plan.flags )
+    list<SR::LocatedLink> required_links;
+    multiset<SR::XLink> coupling_links;
+    list<Value>::const_iterator forceit = forces.begin();
+    list<Value>::const_iterator valit = values.begin();
+    list<VariableId>::const_iterator patit = plan.pq->GetNormalLinks().begin();
+    for( auto var : plan.all_variables )
     {
-        switch( f.freedom )
+        Value v;
+        switch( var.flags.freedom )
         {
         case Freedom::FORCED:
-            if( first )         
-                x = *forceit;
-            else
-                expanded_links.push_back( SR::LocatedLink(*patit, *forceit) );     
-            forceit++;
+            v = *forceit++;
             break;
         
         case Freedom::FREE:
-            if( first )             
-                x = *valit;
-            else
-                expanded_links.push_back( SR::LocatedLink(*patit, *valit) );            
-            valit++;
+            v = *valit++;
             break;
         }
         
-        if( !first )
-            patit++;
-        first = false;
+        switch( var.kind )
+        {
+        case Kind::KEYER:
+            x = v;
+            coupling_links.insert(v);
+            break;
+        
+        case Kind::RESIDUAL:
+            coupling_links.insert(v);
+            break;
+            
+        case Kind::CHILD:
+            required_links.push_back( SR::LocatedLink(*patit++, v) );     
+            break;
+        }
     }    
+
+    // First check any coupling at this pattern node
+    plan.agent->CouplingQuery( coupling_links );
 
     // Use a normal-linked query on our underlying agent
     shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
     try
     {
-        plan.agent->RunNormalLinkedQuery( query, x, expanded_links );      
+        plan.agent->RunNormalLinkedQuery( query, x, required_links );      
     }
     catch( ::Mismatch & )
     {

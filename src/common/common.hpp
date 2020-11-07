@@ -101,4 +101,14 @@ inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
     s.insert( x );
 }
 
+
+template< typename T >
+list<T> operator+( list<T> l, list<T> r ) // Just like in Python!
+{
+    // Note: both l and r are modified by this algo
+    l.splice( l.begin(), r );
+    return l;
+}
+
+
 #endif

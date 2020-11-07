@@ -32,7 +32,8 @@ public:
      * 
      * @param vql callback that requests information about variables
      */
-    explicit SystemicConstraint( SR::PatternLink root_link, 
+    explicit SystemicConstraint( SR::PatternLink keyer_plink, 
+                                 set<SR::PatternLink> residual_plinks,
                                  VariableQueryLambda vql );
     
 private:
@@ -48,20 +49,33 @@ private:
     class ByValueLinkMismatch : public ::Mismatch
     {
     };
+    
+    enum class Kind
+    {
+        KEYER,
+        RESIDUAL,
+        CHILD
+    };
+    
+    struct VariableRecord
+    {
+        Kind kind;
+        VariableId id;
+        VariableFlags flags;
+    };
 
     const struct Plan
     {
-        explicit Plan( SR::PatternLink root_link, 
+        explicit Plan( SR::PatternLink keyer_plink, 
+                       set<SR::PatternLink> residual_plinks,                       
                        VariableQueryLambda vql );
-        void GetAllVariables();
-        void RunVariableQueries( list<VariableId> vars, 
-                                 VariableQueryLambda vql );
+        void RunVariableQueries( VariableQueryLambda vql );
                                  
-        SR::PatternLink root_link;
+        SR::PatternLink keyer_plink;
+        set<SR::PatternLink> residual_plinks;
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
-        list<VariableId> all_variables;
-        list<VariableFlags> flags; // over ALL vars
+        list<VariableRecord> all_variables;
         shared_ptr<SR::Conjecture> conj;
     } plan;
     

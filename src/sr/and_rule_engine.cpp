@@ -21,7 +21,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-//#define USE_SOLVER
+#define USE_SOLVER
 
 using namespace SR;
 
@@ -91,7 +91,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
             return flags;            
         };
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_link, vql );
+        // Determine the coupling residuals for this agent
+        set<PatternLink> current_residual_plinks;
+        for( PatternLink residual_plink : coupling_residual_links )
+            if( residual_plink.GetChildAgent() == constraint_link.GetChildAgent() )
+                current_residual_plinks.insert( residual_plink );
+                
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_link, current_residual_plinks, vql );
         my_constraints[constraint_link] = c;    
         constraints.push_back(c);
     }
