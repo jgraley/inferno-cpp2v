@@ -50,10 +50,11 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }                       
 
 
-TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> StarAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("*");
-    ASSERT( keynode );
+    ASSERT( keylink );
+    TreePtr<Node> keynode = keylink.GetChildX();
     ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
     ASSERT( psc )("Star node ")(*this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");  
     TRACE("Walking container length %d\n", psc->size() );

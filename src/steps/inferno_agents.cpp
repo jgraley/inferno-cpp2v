@@ -79,53 +79,53 @@ string BuildIdentifierAgent::GetNewName()
 
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("%");
     if( !GetKey() )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-        SetKey( keynode );
+        keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) ) );
+        SetKey( keylink );
     }
-    // Note that the keynode could have been set via coupling - but still not
+    // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keynode);   
+    return DuplicateSubtree(keylink.GetChildX());   
 }                                                   
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("%");
     if( !GetKey() )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-        SetKey( keynode );
+        keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) ) );
+        SetKey( keylink );
     }
-    // Note that the keynode could have been set via coupling - but still not
+    // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keynode);   
+    return DuplicateSubtree(keylink.GetChildX());   
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("%");
     if( !GetKey() )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-        SetKey( keynode );
+        keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) ) );
+        SetKey( keylink );
     }
-    // Note that the keynode could have been set via coupling - but still not
+    // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keynode);   
+    return DuplicateSubtree(keylink.GetChildX());   
 }                                                   
 
 //---------------------------------- IdentifierByName ------------------------------------    
@@ -256,7 +256,7 @@ void BuildContainerSizeAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &q
 }   
 
 
-TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
 	INDENT("%");
 	if( !GetKey() )
@@ -267,12 +267,12 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 		ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 		ASSERT( n_container );
 		int size = n_container->size();
-		keynode = MakePatternPtr<SpecificInteger>(size);
-		SetKey( keynode );
+        keylink = XLink::CreateDistinct( MakePatternPtr<SpecificInteger>(size) );
+		SetKey( keylink );
 	}
-	// Note that the keynode could have been set via coupling - but still not
+	// Note that the keylink could have been set via coupling - but still not
 	// likely to do anything sensible, so explicitly check
-	return DuplicateSubtree(keynode);   
+	return DuplicateSubtree(keylink.GetChildX());   
 }                                                   
 
 //---------------------------------- IsLabelReachedAgent ------------------------------------    
@@ -303,7 +303,7 @@ void IsLabelReachedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query
 	// y is nominally the goto expression, coupled in
 	FlushCache();
 	
-	TreePtr<Node> n = AsAgent(pattern)->GetKey(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+	TreePtr<Node> n = AsAgent(pattern)->GetKey().GetChildX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
 	if( !n )
 		n = pattern;
 	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );

@@ -20,7 +20,7 @@ class GreenGrassAgent : public virtual AgentCommon
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
     virtual const TreePtrInterface *GetThrough() const = 0;
 };
 

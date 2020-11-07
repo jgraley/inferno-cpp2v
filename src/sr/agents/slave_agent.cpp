@@ -66,7 +66,7 @@ void SlaveAgent::SetMasterCouplingKeys( const CouplingKeysMap &keys )
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
+TreePtr<Node> SlaveAgent::BuildReplaceImpl( CouplingKey keylink )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   

@@ -24,7 +24,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const = 0;
     virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};

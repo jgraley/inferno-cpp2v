@@ -25,7 +25,7 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> OverlayAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("O");    
     ASSERT( *GetOverlay() );          

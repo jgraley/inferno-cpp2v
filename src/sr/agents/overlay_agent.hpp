@@ -24,7 +24,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;
     virtual const TreePtrInterface *GetOverlay() const = 0;    

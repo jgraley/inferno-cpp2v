@@ -356,7 +356,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
         if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
         {
             // distinct OK because this only runs once per solve
-            TreePtr<Node> node = master_keys->at(link.GetChildAgent());
+            TreePtr<Node> node = master_keys->at(link.GetChildAgent()).GetChildX();
             master_and_root_links[link] = XLink::CreateDistinct(node);
         }
     }
@@ -775,14 +775,14 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     ASSERT( keys.count(agent) > 0 );
 
     // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent) ) ); 
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent).GetChildX() ) ); 
 
     // This function establishes the policy for couplings in one place,
     // apart from the other place which is plan.by_equivalence_links.
     // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
     static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( residual_link.GetChildX(), keys.at(agent) ) )
+    if( !equivalence_relation( residual_link.GetChildX(), keys.at(agent).GetChildX() ) )
         throw Mismatch();    
 }                                     
 
@@ -795,8 +795,7 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
     
     // A coupling relates the coupled agent to an X node, not the
     // link into the agent.
-    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), 
-                                 keyer_link.GetChildX() ) ); 
+    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), keyer_link ) ); 
 }                                                       
 
 
@@ -806,20 +805,20 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
-        bool same  = equivalence_relation( extracted.at(new_agent), new_xnode );
+        bool same  = equivalence_relation( extracted.at(new_agent).GetChildX(), new_xnode );
         if( !same )
         {
             FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted.at(new_agent))
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
-            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted.at(new_agent)))
+            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted.at(new_agent).GetChildX()))
                 FTRACEC("SubSequence\n");
-            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted.at(new_agent)))
+            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted.at(new_agent).GetChildX()))
                 FTRACEC("SubSequenceRange\n");
-            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted.at(new_agent)))
+            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted.at(new_agent).GetChildX()))
                 FTRACEC("SubCollections\n");
             else
                 FTRACEC("Container types don't match\n");
-            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted.at(new_agent).get());
+            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted.at(new_agent).GetChildX().get());
             FOREACH( TreePtr<Node> node, *xc )
                 FTRACEC("ext: ")( node )("\n");
             xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
@@ -830,6 +829,6 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     }
     else
     {
-        ASSERT( extracted.at(new_agent) == new_xnode );
+        ASSERT( extracted.at(new_agent).GetChildX() == new_xnode );
     }
 }

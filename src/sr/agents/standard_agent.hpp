@@ -34,7 +34,7 @@ private:
     		                     CollectionInterface &pattern ) const;
 public:
     virtual void TrackingKey( Agent *from );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr
     TreePtr<Node> BuildReplaceNormal();

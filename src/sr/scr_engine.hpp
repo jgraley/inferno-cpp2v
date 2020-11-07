@@ -31,7 +31,6 @@ public:
                const set<Agent *> &master_agents = set<Agent *>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
                     
-    typedef map< Agent *, TreePtr<Node> > CouplingKeysMap;
 private:
     const struct Plan : public virtual Traceable
     {            

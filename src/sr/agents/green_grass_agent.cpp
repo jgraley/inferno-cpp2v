@@ -35,7 +35,7 @@ void GreenGrassAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("G");
     ASSERT( *GetThrough() );          

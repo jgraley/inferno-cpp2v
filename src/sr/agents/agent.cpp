@@ -213,17 +213,17 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
 }
 
 
-void AgentCommon::SetKey( TreePtr<Node> x )
+void AgentCommon::SetKey( CouplingKey keylink )
 {
-    ASSERT(x);
+    ASSERT(keylink);
     if( !coupling_key )
     { 
-        coupling_key = x;
+        coupling_key = keylink;
     }
 }
 
 
-TreePtr<Node> AgentCommon::GetKey()
+CouplingKey AgentCommon::GetKey()
 {
     return coupling_key; 
 }
@@ -231,7 +231,7 @@ TreePtr<Node> AgentCommon::GetKey()
 
 void AgentCommon::ResetKey()
 {
-    coupling_key = TreePtr<Node>();
+    coupling_key = LocatedLink();
 }
 
 
@@ -257,16 +257,16 @@ TreePtr<Node> AgentCommon::BuildReplace()
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
-    TreePtr<Node> keynode = GetKey();
+    CouplingKey keylink = GetKey();
     
-    return BuildReplaceImpl( keynode );    
+    return BuildReplaceImpl( keylink );    
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> keynode )
+TreePtr<Node> AgentCommon::BuildReplaceImpl( CouplingKey keylink )
 {
-    ASSERT(keynode)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(keynode);   
+    ASSERT(keylink)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(keylink.GetChildX());   
 }
 
 

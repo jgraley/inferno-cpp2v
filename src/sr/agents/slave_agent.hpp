@@ -33,7 +33,7 @@ public:
                                vector< TreePtr<Node> > *blocks ) const;
     virtual void AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }

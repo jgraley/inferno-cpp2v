@@ -319,6 +319,18 @@ TreePtr<Node> LocatedLink::GetChildX() const
 }
 
 
+void LocatedLink::SetX( const XLink &x )
+{
+    xlink = x;
+}
+
+
+void LocatedLink::SetPattern( const PatternLink &pattern )
+{
+    plink = pattern;
+}
+
+
 LocatedLink::operator PatternLink() const
 {
     return plink;

@@ -18,7 +18,6 @@ namespace SR
 class SpecialBase;
 class SCREngine;
 class Agent;
-typedef map< Agent *, TreePtr<Node> > CouplingKeysMap;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -50,7 +49,7 @@ public:
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const = 0;                                                
-    virtual TreePtr<Node> GetKey() = 0;                                  
+    virtual CouplingKey GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
@@ -80,21 +79,21 @@ public:
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink x ) const;                                                
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
-                                             XLink x,
-                                             const list<LocatedLink> &required_links ) const;
+                                          XLink x,
+                                          const list<LocatedLink> &required_links ) const;
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
 protected:
-    void SetKey( TreePtr<Node> x );
+    void SetKey( CouplingKey x );
 
 public:
-    TreePtr<Node> GetKey();                                  
+    CouplingKey GetKey();                                  
     void ResetKey();    
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
@@ -106,7 +105,7 @@ protected:
     const SCREngine *master_scr_engine;    
 			
 private:    
-    TreePtr<Node> coupling_key;    
+    CouplingKey coupling_key;    
     shared_ptr<PatternQuery> pattern_query;
     int num_decisions;
     shared_ptr<EquivalenceRelation> equivalence_relation;

@@ -350,9 +350,9 @@ void StandardAgent::TrackingKey( Agent *from )
 {
     INDENT("T");
     ASSERT( from );
-    TreePtr<Node> key = from->GetKey();
+    CouplingKey key = from->GetKey();
     ASSERT( key );
-    TRACE(*this)("::TrackingKey(")(*(key))(" from ")(*(from))(")\n");
+    TRACE(*this)("::TrackingKey(")(key)(" from ")(*(from))(")\n");
     
     if( GetKey() )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
@@ -390,11 +390,11 @@ void StandardAgent::TrackingKey( Agent *from )
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> StandardAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("B");
-    if( keynode && IsLocalMatch(keynode.get()) ) 
-        return BuildReplaceOverlay( keynode );
+    if( keylink && IsLocalMatch(keylink.GetChildX().get()) ) 
+        return BuildReplaceOverlay( keylink.GetChildX() );
     else
         return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
 }

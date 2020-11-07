@@ -101,6 +101,8 @@ public:
     Agent *GetChildAgent() const;
     const TreePtrInterface *GetPatternPtr() const;
     TreePtr<Node> GetChildX() const;
+    void SetX( const XLink &x );
+    void SetPattern( const PatternLink &pattern );
     operator PatternLink() const;
     string GetTrace() const; // used for debug
 
@@ -113,6 +115,10 @@ private: friend class PatternLink; friend class XLink;
 
 list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
                                       const map< PatternLink, XLink > &keys );
+
+typedef XLink CouplingKey;
+typedef map< Agent *, CouplingKey > CouplingKeysMap;
+
 };
 
 #endif

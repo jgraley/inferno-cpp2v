@@ -56,12 +56,12 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
 void SearchContainerAgent::KeyReplace( const CouplingKeysMap *coupling_keys )
 {
-    terminus_key = coupling_keys->at(AsAgent(terminus));
+    terminus_key = coupling_keys->at(AsAgent(terminus)).GetChildX();
     SetKey( coupling_keys->at(this) );  
 }
 
 
-TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("#");
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
@@ -69,7 +69,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     ASSERT(terminus_key);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(keynode, terminus_key, term);   
+    return DuplicateSubtree(keylink.GetChildX(), terminus_key, term);   
 }
 
 
