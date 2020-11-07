@@ -33,6 +33,10 @@ public:
     {
     };
     
+    class CouplingMismatch : public Mismatch
+    {
+    };
+    
     Agent& operator=(Agent& other);
 	virtual void AgentConfigure( const SCREngine *master_scr_engine ) = 0;
 
@@ -48,7 +52,9 @@ public:
 
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        XLink x,
-                                       const list<LocatedLink> &required_links ) const = 0;                                                
+                                       const list<LocatedLink> &required_links ) const = 0;            
+    virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
+                                                                           
     virtual CouplingKey GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
@@ -84,6 +90,8 @@ public:
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
+    virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
+
 protected:
     void SetKey( CouplingKey x );
 

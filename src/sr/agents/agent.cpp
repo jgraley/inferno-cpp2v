@@ -213,6 +213,26 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
 }
 
 
+void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
+{    
+    candidate_links.erase(XLink::MMAX_Link);
+    
+    XLink keyer_link = *candidate_links.begin();
+    candidate_links.erase(keyer_link);
+
+    for( XLink residual_link : candidate_links )
+    {
+        // This function establishes the policy for couplings in one place,
+        // apart from the other place which is plan.by_equivalence_links.
+        // Today, it's SimpleCompare, via EquivalenceRelation. 
+        // And it always will be: see #121; para starting at "No!!"
+        static EquivalenceRelation equivalence_relation;
+        if( !equivalence_relation( residual_link.GetChildX(), keyer_link.GetChildX() ) )
+            throw CouplingMismatch();   
+    }     
+}
+
+
 void AgentCommon::SetKey( CouplingKey keylink )
 {
     ASSERT(keylink);

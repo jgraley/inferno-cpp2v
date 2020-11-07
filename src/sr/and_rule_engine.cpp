@@ -767,23 +767,29 @@ void AndRuleEngine::RecordLink( LocatedLink link )
 
 void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link )
 {
-    // Allow Magic Match Anything 
-    if( (XLink)residual_link == XLink::MMAX_Link )
-        return;
-
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
+    XLink keyer_link = keys.at(agent);
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent).GetChildX() ) ); 
+
+#if 1
+    multiset<XLink> candidate_links { keyer_link, residual_link };
+    agent->CouplingQuery( candidate_links );
+#else        
+    // Allow Magic Match Anything 
+    if( (XLink)residual_link == XLink::MMAX_Link )
+        return;
 
     // This function establishes the policy for couplings in one place,
     // apart from the other place which is plan.by_equivalence_links.
     // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
     static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( residual_link.GetChildX(), keys.at(agent).GetChildX() ) )
+    if( !equivalence_relation( residual_link.GetChildX(), keyer_link.GetChildX() ) )
         throw Mismatch();    
+#endif
 }                                     
 
 
