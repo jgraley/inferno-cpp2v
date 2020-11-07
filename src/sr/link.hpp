@@ -88,9 +88,9 @@ class LocatedLink : public Traceable
 {
 public:
     LocatedLink();
-    LocatedLink( const PatternLink &plink, 
-                 const XLink &xlink);
-    LocatedLink( const pair<PatternLink, XLink> &p ) :
+    explicit LocatedLink( const PatternLink &plink, 
+                          const XLink &xlink);
+    explicit LocatedLink( const pair<PatternLink, XLink> &p ) :
         LocatedLink(p.first, p.second) {}
     
     bool operator<(const LocatedLink &other) const;
@@ -103,7 +103,7 @@ public:
     TreePtr<Node> GetChildX() const;
     void SetX( const XLink &x );
     void SetPattern( const PatternLink &pattern );
-    operator PatternLink() const;
+    explicit operator PatternLink() const;
     string GetTrace() const; // used for debug
 
 private: friend class PatternLink; friend class XLink;

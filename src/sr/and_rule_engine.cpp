@@ -405,27 +405,27 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     {
         TRACE("Comparing normal link ")(link)
              (" keyer? %d residual? %d master? %d\n", 
-             plan.coupling_nontrivial_keyer_links.count( link ), 
-             plan.coupling_residual_links.count( link ), 
-             plan.master_boundary_links.count(link) );
+             plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ), 
+             plan.coupling_residual_links.count( (PatternLink)link ), 
+             plan.master_boundary_links.count( (PatternLink)link ) );
         ASSERT( link.GetChildX() );
         
         // Check the link: we will either compare a coupling
         // or recurse to DecidedCompare(). We never DC() after a
         // coupling compare, because couplings are only keyed
         // after a successful DC().  
-        if( plan.coupling_residual_links.count( link ) > 0 )
+        if( plan.coupling_residual_links.count( (PatternLink)link ) > 0 )
         {
             CompareCoupling( my_coupling_keys, link );
         }
-        else if( plan.master_boundary_links.count(link) > 0 )
+        else if( plan.master_boundary_links.count( (PatternLink)link ) > 0 )
         {
             CompareCoupling( *master_keys, link );
         }
         else
         {
             DecidedCompare(link);   
-            if( plan.coupling_nontrivial_keyer_links.count( link ) > 0 )
+            if( plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ) > 0 )
                 KeyCoupling( my_coupling_keys, link );
         }
 
@@ -514,7 +514,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 {
     INDENT("M");
 
-    shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at(link);
+    shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at( (PatternLink)link );
     TRACE("Checking multiplicity ")(link)("\n");
         
     ASSERT( link );
@@ -566,13 +566,13 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             {
                 ASSERT( link );
                 // Actions if evaluator link
-                if( plan.my_evaluator_abnormal_engines.count(link) )                
+                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )                
                     InsertSolo( solution_for_evaluators, link );                
                 
                 // Actions if free link
-                if( plan.my_free_abnormal_engines.count(link) )
+                if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                 {
-                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
+                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
                     e->Compare( link.GetChildX(), &subordinate_keys );
                     
                     // Replace needs these keys
@@ -583,10 +583,10 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             // Try matching the multiplicity links.
             FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
             {
-                if( plan.my_evaluator_abnormal_engines.count(link) )
+                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
                     InsertSolo( solution_for_evaluators, link );                
 
-                if( plan.my_multiplicity_engines.count(link) )
+                if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
                     CompareMultiplicityLinks( link, &subordinate_keys );  
             }
 
@@ -758,8 +758,8 @@ void AndRuleEngine::RecordLink( LocatedLink link )
     // Keying for external use (subordinates, slaves and replace)
     // We don't want residuals (which are unreliable) or MMAX
     if( (PatternLink)link != plan.root_plink &&
-        plan.master_boundary_links.count(link) == 0 &&
-        plan.coupling_residual_links.count( link ) == 0 && 
+        plan.master_boundary_links.count( (PatternLink)link ) == 0 &&
+        plan.coupling_residual_links.count( (PatternLink)link ) == 0 && 
         (XLink)link != XLink::MMAX_Link )
         KeyCoupling( external_keys, link );        
 }
