@@ -84,7 +84,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     else
 	    pcontext = &c;
     
-    map< Agent *, TreePtr<Node> > empty;
+    SCREngine::CouplingKeysMap empty;
     
     (void)scr_engine->RepeatingCompareReplace( proot, &empty );   
 

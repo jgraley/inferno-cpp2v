@@ -58,14 +58,15 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     InstallRootAgents(cp, rp);
             
-    //TRACE("Elaborating ")(*this );    
-
+    // For closure under full arrowhead model, we need a link to root
+    root_plink = PatternLink::CreateDistinct( root_pattern );
+    
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines );    
     CreateMyEngines( master_agents, my_agents_needing_engines );    
     ConfigureAgents();
     
-    and_rule_engine = make_shared<AndRuleEngine>(root_pattern, master_agents);
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_agents);
 } 
 
 
@@ -106,14 +107,18 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     
 
 void SCREngine::Plan::CategoriseSubs( const set<Agent *> &master_agents, 
-                                            set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+                                      set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible
     VisibleWalk tp(root_pattern); 
     set<Agent *> visible_agents;
-    FOREACH( TreePtr<Node> n, tp )
+    for( VisibleWalk::iterator it = tp.begin(); it != tp.end(); ++it )
+    {
+        TreePtr<Node> n = *it;
         visible_agents.insert( Agent::AsAgent(n) );
+    //    visible_plinks.insert( FromWalkIterator( it, PatternLink root )
+    }
     
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.        

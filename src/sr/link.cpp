@@ -47,6 +47,15 @@ PatternLink::PatternLink(const Agent *parent_agent,
 }
 
 
+PatternLink PatternLink::FromWalkIterator( const Walk::iterator &wit, PatternLink root )
+{
+    TreePtr<Node> parent_pattern = wit.GetCurrentParent();
+    const TreePtrInterface *pparent = wit.GetCurrentParentPointer();
+    ASSERT( root || (parent_pattern && pparent) );
+    return parent_pattern ? PatternLink( parent_pattern, pparent ) : root;    
+}
+
+              
 PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
 {
     shared_ptr< TreePtr<Node> > sp_tp_pattern = make_shared< TreePtr<Node> >( tp_pattern ); 

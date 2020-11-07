@@ -23,6 +23,9 @@ public:
                  void *whodat=nullptr );
     PatternLink( const Agent *parent_agent,
                  const TreePtrInterface *ppattern );
+    // Make link from walk iterator; if at root (i.e. Walk::begin()) substitute root link
+    static PatternLink FromWalkIterator( const Walk::iterator &wit, PatternLink root = PatternLink() );
+    // Make a copy of tp_pattern which acts as a new, distinct value 
     static PatternLink CreateDistinct( const TreePtr<Node> &tp_pattern );
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;

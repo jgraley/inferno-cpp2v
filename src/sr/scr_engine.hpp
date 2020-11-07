@@ -31,8 +31,8 @@ public:
                const set<Agent *> &master_agents = set<Agent *>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
                     
-private:
     typedef map< Agent *, TreePtr<Node> > CouplingKeysMap;
+private:
     const struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
@@ -54,9 +54,11 @@ private:
         const bool is_search;    
         const CompareReplace *overall_master_ptr;
         TreePtr<Node> root_pattern;
+        PatternLink root_plink;
         Agent *root_agent;
         const SCREngine *master_ptr;
         std::shared_ptr< set<Agent *> > my_agents;   
+        std::shared_ptr< set<PatternLink> > my_agent_links;   
         std::map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;

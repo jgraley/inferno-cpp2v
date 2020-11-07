@@ -25,26 +25,24 @@
 
 using namespace SR;
 
-AndRuleEngine::AndRuleEngine( TreePtr<Node> root_pattern_, const set<Agent *> &master_agents_ ) :
-    plan( this, root_pattern_, master_agents_ )
+AndRuleEngine::AndRuleEngine( PatternLink root_plink, const set<Agent *> &master_agents_ ) :
+    plan( this, root_plink, master_agents_ )
 {
 }    
  
-AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, const set<Agent *> &master_agents_) :
-    algo( algo_ )
+AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const set<Agent *> &master_agents_) :
+    algo( algo_ ),
+    root_plink( root_plink_ ),
+    root_pattern( root_plink.GetPattern() ),
+    root_agent( root_plink.GetChildAgent() ),
+    master_agents( master_agents_ )
 {
     TRACE(GetName());
     INDENT("P");
-    root_pattern = root_pattern_;
-    root_agent = Agent::AsAgent(root_pattern);
-    master_agents = master_agents_;
-    
-    // For closure under full arrowhead model, we need a link to root
-    root_link = PatternLink::CreateDistinct( root_pattern );
     
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
-    PopulateNormalAgents( &normal_agents, &normal_links, root_link );    
+    PopulateNormalAgents( &normal_agents, &normal_links, root_plink );    
     for( PatternLink plink : normal_links )
         if( master_agents.count( plink.GetChildAgent() ) == 0 )
             my_normal_links.insert( plink );
@@ -60,10 +58,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     master_boundary_links.clear();
     reached_agents.clear();
     reached_links.clear();
-    PopulateForSolver( root_link, 
+    PopulateForSolver( root_plink, 
                        master_agents );
 
-    DetermineKeyers( root_link, master_agents );
+    DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
         
@@ -92,7 +90,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
             else
                 flags.compare_by = CSP::CompareBy::LOCATION;   
                                  
-            if( link == root_link ) // Root variable will be forced
+            if( link == root_plink ) // Root variable will be forced
                 flags.freedom = CSP::Freedom::FORCED;
             else if( master_boundary_links.count(link) > 0) // Couplings to master are forced
                 flags.freedom = CSP::Freedom::FORCED;
@@ -115,7 +113,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     list<PatternLink> free_normal_links_ordered;
     for( PatternLink link : normal_links_ordered )
     {
-        if( link != root_link &&
+        if( link != root_plink &&
             master_boundary_agents.count(link.GetChildAgent()) == 0 )
             free_normal_links_ordered.push_back( link );
     }
@@ -310,20 +308,17 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
         {        
             if( pq->GetEvaluator() )
             {
-                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetPattern(), 
-                                                                                  surrounding_agents );  
+                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_agents );  
             }
             else
             {
-                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetPattern(), 
-                                                                             surrounding_agents );  
+                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_agents );  
             }
         }
         
         FOREACH( PatternLink link, pq->GetMultiplicityLinks() )
         {
-            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link.GetPattern(), 
-                                                                        surrounding_agents );  
+            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, surrounding_agents );  
         }
     }
 }
@@ -365,7 +360,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
             master_and_root_links[link] = XLink::CreateDistinct(node);
         }
     }
-    master_and_root_links[plan.root_link] = root_xlink;
+    master_and_root_links[plan.root_plink] = root_xlink;
 
     // Tell all the constraints about the forces
     for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
@@ -394,7 +389,7 @@ void AndRuleEngine::GetNextCSPSolution()
         auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
 
         // Don't bother with the "self" link
-        if( lcp.first != plan.root_link ) 
+        if( lcp.first != plan.root_plink ) 
             vvzip.pop_front();
 
         for( auto vvp : vvzip ) 
@@ -654,13 +649,13 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
 {
     INDENT("C");
     ASSERT( root_xnode );
-    TRACE("Compare x=")(root_xnode)(" pattern=")(plan.root_link)("\n");
+    TRACE("Compare x=")(root_xnode)(" pattern=")(plan.root_plink)("\n");
            
     master_keys = master_keys_;    
     
     // distinct OK because this only runs once per solve
     XLink root_xlink = XLink::CreateDistinct(root_xnode);
-    LocatedLink root_link( plan.root_link, root_xlink );
+    LocatedLink root_link( plan.root_plink, root_xlink );
 
     if( plan.my_normal_agents.empty() )
     {
@@ -695,7 +690,7 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
             // will remove the decision.    
             DecidedCompare( root_link );            
 #endif
-            basic_solution[plan.root_link] = root_xlink;
+            basic_solution[plan.root_plink] = root_xlink;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             if( root_xlink != XLink::MMAX_Link )
                 KeyCoupling( external_keys, root_link );            
@@ -762,7 +757,7 @@ void AndRuleEngine::RecordLink( LocatedLink link )
     
     // Keying for external use (subordinates, slaves and replace)
     // We don't want residuals (which are unreliable) or MMAX
-    if( (PatternLink)link != plan.root_link &&
+    if( (PatternLink)link != plan.root_plink &&
         plan.master_boundary_links.count(link) == 0 &&
         plan.coupling_residual_links.count( link ) == 0 && 
         (XLink)link != XLink::MMAX_Link )

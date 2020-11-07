@@ -46,11 +46,11 @@ public:
     {
     };
     
-    AndRuleEngine( TreePtr<Node> root_pattern_, const set<Agent *> &master_agents);
+    AndRuleEngine( PatternLink root_plink, const set<Agent *> &master_agents);
     
     const struct Plan : public virtual Traceable
     {
-        Plan( AndRuleEngine *algo, TreePtr<Node> root_pattern_, const set<Agent *> &master_agents);
+        Plan( AndRuleEngine *algo, PatternLink root_plink, const set<Agent *> &master_agents);
         void PopulateForSolver( PatternLink link,
                                 const set<Agent *> &master_agents );
         void DetermineKeyersModuloMatchAny( PatternLink plink,
@@ -68,10 +68,10 @@ public:
                                        const set<Agent *> &surrounding_agents );
  
         AndRuleEngine * const algo;
-        TreePtr<Node> root_pattern;
-        Agent *root_agent;
-        PatternLink root_link;
-        set<Agent *> master_agents;
+        const PatternLink root_plink;
+        const TreePtr<Node> root_pattern;
+        Agent * const root_agent;
+        const set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
         set<PatternLink> my_normal_links;
         set< Agent *> my_evaluators;   
