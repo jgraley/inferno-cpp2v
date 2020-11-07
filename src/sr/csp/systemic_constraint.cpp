@@ -14,10 +14,6 @@ SystemicConstraint::Plan::Plan( SR::PatternLink root_link_,
 {
     GetAllVariables();
     RunVariableQueries( all_variables, vql );
-    
-    // This implementation doesn't know how to model the first varaible
-    // by any means other than by location (i.e. by address)
-    ASSERT( flags.front().compare_by == CompareBy::LOCATION );
 
     // Configure our embedded Conjecture object
     set<SR::Agent *> my_agents;
@@ -99,19 +95,7 @@ void SystemicConstraint::TraceProblem() const
             scat += "(link)";
         first = false;    
         
-        string sflags;
-        sflags += "; compare by ";
-        switch( fit->compare_by )
-        {
-        case CompareBy::LOCATION:
-            sflags += "LOCATION";
-            break;
-            
-        case CompareBy::EQUIVALENCE:
-            sflags += "EQUIVALENCE";
-            break;
-        }
-        sflags += "; is ";
+        string sflags = "; is ";
         switch( fit->freedom )
         {
         case Freedom::FREE:

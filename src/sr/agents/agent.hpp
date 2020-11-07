@@ -116,7 +116,7 @@ private:
     CouplingKey coupling_key;    
     shared_ptr<PatternQuery> pattern_query;
     int num_decisions;
-    shared_ptr<EquivalenceRelation> equivalence_relation;
+    EquivalenceRelation equivalence_relation;
 };
 
 

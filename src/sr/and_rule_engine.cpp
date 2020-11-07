@@ -71,7 +71,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     for( PatternLink constraint_link : my_normal_links )
     {        
         if( coupling_residual_links.count(constraint_link) > 0 )
-            continue; // No contraint for a coupling residual link
+            continue; // No constraint for a coupling residual link
             
         // Only one constraint per agent
         ASSERT( check_we_got_the_right_agents.count( constraint_link.GetChildAgent() ) == 0 );
@@ -80,16 +80,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
         CSP::VariableQueryLambda vql = [&](PatternLink link) -> CSP::VariableFlags
         {
             CSP::VariableFlags flags;
- 
-            if( link == constraint_link ) // Self-variable must be by location
-                flags.compare_by = CSP::CompareBy::LOCATION;   
-            else if( coupling_residual_links.count(link) > 0 ) // Coupling residuals are by value
-                flags.compare_by = CSP::CompareBy::EQUIVALENCE;
-            else if( master_boundary_links.count(link) > 0) // Couplings to master are by value
-                flags.compare_by = CSP::CompareBy::EQUIVALENCE;
-            else
-                flags.compare_by = CSP::CompareBy::LOCATION;   
-                                 
+                                  
             if( link == root_plink ) // Root variable will be forced
                 flags.freedom = CSP::Freedom::FORCED;
             else if( master_boundary_links.count(link) > 0) // Couplings to master are forced
@@ -121,12 +112,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     solver = make_shared<CSP::SolverHolder>(salg);
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
-#endif
-    // Aside from CompareCoupling(), this is the other place where
-    // we establish the couplings criterion as the  EquivalenceRelation, 
-    // whatever that might be...? (it's SimpleCompare)
-    by_equivalence_links = SetUnion( coupling_residual_links, 
-                                     master_boundary_links );                           
+#endif                      
 }
 
 
@@ -772,24 +758,10 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     XLink keyer_link = keys.at(agent);
 
     // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent).GetChildX() ) ); 
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_link.GetChildX() ) ); 
 
-#if 1
     multiset<XLink> candidate_links { keyer_link, residual_link };
     agent->CouplingQuery( candidate_links );
-#else        
-    // Allow Magic Match Anything 
-    if( (XLink)residual_link == XLink::MMAX_Link )
-        return;
-
-    // This function establishes the policy for couplings in one place,
-    // apart from the other place which is plan.by_equivalence_links.
-    // Today, it's SimpleCompare, via EquivalenceRelation. 
-    // And it always will be: see #121; para starting at "No!!"
-    static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( residual_link.GetChildX(), keyer_link.GetChildX() ) )
-        throw Mismatch();    
-#endif
 }                                     
 
 

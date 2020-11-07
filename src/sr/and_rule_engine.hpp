@@ -86,7 +86,6 @@ public:
         set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
-        set<PatternLink> by_equivalence_links;
         list<PatternLink> normal_links_ordered;
         map<Agent *, PatternLink> agent_to_keyer;
         

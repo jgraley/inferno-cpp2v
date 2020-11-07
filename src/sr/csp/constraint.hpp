@@ -28,13 +28,6 @@ namespace CSP
  * introduce a typedef for them.
  */
 
-enum class CompareBy
-{
-    LOCATION,
-    EQUIVALENCE
-};
-
-
 enum class Freedom
 {
     FORCED,
@@ -43,20 +36,11 @@ enum class Freedom
 
 
 typedef SR::XLink Value;
-
-struct ValueFlags
-{
-    // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
-    CompareBy compare_by; 
-};
-
-
 typedef SR::PatternLink VariableId;
 
 struct VariableFlags
 {
     // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
-    CompareBy compare_by; 
     Freedom freedom;
 };
 

@@ -41,8 +41,7 @@ const Agent *Agent::AsAgentConst( shared_ptr<const Node> node )
 
 
 AgentCommon::AgentCommon() :
-    master_scr_engine(nullptr),
-    equivalence_relation( make_shared<EquivalenceRelation>() )
+    master_scr_engine(nullptr)
 {
 }
 
@@ -215,20 +214,26 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
 
 void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
 {    
-    candidate_links.erase(XLink::MMAX_Link);
-    
-    XLink keyer_link = *candidate_links.begin();
-    candidate_links.erase(keyer_link);
+    // This function establishes the policy for couplings in one place.
+    // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
+    // And it always will be: see #121; para starting at "No!!"
+    // HOWEVER: it is now possible for agents to override this policy.
 
-    for( XLink residual_link : candidate_links )
+    // We will always accept MMAX links, so ignore them
+    candidate_links.erase(XLink::MMAX_Link);
+
+    // Check remaining links against each other. EquivalenceRelation is
+    // transitive, so it's enough just to daisy-chain the checks.
+    XLink previous_link;
+    for( XLink current_link : candidate_links )
     {
-        // This function establishes the policy for couplings in one place,
-        // apart from the other place which is plan.by_equivalence_links.
-        // Today, it's SimpleCompare, via EquivalenceRelation. 
-        // And it always will be: see #121; para starting at "No!!"
-        static EquivalenceRelation equivalence_relation;
-        if( !equivalence_relation( residual_link.GetChildX(), keyer_link.GetChildX() ) )
-            throw CouplingMismatch();   
+        if( previous_link )
+        {
+            if( !equivalence_relation( previous_link.GetChildX(), 
+                                       current_link.GetChildX() ) )
+                throw CouplingMismatch();               
+        }
+        previous_link = current_link;
     }     
 }
 

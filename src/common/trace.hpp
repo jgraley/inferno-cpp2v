@@ -94,6 +94,21 @@ public:
         return operator()("}");
     }
 
+    template<typename T>
+    Tracer &operator()(const multiset<T> &s) 
+    {
+        operator()("{");
+        bool first = true;
+        for( auto x : s )
+        {
+            if( !first )
+                operator()(", ");
+            operator()(x);
+            first = false;            
+        }
+        return operator()("}");
+    }
+
     template<typename TK, typename TV>
     Tracer &operator()(const map<TK, TV> &m) 
     {
