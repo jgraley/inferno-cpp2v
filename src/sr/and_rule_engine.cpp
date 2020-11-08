@@ -64,69 +64,97 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     DetermineNontrivialKeyers();
         
 #ifdef USE_SOLVER    
-    list< shared_ptr<CSP::Constraint> > constraints;
-    CreateMyConstraints(constraints);
-    CreateCSPSolver(constraints);
+    CreateMyConstraints();
+    CreateMasterCouplingConstraints();
+    CreateCSPSolver();
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
 #endif                      
 }
 
 
-void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints )
+void AndRuleEngine::Plan::CreateMyConstraints()
 {
     set<Agent *> check_we_got_the_right_agents;
-    for( PatternLink constraint_link : my_normal_links )
+    for( PatternLink keyer_plink : coupling_keyer_links )
     {        
-        if( coupling_residual_links.count(constraint_link) > 0 )
-            continue; // No constraint for a coupling residual link
-            
         // Only one constraint per agent
-        ASSERT( check_we_got_the_right_agents.count( constraint_link.GetChildAgent() ) == 0 );
-        check_we_got_the_right_agents.insert( constraint_link.GetChildAgent() );            
+        ASSERT( check_we_got_the_right_agents.count( keyer_plink.GetChildAgent() ) == 0 );
+        check_we_got_the_right_agents.insert( keyer_plink.GetChildAgent() );            
             
-        CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink link) -> CSP::SystemicConstraint::VariableFlags
+        CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::SystemicConstraint::VariableFlags
         {
             CSP::SystemicConstraint::VariableFlags flags;
                                   
-            if( link == root_plink ) // Root variable will be forced
+            if( plink == root_plink ) // Root variable will be forced
                 flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
-            else if( master_boundary_links.count(link) > 0) // Couplings to master are forced
-                flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
-            else
+            else 
                 flags.freedom = CSP::SystemicConstraint::Freedom::FREE;
             
             return flags;            
         };
                 
         // Determine the coupling residuals for this agent
-        set<PatternLink> current_residual_plinks;
+        set<PatternLink> residual_plinks;
         for( PatternLink residual_plink : coupling_residual_links )
-            if( residual_plink.GetChildAgent() == constraint_link.GetChildAgent() )
-                current_residual_plinks.insert( residual_plink );
+            if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
+                residual_plinks.insert( residual_plink );
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_link, 
-                                                                              current_residual_plinks, 
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( keyer_plink, 
+                                                                              residual_plinks, 
                                                                               CSP::SystemicConstraint::Action::FULL,
                                                                               vql );
-        my_constraints[constraint_link] = c;    
-        constraints.push_back(c);
+        my_constraints[keyer_plink] = c;    
     }
 
     ASSERT( check_we_got_the_right_agents == my_normal_agents );
 }
 
 
-void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints )
+void AndRuleEngine::Plan::CreateMasterCouplingConstraints()
 {
+    for( PatternLink keyer_plink : master_boundary_keyer_links )
+    {                                    
+        CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::SystemicConstraint::VariableFlags
+        {
+            CSP::SystemicConstraint::VariableFlags flags;
+                                  
+            if( plink == keyer_plink ) // keyer will be forced
+                flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
+            else // residual
+                flags.freedom = CSP::SystemicConstraint::Freedom::FREE;
+            
+            return flags;            
+        };
+                
+        // Determine the coupling residuals for this agent
+        set<PatternLink> residual_plinks;
+        for( PatternLink residual_plink : master_boundary_residual_links )
+            if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
+                residual_plinks.insert( residual_plink );
+                
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( keyer_plink, 
+                                                                              residual_plinks, 
+                                                                              CSP::SystemicConstraint::Action::COUPLING,
+                                                                              vql );
+        my_constraints[keyer_plink] = c;    
+    }
+}
+
+
+void AndRuleEngine::Plan::CreateCSPSolver()
+{    
+    list< shared_ptr<CSP::Constraint> > constraints;
+    for( auto p : my_constraints )
+        constraints.push_back( p.second );
+    
     // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
     // take the same route we do with DecidedCompare(). Need to remove FORCED agents
     // though.
     list<PatternLink> free_normal_links_ordered;
     for( PatternLink link : normal_links_ordered )
     {
-        if( link != root_plink &&
-            master_boundary_agents.count(link.GetChildAgent()) == 0 )
+        if( link != root_plink )
             free_normal_links_ordered.push_back( link );
     }
     auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_links_ordered);
@@ -143,6 +171,7 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
 
     normal_links_ordered.push_back( link );
     Agent *agent = link.GetChildAgent();
+    TreePtr<Node> agent_pattern = link.GetPattern();
     
     if( reached_agents.count(agent) > 0 )    
         return; 
@@ -155,6 +184,11 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
         // 2. It's not the child of a master agent (we don't recurse on them)
         // See #125
         master_boundary_agents.insert( agent );
+
+        // We don't need the original keyer link for this agent (it belongs
+        // to master) so just create a new one. These will be the FORCED
+        // variables that permit us to inject master keys into CSP.
+        master_boundary_keyer_links.insert( PatternLink::CreateDistinct(agent_pattern) );
         return;
     } 
          
@@ -165,7 +199,7 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
         
         // Note: here, we won't see root if root is a master agent (i.e. trivial pattern)
         if( master_boundary_agents.count( link.GetChildAgent() ) )
-            master_boundary_links.insert( link );
+            master_boundary_residual_links.insert( link );
     }
 }
 
@@ -355,14 +389,11 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
     SolutionMap master_and_root_links;
-    for( PatternLink link : plan.normal_links_ordered )
+    for( PatternLink link : plan.master_boundary_keyer_links )
     {
-        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
-        {
-            // distinct OK because this only runs once per solve
-            TreePtr<Node> node = master_keys->at(link.GetChildAgent()).GetChildX();
-            master_and_root_links[link] = XLink::CreateDistinct(node);
-        }
+        // distinct OK because this only runs once per solve
+        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).GetChildX();
+        master_and_root_links[link] = XLink::CreateDistinct(node);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
@@ -411,7 +442,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
              (" keyer? %d residual? %d master? %d\n", 
              plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ), 
              plan.coupling_residual_links.count( (PatternLink)link ), 
-             plan.master_boundary_links.count( (PatternLink)link ) );
+             plan.master_boundary_residual_links.count( (PatternLink)link ) );
         ASSERT( link.GetChildX() );
         
         // Check the link: we will either compare a coupling
@@ -422,7 +453,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         {
             CompareCoupling( my_coupling_keys, link );
         }
-        else if( plan.master_boundary_links.count( (PatternLink)link ) > 0 )
+        else if( plan.master_boundary_residual_links.count( (PatternLink)link ) > 0 )
         {
             CompareCoupling( *master_keys, link );
         }
@@ -762,7 +793,7 @@ void AndRuleEngine::RecordLink( LocatedLink link )
     // Keying for external use (subordinates, slaves and replace)
     // We don't want residuals (which are unreliable) or MMAX
     if( (PatternLink)link != plan.root_plink &&
-        plan.master_boundary_links.count( (PatternLink)link ) == 0 &&
+        plan.master_boundary_residual_links.count( (PatternLink)link ) == 0 &&
         plan.coupling_residual_links.count( (PatternLink)link ) == 0 && 
         (XLink)link != XLink::MMAX_Link )
         KeyCoupling( external_keys, link );        

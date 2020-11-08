@@ -51,8 +51,9 @@ public:
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo, PatternLink root_plink, const set<Agent *> &master_agents);
-        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints );
-        void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints );
+        void CreateMyConstraints();
+        void CreateMasterCouplingConstraints();
+        void CreateCSPSolver();
         void PopulateSomeThings( PatternLink link,
                                  const set<Agent *> &master_agents );
         void DetermineKeyersModuloMatchAny( PatternLink plink,
@@ -82,7 +83,8 @@ public:
         map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         set<Agent *> master_boundary_agents;
-        set<PatternLink> master_boundary_links;
+        set<PatternLink> master_boundary_keyer_links;
+        set<PatternLink> master_boundary_residual_links;
         set<PatternLink> coupling_keyer_links;
         set<PatternLink> coupling_residual_links;
         set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link

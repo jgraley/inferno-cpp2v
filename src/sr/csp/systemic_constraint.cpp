@@ -20,11 +20,6 @@ SystemicConstraint::Plan::Plan( SR::PatternLink keyer_plink_,
         ASSERT( residual_plink.GetChildAgent() == agent );
     
     RunVariableQueries( vql );
-
-    // Configure our embedded Conjecture object
-    set<SR::Agent *> my_agents;
-    my_agents.insert( agent ); // just the one agent this time
-    conj = make_shared<SR::Conjecture>(my_agents, agent);    
 }
 
 
@@ -39,8 +34,6 @@ SystemicConstraint::SystemicConstraint( SR::PatternLink keyer_plink,
 
 void SystemicConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
 { 
-    all_variables.clear();
-    
     // The keyer
     all_variables.push_back( VariableRecord{ Kind::KEYER, 
                                              keyer_plink, 
@@ -53,10 +46,13 @@ void SystemicConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
                                                  vql(residual_plink) } );     
     
     // The children
-    FOREACH( SR::PatternLink child_plink, pq->GetNormalLinks() )
-        all_variables.push_back( VariableRecord{ Kind::CHILD, 
-                                                 child_plink, 
-                                                 vql(child_plink) } );      
+    if( action==Action::FULL )
+    {
+        FOREACH( SR::PatternLink child_plink, pq->GetNormalLinks() )
+            all_variables.push_back( VariableRecord{ Kind::CHILD, 
+                                                     child_plink, 
+                                                     vql(child_plink) } );      
+    }
 }
 
 
@@ -89,51 +85,30 @@ void SystemicConstraint::TraceProblem() const
     TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.all_variables.size(), GetFreeDegree());
     for( auto var : plan.all_variables )
     {
-        string scat;
-        switch( var.kind )
-        {
-        case Kind::KEYER:
-            scat = "KEYER ";
-            break;
-        
-        case Kind::RESIDUAL:
-            scat = "RESIDUAL ";
-            break;
-            
-        case Kind::CHILD:
-            scat = "CHILD ";
-            break;
-        }
-
-        string sflags = "; is ";
-        switch( var.flags.freedom )
-        {
-        case Freedom::FREE:
-            sflags += "FREE";
-            break;
-            
-        case Freedom::FORCED:
-            sflags += "FORCED";
-            break;
-        }
-        
-        TRACEC(scat)(var.id)(sflags)("\n");
+        TRACEC(Trace(var))("\n");
     }    
 }
 
 
-void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_ )
+void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_map )
 {
     forces.clear();
+    TraceProblem();
     for( auto var : plan.all_variables )
     {
         switch( var.flags.freedom )
         {
         case Freedom::FREE:
+            ASSERT( !forces_map.count( var.id ) )
+                  (*this)("\n")
+                  (Trace(var))(" should not be in forces: ")(forces_map)("\n");
             break;
             
         case Freedom::FORCED:
-            forces.push_back( forces_.at( var.id ) );
+            ASSERT( forces_map.count( var.id ) )
+                  (*this)("\n")
+                  (Trace(var))(" missing from forces: ")(forces_map)("\n"); 
+            forces.push_back( forces_map.at( var.id ) );            
             break;
         }
     }    
@@ -210,10 +185,58 @@ bool SystemicConstraint::Test( list< Value > values )
 
 string SystemicConstraint::GetTrace() const
 {
-    return string("SystemicConstraint(") + plan.agent->GetTrace() + ")";
+    string s = string("SystemicConstraint(");
+    
+    s += plan.agent->GetTrace() + ", ";
+    
+    switch( plan.action )
+    {
+    case Action::FULL:
+        s += "FULL";
+        break;
+    
+    case Action::COUPLING:
+        s += "COUPLING";
+        break;
+    }
+
+    s += ")";
+    return s;
 }      
 
 
+string Trace( const SystemicConstraint::VariableRecord &var )
+{
+    string skind;
+    switch( var.kind )
+    {
+    case SystemicConstraint::Kind::KEYER:
+        skind = "KEYER";
+        break;
+    
+    case SystemicConstraint::Kind::RESIDUAL:
+        skind = "RESIDUAL";
+        break;
+        
+    case SystemicConstraint::Kind::CHILD:
+        skind = "CHILD";
+        break;
+    }
+
+    string sfreedom;
+    switch( var.flags.freedom )
+    {
+    case SystemicConstraint::Freedom::FREE:
+        sfreedom = "FREE";
+        break;
+        
+    case SystemicConstraint::Freedom::FORCED:
+        sfreedom = "FORCED";
+        break;
+    }
+        
+    return skind+":"+var.id.GetTrace()+"("+sfreedom+")";
+}
 
 
 

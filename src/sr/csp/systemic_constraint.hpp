@@ -35,6 +35,20 @@ public:
         Freedom freedom;
     };
     
+    enum class Kind
+    {
+        KEYER,
+        RESIDUAL,
+        CHILD
+    };
+    
+    struct VariableRecord
+    {
+        Kind kind;
+        VariableId id;
+        VariableFlags flags;
+    };
+
     enum class Action
     {
         FULL,
@@ -71,20 +85,6 @@ private:
     {
     };
     
-    enum class Kind
-    {
-        KEYER,
-        RESIDUAL,
-        CHILD
-    };
-    
-    struct VariableRecord
-    {
-        Kind kind;
-        VariableId id;
-        VariableFlags flags;
-    };
-
     const struct Plan
     {
         explicit Plan( SR::PatternLink keyer_plink, 
@@ -93,13 +93,12 @@ private:
                        VariableQueryLambda vql );
         void RunVariableQueries( VariableQueryLambda vql );
                                  
-        SR::PatternLink keyer_plink;
-        set<SR::PatternLink> residual_plinks;
-        Action action;
+        const SR::PatternLink keyer_plink;
+        const set<SR::PatternLink> residual_plinks;
+        const Action action;
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
         list<VariableRecord> all_variables;
-        shared_ptr<SR::Conjecture> conj;
     } plan;
     
     list<Value> forces; // only FREE vars
@@ -108,5 +107,7 @@ private:
 };
 
 };
+
+string Trace( const CSP::SystemicConstraint::VariableRecord &var );
 
 #endif

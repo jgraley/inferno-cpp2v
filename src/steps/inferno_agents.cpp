@@ -362,8 +362,8 @@ bool IsLabelReachedAgent::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
 
 
 bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
-			            	      TreePtr<LabelIdentifier> x, 
-				                  TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
+                                       TreePtr<LabelIdentifier> x, 
+				                       TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
 {
 	INDENT(" ");
 	Reaching rr( x, y );
