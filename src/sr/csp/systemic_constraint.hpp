@@ -23,6 +23,26 @@ namespace CSP
 class SystemicConstraint : public Constraint
 {
 public:
+    enum class Freedom
+    {
+        FORCED,
+        FREE
+    };
+
+    struct VariableFlags
+    {
+        // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
+        Freedom freedom;
+    };
+    
+    enum class Action
+    {
+        FULL,
+        COUPLING
+    };
+
+    typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
+
     /**
      * Create the constraint. 
      * 
@@ -34,6 +54,7 @@ public:
      */
     explicit SystemicConstraint( SR::PatternLink keyer_plink, 
                                  set<SR::PatternLink> residual_plinks,
+                                 Action action,
                                  VariableQueryLambda vql );
     
 private:
@@ -67,12 +88,14 @@ private:
     const struct Plan
     {
         explicit Plan( SR::PatternLink keyer_plink, 
-                       set<SR::PatternLink> residual_plinks,                       
+                       set<SR::PatternLink> residual_plinks,             
+                       Action action,          
                        VariableQueryLambda vql );
         void RunVariableQueries( VariableQueryLambda vql );
                                  
         SR::PatternLink keyer_plink;
         set<SR::PatternLink> residual_plinks;
+        Action action;
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
         list<VariableRecord> all_variables;

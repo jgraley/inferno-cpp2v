@@ -51,8 +51,10 @@ public:
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo, PatternLink root_plink, const set<Agent *> &master_agents);
-        void PopulateForSolver( PatternLink link,
-                                const set<Agent *> &master_agents );
+        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints );
+        void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints );
+        void PopulateSomeThings( PatternLink link,
+                                 const set<Agent *> &master_agents );
         void DetermineKeyersModuloMatchAny( PatternLink plink,
                                             set<Agent *> *master_agents,
                                             set<Agent *> *match_any_agents );

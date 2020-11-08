@@ -21,7 +21,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-#define USE_SOLVER
+//#define USE_SOLVER
 
 using namespace SR;
 
@@ -49,17 +49,15 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
             
     my_normal_agents = SetDifference( normal_agents, master_agents );       
     if( my_normal_agents.empty() ) 
-        return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
+        return;  // Early-out on trivial problems
 
     set<Agent *> surrounding_agents = SetUnion( master_agents, my_normal_agents );         
     CreateSubordniateEngines( normal_agents, surrounding_agents );    
         
-    master_boundary_agents.clear();    
-    master_boundary_links.clear();
     reached_agents.clear();
     reached_links.clear();
-    PopulateForSolver( root_plink, 
-                       master_agents );
+    PopulateSomeThings( root_plink, 
+                        master_agents );
 
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
@@ -67,6 +65,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
         
 #ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
+    CreateMyConstraints(constraints);
+    CreateCSPSolver(constraints);
+#else
+    conj = make_shared<Conjecture>(my_normal_agents, root_agent);
+#endif                      
+}
+
+
+void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints )
+{
     set<Agent *> check_we_got_the_right_agents;
     for( PatternLink constraint_link : my_normal_links )
     {        
@@ -77,16 +85,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
         ASSERT( check_we_got_the_right_agents.count( constraint_link.GetChildAgent() ) == 0 );
         check_we_got_the_right_agents.insert( constraint_link.GetChildAgent() );            
             
-        CSP::VariableQueryLambda vql = [&](PatternLink link) -> CSP::VariableFlags
+        CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink link) -> CSP::SystemicConstraint::VariableFlags
         {
-            CSP::VariableFlags flags;
+            CSP::SystemicConstraint::VariableFlags flags;
                                   
             if( link == root_plink ) // Root variable will be forced
-                flags.freedom = CSP::Freedom::FORCED;
+                flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
             else if( master_boundary_links.count(link) > 0) // Couplings to master are forced
-                flags.freedom = CSP::Freedom::FORCED;
+                flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
             else
-                flags.freedom = CSP::Freedom::FREE;
+                flags.freedom = CSP::SystemicConstraint::Freedom::FREE;
             
             return flags;            
         };
@@ -97,13 +105,20 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
             if( residual_plink.GetChildAgent() == constraint_link.GetChildAgent() )
                 current_residual_plinks.insert( residual_plink );
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_link, current_residual_plinks, vql );
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_link, 
+                                                                              current_residual_plinks, 
+                                                                              CSP::SystemicConstraint::Action::FULL,
+                                                                              vql );
         my_constraints[constraint_link] = c;    
         constraints.push_back(c);
     }
 
     ASSERT( check_we_got_the_right_agents == my_normal_agents );
+}
 
+
+void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints )
+{
     // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
     // take the same route we do with DecidedCompare(). Need to remove FORCED agents
     // though.
@@ -116,14 +131,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     }
     auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_links_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
-#else
-    conj = make_shared<Conjecture>(my_normal_agents, root_agent);
-#endif                      
 }
 
 
-void AndRuleEngine::Plan::PopulateForSolver( PatternLink link,
-                                             const set<Agent *> &master_agents )
+void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
+                                              const set<Agent *> &master_agents )
 {
     if( reached_links.count(link) > 0 )    
         return; 
@@ -149,7 +161,7 @@ void AndRuleEngine::Plan::PopulateForSolver( PatternLink link,
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
     {
-        PopulateForSolver( link, master_agents );        
+        PopulateSomeThings( link, master_agents );        
         
         // Note: here, we won't see root if root is a master agent (i.e. trivial pattern)
         if( master_boundary_agents.count( link.GetChildAgent() ) )

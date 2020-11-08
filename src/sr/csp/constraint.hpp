@@ -20,32 +20,8 @@ class BooleanEvaluator;
 
 namespace CSP
 { 
-/**
- * Embed the assumption that variables are simply 1:1 with agents. Note
- * that this class will _always_ take and Agent * in its constructor, 
- * because that's what "systemic constraint" means - and so the constructor
- * takes Agent * explicitly. But the variables could change, so we 
- * introduce a typedef for them.
- */
-
-enum class Freedom
-{
-    FORCED,
-    FREE
-};
-
-
 typedef SR::XLink Value;
 typedef SR::PatternLink VariableId;
-
-struct VariableFlags
-{
-    // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
-    Freedom freedom;
-};
-
-
-typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
 
 void CheckLocalMatch( VariableId variable, Value value );
 

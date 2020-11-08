@@ -8,9 +8,11 @@ using namespace CSP;
 
 SystemicConstraint::Plan::Plan( SR::PatternLink keyer_plink_, 
                                 set<SR::PatternLink> residual_plinks_,
+                                Action action_,
                                 VariableQueryLambda vql ) :
     keyer_plink( keyer_plink_ ),
     residual_plinks( residual_plinks_ ),
+    action( action_ ),
     agent( keyer_plink.GetChildAgent() ),
     pq( agent->GetPatternQuery() )
 {
@@ -28,8 +30,9 @@ SystemicConstraint::Plan::Plan( SR::PatternLink keyer_plink_,
 
 SystemicConstraint::SystemicConstraint( SR::PatternLink keyer_plink, 
                                         set<SR::PatternLink> residual_plinks,
+                                        Action action,
                                         VariableQueryLambda vql ) :
-    plan( keyer_plink, residual_plinks, vql )
+    plan( keyer_plink, residual_plinks, action, vql )
 {
 }
 
@@ -180,22 +183,28 @@ bool SystemicConstraint::Test( list< Value > values )
         }
     }    
 
-    // First check any coupling at this pattern node
-    plan.agent->CouplingQuery( coupling_links );
-
-    // Use a normal-linked query on our underlying agent
-    shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
     try
     {
-        plan.agent->RunNormalLinkedQuery( query, x, required_links );      
+        if( plan.action==Action::FULL || plan.action==Action::COUPLING )
+        {
+            // First check any coupling at this pattern node
+            plan.agent->CouplingQuery( coupling_links );
+        }
+              
+        if( plan.action==Action::FULL )
+        {
+            // Use a normal-linked query on our underlying agent   
+            shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
+            plan.agent->RunNormalLinkedQuery( query, x, required_links );      
+        }
+
+        return true;
     }
     catch( ::Mismatch & )
     {
-        // RunNormalLinkedQuery() couldn't match.
+        // CouplingQuery() or RunNormalLinkedQuery() couldn't match.
         return false; 
     }               
-
-    return true;
 }
 
 
