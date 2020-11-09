@@ -54,7 +54,8 @@ public:
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const = 0;            
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
-                                                                           
+    virtual void ExpandDomain( set<XLink> &domain ) = 0;
+
     virtual CouplingKey GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
@@ -91,6 +92,7 @@ public:
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
     virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
+    virtual void ExpandDomain( set<XLink> &domain ) { /* implement in agents that can expand the domain */ }
 
 protected:
     void SetKey( CouplingKey x );

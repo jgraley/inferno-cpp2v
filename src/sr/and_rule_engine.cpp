@@ -63,17 +63,22 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
         
-#ifdef USE_SOLVER    
-    CreateMyConstraints();
-    CreateMasterCouplingConstraints();
-    CreateCSPSolver();
+#ifdef USE_SOLVER   
+    {
+        list< shared_ptr<CSP::Constraint> > constraints_list;
+        CreateMyConstraints(constraints_list);
+        CreateMasterCouplingConstraints(constraints_list);
+        CreateCSPSolver(constraints_list);
+        // Note: constraints_list drops out of scope and discards its 
+        // references; only constraints held onto by solver will remain.
+    }
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
 #endif                      
 }
 
 
-void AndRuleEngine::Plan::CreateMyConstraints()
+void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     set<Agent *> check_we_got_the_right_agents;
     for( PatternLink keyer_plink : coupling_keyer_links )
@@ -104,14 +109,14 @@ void AndRuleEngine::Plan::CreateMyConstraints()
                                                                               residual_plinks, 
                                                                               CSP::SystemicConstraint::Action::FULL,
                                                                               vql );
-        my_constraints[keyer_plink] = c;    
+        constraints_list.push_back(c);    
     }
 
     ASSERT( check_we_got_the_right_agents == my_normal_agents );
 }
 
 
-void AndRuleEngine::Plan::CreateMasterCouplingConstraints()
+void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
@@ -137,17 +142,13 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints()
                                                                               residual_plinks, 
                                                                               CSP::SystemicConstraint::Action::COUPLING,
                                                                               vql );
-        my_constraints[keyer_plink] = c;    
+        constraints_list.push_back(c);    
     }
 }
 
 
-void AndRuleEngine::Plan::CreateCSPSolver()
-{    
-    list< shared_ptr<CSP::Constraint> > constraints;
-    for( auto p : my_constraints )
-        constraints.push_back( p.second );
-    
+void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list )
+{       
     // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
     // take the same route we do with DecidedCompare(). Need to remove FORCED agents
     // though.
@@ -157,7 +158,7 @@ void AndRuleEngine::Plan::CreateCSPSolver()
         if( link != root_plink )
             free_normal_links_ordered.push_back( link );
     }
-    auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_links_ordered);
+    auto salg = make_shared<CSP::SimpleSolver>(constraints_list, &free_normal_links_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
 }
 
@@ -369,10 +370,9 @@ void AndRuleEngine::ExpandDomain( set< XLink > &domain )
     // transformations occur in parent-then-child order. That's why this 
     // part is here and not in the CSP stuff: it exploits knowlege of 
     // the directedenss of the pattern trees.
-    for( PatternLink link : plan.normal_links_ordered )
-        if( plan.my_constraints.count(link) > 0 &&  // residual links don't have constraints
-            plan.master_boundary_agents.count(link.GetChildAgent()) == 0 ) // effectively a residual
-            plan.my_constraints.at(link)->ExpandDomain( domain );  
+  //  for( PatternLink link : plan.normal_links_ordered )
+  //      if( plan.coupling_keyer_links.count(link) > 0 )  // residual links don't have constraints
+  //          plink.GetChildAgent()->ExpandDomain( domain );  
 }
 
 
@@ -397,38 +397,25 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
-    // Tell all the constraints about the forces
-    for( pair< PatternLink, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
-        p.second->SetForces( master_and_root_links );
-        
     // Expand the domain to include generated child y nodes.
     ExpandDomain( domain );
     
-    plan.solver->Start( domain );
+    plan.solver->Start( domain, master_and_root_links );
 }
 
 
 void AndRuleEngine::GetNextCSPSolution()
 {
-    map< shared_ptr<CSP::Constraint>, list< XLink > > values;
-    bool match = plan.solver->GetNextSolution( &values );        
+    SolutionMap csp_solution;
+    bool match = plan.solver->GetNextSolution( &csp_solution );        
     if( !match )
         throw NoSolution();
-    TRACEC("GetNextCSPSolution()\n");
+    TRACE("GetNextCSPSolution()\n");
 
     // Recreate my_coupling_keys
-    for( pair< PatternLink, shared_ptr<CSP::Constraint> > lcp : plan.my_constraints )
+    for( pair< PatternLink, XLink > pxp : csp_solution )
     {
-        list< PatternLink > vars = lcp.second->GetFreeVariables();
-        list< XLink > &vals = values.at(lcp.second);
-        auto vvzip = Zip(vars, vals); // TODO LocatedLink::Zip() -> list<LocatedLink>?
-
-        // Don't bother with the "self" link
-        if( lcp.first != plan.root_plink ) 
-            vvzip.pop_front();
-
-        for( auto vvp : vvzip ) 
-            RecordLink( LocatedLink(vvp) );                        
+        RecordLink( LocatedLink(pxp) );                        
     }
 }
 

@@ -61,7 +61,7 @@ public:
     virtual void SetForces( const map<VariableId, Value> &forces ) = 0;    
     
     /**
-     * Test a list of variable values for inclusion in the constraint.
+     * Test a list of free variable values for inclusion in the constraint.
      * 
      * @param values [in] the values of the variables, size should be the degree.
      * @param side_info [out] information relating to abnormal contexts etc, only defined if true is returned.
@@ -70,15 +70,6 @@ public:
      * @retval false the values are not in the constraint
      */
     virtual bool Test( list< Value > values ) = 0;        
-
-    /**
-     * Given a set of possible values for variable 0, expand the domain
-     * to include all possible values for the other variables. This permits
-     * "local links" to appear in the domain.
-     *
-     * @param domain [inout] The domain to expand
-     */
-    void ExpandDomain( set< Value > &domain ) { /* not yet implemented */ }
 };
 
 };

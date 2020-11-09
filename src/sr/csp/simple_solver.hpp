@@ -33,7 +33,9 @@ public:
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
                   const list<VariableId> *variables = nullptr );
 
-    void Run( ReportageObserver *holder, const set<Value> &initial_domain );
+    void Run( ReportageObserver *holder, 
+              const set<Value> &initial_domain,
+              const Assignments &forces );
 
 private:
     const struct Plan
@@ -46,12 +48,9 @@ private:
         list<VariableId> variables;
     } plan;
 
-    typedef map<VariableId, Value> Assignments;
-
     bool TryVariable( list<VariableId>::const_iterator current );
     bool Test( const Assignments &assigns );
     list<Value> GetValuesForConstraint( shared_ptr<Constraint> c, const Assignments &a );    
-    void ReportSolution( const Assignments &assignments );
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();

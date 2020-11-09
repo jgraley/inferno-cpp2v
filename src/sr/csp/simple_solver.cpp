@@ -82,12 +82,18 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
 }
                         
 
-void SimpleSolver::Run( ReportageObserver *holder_, const set< Value > &initial_domain_ )
+void SimpleSolver::Run( ReportageObserver *holder_, 
+                        const set< Value > &initial_domain_,
+                        const Assignments &forces )
 {
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
     initial_domain = initial_domain_;
 
+    // Tell all the constraints about the forces
+    for( shared_ptr<CSP::Constraint> c : plan.constraints )
+        c->SetForces( forces );
+        
     assignments.clear();
     
 #ifdef TRACK_BEST_ASSIGNMENT    
@@ -100,7 +106,7 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< Value > &initial_
         // TODO re-organise (and rename) TryVariable() so we don't need this bit
         bool ok = Test( assignments );
         if( ok )
-            ReportSolution( assignments );
+            holder->ReportSolution( assignments );
     }
     else
     {
@@ -147,7 +153,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 #endif
         
         if( complete )
-            ReportSolution( assignments );
+            holder->ReportSolution( assignments );
         else
             TryVariable( next );
     }
@@ -198,23 +204,6 @@ list<Value> SimpleSolver::GetValuesForConstraint( shared_ptr<Constraint> c, cons
     }    
     return vals;
 }
-
-
-void SimpleSolver::ReportSolution( const Assignments &assignments )
-{
-    map< shared_ptr<Constraint>, list< Value > > vals;
-    vals.clear();
-    for( shared_ptr<Constraint> c : plan.constraints )
-    {
-        vals[c] = GetValuesForConstraint(c, assignments);
-        ASSERT( vals.at(c).size() == c->GetFreeDegree() )
-              ("Incomplete assignment of ")(c)("\n")
-              ("vals=")(vals.at(c))("\n")
-              ("free degree = %d\n", c->GetFreeDegree());
-    }
-    
-    holder->ReportSolution( vals );
-}                     
 
 
 void SimpleSolver::TraceProblem() const

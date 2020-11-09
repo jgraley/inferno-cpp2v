@@ -14,25 +14,26 @@ SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
 }
 
 
-void SolverHolder::Start( const set<Value> &initial_domain_ )
+void SolverHolder::Start( const set<Value> &initial_domain, 
+                          const Solver::Assignments &forces )
 {
-    matches.clear();
-    solver->Run( this, initial_domain_ );
+    solutions_queue.clear();
+    solver->Run( this, initial_domain, forces);
 }
 
 
-void SolverHolder::ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values )
+void SolverHolder::ReportSolution( const Solver::Solution &solution )
 {
-    matches.push_back( values );
+    solutions_queue.push_back( solution );
 }
 
 
-bool SolverHolder::GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values )
+bool SolverHolder::GetNextSolution( Solver::Solution *solution )
 {
-    if( matches.empty() )
+    if( solutions_queue.empty() )
         return false;
-    if( values )
-        *values = matches.front();
-    matches.pop_front();
+    if( solution )
+        *solution = solutions_queue.front();
+    solutions_queue.pop_front();
     return true;
 }

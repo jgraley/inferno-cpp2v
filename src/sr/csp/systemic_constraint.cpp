@@ -93,7 +93,6 @@ void SystemicConstraint::TraceProblem() const
 void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_map )
 {
     forces.clear();
-    TraceProblem();
     for( auto var : plan.all_variables )
     {
         switch( var.flags.freedom )

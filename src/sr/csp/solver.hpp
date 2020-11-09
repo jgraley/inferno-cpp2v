@@ -25,6 +25,8 @@ class SolverHolderReportInterface;
 class Solver : public Traceable
 {
 public:
+    typedef map<VariableId, Value> Assignments;
+    typedef Assignments Solution;
     /**
      * Interface presented to Solver objects for discovered solution reportage.
      */    
@@ -38,7 +40,7 @@ public:
          * 
          * @param side_info [in] side-information as required by the `AndRuleEngine` in order to make use of the solution.
          */
-        virtual void ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values ) = 0;
+        virtual void ReportSolution( const Solution &solution ) = 0;
     }; 
     
     /** Create a solver object.
@@ -71,7 +73,8 @@ public:
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
     virtual void Run( ReportageObserver *holder, 
-                      const set<Value> &initial_domain ) = 0;
+                      const set<Value> &initial_domain,
+                      const Assignments &forces ) = 0;
 };
 
 };
