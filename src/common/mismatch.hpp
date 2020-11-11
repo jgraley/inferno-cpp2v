@@ -6,8 +6,11 @@
 #include <exception>
 	
 // This is just an interface for mismatch exceptions. They should
-// be subclassed inside each class that throws them. To throw outside 
-// of a call to Engine::Compare() is an error.
+// be subclassed inside each class that throws them. 
+// - Inside the SearchReplace algos, this is simply an indication 
+//   that the current compare oprtation mismatched.
+// - In tree helper utilities, it is an error indicating the 
+//   operation could not be completed.
 class Mismatch : public exception
 {
 public:    

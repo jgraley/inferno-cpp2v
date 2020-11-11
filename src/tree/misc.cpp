@@ -35,7 +35,8 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
             if( id == GetIdentifier( d ) )
 	            return d;
 	}
-	ASSERTFAIL();
+    
+	throw TypeDeclarationNotFound();
 }
 
 TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
@@ -48,8 +49,7 @@ TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceId
 	            return d;
 	}
 	
-	ASSERT(0)("did not find instance declaration for identifier ")(*id)("\n");
-	ASSERTFAIL("");
+	throw InstanceDeclarationNotFound();
 }
 
 GetDeclaration GetDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)

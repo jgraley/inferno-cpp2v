@@ -17,7 +17,7 @@ namespace SR
 /// but can change when replace acts to change the tree. Thus it can depend on
 /// the tree. The overall root of the tree is supplied as context to the 
 /// transformation, even when processing slaves.
-class TransformOfAgent : public virtual AgentCommon
+class TransformOfAgent : public virtual AgentCommonDomainExtender
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;

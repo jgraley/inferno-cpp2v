@@ -181,9 +181,7 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
             if( match )
                 break; // Great, the normal links matched
         }
-        catch( ::Mismatch & )
-        {
-        }
+        catch( ::Mismatch & ) {}
         
         Tracer::RAIIEnable silencer( false ); // make conjecture be quiet
         // We will get here on a mismatch, whether detected by DQ or our
@@ -390,4 +388,31 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
     }
     
     return dest;
+}
+
+
+set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( XLink x )
+{
+    set<XLink> extras;
+    Conjecture conj(this);            
+    conj.Start();
+    
+    do
+    {
+        try
+        {
+            shared_ptr<DecidedQuery> query = conj.GetQuery(this);
+            {
+                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+                RunDecidedQuery( *query, x );
+            }
+            
+            for( LocatedLink link : query->GetNormalLinks() )
+                extras.insert( (XLink)link );
+        }
+        catch( ::Mismatch & ) {}
+    }
+    while( conj.Increment() );
+    
+    return extras;
 }

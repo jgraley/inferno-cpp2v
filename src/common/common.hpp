@@ -4,6 +4,8 @@
 #include "standard.hpp"
 #include "trace.hpp"
 
+//#define SIMPLE_SET_UNION
+
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
 class AutoPush
@@ -50,9 +52,16 @@ template< typename KEY >
 inline set<KEY> SetUnion( const set<KEY> &s1, const set<KEY> &s2 )
 {
     set<KEY> result;
+#ifdef SIMPLE_SET_UNION
+    result = s1;
+    for( auto x : s2 )
+        result.insert(x);
+#else
     std::set_union( s1.begin(), s1.end(), 
                     s2.begin(), s2.end(),
                     std::inserter(result, result.end()) );
+    
+#endif
     return result; 
 }
 

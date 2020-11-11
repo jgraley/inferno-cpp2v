@@ -101,7 +101,7 @@ public:
 private:    
     typedef map< PatternLink, XLink > SolutionMap;
 
-    void ExpandDomain( set< XLink > &domain );
+    void GetDomain( XLink root_xlink );
     void StartCSPSolver( XLink root_xlink );
     void GetNextCSPSolution();
     void CompareLinks( Agent *agent,
@@ -131,6 +131,8 @@ private:
     void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
     void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
+
+    set<XLink> domain;
 
     // Keys are mapped agaist agents, even though one of the links into
     // the agent is the keyer. This is well-defined and avoids merging

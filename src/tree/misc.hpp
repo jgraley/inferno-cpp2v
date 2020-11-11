@@ -10,6 +10,12 @@ TreePtr<CPPTree::Identifier> GetIdentifier( TreePtr<CPPTree::Declaration> d );
 class GetDeclaration : public OutOfPlaceTransformation
 {
 public:
+    class TypeDeclarationNotFound : public ::Mismatch
+    {
+    };
+    class InstanceDeclarationNotFound : public ::Mismatch
+    {
+    };
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
     static GetDeclaration instance;
 private:

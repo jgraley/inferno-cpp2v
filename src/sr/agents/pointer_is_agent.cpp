@@ -28,7 +28,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                           XLink x ) const
 {
 	INDENT("@");
-    auto op = [&](XLink x) -> XLink
+    auto op = [&](XLink xlink) -> XLink
     {
 #ifdef SPIKE
 #ifdef SPIKE_MATCH
@@ -41,19 +41,28 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         return spike;	// Singular Link
 #endif
 #else   
+        TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
+        if( xlink.GetChildX() == context )
+        {
+            // Imagine that the root is pointed to by a Node pointer
+            // (in this case wit.GetCurrentParentPointer() would return NULL)
+            TreePtr<Node> node( new Node );
+            return XLink::CreateDistinct(node);	// Cache will un-distinct
+        }
         // Do a walk over context (the whole x tree)
         bool found_one_already = false;
-        Walk e( master_scr_engine->GetOverallMaster()->GetContext() ); 
+        Walk e( context ); 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
-            if( *wit == x.GetChildX() ) // found ourself TODO use find()
+            if( *wit == xlink.GetChildX() ) // found ourself TODO use find()
             {            
                 if(found_one_already)
                     throw Mismatch(); // X has multiple parents - ambiguous, so don't match
                 found_one_already = true;
                     
                 // Get the pointer that points to us
-                const TreePtrInterface *px = wit.GetCurrentParentPointer();         
+                const TreePtrInterface *px = wit.GetCurrentParentPointer();    
+                ASSERT(px);     
                 // Make an architypical node matching the pointer's type
                 TreePtr<Node> ptr_arch = px->MakeValueArchitype();
 

@@ -12,11 +12,6 @@ using namespace SR;
 // TODO pollutes client namespace
 #define BYPASS_WHEN_IDENTICAL 1
 
-/// Agents specific to the inferno C++ and SystemC trees.
-class InfernoAgent : public virtual AgentCommon
-{
-};
-
 //---------------------------------- BuildIdentifier ------------------------------------    
 
 /// Make an identifer based on an existing set, `sources` and a printf
@@ -33,7 +28,7 @@ class InfernoAgent : public virtual AgentCommon
 /// `BYPASS_WHEN_IDENTICAL` means if all the names of the source nodes are the
 /// same, that name is used. This reduces verbosity and is a good fit when
 /// in some sense you are "merging" objects with identifiers.
-struct BuildIdentifierAgent : public virtual InfernoAgent
+struct BuildIdentifierAgent : public virtual AgentCommon
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
@@ -108,7 +103,7 @@ private:
 /// a minimum due to the risk of co-incidentla unwanted matches and the 
 /// general principle that identifier names should not be important (it is
 /// the identiy proprty itself that matters with identifiers). 
-struct IdentifierByNameAgent : public virtual InfernoAgent
+struct IdentifierByNameAgent : public virtual AgentCommon
 {
     IdentifierByNameAgent( string n ) : name(n) {}
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
@@ -170,7 +165,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 /// when accessing arrays. The `terminus` is the node to be found at the end of
 /// the recursion and `depth` is a string matching the steps taken to 
 /// reach the terminus.
-struct NestedAgent : public virtual InfernoAgent
+struct NestedAgent : public virtual AgentCommonDomainExtender
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
@@ -229,7 +224,7 @@ struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
 /// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
-struct BuildContainerSizeAgent : public virtual InfernoAgent,
+struct BuildContainerSizeAgent : public virtual AgentCommon,
                                  Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
@@ -253,7 +248,7 @@ private:
 /// `IsLabelReachedAgent` matches a `LabelIdentifier` if that label is used
 /// anywhere in the expression pointed to by `pattern`.
 /// TODO generalise to more than just labels.
-struct IsLabelReachedAgent : public virtual InfernoAgent, 
+struct IsLabelReachedAgent : public virtual AgentCommon, 
                              Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	

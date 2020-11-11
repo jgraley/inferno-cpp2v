@@ -363,29 +363,46 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
 }
 
 
-void AndRuleEngine::ExpandDomain( set< XLink > &domain )
+void AndRuleEngine::GetDomain( XLink root_xlink )
 {
     INDENT("X");
+    domain.clear();
+    
+    // Put all the nodes in the X tree into the domain
+	Walk wx( root_xlink.GetChildX() ); 
+	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
+    {
+        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );
+        TRACE(xlink)("\n");
+        domain.insert( xlink );
+    }
+
+    TRACE("Initial domain: ")(domain)("\n");
+    
     // It's important that this walk hits parents first because local node 
     // transformations occur in parent-then-child order. That's why this 
     // part is here and not in the CSP stuff: it exploits knowlege of 
     // the directedenss of the pattern trees.
-  //  for( PatternLink link : plan.normal_links_ordered )
-  //      if( plan.coupling_keyer_links.count(link) > 0 )  // residual links don't have constraints
-  //          plink.GetChildAgent()->ExpandDomain( domain );  
+    for( PatternLink plink : plan.normal_links_ordered )
+    {        
+        if( plan.coupling_keyer_links.count(plink) == 0 ) 
+            continue;
+            
+        set<XLink> pattern_extra;
+        for( XLink xlink : domain )
+        {
+            set<XLink> x_extra = plink.GetChildAgent()->ExpandNormalDomain( xlink );  
+            pattern_extra = SetUnion( pattern_extra, x_extra );
+        }
+
+        TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
+        domain = SetUnion( domain, pattern_extra );
+    }
 }
 
 
 void AndRuleEngine::StartCSPSolver(XLink root_xlink)
-{
-    // Put all the nodes in the X tree into the domain
-    set< XLink > domain;
-	Walk wx( root_xlink.GetChildX() ); 
-	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-    {
-        domain.insert( XLink::FromWalkIterator( wx_it, root_xlink ) );
-    }
-        
+{    
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
     SolutionMap master_and_root_links;
@@ -397,9 +414,6 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
-    // Expand the domain to include generated child y nodes.
-    ExpandDomain( domain );
-    
     plan.solver->Start( domain, master_and_root_links );
 }
 
@@ -684,6 +698,8 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
         CompareTrivialProblem( root_link );
         return;
     }
+           
+    GetDomain( root_xlink );
            
 #ifdef USE_SOLVER
     StartCSPSolver( root_xlink );

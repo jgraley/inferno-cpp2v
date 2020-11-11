@@ -13,16 +13,17 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 
 
 void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                            XLink x ) const
+                                            XLink xlink ) const
 {
     INDENT("T");
     query.Reset();
     
-    auto op = [&](XLink x) -> XLink
+    auto op = [&](XLink xlink) -> XLink
     {
         // Transform the candidate expression, sharing the overall S&R context so that
         // things like GetDeclaration can work (they search the whole program tree).
-        TreePtr<Node> xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x.GetChildX() );
+        TreePtr<Node> x = xlink.GetChildX();
+        TreePtr<Node> xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x );
         if( xt )
         {
             // Punt it back into the search/replace engine
@@ -35,7 +36,7 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             throw Mismatch();  
         }
     };
-    query.RegisterNormalLink( PatternLink(this, &pattern), cache( x, op ) );    
+    query.RegisterNormalLink( PatternLink(this, &pattern), cache( xlink, op ) );    
 }
 
 

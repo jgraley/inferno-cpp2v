@@ -54,7 +54,7 @@ public:
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const = 0;            
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
-    virtual void ExpandDomain( set<XLink> &domain ) = 0;
+    virtual set<XLink> ExpandNormalDomain( XLink x ) = 0;
 
     virtual CouplingKey GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
@@ -92,7 +92,7 @@ public:
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
     virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
-    virtual void ExpandDomain( set<XLink> &domain ) { /* implement in agents that can expand the domain */ }
+    virtual set<XLink> ExpandNormalDomain( XLink x ) { return set<XLink>(); /* implement in agents that can expand the domain */ }
 
 protected:
     void SetKey( CouplingKey x );
@@ -131,6 +131,13 @@ public:
     virtual void AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_engine ) = 0;
     virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
 };
+
+
+class AgentCommonDomainExtender : public AgentCommon
+{
+    virtual set<XLink> ExpandNormalDomain( XLink x );
+};
+
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
 // Special nodes (that is nodes defined here with special S&R behaviour)
