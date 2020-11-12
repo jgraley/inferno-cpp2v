@@ -61,6 +61,7 @@ private:
     // Used during solve - depends on pattern and x
     set<Value> initial_domain;    
     Assignments assignments;
+    list<int> try_counts; // just for tracing
     
     // Only needed for debug output
     Assignments best_assignments;

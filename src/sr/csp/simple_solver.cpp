@@ -110,6 +110,7 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     }
     else
     {
+        try_counts.clear();
         TryVariable( plan.variables.begin() );    
     }
 
@@ -129,11 +130,13 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
     ++next;
     bool complete = (next == plan.variables.end());
     
+    try_counts.push_back(0);
     for( Value v : initial_domain )
     {
         assignments[*current] = v;
      
         bool ok = Test( assignments );
+        try_counts.back()++;
         
         if( !ok )
         {
@@ -157,6 +160,9 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
         else
             TryVariable( next );
     }
+
+    try_counts.pop_back();
+
     return false;
 }
 
@@ -226,10 +232,10 @@ void SimpleSolver::CheckLocalMatch( const Assignments &assignments, VariableId v
 
 void SimpleSolver::ShowBestAssignment()
 {
+    INDENT("B");
     if( best_assignments.empty() )
         return; // didn't get around to updating it yet
     TRACE("Best assignment assigned %d of %d variables:\n", best_assignments.size(), plan.variables.size());
-    INDENT("B");
     for( VariableId var : plan.variables )
     {
         if( best_assignments.count(var) > 0 )
@@ -256,6 +262,7 @@ void SimpleSolver::ShowBestAssignment()
             break; // later ones won't even have been tried
         }
     }
+    TRACEC("Try counts: ")(try_counts)("\n");
 }
 
 

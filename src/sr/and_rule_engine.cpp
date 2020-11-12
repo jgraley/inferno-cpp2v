@@ -377,7 +377,7 @@ void AndRuleEngine::GetDomain( XLink root_xlink )
         domain.insert( xlink );
     }
 
-    TRACE("Initial domain: ")(domain)("\n");
+    //TRACE("Initial domain: ")(domain)("\n");
     
     // It's important that this walk hits parents first because local node 
     // transformations occur in parent-then-child order. That's why this 
@@ -395,7 +395,7 @@ void AndRuleEngine::GetDomain( XLink root_xlink )
             pattern_extra = SetUnion( pattern_extra, x_extra );
         }
 
-        TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
+        //TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
         domain = SetUnion( domain, pattern_extra );
     }
 }
@@ -698,10 +698,9 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
         CompareTrivialProblem( root_link );
         return;
     }
-           
-    GetDomain( root_xlink );
-           
+                     
 #ifdef USE_SOLVER
+    GetDomain( root_xlink );
     StartCSPSolver( root_xlink );
 #else
     plan.conj->Start();
