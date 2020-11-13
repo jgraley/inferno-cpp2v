@@ -132,6 +132,7 @@ private:
     void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
+    // Global domain of possible xlink values
     set<XLink> domain;
 
     // Keys are mapped agaist agents, even though one of the links into

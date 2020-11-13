@@ -391,28 +391,30 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 }
 
 
-set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( XLink x )
+set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( set<XLink> xlinks )
 {
-    set<XLink> extras;
     Conjecture conj(this);            
-    conj.Start();
-    
-    do
+
+    set<XLink> extra;
+    for( XLink xlink : xlinks )
     {
-        try
+        conj.Start();
+        do
         {
-            shared_ptr<DecidedQuery> query = conj.GetQuery(this);
+            try
             {
-                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-                RunDecidedQuery( *query, x );
+                shared_ptr<DecidedQuery> query = conj.GetQuery(this);
+                {
+                    Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+                    RunDecidedQuery( *query, xlink );
+                }
+                
+                for( LocatedLink link : query->GetNormalLinks() )
+                    extra.insert( (XLink)link );
             }
-            
-            for( LocatedLink link : query->GetNormalLinks() )
-                extras.insert( (XLink)link );
+            catch( ::Mismatch & ) {}
         }
-        catch( ::Mismatch & ) {}
+        while( conj.Increment() );
     }
-    while( conj.Increment() );
-    
-    return extras;
+    return extra;
 }

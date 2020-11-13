@@ -388,15 +388,10 @@ void AndRuleEngine::GetDomain( XLink root_xlink )
         if( plan.coupling_keyer_links.count(plink) == 0 ) 
             continue;
             
-        set<XLink> pattern_extra;
-        for( XLink xlink : domain )
-        {
-            set<XLink> x_extra = plink.GetChildAgent()->ExpandNormalDomain( xlink );  
-            pattern_extra = SetUnion( pattern_extra, x_extra );
-        }
+        set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
 
         //TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
-        domain = SetUnion( domain, pattern_extra );
+        domain = SetUnion( domain, extra );
     }
 }
 
@@ -698,9 +693,10 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
         CompareTrivialProblem( root_link );
         return;
     }
+
+    GetDomain( root_xlink );
                      
 #ifdef USE_SOLVER
-    GetDomain( root_xlink );
     StartCSPSolver( root_xlink );
 #else
     plan.conj->Start();
