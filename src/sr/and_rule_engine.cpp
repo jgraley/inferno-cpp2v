@@ -402,6 +402,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 {    
     FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
+        ASSERT( domain->count(link) > 0 )(link)(" not found in ")(domain)(" (see issue #202)\n");
         TRACE("Comparing normal link ")(link)
              (" keyer? %d residual? %d master? %d\n", 
              plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ), 
@@ -539,21 +540,18 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
             e->Compare( xe_link, subordinate_keys, domain );
         }
     }
-    else
+    else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
     {
-        ASSERT( link );
-        ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xsc);
-        ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
-        
-        FOREACH( TreePtr<Node> xe_node, *xci )
+        for( XLink xe_link : xssl->elts )
         {
-            TRACE("Comparing ")(xe_node)("\n");
-            // TODO will erroneously create new x links that should be
-            // in domain. See #202
-            XLink xe_link = XLink::CreateDistinct(xe_node);        
+            TRACE("Comparing ")(xe_link)("\n");
             e->Compare( xe_link, subordinate_keys, domain );
         }
     }    
+    else
+    {
+        ASSERTFAIL("unrecognised SubContainer\n");
+    }
 }
 
 
@@ -571,7 +569,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     
     if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain
     {
-        //ASSERT( domain->count(base_xlink) > 0 )(base_xlink)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+        ASSERT( domain->count(base_xlink) > 0 )(base_xlink)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
     }
     for( LocatedLink link : basic_solution_links )
     {
@@ -695,6 +693,10 @@ void AndRuleEngine::Compare( XLink root_xlink,
     LocatedLink root_link( plan.root_plink, root_xlink );
 
     TRACE("Compare root ")(root_link)("\n");
+    if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain
+    {
+        ASSERT( domain->count(root_xlink) > 0 )(root_xlink)(" not found in ")(domain)(" (see issue #202)\n");
+    }
 
     if( plan.my_normal_agents.empty() )
     {

@@ -22,7 +22,7 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 
 
 void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                XLink x ) const
+                                                XLink base_xlink ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -30,15 +30,15 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(x.GetChildX().get());
+    CheckLocalMatch(base_xlink.GetChildX().get());
     
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(x)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
     // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
     // facade for the iterators and can be abandoned safely?
-    shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
+    shared_ptr<ContainerInterface> pwx = GetContainerInterface( base_xlink );
     
     if( pwx->empty() )
     {
@@ -47,10 +47,10 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( PatternLink(this, &terminus), GetXLinkFromIterator(x, thistime) ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), GetXLinkFromIterator(base_xlink, thistime) ); // Link into X
 
     // Let subclasses implement further restrictions
-    DecidedQueryRestrictions( query, thistime );
+    DecidedQueryRestrictions( query, thistime, base_xlink );
 }
 
 
@@ -75,17 +75,17 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( CouplingKey keylink )
 
 //---------------------------------- AnyNode ------------------------------------    
 
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink base_x ) const
+shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink base_xlink ) const
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new FlattenNode( base_x.GetChildX() ) );
+    return shared_ptr<ContainerInterface>( new FlattenNode( base_xlink.GetChildX() ) );
 }
 
 
-XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const
+XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const
 {
-    return XLink(base_x.GetChildX(), &*it);
+    return XLink(base_xlink.GetChildX(), &*it);
 }
 
 
@@ -108,11 +108,11 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink x ) cons
 }
 
 
-XLink StuffAgent::GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const
+XLink StuffAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const
 {
     const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(it.GetUnderlyingIterator());
     ASSERT( pwtt );
-    return XLink::FromWalkIterator( *pwtt, base_x );
+    return XLink::FromWalkIterator( *pwtt, base_xlink );
 }
 
 
@@ -123,7 +123,7 @@ void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 }
 
 
-void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime ) const
+void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const
 {
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.
@@ -136,8 +136,12 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         ASSERT(pwtt)("Failed to get Walk::iterator out of the decision iterator");    
 
         // Check all the nodes that we recursed through in order to get here
-        FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
-            xpr_ss->push_back( n );
+        for( pair<TreePtr<Node>, const TreePtrInterface *> p : pwtt->GetCurrentPath() )
+        {
+            xpr_ss->push_back( p.first );
+            xpr_ss->elts.push_back( p.second ? XLink(p.first, p.second) : base_xlink );
+            TRACE("DQR ")(p.first)(" ")(p.second)("\n");
+        }
 
         XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
         query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X     

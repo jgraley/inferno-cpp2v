@@ -22,13 +22,13 @@ private:
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+                                      XLink base_xlink ) const;                  
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const = 0;
-    virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const = 0;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const = 0;
+    virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
-    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime ) const {};
+    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const {};
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
@@ -42,7 +42,7 @@ public:
 class AnyNodeAgent : public SearchContainerAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const;
-    virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const;
+    virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 };
 
@@ -77,9 +77,9 @@ class StuffAgent : public SearchContainerAgent
 {
 public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const;
-    virtual XLink GetXLinkFromIterator( XLink base_x, ContainerInterface::iterator it ) const;
+    virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
-    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime ) const;
+    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };
