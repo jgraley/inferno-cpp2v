@@ -20,6 +20,9 @@ struct SubContainer : Node // TODO #69
 };
 
 
+// This kind of subcontainer carries a range (begin/end pair) on the 
+// parent X node's container, as well as a pointer to the parent. This
+// is sufficient to enable the correct XLinks to be built when needed.
 struct SubContainerRange : SubContainer
 {    
     NODE_FUNCTIONS
@@ -57,6 +60,8 @@ public:
 };
 
 
+// This kind of subcontainer stores all the XLinks for retrieval later
+// TODO no need for Sequence<Node> any more I believe
 struct SubContainerLinks : SubContainer
 {    
     NODE_FUNCTIONS
