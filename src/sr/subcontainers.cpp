@@ -1,0 +1,32 @@
+#include "subcontainers.hpp"
+
+#include "common/common.hpp"
+#include "helpers/walk.hpp"
+#include "helpers/transformation.hpp"
+#include "node/node.hpp"    
+#include "link.hpp"    
+    
+using namespace SR;    
+    
+
+
+SubSequenceRange::SubSequenceRange( TreePtr<Node> parent_x, iterator &b, iterator &e ) : 
+    SubContainerRange( parent_x ),
+    my_begin(b.Clone()), 
+    my_end(e.Clone())
+{           
+    if( !(*my_begin == *my_end) )
+        EnsureNotOnStack( &*(*my_begin) );
+}
+
+
+const SubSequenceRange::iterator_interface &SubSequenceRange::begin() 
+{ 
+    return *my_begin; 
+}
+
+
+const SubSequenceRange::iterator_interface &SubSequenceRange::end()
+{
+    return *my_end; 
+}

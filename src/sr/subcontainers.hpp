@@ -8,7 +8,7 @@
 namespace SR
 {
     
-// Internal node classes - NOTE these are not agents, they are local X nodes
+// Internal node classes - NOTE these are not agents, they are local tree nodes
 
 struct SubContainer : Node // TODO #69
 {
@@ -16,8 +16,26 @@ struct SubContainer : Node // TODO #69
 };
 
 
+struct SubContainerRange : SubContainer
+{    
+    NODE_FUNCTIONS
+    
+    SubContainerRange( TreePtr<Node> parent_x_ = nullptr ) :
+        parent_x( parent_x_ )
+    {
+    }
+    
+    TreePtr<Node> GetParentX()
+    {
+        return parent_x;
+    }
+    
+    TreePtr<Node> parent_x;
+};
+
+
 struct SubSequenceRange : SequenceInterface,
-                          SubContainer
+                          SubContainerRange
 {
     NODE_FUNCTIONS_FINAL 
 
@@ -25,11 +43,9 @@ struct SubSequenceRange : SequenceInterface,
     shared_ptr<iterator_interface> my_begin;
     shared_ptr<iterator_interface> my_end;
 public:
-    SubSequenceRange( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
-    {           
-    }
-    virtual const iterator_interface &begin() { return *my_begin; }
-    virtual const iterator_interface &end()   { return *my_end; }
+    SubSequenceRange( TreePtr<Node> parent_x, iterator &b, iterator &e );
+    virtual const iterator_interface &begin();
+    virtual const iterator_interface &end();
     virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubSequenceRange"); }
     virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
     virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }

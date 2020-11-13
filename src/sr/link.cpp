@@ -12,12 +12,6 @@ using namespace SR;
 #define WHODAT() nullptr
 #endif
  
-void EnsureNotOnStack( const TreePtrInterface *p )
-{
-    ASSERT( (((uint64_t)p & 0x7fff00000000ULL) != 0x7fff00000000ULL) )
-          ("Supplied link ")(p)(" seems like it's probably on the stack, usually a bad sign\n");
-}
-
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink()
@@ -33,10 +27,10 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
                          void *whodat_) :
     asp_pattern( parent_pattern, ppattern )
 {
-    EnsureNotOnStack( ppattern );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif    
+    EnsureNotOnStack( ppattern, GetTrace() );
 }
 
 
@@ -153,10 +147,10 @@ XLink::XLink( shared_ptr<const Node> parent_x,
 {
     ASSERT(asp_x);
     ASSERT(*asp_x);
-
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
+    EnsureNotOnStack( px, GetTrace() );
 }
 
 
@@ -378,3 +372,11 @@ list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks,
     }
     return llinks;
 }                                      
+
+
+void SR::EnsureNotOnStack( const void *p, string trace )
+{
+    ASSERT( (((uint64_t)p & 0x7f0000000000ULL) != 0x7f0000000000ULL) )
+          ("Constructing ")(trace)("\nSupplied pointer %p seems like it's probably on the stack, usually a bad sign\n", p);
+}
+

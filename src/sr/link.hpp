@@ -115,6 +115,7 @@ private: friend class PatternLink; friend class XLink;
 
 list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
                                       const map< PatternLink, XLink > &keys );
+void EnsureNotOnStack( const void *p, string trace="" );
 
 typedef XLink CouplingKey;
 typedef map< Agent *, CouplingKey > CouplingKeysMap;

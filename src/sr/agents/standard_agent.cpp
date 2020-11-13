@@ -191,7 +191,7 @@ void StandardAgent::DecidedQuerySequence( XLink base_x,
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
-            TreePtr<SubSequenceRange> xss( new SubSequenceRange( xit, xit_star_end ) );
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_x.GetChildX(), xit, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction

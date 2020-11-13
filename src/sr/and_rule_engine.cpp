@@ -11,6 +11,7 @@
 #include "agents/standard_agent.hpp"
 #include "agents/overlay_agent.hpp"
 #include "agents/search_container_agent.hpp"
+#include "agents/star_agent.hpp"
 #include "common/common.hpp"
 #include "agents/match_any_agent.hpp"
 #include "link.hpp"
@@ -515,35 +516,58 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
     shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at( (PatternLink)link );
     TRACE("Checking multiplicity ")(link)("\n");
         
-    ASSERT( link );
-    ContainerInterface *xc = dynamic_cast<ContainerInterface *>(link.GetChildX().get());
-    ASSERT(xc)("Multiplicity x must implement ContainerInterface");
+    auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() );
     
-    FOREACH( TreePtr<Node> xe_node, *xc )
+    if( auto xscr = dynamic_cast<SubContainerRange *>(xsc) )
     {
-        TRACE("Comparing ")(xe_node)("\n");
-        XLink xe_link = XLink::CreateDistinct(xe_node);
-        e->Compare( xe_link, subordinate_keys, domain );
+        ASSERT( link );
+        ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
+        ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
+        
+        FOREACH( const TreePtrInterface &xe_node, *xci )
+        {
+            TRACE("Comparing ")(xe_node)("\n");
+            XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
+            e->Compare( xe_link, subordinate_keys, domain );
+        }
     }
+    else
+    {
+        ASSERT( link );
+        ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xsc);
+        ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
+        
+        FOREACH( TreePtr<Node> xe_node, *xci )
+        {
+            TRACE("Comparing ")(xe_node)("\n");
+            // TODO will erroneously create new x links that should be
+            // in domain. See #202
+            XLink xe_link = XLink::CreateDistinct(xe_node);        
+            e->Compare( xe_link, subordinate_keys, domain );
+        }
+    }    
 }
 
 
 void AndRuleEngine::RegenerationPassAgent( Agent *agent,
-                                           XLink xlink,
+                                           XLink base_xlink,
                                            const CouplingKeysMap &subordinate_keys )
 {
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
-    TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(xlink)("\n");    
+    TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(base_xlink)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
     TRACEC("My solution ")(basic_solution)("\n");    
-    list<LocatedLink> links_from_solution = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
-    TRACEC("Relocating using links ")(links_from_solution)("\n");    
+    list<LocatedLink> basic_solution_links = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
+    TRACEC("Relocating using links ")(basic_solution_links)("\n");    
     
-    for( LocatedLink link : links_from_solution )
+    if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain
     {
-        XLink xlink = (XLink)link;
-        //ASSERT( domain->count(xlink) > 0 )(xlink)(" not found in ")(domain)("\n");
+        //ASSERT( domain->count(base_xlink) > 0 )(base_xlink)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+    }
+    for( LocatedLink link : basic_solution_links )
+    {
+        ASSERT( domain->count((XLink)link) > 0 )((XLink)link)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
     }
     
     // We will need a conjecture, so that we can iterate through multiple 
@@ -557,7 +581,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     {
         // Query the agent: our conj will be used for the iteration and
         // therefore our query will hold the result 
-        agent->ResumeNormalLinkedQuery( conj, xlink, links_from_solution );
+        agent->ResumeNormalLinkedQuery( conj, base_xlink, basic_solution_links );
         i++;
 
         try

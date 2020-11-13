@@ -43,8 +43,8 @@ struct TreePtr;
 struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 {
     // Convert to and from shared_ptr<VALUE_INTERFACE> and TreePtr<VALUE_INTERFACE>
-	virtual operator shared_ptr<Node>() const = 0;
-	virtual operator TreePtr<Node>() const = 0;
+	virtual operator shared_ptr<Node>() const = 0; // TODO dangerous; see #201
+	virtual operator TreePtr<Node>() const = 0; // TODO dangerous; see #201
 
     virtual operator bool() const = 0; // for testing against nullptr
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
