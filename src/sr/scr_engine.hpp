@@ -62,14 +62,13 @@ private:
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
 public:
-    void GatherCouplings( CouplingKeysMap *coupling_keys ) const;
-    int RepeatingCompareReplace( TreePtr<Node> *proot,
-                                 const CouplingKeysMap *master_keys );
-    
-    void SingleCompareReplace( TreePtr<Node> *proot,
+    void GatherCouplings( CouplingKeysMap *coupling_keys ) const;    
+    void ExtendDomain( PatternLink plink, set<XLink> &domain );
+    set<XLink> DetermineDomain( XLink root_xlink );
+    void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                const CouplingKeysMap *master_keys );
-    void Compare( TreePtr<Node> root_xnode );
-
+    int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
+                                 const CouplingKeysMap *master_keys );                              
 private:
     void KeyReplaceNodes( const CouplingKeysMap *coupling_keys) const;
     TreePtr<Node> Replace() const;

@@ -14,6 +14,7 @@
 #include <list>
 
 //#define CANNONICALISE
+#define GET_DOMAIN
 
 using namespace SR;
 using namespace std;
@@ -209,13 +210,6 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
     }
 }
 
-// This one operates from root for a stand-alone compare operation and
-// no master keys.
-void SCREngine::Compare( TreePtr<Node> root_xnode )
-{
-    plan.and_rule_engine->Compare( root_xnode );
-}
-
 
 void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
 {
@@ -249,21 +243,76 @@ void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 }
 
 
-void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
+void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
+{
+    set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
+    //TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
+    domain = SetUnion( domain, extra );
+    
+    // Extend locally first and then pass that into children.
+    // Visit couplings repeatedly TODO union over couplings and
+    // only recurse on last reaching.
+    
+    auto pq = plink.GetChildAgent()->GetPatternQuery();    
+    for( PatternLink child_plink : pq->GetNormalLinks() )
+    {
+        ExtendDomain( child_plink, domain );
+    }
+}
+
+
+set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
+{
+    INDENT("X");
+    set<XLink> domain;
+    
+    // Put all the nodes in the X tree into the domain
+	Walk wx( root_xlink.GetChildX() ); 
+	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
+    {
+        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );
+        TRACE(xlink)("\n");
+        domain.insert( xlink );
+    }
+
+    //TRACE("Initial domain: ")(domain)("\n");
+    int is = domain.size();
+    ExtendDomain( plan.root_plink, domain );
+    int es = domain.size();
+    
+    //TRACE("Extended domain: ")(domain)("\n");
+    if( es > is )
+    {
+        //FTRACE("Domain size %d -> %d\n", is, es);
+    }
+    return domain;
+}
+
+
+void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                       const CouplingKeysMap *master_keys ) 
 {
     INDENT(">");
-    TRACE("Cannonicalise\n");
 
 #ifdef CANNONICALISE
     Cannonicaliser cz;
-    cz( *p_root, p_root );
+    TRACE("Cannonicalise\n");
+    cz( *p_root_xnode, p_root_xnode );
+#endif
+
+    // Cannonicalise could change root
+    XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
+
+    // Global domain of possible xlink values
+    set<XLink> domain;
+#ifdef GET_DOMAIN
+    domain = DetermineDomain( root_xlink );
 #endif
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    plan.and_rule_engine->Compare( *p_root, master_keys );
+    plan.and_rule_engine->Compare( root_xlink, master_keys, &domain );
            
     TRACE("Search successful, now keying replace nodes\n");
     plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
@@ -272,14 +321,14 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     if( !plan.my_engines.empty() )
     {
 		CouplingKeysMap coupling_keys = MapUnion( *master_keys, 
-                                              plan.and_rule_engine->GetCouplingKeys() );    
+                                                  plan.and_rule_engine->GetCouplingKeys() );    
 		
         for( const pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );
 	}
 
     TRACE("Now replacing\n");
-    *p_root = Replace();
+    *p_root_xnode = Replace();
     
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, *plan.my_agents )
@@ -291,7 +340,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
+int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                         const CouplingKeysMap *master_keys )
 {
     INDENT("}");
@@ -309,7 +358,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
-            SingleCompareReplace( proot, master_keys );
+            SingleCompareReplace( p_root_xnode, master_keys );
         }
         catch( ::Mismatch )
         {

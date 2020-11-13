@@ -363,39 +363,6 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
 }
 
 
-void AndRuleEngine::GetDomain( XLink root_xlink )
-{
-    INDENT("X");
-    domain.clear();
-    
-    // Put all the nodes in the X tree into the domain
-	Walk wx( root_xlink.GetChildX() ); 
-	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-    {
-        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );
-        TRACE(xlink)("\n");
-        domain.insert( xlink );
-    }
-
-    //TRACE("Initial domain: ")(domain)("\n");
-    
-    // It's important that this walk hits parents first because local node 
-    // transformations occur in parent-then-child order. That's why this 
-    // part is here and not in the CSP stuff: it exploits knowlege of 
-    // the directedenss of the pattern trees.
-    for( PatternLink plink : plan.normal_links_ordered )
-    {        
-        if( plan.coupling_keyer_links.count(plink) == 0 ) 
-            continue;
-            
-        set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
-
-        //TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
-        domain = SetUnion( domain, extra );
-    }
-}
-
-
 void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 {    
     // Determine the full set of forces 
@@ -409,7 +376,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
-    plan.solver->Start( domain, master_and_root_links );
+    plan.solver->Start( *domain, master_and_root_links );
 }
 
 
@@ -521,7 +488,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            e->Compare( xlink.GetChildX(), subordinate_keys );
+            e->Compare( xlink, subordinate_keys, domain );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -555,7 +522,8 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
     FOREACH( TreePtr<Node> xe_node, *xc )
     {
         TRACE("Comparing ")(xe_node)("\n");
-        e->Compare( xe_node, subordinate_keys );
+        XLink xe_link = XLink::CreateDistinct(xe_node);
+        e->Compare( xe_link, subordinate_keys, domain );
     }
 }
 
@@ -604,7 +572,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    e->Compare( link.GetChildX(), &subordinate_keys );
+                    e->Compare( link, &subordinate_keys, domain );
                     
                     // Replace needs these keys
                     KeyCoupling( provisional_external_keys, link );
@@ -675,26 +643,26 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
-void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
-                             const CouplingKeysMap *master_keys_ )
+void AndRuleEngine::Compare( XLink root_xlink,
+                             const CouplingKeysMap *master_keys_,
+                             set<XLink> *domain_ )
 {
     INDENT("C");
-    ASSERT( root_xnode );
-    TRACE("Compare x=")(root_xnode)(" pattern=")(plan.root_plink)("\n");
+    ASSERT( root_xlink );
            
     master_keys = master_keys_;    
+    domain = domain_;
     
     // distinct OK because this only runs once per solve
-    XLink root_xlink = XLink::CreateDistinct(root_xnode);
     LocatedLink root_link( plan.root_plink, root_xlink );
+
+    TRACE("Compare root ")(root_link)("\n");
 
     if( plan.my_normal_agents.empty() )
     {
         CompareTrivialProblem( root_link );
         return;
     }
-
-    GetDomain( root_xlink );
                      
 #ifdef USE_SOLVER
     StartCSPSolver( root_xlink );
@@ -763,8 +731,10 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode,
 // no master keys.
 void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
-    CouplingKeysMap master_keys;
-    Compare( root_xnode, &master_keys );
+    CouplingKeysMap empty_master_keys;
+    set<XLink> empty_domain;
+    XLink root_xlink = XLink::CreateDistinct(root_xnode);
+    Compare( root_xlink, &empty_master_keys, &empty_domain );
 }
 
 
