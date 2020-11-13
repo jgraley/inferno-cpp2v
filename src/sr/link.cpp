@@ -171,7 +171,7 @@ XLink XLink::FromWalkIterator( const Walk::iterator &wit, XLink root )
     TreePtr<Node> parent_x = wit.GetCurrentParent();
     const TreePtrInterface *px = wit.GetCurrentParentPointer();
     ASSERT( root || (parent_x && px) );
-    return parent_x ? XLink( parent_x, px ) : root;    
+    return parent_x ? XLink( parent_x, px, WHODAT() ) : root;    
 }
 
               

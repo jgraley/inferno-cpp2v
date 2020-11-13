@@ -28,6 +28,8 @@ using namespace std;
 #include <map>
 #include <exception>
 	
+#define CONTAINER_SEP ",\n"    
+    
 class Tracer
 {
 public:
@@ -57,7 +59,7 @@ public:
         for( auto x : l )
         {
             if( !first )
-                operator()(", ");
+                operator()(CONTAINER_SEP);
             operator()(x);
             first = false;
         }
@@ -72,7 +74,7 @@ public:
         for( auto x : l )
         {
             if( !first )
-                operator()(", ");
+                operator()(CONTAINER_SEP);
             operator()(x);
             first = false;
         }
@@ -87,7 +89,7 @@ public:
         for( auto x : s )
         {
             if( !first )
-                operator()(", ");
+                operator()(CONTAINER_SEP);
             operator()(x);
             first = false;            
         }
@@ -102,7 +104,7 @@ public:
         for( auto x : s )
         {
             if( !first )
-                operator()(", ");
+                operator()(CONTAINER_SEP);
             operator()(x);
             first = false;            
         }
@@ -117,7 +119,7 @@ public:
         for( auto p : m )
         {
             if( !first )
-                operator()(", ");
+                operator()(CONTAINER_SEP);
             operator()(p.first);
             operator()(": ");
             operator()(p.second);

@@ -537,8 +537,14 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(xlink)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
     TRACEC("My solution ")(basic_solution)("\n");    
-    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
-    TRACEC("Relocated links ")(ll)("\n");    
+    list<LocatedLink> links_from_solution = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
+    TRACEC("Relocating using links ")(links_from_solution)("\n");    
+    
+    for( LocatedLink link : links_from_solution )
+    {
+        XLink xlink = (XLink)link;
+        //ASSERT( domain->count(xlink) > 0 )(xlink)(" not found in ")(domain)("\n");
+    }
     
     // We will need a conjecture, so that we can iterate through multiple 
     // potentially valid values for the abnormals and multiplicities.
@@ -551,7 +557,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     {
         // Query the agent: our conj will be used for the iteration and
         // therefore our query will hold the result 
-        agent->ResumeNormalLinkedQuery( conj, xlink, ll );
+        agent->ResumeNormalLinkedQuery( conj, xlink, links_from_solution );
         i++;
 
         try

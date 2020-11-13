@@ -8,7 +8,7 @@
 namespace SR
 {
     
-// Internal node classes - NOTE these are not agents, they are local tree nodes
+// Internal node classes - NOTE these are not agents, they are local X nodes
 
 struct SubContainer : Node // TODO #69
 {

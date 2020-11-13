@@ -245,16 +245,25 @@ void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 
 void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
 {
+    // Extend locally first and then pass that into children.
+
     set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
-    //TRACE("Extra domain for ")(plink)(" is ")(pattern_extra)("\n");
+    if( !extra.empty() )
+        TRACEC("Extra domain for ")(plink)(" is ")(extra)("\n");
     domain = SetUnion( domain, extra );
     
-    // Extend locally first and then pass that into children.
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.
-    
     auto pq = plink.GetChildAgent()->GetPatternQuery();    
     for( PatternLink child_plink : pq->GetNormalLinks() )
+    {
+        ExtendDomain( child_plink, domain );
+    }
+    for( PatternLink child_plink : pq->GetAbnormalLinks() )
+    {
+        ExtendDomain( child_plink, domain );
+    }
+    for( PatternLink child_plink : pq->GetMultiplicityLinks() )
     {
         ExtendDomain( child_plink, domain );
     }
@@ -264,6 +273,7 @@ void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
 set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
 {
     INDENT("X");
+    TRACE("Root is ")(root_xlink)("\n");
     set<XLink> domain;
     
     // Put all the nodes in the X tree into the domain
@@ -271,20 +281,20 @@ set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
     {
         XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );
-        TRACE(xlink)("\n");
         domain.insert( xlink );
+        TRACEC("Added ")(xlink)("\n");
     }
+    domain.insert(XLink::MMAX_Link);
 
-    //TRACE("Initial domain: ")(domain)("\n");
     int is = domain.size();
     ExtendDomain( plan.root_plink, domain );
     int es = domain.size();
     
-    //TRACE("Extended domain: ")(domain)("\n");
     if( es > is )
     {
-        //FTRACE("Domain size %d -> %d\n", is, es);
+        TRACEC("Domain size %d -> %d\n", is, es);
     }
+    
     return domain;
 }
 
