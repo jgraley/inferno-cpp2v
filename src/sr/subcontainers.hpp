@@ -4,6 +4,10 @@
 #include "common/common.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+#include "link.hpp"    
+
+#include <list>
+#include <set>
 
 namespace SR
 {
@@ -53,8 +57,14 @@ public:
 };
 
 
+struct SubContainerLinks : SubContainer
+{    
+    NODE_FUNCTIONS
+};
+
+
 struct SubSequence : Sequence<Node>,
-                     SubContainer
+                     SubContainerLinks
 {
     NODE_FUNCTIONS_FINAL 
     SubSequence &operator=( Sequence<Node> o )
@@ -62,11 +72,13 @@ struct SubSequence : Sequence<Node>,
         (void)Sequence<Node>::operator=(o);
         return *this;
     }
+
+    list<XLink> elts;
 };
 
 
-struct SubCollection : Collection<Node>,
-                       SubContainer
+struct SubCollection : Collection<Node>, 
+                       SubContainerLinks
 {
     NODE_FUNCTIONS_FINAL
     SubCollection &operator=( Collection<Node> o )
@@ -74,6 +86,8 @@ struct SubCollection : Collection<Node>,
         (void)Collection<Node>::operator=(o);
         return *this;
     }
+    
+    set<XLink> elts;
 };       
 
 };

@@ -4,7 +4,6 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "node/node.hpp"    
-#include "link.hpp"    
     
 using namespace SR;    
     

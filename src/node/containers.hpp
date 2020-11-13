@@ -265,6 +265,11 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     {
         return Impl::size();
     }
+    virtual int count( const TreePtrInterface &gx )
+    {
+		value_type sx( value_type::InferredDynamicCast(gx) );
+        return std::count( Impl::begin(), Impl::end(), sx );
+    }
     virtual void clear()
     {
     	return Impl::clear();
@@ -338,7 +343,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         // mind validity rules post-erase, is horrible.
         value_type sx( value_type::InferredDynamicCast(gx) );
         typename Impl::iterator it;
-        int count = 0;
+        int n = 0;
         do 
         {
             for( it=begin(); it != end(); ++it )
@@ -346,13 +351,13 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
                 if( *it==sx )
                 {
                     Impl::erase(it);
-                    count++;
+                    n++;
                     break;
                 }
             }
         }
         while( it != end() );
-        return count;
+        return n;
     }
 	virtual void push_back( const TreePtrInterface &gx )
 	{

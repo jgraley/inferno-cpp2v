@@ -284,7 +284,7 @@ void StandardAgent::DecidedQueryCollection( XLink base_x,
             }
             
             // Find the TreePtr in our collection that points to the same
-            // node as *xit, in order to preservew uniqueness properties of links.
+            // node as *xit, in order to preserve uniqueness properties of links.
             // TODO #167 should remove the ened for this
             const TreePtrInterface *my_real_ppx = nullptr;
             FOREACH( const TreePtrInterface &ppx, *px )
@@ -339,7 +339,20 @@ void StandardAgent::DecidedQueryCollection( XLink base_x,
     {
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
+ 
+        // For replace...
         *x_subcollection = xremaining;
+
+        // For solver...
+        // Find the TreePtrs in our collection that point to the same
+        // nodes as xremaining, in order to preserve uniqueness properties of links.
+        // TODO #167 should remove the ened for this   
+        FOREACH( const TreePtrInterface &ppx, *px )
+        {
+            if( xremaining.count(ppx) > 0 )
+                x_subcollection->elts.insert( XLink(base_x.GetChildX(), &ppx) );
+        }
+ 
         query.RegisterAbnormalLink( PatternLink(this, p_star), XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
     }
     TRACE("matched\n");

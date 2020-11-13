@@ -40,6 +40,12 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     {
         CheckLocalMatch( xe.get() );
     }
+     /* For #207
+    for( XLink elt_xlink : x_ci->elts )
+    {
+        CheckLocalMatch( elt_xlink.GetChildX().get() );
+    }
+    */
      
     if( *GetRestriction() )
     {
