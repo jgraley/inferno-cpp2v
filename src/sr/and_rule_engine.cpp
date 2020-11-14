@@ -834,13 +834,14 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
 }                                                       
 
 
-void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *new_agent, TreePtr<Node> new_xnode, Agent *parent_agent )
+void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *new_agent, XLink new_xlink, Agent *parent_agent )
 {
+    TreePtr<Node> new_xnode = new_xlink.GetChildX();
     ASSERT( extracted.count(new_agent) == 1 );
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
-        CompareResult cr  = equivalence_relation.Compare( extracted.at(new_agent).GetChildX(), new_xnode );
+        CompareResult cr  = equivalence_relation.Compare( extracted.at(new_agent), new_xlink );
         if( cr != EQUAL )
         {
             FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted.at(new_agent))

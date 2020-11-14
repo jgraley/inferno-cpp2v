@@ -130,7 +130,7 @@ private:
     void RecordLink( LocatedLink link );
     void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
     void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
-    void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
+    void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, XLink new_xlink, Agent *parent_agent );
 
     // Global domain of possible xlink values
     set<XLink> *domain;

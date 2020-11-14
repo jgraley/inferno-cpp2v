@@ -227,8 +227,8 @@ void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
     {
         if( previous_link )
         {
-            CompareResult cr = equivalence_relation.Compare( previous_link.GetChildX(), 
-                                                             current_link.GetChildX() );
+            CompareResult cr = equivalence_relation.Compare( previous_link, 
+                                                             current_link );
             if( cr != EQUAL )
                 throw CouplingMismatch();               
         }
@@ -392,7 +392,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 }
 
 
-set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( set<XLink> xlinks )
+set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( const set<XLink> &xlinks )
 {
     Conjecture conj(this);            
 

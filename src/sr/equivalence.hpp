@@ -6,7 +6,7 @@
 #include "helpers/transformation.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/flatten.hpp"
-#include "link.h"
+#include "link.hpp"
 
 #include <memory>
 
@@ -19,11 +19,26 @@ class EquivalenceRelation
 {
 public:
     EquivalenceRelation();
-    CompareResult Compare( TreePtr<Node> x, TreePtr<Node> y );
+    CompareResult Compare( XLink xlink, XLink ylink );
 
+    /// Less operator: for use with set, map etc
+    bool operator()( XLink xlink, XLink ylink );
+    
 private:
-    shared_ptr<SimpleCompare> impl;
+    shared_ptr<SimpleCompare> simple_compare;
 }; 
+
+
+class QuotientSet
+{
+public:
+    XLink GetQuotient( XLink x );
+    
+private:    
+    typedef set<XLink, EquivalenceRelation> Classes;
+    Classes classes;
+};
+
 
 };
 

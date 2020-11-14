@@ -7,17 +7,44 @@
 
 using namespace SR;
 
+//////////////////////////// EquivalenceRelation ///////////////////////////////
+
 EquivalenceRelation::EquivalenceRelation() :
-    impl( make_shared<SimpleCompare>() )
+    simple_compare( make_shared<SimpleCompare>() )
 {
 }
 
 
-CompareResult EquivalenceRelation::Compare( TreePtr<Node> x, TreePtr<Node> y )
+CompareResult EquivalenceRelation::Compare( XLink xlink, XLink ylink )
 {
-    return impl->Compare(x, y);
+    // Get the child nodes and disregard the arrow heads
+    TreePtr<Node> xnode = xlink.GetChildX();
+    TreePtr<Node> ynode = ylink.GetChildX();
+    
+    // And then resort to SimpleCompare
+    return simple_compare->Compare( xnode, ynode );
 }
 
+
+bool EquivalenceRelation::operator()( XLink xlink, XLink ylink )
+{
+    return Compare(xlink, ylink) < EQUAL;
+}
+
+//////////////////////////// QuotientSet ///////////////////////////////
+
+XLink QuotientSet::GetQuotient( XLink xlink )
+{
+    // insert() only acts if element not already in set.
+    // Conveniently, it returns an iterator to the matching element
+    // regardless of whether x was inserted, so it's always what we
+    // want to return. p.second is true if insertion tooke place, useful 
+    // for tracing etc.
+    pair<Classes::iterator, bool> p = classes.insert( xlink );
+    return *p.first;
+}
+
+//////////////////////////// Cannonicaliser ///////////////////////////////
 
 void Cannonicaliser::operator()( TreePtr<Node> context, 
        		                     TreePtr<Node> *proot )
@@ -43,8 +70,8 @@ void Cannonicaliser::operator()( TreePtr<Node> context,
     }  
     
 #ifdef CHECK_SC_AT_ROOT
-    EquivalenceRelation e;
-    ASSERT( e.Compare( *proot, dup ) == EQUAL );
+    SimpleCompare sc;
+    ASSERT( sc.Compare( *proot, dup ) == EQUAL );
 #endif
 }                                 
 
@@ -80,7 +107,7 @@ int Cannonicaliser::PassOneWalk( TreePtr<Node> node )
 void Cannonicaliser::Uniquify( const set< TreePtr<Node> > &nodes, 
                                set< TreePtr<Node> > &uniques )
 {
-    EquivalenceRelation e;
+    SimpleCompare sc;
     
     for( TreePtr<Node> n : nodes )
     {
@@ -88,7 +115,7 @@ void Cannonicaliser::Uniquify( const set< TreePtr<Node> > &nodes,
         TreePtr<Node> found_in_uniques;    
         for( TreePtr<Node> u : uniques )
         {
-            if( e.Compare(u, n) == EQUAL )
+            if( sc.Compare(u, n) == EQUAL )
             {
                 found_in_uniques = u;
                 break;
