@@ -19,7 +19,7 @@ class EquivalenceRelation
 {
 public:
     EquivalenceRelation();
-    bool operator()( TreePtr<Node> x, TreePtr<Node> y );
+    CompareResult Compare( TreePtr<Node> x, TreePtr<Node> y );
 
 private:
     shared_ptr<SimpleCompare> impl;

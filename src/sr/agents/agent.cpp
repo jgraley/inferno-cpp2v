@@ -227,8 +227,9 @@ void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
     {
         if( previous_link )
         {
-            if( !equivalence_relation( previous_link.GetChildX(), 
-                                       current_link.GetChildX() ) )
+            CompareResult cr = equivalence_relation.Compare( previous_link.GetChildX(), 
+                                                             current_link.GetChildX() );
+            if( cr != EQUAL )
                 throw CouplingMismatch();               
         }
         previous_link = current_link;

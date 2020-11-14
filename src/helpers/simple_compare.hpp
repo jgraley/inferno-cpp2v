@@ -19,6 +19,9 @@ public:
     
     /// Pass in two collection of pointers to nodes, which can point to subtrees. Result is true if they match. O(n^2) locally.
     CompareResult Compare( CollectionInterface &x, CollectionInterface &y );
+
+    /// Less operator: for use with set, map etc
+    bool operator()( TreePtr<Node> x, TreePtr<Node> y );
 };
 
 #endif

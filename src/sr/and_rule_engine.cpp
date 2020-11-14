@@ -840,8 +840,8 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
-        bool same  = equivalence_relation( extracted.at(new_agent).GetChildX(), new_xnode );
-        if( !same )
+        CompareResult cr  = equivalence_relation.Compare( extracted.at(new_agent).GetChildX(), new_xnode );
+        if( cr != EQUAL )
         {
             FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted.at(new_agent))
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");

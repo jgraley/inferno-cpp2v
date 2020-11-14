@@ -13,9 +13,9 @@ EquivalenceRelation::EquivalenceRelation() :
 }
 
 
-bool EquivalenceRelation::operator()( TreePtr<Node> x, TreePtr<Node> y )
+CompareResult EquivalenceRelation::Compare( TreePtr<Node> x, TreePtr<Node> y )
 {
-    return impl->Compare(x, y) == EQUAL;
+    return impl->Compare(x, y);
 }
 
 
@@ -44,7 +44,7 @@ void Cannonicaliser::operator()( TreePtr<Node> context,
     
 #ifdef CHECK_SC_AT_ROOT
     EquivalenceRelation e;
-    ASSERT( e( *proot, dup ) );
+    ASSERT( e.Compare( *proot, dup ) == EQUAL );
 #endif
 }                                 
 
@@ -88,7 +88,7 @@ void Cannonicaliser::Uniquify( const set< TreePtr<Node> > &nodes,
         TreePtr<Node> found_in_uniques;    
         for( TreePtr<Node> u : uniques )
         {
-            if( e(u, n) )
+            if( e.Compare(u, n) == EQUAL )
             {
                 found_in_uniques = u;
                 break;

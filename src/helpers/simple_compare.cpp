@@ -104,20 +104,21 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
     if( sd != EQUAL )
         return sd;
     
-    auto sc_less = [this]( TreePtr<Node> x, TreePtr<Node> py )
-    {
-        return Compare(x, y) < EQUAL;
-    };
-    typedef set<TreePtr<Node>, decltype(sc_less)> SCOrdered;
-    SCOrdered xo(sc_less), yo(sc_less);
+    typedef set<TreePtr<Node>, SimpleCompare> SCOrdered;
+    SCOrdered xo(*this), yo(*this);
 
     // Fill up the sets of pointers
     FOREACH( TreePtr<Node> xe, x )
-        xo.insert( &xe );
+        xo.insert( xe );
     FOREACH( TreePtr<Node> ye, x )
-        yo.insert( &ye );
+        yo.insert( ye );
 
     // Compare them (will use SimpleCompare)
     return (int)(xo > yo) - (int)(xo < yo);
 }
 
+
+bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl )
+{
+    return Compare(xl, yl) < EQUAL;
+}
