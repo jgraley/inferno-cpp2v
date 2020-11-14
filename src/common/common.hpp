@@ -119,5 +119,7 @@ list<T> operator+( list<T> l, list<T> r ) // Just like in Python!
     return l;
 }
 
+typedef int CompareResult;
+static const CompareResult EQUAL = 0;
 
 #endif

@@ -1,15 +1,30 @@
 #include "simple_compare.hpp"
 #include "common/trace.hpp"
 
+#define CHECK_NEW_OLD_NODE_COMPARE
+
 bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
 {   
     // If we are asked to do a trivial compare, return immediately reporting success
     if( x==y )
         return true;
     
-    // Local comparison deals with node type (or any overloaded matching rule)
-    // Try both ways to explicitly disallow wildcarding (this fn guaranteed symmetrical)
-    if( !x->IsLocalMatch(y.get()) || !y->IsLocalMatch(x.get()))
+    // Local comparison deals with node type and value if there is one
+    CompareResult cr = Node::Compare(x.get(), y.get());
+    
+#ifdef CHECK_NEW_OLD_NODE_COMPARE
+    bool new_uneq = (cr != EQUAL);
+    bool xlmy = x->IsLocalMatch(y.get());
+    bool ylmx = y->IsLocalMatch(x.get());
+    bool old_uneq = (!xlmy || !ylmx);
+    ASSERT( new_uneq==old_uneq )("x: ")(*x)("\n")
+                                ("y: ")(*y)("\n")
+                                ("x.LM(y): ")(xlmy)("\n")
+                                ("y.LM(x): ")(ylmx)("\n")
+                                ("Compare: %d\n", cr);
+#endif
+    
+    if( cr != EQUAL )
         return false;
 
     // Itemise them both and chuck out if sizes do not match

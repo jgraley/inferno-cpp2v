@@ -19,10 +19,19 @@ SpecificString::SpecificString( string s ) :
 bool SpecificString::IsLocalMatch( const Matcher *candidate ) const 
 {
     ASSERT( candidate );
-    const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
+    auto *c = dynamic_cast<const SpecificString *>(candidate);
     return c && c->value == value;
 }
 
+ 
+CompareResult SpecificString::CompareContents( const Matcher *candidate ) const
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const SpecificString *>(candidate);    
+    ASSERT(c);
+    return value.compare(c->value);
+}
+ 
  
 string SpecificString::GetRender() const
 {
@@ -59,7 +68,7 @@ SpecificInteger::SpecificInteger( int i ) :
 bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 {
     ASSERT( candidate );
-    const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
+    auto *c = dynamic_cast<const SpecificInteger *>(candidate);
     // A local match will require all fields to match, not just the numerical value.
     return c && 
            c->isUnsigned() == isUnsigned() &&
@@ -68,6 +77,21 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
+CompareResult SpecificInteger::CompareContents( const Matcher *candidate ) const
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
+    ASSERT(c);
+    if( isUnsigned() != c->isUnsigned() )
+        return (int)(isUnsigned()) - (int)(c->isUnsigned());
+    if( getBitWidth() != c->getBitWidth() )
+        return (int)(getBitWidth()) - (int)(c->getBitWidth());
+    return (*(llvm::APSInt *)this > *(llvm::APSInt *)c) - 
+           (*(llvm::APSInt *)this < *(llvm::APSInt *)c);
+    // Note: just subtracting could overflow
+}
+ 
+ 
 string SpecificInteger::GetRender() const /// Produce a string for debug
 {
     return string(toString(10)) + // decimal
@@ -100,13 +124,34 @@ SpecificFloat::SpecificFloat( llvm::APFloat v ) :
 bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const 
 {
     ASSERT( candidate );
-    const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
+    auto *c = dynamic_cast<const SpecificFloat *>(candidate);
     // A local match will require all fields to match, not just the numerical value.
     return c && 
     //    c->getSemantics() == getSemantics() && //TODO
     bitwiseIsEqual( *c );
 }
 
+
+CompareResult SpecificFloat::CompareContents( const Matcher *candidate ) const
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
+    ASSERT(c);
+        
+    // Primary ordering: the value
+    cmpResult cr = compare(*c);
+    if( cr==APFloat::cmpLessThan )
+        return -1;
+    if( cr==APFloat::cmpGreaterThan )
+        return 1;    
+    
+    // Secondary ordering: the hash
+    uint32_t h = getHashValue();
+    uint32_t ch = c->getHashValue();
+    return (int)(h > ch) - (int)(h < ch);
+    // Note: just subtracting could overflow
+}
+ 
 
 string SpecificFloat::GetRender() const
 {
@@ -151,6 +196,15 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
+CompareResult SpecificIdentifier::CompareContents( const Matcher *candidate ) const
+{
+    ASSERT( candidate );
+        
+    return (int)(this > candidate) - (int)(this < candidate);
+    // Note: just subtracting could overflow
+}
+
+
 string SpecificIdentifier::GetRender() const 
 {
     return name;
@@ -179,8 +233,21 @@ SpecificFloatSemantics::SpecificFloatSemantics( const llvm::fltSemantics *s ) :
 bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 {
     ASSERT( candidate );
-    const SpecificFloatSemantics *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
+    auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     return c && c->value == value;
+}
+
+
+CompareResult SpecificFloatSemantics::CompareContents( const Matcher *candidate ) const
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
+    ASSERT(c);    
+
+    // Don't use any particualr ordering apart from where the 
+    // llvm::fltSemantics are being stored.
+    return (int)(value > c->value) - (int)(value < c->value);
+    // Note: just subtracting could overflow
 }
 
 

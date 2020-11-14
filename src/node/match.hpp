@@ -1,10 +1,12 @@
 #ifndef MATCH_HPP
 #define MATCH_HPP
 
-#include <typeinfo>
-#include <string>
+
 #include "common/trace.hpp"
 #include "common/mismatch.hpp"
+#include <typeinfo>
+#include <string>
+#include <typeindex>		
 
 /// Support class allowing hierarchical type comparisons between nodes
 struct Matcher
@@ -37,6 +39,18 @@ struct Matcher
         ASSERT( source_architype );
         (void)target_architype; // don't care about value of architypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_architype);
+    }
+    static CompareResult Compare( const Matcher *l, const Matcher *r )
+    {
+        type_index l_index( typeid(*l) );
+        type_index r_index( typeid(*r) );
+        if( l_index != r_index )
+            return (l_index > r_index) ? 1 : -1;
+        return l->CompareContents(r);
+    }
+    virtual CompareResult CompareContents( const Matcher *candidate ) const 
+    {
+        return EQUAL; // usually there are no contents
     }
 };
 
