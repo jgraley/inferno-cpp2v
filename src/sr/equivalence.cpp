@@ -15,7 +15,7 @@ EquivalenceRelation::EquivalenceRelation() :
 
 bool EquivalenceRelation::operator()( TreePtr<Node> x, TreePtr<Node> y )
 {
-    return (*impl)(x, y);
+    return impl->Compare(x, y) == EQUAL;
 }
 
 

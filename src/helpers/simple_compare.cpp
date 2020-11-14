@@ -3,11 +3,11 @@
 
 //#define CHECK_NEW_OLD_NODE_COMPARE
 
-bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
+CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
 {   
     // If we are asked to do a trivial compare, return immediately reporting success
     if( x==y )
-        return true;
+        return EQUAL;
     
     // Local comparison deals with node type and value if there is one
     CompareResult cr = Node::Compare(x.get(), y.get());
@@ -25,13 +25,14 @@ bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
 #endif
     
     if( cr != EQUAL )
-        return false;
+        return cr;
 
     // Itemise them both and chuck out if sizes do not match
     vector< Itemiser::Element * > x_memb = x->Itemise();
     vector< Itemiser::Element * > y_memb = y->Itemise();
-    if( (int)(x_memb.size()) - (int)(y_memb.size()) != 0 )
-        return false; 
+    int sd = (int)(x_memb.size()) - (int)(y_memb.size());
+    if( sd != EQUAL )
+        return sd; 
     
     for( int i=0; i<x_memb.size(); i++ )
     {
@@ -43,24 +44,24 @@ bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
         {
             SequenceInterface *y_seq = dynamic_cast<SequenceInterface *>(y_memb[i]);
             ASSERT( y_seq );
-            bool cr = operator()( *x_seq, *y_seq );
-            if( !cr )
+            CompareResult cr = Compare( *x_seq, *y_seq );
+            if( cr != EQUAL )
                 return cr;                
         }
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]) )
         {
             CollectionInterface *y_col = dynamic_cast<CollectionInterface *>(y_memb[i]);
             ASSERT( y_col );
-            bool cr = operator()( *x_col, *y_col );
-            if( !cr )
+            CompareResult cr = Compare( *x_col, *y_col );
+            if( cr != EQUAL )
                 return cr;                
         }
         else if( TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]) )
         {
             TreePtrInterface *y_ptr = dynamic_cast<TreePtrInterface *>(y_memb[i]);
             ASSERT( y_ptr );
-            bool cr = operator()( *x_ptr, *y_ptr );
-            if( !cr )
+            CompareResult cr = Compare( *x_ptr, *y_ptr );
+            if( cr != EQUAL )
                 return cr;                
         }
         else
@@ -70,64 +71,53 @@ bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
     }
 
     // survived to the end? then we have a match.
-    return true;
+    return EQUAL;
 }
 
 
-bool SimpleCompare::operator()( SequenceInterface &x, SequenceInterface &y )
+CompareResult SimpleCompare::Compare( SequenceInterface &x, SequenceInterface &y )
 {
     // Ensure the sizes are the same so we don;t go off the end
-    if( (int)(x.size()) - (int)(y.size()) != 0 )
-        return false;
+    int sd = (int)(x.size()) - (int)(y.size());
+    if( sd != EQUAL )
+        return sd;
     
     ContainerInterface::iterator xit, yit;
     
     // Check each element in turn
     for( xit = x.begin(), yit = y.begin(); xit != x.end(); ++xit, ++yit )
     {
-        bool cr = operator()( *xit, *yit );
-        if( !cr )
+        CompareResult cr = Compare( *xit, *yit );
+        if( cr != EQUAL )
             return cr;
     }
 
     // survived to the end? then we have a match.
-    return true;
+    return EQUAL;
 }
 
 
-bool SimpleCompare::operator()( CollectionInterface &x, CollectionInterface &y )
+CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterface &y )
 {
-    // Ensure the sizes are the same so we don;t go off the end
-    if( (int)(x.size()) - (int)(y.size()) != 0 )
-        return false;
+    // Ensure the sizes are the same so we don't go off the end
+    int sd = (int)(x.size()) - (int)(y.size());
+    if( sd != EQUAL )
+        return sd;
     
-    Collection<Node> xremaining;
-    FOREACH( const TreePtrInterface &xe, x )
-        xremaining.insert( xe );
-    
-    FOREACH( const TreePtrInterface &ye, y )
+    auto sc_less = [this]( const TreePtrInterface *px, const TreePtrInterface *py )
     {
-        bool found = false;
-        TreePtr<Node> xfound;
-        ContainerInterface::iterator xit, xit_found;
-        for( xit=xremaining.begin(); xit != xremaining.end(); ++xit )
-        {
-            const TreePtrInterface &xe = *xit;
-            if( operator()( xe, ye ) )
-            {
-                found = true;
-                xfound = xe;
-                xit_found = xit;
-                break;
-            }
-        }
-        if( !found )
-            return false;
-        
-        // Erase the element ising iterator in case of duplicates in xremaining
-        xremaining.erase( xit_found );
-    }
+        return Compare(*px, *py) < EQUAL;
+    };
+    typedef set<const TreePtrInterface *, decltype(sc_less)> SCOrderedPtrs;
+    SCOrderedPtrs x_ptrs(sc_less), y_ptrs(sc_less);
 
-    // survived to the end? then we have a match.
-    return true;
+    // Fill up the sets of pointers
+    FOREACH( const TreePtrInterface &xe, x )
+        x_ptrs.insert( &xe );
+    FOREACH( const TreePtrInterface &ye, x )
+        y_ptrs.insert( &ye );
+
+    // Compare them (will use SimpleCompare)
+    return (int)(x_ptrs > y_ptrs) - (int)(x_ptrs < y_ptrs);
 }
+
