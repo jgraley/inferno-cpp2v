@@ -1,7 +1,7 @@
 #include "simple_compare.hpp"
 #include "common/trace.hpp"
 
-#define CHECK_NEW_OLD_NODE_COMPARE
+//#define CHECK_NEW_OLD_NODE_COMPARE
 
 bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
 {   
@@ -30,7 +30,7 @@ bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
     // Itemise them both and chuck out if sizes do not match
     vector< Itemiser::Element * > x_memb = x->Itemise();
     vector< Itemiser::Element * > y_memb = y->Itemise();
-    if( x_memb.size() != y_memb.size() )
+    if( (int)(x_memb.size()) - (int)(y_memb.size()) != 0 )
         return false; 
     
     for( int i=0; i<x_memb.size(); i++ )
@@ -42,26 +42,26 @@ bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]) )
         {
             SequenceInterface *y_seq = dynamic_cast<SequenceInterface *>(y_memb[i]);
-            if( !y_seq )
-                return false;
-            if( !operator()( *x_seq, *y_seq ) )
-                return false;                
+            ASSERT( y_seq );
+            bool cr = operator()( *x_seq, *y_seq );
+            if( !cr )
+                return cr;                
         }
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]) )
         {
             CollectionInterface *y_col = dynamic_cast<CollectionInterface *>(y_memb[i]);
-            if( !y_col )
-                return false;
-            if( !operator()( *x_col, *y_col ) )
-                return false;                
+            ASSERT( y_col );
+            bool cr = operator()( *x_col, *y_col );
+            if( !cr )
+                return cr;                
         }
         else if( TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]) )
         {
             TreePtrInterface *y_ptr = dynamic_cast<TreePtrInterface *>(y_memb[i]);
-            if( !y_ptr )
-                return false;
-            if( !operator()( *x_ptr, *y_ptr ) )
-                return false;                
+            ASSERT( y_ptr );
+            bool cr = operator()( *x_ptr, *y_ptr );
+            if( !cr )
+                return cr;                
         }
         else
         {
@@ -77,7 +77,7 @@ bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
 bool SimpleCompare::operator()( SequenceInterface &x, SequenceInterface &y )
 {
     // Ensure the sizes are the same so we don;t go off the end
-    if( x.size() != y.size() )
+    if( (int)(x.size()) - (int)(y.size()) != 0 )
         return false;
     
     ContainerInterface::iterator xit, yit;
@@ -85,8 +85,9 @@ bool SimpleCompare::operator()( SequenceInterface &x, SequenceInterface &y )
     // Check each element in turn
     for( xit = x.begin(), yit = y.begin(); xit != x.end(); ++xit, ++yit )
     {
-        if( !operator()( *xit, *yit ) )
-            return false;
+        bool cr = operator()( *xit, *yit );
+        if( !cr )
+            return cr;
     }
 
     // survived to the end? then we have a match.
@@ -97,7 +98,7 @@ bool SimpleCompare::operator()( SequenceInterface &x, SequenceInterface &y )
 bool SimpleCompare::operator()( CollectionInterface &x, CollectionInterface &y )
 {
     // Ensure the sizes are the same so we don;t go off the end
-    if( x.size() != y.size() )
+    if( (int)(x.size()) - (int)(y.size()) != 0 )
         return false;
     
     Collection<Node> xremaining;
