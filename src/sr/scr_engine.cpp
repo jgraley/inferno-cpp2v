@@ -16,6 +16,7 @@
 //#define CANNONICALISE
 #define GET_DOMAIN
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
+#define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
 
 using namespace SR;
 using namespace std;
@@ -35,7 +36,8 @@ SCREngine::SCREngine( bool is_search_,
                       const set<Agent *> &master_agents,
                       const SCREngine *master ) :
     plan(this, is_search_, overall_master, cp, rp, master_agents, master),
-    depth( 0 )
+    depth( 0 ),
+    domain_extension_classes( make_shared<QuotientSet>() )
 {
 }
 
@@ -244,6 +246,16 @@ void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 }
 
 
+XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
+{
+#ifdef ENABLE_UNIQUIFY_DOMAIN_EXTENSION    
+    return domain_extension_classes->Uniquify( xlink );
+#else
+    return xlink;
+#endif    
+}
+
+
 void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
 {
     // Extend locally first and then pass that into children.
@@ -271,24 +283,27 @@ void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
 }
 
 
-set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
+void SCREngine::DetermineDomain( XLink root_xlink )
 {
     INDENT("X");
     TRACE("Root is ")(root_xlink)("\n");
-    set<XLink> domain;
+    
+    // Both should be cleared together
+    domain.clear();
+    domain_extension_classes->Clear();
     
     // Put all the nodes in the X tree into the domain
 	Walk wx( root_xlink.GetChildX() ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
     {
-        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );
-        domain.insert( xlink );
-/*
+        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );        
+
         // Here, elemets go into quotient set, but it does not 
-        // uniquify: every link appears in domain.
+        // uniquify: every link in the input X tree must appear 
+        // separately in domain.
         domain.insert( xlink );
-        (void)quotient_set.Uniquify( xlink );
-*/        
+        (void)domain_extension_classes->Uniquify( xlink );
+        
         TRACEC("Added ")(xlink)("\n");
     }
     domain.insert(XLink::MMAX_Link);
@@ -299,15 +314,13 @@ set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
     
     if( es > is )
     {
-        TRACEC("Domain size %d -> %d\n", is, es);
+        FTRACE("Domain size %d -> %d\n", is, es);
     }
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
     e.TestProperties( domain );
 #endif
-    
-    return domain;
 }
 
 
@@ -326,9 +339,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
 
     // Global domain of possible xlink values
-    set<XLink> domain;
 #ifdef GET_DOMAIN
-    domain = DetermineDomain( root_xlink );
+    DetermineDomain( root_xlink );
 #endif
 
     TRACE("Begin search\n");

@@ -203,7 +203,8 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         auto op = [&](XLink x) -> XLink
         {
             TreePtr<Node> cur_depth( new SpecificString(s) );
-            return XLink::CreateDistinct(cur_depth); // cache will un-distinct
+            XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
+            return master_scr_engine->UniquifyDomainExtension(new_xlink);
         };
         // note: not caching the recursive algorithm because we
         // need terminus from it. See #153 for discussion

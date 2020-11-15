@@ -37,6 +37,7 @@ class QuotientSet
 {
 public:
     XLink Uniquify( XLink x );
+    void Clear();
     
 private:    
     typedef set<XLink, EquivalenceRelation> Classes;

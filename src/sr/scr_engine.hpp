@@ -19,6 +19,7 @@ class Conjecture;
 class SpecialBase;
 class CompareReplace;
 class AndRuleEngine;
+class QuotientSet;
 
 /// Common implementation for search+replace, compare+replace and slaves
 class SCREngine : public virtual Traceable
@@ -64,7 +65,7 @@ private:
 public:
     void GatherCouplings( CouplingKeysMap *coupling_keys ) const;    
     void ExtendDomain( PatternLink plink, set<XLink> &domain );
-    set<XLink> DetermineDomain( XLink root_xlink );
+    void DetermineDomain( XLink root_xlink );
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                const CouplingKeysMap *master_keys );
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
@@ -84,6 +85,7 @@ public:
     friend class Conjecture;
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
+    XLink UniquifyDomainExtension( XLink xlink ) const;
         
 private:    
     static int repetitions;
@@ -91,6 +93,9 @@ private:
     
     vector<int> stop_after;
     int depth;    
+    
+    set<XLink> domain;    
+    shared_ptr<QuotientSet> domain_extension_classes;
 
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the

@@ -181,6 +181,12 @@ XLink QuotientSet::Uniquify( XLink xlink )
     return *p.first;
 }
 
+
+void QuotientSet::Clear()
+{
+    classes.clear();
+}
+
 //////////////////////////// Cannonicaliser ///////////////////////////////
 
 void Cannonicaliser::operator()( TreePtr<Node> context, 

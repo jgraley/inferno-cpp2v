@@ -6,15 +6,6 @@
 #include "standard_agent.hpp"
 
 using namespace SR;
-//#define SPIKE
-// SPIKE with neiter SPIKE_MATCH nor SPIKE_MATCH will fail to register the link
-//#define SPIKE_MATCH
-//#define SPIKE_MISMATCH
-
-#ifdef SPIKE
-// to get CPPTree::Integer for the spike only
-#include "../tree/cpptree.hpp" 
-#endif
 
 shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 {
@@ -30,24 +21,14 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	INDENT("@");
     auto op = [&](XLink xlink) -> XLink
     {
-#ifdef SPIKE
-#ifdef SPIKE_MATCH
-        TreePtr<Node> spike( new Node );
-        return spike );	// Singular Link
-#endif
-#ifdef SPIKE_MISMATCH
-        TreePtr<CPPTree::Integer> spikex; // won't match in the use-case
-        TreePtr<Node> spike = spikex.MakeValueArchitype();
-        return spike;	// Singular Link
-#endif
-#else   
         TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
         if( xlink.GetChildX() == context )
         {
-            // Imagine that the root is pointed to by a Node pointer
+            // Imagine that the root is pointed to by a TreePtr<Node>
             // (in this case wit.GetCurrentParentPointer() would return NULL)
             TreePtr<Node> node( new Node );
-            return XLink::CreateDistinct(node);	// Cache will un-distinct
+            XLink new_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct            
+            return master_scr_engine->UniquifyDomainExtension(new_xlink);
         }
         // Do a walk over context (the whole x tree)
         bool found_one_already = false;
@@ -67,7 +48,8 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtr<Node> ptr_arch = px->MakeValueArchitype();
 
                 // Stick that in your pipe + smoke it
-                return XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
+                XLink new_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
+                return master_scr_engine->UniquifyDomainExtension(new_xlink);
             }
         }
         if(!found_one_already)
@@ -76,10 +58,10 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // so simulate a link that allows anything (because in fact
             // you can replace the root node with anything).
             TreePtr<Node> node( new Node );
-            return XLink::CreateDistinct(node);	// Cache will un-distinct
+            XLink new_xlink =  XLink::CreateDistinct(node);	// Cache will un-distinct
+            return master_scr_engine->UniquifyDomainExtension(new_xlink);
         }
         ASSERTFAIL("Failed to generate a link\n");
-#endif
     };
     
     query.Reset();

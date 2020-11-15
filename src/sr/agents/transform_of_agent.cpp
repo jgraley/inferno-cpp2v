@@ -27,7 +27,8 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         if( xt )
         {
             // Punt it back into the search/replace engine
-            return XLink::CreateDistinct(xt);  // Cache will un-distinct
+            XLink new_xlink = XLink::CreateDistinct(xt);  // Cache will un-distinct
+            return master_scr_engine->UniquifyDomainExtension(new_xlink);
         }
         else
         {
