@@ -51,11 +51,12 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
         return vxlinks[random_index(random_gen)];
     };
         
+    // Measure the coverage    
     static int tr=0;
     static vector<int> ts(3);
     static vector<int> tt(9);    
         
-    // Reflexive
+    // Reflexive property
     for( XLink a_xlink : vxlinks )
     {
         CompareResult aa_cr = Compare(a_xlink, a_xlink);
@@ -63,7 +64,7 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
         tr++;
     }
     
-    // Symmetric/antisymmetric
+    // Symmetric/antisymmetric property
     for( int i=0; i<vxlinks.size()*10; i++ )
     {
         XLink a_xlink = random_xlink();
@@ -89,7 +90,7 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
             ASSERTFAIL("huh?\n");
     }
      
-    // Transitive
+    // Transitive property
     for( int i=0; i<vxlinks.size()*10; i++ )
     {
         XLink a_xlink = random_xlink();
@@ -162,7 +163,8 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
             ASSERTFAIL("huh?\n");
     }    
     
-    FTRACE("Relation passed tests:\n")
+    // See #210 for some results
+    FTRACE("Relation tests passed. Coverage:\n")
           ("reflexive ")(tr)("\n")
           ("symmetric/antisymmetric ")(ts)("\n")
           ("transitive ")(tt)("\n");
