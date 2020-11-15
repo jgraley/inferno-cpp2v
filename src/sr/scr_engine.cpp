@@ -314,7 +314,7 @@ void SCREngine::DetermineDomain( XLink root_xlink )
     
     if( es > is )
     {
-        FTRACE("Domain size %d -> %d\n", is, es);
+        TRACE("Domain size %d -> %d\n", is, es);
     }
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
