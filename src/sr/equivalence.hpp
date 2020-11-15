@@ -24,6 +24,10 @@ public:
     /// Less operator: for use with set, map etc
     bool operator()( XLink xlink, XLink ylink );
     
+    /// Perform a test to check the reflexiv, symmetric and 
+    /// transitive properties, given a representative set
+    /// of links. Pass if no assert failure.
+    void TestProperties( const set<XLink> &xlinks );
 private:
     shared_ptr<SimpleCompare> simple_compare;
 }; 
@@ -32,14 +36,11 @@ private:
 class QuotientSet
 {
 public:
-    XLink GetQuotient( XLink x );
+    XLink Uniquify( XLink x );
     
 private:    
     typedef set<XLink, EquivalenceRelation> Classes;
     Classes classes;
-};
-
-
 };
 
 
@@ -61,6 +62,8 @@ private:
     
     // Filled in during pass 2
     vector< set< TreePtr<Node> > > uniques_by_shallowness;    
+};
+
 };
 
 #endif

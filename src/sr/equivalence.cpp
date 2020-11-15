@@ -3,6 +3,8 @@
 #include "helpers/simple_compare.hpp"
 #include "helpers/duplicate.hpp"
 
+#include <random>
+
 #define CHECK_SC_AT_ROOT
 
 using namespace SR;
@@ -31,9 +33,144 @@ bool EquivalenceRelation::operator()( XLink xlink, XLink ylink )
     return Compare(xlink, ylink) < EQUAL;
 }
 
+
+void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
+{
+    // Need a random access container because we will in fact randomly access it
+    vector<XLink> vxlinks;
+    
+    for( XLink xlink : xlinks )
+        vxlinks.push_back(xlink);
+
+    std::mt19937 random_gen;  // everyone's favourite engine: fast, long period
+    std::uniform_int_distribution<int> random_index(0, vxlinks.size()-1);  // numbers in the range [0, vxlinks.size())
+    static const unsigned long int seed = 0;
+    random_gen.seed(seed);
+    auto random_xlink = [&]()
+    {
+        return vxlinks[random_index(random_gen)];
+    };
+        
+    static int tr=0;
+    static vector<int> ts(3);
+    static vector<int> tt(9);    
+        
+    // Reflexive
+    for( XLink a_xlink : vxlinks )
+    {
+        CompareResult aa_cr = Compare(a_xlink, a_xlink);
+        ASSERT( aa_cr == EQUAL );
+        tr++;
+    }
+    
+    // Symmetric/antisymmetric
+    for( int i=0; i<vxlinks.size()*10; i++ )
+    {
+        XLink a_xlink = random_xlink();
+        XLink b_xlink = random_xlink();
+        CompareResult ab_cr = Compare(a_xlink, b_xlink);
+        CompareResult ba_cr = Compare(b_xlink, a_xlink);
+        if( ab_cr == EQUAL )            // a == b
+        {
+            ASSERT( ba_cr == EQUAL );       
+            ts[0]++;
+        }
+        else if( ab_cr < EQUAL )        // a < b
+        {
+            ASSERT( ba_cr > EQUAL);
+            ts[1]++;
+        }
+        else if( ab_cr > EQUAL )        // a > b
+        {
+            ASSERT( ba_cr < EQUAL);
+            ts[2]++;
+        }
+        else
+            ASSERTFAIL("huh?\n");
+    }
+     
+    // Transitive
+    for( int i=0; i<vxlinks.size()*10; i++ )
+    {
+        XLink a_xlink = random_xlink();
+        XLink b_xlink = random_xlink();
+        XLink c_xlink = random_xlink();
+        CompareResult ab_cr = Compare(a_xlink, b_xlink);
+        CompareResult bc_cr = Compare(b_xlink, c_xlink);
+        CompareResult ac_cr = Compare(a_xlink, c_xlink);
+        if( ab_cr == EQUAL )            // a == b
+        {
+            if( bc_cr == EQUAL )            // b == c
+            {
+                ASSERT( ac_cr == EQUAL );
+                tt[0]++;
+            }
+            else if( bc_cr < EQUAL )        // b < c
+            {
+                ASSERT( ac_cr < EQUAL );
+                tt[1]++;
+            }
+            else if( bc_cr > EQUAL )        // b > c
+            {
+                ASSERT( ac_cr > EQUAL );
+                tt[2]++;
+            }
+            else
+                ASSERTFAIL("huh?\n");
+        }
+        else if( ab_cr < EQUAL )        // a < b
+        {
+            if( bc_cr == EQUAL )            // b == c
+            {
+                ASSERT( ac_cr < EQUAL );
+                tt[3]++;
+            }
+            else if( bc_cr < EQUAL )        // b < c
+            {
+                ASSERT( ac_cr < EQUAL );
+                tt[4]++;
+            }
+            else if( bc_cr > EQUAL )        // b > c
+            {
+                ASSERT( true ); // no information relating a to c
+                tt[5]++;
+            }
+            else
+                ASSERTFAIL("huh?\n");
+        }
+        else if( ab_cr > EQUAL )        // a > b
+        {
+            if( bc_cr == EQUAL )            // b == c
+            {
+                ASSERT( ac_cr > EQUAL );
+                tt[6]++;
+            }
+            else if( bc_cr < EQUAL )        // b < c
+            {
+                ASSERT( true ); // no information relating a to c
+                tt[7]++;
+            }
+            else if( bc_cr > EQUAL )        // b > c
+            {
+                ASSERT( ac_cr > EQUAL );
+                tt[8]++;
+            }
+            else
+                ASSERTFAIL("huh?\n");
+        }
+        else
+            ASSERTFAIL("huh?\n");
+    }    
+    
+    FTRACE("Relation passed tests:\n")
+          ("reflexive ")(tr)("\n")
+          ("symmetric/antisymmetric ")(ts)("\n")
+          ("transitive ")(tt)("\n");
+}
+
 //////////////////////////// QuotientSet ///////////////////////////////
 
-XLink QuotientSet::GetQuotient( XLink xlink )
+XLink QuotientSet::Uniquify( XLink xlink )
 {
     // insert() only acts if element not already in set.
     // Conveniently, it returns an iterator to the matching element

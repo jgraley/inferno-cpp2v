@@ -15,6 +15,7 @@
 
 //#define CANNONICALISE
 #define GET_DOMAIN
+//#define TEST_RELATION_PROPERTIES_USING_DOMAIN
 
 using namespace SR;
 using namespace std;
@@ -282,6 +283,12 @@ set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
     {
         XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );
         domain.insert( xlink );
+/*
+        // Here, elemets go into quotient set, but it does not 
+        // uniquify: every link appears in domain.
+        domain.insert( xlink );
+        (void)quotient_set.Uniquify( xlink );
+*/        
         TRACEC("Added ")(xlink)("\n");
     }
     domain.insert(XLink::MMAX_Link);
@@ -294,6 +301,11 @@ set<XLink> SCREngine::DetermineDomain( XLink root_xlink )
     {
         TRACEC("Domain size %d -> %d\n", is, es);
     }
+    
+#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
+    EquivalenceRelation e;
+    e.TestProperties( domain );
+#endif
     
     return domain;
 }
