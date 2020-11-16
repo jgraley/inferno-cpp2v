@@ -248,6 +248,12 @@ void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 
 XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 {
+    // Don't worry about generated nodes that are already in 
+    // the X tree (they had to have been found there after a
+    // search). 
+    if( domain.count(xlink) > 0 )
+        return xlink;
+        
 #ifdef ENABLE_UNIQUIFY_DOMAIN_EXTENSION    
     return domain_extension_classes->Uniquify( xlink );
 #else
