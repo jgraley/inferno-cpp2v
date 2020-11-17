@@ -30,6 +30,127 @@ using namespace std;
 	
 #define CONTAINER_SEP ",\n"    
     
+    
+string MyTrace(const Traceable &t); 
+string MyTrace(bool b); 
+string MyTrace(int i); 
+string MyTrace(size_t i); 
+string MyTrace(const exception &e); 
+
+template<typename T>
+string MyTrace(const list<T> &l) 
+{
+    string str = "[";
+    bool first = true;
+    for( auto x : l )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += MyTrace(x);
+        first = false;
+    }
+    return str + "]";
+}
+
+
+template<typename T>
+string MyTrace(const vector<T> &l) 
+{
+    string str = "[";
+    bool first = true;
+    for( auto x : l )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += MyTrace(x);
+        first = false;
+    }
+    return str + "]";
+}
+
+
+template<typename T>
+string MyTrace(const set<T> &s) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto x : s )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += MyTrace(x);
+        first = false;            
+    }
+    return str + "}";
+}
+
+
+template<typename T>
+string MyTrace(const multiset<T> &s) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto x : s )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += MyTrace(x);
+        first = false;            
+    }
+    return str + "}";
+}
+
+
+template<typename TK, typename TV>
+string MyTrace(const map<TK, TV> &m) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto p : m )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += MyTrace(p.first);
+        str += ": ";
+        str += MyTrace(p.second);
+        first = false;            
+    }
+    return str + "}";
+}
+
+
+template<typename TF, typename TS>
+string MyTrace(const pair<TF, TS> &p) 
+{
+    string str = "(";
+    str += MyTrace(p.first);
+    str += ", ";
+    str += MyTrace(p.second);
+    return str + ")";
+}
+
+
+template<typename T>
+string MyTrace(const T *p) 
+{
+    if( p )
+    {
+        return string("&") + MyTrace(*p);        
+    }
+    else
+    {
+        return string("NULL");
+    }
+}
+
+
+template<typename T>
+string MyTrace(shared_ptr<T> p) 
+{
+    return MyTrace(p.get());        
+}
+    
+    
 class Tracer
 {
 public:
@@ -44,121 +165,14 @@ public:
     ~Tracer();
     Tracer &operator()();
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
-
     Tracer &operator()(const char *fmt, ...);
-    Tracer &operator()(const Traceable &s); 
-    Tracer &operator()(bool b); 
-    Tracer &operator()(int i); 
-    Tracer &operator()(size_t i); 
-    Tracer &operator()(const exception &e); 
 
     template<typename T>
-    Tracer &operator()(const list<T> &l) 
+    Tracer &operator()(const T &x)
     {
-        operator()("[");
-        bool first = true;
-        for( auto x : l )
-        {
-            if( !first )
-                operator()(CONTAINER_SEP);
-            operator()(x);
-            first = false;
-        }
-        return operator()("]");
+        return operator()( MyTrace(x) );
     }
     
-    template<typename T>
-    Tracer &operator()(const vector<T> &l) 
-    {
-        operator()("[");
-        bool first = true;
-        for( auto x : l )
-        {
-            if( !first )
-                operator()(CONTAINER_SEP);
-            operator()(x);
-            first = false;
-        }
-        return operator()("]");
-    }
-
-    template<typename T>
-    Tracer &operator()(const set<T> &s) 
-    {
-        operator()("{");
-        bool first = true;
-        for( auto x : s )
-        {
-            if( !first )
-                operator()(CONTAINER_SEP);
-            operator()(x);
-            first = false;            
-        }
-        return operator()("}");
-    }
-
-    template<typename T>
-    Tracer &operator()(const multiset<T> &s) 
-    {
-        operator()("{");
-        bool first = true;
-        for( auto x : s )
-        {
-            if( !first )
-                operator()(CONTAINER_SEP);
-            operator()(x);
-            first = false;            
-        }
-        return operator()("}");
-    }
-
-    template<typename TK, typename TV>
-    Tracer &operator()(const map<TK, TV> &m) 
-    {
-        operator()("{");
-        bool first = true;
-        for( auto p : m )
-        {
-            if( !first )
-                operator()(CONTAINER_SEP);
-            operator()(p.first);
-            operator()(": ");
-            operator()(p.second);
-            first = false;            
-        }
-        return operator()("}");
-    }
-
-    template<typename TF, typename TS>
-    Tracer &operator()(const pair<TF, TS> &p) 
-    {
-        operator()("(");
-        operator()(p.first);
-        operator()(", ");
-        operator()(p.second);
-        return operator()(")");
-    }
-
-    template<typename T>
-    Tracer &operator()(const T *p) 
-    {
-        if( p )
-        {
-            operator()("&");
-            return operator()(*p);        
-        }
-        else
-        {
-            return operator()("NULL");
-        }
-    }
-
-    template<typename T>
-    Tracer &operator()(shared_ptr<T> p) 
-    {
-        return operator()(p.get());        
-    }
-
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
     inline static bool IsEnabled() { return enable; }
     static string GetPrefix() { return Descend::pre; }

@@ -1,10 +1,12 @@
 #ifndef ITEMISE_HPP
 #define ITEMISE_HPP
 
+#include "common/common.hpp"
+#include "common/trace.hpp"
+
+#include <inttypes.h>
 #include <stdio.h>
 #include <vector>
-#include "common/common.hpp"
-#include <inttypes.h>
 
 using namespace std;
 

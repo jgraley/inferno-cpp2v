@@ -17,6 +17,36 @@ string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
 
 using namespace std;
 
+string MyTrace(const Traceable &t)
+{    
+    return t.GetTrace();
+}
+
+
+string MyTrace(bool b)
+{    
+    return b?string("true"):string("false");
+}
+
+
+string MyTrace(int i)
+{    
+    return to_string(i);
+}
+
+
+string MyTrace(size_t i)
+{    
+    return to_string(i);
+}
+
+
+string MyTrace(const exception &e)
+{
+    return string( e.what() );
+}
+
+
 void Tracer::Descend::Indent()
 {
     // Detect cases where the indent level dropped and then went up again, without
@@ -102,17 +132,6 @@ Tracer &Tracer::operator()()
 }
 
 
-Tracer &Tracer::operator()(const char *fmt, ...)
-{
-    va_list vl;
-    va_start( vl, fmt );
-    string s = VSSPrintf( fmt, vl );
-    va_end( vl );
-
-    return operator()(s);
-}
-
-
 Tracer &Tracer::operator()(const string &s)
 {    
     if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
@@ -131,33 +150,14 @@ Tracer &Tracer::operator()(const string &s)
 }
 
 
-Tracer &Tracer::operator()(const Traceable &s)
-{    
-    return operator()(s.GetTrace());
-}
-
-
-Tracer &Tracer::operator()(bool b)
-{    
-    return operator()( b?string("true"):string("false") );
-}
-
-
-Tracer &Tracer::operator()(int i)
-{    
-    return operator()( to_string(i) );
-}
-
-
-Tracer &Tracer::operator()(size_t i)
-{    
-    return operator()( to_string(i) );
-}
-
-
-Tracer &Tracer::operator()(const exception &e)
+Tracer &Tracer::operator()(const char *fmt, ...)
 {
-    return operator()( e.what() );
+    va_list vl;
+    va_start( vl, fmt );
+    string s = VSSPrintf( fmt, vl );
+    va_end( vl );
+
+    return operator()(s);
 }
 
 

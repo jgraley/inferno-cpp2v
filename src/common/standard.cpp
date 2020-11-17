@@ -7,7 +7,7 @@ string VSSPrintf(const char *fmt, va_list vl)
 {
     char cs[1024];    
     vsnprintf( cs, sizeof(cs), fmt, vl );  
-    cs[sizeof(cs)-1] = '\0';
+    //cs[sizeof(cs)-1] = '\0';
     return string(cs);
 }
 
@@ -80,8 +80,7 @@ string Traceable::Denamespace( string s )
             part = part.substr(p+2);
         s += part;
     }
-    
-    
+        
     return s;
 }
 
