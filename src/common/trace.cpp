@@ -7,6 +7,8 @@
 #include <execinfo.h>
 #endif
 
+#include <iostream>
+
 bool Tracer::require_endl = false;
 bool Tracer::require_banner = true;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
@@ -21,9 +23,9 @@ void Tracer::Descend::Indent()
     // any actual traces at the lower indent level. Just do a blank trace that leaves
     // a visible gap (the "<" was confusing; gap suffices). 
     if( leftmost_pre.size() < last_traced_pre.size() && leftmost_pre.size() < pre.size() )
-        fprintf(stderr, "%s\n", leftmost_pre.c_str());
+        clog << leftmost_pre << endl;
     last_traced_pre = leftmost_pre = pre;
-    fprintf(stderr, "%s ", pre.c_str());
+    clog << pre.c_str() << " ";
 }
 
 
@@ -63,9 +65,9 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) 
     if( flags & ABORT )
     {
         MaybePrintEndl();
-        fprintf( stderr, "\n");
+        clog << endl;
         PrintPrefix();
-        fprintf( stderr, "----ASSERTION FAILED: %s\n", c);
+        clog << SSPrintf( "----ASSERTION FAILED: %s", c ) << endl;
         MaybePrintBanner();
     }
 }
@@ -102,27 +104,32 @@ Tracer &Tracer::operator()()
 
 Tracer &Tracer::operator()(const char *fmt, ...)
 {
-    if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
-        return *this;
-
     va_list vl;
     va_start( vl, fmt );
-    if( !require_endl ) 
-    {    	
-        MaybePrintBanner();
-        PrintPrefix();
-    }
-    vfprintf( stderr, fmt, vl );
+    char buf[1024];
+    vsprintf( buf, fmt, vl );
     va_end( vl );
-    
-    require_endl = (strlen(fmt)==0 || fmt[strlen(fmt)-1]!='\n');
-    return *this;
+    string s(buf);
+
+    return operator()(s);
 }
 
 
 Tracer &Tracer::operator()(const string &s)
 {    
-    return operator()("%s", s.c_str());
+    if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
+        return *this;
+
+    if( !require_endl ) 
+    {    	
+        MaybePrintBanner();
+        PrintPrefix();
+    }
+    
+    clog << s;
+    
+    require_endl = (s.empty() || s.back() != '\n');
+    return *this;    
 }
 
 
@@ -134,7 +141,7 @@ Tracer &Tracer::operator()(const Traceable &s)
 
 Tracer &Tracer::operator()(bool b)
 {    
-    return operator()(b?"true":"false");
+    return operator()( b?string("true"):string("false") );
 }
 
 
@@ -166,7 +173,7 @@ void Tracer::MaybePrintEndl()
 {
     if( require_endl ) 
     {
-        fprintf(stderr, "\n");
+        clog << endl;
         require_endl = false;
     }   
 }
@@ -208,16 +215,16 @@ void Tracer::PrintPrefix()
         case -4: // inputting
             break;
         case -3: // inputting
-            fprintf( stderr, "I  " );
+            clog << "I  ";
             break;
         case -2: // outputting
-            fprintf( stderr, "O  " );
+            clog << "O  ";
             break;
         case -1: // planning
-            fprintf( stderr, "P  " );  
+            clog << "P  ";
             break;
         default: // during a step
-            fprintf( stderr, "%03d", current_step );  
+            clog << SSPrintf( "%03d", current_step );  
             break;
     }
     Descend::Indent();
@@ -229,7 +236,7 @@ void Tracer::MaybePrintBanner()
     if( require_banner && (file != "" || line != 0 || function != "") )
     {
         PrintPrefix();
-        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
+        clog << SSPrintf("----%s:%d in %s()", file, line, function) << endl;
         require_banner = false;
     }    
 }

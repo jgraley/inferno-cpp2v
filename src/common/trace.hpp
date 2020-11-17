@@ -141,15 +141,21 @@ public:
     template<typename T>
     Tracer &operator()(const T *p) 
     {
-        operator()("&");
-        return operator()(*p);        
+        if( p )
+        {
+            operator()("&");
+            return operator()(*p);        
+        }
+        else
+        {
+            return operator()("NULL");
+        }
     }
 
     template<typename T>
     Tracer &operator()(shared_ptr<T> p) 
     {
-        operator()("&");
-        return operator()(*p);        
+        return operator()(p.get());        
     }
 
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
