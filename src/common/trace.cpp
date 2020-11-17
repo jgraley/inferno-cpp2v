@@ -106,10 +106,8 @@ Tracer &Tracer::operator()(const char *fmt, ...)
 {
     va_list vl;
     va_start( vl, fmt );
-    char buf[1024];
-    vsprintf( buf, fmt, vl );
+    string s = VSSPrintf( fmt, vl );
     va_end( vl );
-    string s(buf);
 
     return operator()(s);
 }

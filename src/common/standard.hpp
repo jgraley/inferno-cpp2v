@@ -8,6 +8,7 @@
 #include <bits/stdint-uintn.h>
 #include <memory>
 #include <algorithm>
+#include <stdarg.h>
 
 // JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
 #include <boost/foreach.hpp>
@@ -20,6 +21,7 @@ using namespace std;
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
 // sprintf into a std::string
+string VSSPrintf(const char *fmt, va_list vl);
 string SSPrintf(const char *fmt, ...);
 
 void CommonTest();

@@ -43,8 +43,9 @@ public:
     Tracer( Flags fl=(Flags)0, const char *c=0 );
     ~Tracer();
     Tracer &operator()();
-    Tracer &operator()(const char *fmt, ...);
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
+
+    Tracer &operator()(const char *fmt, ...);
     Tracer &operator()(const Traceable &s); 
     Tracer &operator()(bool b); 
     Tracer &operator()(int i); 

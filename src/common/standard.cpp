@@ -1,19 +1,24 @@
 #include "standard.hpp"
 #include "trace.hpp"
-#include <stdarg.h>
 #include <cxxabi.h>
 #include <stdio.h>
 
+string VSSPrintf(const char *fmt, va_list vl)
+{
+    char cs[1024];    
+    vsnprintf( cs, sizeof(cs), fmt, vl );  
+    cs[sizeof(cs)-1] = '\0';
+    return string(cs);
+}
+
 string SSPrintf(const char *fmt, ...)
 {
-    char cs[256];
-
     va_list vl;
     va_start( vl, fmt );
-    vsnprintf( cs, sizeof(cs), fmt, vl );
+    string s = VSSPrintf(fmt, vl);
     va_end( vl );
     
-    return string(cs);
+    return s;
 }
 
 void CommonTest()
