@@ -87,7 +87,9 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
             ts[2]++;
         }
         else
-            ASSERTFAIL("huh?\n");
+        {
+            ASSERTFAIL("huh?\n");            
+        }
     }
      
     // Transitive property
@@ -117,7 +119,9 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
                 tt[2]++;
             }
             else
+            {
                 ASSERTFAIL("huh?\n");
+            }
         }
         else if( ab_cr < EQUAL )        // a < b
         {
@@ -133,11 +137,12 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
             }
             else if( bc_cr > EQUAL )        // b > c
             {
-                ASSERT( true ); // no information relating a to c
-                tt[5]++;
+                // no information relating a to c
             }
             else
+            {
                 ASSERTFAIL("huh?\n");
+            }
         }
         else if( ab_cr > EQUAL )        // a > b
         {
@@ -148,8 +153,7 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
             }
             else if( bc_cr < EQUAL )        // b < c
             {
-                ASSERT( true ); // no information relating a to c
-                tt[7]++;
+                // no information relating a to c
             }
             else if( bc_cr > EQUAL )        // b > c
             {
@@ -157,10 +161,14 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
                 tt[8]++;
             }
             else
+            {
                 ASSERTFAIL("huh?\n");
+            }
         }
         else
+        {
             ASSERTFAIL("huh?\n");
+        }
     }    
     
     // See #210 for some results
