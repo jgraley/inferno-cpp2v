@@ -17,33 +17,33 @@ string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
 
 using namespace std;
 
-string MyTrace(const Traceable &t)
+string Trace(const Traceable &t)
 {    
     return t.GetTrace();
 }
 
 
-string MyTrace(bool b)
+string Trace(bool b)
 {    
     return b?string("true"):string("false");
 }
 
 
-string MyTrace(int i)
+string Trace(int i)
 {    
     return to_string(i);
 }
 
 
-string MyTrace(size_t i)
+string Trace(size_t i)
 {    
     return to_string(i);
 }
 
 
-string MyTrace(const exception &e)
+string Trace(const exception &e)
 {
-    return string( e.what() );
+    return string( e.what() ? e.what() : "exception:what()=NULL" );
 }
 
 

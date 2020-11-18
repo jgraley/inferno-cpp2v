@@ -31,14 +31,14 @@ using namespace std;
 #define CONTAINER_SEP ",\n"    
     
     
-string MyTrace(const Traceable &t); 
-string MyTrace(bool b); 
-string MyTrace(int i); 
-string MyTrace(size_t i); 
-string MyTrace(const exception &e); 
+string Trace(const Traceable &t); 
+string Trace(bool b); 
+string Trace(int i); 
+string Trace(size_t i); 
+string Trace(const exception &e); 
 
 template<typename T>
-string MyTrace(const list<T> &l) 
+string Trace(const list<T> &l) 
 {
     string str = "[";
     bool first = true;
@@ -46,7 +46,7 @@ string MyTrace(const list<T> &l)
     {
         if( !first )
             str += CONTAINER_SEP;
-        str += MyTrace(x);
+        str += Trace(x);
         first = false;
     }
     return str + "]";
@@ -54,7 +54,7 @@ string MyTrace(const list<T> &l)
 
 
 template<typename T>
-string MyTrace(const vector<T> &l) 
+string Trace(const vector<T> &l) 
 {
     string str = "[";
     bool first = true;
@@ -62,7 +62,7 @@ string MyTrace(const vector<T> &l)
     {
         if( !first )
             str += CONTAINER_SEP;
-        str += MyTrace(x);
+        str += Trace(x);
         first = false;
     }
     return str + "]";
@@ -70,7 +70,7 @@ string MyTrace(const vector<T> &l)
 
 
 template<typename T>
-string MyTrace(const set<T> &s) 
+string Trace(const set<T> &s) 
 {
     string str = "{";
     bool first = true;
@@ -78,7 +78,7 @@ string MyTrace(const set<T> &s)
     {
         if( !first )
             str += CONTAINER_SEP;
-        str += MyTrace(x);
+        str += Trace(x);
         first = false;            
     }
     return str + "}";
@@ -86,7 +86,7 @@ string MyTrace(const set<T> &s)
 
 
 template<typename T>
-string MyTrace(const multiset<T> &s) 
+string Trace(const multiset<T> &s) 
 {
     string str = "{";
     bool first = true;
@@ -94,7 +94,7 @@ string MyTrace(const multiset<T> &s)
     {
         if( !first )
             str += CONTAINER_SEP;
-        str += MyTrace(x);
+        str += Trace(x);
         first = false;            
     }
     return str + "}";
@@ -102,7 +102,7 @@ string MyTrace(const multiset<T> &s)
 
 
 template<typename TK, typename TV>
-string MyTrace(const map<TK, TV> &m) 
+string Trace(const map<TK, TV> &m) 
 {
     string str = "{";
     bool first = true;
@@ -110,9 +110,9 @@ string MyTrace(const map<TK, TV> &m)
     {
         if( !first )
             str += CONTAINER_SEP;
-        str += MyTrace(p.first);
+        str += Trace(p.first);
         str += ": ";
-        str += MyTrace(p.second);
+        str += Trace(p.second);
         first = false;            
     }
     return str + "}";
@@ -120,22 +120,22 @@ string MyTrace(const map<TK, TV> &m)
 
 
 template<typename TF, typename TS>
-string MyTrace(const pair<TF, TS> &p) 
+string Trace(const pair<TF, TS> &p) 
 {
     string str = "(";
-    str += MyTrace(p.first);
+    str += Trace(p.first);
     str += ", ";
-    str += MyTrace(p.second);
+    str += Trace(p.second);
     return str + ")";
 }
 
 
 template<typename T>
-string MyTrace(const T *p) 
+string Trace(const T *p) 
 {
     if( p )
     {
-        return string("&") + MyTrace(*p);        
+        return string("&") + Trace(*p);        
     }
     else
     {
@@ -145,9 +145,9 @@ string MyTrace(const T *p)
 
 
 template<typename T>
-string MyTrace(shared_ptr<T> p) 
+string Trace(shared_ptr<T> p) 
 {
-    return MyTrace(p.get());        
+    return Trace(p.get());        
 }
     
     
@@ -170,7 +170,7 @@ public:
     template<typename T>
     Tracer &operator()(const T &x)
     {
-        return operator()( MyTrace(x) );
+        return operator()( Trace(x) );
     }
     
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
@@ -223,6 +223,7 @@ private:
     static bool enable;
     static int current_step;
 };
+
 
 #define INFERNO_CURRENT_FUNCTION __func__
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
