@@ -12,6 +12,8 @@ using namespace SR;
 #define WHODAT() nullptr
 #endif
  
+#define ALIGNMENT_BITS 3 
+
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink()
@@ -81,6 +83,12 @@ bool PatternLink::operator==(const PatternLink &other) const
 bool PatternLink::operator==(const LocatedLink &other) const
 {
     return *this == other.plink;
+}
+
+
+size_t PatternLink::GetHash() const noexcept
+{
+    return std::hash<decltype(asp_pattern)>()(asp_pattern) >> ALIGNMENT_BITS;
 }
 
 
@@ -206,6 +214,12 @@ bool XLink::operator==(const XLink &other) const
 }
 
 
+size_t XLink::GetHash() const noexcept
+{
+    return std::hash<decltype(asp_x)>()(asp_x) >> ALIGNMENT_BITS; 
+}
+
+
 XLink::operator bool() const
 {
     return asp_x != nullptr;
@@ -279,6 +293,12 @@ bool LocatedLink::operator!=(const LocatedLink &other) const
 bool LocatedLink::operator==(const LocatedLink &other) const
 {
     return plink == other.plink && xlink == other.xlink;
+}
+
+
+size_t LocatedLink::GetHash() const noexcept
+{
+    return plink.GetHash() + xlink.GetHash();
 }
 
 

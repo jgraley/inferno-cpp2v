@@ -31,6 +31,7 @@ public:
     bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;
     bool operator==(const LocatedLink &other) const;
+    size_t GetHash() const noexcept;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
     TreePtr<Node> GetPattern() const;
@@ -63,6 +64,7 @@ public:
     bool operator<(const XLink &other) const;
     bool operator!=(const XLink &other) const;
     bool operator==(const XLink &other) const;
+    size_t GetHash() const noexcept;    
     explicit operator bool() const;
     TreePtr<Node> GetChildX() const;
     string GetTrace() const; // used for debug
@@ -96,6 +98,7 @@ public:
     bool operator<(const LocatedLink &other) const;
     bool operator!=(const LocatedLink &other) const;
     bool operator==(const LocatedLink &other) const;
+    size_t GetHash() const noexcept;    
     explicit operator bool() const;
     operator pair<const PatternLink, XLink>() const;
     Agent *GetChildAgent() const;
@@ -121,5 +124,23 @@ typedef XLink CouplingKey;
 typedef map< Agent *, CouplingKey > CouplingKeysMap;
 
 };
+
+namespace std
+{
+    template<> struct hash<SR::PatternLink>
+    {
+        size_t operator()(const SR::PatternLink &plink) const noexcept
+        {
+            return plink.GetHash();
+        }
+    };
+    template<> struct hash<SR::XLink>
+    {
+        size_t operator()(const SR::XLink &xlink) const noexcept
+        {
+            return xlink.GetHash();
+        }
+    };
+}
 
 #endif

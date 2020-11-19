@@ -26,10 +26,13 @@ using namespace std;
 #include <list>
 #include <set>
 #include <map>
+#include <unordered_set>
+#include <unordered_map>
 #include <exception>
 	
 #define CONTAINER_SEP ",\n"    
     
+////////////////////////// Trace() free functions //////////////////////////
     
 string Trace(const Traceable &t); 
 string Trace(bool b); 
@@ -38,18 +41,34 @@ string Trace(size_t i);
 string Trace(const exception &e); 
 
 template<typename T>
-string Trace(const list<T> &l) 
+string Trace(const T *p) 
 {
-    string str = "[";
-    bool first = true;
-    for( auto x : l )
+    if( p )
     {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;
+        return string("&") + Trace(*p);        
     }
-    return str + "]";
+    else
+    {
+        return string("NULL");
+    }
+}
+
+
+template<typename T>
+string Trace(shared_ptr<T> p) 
+{
+    return Trace(p.get());        
+}
+    
+    
+template<typename TF, typename TS>
+string Trace(const pair<TF, TS> &p) 
+{
+    string str = "(";
+    str += Trace(p.first);
+    str += ", ";
+    str += Trace(p.second);
+    return str + ")";
 }
 
 
@@ -70,23 +89,23 @@ string Trace(const vector<T> &l)
 
 
 template<typename T>
-string Trace(const set<T> &s) 
+string Trace(const list<T> &l) 
 {
-    string str = "{";
+    string str = "[";
     bool first = true;
-    for( auto x : s )
+    for( auto x : l )
     {
         if( !first )
             str += CONTAINER_SEP;
         str += Trace(x);
-        first = false;            
+        first = false;
     }
-    return str + "}";
+    return str + "]";
 }
 
 
 template<typename T>
-string Trace(const multiset<T> &s) 
+string Trace(const set<T> &s) 
 {
     string str = "{";
     bool first = true;
@@ -119,38 +138,72 @@ string Trace(const map<TK, TV> &m)
 }
 
 
-template<typename TF, typename TS>
-string Trace(const pair<TF, TS> &p) 
+template<typename T>
+string Trace(const multiset<T> &s) 
 {
-    string str = "(";
-    str += Trace(p.first);
-    str += ", ";
-    str += Trace(p.second);
-    return str + ")";
+    string str = "{";
+    bool first = true;
+    for( auto x : s )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += Trace(x);
+        first = false;            
+    }
+    return str + "}";
+}
+
+template<typename T>
+string Trace(const unordered_set<T> &s) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto x : s )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += Trace(x);
+        first = false;            
+    }
+    return str + "}";
+}
+
+
+template<typename TK, typename TV>
+string Trace(const unordered_map<TK, TV> &m) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto p : m )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += Trace(p.first);
+        str += ": ";
+        str += Trace(p.second);
+        first = false;            
+    }
+    return str + "}";
 }
 
 
 template<typename T>
-string Trace(const T *p) 
+string Trace(const unordered_multiset<T> &s) 
 {
-    if( p )
+    string str = "{";
+    bool first = true;
+    for( auto x : s )
     {
-        return string("&") + Trace(*p);        
+        if( !first )
+            str += CONTAINER_SEP;
+        str += Trace(x);
+        first = false;            
     }
-    else
-    {
-        return string("NULL");
-    }
+    return str + "}";
 }
 
+////////////////////////// Tracer //////////////////////////
 
-template<typename T>
-string Trace(shared_ptr<T> p) 
-{
-    return Trace(p.get());        
-}
-    
-    
 class Tracer
 {
 public:
@@ -224,6 +277,7 @@ private:
     static int current_step;
 };
 
+////////////////////////// The fiddly stuff //////////////////////////
 
 #define INFERNO_CURRENT_FUNCTION __func__
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find

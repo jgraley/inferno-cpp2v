@@ -76,26 +76,26 @@ public:
         Agent * const root_agent;
         const set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
-        set<PatternLink> my_normal_links;
-        set< Agent *> my_evaluators;   
-        map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
-        map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
-        map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
-        set<Agent *> master_boundary_agents;
-        set<PatternLink> master_boundary_keyer_links;
-        set<PatternLink> master_boundary_residual_links;
-        set<PatternLink> coupling_keyer_links;
-        set<PatternLink> coupling_residual_links;
-        set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link
+        unordered_set<PatternLink> my_normal_links;
+        unordered_set< Agent *> my_evaluators;   
+        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
+        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
+        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
+        unordered_map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
+        unordered_set<Agent *> master_boundary_agents;
+        unordered_set<PatternLink> master_boundary_keyer_links;
+        unordered_set<PatternLink> master_boundary_residual_links;
+        unordered_set<PatternLink> coupling_keyer_links;
+        unordered_set<PatternLink> coupling_residual_links;
+        unordered_set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
         list<PatternLink> normal_links_ordered;
-        map<Agent *, PatternLink> agent_to_keyer;
+        unordered_map<Agent *, PatternLink> agent_to_keyer;
         
     private: // working variables in plan construction
-        set<Agent *> reached_agents;
-        set<PatternLink> reached_links; 
+        unordered_set<Agent *> reached_agents;
+        unordered_set<PatternLink> reached_links; 
     } plan;
     
 private:    
