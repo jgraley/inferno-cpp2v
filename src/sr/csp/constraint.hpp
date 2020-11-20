@@ -22,6 +22,9 @@ namespace CSP
 { 
 typedef SR::XLink Value;
 typedef SR::PatternLink VariableId;
+typedef unordered_map<VariableId, Value> Assignments;
+typedef Assignments Solution;
+
 
 void CheckLocalMatch( VariableId variable, Value value );
 
@@ -58,7 +61,7 @@ public:
      * 
      * @param forces [in] a map from varaibles to forced values
      */    
-    virtual void SetForces( const map<VariableId, Value> &forces ) = 0;    
+    virtual void SetForces( const Assignments &forces ) = 0;    
     
     /**
      * Test a list of free variable values for inclusion in the constraint.

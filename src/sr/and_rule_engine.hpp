@@ -102,7 +102,7 @@ public:
     } plan;
     
 private:    
-    typedef map< PatternLink, XLink > SolutionMap;
+    typedef unordered_map< PatternLink, XLink > SolutionMap;
 
     void StartCSPSolver( XLink root_xlink );
     void GetNextCSPSolution();

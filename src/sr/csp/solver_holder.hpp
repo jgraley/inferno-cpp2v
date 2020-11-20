@@ -35,7 +35,7 @@ public:
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
     void Start( const set<Value> &initial_domain, 
-                const Solver::Assignments &forces );
+                const Assignments &forces );
 
     /**
      * Try to extract a single solution from the solver. 
@@ -47,15 +47,15 @@ public:
      * @retval true A solution was found, and non-null arguments are filled in
      * @retval false No solutions are left, and the pointer arguments are unused
      */
-    bool GetNextSolution( Solver::Solution *solution = nullptr );
+    bool GetNextSolution( Solution *solution = nullptr );
 
  
 private:
-    void ReportSolution( const Solver::Solution &solution );
+    void ReportSolution( const Solution &solution );
 
     const shared_ptr<Solver> solver;
 
-    list<Solver::Solution> solutions_queue;    
+    list<Solution> solutions_queue;    
 };
 
 };

@@ -75,7 +75,7 @@ private:
     int GetFreeDegree() const;
     list<VariableId> GetFreeVariables() const;
     void TraceProblem() const;
-    virtual void SetForces( const map<VariableId, Value> &forces );    
+    virtual void SetForces( const Assignments &forces );    
     bool Test( list< Value > values );
         
     class ByLocationLinkMismatch : public ::Mismatch

@@ -25,8 +25,7 @@ class SolverHolderReportInterface;
 class Solver : public Traceable
 {
 public:
-    typedef map<VariableId, Value> Assignments;
-    typedef Assignments Solution;
+
     /**
      * Interface presented to Solver objects for discovered solution reportage.
      */    

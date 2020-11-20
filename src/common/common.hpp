@@ -23,11 +23,11 @@ private:
 };
 
 
-template< typename KEY, typename T >
-inline void InsertSolo( map<KEY, T> &m, const typename map<KEY, T>::value_type &p )
+template< typename S >
+inline void InsertSolo( S &s, const typename S::value_type &p )
 {
-    ASSERT( m.count(p.first) == 0 )(p)(" already in map ")(m);
-    m.insert( p );
+    auto pr = s.insert( p );
+    ASSERT( pr.second );
 }
 
 
@@ -44,8 +44,8 @@ inline S1 UnionOf( const S1 &s1, const S2 &s2 )
 }
 
 
-// Union two sets, without the pain of iterators
-// Union two maps. Second overrules first!!
+// Union any compatible associative containers, ordered
+// or otherwise. Sets must be disjoint.
 template< typename S1, typename S2 >
 inline S1 UnionOfSolo( const S1 &s1, const S2 &s2 )
 {
@@ -60,7 +60,8 @@ inline S1 UnionOfSolo( const S1 &s1, const S2 &s2 )
 }
 
 
-// Intersect two sets, without the pain of iterators
+// Intersect any compatible associative containers, ordered
+// or otherwise.
 template< typename S1, typename S2 >
 inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 {
@@ -72,7 +73,8 @@ inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 }
 
 
-// Intersect set with complement, without the pain of iterators
+// Intersect set with complement, any compatible associative 
+// containers, ordered or otherwise.
 template< typename S1, typename S2 >
 inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 {

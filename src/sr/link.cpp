@@ -381,7 +381,7 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
 */
 
 list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                          const map< PatternLink, XLink > &basic_solution )
+                                          const unordered_map< PatternLink, XLink > &basic_solution )
 {
     list<LocatedLink> llinks;
     for( PatternLink plink : plinks )

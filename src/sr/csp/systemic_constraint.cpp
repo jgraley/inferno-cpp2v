@@ -90,7 +90,7 @@ void SystemicConstraint::TraceProblem() const
 }
 
 
-void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_map )
+void SystemicConstraint::SetForces( const Assignments &forces_map )
 {
     forces.clear();
     for( auto var : plan.all_variables )

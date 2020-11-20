@@ -117,7 +117,7 @@ private: friend class PatternLink; friend class XLink;
 //bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 
 list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                      const map< PatternLink, XLink > &keys );
+                                      const unordered_map< PatternLink, XLink > &keys );
 void EnsureNotOnStack( const void *p, string trace="" );
 
 typedef XLink CouplingKey;

@@ -15,20 +15,20 @@ SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
 
 
 void SolverHolder::Start( const set<Value> &initial_domain, 
-                          const Solver::Assignments &forces )
+                          const Assignments &forces )
 {
     solutions_queue.clear();
     solver->Run( this, initial_domain, forces);
 }
 
 
-void SolverHolder::ReportSolution( const Solver::Solution &solution )
+void SolverHolder::ReportSolution( const Solution &solution )
 {
     solutions_queue.push_back( solution );
 }
 
 
-bool SolverHolder::GetNextSolution( Solver::Solution *solution )
+bool SolverHolder::GetNextSolution( Solution *solution )
 {
     if( solutions_queue.empty() )
         return false;
