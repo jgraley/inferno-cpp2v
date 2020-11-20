@@ -83,7 +83,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
                         
 
 void SimpleSolver::Run( ReportageObserver *holder_, 
-                        const set< Value > &initial_domain_,
+                        const unordered_set< Value > &initial_domain_,
                         const Assignments &forces )
 {
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");

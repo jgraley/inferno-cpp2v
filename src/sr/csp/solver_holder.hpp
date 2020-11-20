@@ -34,7 +34,7 @@ public:
      * 
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
-    void Start( const set<Value> &initial_domain, 
+    void Start( const unordered_set<Value> &initial_domain, 
                 const Assignments &forces );
 
     /**

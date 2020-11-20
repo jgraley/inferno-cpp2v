@@ -392,11 +392,11 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 }
 
 
-set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( const set<XLink> &xlinks )
+unordered_set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
 {
     Conjecture conj(this);            
 
-    set<XLink> extra;
+    unordered_set<XLink> extra;
     for( XLink xlink : xlinks )
     {
         conj.Start();

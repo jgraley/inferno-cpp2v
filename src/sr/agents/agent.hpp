@@ -54,7 +54,7 @@ public:
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const = 0;            
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
-    virtual set<XLink> ExpandNormalDomain( const set<XLink> &xlinks ) = 0;
+    virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
     // function<XLink(XLink)> deduplicator
 
     virtual CouplingKey GetKey() = 0;                                  
@@ -93,7 +93,7 @@ public:
                                        XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
     virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
-    virtual set<XLink> ExpandNormalDomain( const set<XLink> &xlinks ) { return set<XLink>(); /* implement in agents that can expand the domain */ }
+    virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return unordered_set<XLink>(); /* implement in agents that can expand the domain */ }
 
 protected:
     void SetKey( CouplingKey x );
@@ -136,7 +136,7 @@ public:
 
 class AgentCommonDomainExtender : public AgentCommon
 {
-    virtual set<XLink> ExpandNormalDomain( const set<XLink> &xlinks );
+    virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
 };
 
 

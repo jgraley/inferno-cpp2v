@@ -64,7 +64,7 @@ private:
     } plan;
 public:
     void GatherCouplings( CouplingKeysMap *coupling_keys ) const;    
-    void ExtendDomain( PatternLink plink, set<XLink> &domain );
+    void ExtendDomain( PatternLink plink, unordered_set<XLink> &domain );
     void DetermineDomain( XLink root_xlink );
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                const CouplingKeysMap *master_keys );
@@ -94,7 +94,7 @@ private:
     vector<int> stop_after;
     int depth;    
     
-    set<XLink> domain;    
+    unordered_set<XLink> domain;    
     shared_ptr<QuotientSet> domain_extension_classes;
 
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves

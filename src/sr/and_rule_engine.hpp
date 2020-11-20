@@ -122,7 +122,7 @@ private:
 public:
     void Compare( XLink root_xlink,
                   const CouplingKeysMap *master_keys,
-                  set<XLink> *domain );
+                  unordered_set<XLink> *domain );
     void CompareTrivialProblem( LocatedLink root_link );
     void Compare( TreePtr<Node> root_xnode );
     void EnsureChoicesHaveIterators();
@@ -136,7 +136,7 @@ private:
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, XLink new_xlink, Agent *parent_agent );
 
     // Global domain of possible xlink values
-    set<XLink> *domain;
+    unordered_set<XLink> *domain;
 
     // Keys are mapped agaist agents, even though one of the links into
     // the agent is the keyer. This is well-defined and avoids merging

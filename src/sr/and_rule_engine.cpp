@@ -684,7 +684,7 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( XLink root_xlink,
                              const CouplingKeysMap *master_keys_,
-                             set<XLink> *domain_ )
+                             unordered_set<XLink> *domain_ )
 {
     INDENT("C");
     ASSERT( root_xlink );
@@ -775,7 +775,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
 void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
     CouplingKeysMap empty_master_keys;
-    set<XLink> empty_domain;
+    unordered_set<XLink> empty_domain;
     XLink root_xlink = XLink::CreateDistinct(root_xnode);
     Compare( root_xlink, &empty_master_keys, &empty_domain );
 }

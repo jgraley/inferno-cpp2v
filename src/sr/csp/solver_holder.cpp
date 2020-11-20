@@ -14,7 +14,7 @@ SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
 }
 
 
-void SolverHolder::Start( const set<Value> &initial_domain, 
+void SolverHolder::Start( const unordered_set<Value> &initial_domain, 
                           const Assignments &forces )
 {
     solutions_queue.clear();

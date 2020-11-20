@@ -262,11 +262,11 @@ XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 }
 
 
-void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
+void SCREngine::ExtendDomain( PatternLink plink, unordered_set<XLink> &domain )
 {
     // Extend locally first and then pass that into children.
 
-    set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
+    unordered_set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
     if( !extra.empty() )
         TRACEC("Extra domain for ")(plink)(" is ")(extra)("\n");
     domain = UnionOf( domain, extra );
