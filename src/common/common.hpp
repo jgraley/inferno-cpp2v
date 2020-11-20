@@ -4,9 +4,6 @@
 #include "standard.hpp"
 #include "trace.hpp"
 
-// We need this for unordered_set etc
-#define SIMPLE_SET_STUFF
-
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
 class AutoPush
@@ -26,20 +23,6 @@ private:
 };
 
 
-// Union two maps. Second overrules first!!
-template< typename KEY, typename T >
-inline map<KEY, T> MapUnion( const map<KEY, T> &m1, const map<KEY, T> &m2 )
-{
-	typedef pair<KEY, T> Pair;
-    map<KEY, T> result = m1;
-    for( Pair p : m2 )
-    {
-		result[p.first] = p.second;
-    }
-    return result; 
-}
-
-
 template< typename KEY, typename T >
 inline void InsertSolo( map<KEY, T> &m, const typename map<KEY, T>::value_type &p )
 {
@@ -49,56 +32,54 @@ inline void InsertSolo( map<KEY, T> &m, const typename map<KEY, T>::value_type &
 
 
 // Union two sets, without the pain of iterators
+// Union two maps. Second overrules first!!
 template< typename S1, typename S2 >
-inline S1 SetUnion( const S1 &s1, const S2 &s2 )
+inline S1 UnionOf( const S1 &s1, const S2 &s2 )
 {
     S1 result;
-#ifdef SIMPLE_SET_STUFF
     result = s1;
     for( auto x : s2 )
         result.insert(x);
-#else
-    std::set_union( s1.begin(), s1.end(), 
-                    s2.begin(), s2.end(),
-                    std::inserter(result, result.end()) );
-    
-#endif
+    return result; 
+}
+
+
+// Union two sets, without the pain of iterators
+// Union two maps. Second overrules first!!
+template< typename S1, typename S2 >
+inline S1 UnionOfSolo( const S1 &s1, const S2 &s2 )
+{
+    S1 result;
+    result = s1;
+    for( auto x : s2 )
+    {
+        auto p = result.insert(x);
+        ASSERT( p.second );
+    }
     return result; 
 }
 
 
 // Intersect two sets, without the pain of iterators
 template< typename S1, typename S2 >
-inline S1 SetIntersection( const S1 &s1, const S2 &s2 )
+inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 {
     S1 result;
-#ifdef SIMPLE_SET_STUFF
     for( auto x : s2 )
         if( s1.count(x) > 0 )
-            result.insert(x);
-#else
-    std::set_intersection( s1.begin(), s1.end(), 
-                           s2.begin(), s2.end(),
-                           std::inserter(result, result.end()) );
-#endif                           
+            result.insert(x);                     
     return result; 
 }
 
 
 // Intersect set with complement, without the pain of iterators
 template< typename S1, typename S2 >
-inline S1 SetDifference( const S1 &s1, const S2 &s2 )
+inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 {
     S1 result;
-#ifdef SIMPLE_SET_STUFF
     result = s1;
     for( auto x : s2 )
-        result.erase(x);
-#else
-    std::set_difference( s1.begin(), s1.end(), 
-                         s2.begin(), s2.end(),
-                         std::inserter(result, result.end()) );
-#endif                         
+        result.erase(x);                 
     return result; // There, much nicer!
 }    
 

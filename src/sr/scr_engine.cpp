@@ -127,7 +127,7 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.        
     my_agents = make_shared< unordered_set<Agent *> >();
-    *my_agents = SetDifference( visible_agents, master_agents );         
+    *my_agents = DifferenceOf( visible_agents, master_agents );         
 
     // Determine who our slaves are
     FOREACH( Agent *a, *my_agents )
@@ -140,7 +140,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
                                        const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Determine which agents our slaves should not configure
-    unordered_set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
+    unordered_set<Agent *> surrounding_agents = UnionOf( master_agents, *my_agents ); 
             
     FOREACH( AgentCommonNeedSCREngine *a, my_agents_needing_engines )
     {
@@ -269,7 +269,7 @@ void SCREngine::ExtendDomain( PatternLink plink, set<XLink> &domain )
     set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
     if( !extra.empty() )
         TRACEC("Extra domain for ")(plink)(" is ")(extra)("\n");
-    domain = SetUnion( domain, extra );
+    domain = UnionOf( domain, extra );
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.
@@ -360,8 +360,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 
     if( !plan.my_engines.empty() )
     {
-		CouplingKeysMap coupling_keys = MapUnion( *master_keys, 
-                                                  plan.and_rule_engine->GetCouplingKeys() );    
+		CouplingKeysMap coupling_keys = UnionOfSolo( *master_keys, 
+                                                   plan.and_rule_engine->GetCouplingKeys() );    
 		
         for( const pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );

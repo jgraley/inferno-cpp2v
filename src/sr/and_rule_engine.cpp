@@ -51,11 +51,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         if( master_agents.count( plink.GetChildAgent() ) == 0 )
             my_normal_links.insert( plink );
             
-    my_normal_agents = SetDifference( normal_agents, master_agents );       
+    my_normal_agents = DifferenceOf( normal_agents, master_agents );       
     if( my_normal_agents.empty() ) 
         return;  // Early-out on trivial problems
 
-    unordered_set<Agent *> surrounding_agents = SetUnion( my_normal_agents, master_agents );         
+    unordered_set<Agent *> surrounding_agents = UnionOf( my_normal_agents, master_agents );         
     CreateSubordniateEngines( normal_agents, surrounding_agents );    
         
     reached_agents.clear();
@@ -633,7 +633,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 CompareEvaluatorLinks( agent, &subordinate_keys, &solution_for_evaluators );            
             
             // If we got here, we're done!
-            external_keys = MapUnion( provisional_external_keys, external_keys );      
+            external_keys = UnionOfSolo( provisional_external_keys, external_keys );      
             
             TRACE("Leaving while loop after %d tries\n", i);    
             break;
@@ -650,7 +650,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 void AndRuleEngine::RegenerationPass()
 {
     INDENT("R");
-    const CouplingKeysMap subordinate_keys = MapUnion( *master_keys, external_keys );          
+    const CouplingKeysMap subordinate_keys = UnionOfSolo( *master_keys, external_keys );          
     TRACEC("Subordinate keys ")(subordinate_keys)("\n");       
 
     for( auto plink : plan.coupling_keyer_links )
