@@ -116,7 +116,7 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible
     VisibleWalk tp(root_pattern); 
-    set<Agent *> visible_agents;
+    unordered_set<Agent *> visible_agents;
     for( VisibleWalk::iterator it = tp.begin(); it != tp.end(); ++it )
     {
         TreePtr<Node> n = *it;
@@ -126,7 +126,7 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.        
-    my_agents = make_shared< set<Agent *> >();
+    my_agents = make_shared< unordered_set<Agent *> >();
     *my_agents = SetDifference( visible_agents, master_agents );         
 
     // Determine who our slaves are

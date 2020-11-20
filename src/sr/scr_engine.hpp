@@ -57,8 +57,8 @@ private:
         PatternLink root_plink;
         Agent *root_agent;
         const SCREngine *master_ptr;
-        std::shared_ptr< set<Agent *> > my_agents;   
-        std::shared_ptr< set<PatternLink> > my_agent_links;   
+        std::shared_ptr< unordered_set<Agent *> > my_agents;   
+        std::shared_ptr< unordered_set<PatternLink> > my_agent_links;   
         std::map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
