@@ -46,36 +46,39 @@ public:
     {
     };
     
-    AndRuleEngine( PatternLink root_plink, const set<Agent *> &master_agents);
+    AndRuleEngine( PatternLink root_plink, 
+                   const unordered_set<Agent *> &master_agents);
     
     const struct Plan : public virtual Traceable
     {
-        Plan( AndRuleEngine *algo, PatternLink root_plink, const set<Agent *> &master_agents);
+        Plan( AndRuleEngine *algo,  
+              PatternLink root_plink, 
+              const unordered_set<Agent *> &master_agents);
         void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
         void PopulateSomeThings( PatternLink link,
-                                 const set<Agent *> &master_agents );
+                                 const unordered_set<Agent *> &master_agents );
         void DetermineKeyersModuloMatchAny( PatternLink plink,
-                                            set<Agent *> *master_agents,
-                                            set<Agent *> *match_any_agents );
+                                            unordered_set<Agent *> *master_agents,
+                                            unordered_set<Agent *> *match_any_agents );
         void DetermineKeyers( PatternLink plink,
-                              set<Agent *> master_agents );
+                              unordered_set<Agent *> master_agents );
         void DetermineResiduals( Agent *agent,
-                                 set<Agent *> master_agents );
+                                 unordered_set<Agent *> master_agents );
         void DetermineNontrivialKeyers();
-        void PopulateNormalAgents( set<Agent *> *normal_agents, 
-                                   set<PatternLink> *my_normal_links,
+        void PopulateNormalAgents( unordered_set<Agent *> *normal_agents, 
+                                   unordered_set<PatternLink> *my_normal_links,
                                    PatternLink link );
-        void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                       const set<Agent *> &surrounding_agents );
+        void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
+                                       const unordered_set<Agent *> &surrounding_agents );
  
         AndRuleEngine * const algo;
         const PatternLink root_plink;
         const TreePtr<Node> root_pattern;
         Agent * const root_agent;
-        const set<Agent *> master_agents;
-        set<Agent *> my_normal_agents;   
+        const unordered_set<Agent *> master_agents;
+        unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
         unordered_set< Agent *> my_evaluators;   
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;

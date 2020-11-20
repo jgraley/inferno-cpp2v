@@ -33,7 +33,7 @@ SCREngine::SCREngine( bool is_search_,
                       const CompareReplace *overall_master,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
-                      const set<Agent *> &master_agents,
+                      const unordered_set<Agent *> &master_agents,
                       const SCREngine *master ) :
     plan(this, is_search_, overall_master, cp, rp, master_agents, master),
     depth( 0 ),
@@ -47,7 +47,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        const CompareReplace *overall_master,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
-                       const set<Agent *> &master_agents,
+                       const unordered_set<Agent *> &master_agents,
                        const SCREngine *master ) :
     algo( algo_ ),
     is_search( is_search_ ),
@@ -110,7 +110,7 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
 }
     
 
-void SCREngine::Plan::CategoriseSubs( const set<Agent *> &master_agents, 
+void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agents, 
                                       set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
@@ -136,11 +136,11 @@ void SCREngine::Plan::CategoriseSubs( const set<Agent *> &master_agents,
 }
 
 
-void SCREngine::Plan::CreateMyEngines( const set<Agent *> &master_agents, 
-                                             const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agents, 
+                                       const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Determine which agents our slaves should not configure
-    set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
+    unordered_set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
             
     FOREACH( AgentCommonNeedSCREngine *a, my_agents_needing_engines )
     {

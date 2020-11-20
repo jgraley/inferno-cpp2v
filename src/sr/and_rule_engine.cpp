@@ -26,12 +26,15 @@
 
 using namespace SR;
 
-AndRuleEngine::AndRuleEngine( PatternLink root_plink, const set<Agent *> &master_agents_ ) :
+AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
+                              const unordered_set<Agent *> &master_agents_ ) :
     plan( this, root_plink, master_agents_ )
 {
 }    
  
-AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const set<Agent *> &master_agents_) :
+AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
+                           PatternLink root_plink_, 
+                           const unordered_set<Agent *> &master_agents_) :
     algo( algo_ ),
     root_plink( root_plink_ ),
     root_pattern( root_plink.GetPattern() ),
@@ -41,8 +44,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     TRACE(GetName());
     INDENT("P");
     
-    set<Agent *> normal_agents;
-    set<PatternLink> normal_links;
+    unordered_set<Agent *> normal_agents;
+    unordered_set<PatternLink> normal_links;
     PopulateNormalAgents( &normal_agents, &normal_links, root_plink );    
     for( PatternLink plink : normal_links )
         if( master_agents.count( plink.GetChildAgent() ) == 0 )
@@ -52,7 +55,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
     if( my_normal_agents.empty() ) 
         return;  // Early-out on trivial problems
 
-    set<Agent *> surrounding_agents = SetUnion( master_agents, my_normal_agents );         
+    unordered_set<Agent *> surrounding_agents = SetUnion( my_normal_agents, master_agents );         
     CreateSubordniateEngines( normal_agents, surrounding_agents );    
         
     reached_agents.clear();
@@ -81,7 +84,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, PatternLink root_plink_, const 
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
-    set<Agent *> check_we_got_the_right_agents;
+    unordered_set<Agent *> check_we_got_the_right_agents;
     for( PatternLink keyer_plink : coupling_keyer_links )
     {        
         // Only one constraint per agent
@@ -165,7 +168,7 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
 
 
 void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
-                                              const set<Agent *> &master_agents )
+                                              const unordered_set<Agent *> &master_agents )
 {
     if( reached_links.count(link) > 0 )    
         return; 
@@ -207,8 +210,8 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
 
         
 void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
-                                                         set<Agent *> *senior_agents,
-                                                         set<Agent *> *matchany_agents )
+                                                         unordered_set<Agent *> *senior_agents,
+                                                         unordered_set<Agent *> *matchany_agents )
 {
     if( senior_agents->count( plink.GetChildAgent() ) > 0 )
         return; // will be fixed values for our solver
@@ -237,12 +240,12 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
         
         
 void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
-                                           set<Agent *> senior_agents ) 
+                                           unordered_set<Agent *> senior_agents ) 
 {
     // Scan the senior region. We wish to break off at MatchAny nodes. Senior is the
     // region up to and including a MatchAny; junior is the region under each of its
     // links.
-    set<Agent *> my_matchany_agents;
+    unordered_set<Agent *> my_matchany_agents;
     DetermineKeyersModuloMatchAny( plink, &senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
@@ -264,7 +267,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
         
         
 void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
-                                              set<Agent *> master_agents ) 
+                                              unordered_set<Agent *> master_agents ) 
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
@@ -310,8 +313,8 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 }
 
 
-void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents, 
-                                                set<PatternLink> *normal_links,
+void AndRuleEngine::Plan::PopulateNormalAgents( unordered_set<Agent *> *normal_agents, 
+                                                unordered_set<PatternLink> *normal_links,
                                                 PatternLink link )
 {
     // Note that different links can point to the same agent, so 
@@ -334,8 +337,8 @@ void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents,
 }
 
 
-void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                                    const set<Agent *> &surrounding_agents )
+void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
+                                                    const unordered_set<Agent *> &surrounding_agents )
 {
     for( auto agent : normal_agents )
     {

@@ -4,7 +4,8 @@
 #include "standard.hpp"
 #include "trace.hpp"
 
-//#define SIMPLE_SET_UNION
+// We need this for unordered_set etc
+#define SIMPLE_SET_STUFF
 
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
@@ -48,11 +49,11 @@ inline void InsertSolo( map<KEY, T> &m, const typename map<KEY, T>::value_type &
 
 
 // Union two sets, without the pain of iterators
-template< typename KEY >
-inline set<KEY> SetUnion( const set<KEY> &s1, const set<KEY> &s2 )
+template< typename S1, typename S2 >
+inline S1 SetUnion( const S1 &s1, const S2 &s2 )
 {
-    set<KEY> result;
-#ifdef SIMPLE_SET_UNION
+    S1 result;
+#ifdef SIMPLE_SET_STUFF
     result = s1;
     for( auto x : s2 )
         result.insert(x);
@@ -67,25 +68,37 @@ inline set<KEY> SetUnion( const set<KEY> &s1, const set<KEY> &s2 )
 
 
 // Intersect two sets, without the pain of iterators
-template< typename KEY >
-inline set<KEY> SetIntersection( const set<KEY> &s1, const set<KEY> &s2 )
+template< typename S1, typename S2 >
+inline S1 SetIntersection( const S1 &s1, const S2 &s2 )
 {
-    set<KEY> result;
+    S1 result;
+#ifdef SIMPLE_SET_STUFF
+    for( auto x : s2 )
+        if( s1.count(x) > 0 )
+            result.insert(x);
+#else
     std::set_intersection( s1.begin(), s1.end(), 
-                            s2.begin(), s2.end(),
-                            std::inserter(result, result.end()) );
+                           s2.begin(), s2.end(),
+                           std::inserter(result, result.end()) );
+#endif                           
     return result; 
 }
 
 
 // Intersect set with complement, without the pain of iterators
-template< typename KEY >
-inline set<KEY> SetDifference( const set<KEY> &s1, const set<KEY> &s2 )
+template< typename S1, typename S2 >
+inline S1 SetDifference( const S1 &s1, const S2 &s2 )
 {
-    set<KEY> result;
+    S1 result;
+#ifdef SIMPLE_SET_STUFF
+    result = s1;
+    for( auto x : s2 )
+        result.erase(x);
+#else
     std::set_difference( s1.begin(), s1.end(), 
                          s2.begin(), s2.end(),
                          std::inserter(result, result.end()) );
+#endif                         
     return result; // There, much nicer!
 }    
 

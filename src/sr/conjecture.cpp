@@ -7,7 +7,7 @@
 
 namespace SR 
 {
-Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
+Conjecture::Plan::Plan( unordered_set<Agent *> my_agents, const Agent *root_agent )
 {
     last_agent = agent_records.end();
 
@@ -71,7 +71,7 @@ void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
 }
 
 
-Conjecture::Conjecture( set<Agent *> my_agents, const Agent *root_agent ) :
+Conjecture::Conjecture( unordered_set<Agent *> my_agents, const Agent *root_agent ) :
     plan( my_agents, root_agent )
 {
 }

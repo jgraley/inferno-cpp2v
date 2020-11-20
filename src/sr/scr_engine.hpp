@@ -29,7 +29,7 @@ public:
                const CompareReplace *overall_master,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
-               const set<Agent *> &master_agents = set<Agent *>(),                            
+               const unordered_set<Agent *> &master_agents = unordered_set<Agent *>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
                     
 private:
@@ -39,14 +39,14 @@ private:
               bool is_search,
               const CompareReplace *overall_master,
               TreePtr<Node> cp,
-              TreePtr<Node> rp = TreePtr<Node>(),
-              const set<Agent *> &master_agents = set<Agent *>(),                            
-              const SCREngine *master = nullptr); /* if null, you are overall master */ 
+              TreePtr<Node> rp,
+              const unordered_set<Agent *> &master_agents,                            
+              const SCREngine *master ); /* if null, you are overall master */ 
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
-        void CategoriseSubs( const set<Agent *> &master_agents, 
+        void CategoriseSubs( const unordered_set<Agent *> &master_agents, 
                              set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-        void CreateMyEngines( const set<Agent *> &master_agents,                       
+        void CreateMyEngines( const unordered_set<Agent *> &master_agents,                       
                               const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
         void ConfigureAgents();
 
