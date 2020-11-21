@@ -9,13 +9,9 @@
 
 #include <iostream>
 
-bool Tracer::require_endl = false;
-bool Tracer::require_banner = true;
-bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
-string Tracer::Descend::pre;
-string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
-
 using namespace std;
+
+////////////////////////// Trace() free functions //////////////////////////
 
 string Trace(const Traceable &t)
 {    
@@ -46,18 +42,7 @@ string Trace(const exception &e)
     return string( e.what() ? e.what() : "exception:what()=NULL" );
 }
 
-
-void Tracer::Descend::Indent()
-{
-    // Detect cases where the indent level dropped and then went up again, without
-    // any actual traces at the lower indent level. Just do a blank trace that leaves
-    // a visible gap (the "<" was confusing; gap suffices). 
-    if( leftmost_pre.size() < last_traced_pre.size() && leftmost_pre.size() < pre.size() )
-        clog << leftmost_pre << endl;
-    last_traced_pre = leftmost_pre = pre;
-    clog << pre.c_str() << " ";
-}
-
+////////////////////////// Misc free functions //////////////////////////
 
 #ifdef __GLIBC__
 inline void InfernoBacktrace()
@@ -84,6 +69,16 @@ inline void InfernoAbort()
     abort(); 
 }
 
+
+// Make BOOST_ASSERT work (we don't use them but other code might)
+void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
+{
+    Tracer::MaybePrintEndl();
+    Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n\n", expr );
+    InfernoAbort();
+}
+
+////////////////////////// Tracer //////////////////////////
 
 Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) :
     file( f ),
@@ -200,6 +195,19 @@ Tracer::Descend::~Descend()
         leftmost_pre = pre;
 }
 
+
+void Tracer::Descend::Indent()
+{
+    // Detect cases where the indent level dropped and then went up again, without
+    // any actual traces at the lower indent level. Just do a blank trace that leaves
+    // a visible gap (the "<" was confusing; gap suffices). 
+    if( leftmost_pre.size() < last_traced_pre.size() && leftmost_pre.size() < pre.size() )
+        clog << leftmost_pre << endl;
+    last_traced_pre = leftmost_pre = pre;
+    clog << pre.c_str() << " ";
+}
+
+
 void Tracer::SetStep( int s )
 {
     current_step = s;
@@ -240,17 +248,10 @@ void Tracer::MaybePrintBanner()
 }
 
 
-
-
-// Make BOOST_ASSERT work (we don't use them but other code might)
-void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
-{
-    Tracer::MaybePrintEndl();
-    Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n\n", expr );
-    InfernoAbort();
-}
-
-
 int Tracer::current_step = -4; // -4 is disable
-
+bool Tracer::require_endl = false;
+bool Tracer::require_banner = true;
+bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
+string Tracer::Descend::pre;
+string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
 

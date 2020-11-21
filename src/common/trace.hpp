@@ -283,13 +283,13 @@ private:
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
 // it can get in the way
 
-#define TRACE if(Tracer::IsEnabled()) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
+#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
 #define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
-#define TRACEC if(Tracer::IsEnabled()) Tracer()
+#define TRACEC if(!Tracer::IsEnabled()) {} else Tracer()
 #define FTRACEC Tracer(Tracer::FORCE)
 
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
-#define ASSERT(CONDITION) if(!(CONDITION)) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
