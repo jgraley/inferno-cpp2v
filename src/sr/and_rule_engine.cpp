@@ -382,7 +382,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
-    plan.solver->Start( *domain, master_and_root_links );
+    plan.solver->Start( knowledge->domain, master_and_root_links );
 }
 
 
@@ -408,7 +408,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
-        ASSERT( domain->count(link) > 0 )(link)(" not found in ")(domain)(" (see issue #202)\n");
+        ASSERT( knowledge->domain.count(link) > 0 )(link)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
 
         TRACE("Comparing normal link ")(link)
@@ -498,7 +498,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            e->Compare( xlink, subordinate_keys, domain );
+            e->Compare( xlink, subordinate_keys, knowledge );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -537,7 +537,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-            e->Compare( xe_link, subordinate_keys, domain );
+            e->Compare( xe_link, subordinate_keys, knowledge );
         }
     }
     else if( auto xscl = dynamic_cast<SubCollection *>(xsc) )
@@ -545,7 +545,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         for( XLink xe_link : xscl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, subordinate_keys, domain );
+            e->Compare( xe_link, subordinate_keys, knowledge );
         }
     }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
@@ -553,7 +553,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         for( XLink xe_link : xssl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, subordinate_keys, domain );
+            e->Compare( xe_link, subordinate_keys, knowledge );
         }
     }    
     else
@@ -577,9 +577,9 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
     if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( domain->count(base_xlink) > 0 )(base_xlink)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+        ASSERT( knowledge->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
     for( LocatedLink link : basic_solution_links )    
-        ASSERT( domain->count((XLink)link) > 0 )((XLink)link)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+        ASSERT( knowledge->domain.count((XLink)link) > 0 )((XLink)link)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
     
     // We will need a conjecture, so that we can iterate through multiple 
@@ -614,7 +614,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    e->Compare( link, &subordinate_keys, domain );
+                    e->Compare( link, &subordinate_keys, knowledge );
                     
                     // Replace needs these keys
                     KeyCoupling( provisional_external_keys, link );
@@ -687,13 +687,13 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( XLink root_xlink,
                              const CouplingKeysMap *master_keys_,
-                             unordered_set<XLink> *domain_ )
+                             const TheKnowledge *knowledge_ )
 {
     INDENT("C");
     ASSERT( root_xlink );
            
     master_keys = master_keys_;    
-    domain = domain_;
+    knowledge = knowledge_;
     
     // distinct OK because this only runs once per solve
     LocatedLink root_link( plan.root_plink, root_xlink );
@@ -702,7 +702,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
     if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( domain->count(root_xlink) > 0 )(root_xlink)(" not found in ")(domain)(" (see issue #202)\n");
+        ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
 
     if( plan.my_normal_agents.empty() )
@@ -779,9 +779,9 @@ void AndRuleEngine::Compare( XLink root_xlink,
 void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
     CouplingKeysMap empty_master_keys;
-    unordered_set<XLink> empty_domain;
+    TheKnowledge empty_knowledge;
     XLink root_xlink = XLink::CreateDistinct(root_xnode);
-    Compare( root_xlink, &empty_master_keys, &empty_domain );
+    Compare( root_xlink, &empty_master_keys, &empty_knowledge );
 }
 
 
@@ -862,10 +862,10 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
             else
                 FTRACEC("Container types don't match\n");
             ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted.at(new_agent).GetChildX().get());
-            FOREACH( TreePtr<Node> node, *xc )
+            FOREACH( const TreePtrInterface &node, *xc )
                 FTRACEC("ext: ")( node )("\n");
             xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
-            FOREACH( TreePtr<Node> node, *xc )
+            FOREACH( const TreePtrInterface &node, *xc )
                 FTRACEC("new: ")( node )("\n");
             ASSERTFAIL("AssertNewCoupling() failure");                                                
         }

@@ -9,7 +9,7 @@ void MatchAnyAgent::AgentConfigure( const SCREngine *master_scr_engine )
     AgentCommon::AgentConfigure(master_scr_engine);
 
     options = make_shared< Collection<Node> >();
-    FOREACH( const TreePtr<Node> p, GetPatterns() )
+    FOREACH( const TreePtrInterface &p, GetPatterns() )
         options->insert( p );
 }
 

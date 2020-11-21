@@ -60,7 +60,7 @@ CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
         {
             TreePtrInterface *y_ptr = dynamic_cast<TreePtrInterface *>(y_memb[i]);
             ASSERT( y_ptr );
-            CompareResult cr = Compare( *x_ptr, *y_ptr );
+            CompareResult cr = Compare( (TreePtr<Node>)*x_ptr, (TreePtr<Node>)*y_ptr );
             if( cr != EQUAL )
                 return cr;                
         }
@@ -87,7 +87,7 @@ CompareResult SimpleCompare::Compare( SequenceInterface &x, SequenceInterface &y
     // Check each element in turn
     for( xit = x.begin(), yit = y.begin(); xit != x.end(); ++xit, ++yit )
     {
-        CompareResult cr = Compare( *xit, *yit );
+        CompareResult cr = Compare( (TreePtr<Node>)*xit, (TreePtr<Node>)*yit );
         if( cr != EQUAL )
             return cr;
     }
@@ -108,10 +108,10 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
     SCOrdered xo(*this), yo(*this);
 
     // Fill up the sets of pointers
-    FOREACH( TreePtr<Node> xe, x )
-        xo.insert( xe );
-    FOREACH( TreePtr<Node> ye, x )
-        yo.insert( ye );
+    FOREACH( const TreePtrInterface &xe, x )
+        xo.insert( (TreePtr<Node>)xe );
+    FOREACH( const TreePtrInterface &ye, x )
+        yo.insert( (TreePtr<Node>)ye );
 
     // Compare them (will use SimpleCompare)
     return (int)(xo > yo) - (int)(xo < yo);

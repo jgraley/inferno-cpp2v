@@ -15,9 +15,7 @@
 
 //#define CANNONICALISE
 
-#define GET_DOMAIN
-
-//#define TEST_RELATION_PROPERTIES_USING_DOMAIN
+#define BUILD_THE_KNOWLEDGE
 
 #define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
 
@@ -39,8 +37,7 @@ SCREngine::SCREngine( bool is_search_,
                       const unordered_set<Agent *> &master_agents,
                       const SCREngine *master ) :
     plan(this, is_search_, overall_master, cp, rp, master_agents, master),
-    depth( 0 ),
-    domain_extension_classes( make_shared<QuotientSet>() )
+    depth( 0 )
 {
 }
 
@@ -122,7 +119,7 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     unordered_set<Agent *> visible_agents;
     for( VisibleWalk::iterator it = tp.begin(); it != tp.end(); ++it )
     {
-        TreePtr<Node> n = *it;
+        auto n = (TreePtr<Node>)*it;
         visible_agents.insert( Agent::AsAgent(n) );
     //    visible_plinks.insert( FromWalkIterator( it, PatternLink root )
     }
@@ -254,82 +251,14 @@ XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
     // Don't worry about generated nodes that are already in 
     // the X tree (they had to have been found there after a
     // search). 
-    if( domain.count(xlink) > 0 )
+    if( knowledge.domain.count(xlink) > 0 )
         return xlink;
         
 #ifdef ENABLE_UNIQUIFY_DOMAIN_EXTENSION    
-    return domain_extension_classes->Uniquify( xlink );
+    return knowledge.domain_extension_classes->Uniquify( xlink );
 #else
     return xlink;
 #endif    
-}
-
-
-void SCREngine::ExtendDomain( PatternLink plink, unordered_set<XLink> &domain )
-{
-    // Extend locally first and then pass that into children.
-
-    unordered_set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
-    if( !extra.empty() )
-        TRACEC("Extra domain for ")(plink)(" is ")(extra)("\n");
-    domain = UnionOf( domain, extra );
-    
-    // Visit couplings repeatedly TODO union over couplings and
-    // only recurse on last reaching.
-    auto pq = plink.GetChildAgent()->GetPatternQuery();    
-    for( PatternLink child_plink : pq->GetNormalLinks() )
-    {
-        ExtendDomain( child_plink, domain );
-    }
-    for( PatternLink child_plink : pq->GetAbnormalLinks() )
-    {
-        ExtendDomain( child_plink, domain );
-    }
-    for( PatternLink child_plink : pq->GetMultiplicityLinks() )
-    {
-        ExtendDomain( child_plink, domain );
-    }
-}
-
-
-void SCREngine::DetermineDomain( XLink root_xlink )
-{
-    INDENT("X");
-    TRACE("Root is ")(root_xlink)("\n");
-    
-    // Both should be cleared together
-    domain.clear();
-    domain_extension_classes->Clear();
-    
-    // Put all the nodes in the X tree into the domain
-	Walk wx( root_xlink.GetChildX() ); 
-	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-    {
-        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );        
-
-        // Here, elemets go into quotient set, but it does not 
-        // uniquify: every link in the input X tree must appear 
-        // separately in domain.
-        domain.insert( xlink );
-        (void)domain_extension_classes->Uniquify( xlink );
-        
-        TRACEC("Added ")(xlink)("\n");
-    }
-    domain.insert(XLink::MMAX_Link);
-
-    int is = domain.size();
-    ExtendDomain( plan.root_plink, domain );
-    int es = domain.size();
-    
-    if( es > is )
-    {
-        TRACE("Domain size %d -> %d\n", is, es);
-    }
-    
-#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
-    EquivalenceRelation e;
-    e.TestProperties( domain );
-#endif
 }
 
 
@@ -348,14 +277,14 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
 
     // Global domain of possible xlink values
-#ifdef GET_DOMAIN
-    DetermineDomain( root_xlink );
+#ifdef BUILD_THE_KNOWLEDGE
+    knowledge.Build( plan.root_plink, root_xlink );
 #endif
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    plan.and_rule_engine->Compare( root_xlink, master_keys, &domain );
+    plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );
            
     TRACE("Search successful, now keying replace nodes\n");
     plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs

@@ -144,10 +144,10 @@ string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
 	string s;
     TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
 	::UniqueWalk w( root );
-	FOREACH( TreePtr<Node> n, w )
+	FOREACH( const TreePtrInterface &n, w )
 	{
 		if( n )
-			s += links_pass ? DoNodeLinks(n) : DoNode(n);
+			s += links_pass ? DoNodeLinks((TreePtr<Node>)n) : DoNode((TreePtr<Node>)n);
 	}
 	return s;
 }
@@ -171,15 +171,15 @@ string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass )
     vector< TreePtr<Node> > links;
     (void)e->GetGraphInfo( &labels, &links );
     
-    FOREACH( TreePtr<Node> pattern, links )
+    FOREACH( const TreePtrInterface &pattern, links )
     {
         if( pattern )
         {
             TRACE("Walking transform pattern ")(*pattern)("\n");
-            Walk w( pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
-            FOREACH( TreePtr<Node> n, w )
+            Walk w( (TreePtr<Node>)pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
+            FOREACH( const TreePtrInterface &n, w )
             {              
-                s += links_pass ? DoNodeLinks(n) : DoNode(n);
+                s += links_pass ? DoNodeLinks((TreePtr<Node>)n) : DoNode((TreePtr<Node>)n);
             }
         }
     }
@@ -484,19 +484,19 @@ string Graph::DoNodeLinks( TreePtr<Node> n )
 		if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			FOREACH( const TreePtrInterface &p, *col )
-				s += DoLink( n, SeqField(i), p, string(), &p );
+				s += DoLink( n, SeqField(i), (TreePtr<Node>)p, string(), &p );
 		}
 		else if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
 		{
 			int j=0;
 			FOREACH( const TreePtrInterface &p, *seq )
-				s += DoLink( n, SeqField(i, j++), p, string(), &p );
+				s += DoLink( n, SeqField(i, j++), (TreePtr<Node>)p, string(), &p );
 		}
 		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
             //TRACE("TreePtr %d is @%p\n", i, ptr );
 			if( *ptr )
-				s += DoLink( n, SeqField(i), *ptr, string(), ptr );
+				s += DoLink( n, SeqField(i), (TreePtr<Node>)*ptr, string(), ptr );
 		}
 		else
 		{

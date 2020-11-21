@@ -104,8 +104,8 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 bool Render::IsSystemC( TreePtr<Node> root )
 { 
     Walk e(root);
-    FOREACH( TreePtr<Node> n, e )
-        if( dynamic_pointer_cast<SCConstruct>(n) )
+    FOREACH( const TreePtrInterface &n, e )
+        if( dynamic_pointer_cast<SCConstruct>((TreePtr<Node>)n) )
             return true;
     return false;
 }

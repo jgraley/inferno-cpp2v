@@ -27,25 +27,25 @@ void Validate::operator()( TreePtr<Node> context,
 	// incoming links from other than the subtree of interest still count
 	// when validating link counts).
 	Walk wcon( context );
-	FOREACH( const TreePtr<Node> x, wcon )
+	FOREACH( const TreePtrInterface &x, wcon )
 	{
 		if( x )
 		{
 			// TODO use UniqueWalk for this!
-			vector< Itemiser::Element * > members = x->Itemise();
+			vector< Itemiser::Element * > members = ((TreePtr<Node>)x)->Itemise();
 		    FOREACH( Itemiser::Element *m, members )
 			{
 				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
 				{
 					FOREACH( const TreePtrInterface &tpi, *con )
-						OnLink( x, tpi );
+						OnLink( (TreePtr<Node>)x, (TreePtr<Node>)tpi );
 				}
 				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
 				{
-					OnLink( x, *ptr );
+					OnLink( (TreePtr<Node>)x, (TreePtr<Node>)*ptr );
 				}
 			}
-			if( x == *proot )
+			if( (TreePtr<Node>)x == *proot )
 				connected = true;
 		}
 	}
@@ -54,7 +54,7 @@ void Validate::operator()( TreePtr<Node> context,
 	Walk w( *proot );
 	for( Walk::iterator wit = w.begin(); wit != w.end(); ++wit )
 	{
-		const TreePtr<Node> x = *wit;
+		const auto x = (TreePtr<Node>)*wit;
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
 			// nullptr pointers not allowed in program tree (though they are allowed in search/replace patterns)

@@ -104,13 +104,13 @@ Agent *PatternLink::GetChildAgent() const
 {
     ASSERT( asp_pattern )
           ("GetChildAgent() called on uninitialised (nullptr) link\n");
-    return Agent::AsAgent(*asp_pattern);    
+    return Agent::AsAgent((TreePtr<Node>)*asp_pattern);    
 }
 
 
 TreePtr<Node> PatternLink::GetPattern() const
 {
-    return *asp_pattern;
+    return (TreePtr<Node>)*asp_pattern;
 }
 
 
@@ -230,7 +230,7 @@ XLink::operator bool() const
 
 TreePtr<Node> XLink::GetChildX() const
 {
-    return *asp_x;
+    return (TreePtr<Node>)*asp_x;
 }
 
 

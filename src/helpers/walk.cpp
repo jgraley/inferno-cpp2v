@@ -151,7 +151,7 @@ void Walk_iterator::AdvanceInto()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
-	TreePtr<Node> element = **this; // look at current node
+	TreePtr<Node> element = (TreePtr<Node>)**this; // look at current node
 	bool recurse = false;
 	if( element ) // must be non-nullptr
 	{
@@ -166,7 +166,7 @@ void Walk_iterator::AdvanceInto()
     if( recurse )
     {
     	// Step into
-        Push( **this );
+        Push( (TreePtr<Node>)**this );
         BypassEndOfChildren(); // get past an empty child
     }
     else
@@ -239,7 +239,7 @@ void Walk_iterator::DoNodeFilter()
 {
     while(!done)
     {
-        TreePtr<Node> element = **this; // look at current node
+        auto element = (TreePtr<Node>)**this; // look at current node
         
         // TODO pass NULLs to filter, let it decide what to do
         bool ok = true;

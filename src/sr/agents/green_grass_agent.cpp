@@ -40,7 +40,7 @@ TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( CouplingKey keylink )
     INDENT("G");
     ASSERT( *GetThrough() );          
     TRACE("GreenGrass node through=")(**GetThrough())("\n");
-    return AsAgent(*GetThrough())->BuildReplace();
+    return AsAgent((TreePtr<Node>)*GetThrough())->BuildReplace();
 }
 
 

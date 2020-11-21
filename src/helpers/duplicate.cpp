@@ -57,7 +57,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
                 //TRACE("Duplicating ")(*p)("\n");
-                TreePtr<Node> n = DuplicateSubtree( p, source_terminus, dest_terminus );
+                TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p, source_terminus, dest_terminus );
                 //TRACE("Normal element, inserting ")(*n)(" directly\n");
                 dest_con->insert( n );
             }
@@ -67,7 +67,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
             //TRACE("Duplicating node ")(*keynode_ptr)("\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr )("source should be non-nullptr");
-            *dest_ptr = DuplicateSubtree( *keynode_ptr, source_terminus, dest_terminus );
+            *dest_ptr = DuplicateSubtree( (TreePtr<Node>)*keynode_ptr, source_terminus, dest_terminus );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
         }

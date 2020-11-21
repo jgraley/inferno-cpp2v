@@ -384,9 +384,9 @@ bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 
 	TRACE("Looking for assignment like ")(*y)(" = ")(*x)("\n");
 
-	FOREACH( TreePtr<Node> n, e )
+	FOREACH( const TreePtrInterface &n, e )
 	{
-		if( TreePtr<Assign> a = dynamic_pointer_cast<Assign>(n) )
+		if( TreePtr<Assign> a = dynamic_pointer_cast<Assign>((TreePtr<Node>)n) )
 		{
 			TreePtr<Expression> lhs = a->operands.front();
 			if( TreePtr<Subscript> slhs = dynamic_pointer_cast<Subscript>( lhs ) ) // subscript as l-value 

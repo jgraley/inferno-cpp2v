@@ -36,9 +36,9 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     
     // Check pre-restriction
     TRACE("StarAgent pre-res\n");
-    FOREACH( TreePtr<Node> xe, *x_ci )
+    FOREACH( const TreePtrInterface &xe, *x_ci )
     {
-        CheckLocalMatch( xe.get() );
+        CheckLocalMatch( ((TreePtr<Node>)xe).get() );
     }
      /* For #207
     for( XLink elt_xlink : x_ci->elts )
@@ -77,7 +77,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( CouplingKey keylink )
     dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     FOREACH( const TreePtrInterface &pp, *psc )
     {
-        TreePtr<Node> nn = DuplicateSubtree( pp );
+        TreePtr<Node> nn = DuplicateSubtree( (TreePtr<Node>)pp );
         dest_container->insert( nn );
     }
     

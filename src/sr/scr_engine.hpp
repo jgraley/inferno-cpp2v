@@ -7,6 +7,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
+#include "the_knowledge.hpp"
 #include <set>
 
 
@@ -19,7 +20,6 @@ class Conjecture;
 class SpecialBase;
 class CompareReplace;
 class AndRuleEngine;
-class QuotientSet;
 
 /// Common implementation for search+replace, compare+replace and slaves
 class SCREngine : public virtual Traceable
@@ -64,8 +64,6 @@ private:
     } plan;
 public:
     void GatherCouplings( CouplingKeysMap *coupling_keys ) const;    
-    void ExtendDomain( PatternLink plink, unordered_set<XLink> &domain );
-    void DetermineDomain( XLink root_xlink );
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                const CouplingKeysMap *master_keys );
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
@@ -93,10 +91,8 @@ private:
     
     vector<int> stop_after;
     int depth;    
+    TheKnowledge knowledge;
     
-    unordered_set<XLink> domain;    
-    shared_ptr<QuotientSet> domain_extension_classes;
-
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the
 		nodes under the same engine as the root. Based on UniqueWalk, so each node only

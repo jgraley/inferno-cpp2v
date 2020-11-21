@@ -239,7 +239,7 @@ int Cannonicaliser::PassOneWalk( TreePtr<Node> node )
     FlattenNode f( node );
     for( FlattenNode::iterator it = f.begin(); it != f.end(); ++it )
     {        
-        TreePtr<Node> child = *it;
+        TreePtr<Node> child = (TreePtr<Node>)*it;
         list< FlattenNode::iterator > &child_pp = parent_pointers[child];
         if( find( child_pp.begin(), child_pp.end(), it ) != child_pp.end() ) // TODO if this was a set this would be fast, but need < on all the iterators
             continue; // already reached here

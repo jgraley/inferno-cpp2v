@@ -29,9 +29,9 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
 	Walk w(context);
-	FOREACH( TreePtr<Node> n, w )
+	FOREACH( const TreePtrInterface &n, w )
 	{
-        if( TreePtr<UserType> d = dynamic_pointer_cast<UserType>(n) )
+        if( TreePtr<UserType> d = dynamic_pointer_cast<UserType>((TreePtr<Node>)n) )
             if( id == GetIdentifier( d ) )
 	            return d;
 	}
@@ -42,9 +42,9 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
 TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
 	Walk w( context );
-	FOREACH( TreePtr<Node> n, w )
+	FOREACH( const TreePtrInterface &n, w )
 	{
-        if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(n) )
+        if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>((TreePtr<Node>)n) )
             if( id == GetIdentifier( d ) )
 	            return d;
 	}

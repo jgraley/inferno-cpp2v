@@ -21,10 +21,10 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
         {
             int num_stars = 0;
-   			FOREACH( TreePtr<Node> pe, *pattern_seq )
+   			FOREACH( const TreePtrInterface &pe, *pattern_seq )
             {
                 ASSERT( pe );
-                if( dynamic_pointer_cast<StarAgent>(pe) )
+                if( dynamic_pointer_cast<StarAgent>((TreePtr<Node>)pe) )
                     num_stars++;
             }
             num_stars--; // Don't register a decision for the last Star
@@ -267,8 +267,8 @@ void StandardAgent::DecidedQueryCollection( XLink base_x,
                 
                 // Now take a copy. 
                 xremaining.clear();
-                FOREACH( TreePtr<Node> tp, *old_decision.container )
-                    xremaining.insert(tp);
+                FOREACH( const TreePtrInterface &tp, *old_decision.container )
+                    xremaining.insert((TreePtr<Node>)tp);
                     
                 // re-submit the exact same decision.
                 xit = query.SkipDecision();
@@ -396,7 +396,7 @@ void StandardAgent::TrackingKey( Agent *from )
             if( *pattern_ptr )
             {
                 ASSERT(*keyer_ptr)("Cannot key intermediate because correpsonding search node is nullptr");
-                AsAgent(*pattern_ptr)->TrackingKey( AsAgent(*keyer_ptr) );
+                AsAgent((TreePtr<Node>)*pattern_ptr)->TrackingKey( AsAgent((TreePtr<Node>)*keyer_ptr) );
             }
         }
     }
@@ -456,7 +456,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*p)("\n");
-				TreePtr<Node> n = AsAgent(p)->BuildReplace();
+				TreePtr<Node> n = AsAgent((TreePtr<Node>)p)->BuildReplace();
                 ASSERT(n); 
                 if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
                 {
@@ -478,8 +478,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
         	TRACE();
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for pattern");
-            TreePtr<Node> pattern_child = *pattern_ptr;
-            TreePtr<Node> dest_child = *dest_ptr;
+            auto pattern_child = (TreePtr<Node>)*pattern_ptr;
+            auto dest_child = (TreePtr<Node>)*dest_ptr;
                        
             if( pattern_child )
             {                             
@@ -526,7 +526,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows nullptr
-		        TreePtr<Node> n = DuplicateSubtree( p );
+		        TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", sc->size() );
@@ -545,7 +545,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
         {
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr );
-            *dest_ptr = DuplicateSubtree( *keynode_ptr );
+            *dest_ptr = DuplicateSubtree( (TreePtr<Node>)*keynode_ptr );
             ASSERT( *dest_ptr );
             ASSERT( (**dest_ptr).IsFinal() );            
         }
@@ -598,7 +598,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*p)("\n");
-	            TreePtr<Node> n = AsAgent(p)->BuildReplace();
+	            TreePtr<Node> n = AsAgent((TreePtr<Node>)p)->BuildReplace();
 		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", psc->size() );
@@ -617,7 +617,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*this)(" was nullptr when not overlaying\n");
-            *dest_ptr = AsAgent(*pattern_ptr)->BuildReplace();
+            *dest_ptr = AsAgent((TreePtr<Node>)*pattern_ptr)->BuildReplace();
             ASSERT( *dest_ptr );
             ASSERT( (**dest_ptr).IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n"); 
         }
