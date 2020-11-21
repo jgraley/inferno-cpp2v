@@ -234,6 +234,11 @@ TreePtr<Node> SCREngine::Replace() const
     
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace();
+    
+    // Need a duplicate here in case we're a slave replacing an identifier
+    // with a non-identifier. Otherwise our subtree would look fine, but 
+    // global X tree would be incorrect (multiple links to non-identifier)
+    // and that would break knowledge building. See #217
     return plan.root_agent->DuplicateSubtree(rnode);
 }
 
