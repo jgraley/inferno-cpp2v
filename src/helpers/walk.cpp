@@ -65,15 +65,31 @@ Walk_iterator::pointer Walk_iterator::operator->() const
 }
 
 
-TreePtr<Node> Walk_iterator::GetCurrentParent() const
+TreePtr<Node> Walk_iterator::GetParent(int generations) const
 {
-    return state.empty() ? nullptr : state.back().node;
+    list< StateEntry >::const_iterator it = state.end();
+    for( int i=0; i<=generations; i++ )
+    {
+        if( it == state.begin() )
+            return nullptr;
+        --it;
+    } 
+     
+    return it->node;
 }
 
 
-const TreePtrInterface *Walk_iterator::GetCurrentParentPointer() const
+const TreePtrInterface *Walk_iterator::GetNodePointerInParent(int generations) const
 {
-    return state.empty() ? nullptr : &*(state.back().iterator); 
+    list< StateEntry >::const_iterator it = state.end();
+    for( int i=0; i<=generations; i++ )
+    {
+        if( it == state.begin() )
+            return nullptr;
+        --it;
+    } 
+     
+    return &*(it->iterator);
 }
 
 

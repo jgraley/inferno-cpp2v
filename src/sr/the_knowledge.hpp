@@ -16,9 +16,9 @@ class TheKnowledge : public Traceable
 {
 public:
     void Build( PatternLink root_plink, XLink root_xlink );
-    void DetermineDomain( PatternLink root_plink, XLink root_xlink );
     
 private:
+    void DetermineDomain( PatternLink root_plink, XLink root_xlink );
     void ExtendDomain( PatternLink plink );
 
 public:
@@ -28,6 +28,8 @@ public:
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;
     
+    // Child-to-parent map
+    unordered_map<XLink, XLink> parents;
 };    
     
 };

@@ -23,7 +23,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
         ASSERT( dest_terminus );
    
     // If source_terminus and dest_terminus are supplied, substitute dest_terminus node
-    // in place of all copes of source terminus (directly, without duplicating).
+    // in place of all copies of source terminus (directly, without duplicating).
     if( source_terminus && source == source_terminus ) 
         return dest_terminus;
 

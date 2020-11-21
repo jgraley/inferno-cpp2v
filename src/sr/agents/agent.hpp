@@ -62,6 +62,9 @@ public:
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
+    virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
+                                            TreePtr<Node> source_terminus = TreePtr<Node>(),
+                                            TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		

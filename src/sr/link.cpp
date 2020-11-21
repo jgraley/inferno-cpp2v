@@ -45,10 +45,10 @@ PatternLink::PatternLink(const Agent *parent_agent,
 }
 
 
-PatternLink PatternLink::FromWalkIterator( const Walk::iterator &wit, PatternLink root )
+PatternLink PatternLink::FromWalkIterator( const Walk::iterator &wit, PatternLink root, int generations )
 {
-    TreePtr<Node> parent_pattern = wit.GetCurrentParent();
-    const TreePtrInterface *pparent = wit.GetCurrentParentPointer();
+    TreePtr<Node> parent_pattern = wit.GetParent(generations);
+    const TreePtrInterface *pparent = wit.GetNodePointerInParent(generations);
     ASSERT( root || (parent_pattern && pparent) );
     return parent_pattern ? PatternLink( parent_pattern, pparent ) : root;    
 }
@@ -170,10 +170,10 @@ XLink::XLink( const LocatedLink &l ) :
 }
 
 
-XLink XLink::FromWalkIterator( const Walk::iterator &wit, XLink root )
+XLink XLink::FromWalkIterator( const Walk::iterator &wit, XLink root, int generations )
 {
-    TreePtr<Node> parent_x = wit.GetCurrentParent();
-    const TreePtrInterface *px = wit.GetCurrentParentPointer();
+    TreePtr<Node> parent_x = wit.GetParent(generations);
+    const TreePtrInterface *px = wit.GetNodePointerInParent(generations);
     ASSERT( root || (parent_x && px) );
     return parent_x ? XLink( parent_x, px, WHODAT() ) : root;    
 }

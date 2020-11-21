@@ -233,7 +233,8 @@ TreePtr<Node> SCREngine::Replace() const
     INDENT("R");
     
     // Now replace according to the couplings
-    return plan.root_agent->BuildReplace();
+    TreePtr<Node> rnode = plan.root_agent->BuildReplace();
+    return plan.root_agent->DuplicateSubtree(rnode);
 }
 
 

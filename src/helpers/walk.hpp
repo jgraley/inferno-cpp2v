@@ -35,8 +35,8 @@ public:
     Walk_iterator( TreePtr<Node> &root,
                    Filter *out_filter = nullptr,
     		       Filter *recurse_filter = nullptr );
-    virtual TreePtr<Node> GetCurrentParent() const; // Go back a whole step
-    virtual const TreePtrInterface *GetCurrentParentPointer() const;// Go back half a step
+    virtual TreePtr<Node> GetParent(int grandness=0) const; // Go back a whole step
+    virtual const TreePtrInterface *GetNodePointerInParent(int grandness=0) const;// Go back half a step
     // Get all the true recursions made so far (i.e. excluding root and current position)
     virtual list< pair<TreePtr<Node>, const TreePtrInterface *> > GetCurrentPath() const;  // return current recurse nodes
     // NOTE on recurse nodes. Recuse nodes are the nodes that were "passed through" 
@@ -64,7 +64,7 @@ protected:
         ContainerInterface::iterator iterator;
     };
     // deque not stack so we can iterate the whole thing
-    deque< StateEntry > state; // Mapping: top is back
+    list< StateEntry > state; // Mapping: top is back
     bool done;   
 };
 

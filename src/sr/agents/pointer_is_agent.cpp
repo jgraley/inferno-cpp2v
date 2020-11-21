@@ -25,7 +25,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         if( xlink.GetChildX() == context )
         {
             // Imagine that the root is pointed to by a TreePtr<Node>
-            // (in this case wit.GetCurrentParentPointer() would return NULL)
+            // (in this case wit.GetNodePointerInParent() would return NULL)
             TreePtr<Node> node( new Node );
             XLink new_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct            
             return master_scr_engine->UniquifyDomainExtension(new_xlink);
@@ -42,7 +42,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 found_one_already = true;
                     
                 // Get the pointer that points to us
-                const TreePtrInterface *px = wit.GetCurrentParentPointer();    
+                const TreePtrInterface *px = wit.GetNodePointerInParent();    
                 ASSERT(px);     
                 // Make an architypical node matching the pointer's type
                 TreePtr<Node> ptr_arch = px->MakeValueArchitype();

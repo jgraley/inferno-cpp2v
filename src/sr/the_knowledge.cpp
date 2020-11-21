@@ -10,6 +10,8 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 {
     INDENT("K");
     DetermineDomain( root_plink, root_xlink );
+    
+    
 }
 
     
@@ -18,6 +20,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     // Both should be cleared together
     domain.clear();
     domain_extension_classes = make_shared<QuotientSet>();
+    parents.clear();
     
     // Put all the nodes in the X tree into the domain
 	Walk wx( root_xlink.GetChildX() ); 
@@ -25,11 +28,17 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     {
         XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );        
 
-        // Here, elemets go into quotient set, but it does not 
+        // Here, elements go into quotient set, but it does not 
         // uniquify: every link in the input X tree must appear 
         // separately in domain.
         domain.insert( xlink );
         (void)domain_extension_classes->Uniquify( xlink );
+        
+        if( xlink != root_xlink )
+        {
+            XLink parent_xlink = XLink::FromWalkIterator( wx_it, root_xlink, 1 );        
+            InsertSolo( parents, make_pair(xlink, parent_xlink) );
+        }
         
         TRACEC("Added ")(xlink)("\n");
     }
