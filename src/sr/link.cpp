@@ -14,6 +14,8 @@ using namespace SR;
  
 #define ALIGNMENT_BITS 3 
 
+//#define TEST_ASSERT_NOT_ON_STACK
+
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink()
@@ -32,7 +34,7 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif    
-    EnsureNotOnStack( ppattern, GetTrace() );
+    ASSERT_NOT_ON_STACK( ppattern )( *this );
 }
 
 
@@ -158,7 +160,7 @@ XLink::XLink( shared_ptr<const Node> parent_x,
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
-    EnsureNotOnStack( px, GetTrace() );
+    ASSERT_NOT_ON_STACK( px )( *this );
 }
 
 
@@ -270,6 +272,12 @@ LocatedLink::LocatedLink( const PatternLink &plink_,
     xlink( xlink_ )                                                  
 {
     ASSERT( (bool)plink == (bool)xlink );
+    
+#ifdef TEST_ASSERT_NOT_ON_STACK
+    // Test the fail case; pass case is being tested all the time anyway
+    int a;
+    ASSERT_NOT_ON_STACK(&a)(*this);
+#endif        
 }
 
 
@@ -392,11 +400,4 @@ list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks,
     }
     return llinks;
 }                                      
-
-
-void SR::EnsureNotOnStack( const void *p, string trace )
-{
-    ASSERT( (((uint64_t)p & 0x7f0000000000ULL) != 0x7f0000000000ULL) )
-          ("Constructing ")(trace)("\nSupplied pointer %p seems like it's probably on the stack, usually a bad sign\n", p);
-}
 

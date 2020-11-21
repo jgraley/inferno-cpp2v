@@ -15,7 +15,7 @@ SubSequenceRange::SubSequenceRange( TreePtr<Node> parent_x, iterator &b, iterato
     my_end(e.Clone())
 {           
     if( !(*my_begin == *my_end) )
-        EnsureNotOnStack( &*(*my_begin) );
+        ASSERT_NOT_ON_STACK( &*(*my_begin) )( *this ); 
 }
 
 

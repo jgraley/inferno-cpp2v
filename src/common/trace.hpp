@@ -277,7 +277,16 @@ private:
     static int current_step;
 };
 
-////////////////////////// The fiddly stuff //////////////////////////
+////////////////////////// Macro layer //////////////////////////
+
+//
+// Any time code wants to talk "out of band" to the user, go through
+// a macro here, adding one if necessary so that
+// (a) you can ensure you don't waste CPU on string processing except
+//     where needed (trace enables/assert condition failed), and
+// (b) you get decvent file and line info so can locate the source
+//     without resorting to gdb.
+//
 
 #define INFERNO_CURRENT_FUNCTION __func__
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
@@ -294,6 +303,9 @@ private:
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+
+#define ASSERT_NOT_ON_STACK(POINTER) ASSERT( (((uint64_t)(POINTER) & 0x7f0000000000ULL) != 0x7f0000000000ULL) ) \
+                                            ("\nObject at %p seems like it's probably on the stack, usually a bad sign\n", POINTER)
 
 #define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
 
