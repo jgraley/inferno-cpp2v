@@ -10,8 +10,6 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 {
     INDENT("K");
     DetermineDomain( root_plink, root_xlink );
-    
-    
 }
 
     
@@ -22,26 +20,8 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     domain_extension_classes = make_shared<QuotientSet>();
     parents.clear();
     
-    // Put all the nodes in the X tree into the domain
-	Walk wx( root_xlink.GetChildX() ); 
-	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-    {
-        XLink xlink = XLink::FromWalkIterator( wx_it, root_xlink );        
-
-        // Here, elements go into quotient set, but it does not 
-        // uniquify: every link in the input X tree must appear 
-        // separately in domain.
-        domain.insert( xlink );
-        (void)domain_extension_classes->Uniquify( xlink );
-        
-        if( xlink != root_xlink )
-        {
-            XLink parent_xlink = XLink::FromWalkIterator( wx_it, root_xlink, 1 );        
-            InsertSolo( parents, make_pair(xlink, parent_xlink) );
-        }
-        
-        TRACEC("Added ")(xlink)("\n");
-    }
+    AddSubtreeToDomain( XLink(), root_xlink, REQUIRE_SOLO );
+    
     domain.insert(XLink::MMAX_Link);
 
     int is = domain.size();
@@ -49,9 +29,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     int es = domain.size();
     
     if( es > is )
-    {
         TRACE("Domain size %d -> %d\n", is, es);
-    }
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
@@ -65,9 +43,11 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     // Extend locally first and then pass that into children.
 
     unordered_set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
-    if( !extra.empty() )
-        TRACEC("Extra domain for ")(plink)(" is ")(extra)("\n");
-    domain = UnionOf( domain, extra );
+    for( XLink e : extra )
+    {
+        TRACE("Extra item for ")(plink)(" is ")(e)("\n");
+        AddSubtreeToDomain( XLink(), e, STOP_IF_ALREADY_IN ); // set to REQUIRE_SOLO to replicate #218
+    }
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.
@@ -86,3 +66,28 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     }
 }
 
+
+void TheKnowledge::AddSubtreeToDomain( XLink parent_xlink, XLink xlink, SubtreeMode mode )
+{
+    // This will also prevent recursion into xlink
+    if( mode==STOP_IF_ALREADY_IN && domain.count(xlink) > 0 )
+        return; // Terminate into the existing domain
+    
+    InsertSolo( domain, xlink );
+    if( parent_xlink )
+        InsertSolo( parents, make_pair(xlink, parent_xlink) );
+
+    // Here, elements go into quotient set, but it does not 
+    // uniquify: every link in the input X tree must appear 
+    // separately in domain.
+    (void)domain_extension_classes->Uniquify( xlink );
+
+    // Put all the nodes in the X tree into the domain
+	FlattenNode fx( xlink.GetChildX() ); 
+	for( FlattenNode::iterator fx_it=fx.begin(); fx_it!=fx.end(); ++fx_it )
+    {
+        XLink child_xlink( xlink.GetChildX(), &*fx_it );        
+                
+        AddSubtreeToDomain( xlink, child_xlink, mode );
+    }
+}
