@@ -14,8 +14,11 @@
 #include <list>
 
 //#define CANNONICALISE
+
 #define GET_DOMAIN
+
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
+
 #define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
 
 using namespace SR;
@@ -361,7 +364,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     if( !plan.my_engines.empty() )
     {
 		CouplingKeysMap coupling_keys = UnionOfSolo( *master_keys, 
-                                                   plan.and_rule_engine->GetCouplingKeys() );    
+                                                     plan.and_rule_engine->GetCouplingKeys() );    
 		
         for( const pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );

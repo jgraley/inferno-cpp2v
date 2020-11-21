@@ -24,6 +24,8 @@
 
 //#define USE_SOLVER
 
+#define CHECK_EVERYTHING_IS_IN_DOMAIN
+
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -405,7 +407,10 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 {    
     FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
+#ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
         ASSERT( domain->count(link) > 0 )(link)(" not found in ")(domain)(" (see issue #202)\n");
+#endif
+
         TRACE("Comparing normal link ")(link)
              (" keyer? %d residual? %d master? %d\n", 
              plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ), 
@@ -569,15 +574,13 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     TRACEC("My solution ")(basic_solution)("\n");    
     list<LocatedLink> basic_solution_links = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
     TRACEC("Relocating using links ")(basic_solution_links)("\n");    
-    
-    if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain
-    {
+
+#ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
+    if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain    
         ASSERT( domain->count(base_xlink) > 0 )(base_xlink)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
-    }
-    for( LocatedLink link : basic_solution_links )
-    {
+    for( LocatedLink link : basic_solution_links )    
         ASSERT( domain->count((XLink)link) > 0 )((XLink)link)(" not found in ")(domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
-    }
+#endif
     
     // We will need a conjecture, so that we can iterate through multiple 
     // potentially valid values for the abnormals and multiplicities.
@@ -696,10 +699,11 @@ void AndRuleEngine::Compare( XLink root_xlink,
     LocatedLink root_link( plan.root_plink, root_xlink );
 
     TRACE("Compare root ")(root_link)("\n");
-    if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain
-    {
+
+#ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
+    if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
         ASSERT( domain->count(root_xlink) > 0 )(root_xlink)(" not found in ")(domain)(" (see issue #202)\n");
-    }
+#endif
 
     if( plan.my_normal_agents.empty() )
     {
