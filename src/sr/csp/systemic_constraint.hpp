@@ -75,7 +75,8 @@ private:
     int GetFreeDegree() const;
     list<VariableId> GetFreeVariables() const;
     void TraceProblem() const;
-    virtual void SetForces( const Assignments &forces );    
+    virtual void Start( const Assignments &forces, 
+                            const SR::TheKnowledge *knowledge );    
     bool Test( list< Value > values );
         
     class ByLocationLinkMismatch : public ::Mismatch
@@ -101,7 +102,8 @@ private:
         list<VariableRecord> all_variables;
     } plan;
     
-    list<Value> forces; // only FREE vars
+    list<Value> forces;
+    const SR::TheKnowledge *knowledge;
     
     virtual string GetTrace() const;
 };

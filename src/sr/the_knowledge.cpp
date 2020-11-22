@@ -22,14 +22,14 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     
     AddSubtreeToDomain( XLink(), root_xlink, REQUIRE_SOLO );
     
-    domain.insert(XLink::MMAX_Link);
-
     int is = domain.size();
     ExtendDomain( root_plink );
     int es = domain.size();
     
     if( es > is )
         TRACE("Domain size %d -> %d\n", is, es);
+
+    domain.insert(XLink::MMAX_Link);
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
@@ -43,10 +43,10 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     // Extend locally first and then pass that into children.
 
     unordered_set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
-    for( XLink e : extra )
+    for( XLink exlink : extra )
     {
-        TRACE("Extra item for ")(plink)(" is ")(e)("\n");
-        AddSubtreeToDomain( XLink(), e, STOP_IF_ALREADY_IN ); // set to REQUIRE_SOLO to replicate #218
+        TRACE("Extra item for ")(plink)(" is ")(exlink)("\n");
+        AddSubtreeToDomain( XLink(), exlink, STOP_IF_ALREADY_IN ); // set to REQUIRE_SOLO to replicate #218
     }
     
     // Visit couplings repeatedly TODO union over couplings and

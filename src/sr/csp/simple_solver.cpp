@@ -84,7 +84,8 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
 
 void SimpleSolver::Run( ReportageObserver *holder_, 
                         const unordered_set< Value > &initial_domain_,
-                        const Assignments &forces )
+                        const Assignments &forces,
+                        const SR::TheKnowledge *knowledge )
 {
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
@@ -92,7 +93,7 @@ void SimpleSolver::Run( ReportageObserver *holder_,
 
     // Tell all the constraints about the forces
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
-        c->SetForces( forces );
+        c->Start( forces, knowledge );
         
     assignments.clear();
     

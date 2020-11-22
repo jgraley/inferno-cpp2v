@@ -107,7 +107,8 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 
 void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
                                            XLink x,
-                                           const list<LocatedLink> &required_links ) const
+                                           const list<LocatedLink> &required_links,
+                                           const TheKnowledge *knowledge ) const
 {    
     while(1)
     {
@@ -197,7 +198,8 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
 
 void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                         XLink x,
-                                        const list<LocatedLink> &required_links ) const
+                                        const list<LocatedLink> &required_links,
+                                        const TheKnowledge *knowledge ) const
 {
     Conjecture conj(this, query);            
     conj.Start();
@@ -206,7 +208,7 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
     // is at least one match, so a single call suffices. To get all
     // the matches, call ResumeNormalLinkedQuery() directly with 
     // your own Conjecture object.
-    ResumeNormalLinkedQuery( conj, x, required_links );
+    ResumeNormalLinkedQuery( conj, x, required_links, knowledge );
 }
 
 

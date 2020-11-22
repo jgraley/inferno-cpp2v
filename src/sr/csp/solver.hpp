@@ -6,11 +6,15 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
+namespace SR
+{
+class TheKnowledge;
+}
+
 namespace CSP
-{ 
-    
+{     
 class SolverHolderReportInterface;
-    
+
 /** Interface class for constraint problem solvers. 
  * 
  * This class is unstated - i.e.
@@ -73,7 +77,8 @@ public:
      */
     virtual void Run( ReportageObserver *holder, 
                       const unordered_set<Value> &initial_domain,
-                      const Assignments &forces ) = 0;
+                      const Assignments &forces,
+                      const SR::TheKnowledge *knowledge ) = 0;
 };
 
 };

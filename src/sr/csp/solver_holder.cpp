@@ -15,10 +15,11 @@ SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
 
 
 void SolverHolder::Start( const unordered_set<Value> &initial_domain, 
-                          const Assignments &forces )
+                          const Assignments &forces,
+                          const SR::TheKnowledge *knowledge )
 {
     solutions_queue.clear();
-    solver->Run( this, initial_domain, forces);
+    solver->Run( this, initial_domain, forces, knowledge);
 }
 
 

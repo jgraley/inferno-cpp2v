@@ -7,12 +7,16 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
+namespace SR
+{
+class Agent;
+class TheKnowledge;
+}
+
 namespace CSP
 { 
-    
-class Agent;
 class Solver;
-    
+
 /** A simple back-tracking solver
  */
 class SolverHolder : private Solver::ReportageObserver
@@ -35,7 +39,8 @@ public:
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
     void Start( const unordered_set<Value> &initial_domain, 
-                const Assignments &forces );
+                const Assignments &forces,
+                const SR::TheKnowledge *knowledge );
 
     /**
      * Try to extract a single solution from the solver. 

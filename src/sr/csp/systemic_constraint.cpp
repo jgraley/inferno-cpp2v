@@ -90,7 +90,8 @@ void SystemicConstraint::TraceProblem() const
 }
 
 
-void SystemicConstraint::SetForces( const Assignments &forces_map )
+void SystemicConstraint::Start( const Assignments &forces_map, 
+                                    const SR::TheKnowledge *knowledge )
 {
     forces.clear();
     for( auto var : plan.all_variables )
@@ -169,7 +170,7 @@ bool SystemicConstraint::Test( list< Value > values )
         {
             // Use a normal-linked query on our underlying agent   
             shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
-            plan.agent->RunNormalLinkedQuery( query, x, required_links );      
+            plan.agent->RunNormalLinkedQuery( query, x, required_links, knowledge );      
         }
 
         return true;

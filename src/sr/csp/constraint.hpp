@@ -16,6 +16,7 @@ namespace SR
 {
 class Agent;
 class BooleanEvaluator;
+class TheKnowledge;
 };
 
 namespace CSP
@@ -61,7 +62,8 @@ public:
      * 
      * @param forces [in] a map from varaibles to forced values
      */    
-    virtual void SetForces( const Assignments &forces ) = 0;    
+    virtual void Start( const Assignments &forces, 
+                            const SR::TheKnowledge *knowledge ) = 0;    
     
     /**
      * Test a list of free variable values for inclusion in the constraint.

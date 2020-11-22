@@ -382,7 +382,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
-    plan.solver->Start( knowledge->domain, master_and_root_links );
+    plan.solver->Start( knowledge->domain, master_and_root_links, knowledge );
 }
 
 
@@ -593,7 +593,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     {
         // Query the agent: our conj will be used for the iteration and
         // therefore our query will hold the result 
-        agent->ResumeNormalLinkedQuery( conj, base_xlink, basic_solution_links );
+        agent->ResumeNormalLinkedQuery( conj, base_xlink, basic_solution_links, knowledge );
         i++;
 
         try

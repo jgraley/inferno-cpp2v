@@ -35,7 +35,8 @@ public:
 
     void Run( ReportageObserver *holder, 
               const unordered_set<Value> &initial_domain,
-              const Assignments &forces );
+              const Assignments &forces,
+              const SR::TheKnowledge *knowledge );
 
 private:
     const struct Plan
