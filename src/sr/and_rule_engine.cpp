@@ -584,7 +584,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     
     // We will need a conjecture, so that we can iterate through multiple 
     // potentially valid values for the abnormals and multiplicities.
-    auto query = make_shared<DecidedQuery>(pq);
+    shared_ptr<SR::DecidedQuery> query = agent->CreateDecidedQuery();
     Conjecture conj(agent, query);            
     conj.Start();
     

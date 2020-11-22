@@ -212,6 +212,20 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
 }
 
 
+
+AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
+                                                              const list<LocatedLink> &required_links,
+                                                              const TheKnowledge *knowledge ) const
+{
+    shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
+    QueryLambda lambda = [=]()->shared_ptr<DecidedQuery>
+    { 
+        return query; 
+    };
+    return lambda;
+}   
+                                              
+
 void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
 {    
     // This function establishes the policy for couplings in one place.
