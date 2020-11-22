@@ -11,6 +11,7 @@
 #include <stdexcept>
 
 //#define CHECK_LINKS_COMPARISON
+//#define NLQ_TEST
 
 using namespace SR;
 
@@ -196,35 +197,168 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
 }                           
 
 
-void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
-                                        XLink x,
-                                        const list<LocatedLink> &required_links,
-                                        const TheKnowledge *knowledge ) const
+AgentCommon::QueryLambda AgentCommon::FastStartNormalLinkedQuery( XLink x,
+                                                                const list<LocatedLink> &required_links,
+                                                                const TheKnowledge *knowledge ) const
 {
-    Conjecture conj(this, query);            
-    conj.Start();
-    
-    // RunNormalLinkedQuery() only wants to determine whether there
-    // is at least one match, so a single call suffices. To get all
-    // the matches, call ResumeNormalLinkedQuery() directly with 
-    // your own Conjecture object.
-    ResumeNormalLinkedQuery( conj, x, required_links, knowledge );
+    throw NotImplemented();
 }
 
-
-
-AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
-                                                              const list<LocatedLink> &required_links,
-                                                              const TheKnowledge *knowledge ) const
+                                                                
+AgentCommon::QueryLambda AgentCommon::SlowStartNormalLinkedQuery( XLink x,
+                                                                  const list<LocatedLink> &required_links,
+                                                                  const TheKnowledge *knowledge ) const
 {
     shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
-    QueryLambda lambda = [=]()->shared_ptr<DecidedQuery>
+    
+    // We will need a conjecture, so that we can iterate through multiple 
+    // potentially valid values for the abnormals and multiplicities.
+    auto conj = make_shared<Conjecture>(this, query);            
+    conj->Start();
+    bool first = true;
+    
+    QueryLambda lambda = [=]()mutable->shared_ptr<DecidedQuery>
     { 
+        if( !first )
+        {
+            if( !conj->Increment() )
+                throw NormalLinksMismatch(); // Conjecture has run out of choices to try.            
+        }
+
+        // Query the agent: our conj will be used for the iteration and
+        // therefore our query will hold the result 
+        ResumeNormalLinkedQuery( *conj, x, required_links, knowledge );
+        first = false;
+        
         return query; 
     };
     return lambda;
 }   
                                               
+
+AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
+                                                              const list<LocatedLink> &required_links,
+                                                              const TheKnowledge *knowledge ) const
+{
+    QueryLambda fast_lambda;
+    QueryLambda slow_lambda;
+    try
+    {
+        fast_lambda = FastStartNormalLinkedQuery( x, required_links, knowledge );
+    }
+    catch( NotImplemented & ) 
+    {
+        return SlowStartNormalLinkedQuery( x, required_links, knowledge );
+    }
+#ifndef NLQ_TEST
+    return fast_lambda;
+#else
+    catch( ::Mismatch &e ) 
+    {
+        try
+        {
+            (void)SlowStartNormalLinkedQuery( x, required_links, knowledge );
+            ASSERT(false)("Fast start threw ")(e)(" but Slow didn't\n")
+                         (*this)(" at ")(x)("\n")
+                         ("Required ")(required_links);
+        }
+        catch( ::Mismatch &e ) 
+        {
+            // Passed test: both threw Mismatch
+            throw e;
+        }        
+    }
+    // FastStartNormalLinkedQuery() didn't throw
+    try
+    {
+        slow_lambda = SlowStartNormalLinkedQuery( x, required_links, knowledge );        
+    }
+    catch( ::Mismatch &e ) 
+    {
+        ASSERT(false)("Slow start threw ")(e)(" but Fast didn't\n")
+                     (*this)(" at ")(x)("\n")
+                     ("Required ")(required_links);   
+    }
+    
+    QueryLambda test_lambda = [=]()mutable->shared_ptr<DecidedQuery>
+    {
+        shared_ptr<SR::DecidedQuery> fast_query;
+        shared_ptr<SR::DecidedQuery> slow_query;
+        try 
+        { 
+            fast_query = fast_lambda(); 
+        }
+        catch( ::Mismatch &e ) 
+        {
+            try 
+            { 
+                (void)slow_lambda(); 
+                ASSERT(false)("Fast lambda threw ")(e)(" but Slow didn't\n")
+                             (*this)(" at ")(x)("\n")
+                             ("Required ")(required_links);
+            }
+            catch( ::Mismatch &e ) 
+            {
+                throw e;
+            }                
+        }
+        // Didn't throw
+        try
+        {
+            slow_query = slow_lambda(); 
+        }
+        catch( ::Mismatch &e ) 
+        {
+            ASSERT(false)("Slow lambda threw ")(e)(" but Fast didn't\n")
+                         (*this)(" at ")(x)("\n")
+                         ("Required ")(required_links);   
+        }
+        ASSERT( fast_query->GetNormalLinks() == slow_query->GetNormalLinks() );
+        ASSERT( fast_query->GetAbnormalLinks() == slow_query->GetAbnormalLinks() );
+        
+        // Multiplicity X links are not uniquified        
+        list<LocatedLink>::const_iterator fit = fast_query->GetMultiplicityLinks().begin();
+        list<LocatedLink>::const_iterator sit = slow_query->GetMultiplicityLinks().begin();
+        while( fit != fast_query->GetMultiplicityLinks().end() || sit != slow_query->GetMultiplicityLinks().end() )
+        {
+            ASSERT( fit != fast_query->GetMultiplicityLinks().end() && sit != slow_query->GetMultiplicityLinks().end() );
+            ASSERT( (PatternLink)*fit == (PatternLink)*sit );
+            auto fxsc = dynamic_cast<SubContainer *>( fit->GetChildX().get() );
+            auto sxsc = dynamic_cast<SubContainer *>( sit->GetChildX().get() );
+            
+            if( auto fxssr = dynamic_cast<SubSequenceRange *>(fxsc) )
+            {
+                auto sxssr = dynamic_cast<SubSequenceRange *>(sxsc);
+                ASSERT( sxssr );
+                ASSERT( fxssr->begin() == sxssr->begin() );
+                ASSERT( fxssr->end() == sxssr->end() );
+            }
+            else if( auto fxscl = dynamic_cast<SubCollection *>(fxsc) )
+            {
+                auto sxscl = dynamic_cast<SubCollection *>(sxsc);
+                ASSERT( sxscl );
+                ASSERT( fxscl->elts == sxscl->elts )
+                      (fxscl->elts)(" != ")(sxscl->elts);
+             }
+            else if( auto fxssl = dynamic_cast<SubSequence *>(fxsc) )
+            {
+                auto sxssl = dynamic_cast<SubSequence *>(sxsc);
+                ASSERT( sxssl );
+                ASSERT( fxssl->elts == sxssl->elts )
+                      (fxssl->elts)(" != ")(sxssl->elts);
+            }    
+            else
+            {
+                ASSERTFAIL("unrecognised SubContainer\n");
+            }
+        }
+
+        return slow_query;
+    };
+    return test_lambda;
+#endif
+}
+
 
 void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
 {    

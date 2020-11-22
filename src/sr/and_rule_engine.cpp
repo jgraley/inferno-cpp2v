@@ -582,18 +582,13 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
         ASSERT( knowledge->domain.count((XLink)link) > 0 )((XLink)link)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
     
-    // We will need a conjecture, so that we can iterate through multiple 
-    // potentially valid values for the abnormals and multiplicities.
-    shared_ptr<SR::DecidedQuery> query = agent->CreateDecidedQuery();
-    Conjecture conj(agent, query);            
-    conj.Start();
+    auto nlq_lambda = agent->StartNormalLinkedQuery( base_xlink, basic_solution_links, knowledge );
     
     int i=0;
     while(1)
     {
-        // Query the agent: our conj will be used for the iteration and
-        // therefore our query will hold the result 
-        agent->ResumeNormalLinkedQuery( conj, base_xlink, basic_solution_links, knowledge );
+
+        shared_ptr<SR::DecidedQuery> query = nlq_lambda();
         i++;
 
         try
@@ -643,9 +638,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
         }
         catch( const ::Mismatch& mismatch )
         {
-        }
-        if( !conj.Increment() )
-            throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
+        }         
     } 
 }      
 

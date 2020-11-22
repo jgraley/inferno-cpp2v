@@ -45,7 +45,7 @@ public:
     // begin(), when it is the current node. But it *is* a recurse node after iterator++
     // when it has been passed through in order to reach the current node (except
     // when we are at end() of course). Note: returns pairs of (node, parent_ptr)
-    // except when node is 
+    // except when node is root node when you get (NULL, NULL)
     
 protected:
     virtual void DoNodeFilter();

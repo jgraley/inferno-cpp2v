@@ -49,14 +49,6 @@ public:
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink x ) const = 0;                                                
-    virtual void ResumeNormalLinkedQuery( Conjecture &conj,
-                                          XLink x,
-                                          const list<LocatedLink> &required_links,
-                                          const TheKnowledge *knowledge ) const = 0;
-    virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
-                                       XLink x,
-                                       const list<LocatedLink> &required_links,
-                                       const TheKnowledge *knowledge ) const = 0;         
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
     virtual QueryLambda StartNormalLinkedQuery( XLink x,
                                                 const list<LocatedLink> &required_links,
@@ -91,6 +83,9 @@ public:
 class AgentCommon : public Agent
 {
 public:
+    class NotImplemented : exception
+    {
+    };
     AgentCommon();
     virtual void AgentConfigure( const SCREngine *master_scr_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
@@ -100,11 +95,13 @@ public:
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
                                           XLink x,
                                           const list<LocatedLink> &required_links,
-                                          const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
-                                       XLink x,
-                                       const list<LocatedLink> &required_links,
-                                       const TheKnowledge *knowledge ) const;                                                
+                                          const TheKnowledge *knowledge ) const;                                              
+    virtual QueryLambda FastStartNormalLinkedQuery( XLink x,
+                                                    const list<LocatedLink> &required_links,
+                                                    const TheKnowledge *knowledge ) const;
+    virtual QueryLambda SlowStartNormalLinkedQuery( XLink x,
+                                                    const list<LocatedLink> &required_links,
+                                                    const TheKnowledge *knowledge ) const;
     virtual QueryLambda StartNormalLinkedQuery( XLink x,
                                                 const list<LocatedLink> &required_links,
                                                 const TheKnowledge *knowledge ) const;

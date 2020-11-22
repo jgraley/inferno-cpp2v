@@ -31,6 +31,9 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
                          void *whodat_) :
     asp_pattern( parent_pattern, ppattern )
 {
+    ASSERT( parent_pattern );
+    ASSERT( ppattern );
+    ASSERT( *ppattern );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif    
@@ -122,7 +125,13 @@ const TreePtrInterface *PatternLink::GetPatternPtr() const
 
 string PatternLink::GetTrace() const
 {
-    string s = SSPrintf("%p->", asp_pattern.get()) + GetChildAgent()->GetTrace();
+    string s = SSPrintf("%p->", asp_pattern.get());
+    if(asp_pattern==nullptr)
+        s += "NULL";
+    else if(!*asp_pattern)
+        s += "&NULL";
+    else
+        s += GetChildAgent()->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
     s += SSPrintf("@%lX", (unsigned long)whodat);
 #endif

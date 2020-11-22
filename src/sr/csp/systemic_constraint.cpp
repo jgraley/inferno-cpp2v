@@ -168,16 +168,18 @@ bool SystemicConstraint::Test( list< Value > values )
               
         if( plan.action==Action::FULL )
         {
-            // Use a normal-linked query on our underlying agent   
-            shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
-            plan.agent->RunNormalLinkedQuery( query, x, required_links, knowledge );      
+            // Use a normal-linked query on our underlying agent.
+            // We only need one match to know that required_links are good, 
+            // i.e. to run once without throuwing a mismatch. Don't need
+            // the returned query.
+            (void)plan.agent->StartNormalLinkedQuery( x, required_links, knowledge )();      
         }
 
         return true;
     }
     catch( ::Mismatch & )
     {
-        // CouplingQuery() or RunNormalLinkedQuery() couldn't match.
+        // CouplingQuery() or StartNormalLinkedQuery() couldn't match.
         return false; 
     }               
 }

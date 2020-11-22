@@ -2,8 +2,11 @@
 #include "../search_replace.hpp" 
 #include "../conjecture.hpp" 
 #include "link.hpp"
+#include "the_knowledge.hpp"
 
 using namespace SR;
+
+#define FAST_STUFF
 
 //---------------------------------- SearchContainerAgent ------------------------------------    
 
@@ -138,7 +141,6 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         // Check all the nodes that we recursed through in order to get here
         for( pair<TreePtr<Node>, const TreePtrInterface *> p : pwtt->GetCurrentPath() )
         {
-            xpr_ss->push_back( p.first );
             xpr_ss->elts.push_back( p.second ? XLink(p.first, p.second) : base_xlink );
             TRACE("DQR ")(p.first)(" ")(p.second)("\n");
         }
@@ -147,6 +149,76 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X     
     }   
 }
+
+
+Agent::QueryLambda StuffAgent::FastStartNormalLinkedQuery( XLink base_xlink,
+                                                           const list<LocatedLink> &required_normal_links,
+                                                           const TheKnowledge *knowledge ) const
+{
+    INDENT("#");
+    ASSERT( this );
+    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+    
+    // Check pre-restriction
+    CheckLocalMatch(base_xlink.GetChildX().get());
+    
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    
+    // We expect one normal link - the terminus. recurse_restriction is a
+    // multiplicity link.
+    ASSERT( required_normal_links.size() == 1 );
+    ASSERT( ((PatternLink)(required_normal_links.front())).GetPattern() == terminus );
+
+#ifdef FAST_STUFF
+    XLink terminus_link = (XLink)(required_normal_links.front()); //checked by the above ASSERT
+    XLink x = terminus_link;
+    bool found = false;
+    TreePtr<SubSequence> xpr_ss( new SubSequence() );
+    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(terminus_link)("\n");
+    while(true)
+    {
+        if( x == base_xlink )
+        {
+            found = true;
+            TRACEC("Found ")(x)("\n");
+            break;            
+        }        
+        
+        if( knowledge->parents.count(x) == 0 )
+            break;            
+        x = knowledge->parents.at(x);
+        
+        // Putting this here excludes the terminus, as required
+        TRACEC("Move to parent ")(x)("\n");
+        xpr_ss->elts.push_front( x );      
+    }
+    if( !found )
+    {
+        TRACEC("Not found\n");        
+        throw TerminusMismatch();
+    }
+    
+    // TODO this stuff into iterator?
+    shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
+    query->RegisterNormalLink( PatternLink(this, &terminus), terminus_link ); // Link into X
+    if( recurse_restriction )
+    {
+        XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
+        query->RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
+    }
+    bool first = true;
+    QueryLambda lambda = [=]()mutable->shared_ptr<DecidedQuery>
+    {
+        if( !first )
+            throw NormalLinksMismatch();
+        first = false;
+        return query;
+    };
+    return lambda;
+#else
+    return AgentCommon::FastStartNormalLinkedQuery(base_xlink, required_normal_links, knowledge);
+#endif    
+}                                                                                        
 
 
 void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
