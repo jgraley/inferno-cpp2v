@@ -106,94 +106,68 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
-                                           XLink x,
-                                           const list<LocatedLink> &required_links,
-                                           const TheKnowledge *knowledge ) const
+void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
+                                            XLink x,
+                                            const list<LocatedLink> &required_links,
+                                            const TheKnowledge *knowledge ) const
 {    
-    while(1)
     {
-        try
-        {
-            shared_ptr<DecidedQuery> query = conj.GetQuery(this);
-            {
-                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-                RunDecidedQuery( *query, x );
-            }
-            
-            // The query now has populated links, which should be full
-            // (otherwise RunDecidedQuery() should have thrown). We loop 
-            // over both and check that they refer to the same x nodes
-            // we were passed. Mismatch will throw, same as in DQ.
-            auto actual_links = query->GetNormalLinks();
-            ASSERT( actual_links.size() == required_links.size() );
-            // TRACE("Actual links   ")(actual_links)("\n");
-            // TRACEC("Required links ")(required_links)("\n");
-            
-            bool match = true;
-            auto alit = actual_links.begin();
-            auto rlit = required_links.begin();
-            for( ;
-                 alit != actual_links.end() || rlit != required_links.end();
-                 ++alit, ++rlit )
-            {
-                if( alit == actual_links.end() || rlit == required_links.end() )
-                {
-                    match = false;
-                    break;
-                }
-                LocatedLink alink = *alit;
-                LocatedLink rlink = *rlit;
-                ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
-                if( (XLink)alink == XLink::MMAX_Link )
-                    continue;
-                // Compare by location
+        Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+        RunDecidedQuery( query, x );
+    }
+    
+    // The query now has populated links, which should be full
+    // (otherwise RunDecidedQuery() should have thrown). We loop 
+    // over both and check that they refer to the same x nodes
+    // we were passed. Mismatch will throw, same as in DQ.
+    auto actual_links = query.GetNormalLinks();
+    ASSERT( actual_links.size() == required_links.size() );
+    // TRACE("Actual links   ")(actual_links)("\n");
+    // TRACEC("Required links ")(required_links)("\n");
+    
+    auto alit = actual_links.begin();
+    auto rlit = required_links.begin();
+    for( ;
+         alit != actual_links.end() || rlit != required_links.end();
+         ++alit, ++rlit )
+    {
+        if( alit == actual_links.end() || rlit == required_links.end() )
+            throw NormalLinksMismatch(); // number of links mismatches
+
+        LocatedLink alink = *alit;
+        LocatedLink rlink = *rlit;
+        ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
+        if( (XLink)alink == XLink::MMAX_Link )
+            continue;
+        // Compare by location
 #ifdef CHECK_LINKS_COMPARISON
-                if( alink.GetChildX() == rlink.GetChildX() )
+        if( alink.GetChildX() == rlink.GetChildX() )
+        {
+            if( !TreePtr<CPPTree::Identifier>::DynamicCast( alink.GetChildX() ) )
+            {
+                if( auto tp = dynamic_cast<const TransformOfAgent *>(this) )
                 {
-                    if( !TreePtr<CPPTree::Identifier>::DynamicCast( alink.GetChildX() ) )
-                    {
-                        if( auto tp = dynamic_cast<const TransformOfAgent *>(this) )
-                        {
-                            ASSERT( (XLink)alink == (XLink)rlink )
-                                  ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
-                                  ("Actual   ")(alink)("\n")
-                                  ("Required ")(rlink)("\n")
-                                  ("TransformOfAgent's cache ")(tp->cache.cache)("\n");
-                        }
-                        else
-                        {
-                            ASSERT( (XLink)alink == (XLink)rlink )
-                                  ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
-                                  ("Actual   ")(alink)("\n")
-                                  ("Required ")(rlink)("\n");
-                        }
-                    }
+                    ASSERT( (XLink)alink == (XLink)rlink )
+                          ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
+                          ("Actual   ")(alink)("\n")
+                          ("Required ")(rlink)("\n")
+                          ("TransformOfAgent's cache ")(tp->cache.cache)("\n");
                 }
                 else
-#else                
-                if( (XLink)alink != (XLink)rlink )
-#endif                
                 {
-                    match = false;
-                    // TODO break?
-                }                 
+                    ASSERT( (XLink)alink == (XLink)rlink )
+                          ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
+                          ("Actual   ")(alink)("\n")
+                          ("Required ")(rlink)("\n");
+                }
             }
-            
-            if( match )
-                break; // Great, the normal links matched
         }
-        catch( ::Mismatch & ) {}
-        
-        Tracer::RAIIEnable silencer( false ); // make conjecture be quiet
-        // We will get here on a mismatch, whether detected by DQ or our
-        // own comparison of the normal links. Permit the conjecture
-        // to move to a new set of choices.
-        if( !conj.Increment() )
-            throw NormalLinksMismatch(); // Conjecture has run out of choices to try.
-            
-        // Conjecture would like us to try again with new choices
-    }     
+        else
+#else                
+        if( (XLink)alink != (XLink)rlink )
+#endif                
+            throw NormalLinksMismatch(); // value of links mismatches                                
+    }            
 }                           
 
 
@@ -225,9 +199,27 @@ AgentCommon::QueryLambda AgentCommon::SlowStartNormalLinkedQuery( XLink x,
                 throw NormalLinksMismatch(); // Conjecture has run out of choices to try.            
         }
 
-        // Query the agent: our conj will be used for the iteration and
-        // therefore our query will hold the result 
-        ResumeNormalLinkedQuery( *conj, x, required_links, knowledge );
+        while(1)
+        {
+            try
+            {
+                // Query the agent: our conj will be used for the iteration and
+                // therefore our query will hold the result 
+                shared_ptr<DecidedQuery> query = conj->GetQuery(this);
+                DecidedNormalLinkedQuery( *query, x, required_links, knowledge );
+                break; // Great, the normal links matched
+            }
+            catch( ::Mismatch & ) {}
+            
+            Tracer::RAIIEnable silencer( false ); // make conjecture be quiet
+            // We will get here on a mismatch, whether detected by DQ or our
+            // own comparison of the normal links. Permit the conjecture
+            // to move to a new set of choices.
+            if( !conj->Increment() )
+                throw NormalLinksMismatch(); // Conjecture has run out of choices to try.
+                
+            // Conjecture would like us to try again with new choices
+        }     
         first = false;
         
         return query; 

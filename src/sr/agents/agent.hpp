@@ -92,10 +92,10 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink x ) const;                                                
-    virtual void ResumeNormalLinkedQuery( Conjecture &conj,
-                                          XLink x,
-                                          const list<LocatedLink> &required_links,
-                                          const TheKnowledge *knowledge ) const;                                              
+    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
+                                           XLink x,
+                                           const list<LocatedLink> &required_links,
+                                           const TheKnowledge *knowledge ) const;                                              
     virtual QueryLambda FastStartNormalLinkedQuery( XLink x,
                                                     const list<LocatedLink> &required_links,
                                                     const TheKnowledge *knowledge ) const;
