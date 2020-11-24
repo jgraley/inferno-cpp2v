@@ -96,12 +96,12 @@ public:
                                            XLink x,
                                            const list<LocatedLink> &required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    virtual QueryLambda FastStartNormalLinkedQuery( XLink x,
-                                                    const list<LocatedLink> &required_links,
-                                                    const TheKnowledge *knowledge ) const;
-    virtual QueryLambda SlowStartNormalLinkedQuery( XLink x,
-                                                    const list<LocatedLink> &required_links,
-                                                    const TheKnowledge *knowledge ) const;
+    virtual void TestDecidedNormalLinkedQuery( DecidedQuery &query,
+                                               XLink x,
+                                               const list<LocatedLink> &required_links,
+                                               const TheKnowledge *knowledge ) const;                                              
+    void CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
+                             const DecidedQueryCommon::Links &ref_links ) const;
     virtual QueryLambda StartNormalLinkedQuery( XLink x,
                                                 const list<LocatedLink> &required_links,
                                                 const TheKnowledge *knowledge ) const;

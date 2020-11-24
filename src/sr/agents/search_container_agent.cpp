@@ -151,9 +151,10 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-Agent::QueryLambda StuffAgent::FastStartNormalLinkedQuery( XLink base_xlink,
-                                                           const list<LocatedLink> &required_normal_links,
-                                                           const TheKnowledge *knowledge ) const
+void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
+                                           XLink base_xlink,
+                                           const list<LocatedLink> &required_normal_links,
+                                           const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -198,25 +199,14 @@ Agent::QueryLambda StuffAgent::FastStartNormalLinkedQuery( XLink base_xlink,
         throw TerminusMismatch();
     }
     
-    // TODO this stuff into iterator?
-    shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
-    query->RegisterNormalLink( PatternLink(this, &terminus), terminus_link ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), terminus_link ); // Link into X
     if( recurse_restriction )
     {
         XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
-        query->RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
-    }
-    bool first = true;
-    QueryLambda lambda = [=]()mutable->shared_ptr<DecidedQuery>
-    {
-        if( !first )
-            throw NormalLinksMismatch();
-        first = false;
-        return query;
-    };
-    return lambda;
+        query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
+    }    
 #else
-    return AgentCommon::FastStartNormalLinkedQuery(base_xlink, required_normal_links, knowledge);
+    return AgentCommon::DecidedNormalLinkedQuery(query, base_xlink, required_normal_links, knowledge);
 #endif    
 }                                                                                        
 
