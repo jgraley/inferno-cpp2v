@@ -52,7 +52,11 @@ public:
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
     virtual QueryLambda StartNormalLinkedQuery( XLink x,
                                                 const list<LocatedLink> &required_links,
-                                                const TheKnowledge *knowledge ) const = 0;
+                                                const TheKnowledge *knowledge,
+                                                bool force_common = false ) const = 0;
+    virtual QueryLambda TestStartNormalLinkedQuery( XLink x,
+                                                    const list<LocatedLink> &required_links,
+                                                    const TheKnowledge *knowledge ) const = 0;
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
     virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
     // function<XLink(XLink)> deduplicator
@@ -96,15 +100,15 @@ public:
                                            XLink x,
                                            const list<LocatedLink> &required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    virtual void TestDecidedNormalLinkedQuery( DecidedQuery &query,
-                                               XLink x,
-                                               const list<LocatedLink> &required_links,
-                                               const TheKnowledge *knowledge ) const;                                              
     void CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
                              const DecidedQueryCommon::Links &ref_links ) const;
     virtual QueryLambda StartNormalLinkedQuery( XLink x,
                                                 const list<LocatedLink> &required_links,
-                                                const TheKnowledge *knowledge ) const;
+                                                const TheKnowledge *knowledge,
+                                                bool force_common = false ) const;
+    virtual QueryLambda TestStartNormalLinkedQuery( XLink x,
+                                                    const list<LocatedLink> &required_links,
+                                                    const TheKnowledge *knowledge ) const;
     virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
     virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return unordered_set<XLink>(); /* implement in agents that can expand the domain */ }
 

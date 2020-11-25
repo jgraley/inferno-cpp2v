@@ -11,7 +11,6 @@
 #include <stdexcept>
 
 //#define CHECK_LINKS_COMPARISON
-//#define NLQ_TEST
 
 using namespace SR;
 
@@ -111,6 +110,7 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
                                             const list<LocatedLink> &required_links,
                                             const TheKnowledge *knowledge ) const
 {    
+    TRACE("common DNLQ: ")(*this)(" at ")(x)("\n");
     {
         Tracer::RAIIEnable silencer( false ); // make DQ be quiet
         RunDecidedQuery( query, x );
@@ -121,6 +121,8 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
     // over both and check that they refer to the same x nodes
     // we were passed. Mismatch will throw, same as in DQ.
     auto actual_links = query.GetNormalLinks();
+    TRACEC("Actual   ")(actual_links)("\n");
+    TRACEC("Required ")(required_links)("\n");
     ASSERT( actual_links.size() == required_links.size() );
     // TRACE("Actual links   ")(actual_links)("\n");
     // TRACEC("Required links ")(required_links)("\n");
@@ -169,55 +171,13 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
             throw NormalLinksMismatch(); // value of links mismatches                                
     }            
 }                           
-
-                                             
-void AgentCommon::TestDecidedNormalLinkedQuery( DecidedQuery &mut_query,
-                                                XLink x,
-                                                const list<LocatedLink> &required_links,
-                                                const TheKnowledge *knowledge ) const
-{
-    DecidedQuery ref_query( mut_query );
-    try
-    {
-         DecidedNormalLinkedQuery( mut_query, x, required_links, knowledge );
-    }
-    catch( ::Mismatch &e ) // MUT threw
-    {
-        try
-        {
-            AgentCommon::DecidedNormalLinkedQuery( ref_query, x, required_links, knowledge );
-            ASSERT(false)("MUT threw ")(e)(" but ref didn't\n")
-                         (*this)(" at ")(x)("\n")
-                         ("Required ")(required_links);
-        }
-        catch( ::Mismatch &e ) // Ref threw
-        {
-            // Passed test: both threw Mismatch
-            throw e;
-        }        
-    }
-    // MUT didn't throw
-    try
-    {
-        AgentCommon::DecidedNormalLinkedQuery( ref_query, x, required_links, knowledge );
-    }
-    catch( ::Mismatch &e ) // Ref threw
-    {
-        ASSERT(false)("Ref threw ")(e)(" but MUT didn't\n")
-                     (*this)(" at ")(x)("\n")
-                     ("Required ")(required_links);   
-    }    
-
-    // Now to check the links the two algos put in their query objects
-    CheckMatchingLinks( mut_query.GetNormalLinks(), ref_query.GetNormalLinks() );
-    CheckMatchingLinks( mut_query.GetAbnormalLinks(), ref_query.GetAbnormalLinks() );
-    CheckMatchingLinks( mut_query.GetMultiplicityLinks(), ref_query.GetMultiplicityLinks() );
-}
-
+                                
     
 void AgentCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
                                       const DecidedQueryCommon::Links &ref_links ) const
 {    
+    TRACE("Checking ")(mut_links)(" against ")(ref_links)("\n");
+    
     // Multiplicity X links are not uniquified but their contents should match 
     list<LocatedLink>::const_iterator mit = mut_links.begin();
     list<LocatedLink>::const_iterator rit = ref_links.begin();
@@ -253,13 +213,16 @@ void AgentCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links
         {
             ASSERT( *mit == *rit );
         }
+        ++mit;
+        ++rit;
     }
 }
 
 
 AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
                                                               const list<LocatedLink> &required_links,
-                                                              const TheKnowledge *knowledge ) const
+                                                              const TheKnowledge *knowledge,
+                                                              bool force_common ) const
 {
     shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
     
@@ -284,11 +247,12 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 shared_ptr<DecidedQuery> query = conj->GetQuery(this);
-#ifdef NLQ_TEST
-                TestDecidedNormalLinkedQuery( *query, x, required_links, knowledge );
-#else
-                DecidedNormalLinkedQuery( *query, x, required_links, knowledge );
-#endif                
+                
+                if( force_common )
+                    AgentCommon::DecidedNormalLinkedQuery( *query, x, required_links, knowledge );
+                else
+                    DecidedNormalLinkedQuery( *query, x, required_links, knowledge );                            
+                    
                 break; // Great, the normal links matched
             }
             catch( ::Mismatch & ) {}
@@ -309,6 +273,89 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
     return lambda;
 }   
                                               
+                                              
+AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink x,
+                                                                  const list<LocatedLink> &required_links,
+                                                                  const TheKnowledge *knowledge ) const
+{
+
+    QueryLambda mut_lambda;
+    QueryLambda ref_lambda;
+    try
+    {
+        mut_lambda = StartNormalLinkedQuery( x, required_links, knowledge, false );
+    }
+    catch( ::Mismatch &e ) 
+    {
+        try
+        {
+            (void)StartNormalLinkedQuery( x, required_links, knowledge, true );
+            ASSERT(false)("Fast start threw ")(e)(" but Slow didn't\n")
+                         (*this)(" at ")(x)("\n")
+                         ("Required ")(required_links);
+        }
+        catch( ::Mismatch &e ) 
+        {
+            // Passed test: both threw Mismatch
+            throw e;
+        }        
+    }
+    // FastStartNormalLinkedQuery() didn't throw
+    try
+    {
+        ref_lambda = StartNormalLinkedQuery( x, required_links, knowledge, true );        
+    }
+    catch( ::Mismatch &e ) 
+    {
+        ASSERT(false)("Slow start threw ")(e)(" but Fast didn't\n")
+                     (*this)(" at ")(x)("\n")
+                     ("Required ")(required_links);   
+    }
+
+    QueryLambda test_lambda = [=]()mutable->shared_ptr<DecidedQuery>
+    {
+        shared_ptr<SR::DecidedQuery> mut_query;
+        shared_ptr<SR::DecidedQuery> ref_query;
+        try 
+        { 
+            mut_query = mut_lambda(); 
+        }
+        catch( ::Mismatch &e ) 
+        {
+            try 
+            { 
+                (void)ref_lambda(); 
+                ASSERT(false)("Fast lambda threw ")(e)(" but Slow didn't\n")
+                             (*this)(" at ")(x)("\n")
+                             ("Required ")(required_links);
+            }
+            catch( ::Mismatch &e ) 
+            {
+                throw e;
+            }                
+        }
+        // Didn't throw
+        try
+        {
+            ref_query = ref_lambda(); 
+        }
+        catch( ::Mismatch &e ) 
+        {
+            ASSERT(false)("Slow lambda threw ")(e)(" but Fast didn't\n")
+                         (*this)(" at ")(x)("\n")
+                         ("Required ")(required_links);   
+        }
+        
+        // Now to check the links the two algos put in their query objects
+        CheckMatchingLinks( mut_query->GetNormalLinks(), ref_query->GetNormalLinks() );
+        CheckMatchingLinks( mut_query->GetAbnormalLinks(), ref_query->GetAbnormalLinks() );
+        CheckMatchingLinks( mut_query->GetMultiplicityLinks(), ref_query->GetMultiplicityLinks() );
+        return mut_query;
+    };
+    
+    return test_lambda;
+}
+
 
 void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
 {    

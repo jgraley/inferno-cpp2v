@@ -24,7 +24,10 @@
 
 //#define USE_SOLVER
 
-#define CHECK_EVERYTHING_IS_IN_DOMAIN
+//#define CHECK_EVERYTHING_IS_IN_DOMAIN
+
+//#define NLQ_TEST
+
 
 using namespace SR;
 
@@ -582,7 +585,11 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
         ASSERT( knowledge->domain.count((XLink)link) > 0 )((XLink)link)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
     
+#ifdef NLQ_TEST
+    auto nlq_lambda = agent->TestStartNormalLinkedQuery( base_xlink, basic_solution_links, knowledge );
+#else    
     auto nlq_lambda = agent->StartNormalLinkedQuery( base_xlink, basic_solution_links, knowledge );
+#endif
     
     int i=0;
     while(1)

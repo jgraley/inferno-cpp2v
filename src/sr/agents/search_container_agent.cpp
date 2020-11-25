@@ -6,8 +6,6 @@
 
 using namespace SR;
 
-#define FAST_STUFF
-
 //---------------------------------- SearchContainerAgent ------------------------------------    
 
 shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
@@ -170,7 +168,6 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     ASSERT( required_normal_links.size() == 1 );
     ASSERT( ((PatternLink)(required_normal_links.front())).GetPattern() == terminus );
 
-#ifdef FAST_STUFF
     XLink terminus_link = (XLink)(required_normal_links.front()); //checked by the above ASSERT
     XLink x = terminus_link;
     bool found = false;
@@ -204,10 +201,7 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     {
         XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
         query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
-    }    
-#else
-    return AgentCommon::DecidedNormalLinkedQuery(query, base_xlink, required_normal_links, knowledge);
-#endif    
+    }      
 }                                                                                        
 
 
