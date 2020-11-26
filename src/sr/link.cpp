@@ -164,8 +164,9 @@ XLink::XLink( shared_ptr<const Node> parent_x,
               void *whodat_ ) :
     asp_x( parent_x, px )              
 {
-    ASSERT(asp_x);
-    ASSERT(*asp_x);
+    ASSERT( parent_x );
+    ASSERT( px );
+    ASSERT( *px );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
@@ -257,8 +258,8 @@ XLink::XLink( shared_ptr<const TreePtrInterface> px,
               void *whodat_ ) :
     asp_x( px )
 {
-    ASSERT(asp_x);
-    ASSERT(*asp_x);
+    ASSERT(px);
+    ASSERT(*px);
 
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
