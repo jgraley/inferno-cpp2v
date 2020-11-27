@@ -41,7 +41,7 @@ public:
 /// being bypassed.
 class AnyNodeAgent : public SearchContainerAgent
 {
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 };
@@ -80,7 +80,7 @@ public:
     {
     };
 
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_x ) const;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;

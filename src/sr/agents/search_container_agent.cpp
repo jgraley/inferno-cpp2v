@@ -101,11 +101,11 @@ void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
 
 //---------------------------------- Stuff ------------------------------------    
 
-shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink x ) const
+shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink base_xlink ) const
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new Walk( x.GetChildX(), nullptr, nullptr ) );
+    return shared_ptr<ContainerInterface>( new Walk( base_xlink.GetChildX(), nullptr, nullptr ) );
 }
 
 

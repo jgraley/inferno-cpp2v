@@ -21,14 +21,14 @@ class StandardAgent : public virtual AgentCommon
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+                                      XLink base_xlink ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
-    void DecidedQuerySequence( XLink base_x,
+    void DecidedQuerySequence( XLink base_xlink,
                                DecidedQueryAgentInterface &query,
                                SequenceInterface *px,
     	                       SequenceInterface &pattern ) const;
-    void DecidedQueryCollection( XLink base_x,
+    void DecidedQueryCollection( XLink base_xlink,
                                  DecidedQueryAgentInterface &query,
                                  CollectionInterface *px,
     		                     CollectionInterface &pattern ) const;
