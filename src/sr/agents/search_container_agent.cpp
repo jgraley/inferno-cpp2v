@@ -168,7 +168,7 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     
     auto terminus_plink = PatternLink(this, &terminus);
     XLink req_terminus_xlink = required_links->at(terminus_plink); 
-    query.RegisterNormalLink( PatternLink(this, &terminus), req_terminus_xlink ); // Note: just extracted directly from required_links
+    query.RegisterNormalLink( terminus_plink, req_terminus_xlink ); // Note: just extracted directly from required_links
     
     XLink x = req_terminus_xlink;
     bool found = false;

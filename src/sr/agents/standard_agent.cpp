@@ -12,6 +12,47 @@ using namespace SR;
 //#define ERASE_USING_ITERATOR
 //#define CHECK_ITERATOR_IN_CONTAINER
 
+void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
+{
+    AgentCommon::AgentConfigure(master_scr_engine);
+    plan.DoPlan( this );    
+}
+
+
+void StandardAgent::Plan::DoPlan( StandardAgent *algo )
+{
+    const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
+    FOREACH( Itemiser::Element *ie, pattern_memb )
+    {
+        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
+            SequencePlanning(pattern_seq);
+    }
+    
+    planned = true;
+}
+
+
+void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
+{
+    int pattern_num_non_star = 0;
+    ContainerInterface::iterator p_last_star;
+	for( ContainerInterface::iterator pit = pattern->begin(); 
+         pit != pattern->end(); 
+         ++pit ) 
+    {
+		TreePtr<Node> pe( *pit );
+		ASSERT( pe );
+        if( dynamic_pointer_cast<StarAgent>(pe) )
+            p_last_star = pit;
+        else
+            pattern_num_non_star++;
+    }
+
+    sequence_pattern_num_non_star[pattern] = pattern_num_non_star;
+    sequence_p_last_star[pattern] = p_last_star;
+}
+
+
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
@@ -105,14 +146,14 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedQuerySequence( query, base_xlink, p_x_seq, *pattern_seq );
+            DecidedQuerySequence( query, base_xlink, p_x_seq, pattern_seq );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( query, base_xlink, p_x_col, *pattern_col );
+            DecidedQueryCollection( query, base_xlink, p_x_col, pattern_col );
         }
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -137,36 +178,29 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                           XLink base_xlink,
                                           SequenceInterface *px,
-		                                  SequenceInterface &pattern ) const
+		                                  SequenceInterface *pattern ) const
 {
     INDENT("S");
-	ContainerInterface::iterator pit, npit, nnpit, nxit;
+    ASSERT( plan.planned );
     
-	// Attempt to match all the elements between start and the end of the sequence; stop
-	// if either pattern or subject runs out.
-	ContainerInterface::iterator xit = px->begin();
-	int p_remaining;
+    int pattern_num_non_star = plan.sequence_pattern_num_non_star.at(pattern);
+    ContainerInterface::iterator p_last_star = plan.sequence_p_last_star.at(pattern);
 
-    int pattern_num_non_star = 0;
-    ContainerInterface::iterator p_last_star;
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in GetPatternQuery() and cache?
-    {
-		TreePtr<Node> pe( *pit );
-		ASSERT( pe );
-        if( dynamic_pointer_cast<StarAgent>(pe) )
-            p_last_star = pit;
-        else
-            pattern_num_non_star++;
-    }
     if( px->size() < pattern_num_non_star )
     {
         throw Mismatch();     // TODO break to get the final trace?
     }
+
+	ContainerInterface::iterator pit, npit, nnpit, nxit;            
     ContainerInterface::iterator xit_star_limit = px->end();            
     for( int i=0; i<pattern_num_non_star; i++ )
-        --xit_star_limit;
+        --xit_star_limit;                
         
-	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
+	// Attempt to match all the elements between start and the end of the sequence; stop
+	// if either pattern or subject runs out.
+	ContainerInterface::iterator xit = px->begin();
+	int p_remaining;
+	for( pit = pattern->begin(), p_remaining = pattern->size(); pit != pattern->end(); ++pit, --p_remaining )
 	{
  		ASSERT( xit == px->end() || *xit );
 
@@ -218,10 +252,10 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
+	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern->end() );
     if( xit != px->end() )
         throw Mismatch();  
-    else if( pit != pattern.end() )
+    else if( pit != pattern->end() )
         throw Mismatch();  
     else 
         ASSERT( p_remaining==0 );
@@ -231,7 +265,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             XLink base_xlink,
                                             CollectionInterface *px,
-		 					                CollectionInterface &pattern ) const
+		 					                CollectionInterface *pattern ) const
 {
     INDENT("C");
     
@@ -244,11 +278,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     
     const TreePtrInterface *p_star = nullptr;
 
-    for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
+    for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
     {
     	TRACE("Collection compare %d remain out of %d; looking at ",
                 xremaining.size(),
-                pattern.size() )(**pit)(" in pattern\n" );
+                pattern->size() )(**pit)(" in pattern\n" );
 		TreePtr<Node> pe( *pit );
         if( dynamic_pointer_cast<StarAgent>(pe) ) // Star in pattern collection?
         {
@@ -392,14 +426,14 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedNormalLinkedQuerySequence( query, base_xlink, p_x_seq, *pattern_seq, required_links, knowledge );
+            DecidedNormalLinkedQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( query, base_xlink, p_x_col, *pattern_col );
+            DecidedNormalLinkedQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge );
         }
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -426,96 +460,45 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
 void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
                                                       XLink base_xlink,
                                                       SequenceInterface *px,
-                                                      SequenceInterface &pattern,
+                                                      SequenceInterface *pattern,
                                                       const SolutionMap *required_links,
                                                       const TheKnowledge *knowledge ) const
 {
     INDENT("S");
-	ContainerInterface::iterator pit, npit, nnpit, nxit;
-    
-	// Attempt to match all the elements between start and the end of the sequence; stop
-	// if either pattern or subject runs out.
-	ContainerInterface::iterator xit = px->begin();
-	int p_remaining;
 
-    int pattern_num_non_star = 0;
-    ContainerInterface::iterator p_last_star;
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in GetPatternQuery() and cache?
+    TheKnowledge::Nugget::IndexType current_index = -1; 
+    // Note trying not to use px - might be large!
+    FOREACH( const TreePtrInterface &pei, *pattern )
     {
-		TreePtr<Node> pe( *pit );
-		ASSERT( pe );
-        if( dynamic_pointer_cast<StarAgent>(pe) )
-            p_last_star = pit;
-        else
-            pattern_num_non_star++;
-    }
-    if( px->size() < pattern_num_non_star )
-    {
-        throw Mismatch();     // TODO break to get the final trace?
-    }
-    ContainerInterface::iterator xit_star_limit = px->end();            
-    for( int i=0; i<pattern_num_non_star; i++ )
-        --xit_star_limit;
-        
-	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
-	{
- 		ASSERT( xit == px->end() || *xit );
-
-		// Get the next element of the pattern
-		TreePtr<Node> pe( *pit );
-		ASSERT( pe );
+        TreePtr<Node> pe(pei);
         if( dynamic_pointer_cast<StarAgent>(pe) )
         {
-            // We have a Star type wildcard that can match multiple elements.
-            ContainerInterface::iterator xit_star_end;
-                
-            // The last Star does not need a decision            
-            if( pit == p_last_star )
-            {
-                // No more stars, so skip ahead to the end of the possible star range. 
-                xit_star_end = xit_star_limit;
-            }				
-            else
-            {
-                // Decide how many elements the current * should match, using conjecture. The star's range
-                // ends at the chosen element. Be inclusive because what we really want is a range.
-                ASSERT( xit == px->end() || *xit );
-                xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
-            }
-            
-            // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
-            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit, xit_star_end ) );
-
-            // Apply couplings to this Star and matched range
-            // Restrict to pre-restriction or pattern restriction
-            query.RegisterAbnormalLink( PatternLink(this, &*pit), XLink::CreateDistinct(xss) ); // Only used in after-pass
-             
-            // Resume at the first element after the matched range
-            xit = xit_star_end;
         }
- 	    else // not a Star so match singly...
-	    {
-            if( xit == px->end() )
-                break;
-       
-            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
-            ++xit;
-            
-            // Every non-star pattern node we pass means there's one fewer remaining
-            // and we can match a star one step further
-            ASSERT(xit_star_limit != px->end());
-            ++xit_star_limit;
-	    }
-	}
+        else
+        {
+            auto plink = PatternLink(this, &pe);
+            XLink req_xlink = required_links->at(plink); 
+            query.RegisterNormalLink( plink, req_xlink ); // Note: just extracted directly from required_links
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
+            if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE ||
+                  nugget.container == px ||
+                  nugget.index > current_index) )
+                throw SequenceMismatch();
+            current_index = nugget.index;    
+        }
+    }
+}
 
-    // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
-    if( xit != px->end() )
-        throw Mismatch();  
-    else if( pit != pattern.end() )
-        throw Mismatch();  
-    else 
-        ASSERT( p_remaining==0 );
+
+void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterface &query,
+                                                        XLink base_xlink,
+                                                        CollectionInterface *px,
+                                                        CollectionInterface *pattern,
+                                                        const SolutionMap *required_links,
+                                                        const TheKnowledge *knowledge ) const
+{
+    INDENT("S");
+
 }
 
 

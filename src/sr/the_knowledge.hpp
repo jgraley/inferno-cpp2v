@@ -40,10 +40,11 @@ public:
             IN_SEQUENCE,
             IN_COLLECTION
         };
+        typedef int IndexType;
         Cadence cadence;
         XLink parent_xlink;
         const ContainerInterface *container;
-        int index;
+        IndexType index;
         
         string GetTrace() const;
     };
@@ -59,7 +60,7 @@ private:
                   Nugget::Cadence cadence, 
                   XLink parent_xlink = XLink(), 
                   const ContainerInterface *container = nullptr, 
-                  int index = -1 );
+                  Nugget::IndexType index = -1 );
     void AddChildren( SubtreeMode mode, XLink xlink );
     void AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink );
     void AddSequence( SubtreeMode mode, const SequenceInterface *x_seq, XLink xlink );

@@ -22,6 +22,22 @@ public:
     class SingularMismatch : exception
     {
     };
+    class SequenceMismatch : exception
+    {
+    };
+    
+	virtual void AgentConfigure( const SCREngine *master_scr_engine );
+
+    struct Plan
+    {
+        bool planned = false;
+        map<SequenceInterface *, int> sequence_pattern_num_non_star;
+        map<SequenceInterface *, ContainerInterface::iterator> sequence_p_last_star;
+        
+        void DoPlan( StandardAgent *algo );
+        void SequencePlanning( SequenceInterface *pattern );
+    };
+    
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
@@ -31,11 +47,11 @@ private:
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
                                SequenceInterface *px,
-    	                       SequenceInterface &pattern ) const;
+    	                       SequenceInterface *pattern ) const;
     void DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                  XLink base_xlink,
                                  CollectionInterface *px,
-    		                     CollectionInterface &pattern ) const;
+    		                     CollectionInterface *pattern ) const;
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
@@ -43,9 +59,15 @@ private:
     void DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            SequenceInterface *px,
-                                           SequenceInterface &pattern,
+                                           SequenceInterface *pattern,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
+    void DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterface &query,
+                                             XLink base_xlink,
+                                             CollectionInterface *px,
+                                             CollectionInterface *pattern,
+                                             const SolutionMap *required_links,
+                                             const TheKnowledge *knowledge ) const;
                                            
 public:
     virtual void TrackingKey( Agent *from );
@@ -54,6 +76,8 @@ public:
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr
     TreePtr<Node> BuildReplaceNormal();
+    
+    Plan plan; // can't be const because children added after construct
 };
 
 

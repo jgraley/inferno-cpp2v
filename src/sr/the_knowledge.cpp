@@ -132,7 +132,7 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_
 
 void TheKnowledge::AddSequence( SubtreeMode mode, const SequenceInterface *x_seq, XLink xlink )
 {
-    int index = 0;
+    Nugget::IndexType index = 0;
     FOREACH( const TreePtrInterface &x, *x_seq )
     {
         XLink child_xlink( xlink.GetChildX(), &x );
