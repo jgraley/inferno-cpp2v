@@ -157,6 +157,7 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+    query.Reset();
 
     list<LocatedLink> required_normal_links = LocateLinksFromMap( pattern_query->GetNormalLinks(), *required_links );
     

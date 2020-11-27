@@ -23,6 +23,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
+
 private:
     void DecidedQuerySequence( XLink base_xlink,
                                DecidedQueryAgentInterface &query,
@@ -32,9 +33,15 @@ private:
                                  DecidedQueryAgentInterface &query,
                                  CollectionInterface *px,
     		                     CollectionInterface &pattern ) const;
+    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
+                                           XLink x,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                              
+
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
+
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr
     TreePtr<Node> BuildReplaceNormal();

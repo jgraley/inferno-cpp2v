@@ -359,6 +359,16 @@ void StandardAgent::DecidedQueryCollection( XLink base_xlink,
 }
 
 
+void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
+                                              XLink base_xlink,
+                                              const SolutionMap *required_links,
+                                              const TheKnowledge *knowledge ) const
+{
+    INDENT("Q");
+    AgentCommon::DecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
+}
+
+
 void StandardAgent::TrackingKey( Agent *from )
 {
     INDENT("T");
