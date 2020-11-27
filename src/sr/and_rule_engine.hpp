@@ -103,9 +103,7 @@ public:
         unordered_set<PatternLink> reached_links; 
     } plan;
     
-private:    
-    typedef unordered_map< PatternLink, XLink > SolutionMap;
-
+private:        
     void StartCSPSolver( XLink root_xlink );
     void GetNextCSPSolution();
     void CompareLinks( Agent *agent,

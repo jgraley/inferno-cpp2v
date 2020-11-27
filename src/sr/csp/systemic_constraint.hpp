@@ -76,7 +76,7 @@ private:
     list<VariableId> GetFreeVariables() const;
     void TraceProblem() const;
     virtual void Start( const Assignments &forces, 
-                            const SR::TheKnowledge *knowledge );    
+                        const SR::TheKnowledge *knowledge );    
     bool Test( list< Value > values );
         
     class ByLocationLinkMismatch : public ::Mismatch

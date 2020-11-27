@@ -122,9 +122,11 @@ void EnsureNotOnStack( const void *p, string trace="" );
 
 typedef XLink CouplingKey;
 typedef map< Agent *, CouplingKey > CouplingKeysMap;
-
+typedef unordered_map< PatternLink, XLink > SolutionMap;
 };
 
+// The hashing functions we require in order to use links as keys to
+// unordered_set, unordered_map
 namespace std
 {
     template<> struct hash<SR::PatternLink>

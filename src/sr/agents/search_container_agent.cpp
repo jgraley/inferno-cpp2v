@@ -151,28 +151,28 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 
 void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
                                            XLink base_xlink,
-                                           const list<LocatedLink> &required_normal_links,
+                                           const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+
+    list<LocatedLink> required_normal_links = LocateLinksFromMap( pattern_query->GetNormalLinks(), *required_links );
     
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
     
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
-    // We expect one normal link - the terminus. recurse_restriction is a
-    // multiplicity link.
-    ASSERT( required_normal_links.size() == 1 );
-    ASSERT( ((PatternLink)(required_normal_links.front())).GetPattern() == terminus );
-
-    XLink terminus_link = (XLink)(required_normal_links.front()); //checked by the above ASSERT
-    XLink x = terminus_link;
+    auto terminus_plink = PatternLink(this, &terminus);
+    XLink terminus_xlink = required_links->at(terminus_plink); 
+    query.RegisterNormalLink( PatternLink(this, &terminus), terminus_xlink ); // Note: just extracted directly from required_links
+    
+    XLink x = terminus_xlink;
     bool found = false;
     TreePtr<SubSequence> xpr_ss( new SubSequence() );
-    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(terminus_link)("\n");
+    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(terminus_xlink)("\n");
     while(true)
     {
         if( x == base_xlink )
@@ -196,7 +196,6 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
         throw TerminusMismatch();
     }
     
-    query.RegisterNormalLink( PatternLink(this, &terminus), terminus_link ); // Link into X
     if( recurse_restriction )
     {
         XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass

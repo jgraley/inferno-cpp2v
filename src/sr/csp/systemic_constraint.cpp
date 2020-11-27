@@ -91,7 +91,7 @@ void SystemicConstraint::TraceProblem() const
 
 
 void SystemicConstraint::Start( const Assignments &forces_map, 
-                                    const SR::TheKnowledge *knowledge )
+                                    const SR::TheKnowledge *knowledge_ )
 {
     forces.clear();
     for( auto var : plan.all_variables )
@@ -112,6 +112,9 @@ void SystemicConstraint::Start( const Assignments &forces_map,
             break;
         }
     }    
+    
+    knowledge = knowledge_;
+    ASSERT( knowledge );
 }   
 
 
@@ -122,7 +125,7 @@ bool SystemicConstraint::Test( list< Value > values )
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
     Value x;
-    list<SR::LocatedLink> required_links;
+    SR::SolutionMap required_links;
     multiset<SR::XLink> coupling_links;
     list<Value>::const_iterator forceit = forces.begin();
     list<Value>::const_iterator valit = values.begin();
@@ -153,13 +156,15 @@ bool SystemicConstraint::Test( list< Value > values )
             break;
             
         case Kind::CHILD:
-            required_links.push_back( SR::LocatedLink(*patit++, v) );     
+            required_links[*patit++] = v;     
             break;
         }
     }    
 
     try
     {
+        Tracer::RAIIEnable silencer( false ); // make queries be quiet
+
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {
             // First check any coupling at this pattern node
@@ -169,10 +174,10 @@ bool SystemicConstraint::Test( list< Value > values )
         if( plan.action==Action::FULL )
         {
             // Use a normal-linked query on our underlying agent.
-            // We only need one match to know that required_links are good, 
+            // We only need one match to know that required_links_list are good, 
             // i.e. to run once without throuwing a mismatch. Don't need
             // the returned query.
-            (void)plan.agent->StartNormalLinkedQuery( x, required_links, knowledge )();      
+            (void)plan.agent->StartNormalLinkedQuery( x, &required_links, knowledge )();      
         }
 
         return true;

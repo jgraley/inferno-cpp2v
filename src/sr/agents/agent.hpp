@@ -48,14 +48,14 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink x ) const = 0;                                                
+                                  XLink base_xlink ) const = 0;                                                
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
-    virtual QueryLambda StartNormalLinkedQuery( XLink x,
-                                                const list<LocatedLink> &required_links,
+    virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
+                                                const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
                                                 bool force_common = false ) const = 0;
-    virtual QueryLambda TestStartNormalLinkedQuery( XLink x,
-                                                    const list<LocatedLink> &required_links,
+    virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
+                                                    const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
     virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
@@ -95,19 +95,19 @@ public:
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink x ) const;                                                
+                                  XLink base_xlink ) const;                                                
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink x,
-                                           const list<LocatedLink> &required_links,
+                                           XLink base_xlink,
+                                           const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     void CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
                              const DecidedQueryCommon::Links &ref_links ) const;
-    virtual QueryLambda StartNormalLinkedQuery( XLink x,
-                                                const list<LocatedLink> &required_links,
+    virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
+                                                const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
                                                 bool force_common = false ) const;
-    virtual QueryLambda TestStartNormalLinkedQuery( XLink x,
-                                                    const list<LocatedLink> &required_links,
+    virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
+                                                    const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
     virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
     virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return unordered_set<XLink>(); /* implement in agents that can expand the domain */ }
@@ -129,12 +129,12 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:                                  
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const = 0;                                      
+                                      XLink base_xlink ) const = 0;                                      
     const SCREngine *master_scr_engine;    
+    shared_ptr<PatternQuery> pattern_query;
 			
 private:    
     CouplingKey coupling_key;    
-    shared_ptr<PatternQuery> pattern_query;
     int num_decisions;
     EquivalenceRelation equivalence_relation;
 };

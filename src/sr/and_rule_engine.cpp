@@ -575,20 +575,19 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(base_xlink)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
     TRACEC("My solution ")(basic_solution)("\n");    
-    list<LocatedLink> basic_solution_links = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
-    TRACEC("Relocating using links ")(basic_solution_links)("\n");    
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
     if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain    
         ASSERT( knowledge->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
-    for( LocatedLink link : basic_solution_links )    
-        ASSERT( knowledge->domain.count((XLink)link) > 0 )((XLink)link)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+    for( XLink xlink : pq->GetNormalLinks() )    
+        ASSERT( knowledge->domain.count(xlink) > 0 )(xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
     
 #ifdef NLQ_TEST
+    list<LocatedLink> basic_solution_links = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
     auto nlq_lambda = agent->TestStartNormalLinkedQuery( base_xlink, basic_solution_links, knowledge );
 #else    
-    auto nlq_lambda = agent->StartNormalLinkedQuery( base_xlink, basic_solution_links, knowledge );
+    auto nlq_lambda = agent->StartNormalLinkedQuery( base_xlink, &basic_solution, knowledge );
 #endif
     
     int i=0;

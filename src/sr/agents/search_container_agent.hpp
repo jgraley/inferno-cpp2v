@@ -86,7 +86,7 @@ public:
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
                                            XLink x,
-                                           const list<LocatedLink> &required_links,
+                                           const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 

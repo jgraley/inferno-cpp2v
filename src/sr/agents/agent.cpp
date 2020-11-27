@@ -83,38 +83,35 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
     
     
 void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                   XLink x ) const
+                                   XLink base_xlink ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     
-    if( x == XLink::MMAX_Link )
+    if( base_xlink == XLink::MMAX_Link )
     {
         query.Reset();
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
         for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), x );
+            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
     }   
     else
     {
-        RunDecidedQueryImpl( query, x );
+        RunDecidedQueryImpl( query, base_xlink );
     }
 }                             
 
 
 void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
-                                            XLink x,
-                                            const list<LocatedLink> &required_links,
+                                            XLink base_xlink,
+                                            const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
 {    
-    TRACE("common DNLQ: ")(*this)(" at ")(x)("\n");
-    {
-        Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-        RunDecidedQuery( query, x );
-    }
+    TRACE("common DNLQ: ")(*this)(" at ")(base_xlink)("\n");
+    RunDecidedQuery( query, base_xlink );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
@@ -122,22 +119,12 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
     // we were passed. Mismatch will throw, same as in DQ.
     auto actual_links = query.GetNormalLinks();
     TRACEC("Actual   ")(actual_links)("\n");
-    TRACEC("Required ")(required_links)("\n");
-    ASSERT( actual_links.size() == required_links.size() );
-    // TRACE("Actual links   ")(actual_links)("\n");
-    // TRACEC("Required links ")(required_links)("\n");
+    ASSERT( actual_links.size() == pattern_query->GetNormalLinks().size() );
     
-    auto alit = actual_links.begin();
-    auto rlit = required_links.begin();
-    for( ;
-         alit != actual_links.end() || rlit != required_links.end();
-         ++alit, ++rlit )
+    for( LocatedLink alink : actual_links )
     {
-        if( alit == actual_links.end() || rlit == required_links.end() )
-            throw NormalLinksMismatch(); // number of links mismatches
-
-        LocatedLink alink = *alit;
-        LocatedLink rlink = *rlit;
+        auto plink = (PatternLink)alink;
+        LocatedLink rlink( plink, required_links->at(plink) );
         ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
         if( (XLink)alink == XLink::MMAX_Link )
             continue;
@@ -219,8 +206,8 @@ void AgentCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links
 }
 
 
-AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
-                                                              const list<LocatedLink> &required_links,
+AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
+                                                              const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
                                                               bool force_common ) const
 {
@@ -249,9 +236,9 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
                 shared_ptr<DecidedQuery> query = conj->GetQuery(this);
                 
                 if( force_common )
-                    AgentCommon::DecidedNormalLinkedQuery( *query, x, required_links, knowledge );
+                    AgentCommon::DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );
                 else
-                    DecidedNormalLinkedQuery( *query, x, required_links, knowledge );                            
+                    DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );                            
                     
                 break; // Great, the normal links matched
             }
@@ -274,8 +261,8 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink x,
 }   
                                               
                                               
-AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink x,
-                                                                  const list<LocatedLink> &required_links,
+AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xlink,
+                                                                  const SolutionMap *required_links,
                                                                   const TheKnowledge *knowledge ) const
 {
 
@@ -283,15 +270,15 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink x,
     QueryLambda ref_lambda;
     try
     {
-        mut_lambda = StartNormalLinkedQuery( x, required_links, knowledge, false );
+        mut_lambda = StartNormalLinkedQuery( base_xlink, required_links, knowledge, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
-            (void)StartNormalLinkedQuery( x, required_links, knowledge, true );
+            (void)StartNormalLinkedQuery( base_xlink, required_links, knowledge, true );
             ASSERT(false)("Fast start threw ")(e)(" but Slow didn't\n")
-                         (*this)(" at ")(x)("\n")
+                         (*this)(" at ")(base_xlink)("\n")
                          ("Required ")(required_links);
         }
         catch( ::Mismatch &e ) 
@@ -303,12 +290,12 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink x,
     // FastStartNormalLinkedQuery() didn't throw
     try
     {
-        ref_lambda = StartNormalLinkedQuery( x, required_links, knowledge, true );        
+        ref_lambda = StartNormalLinkedQuery( base_xlink, required_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
     {
         ASSERT(false)("Slow start threw ")(e)(" but Fast didn't\n")
-                     (*this)(" at ")(x)("\n")
+                     (*this)(" at ")(base_xlink)("\n")
                      ("Required ")(required_links);   
     }
 
@@ -326,7 +313,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink x,
             { 
                 (void)ref_lambda(); 
                 ASSERT(false)("Fast lambda threw ")(e)(" but Slow didn't\n")
-                             (*this)(" at ")(x)("\n")
+                             (*this)(" at ")(base_xlink)("\n")
                              ("Required ")(required_links);
             }
             catch( ::Mismatch &e ) 
@@ -342,7 +329,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink x,
         catch( ::Mismatch &e ) 
         {
             ASSERT(false)("Slow lambda threw ")(e)(" but Fast didn't\n")
-                         (*this)(" at ")(x)("\n")
+                         (*this)(" at ")(base_xlink)("\n")
                          ("Required ")(required_links);   
         }
         
