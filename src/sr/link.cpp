@@ -128,8 +128,6 @@ string PatternLink::GetTrace() const
     string s = SSPrintf("%p->", asp_pattern.get());
     if(asp_pattern==nullptr)
         s += "NULL";
-    else if(!*asp_pattern)
-        s += "&NULL";
     else
         s += GetChildAgent()->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
@@ -246,7 +244,11 @@ TreePtr<Node> XLink::GetChildX() const
 
 string XLink::GetTrace() const // used for debug
 {
-    string s = SSPrintf("%p~>", asp_x.get()) + GetChildX()->GetTrace();
+    string s = SSPrintf("%p->", asp_x.get());
+    if(asp_x==nullptr)
+        s += "NULL";
+    else
+        s += GetChildX()->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
     s += SSPrintf("@%lX", (unsigned long)whodat);
 #endif

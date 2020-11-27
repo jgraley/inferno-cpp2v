@@ -30,22 +30,42 @@ public:
         STOP_IF_ALREADY_IN
     };
         
-private:
-    void DetermineDomain( PatternLink root_plink, XLink root_xlink );
-    void ExtendDomain( PatternLink plink );
-    void AddSubtreeToDomain( XLink parent_xlink, XLink root_xlink, SubtreeMode mode );
-
-public:
     class Nugget : public Traceable
     {
     public:
+        enum Cadence
+        {
+            ROOT,
+            SINGULAR,
+            IN_SEQUENCE,
+            IN_COLLECTION
+        };
+        Cadence cadence;
         XLink parent_xlink;
+        const ContainerInterface *container;
+        int index;
         
-        string GetTrace();
+        string GetTrace() const;
     };
     
     const Nugget &GetNugget(XLink xlink) const;
 
+private:
+    void DetermineDomain( PatternLink root_plink, XLink root_xlink );
+    void ExtendDomain( PatternLink plink );
+    void AddSubtree( SubtreeMode mode, XLink root_xlink );
+    void AddLink( SubtreeMode mode, 
+                  XLink xlink, 
+                  Nugget::Cadence cadence, 
+                  XLink parent_xlink = XLink(), 
+                  const ContainerInterface *container = nullptr, 
+                  int index = -1 );
+    void AddChildren( SubtreeMode mode, XLink xlink );
+    void AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink );
+    void AddSequence( SubtreeMode mode, const SequenceInterface *x_seq, XLink xlink );
+    void AddCollection( SubtreeMode mode, const CollectionInterface *x_col, XLink xlink );
+
+public:
     // Global domain of possible xlink values
     unordered_set<XLink> domain;            
     

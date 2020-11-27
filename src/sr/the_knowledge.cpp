@@ -20,7 +20,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     domain_extension_classes = make_shared<QuotientSet>();
     nuggets.clear();
     
-    AddSubtreeToDomain( XLink(), root_xlink, REQUIRE_SOLO );
+    AddSubtree( REQUIRE_SOLO, root_xlink );
     
     int is = domain.size();
     ExtendDomain( root_plink );
@@ -46,7 +46,7 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     for( XLink exlink : extra )
     {
         TRACE("Extra item for ")(plink)(" is ")(exlink)("\n");
-        AddSubtreeToDomain( XLink(), exlink, STOP_IF_ALREADY_IN ); // set to REQUIRE_SOLO to replicate #218
+        AddSubtree( STOP_IF_ALREADY_IN, exlink ); // set to REQUIRE_SOLO to replicate #218
     }
     
     // Visit couplings repeatedly TODO union over couplings and
@@ -67,8 +67,21 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
 }
 
 
-void TheKnowledge::AddSubtreeToDomain( XLink parent_xlink, XLink xlink, SubtreeMode mode )
+void TheKnowledge::AddSubtree( SubtreeMode mode, XLink root_xlink )
 {
+    // Bootstrap the recursive process with initial (root) values
+    AddLink( mode, root_xlink, Nugget::ROOT );
+}
+
+
+void TheKnowledge::AddLink( SubtreeMode mode, 
+                            XLink xlink, 
+                            Nugget::Cadence cadence, 
+                            XLink parent_xlink, 
+                            const ContainerInterface *container, 
+                            int index )
+{
+    INDENT(">");
     // This will also prevent recursion into xlink
     if( mode==STOP_IF_ALREADY_IN && domain.count(xlink) > 0 )
         return; // Terminate into the existing domain
@@ -79,28 +92,97 @@ void TheKnowledge::AddSubtreeToDomain( XLink parent_xlink, XLink xlink, SubtreeM
     // Add a nugget of knowledge
     Nugget nugget;
     nugget.parent_xlink = parent_xlink;
+    nugget.cadence = cadence;
+    nugget.container = container;
+    nugget.index = index;
     InsertSolo( nuggets, make_pair(xlink, nugget) );
 
     // Here, elements go into quotient set, but it does not 
     // uniquify: every link in the input X tree must appear 
     // separately in domain.
     (void)domain_extension_classes->Uniquify( xlink );
+    
+    // Recurse into our child nodes
+    AddChildren( mode, xlink );
+}
 
-    // Put all the nodes in the X tree into the domain
-	FlattenNode fx( xlink.GetChildX() ); 
-	for( FlattenNode::iterator fx_it=fx.begin(); fx_it!=fx.end(); ++fx_it )
+void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
+{
+    vector< Itemiser::Element * > x_memb = xlink.GetChildX()->Itemise();
+    for( Itemiser::Element *xe : x_memb )
     {
-        XLink child_xlink( xlink.GetChildX(), &*fx_it );        
-                
-        AddSubtreeToDomain( xlink, child_xlink, mode );
+        if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
+            AddSequence( mode, x_seq, xlink );
+        else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
+            AddCollection( mode, x_col, xlink );
+        else if( TreePtrInterface *x_sing = dynamic_cast<TreePtrInterface *>(xe) )
+            AddSingularNode( mode, x_sing, xlink );
+        else
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }
 }
 
 
-string TheKnowledge::Nugget::GetTrace()
+void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink )
+{
+    XLink child_xlink( xlink.GetChildX(), x_sing );        
+    AddLink( mode, child_xlink, Nugget::SINGULAR, xlink );
+}
+
+
+void TheKnowledge::AddSequence( SubtreeMode mode, const SequenceInterface *x_seq, XLink xlink )
+{
+    int index = 0;
+    FOREACH( const TreePtrInterface &x, *x_seq )
+    {
+        XLink child_xlink( xlink.GetChildX(), &x );
+        AddLink( mode, child_xlink, Nugget::IN_SEQUENCE, xlink, x_seq, index );
+        index++;
+    }
+}
+
+
+void TheKnowledge::AddCollection( SubtreeMode mode, const CollectionInterface *x_col, XLink xlink )
+{
+    FOREACH( const TreePtrInterface &x, *x_col )
+    {
+        XLink child_xlink( xlink.GetChildX(), &x );        
+        AddLink( mode, child_xlink, Nugget::IN_COLLECTION, xlink, x_col );
+    }
+}
+
+
+string TheKnowledge::Nugget::GetTrace() const
 {
     string s = "(";
-    s += "parent_xlink=" + Trace(parent_xlink);
+
+    bool par = false;
+    bool cont = false;
+    bool idx = false;
+    switch( cadence )
+    {
+        case ROOT:
+            s += "ROOT";
+            break;
+        case SINGULAR:
+            s += "SINGULAR";
+            par = true;
+            break;
+        case IN_SEQUENCE:
+            s += "IN_SEQUENCE";
+            par = cont = idx = true;
+            break;
+        case IN_COLLECTION:
+            s += "IN_COLLECTION";
+            par = cont = true;
+            break;
+    }    
+    if( par )
+        s += ", parent_xlink=" + Trace(parent_xlink);
+    if( cont )
+        s += SSPrintf(", container=%p(%d)", container);
+    if( idx )
+        s += SSPrintf(", index=%d", index);
     s += ")";
     return s;
 }
