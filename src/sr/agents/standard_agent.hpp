@@ -19,25 +19,34 @@ namespace SR
 class StandardAgent : public virtual AgentCommon
 {
 public:
+    class SingularMismatch : exception
+    {
+    };
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 
 private:
-    void DecidedQuerySequence( XLink base_xlink,
-                               DecidedQueryAgentInterface &query,
+    void DecidedQuerySequence( DecidedQueryAgentInterface &query,
+                               XLink base_xlink,
                                SequenceInterface *px,
     	                       SequenceInterface &pattern ) const;
-    void DecidedQueryCollection( XLink base_xlink,
-                                 DecidedQueryAgentInterface &query,
+    void DecidedQueryCollection( DecidedQueryAgentInterface &query,
+                                 XLink base_xlink,
                                  CollectionInterface *px,
     		                     CollectionInterface &pattern ) const;
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink x,
+                                           XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-
+    void DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
+                                           XLink base_xlink,
+                                           SequenceInterface *px,
+                                           SequenceInterface &pattern,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
+                                           
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );

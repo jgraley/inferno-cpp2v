@@ -167,13 +167,13 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
     auto terminus_plink = PatternLink(this, &terminus);
-    XLink terminus_xlink = required_links->at(terminus_plink); 
-    query.RegisterNormalLink( PatternLink(this, &terminus), terminus_xlink ); // Note: just extracted directly from required_links
+    XLink req_terminus_xlink = required_links->at(terminus_plink); 
+    query.RegisterNormalLink( PatternLink(this, &terminus), req_terminus_xlink ); // Note: just extracted directly from required_links
     
-    XLink x = terminus_xlink;
+    XLink x = req_terminus_xlink;
     bool found = false;
     TreePtr<SubSequence> xpr_ss( new SubSequence() );
-    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(terminus_xlink)("\n");
+    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(req_terminus_xlink)("\n");
     while(true)
     {
         if( x == base_xlink )
@@ -183,9 +183,10 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
             break;            
         }        
         
-        if( knowledge->parents.count(x) == 0 )
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(x) );
+        if( !nugget.parent_xlink )
             break;            
-        x = knowledge->parents.at(x);
+        x = nugget.parent_xlink;
         
         // Putting this here excludes the terminus, as required
         TRACEC("Move to parent ")(x)("\n");

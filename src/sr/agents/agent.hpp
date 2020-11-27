@@ -87,9 +87,6 @@ public:
 class AgentCommon : public Agent
 {
 public:
-    class NotImplemented : exception
-    {
-    };
     AgentCommon();
     virtual void AgentConfigure( const SCREngine *master_scr_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;

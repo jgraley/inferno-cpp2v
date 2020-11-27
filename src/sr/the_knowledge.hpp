@@ -29,13 +29,23 @@ public:
         // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
         STOP_IF_ALREADY_IN
     };
-    
+        
 private:
     void DetermineDomain( PatternLink root_plink, XLink root_xlink );
     void ExtendDomain( PatternLink plink );
     void AddSubtreeToDomain( XLink parent_xlink, XLink root_xlink, SubtreeMode mode );
 
 public:
+    class Nugget : public Traceable
+    {
+    public:
+        XLink parent_xlink;
+        
+        string GetTrace();
+    };
+    
+    const Nugget &GetNugget(XLink xlink) const;
+
     // Global domain of possible xlink values
     unordered_set<XLink> domain;            
     
@@ -43,7 +53,7 @@ public:
     shared_ptr<QuotientSet> domain_extension_classes;
     
     // Child-to-parent map
-    unordered_map<XLink, XLink> parents;
+    unordered_map<XLink, Nugget> nuggets;
 };    
     
 };

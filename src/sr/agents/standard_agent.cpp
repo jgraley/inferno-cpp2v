@@ -105,23 +105,25 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedQuerySequence( base_xlink, query, p_x_seq, *pattern_seq );
+            DecidedQuerySequence( query, base_xlink, p_x_seq, *pattern_seq );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( base_xlink, query, p_x_col, *pattern_col );
+            DecidedQueryCollection( query, base_xlink, p_x_col, *pattern_col );
         }
-        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
-            if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be nullptr meaning no restriction
+            if( TreePtr<Node>(*pattern_sing) ) // TreePtrs are allowed to be nullptr meaning no restriction
             {
-                TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-                ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
-                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr)("\n");
-                query.RegisterNormalLink(PatternLink(this, pattern_ptr), XLink(base_xlink.GetChildX(), p_x_ptr)); // Link into X
+                TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[i]);
+                auto sing_plink = PatternLink(this, pattern_sing);
+                auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
+                ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_sing)("\n");
+                query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
             }
         }
         else
@@ -129,11 +131,11 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
     }
-    return;
 }
 
-void StandardAgent::DecidedQuerySequence( XLink base_xlink,
-                                          DecidedQueryAgentInterface &query,
+
+void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
+                                          XLink base_xlink,
                                           SequenceInterface *px,
 		                                  SequenceInterface &pattern ) const
 {
@@ -226,8 +228,8 @@ void StandardAgent::DecidedQuerySequence( XLink base_xlink,
 }
 
 
-void StandardAgent::DecidedQueryCollection( XLink base_xlink,
-                                            DecidedQueryAgentInterface &query,
+void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
+                                            XLink base_xlink,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern ) const
 {
@@ -364,8 +366,156 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
                                               const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const
 {
-    INDENT("Q");
+#ifndef FAST_DNLQ
     AgentCommon::DecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
+    return;
+#endif    
+    INDENT("Q");
+    query.Reset();
+
+    // Check pre-restriction
+    CheckLocalMatch(base_xlink.GetChildX().get());
+
+    // Recurse through the children. Note that the itemiser internally does a
+    // dynamic_cast onto the type of pattern, and itemises over that type. x must
+    // be dynamic_castable to pattern's type.
+    vector< Itemiser::Element * > pattern_memb = Itemise();
+    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   // Get the members of x corresponding to pattern's class
+    ASSERT( pattern_memb.size() == x_memb.size() );
+    for( int i=0; i<pattern_memb.size(); i++ )
+    {
+        ASSERT( pattern_memb[i] )( "itemise returned null element");
+        ASSERT( x_memb[i] )( "itemise returned null element");
+
+        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
+        {
+            SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
+            ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
+            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
+            DecidedNormalLinkedQuerySequence( query, base_xlink, p_x_seq, *pattern_seq, required_links, knowledge );
+        }
+        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
+        {
+            CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
+            ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
+            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
+            DecidedQueryCollection( query, base_xlink, p_x_col, *pattern_col );
+        }
+        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        {
+            if( TreePtr<Node>(*pattern_sing) ) // TreePtrs are allowed to be nullptr meaning no restriction
+            {
+                TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[i]);
+                ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+                auto sing_plink = PatternLink(this, pattern_sing);
+                auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
+                if( sing_xlink != required_links->at( sing_plink ) );
+                    throw SingularMismatch();
+                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_sing)("\n");
+                query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
+            }
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+        }
+    }
+}
+
+
+void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
+                                                      XLink base_xlink,
+                                                      SequenceInterface *px,
+                                                      SequenceInterface &pattern,
+                                                      const SolutionMap *required_links,
+                                                      const TheKnowledge *knowledge ) const
+{
+    INDENT("S");
+	ContainerInterface::iterator pit, npit, nnpit, nxit;
+    
+	// Attempt to match all the elements between start and the end of the sequence; stop
+	// if either pattern or subject runs out.
+	ContainerInterface::iterator xit = px->begin();
+	int p_remaining;
+
+    int pattern_num_non_star = 0;
+    ContainerInterface::iterator p_last_star;
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in GetPatternQuery() and cache?
+    {
+		TreePtr<Node> pe( *pit );
+		ASSERT( pe );
+        if( dynamic_pointer_cast<StarAgent>(pe) )
+            p_last_star = pit;
+        else
+            pattern_num_non_star++;
+    }
+    if( px->size() < pattern_num_non_star )
+    {
+        throw Mismatch();     // TODO break to get the final trace?
+    }
+    ContainerInterface::iterator xit_star_limit = px->end();            
+    for( int i=0; i<pattern_num_non_star; i++ )
+        --xit_star_limit;
+        
+	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
+	{
+ 		ASSERT( xit == px->end() || *xit );
+
+		// Get the next element of the pattern
+		TreePtr<Node> pe( *pit );
+		ASSERT( pe );
+        if( dynamic_pointer_cast<StarAgent>(pe) )
+        {
+            // We have a Star type wildcard that can match multiple elements.
+            ContainerInterface::iterator xit_star_end;
+                
+            // The last Star does not need a decision            
+            if( pit == p_last_star )
+            {
+                // No more stars, so skip ahead to the end of the possible star range. 
+                xit_star_end = xit_star_limit;
+            }				
+            else
+            {
+                // Decide how many elements the current * should match, using conjecture. The star's range
+                // ends at the chosen element. Be inclusive because what we really want is a range.
+                ASSERT( xit == px->end() || *xit );
+                xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
+            }
+            
+            // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit, xit_star_end ) );
+
+            // Apply couplings to this Star and matched range
+            // Restrict to pre-restriction or pattern restriction
+            query.RegisterAbnormalLink( PatternLink(this, &*pit), XLink::CreateDistinct(xss) ); // Only used in after-pass
+             
+            // Resume at the first element after the matched range
+            xit = xit_star_end;
+        }
+ 	    else // not a Star so match singly...
+	    {
+            if( xit == px->end() )
+                break;
+       
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
+            ++xit;
+            
+            // Every non-star pattern node we pass means there's one fewer remaining
+            // and we can match a star one step further
+            ASSERT(xit_star_limit != px->end());
+            ++xit_star_limit;
+	    }
+	}
+
+    // If we finished the job and pattern and subject are still aligned, then it was a match
+	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
+    if( xit != px->end() )
+        throw Mismatch();  
+    else if( pit != pattern.end() )
+        throw Mismatch();  
+    else 
+        ASSERT( p_remaining==0 );
 }
 
 

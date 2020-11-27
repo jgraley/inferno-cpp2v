@@ -18,7 +18,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     // Both should be cleared together
     domain.clear();
     domain_extension_classes = make_shared<QuotientSet>();
-    parents.clear();
+    nuggets.clear();
     
     AddSubtreeToDomain( XLink(), root_xlink, REQUIRE_SOLO );
     
@@ -73,9 +73,13 @@ void TheKnowledge::AddSubtreeToDomain( XLink parent_xlink, XLink xlink, SubtreeM
     if( mode==STOP_IF_ALREADY_IN && domain.count(xlink) > 0 )
         return; // Terminate into the existing domain
     
+    // Update domain
     InsertSolo( domain, xlink );
-    if( parent_xlink )
-        InsertSolo( parents, make_pair(xlink, parent_xlink) );
+    
+    // Add a nugget of knowledge
+    Nugget nugget;
+    nugget.parent_xlink = parent_xlink;
+    InsertSolo( nuggets, make_pair(xlink, nugget) );
 
     // Here, elements go into quotient set, but it does not 
     // uniquify: every link in the input X tree must appear 
@@ -91,3 +95,19 @@ void TheKnowledge::AddSubtreeToDomain( XLink parent_xlink, XLink xlink, SubtreeM
         AddSubtreeToDomain( xlink, child_xlink, mode );
     }
 }
+
+
+string TheKnowledge::Nugget::GetTrace()
+{
+    string s = "(";
+    s += "parent_xlink=" + Trace(parent_xlink);
+    s += ")";
+    return s;
+}
+
+
+const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
+{
+    return nuggets.at(xlink);
+}
+
