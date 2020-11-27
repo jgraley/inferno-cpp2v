@@ -50,7 +50,7 @@ struct SubSequenceRange : SequenceInterface,
     shared_ptr<iterator_interface> my_begin;
     shared_ptr<iterator_interface> my_end;
 public:
-    SubSequenceRange( TreePtr<Node> parent_x, iterator &b, iterator &e );
+    SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e );
     virtual const iterator_interface &begin();
     virtual const iterator_interface &end();
     virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubSequenceRange"); }

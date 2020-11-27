@@ -9,7 +9,7 @@ using namespace SR;
     
 
 
-SubSequenceRange::SubSequenceRange( TreePtr<Node> parent_x, iterator &b, iterator &e ) : 
+SubSequenceRange::SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e ) : 
     SubContainerRange( parent_x ),
     my_begin(b.Clone()), 
     my_end(e.Clone())

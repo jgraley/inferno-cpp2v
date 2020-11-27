@@ -138,7 +138,7 @@ public:
 				return nullptr;
 		}
 		
-		virtual shared_ptr<iterator_interface> Clone() // TODO does this need to be virtual?
+		virtual shared_ptr<iterator_interface> Clone() const // TODO does this need to be virtual?
 		{
 			ASSERT(pib)("Attempt to Clone() uninitialised iterator");
 			return pib->Clone();

@@ -19,8 +19,9 @@ void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 }
 
 
-void StandardAgent::Plan::DoPlan( StandardAgent *algo )
+void StandardAgent::Plan::DoPlan( StandardAgent *algo_ )
 {
+    algo = algo_;
     const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
@@ -34,8 +35,10 @@ void StandardAgent::Plan::DoPlan( StandardAgent *algo )
 
 void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
 {
+    bool prev_is_star = false;
     int pattern_num_non_star = 0;
-    ContainerInterface::iterator p_last_star;
+    ContainerInterface::iterator p_prev_star;
+    ContainerInterface::iterator p_prev;
 	for( ContainerInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 
          ++pit ) 
@@ -43,13 +46,22 @@ void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
         if( dynamic_pointer_cast<StarAgent>(pe) )
-            p_last_star = pit;
+        {               
+            p_prev_star = pit;
+            prev_is_star = true;
+        }
         else
+        {
+            if( prev_is_star )
+                stars_preceding_non_stars.insert( PatternLink(algo, &*p_prev) );
             pattern_num_non_star++;
+            prev_is_star = false;
+        }     
+        p_prev = pit;       
     }
 
     sequence_pattern_num_non_star[pattern] = pattern_num_non_star;
-    sequence_p_last_star[pattern] = p_last_star;
+    sequence_p_last_star[pattern] = p_prev_star;
 }
 
 
@@ -443,10 +455,11 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
                 ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
                 auto sing_plink = PatternLink(this, pattern_sing);
                 auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
-                if( sing_xlink != required_links->at( sing_plink ) );
-                    throw SingularMismatch();
+                
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_sing)("\n");
                 query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
+                if( sing_xlink != required_links->at( sing_plink ) );
+                    throw SingularMismatch();
             }
         }
         else
@@ -465,26 +478,107 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                                                       const TheKnowledge *knowledge ) const
 {
     INDENT("S");
+    ASSERT( plan.planned );
 
     TheKnowledge::Nugget::IndexType current_index = -1; 
-    // Note trying not to use px - might be large!
-    FOREACH( const TreePtrInterface &pei, *pattern )
+    
+    int pattern_num_non_star = plan.sequence_pattern_num_non_star.at(pattern);
+    ContainerInterface::iterator p_last_star = plan.sequence_p_last_star.at(pattern);
+
+    if( px->size() < pattern_num_non_star )
     {
-        TreePtr<Node> pe(pei);
+        throw Mismatch();     // TODO break to get the final trace?
+    }
+
+	ContainerInterface::iterator pit, npit, nnpit, nxit, pending_star_xit_begin;            
+    ContainerInterface::iterator xit_star_limit = px->end();            
+    for( int i=0; i<pattern_num_non_star; i++ )
+        --xit_star_limit;                
+        
+	// Attempt to match all the elements between start and the end of the sequence; stop
+	// if either pattern or subject runs out.
+	ContainerInterface::iterator xit = px->begin();
+	int p_remaining;
+    PatternLink pending_star_plink = PatternLink();
+    PatternLink pending_star_xit;
+	for( pit = pattern->begin(), p_remaining = pattern->size(); pit != pattern->end(); ++pit, --p_remaining )
+	{
+        TreePtr<Node> pe(*pit);
+        PatternLink plink( this, &pe );
         if( dynamic_pointer_cast<StarAgent>(pe) )
         {
+            // We have a Star type wildcard that can match multiple elements.
+            ContainerInterface::iterator xit_star_end;
+                
+            if( plan.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
+            {
+                // Next will be non-star; wait for that
+                pending_star_plink = plink;
+                pending_star_xit_begin = xit;
+            }
+            else if( pit == p_last_star ) // The last Star does not need a decision
+            {
+                // No more stars, so skip ahead to the end of the possible star range. 
+                xit_star_end = xit_star_limit;
+            }				
+            else // Next plink is another star
+            {
+                // Decide how many elements the current * should match, using conjecture. The star's range
+                // ends at the chosen element. Be inclusive because what we really want is a range.
+                ASSERT( xit == px->end() || *xit );
+                xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
+            }
+            
+            if( !pending_star_plink )
+            {
+                // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
+                TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit, xit_star_end ) );
+
+                // Apply couplings to this Star and matched range
+                // Restrict to pre-restriction or pattern restriction
+                query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass
+                 
+                // Resume at the first element after the matched range
+                xit = xit_star_end;
+            }
         }
         else
         {
             auto plink = PatternLink(this, &pe);
             XLink req_xlink = required_links->at(plink); 
-            query.RegisterNormalLink( plink, req_xlink ); // Note: just extracted directly from required_links
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
+            
+            // Pending (non-free and non-last) star from last iteration?
+            if( pending_star_plink )
+            {
+                // Star ends just before this link
+                ContainerInterface::iterator xit_star_end = nugget.iterator;
+                TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), pending_star_xit_begin, xit_star_end ) );
+
+                // Apply couplings to this Star and matched range
+                // Restrict to pre-restriction or pattern restriction
+                query.RegisterAbnormalLink( pending_star_plink, XLink::CreateDistinct(xss) ); // Only used in after-pass
+                
+                pending_star_plink = PatternLink(); // only need to do this once!
+            }
+            
+            // Deal with current non-star
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE ||
                   nugget.container == px ||
                   nugget.index > current_index) )
                 throw SequenceMismatch();
+            query.RegisterNormalLink( plink, req_xlink ); // Note: just extracted directly from required_links
+             
+            // Updates after non-star link    
             current_index = nugget.index;    
+            xit = nugget.iterator;    
+            ++xit;
+            pending_star_plink = PatternLink();    
+            
+            // Every non-star pattern node we pass means there's one fewer remaining
+            // and we can match a star one step further
+            ASSERT(xit_star_limit != px->end());
+            ++xit_star_limit;    
         }
     }
 }

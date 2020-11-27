@@ -30,12 +30,14 @@ public:
 
     struct Plan
     {
+        void DoPlan( StandardAgent *algo );
+        void SequencePlanning( SequenceInterface *pattern );
+
+        StandardAgent *algo;
         bool planned = false;
         map<SequenceInterface *, int> sequence_pattern_num_non_star;
         map<SequenceInterface *, ContainerInterface::iterator> sequence_p_last_star;
-        
-        void DoPlan( StandardAgent *algo );
-        void SequencePlanning( SequenceInterface *pattern );
+        set<PatternLink> stars_preceding_non_stars;
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
