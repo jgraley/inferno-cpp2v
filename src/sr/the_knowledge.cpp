@@ -70,16 +70,15 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
 void TheKnowledge::AddSubtree( SubtreeMode mode, XLink root_xlink )
 {
     // Bootstrap the recursive process with initial (root) values
-    AddLink( mode, root_xlink, Nugget::ROOT );
+    Nugget nugget;
+    nugget.cadence = Nugget::ROOT;
+    AddLink( mode, root_xlink, nugget );
 }
 
 
 void TheKnowledge::AddLink( SubtreeMode mode, 
                             XLink xlink, 
-                            Nugget::Cadence cadence, 
-                            XLink parent_xlink, 
-                            const ContainerInterface *container, 
-                            int index )
+                            Nugget nugget )
 {
     INDENT(">");
     // This will also prevent recursion into xlink
@@ -90,11 +89,6 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     InsertSolo( domain, xlink );
     
     // Add a nugget of knowledge
-    Nugget nugget;
-    nugget.parent_xlink = parent_xlink;
-    nugget.cadence = cadence;
-    nugget.container = container;
-    nugget.index = index;
     InsertSolo( nuggets, make_pair(xlink, nugget) );
 
     // Here, elements go into quotient set, but it does not 
@@ -126,28 +120,46 @@ void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
 void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink )
 {
     XLink child_xlink( xlink.GetChildX(), x_sing );        
-    AddLink( mode, child_xlink, Nugget::SINGULAR, xlink );
+    Nugget nugget;
+    nugget.cadence = Nugget::SINGULAR;
+    nugget.parent_xlink = xlink;
+    AddLink( mode, child_xlink, nugget );
 }
 
 
-void TheKnowledge::AddSequence( SubtreeMode mode, const SequenceInterface *x_seq, XLink xlink )
+void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink )
 {
     Nugget::IndexType index = 0;
-    FOREACH( const TreePtrInterface &x, *x_seq )
+    for( SequenceInterface::iterator xit = x_seq->begin();
+         xit != x_seq->end();
+         ++xit )
     {
-        XLink child_xlink( xlink.GetChildX(), &x );
-        AddLink( mode, child_xlink, Nugget::IN_SEQUENCE, xlink, x_seq, index );
+        XLink child_xlink( xlink.GetChildX(), &*xit );
+        Nugget nugget;
+        nugget.cadence = Nugget::IN_SEQUENCE;
+        nugget.parent_xlink = xlink;
+        nugget.container = x_seq;
+        nugget.iterator = xit;
+        nugget.index = index;  
+        AddLink( mode, child_xlink, nugget );
         index++;
     }
 }
 
 
-void TheKnowledge::AddCollection( SubtreeMode mode, const CollectionInterface *x_col, XLink xlink )
+void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink )
 {
-    FOREACH( const TreePtrInterface &x, *x_col )
+    for( CollectionInterface::iterator xit = x_col->begin();
+         xit != x_col->end();
+         ++xit )
     {
-        XLink child_xlink( xlink.GetChildX(), &x );        
-        AddLink( mode, child_xlink, Nugget::IN_COLLECTION, xlink, x_col );
+        XLink child_xlink( xlink.GetChildX(), &*xit );        
+        Nugget nugget;
+        nugget.cadence = Nugget::IN_COLLECTION;
+        nugget.parent_xlink = xlink;
+        nugget.container = x_col;
+        nugget.iterator = xit;
+        AddLink( mode, child_xlink, nugget );
     }
 }
 
@@ -180,7 +192,10 @@ string TheKnowledge::Nugget::GetTrace() const
     if( par )
         s += ", parent_xlink=" + Trace(parent_xlink);
     if( cont )
+    {
         s += SSPrintf(", container=%p(%d)", container);
+        s += "@" + Trace(*iterator);
+    }
     if( idx )
         s += SSPrintf(", index=%d", index);
     s += ")";

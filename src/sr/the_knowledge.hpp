@@ -42,9 +42,10 @@ public:
         };
         typedef int IndexType;
         Cadence cadence;
-        XLink parent_xlink;
-        const ContainerInterface *container;
-        IndexType index;
+        XLink parent_xlink = XLink();
+        const ContainerInterface *container = nullptr;
+        ContainerInterface::iterator iterator;
+        IndexType index = -1;
         
         string GetTrace() const;
     };
@@ -57,14 +58,11 @@ private:
     void AddSubtree( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
-                  Nugget::Cadence cadence, 
-                  XLink parent_xlink = XLink(), 
-                  const ContainerInterface *container = nullptr, 
-                  Nugget::IndexType index = -1 );
+                  Nugget nugget );
     void AddChildren( SubtreeMode mode, XLink xlink );
     void AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink );
-    void AddSequence( SubtreeMode mode, const SequenceInterface *x_seq, XLink xlink );
-    void AddCollection( SubtreeMode mode, const CollectionInterface *x_col, XLink xlink );
+    void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
+    void AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink );
 
 public:
     // Global domain of possible xlink values
