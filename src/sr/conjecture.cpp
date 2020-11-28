@@ -129,8 +129,14 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
     DecidedQueryCommon::Choice back_choice = query->GetChoices()[bc];
     const auto &back_decision = query->GetDecisions()[bc];
     
+    if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN )
+    {
+        back_choice.iter = back_decision.begin;
+        back_choice.mode = DecidedQueryCommon::Choice::ITER;
+    }
+    
     // Inclusive case - we let the choice go to end but we won't go any further
-    if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
+    if( back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->Invalidate(bc);
         if( bc==0 )
@@ -139,24 +145,14 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
             return IncrementAgent( rit, bc - 1 );
 	}
 
-	if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN || back_choice.iter != back_decision.end ) 
+	if( back_choice.iter != back_decision.end ) 
 	{
-        switch( back_choice.mode )
-        {
-            case DecidedQueryCommon::Choice::ITER:
-                ++back_choice.iter; 
-                break;
-            
-            case DecidedQueryCommon::Choice::BEGIN:
-                back_choice.iter = back_decision.begin;
-                back_choice.mode = DecidedQueryCommon::Choice::ITER;
-                break;
-        }        
+        ++back_choice.iter; 
         query->SetChoice( bc, back_choice );
     }
 		
     // Exclusive case - we don't let the choice be end
-    if( back_choice.mode==DecidedQueryCommon::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
+    if( !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->Invalidate(bc);
         if( bc==0 )
