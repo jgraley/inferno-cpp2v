@@ -136,7 +136,8 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
     }
     
     // Inclusive case - we let the choice go to end but we won't go any further
-    if( back_decision.inclusive && back_choice.iter == back_decision.end )
+    // Also do this check in Exclusive mode in case already at end
+    if( back_choice.iter == back_decision.end )
     {
         query->Invalidate(bc);
         if( bc==0 )
