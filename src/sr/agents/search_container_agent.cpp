@@ -159,7 +159,15 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
     query.Reset();
 
-    list<LocatedLink> required_normal_links = LocateLinksFromMap( pattern_query->GetNormalLinks(), *required_links );
+    if( base_xlink == XLink::MMAX_Link )
+    {
+        // Magic Match Anything node: all normal children also match anything
+        // This is just to keep normal-domain solver happy, so we 
+        // only need normals. 
+        for( PatternLink l : pattern_query->GetNormalLinks() )       
+            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
+        return;
+    }   
     
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());

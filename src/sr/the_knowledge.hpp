@@ -43,7 +43,7 @@ public:
         typedef int IndexType;
         Cadence cadence;
         XLink parent_xlink = XLink();
-        const ContainerInterface *container = nullptr;
+        ContainerInterface *container = nullptr;
         ContainerInterface::iterator iterator;
         IndexType index = -1;
         

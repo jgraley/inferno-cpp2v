@@ -155,57 +155,11 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
 #else                
         if( (XLink)alink != (XLink)rlink )
 #endif                
-            throw NormalLinksMismatch(); // value of links mismatches                                
+            throw SlowNLQLinksMismatch(); // value of links mismatches                                
     }            
 }                           
                                 
     
-void AgentCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
-                                      const DecidedQueryCommon::Links &ref_links ) const
-{    
-    TRACE("Checking ")(mut_links)(" against ")(ref_links)("\n");
-    
-    // Multiplicity X links are not uniquified but their contents should match 
-    list<LocatedLink>::const_iterator mit = mut_links.begin();
-    list<LocatedLink>::const_iterator rit = ref_links.begin();
-    while( mit != mut_links.end() || rit != ref_links.end() )
-    {
-        ASSERT( mit != mut_links.end() && rit != ref_links.end() );
-        ASSERT( (PatternLink)*mit == (PatternLink)*rit );
-        auto mxp = mit->GetChildX().get();
-        auto rxp = rit->GetChildX().get();
-        
-        if( auto mxssr = dynamic_cast<SubSequenceRange *>(mxp) )
-        {
-            auto rxssr = dynamic_cast<SubSequenceRange *>(rxp);
-            ASSERT( rxssr );
-            ASSERT( mxssr->begin() == rxssr->begin() );
-            ASSERT( mxssr->end() == rxssr->end() );
-        }
-        else if( auto mxscl = dynamic_cast<SubCollection *>(mxp) )
-        {
-            auto rxscl = dynamic_cast<SubCollection *>(rxp);
-            ASSERT( rxscl );
-            ASSERT( mxscl->elts == rxscl->elts )
-                  (mxscl->elts)(" != ")(rxscl->elts);
-         }
-        else if( auto mxssl = dynamic_cast<SubSequence *>(mxp) )
-        {
-            auto rxssl = dynamic_cast<SubSequence *>(rxp);
-            ASSERT( rxssl );
-            ASSERT( mxssl->elts == rxssl->elts )
-                  (mxssl->elts)(" != ")(rxssl->elts);
-        }    
-        else // some other node: should match by link
-        {
-            ASSERT( *mit == *rit );
-        }
-        ++mit;
-        ++rit;
-    }
-}
-
-
 AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                                                               const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
@@ -223,8 +177,9 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
     { 
         if( !first )
         {
+            TRACE("Trying conjecture increment\n");
             if( !conj->Increment() )
-                throw NormalLinksMismatch(); // Conjecture has run out of choices to try.            
+                throw NLQConjOutAfterHitMismatch(); // Conjecture has run out of choices to try.            
         }
 
         while(1)
@@ -238,20 +193,22 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 if( force_common )
                     AgentCommon::DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );
                 else
-                    DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );                            
+                    DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
+                    
+                TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
                 break; // Great, the normal links matched
             }
-            catch( ::Mismatch & ) {}
-            
-            Tracer::RAIIEnable silencer( false ); // make conjecture be quiet
-            // We will get here on a mismatch, whether detected by DQ or our
-            // own comparison of the normal links. Permit the conjecture
-            // to move to a new set of choices.
-            if( !conj->Increment() )
-                throw NormalLinksMismatch(); // Conjecture has run out of choices to try.
-                
-            // Conjecture would like us to try again with new choices
+            catch( ::Mismatch &e ) 
+            {
+                // We will get here on a mismatch, whether detected by DQ or our
+                // own comparison of the normal links. Permit the conjecture
+                // to move to a new set of choices.
+                //FTRACE("Rethrowing ")(e)("\n");
+                if( !conj->Increment() )
+                    throw e; // Conjecture has run out of choices to try.
+                // Conjecture would like us to try again with new choices
+            }
         }     
         first = false;
         
@@ -265,9 +222,10 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
                                                                   const SolutionMap *required_links,
                                                                   const TheKnowledge *knowledge ) const
 {
-
     QueryLambda mut_lambda;
     QueryLambda ref_lambda;
+    auto mut_hits = make_shared<int>(0);
+    auto ref_hits = make_shared<int>(0);
     try
     {
         mut_lambda = StartNormalLinkedQuery( base_xlink, required_links, knowledge, false );
@@ -276,10 +234,13 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
     {
         try
         {
+            Tracer::RAIIEnable silencer( false ); // make ref algo be quiet            
             (void)StartNormalLinkedQuery( base_xlink, required_links, knowledge, true );
-            ASSERT(false)("Fast start threw ")(e)(" but Slow didn't\n")
+            ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)(" at ")(base_xlink)("\n")
-                         ("Required ")(required_links);
+                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
+                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
+                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
         }
         catch( ::Mismatch &e ) 
         {
@@ -290,13 +251,16 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
     // FastStartNormalLinkedQuery() didn't throw
     try
     {
+        Tracer::RAIIEnable silencer( false ); // make ref algo be quiet             
         ref_lambda = StartNormalLinkedQuery( base_xlink, required_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
     {
-        ASSERT(false)("Slow start threw ")(e)(" but Fast didn't\n")
+        ASSERT(false)("Ref start threw ")(e)(" but MUT didn't\n")
                      (*this)(" at ")(base_xlink)("\n")
-                     ("Required ")(required_links);   
+                     ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
+                     ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
+                     ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
     }
 
     QueryLambda test_lambda = [=]()mutable->shared_ptr<DecidedQuery>
@@ -306,15 +270,28 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
         try 
         { 
             mut_query = mut_lambda(); 
+            TRACE("MUT lambda hit #%d\n", (*mut_hits))
+                 (*mut_query)("\n");
+
+            (*mut_hits)++;
         }
         catch( ::Mismatch &e ) 
         {
             try 
             { 
-                (void)ref_lambda(); 
-                ASSERT(false)("Fast lambda threw ")(e)(" but Slow didn't\n")
+                {
+                    Tracer::RAIIEnable silencer( false ); // make ref algo be quiet            
+                    ref_query = ref_lambda(); 
+                }
+                TRACE("Ref lambda hit #%d\n", (*ref_hits))
+                     (*ref_query)("\n");
+                (*ref_hits)++;                
+                ASSERT(false)("MUT lambda threw ")(e)(" but ref didn't\n")
+                             ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
                              (*this)(" at ")(base_xlink)("\n")
-                             ("Required ")(required_links);
+                             ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
+                             ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
+                             ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
             }
             catch( ::Mismatch &e ) 
             {
@@ -324,19 +301,29 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
         // Didn't throw
         try
         {
-            ref_query = ref_lambda(); 
+            {
+                Tracer::RAIIEnable silencer( false ); /// make ref algo be quiet             
+                ref_query = ref_lambda(); 
+            }
+            TRACE("Ref lambda hit #%d\n", (*ref_hits))
+                 (*ref_query)("\n");
+
+            (*ref_hits)++;                
         }
         catch( ::Mismatch &e ) 
         {
-            ASSERT(false)("Slow lambda threw ")(e)(" but Fast didn't\n")
+            ASSERT(false)("Ref lambda threw ")(e)(" but MUT didn't\n")
+                         ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
                          (*this)(" at ")(base_xlink)("\n")
-                         ("Required ")(required_links);   
+                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
+                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
+                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
         }
         
         // Now to check the links the two algos put in their query objects
-        CheckMatchingLinks( mut_query->GetNormalLinks(), ref_query->GetNormalLinks() );
-        CheckMatchingLinks( mut_query->GetAbnormalLinks(), ref_query->GetAbnormalLinks() );
-        CheckMatchingLinks( mut_query->GetMultiplicityLinks(), ref_query->GetMultiplicityLinks() );
+        DecidedQueryCommon::CheckMatchingLinks( mut_query->GetNormalLinks(), ref_query->GetNormalLinks() );
+        DecidedQueryCommon::CheckMatchingLinks( mut_query->GetAbnormalLinks(), ref_query->GetAbnormalLinks() );
+        DecidedQueryCommon::CheckMatchingLinks( mut_query->GetMultiplicityLinks(), ref_query->GetMultiplicityLinks() );
         return mut_query;
     };
     

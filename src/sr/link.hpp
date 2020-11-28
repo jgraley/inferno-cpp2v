@@ -114,15 +114,16 @@ private: friend class PatternLink; friend class XLink;
     XLink xlink; 
 };
 
-//bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
-
-list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                      const unordered_map< PatternLink, XLink > &keys );
-void EnsureNotOnStack( const void *p, string trace="" );
-
 typedef XLink CouplingKey;
 typedef map< Agent *, CouplingKey > CouplingKeysMap;
 typedef unordered_map< PatternLink, XLink > SolutionMap;
+
+//bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
+
+SolutionMap MapForPattern( const list<PatternLink> &plinks, 
+                           const SolutionMap &keys );
+void EnsureNotOnStack( const void *p, string trace="" );
+
 };
 
 // The hashing functions we require in order to use links as keys to

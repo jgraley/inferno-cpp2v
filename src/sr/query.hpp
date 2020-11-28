@@ -63,24 +63,20 @@ private:
 class DecidedQueryCommon
 {
 public:
-    struct Range
+    struct Range : public Traceable
     {
+        Range(ContainerInterface::iterator begin,
+              ContainerInterface::iterator end,    
+              bool inclusive,
+              std::shared_ptr<ContainerInterface> container);
+        Range() {}
+        bool operator==(const Range &o) const;
+        string GetTrace() const;
+        
         ContainerInterface::iterator begin;
         ContainerInterface::iterator end;    
         bool inclusive; // If true, include "end" as a possible choice
         std::shared_ptr<ContainerInterface> container; // Only needed if the container is not part of the x tree
-        bool operator==(const Range &o) const // Only required for an ASSERT
-        {
-			if( begin != o.begin )
-                return false;
-            if( end != o.end )
-                return false;
-            if( inclusive != o.inclusive )
-                return false;
-            if( container != o.container )
-                return false;
-            return true;
-		}
     };
     
     struct Choice
@@ -107,6 +103,10 @@ public:
         QUERY,
         CONJECTURE
     } last_activity = NEW;
+    
+    static void CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
+                                    const DecidedQueryCommon::Links &ref_links );
+    static string TraceLinks( const DecidedQueryCommon::Links &links );    
 };
 
 
@@ -167,7 +167,8 @@ public:
 
 
 class DecidedQuery : virtual public DecidedQueryClientInterface,
-                     virtual public DecidedQueryAgentInterface
+                     virtual public DecidedQueryAgentInterface,
+                     public Traceable
 {
 public:    
     DecidedQuery( shared_ptr<const PatternQuery> pq );
@@ -207,6 +208,7 @@ public:
     void PushBackChoice( Choice newc );    
     void EnsureChoicesHaveIterators();
     const Agent *GetBaseAgent() const { return base_agent; }
+    string GetTrace() const;    
     
 private: friend class Conjecture;
     const Agent *base_agent;
@@ -223,4 +225,5 @@ private: friend class Conjecture;
 };
 
 };
+
 #endif

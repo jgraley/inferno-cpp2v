@@ -3,8 +3,6 @@
 
 using namespace SR;
 
-#define XLINK_BY_ARROWHEAD
-
 // For debugging
 #ifdef KEEP_WHODAT_INFO
 #define WHODAT() __builtin_extract_return_addr (__builtin_return_address (0))
@@ -196,31 +194,19 @@ XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
               
 bool XLink::operator<(const XLink &other) const
 {
-#ifdef XLINK_BY_ARROWHEAD
-    return asp_x < other.asp_x;    
-#else
-    return *asp_x < *other.asp_x;    
-#endif    
+    return asp_x < other.asp_x;      
 }
 
     
 bool XLink::operator!=(const XLink &other) const
 {
-#ifdef XLINK_BY_ARROWHEAD
     return asp_x != other.asp_x;    
-#else
-    return *asp_x != *other.asp_x;    
-#endif
 }
 
 
 bool XLink::operator==(const XLink &other) const
 {
-#ifdef XLINK_BY_ARROWHEAD
     return asp_x == other.asp_x;    
-#else
-    return *asp_x == *other.asp_x;    
-#endif
 }
 
 
@@ -400,16 +386,23 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
 }
 */
 
-list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                          const unordered_map< PatternLink, XLink > &basic_solution )
+SolutionMap SR::MapForPattern( const list<PatternLink> &plinks, 
+                               const SolutionMap &basic_solution )
 {
-    list<LocatedLink> llinks;
+    SolutionMap m;
     for( PatternLink plink : plinks )
     {
-        ASSERT( basic_solution.count(plink) > 0 );
-        LocatedLink llink( plink, basic_solution.at(plink) );
-        llinks.push_back( llink );
+        XLink xlink;
+        if( basic_solution.count(plink) > 0 )
+        {            
+            xlink = basic_solution.at(plink);
+        }
+        else // missing; probably a SubContainer
+        {
+            xlink = XLink();
+        }
+        m[plink] = xlink;
     }
-    return llinks;
+    return m;
 }                                      
 

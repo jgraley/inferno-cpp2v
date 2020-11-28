@@ -19,12 +19,20 @@ namespace SR
 class StandardAgent : public virtual AgentCommon
 {
 public:
-    class SingularMismatch : exception
-    {
-    };
-    class SequenceMismatch : exception
-    {
-    };
+    class Mismatch : public ::Mismatch {};
+    
+    class SingularMismatch : public Mismatch {};
+    
+    class SequenceMismatch : public Mismatch {};
+    class WrongContainerSequenceMismatch : public SequenceMismatch {}; 
+    class NotAfterSequenceMismatch : public SequenceMismatch {};
+    class NotSuccessorSequenceMismatch : public SequenceMismatch {};
+    class SurplusXSequenceMismatch : public SequenceMismatch {};
+    
+    class CollectionMismatch : public Mismatch {};
+    class WrongContainerCollectionMismatch : public CollectionMismatch {};
+    class CollisionCollectionMismatch : public CollectionMismatch {};
+    class SurplusXCollectionMismatch : public CollectionMismatch {};
     
 	virtual void AgentConfigure( const SCREngine *master_scr_engine );
 

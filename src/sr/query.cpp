@@ -62,6 +62,127 @@ PatternQuery::Links PatternQuery::GetAllLinks() const
 }
 
 
+void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
+                                             const DecidedQueryCommon::Links &ref_links )
+{    
+    TRACE("Checking ")(mut_links)(" against ")(ref_links)("\n");
+    
+    // Multiplicity X links are not uniquified but their contents should match 
+    list<LocatedLink>::const_iterator mit = mut_links.begin();
+    list<LocatedLink>::const_iterator rit = ref_links.begin();
+    while( mit != mut_links.end() || rit != ref_links.end() )
+    {
+        ASSERT( mit != mut_links.end() && rit != ref_links.end() );
+        ASSERT( (PatternLink)*mit == (PatternLink)*rit );
+        auto mxp = mit->GetChildX().get();
+        auto rxp = rit->GetChildX().get();
+        
+        if( auto mxssr = dynamic_cast<SubSequenceRange *>(mxp) )
+        {
+            auto rxssr = dynamic_cast<SubSequenceRange *>(rxp);
+            ASSERT( rxssr );
+            ASSERT( mxssr->begin() == rxssr->begin() );
+            ASSERT( mxssr->end() == rxssr->end() );
+        }
+        else if( auto mxscl = dynamic_cast<SubCollection *>(mxp) )
+        {
+            auto rxscl = dynamic_cast<SubCollection *>(rxp);
+            ASSERT( rxscl );
+            ASSERT( mxscl->elts == rxscl->elts )
+                  (mxscl->elts)(" != ")(rxscl->elts);
+         }
+        else if( auto mxssl = dynamic_cast<SubSequence *>(mxp) )
+        {
+            auto rxssl = dynamic_cast<SubSequence *>(rxp);
+            ASSERT( rxssl );
+            ASSERT( mxssl->elts == rxssl->elts )
+                  (mxssl->elts)(" != ")(rxssl->elts);
+        }    
+        else // some other node: should match by link
+        {
+            ASSERT( *mit == *rit );
+        }
+        ++mit;
+        ++rit;
+    }
+}
+
+
+string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
+{      
+    string s = "[";
+    for( LocatedLink link : links )
+    {
+        auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() );
+        
+        s += Trace((PatternLink)link) + ":=";
+        if( auto xscr = dynamic_cast<SubContainerRange *>(xsc) )
+        {
+            ASSERT( link );
+            ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
+            ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
+            
+            s += "SubContainerRange[";
+            FOREACH( const TreePtrInterface &xe_node, *xci )
+            {
+                XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
+                s += Trace(xe_link) + ", ";
+            }
+            s += "],\n";
+        }
+        else if( auto xscl = dynamic_cast<SubCollection *>(xsc) )
+        {
+            s += "SubCollection[";
+            for( XLink xe_link : xscl->elts )
+                s += Trace(xe_link) + ", ";
+            s += "],\n";
+        }
+        else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
+        {
+            s += "SubSequence[";
+            for( XLink xe_link : xssl->elts )
+                s += Trace(xe_link) + ", ";
+            s += "],\n";
+        }    
+        else
+        {
+            s += Trace((XLink)link) + ",\n";
+        }
+    }
+    return s + "]";
+}
+
+
+string DecidedQuery::GetTrace() const
+{
+    string s;
+    s += "Normal: " + TraceLinks(GetNormalLinks()) + "\n";
+    s += "Abormal: " + TraceLinks(GetAbnormalLinks()) + "\n";
+    s += "Multiplicity: " + TraceLinks(GetMultiplicityLinks()) + "\n";
+
+    ASSERT( choices.size() == decisions.size() );
+
+    s += "Decisions: [";
+    for( int i=0; i<decisions.size(); i++ )
+    {
+        Range d = decisions[i];
+        Choice c = choices[i];
+        s += SSPrintf("%d:", i);
+        s += Trace(d) + ", ";
+        s += "choice=";
+        if( c.mode == Choice::BEGIN )
+            s += "BEGIN";
+        else if( d.container )
+            s += (c.iter==d.container->end() ? "END" : Trace(*(c.iter)));
+        else
+            s += Trace(*(c.iter));
+        s += ",\n";
+    }
+    s += "]";
+    return s;
+}
+
+
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
     base_agent( pq->GetBaseAgent() ),
     decisions( pq->GetDecisions().size() ),
@@ -194,12 +315,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( ContainerInterface:
                                                              bool inclusive,
                                                              shared_ptr<ContainerInterface> container )
 {
-    Range r;
-    r.begin = begin;
-    r.end = end;
-    r.inclusive = inclusive;
-    r.container = container;
-            
+    Range r( begin, end, inclusive, container);
     return RegisterDecision( r );
 }
                                                                     
@@ -301,6 +417,58 @@ DecidedQuery::Links DecidedQuery::GetAllLinks() const
     for( auto link : GetMultiplicityLinks() )
         links.push_back( link );
     return links;
+}
+
+
+DecidedQueryCommon::Range::Range( ContainerInterface::iterator begin_,
+                                  ContainerInterface::iterator end_,    
+                                  bool inclusive_,
+                                  std::shared_ptr<ContainerInterface> container_ ) :
+    begin(begin_), end(end_), inclusive(inclusive_), container(container_)
+{
+}
+
+
+bool DecidedQueryCommon::Range::operator==(const Range &o) const // Only required for an ASSERT
+{
+    if( begin != o.begin )
+        return false;
+    if( end != o.end )
+        return false;
+    if( inclusive != o.inclusive )
+        return false;
+    if( container != o.container )
+        return false;
+    return true;
+}
+
+
+string DecidedQueryCommon::Range::GetTrace() const 
+{
+    string s;
+    s += "(";
+    if( container )
+        s += SSPrintf("container=%p", container.get()) + ", ";
+    else
+        s += SSPrintf("container=%p", container.get()) + ", ";
+            
+    if( container )
+        s += "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) + ", ";
+    
+    if( container )
+        s += "end=@" + (end==container->end() ? string("END") : Trace(*end)) + ", ";
+    
+    s += "inclusive=" + Trace(inclusive) + ", ";
+    
+    s += "range=[";
+    for( ContainerInterface::iterator it = begin;
+         it != end;
+         ++it )
+        s += Trace(*it) + ", ";
+    s += "] ";
+
+    s += ")";
+    return s;
 }
 
 

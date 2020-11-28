@@ -28,17 +28,14 @@ class Agent : public virtual Traceable,
 {
 public:
     // Any mismatch this class throws
-    class Mismatch : public ::Mismatch
-    {
-    };
+    class Mismatch : public ::Mismatch {};
     
-    class NormalLinksMismatch : public Mismatch
-    {
-    };
+    class NLQMismatch : public Mismatch {};
+    class NLQConjOutAfterHitMismatch : public NLQMismatch {};
+    class NLQConjOutAfterMissMismatch : public NLQMismatch {};
+    class SlowNLQLinksMismatch : public NLQMismatch {};
     
-    class CouplingMismatch : public Mismatch
-    {
-    };
+    class CouplingMismatch : public Mismatch {};
     
     Agent& operator=(Agent& other);
 	virtual void AgentConfigure( const SCREngine *master_scr_engine ) = 0;
@@ -97,8 +94,6 @@ public:
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    void CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
-                             const DecidedQueryCommon::Links &ref_links ) const;
     virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,

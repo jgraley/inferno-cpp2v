@@ -11,6 +11,7 @@ using namespace SR;
 
 //#define ERASE_USING_ITERATOR
 //#define CHECK_ITERATOR_IN_CONTAINER
+//#define FAST_DNLQ
 
 void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 {
@@ -419,7 +420,18 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     INDENT("Q");
     query.Reset();
 
+    if( base_xlink == XLink::MMAX_Link )
+    {
+        // Magic Match Anything node: all normal children also match anything
+        // This is just to keep normal-domain solver happy, so we 
+        // only need normals. 
+        for( PatternLink l : pattern_query->GetNormalLinks() )       
+            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
+        return;
+    }   
+
     // Check pre-restriction
+    TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
     CheckLocalMatch(base_xlink.GetChildX().get());
 
     // Recurse through the children. Note that the itemiser internally does a
@@ -456,9 +468,9 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
                 auto sing_plink = PatternLink(this, pattern_sing);
                 auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
                 
-                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_sing)("\n");
+                TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
                 query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
-                if( sing_xlink != required_links->at( sing_plink ) );
+                if( sing_xlink != required_links->at( sing_plink ) )
                     throw SingularMismatch();
             }
         }
@@ -480,15 +492,12 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     INDENT("S");
     ASSERT( plan.planned );
 
-    TheKnowledge::Nugget::IndexType current_index = -1; 
+    TheKnowledge::Nugget::IndexType prev_index = -1; 
     
     int pattern_num_non_star = plan.sequence_pattern_num_non_star.at(pattern);
     ContainerInterface::iterator p_last_star = plan.sequence_p_last_star.at(pattern);
 
-    if( px->size() < pattern_num_non_star )
-    {
-        throw Mismatch();     // TODO break to get the final trace?
-    }
+    TRACEC("DNLQ sequence: %d plinks of which %d are non-star\n", pattern->size(), pattern_num_non_star);
 
 	ContainerInterface::iterator pit, npit, nnpit, nxit, pending_star_xit_begin;            
     ContainerInterface::iterator xit_star_limit = px->end();            
@@ -503,21 +512,24 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     PatternLink pending_star_xit;
 	for( pit = pattern->begin(), p_remaining = pattern->size(); pit != pattern->end(); ++pit, --p_remaining )
 	{
-        TreePtr<Node> pe(*pit);
-        PatternLink plink( this, &pe );
-        if( dynamic_pointer_cast<StarAgent>(pe) )
+        PatternLink plink( this, &*pit );
+
+        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) 
         {
+            ASSERT( !pending_star_plink );
             // We have a Star type wildcard that can match multiple elements.
             ContainerInterface::iterator xit_star_end;
                 
             if( plan.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
             {
+                TRACEC("Star before non-star ")(plink)("\n");
                 // Next will be non-star; wait for that
                 pending_star_plink = plink;
                 pending_star_xit_begin = xit;
             }
             else if( pit == p_last_star ) // The last Star does not need a decision
             {
+                TRACEC("Last star ")(plink)("\n");
                 // No more stars, so skip ahead to the end of the possible star range. 
                 xit_star_end = xit_star_limit;
             }				
@@ -525,6 +537,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             {
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
+                TRACEC("Star before another star ")(plink)("\n");
                 ASSERT( xit == px->end() || *xit );
                 xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
             }
@@ -544,33 +557,39 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         }
         else
         {
-            auto plink = PatternLink(this, &pe);
             XLink req_xlink = required_links->at(plink); 
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            
-            // Pending (non-free and non-last) star from last iteration?
-            if( pending_star_plink )
+            if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE &&
+                  nugget.container == px) )
+                throw WrongContainerSequenceMismatch(); // Be in the right sequence
+                        
+            if( pending_star_plink ) // Previous iteration was a star
             {
+                TRACEC("Non-star after star ")(plink)("\n");
+                // The range must end to the right of where it started
+                if( nugget.index <= prev_index )
+                    throw NotAfterSequenceMismatch();
+
                 // Star ends just before this link
                 ContainerInterface::iterator xit_star_end = nugget.iterator;
                 TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), pending_star_xit_begin, xit_star_end ) );
 
                 // Apply couplings to this Star and matched range
                 // Restrict to pre-restriction or pattern restriction
-                query.RegisterAbnormalLink( pending_star_plink, XLink::CreateDistinct(xss) ); // Only used in after-pass
-                
-                pending_star_plink = PatternLink(); // only need to do this once!
+                query.RegisterAbnormalLink( pending_star_plink, XLink::CreateDistinct(xss) ); // Only used in after-pass                
+            }
+            else // previous was a non-star
+            {
+                TRACEC("Non-star after non-star ")(plink)("\n");
+                // We must be in the next slot
+                if( nugget.iterator != xit )
+                    throw NotSuccessorSequenceMismatch();                
             }
             
-            // Deal with current non-star
-            if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE ||
-                  nugget.container == px ||
-                  nugget.index > current_index) )
-                throw SequenceMismatch();
             query.RegisterNormalLink( plink, req_xlink ); // Note: just extracted directly from required_links
              
             // Updates after non-star link    
-            current_index = nugget.index;    
+            prev_index = nugget.index;    
             xit = nugget.iterator;    
             ++xit;
             pending_star_plink = PatternLink();    
@@ -581,6 +600,10 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             ++xit_star_limit;    
         }
     }
+    // If we finished the job and pattern and subject are still aligned, then it was a match
+	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern->end() );
+    if( xit != px->end() )
+        throw SurplusXSequenceMismatch();  
 }
 
 
@@ -591,8 +614,71 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
                                                         const SolutionMap *required_links,
                                                         const TheKnowledge *knowledge ) const
 {
-    INDENT("S");
+    INDENT("C");
+    
+    // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
+	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
+	// after decisions.
+    set<XLink> remaining_xlinks;
+    FOREACH( const TreePtrInterface &xe, *px )
+        remaining_xlinks.insert( XLink( base_xlink.GetChildX(), &xe ) ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
+    
+    PatternLink star_plink;
 
+    for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
+    {
+        auto plink = PatternLink(this, &*pit);
+    	TRACE("Collection compare %d remain out of %d; looking at ",
+                remaining_xlinks.size(),
+                pattern->size() )(**pit)(" in pattern\n" );
+        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) // Star in pattern collection?
+        {
+        	ASSERT(!star_plink)("Only one Star node (or nullptr ptr) allowed in a search pattern Collection");
+            star_plink = plink; // remember for later and skip to next pattern
+        }
+	    else // not a Star so match singly...
+	    {
+            XLink req_xlink = required_links->at(plink); 
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
+            if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION &&
+                  nugget.container == px) )
+                throw WrongContainerCollectionMismatch(); // Be in the right collection
+                
+            if( remaining_xlinks.count( req_xlink ) == 0 )
+                throw CollisionCollectionMismatch(); // Already removed this one: collision
+            remaining_xlinks.erase( req_xlink );
+            
+            query.RegisterNormalLink( plink, req_xlink ); // Link into X
+        }
+    }
+    
+    // Now handle the p_star if there was one; all the non-star matches have been erased from
+    // the collection, leaving only the star matches.
+
+    if( !remaining_xlinks.empty() && !star_plink )
+    {
+        TRACE("mismatch - x left over\n");
+        throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
+    }
+
+    TRACE("seen_star %d size of xremaining %d\n", !!star_plink, remaining_xlinks.size() );
+    
+    if( star_plink )
+    {
+        // Apply pre-restriction to the star
+        TreePtr<SubCollection> x_subcollection( new SubCollection );
+ 
+        // For replace...  
+        for( XLink xlink : remaining_xlinks )
+        {            
+            x_subcollection->insert( xlink.GetChildX() );
+        }
+
+        // For solver...
+        x_subcollection->elts = remaining_xlinks;
+ 
+        query.RegisterAbnormalLink( star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
+    }    
 }
 
 

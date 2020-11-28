@@ -15,7 +15,7 @@ class Mismatch : public exception
 {
 public:    
     virtual const char* what() const noexcept;
-    string What() const noexcept;
+    virtual string What() const noexcept;
     
 private:
     mutable string w;

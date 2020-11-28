@@ -584,8 +584,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 #endif
     
 #ifdef NLQ_TEST
-    list<LocatedLink> basic_solution_links = LocateLinksFromMap( pq->GetNormalLinks(), basic_solution );
-    auto nlq_lambda = agent->TestStartNormalLinkedQuery( base_xlink, basic_solution_links, knowledge );
+    auto nlq_lambda = agent->TestStartNormalLinkedQuery( base_xlink, &basic_solution, knowledge );
 #else    
     auto nlq_lambda = agent->StartNormalLinkedQuery( base_xlink, &basic_solution, knowledge );
 #endif
@@ -596,6 +595,8 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 
         shared_ptr<SR::DecidedQuery> query = nlq_lambda();
         i++;
+                
+        Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
 
         try
         {
