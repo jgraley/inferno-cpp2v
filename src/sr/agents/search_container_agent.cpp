@@ -149,27 +149,14 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink base_xlink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const
+void StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                  XLink base_xlink,
+                                                  const SolutionMap *required_links,
+                                                  const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-
-    query.last_activity = DecidedQueryCommon::QUERY;
-    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    if( base_xlink == XLink::MMAX_Link )
-    {
-        // Magic Match Anything node: all normal children also match anything
-        // This is just to keep normal-domain solver happy, so we 
-        // only need normals. 
-        for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
-        return;
-    }   
-    
     query.Reset();
 
     // Check pre-restriction

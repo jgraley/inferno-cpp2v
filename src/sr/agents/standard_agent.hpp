@@ -65,7 +65,15 @@ private:
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+                                           const TheKnowledge *knowledge ) const
+    {
+        // Stop it using DQ
+        RunDecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
+    }
+    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                  XLink base_xlink,
+                                                  const SolutionMap *required_links,
+                                                  const TheKnowledge *knowledge ) const;                                              
     void DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            SequenceInterface *px,
@@ -123,7 +131,7 @@ public:
         // GetName() works via RTTI so no amount of casting of "this" will stop the full
         // final node's name being returned. So we have to actually make a temp in the
         // node type and use that.
-        return string("Agent<") + NODE_TYPE().GetTypeName() + string(">");        
+        return string("StandardAgent<") + NODE_TYPE().GetTypeName() + string(">");        
     }
 
     shared_ptr<const Node> GetPatternPtr() const

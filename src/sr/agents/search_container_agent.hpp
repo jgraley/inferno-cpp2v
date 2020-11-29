@@ -85,9 +85,17 @@ public:
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink x,
+                                           XLink base_xlink,
                                            const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+                                           const TheKnowledge *knowledge ) const
+    {
+        // Stop it using DQ
+        RunDecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
+    }
+    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                  XLink x,
+                                                  const SolutionMap *required_links,
+                                                  const TheKnowledge *knowledge ) const;                                              
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree

@@ -11,7 +11,6 @@ using namespace SR;
 
 //#define ERASE_USING_ITERATOR
 //#define CHECK_ITERATOR_IN_CONTAINER
-#define FAST_DNLQ 
 
 void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 {
@@ -404,29 +403,12 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 }
 
 
-void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
-                                              XLink base_xlink,
-                                              const SolutionMap *required_links,
-                                              const TheKnowledge *knowledge ) const
-{
-#ifndef FAST_DNLQ
-    AgentCommon::DecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
-    return;
-#endif    
+void StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                     XLink base_xlink,
+                                                     const SolutionMap *required_links,
+                                                     const TheKnowledge *knowledge ) const
+{ 
     INDENT("Q");
-
-    query.last_activity = DecidedQueryCommon::QUERY;
-    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    if( base_xlink == XLink::MMAX_Link )
-    {
-        // Magic Match Anything node: all normal children also match anything
-        // This is just to keep normal-domain solver happy, so we 
-        // only need normals. 
-        for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
-        return;
-    }   
-
     query.Reset();
 
     // Check pre-restriction

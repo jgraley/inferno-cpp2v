@@ -105,10 +105,54 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
+void AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                   XLink base_xlink,
+                                                   const SolutionMap *required_links,
+                                                   const TheKnowledge *knowledge ) const
+{
+    ASSERTFAIL();
+}
+    
+    
+void AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
+                                               XLink base_xlink,
+                                               const SolutionMap *required_links,
+                                               const TheKnowledge *knowledge ) const
+{
+    query.last_activity = DecidedQueryCommon::QUERY;
+   
+    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
+    
+    if( base_xlink == XLink::MMAX_Link )
+    {
+        query.Reset();
+        // Magic Match Anything node: all normal children also match anything
+        // This is just to keep normal-domain solver happy, so we 
+        // only need normals. 
+        for( PatternLink l : pattern_query->GetNormalLinks() )       
+            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
+    }   
+    else
+    {
+        TRACE("Attempting to vcall on ")(*this)("\n");
+        this->RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+    }
+}                             
+
+
 void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
                                             XLink base_xlink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
+{    
+    DNLQFromDQ( query, base_xlink, required_links, knowledge );
+}
+
+    
+void AgentCommon::DNLQFromDQ( DecidedQuery &query,
+                              XLink base_xlink,
+                              const SolutionMap *required_links,
+                              const TheKnowledge *knowledge ) const
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(base_xlink)("\n");
     RunDecidedQuery( query, base_xlink );
@@ -163,7 +207,7 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
 AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                                                               const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
-                                                              bool use_agent_common_DNLQ ) const
+                                                              bool use_DQ ) const
 {
     shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
     
@@ -190,8 +234,8 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 // therefore our query will hold the result 
                 shared_ptr<DecidedQuery> query = conj->GetQuery(this);
                 
-                if( use_agent_common_DNLQ )
-                    AgentCommon::DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );
+                if( use_DQ )
+                    DNLQFromDQ( *query, base_xlink, required_links, knowledge );
                 else
                     DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
                     

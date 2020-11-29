@@ -50,7 +50,7 @@ public:
     virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
-                                                bool use_agent_common_DNLQ = false ) const = 0;
+                                                bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
@@ -90,14 +90,26 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
+    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                  XLink base_xlink,
+                                                  const SolutionMap *required_links,
+                                                  const TheKnowledge *knowledge ) const;
+    void RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink,
+                                      const SolutionMap *required_links,
+                                      const TheKnowledge *knowledge ) const;
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
+    void DNLQFromDQ( DecidedQuery &query,
+                     XLink base_xlink,
+                     const SolutionMap *required_links,
+                     const TheKnowledge *knowledge ) const;                                              
     virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
-                                                bool use_agent_common_DNLQ = false ) const;
+                                                bool use_DQ = false ) const;
     virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
