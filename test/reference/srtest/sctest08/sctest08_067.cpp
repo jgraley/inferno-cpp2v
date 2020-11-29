@@ -1,9 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -12,17 +9,6 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ unsigned int helper_link;
-/*temp*/ unsigned int otherhelper_link;
-/*temp*/ unsigned int otherhelper_link1;
-/*temp*/ int helper_n;
-/*temp*/ unsigned int helper_link1;
-private:
-unsigned int link;
-unsigned int helper_stack_index;
-int (n_stack[10U]);
-unsigned int (link_stack[10U]);
-public:
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
@@ -37,15 +23,27 @@ T_STATE_LINK1 = 8U,
 T_STATE_ENTER_otherhelper = 9U,
 };
 void T();
+private:
+unsigned int link;
+unsigned int helper_stack_index;
+unsigned int (link_stack[10U]);
+int (n_stack[10U]);
+public:
+/*temp*/ unsigned int helper_link;
+/*temp*/ unsigned int otherhelper_link;
+/*temp*/ unsigned int otherhelper_link1;
+/*temp*/ int helper_n;
+/*temp*/ unsigned int helper_link1;
 };
+int gvar;
+int i;
+int j;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
-/*temp*/ unsigned int temp_link;
 /*temp*/ unsigned int temp_link1;
-/*temp*/ int temp_n;
+/*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&
 #error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
 , &&
@@ -67,6 +65,8 @@ static const unsigned int (lmap[]) = { &&
 , &&
 #error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
+/*temp*/ int temp_n;
 do
 {
 if( (sc_delta_count())==(0U) )

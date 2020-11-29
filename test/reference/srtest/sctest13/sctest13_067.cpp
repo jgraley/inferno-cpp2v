@@ -8,15 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-int i;
-float fi;
-/*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
-/*temp*/ unsigned int f_link1;
-private:
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK = 0U,
@@ -35,15 +26,22 @@ T_STATE_LINK = 12U,
 T_STATE_PROCEED_THEN_ELSE5 = 13U,
 T_STATE_ENTER_f = 14U,
 };
+int x;
+int i;
+float fi;
 void T();
+private:
+unsigned int link;
+public:
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
+/*temp*/ unsigned int f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int result;
 static const unsigned int (lmap[]) = { &&
 #error identifier ENTER_f_PROCEED_THEN_ELSE_LINK_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_CONTINUE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK undeclared not supported in RenderIdentifier
 , &&
@@ -75,6 +73,8 @@ static const unsigned int (lmap[]) = { &&
 , &&
 #error identifier ENTER_f_PROCEED_THEN_ELSE_LINK_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_CONTINUE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
+/*temp*/ int result;
 do
 {
 if( (sc_delta_count())==(0U) )

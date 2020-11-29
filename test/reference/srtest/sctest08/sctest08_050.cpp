@@ -1,9 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -12,17 +9,6 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ void *helper_link;
-/*temp*/ void *otherhelper_link;
-/*temp*/ void *otherhelper_link1;
-/*temp*/ int helper_n;
-/*temp*/ void *helper_link1;
-private:
-void *link;
-unsigned int helper_stack_index;
-int (n_stack[10U]);
-void *(link_stack[10U]);
-public:
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
@@ -37,16 +23,30 @@ T_STATE_LINK1 = 8U,
 T_STATE_ENTER_otherhelper = 9U,
 };
 void T();
+private:
+void *link;
+unsigned int helper_stack_index;
+void *(link_stack[10U]);
+int (n_stack[10U]);
+public:
+/*temp*/ void *helper_link;
+/*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
+/*temp*/ int helper_n;
+/*temp*/ void *helper_link1;
 };
+int gvar;
+int i;
+int j;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto void *state;
-/*temp*/ void *temp_link;
 /*temp*/ void *temp_link1;
-/*temp*/ int temp_n;
+/*temp*/ void *temp_link;
 static const void *(lmap[]) = { &&PROCEED_NEXT, &&LINK, &&YIELD, &&PROCEED_THEN_ELSE, &&ENTER_helper, &&PROCEED_NEXT1, &&YIELD1, &&PROCEED_THEN_ELSE1, &&LINK1, &&ENTER_otherhelper };
+auto void *state;
+/*temp*/ int temp_n;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);

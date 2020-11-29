@@ -10,31 +10,31 @@ SC_THREAD(T);
 }
 int x;
 int y;
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
-/*temp*/ int f_i;
-/*temp*/ void *f_link1;
+void T();
 private:
 int i;
 void *link;
 public:
-void T();
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ int f_i;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
 /*temp*/ void *temp_link;
-/*temp*/ int result;
-/*temp*/ int result1;
-/*temp*/ int muxtemp;
-/*temp*/ int result2;
-/*temp*/ int result3;
 /*temp*/ bool ortemp;
-/*temp*/ bool result4;
-/*temp*/ int result5;
 /*temp*/ bool andtemp;
+/*temp*/ int muxtemp;
+/*temp*/ bool result4;
 /*temp*/ bool result6;
+/*temp*/ int result5;
+/*temp*/ int result3;
+/*temp*/ int result2;
+/*temp*/ int result1;
+/*temp*/ int result;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
 wait(SC_ZERO_TIME);

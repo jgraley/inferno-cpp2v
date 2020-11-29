@@ -1060,10 +1060,6 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 {
 	TRACE();
 
-	// Uncomment one of these to stress the sorter
-	//sd = ReverseDecls( sd );
-	//sd = JumbleDecls( sd );
-
 	Sequence<Declaration> sorted = SortDecls( sd->members, true );
 	backing_ordering[sd] = sorted;
 

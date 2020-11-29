@@ -8,13 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-/*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
-/*temp*/ unsigned int f_link1;
-private:
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED = 0U,
@@ -34,20 +27,27 @@ T_STATE_ELSE = 13U,
 T_STATE_THEN_ELSE_BREAK = 14U,
 T_STATE_ENTER_f = 15U,
 };
+int x;
 void T();
+private:
+unsigned int link;
+public:
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
+/*temp*/ unsigned int f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int result;
+static const unsigned int (lmap[]) = { &&PROCEED, &&PROCEED1, &&PROCEED_CASE, &&CASE, &&CASE1, &&BREAK, &&PROCEED2, &&PROCEED_CASE1, &&CASE2, &&PROCEED3, &&PROCEED4, &&THEN, &&LINK, &&ELSE, &&THEN_ELSE_BREAK, &&ENTER_f };
+auto int switch_value1;
+auto int switch_value;
+auto unsigned int state;
 /*temp*/ int muxtemp;
 /*temp*/ int result1;
-auto int switch_value;
-auto int switch_value1;
-static const unsigned int (lmap[]) = { &&PROCEED, &&PROCEED1, &&PROCEED_CASE, &&CASE, &&CASE1, &&BREAK, &&PROCEED2, &&PROCEED_CASE1, &&CASE2, &&PROCEED3, &&PROCEED4, &&THEN, &&LINK, &&ELSE, &&THEN_ELSE_BREAK, &&ENTER_f };
+/*temp*/ int result;
  ::TopLevel::x=(0);
 switch( 0 )
 {

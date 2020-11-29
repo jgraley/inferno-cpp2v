@@ -8,15 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-int y;
-/*temp*/ int f_return;
-/*temp*/ int f_i;
-/*temp*/ unsigned int f_link;
-private:
-int i;
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED = 0U,
@@ -34,24 +25,33 @@ T_STATE_ELSE = 11U,
 T_STATE_PROCEED_THEN_ELSE = 12U,
 T_STATE_ENTER_f = 13U,
 };
+int x;
+int y;
 void T();
+private:
+int i;
+unsigned int link;
+public:
+/*temp*/ int f_return;
+/*temp*/ int f_i;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int result;
-/*temp*/ int result1;
-/*temp*/ int muxtemp;
-/*temp*/ int result2;
-/*temp*/ int result3;
+auto unsigned int state;
 /*temp*/ bool ortemp;
-/*temp*/ bool result4;
-/*temp*/ int result5;
 /*temp*/ bool andtemp;
+/*temp*/ int muxtemp;
+/*temp*/ bool result4;
 /*temp*/ bool result6;
+/*temp*/ int result5;
+/*temp*/ int result3;
+/*temp*/ int result2;
+/*temp*/ int result1;
+/*temp*/ int result;
 do
 {
 if( (sc_delta_count())==(0U) )

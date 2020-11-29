@@ -9,15 +9,6 @@ recurser_stack_index(0U)
 {
 SC_THREAD(T);
 }
-int x;
-/*temp*/ unsigned int recurser_link;
-/*temp*/ int recurser_i;
-/*temp*/ unsigned int recurser_link1;
-private:
-unsigned int recurser_stack_index;
-int (i_stack[10U]);
-unsigned int (link_stack[10U]);
-public:
 enum TStates
 {
 T_STATE_LINK = 0U,
@@ -26,18 +17,27 @@ T_STATE_PROCEED = 2U,
 T_STATE_LINK1 = 3U,
 T_STATE_LINK_THEN_ELSE = 4U,
 };
+int x;
 void T();
+private:
+unsigned int recurser_stack_index;
+unsigned int (link_stack[10U]);
+int (i_stack[10U]);
+public:
+/*temp*/ unsigned int recurser_link;
+/*temp*/ int recurser_i;
+/*temp*/ unsigned int recurser_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
-/*temp*/ int temp_i;
-/*temp*/ int temp_i1;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int temp_i2;
 static const unsigned int (lmap[]) = { &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK };
+auto unsigned int state;
+/*temp*/ int temp_i2;
+/*temp*/ int temp_i1;
+/*temp*/ int temp_i;
 LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK:;
 if( (sc_delta_count())==(0U) )
 {

@@ -8,16 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-int y;
-/*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
-/*temp*/ int f_i;
-/*temp*/ unsigned int f_link1;
-private:
-int i;
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED = 0U,
@@ -35,24 +25,23 @@ T_STATE_ELSE = 11U,
 T_STATE_PROCEED_THEN_ELSE = 12U,
 T_STATE_ENTER_f = 13U,
 };
+int x;
+int y;
 void T();
+private:
+int i;
+unsigned int link;
+public:
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
+/*temp*/ int f_i;
+/*temp*/ unsigned int f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int result;
-/*temp*/ int result1;
-/*temp*/ int muxtemp;
-/*temp*/ int result2;
-/*temp*/ int result3;
-/*temp*/ bool ortemp;
-/*temp*/ bool result4;
-/*temp*/ int result5;
-/*temp*/ bool andtemp;
-/*temp*/ bool result6;
 static const unsigned int (lmap[]) = { &&
 #error identifier ENTER_f_PROCEED_THEN_ELSE_ELSE_LINK_THEN_LINK_PROCEED_PROCEED_NEXT_PROCEED_ELSE_LINK_THEN_THEN_ELSE_LINK_PROCEED undeclared not supported in RenderIdentifier
 , &&
@@ -82,6 +71,17 @@ static const unsigned int (lmap[]) = { &&
 , &&
 #error identifier ENTER_f_PROCEED_THEN_ELSE_ELSE_LINK_THEN_LINK_PROCEED_PROCEED_NEXT_PROCEED_ELSE_LINK_THEN_THEN_ELSE_LINK_PROCEED undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
+/*temp*/ bool ortemp;
+/*temp*/ bool andtemp;
+/*temp*/ int muxtemp;
+/*temp*/ bool result4;
+/*temp*/ bool result6;
+/*temp*/ int result5;
+/*temp*/ int result3;
+/*temp*/ int result2;
+/*temp*/ int result1;
+/*temp*/ int result;
 do
 {
 if( (sc_delta_count())==(0U) )

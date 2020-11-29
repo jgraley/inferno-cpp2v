@@ -8,8 +8,8 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 int x;
+void T();
 int (f)();
 };
 TopLevel top_level("top_level");

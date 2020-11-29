@@ -8,29 +8,29 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(U);
 }
-/*temp*/ unsigned int HelperU_link;
-/*temp*/ unsigned int HelperU_link1;
-private:
-unsigned int link;
-public:
 enum UStates
 {
 U_STATE_LINK = 0U,
 U_STATE_ENTER_HelperU = 1U,
 };
 void U();
+private:
+unsigned int link;
+public:
+/*temp*/ unsigned int HelperU_link;
+/*temp*/ unsigned int HelperU_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::U()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&
 #error identifier ENTER_HelperU_LINK undeclared not supported in RenderIdentifier
 , &&
 #error identifier ENTER_HelperU_LINK undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0U) )

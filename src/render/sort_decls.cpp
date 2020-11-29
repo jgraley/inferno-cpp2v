@@ -1,6 +1,7 @@
 
 #include "sort_decls.hpp"
 #include "tree/misc.hpp"
+#include "helpers/simple_compare.hpp"
 
 using namespace CPPTree;
 
@@ -137,9 +138,16 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     int ocs = c.size();
     
     // Our algorithm will modify the source container, so make a copy of it
-    Collection<Declaration> cc;
+    Sequence<Declaration> cc;
     FOREACH( const TreePtrInterface &a, c )
-    	cc.insert( a );
+    	cc.push_back( a );
+
+	// Uncomment one of these to stress the sorter
+	//cc = ReverseDecls( cc );
+	//cc = JumbleDecls( cc );
+
+    // Sort using SimpleCompare first: this should improve reproducibility
+    cc = PreSortDecls( cc );
 
 	// Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
@@ -182,6 +190,25 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     TRACE("\n");
 	ASSERT( s.size() == ocs );
 	return s;
+}
+
+
+Sequence<Declaration> PreSortDecls( Sequence<Declaration> c )
+{
+    SimpleCompare sc;
+
+    // Make a SimpleCompare-ordered set and fill it with the decls
+    typedef set<TreePtr<Declaration>, SimpleCompare> SCOrdered;
+    SCOrdered sco(sc);
+    FOREACH( const TreePtr<Declaration> &a, c )
+    	sco.insert( a );
+
+    // Extract the decls from the set, now in SimpleCompare order
+	Sequence<Declaration> s;
+    for( TreePtr<Declaration> b : sco )
+        s.push_back( b );
+    
+    return s;
 }
 
 

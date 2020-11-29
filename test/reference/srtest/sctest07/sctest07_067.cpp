@@ -1,9 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -22,11 +19,13 @@ T_STATE_PROCEED_THEN_ELSE1 = 5U,
 };
 void T();
 };
+int gvar;
+int i;
+int j;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&
 #error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
 , &&
@@ -40,6 +39,7 @@ static const unsigned int (lmap[]) = { &&
 , &&
 #error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0U) )

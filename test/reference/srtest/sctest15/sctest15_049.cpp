@@ -8,19 +8,19 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(U);
 }
-/*temp*/ void *HelperU_link;
-/*temp*/ void *HelperU_link1;
+void U();
 private:
 void *link;
 public:
-void U();
+/*temp*/ void *HelperU_link;
+/*temp*/ void *HelperU_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::U()
 {
-auto void *state;
 /*temp*/ void *temp_link;
+auto void *state;
  ::TopLevel::HelperU_link1=(&&LINK);
 wait(SC_ZERO_TIME);
 {

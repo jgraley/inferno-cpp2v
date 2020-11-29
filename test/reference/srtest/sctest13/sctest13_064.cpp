@@ -8,15 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-int i;
-float fi;
-/*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
-/*temp*/ unsigned int f_link1;
-private:
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK = 0U,
@@ -35,16 +26,25 @@ T_STATE_LINK = 12U,
 T_STATE_PROCEED_THEN_ELSE5 = 13U,
 T_STATE_ENTER_f = 14U,
 };
+int x;
+int i;
+float fi;
 void T();
+private:
+unsigned int link;
+public:
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
+/*temp*/ unsigned int f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int result;
 static const unsigned int (lmap[]) = { &&PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK, &&PROCEED_NEXT_CONTINUE, &&PROCEED_THEN_ELSE5, &&PROCEED_NEXT4, &&PROCEED_THEN_ELSE4, &&PROCEED_NEXT3, &&PROCEED_THEN_ELSE3, &&PROCEED_NEXT2, &&PROCEED_THEN_ELSE2, &&PROCEED_NEXT1, &&PROCEED_THEN_ELSE1, &&PROCEED_NEXT, &&LINK, &&PROCEED_THEN_ELSE, &&ENTER_f };
+auto unsigned int state;
+/*temp*/ int result;
  ::TopLevel::x=(0);
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;

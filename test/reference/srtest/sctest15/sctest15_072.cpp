@@ -8,10 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(U);
 }
-/*temp*/ unsigned int HelperU_link;
-private:
-unsigned int link;
-public:
 enum UStates
 {
 U_STATE_LINK = 0U,
@@ -19,7 +15,10 @@ U_STATE_ENTER_HelperU = 1U,
 };
 void U();
 private:
+unsigned int link;
 unsigned int state;
+public:
+/*temp*/ unsigned int HelperU_link;
 };
 TopLevel top_level("top_level");
 

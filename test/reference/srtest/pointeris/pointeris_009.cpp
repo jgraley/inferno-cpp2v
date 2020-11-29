@@ -1,8 +1,8 @@
+void (main)();
 int a = ((99)*({ do
 {
 }
 while( 0 ); 233; }))+(44);
-void (main)();
 int main_return;
 
 void (main)()

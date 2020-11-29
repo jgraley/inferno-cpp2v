@@ -8,13 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-int i;
-/*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
-private:
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK = 0U,
@@ -33,9 +26,15 @@ T_STATE_LINK = 12U,
 T_STATE_PROCEED_THEN_ELSE5 = 13U,
 T_STATE_ENTER_f = 14U,
 };
+int x;
+int i;
 void T();
 private:
+unsigned int link;
 unsigned int state;
+public:
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 

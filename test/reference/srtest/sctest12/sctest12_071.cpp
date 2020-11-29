@@ -8,12 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-/*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
-private:
-unsigned int link;
-public:
 enum TStates
 {
 T_STATE_PROCEED = 0U,
@@ -33,19 +27,25 @@ T_STATE_ELSE = 13U,
 T_STATE_THEN_ELSE_BREAK = 14U,
 T_STATE_ENTER_f = 15U,
 };
+int x;
 void T();
+private:
+unsigned int link;
+public:
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-/*temp*/ int result;
+auto int switch_value1;
+auto int switch_value;
+auto unsigned int state;
 /*temp*/ int muxtemp;
 /*temp*/ int result1;
-auto int switch_value;
-auto int switch_value1;
+/*temp*/ int result;
 do
 {
 if( (sc_delta_count())==(0U) )

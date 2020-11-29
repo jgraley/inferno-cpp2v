@@ -15,8 +15,13 @@ bool IsDependOn( TreePtr<CPPTree::Declaration> a, TreePtr<CPPTree::Declaration> 
 // on. set to "true" if incomplete declarations for all records have already been emitted. 
 Sequence<CPPTree::Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record );
 
+// Sort using SimpleCompare
+Sequence<CPPTree::Declaration> PreSortDecls( Sequence<CPPTree::Declaration> c );
+
 // Mix them up randomly!!
 Sequence<CPPTree::Declaration> JumbleDecls( Sequence<CPPTree::Declaration> c );
+
+// Reverse them!!
 Sequence<CPPTree::Declaration> ReverseDecls( Sequence<CPPTree::Declaration> c );
 
 #endif

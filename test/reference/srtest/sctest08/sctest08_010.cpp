@@ -1,9 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -11,22 +8,33 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void (otherhelper)(auto void *link);
-void (helper)(auto int n, auto void *link);
 void T();
+void (helper)(auto int n, auto void *link);
+void (otherhelper)(auto void *link);
 /*temp*/ void *helper_link;
 /*temp*/ void *otherhelper_link;
 };
+int gvar;
+int i;
+int j;
 TopLevel top_level("top_level");
 
-void (TopLevel::otherhelper)(void *link)
+void TopLevel::T()
 {
-/*temp*/ void *temp_link;
- ::gvar=( ::gvar-(1));
+ ::gvar=(1);
+for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
 {
-temp_link=link;
-return ;
+ ::gvar=( ::gvar+ ::i);
+({ /*temp*/ int temp_n; temp_n=(3); {
+ ::TopLevel::helper(temp_n, &&LINK);
+LINK:;
 }
+});
+ ::gvar=( ::gvar*(2));
+wait(SC_ZERO_TIME);
+}
+cease(  ::gvar );
+return ;
 }
 
 void (TopLevel::helper)(int n, void *link)
@@ -47,20 +55,12 @@ return ;
 }
 }
 
-void TopLevel::T()
+void (TopLevel::otherhelper)(void *link)
 {
- ::gvar=(1);
-for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
+/*temp*/ void *temp_link;
+ ::gvar=( ::gvar-(1));
 {
- ::gvar=( ::gvar+ ::i);
-({ /*temp*/ int temp_n; temp_n=(3); {
- ::TopLevel::helper(temp_n, &&LINK);
-LINK:;
-}
-});
- ::gvar=( ::gvar*(2));
-wait(SC_ZERO_TIME);
-}
-cease(  ::gvar );
+temp_link=link;
 return ;
+}
 }

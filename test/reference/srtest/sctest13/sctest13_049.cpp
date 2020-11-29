@@ -11,20 +11,20 @@ SC_THREAD(T);
 int x;
 int i;
 float fi;
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
-/*temp*/ void *f_link1;
+void T();
 private:
 void *link;
 public:
-void T();
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto void *state;
 /*temp*/ void *temp_link;
+auto void *state;
 /*temp*/ int result;
  ::TopLevel::x=(0);
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )

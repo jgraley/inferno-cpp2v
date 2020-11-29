@@ -3,7 +3,6 @@
 class Adder;
 class Multiplier;
 class TopLevel;
-int gvar;
 class Adder : public sc_module
 {
 public:
@@ -11,7 +10,6 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-bool proceed;
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
@@ -19,6 +17,7 @@ T_STATE_PROCEED_THEN_ELSE = 1U,
 T_STATE_PROCEED_NEXT1 = 2U,
 T_STATE_PROCEED_THEN_ELSE1 = 3U,
 };
+bool proceed;
 void T();
 };
 class Multiplier : public sc_module
@@ -28,8 +27,6 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-bool instigate;
-bool proceed;
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
@@ -39,6 +36,8 @@ T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_NEXT2 = 4U,
 T_STATE_PROCEED_THEN_ELSE2 = 5U,
 };
+bool instigate;
+bool proceed;
 void T();
 };
 class TopLevel : public sc_module
@@ -50,18 +49,18 @@ mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
- ::Adder add_inst;
- ::Multiplier mul_inst;
-void T();
 enum TStates
 {
 };
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
+void T();
 };
+int gvar;
 TopLevel top_level("top_level");
 
 void Adder::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&
 #error identifier PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT undeclared not supported in RenderIdentifier
 , &&
@@ -71,6 +70,7 @@ static const unsigned int (lmap[]) = { &&
 , &&
 #error identifier PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0U) )
@@ -111,7 +111,6 @@ while( true );
 
 void Multiplier::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&
 #error identifier PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT undeclared not supported in RenderIdentifier
 , &&
@@ -125,6 +124,7 @@ static const unsigned int (lmap[]) = { &&
 , &&
 #error identifier PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT undeclared not supported in RenderIdentifier
  };
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0U) )

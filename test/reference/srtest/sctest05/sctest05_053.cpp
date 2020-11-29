@@ -1,8 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
 class TopLevel : public sc_module
 {
 public:
@@ -20,12 +18,14 @@ T_STATE_PROCEED_THEN_ELSE = 4U,
 };
 void T();
 };
+int gvar;
+int i;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED, &&YIELD, &&THEN_ELSE, &&PROCEED_THEN_ELSE };
+auto unsigned int state;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);

@@ -8,52 +8,50 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(T);
 }
+/*temp*/ unsigned int temp_link;
+enum TStates
+{
+T_STATE_LINK = 0U,
+T_STATE_ENTER_f = 3U,
+T_STATE_LINK1 = 1U,
+T_STATE_LINK2 = 2U,
+};
 int x;
+void T();
+private:
+int i;
+short j;
+char k;
+int t;
+unsigned int link;
+unsigned int state;
+public:
+/*temp*/ int temp_i2;
+/*temp*/ int temp_i1;
+/*temp*/ int temp_j2;
+/*temp*/ int temp_k2;
+/*temp*/ int temp_j1;
+/*temp*/ int temp_k1;
+/*temp*/ int temp_i;
+/*temp*/ int temp_j;
+/*temp*/ int temp_k;
 /*temp*/ int f_return;
 /*temp*/ int f_i;
 /*temp*/ short f_j;
 /*temp*/ char f_k;
 /*temp*/ unsigned int f_link;
-private:
-int t;
-int i;
-short j;
-char k;
-unsigned int link;
-public:
-enum TStates
-{
-T_STATE_LINK = 0U,
-T_STATE_LINK1 = 1U,
-T_STATE_LINK2 = 2U,
-T_STATE_ENTER_f = 3U,
-};
-private:
-unsigned int state;
-public:
-/*temp*/ unsigned int temp_link;
-/*temp*/ int result;
-/*temp*/ int temp_k;
-/*temp*/ int result1;
-/*temp*/ int temp_j;
-/*temp*/ int result2;
-/*temp*/ int temp_i;
-/*temp*/ int result3;
-/*temp*/ int result4;
-/*temp*/ int temp_k1;
-/*temp*/ int result5;
-/*temp*/ int temp_j1;
-/*temp*/ int result6;
-/*temp*/ int result7;
-/*temp*/ int temp_k2;
-/*temp*/ int result8;
-/*temp*/ int temp_j2;
 /*temp*/ int result9;
-/*temp*/ int temp_i1;
-/*temp*/ int result10;
-/*temp*/ int temp_i2;
-void T();
 /*temp*/ int result11;
+/*temp*/ int result3;
+/*temp*/ int result10;
+/*temp*/ int result8;
+/*temp*/ int result7;
+/*temp*/ int result6;
+/*temp*/ int result4;
+/*temp*/ int result5;
+/*temp*/ int result2;
+/*temp*/ int result1;
+/*temp*/ int result;
 };
 TopLevel top_level("top_level");
 

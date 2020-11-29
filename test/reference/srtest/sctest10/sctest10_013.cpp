@@ -8,14 +8,14 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 int x;
+void T();
+void (f)();
 /*temp*/ int f_return;
 /*temp*/ void *f_link;
 /*temp*/ int f_i;
 /*temp*/ short f_j;
 /*temp*/ char f_k;
-void (f)();
 /*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
@@ -78,12 +78,12 @@ return ;
 
 void (TopLevel::f)()
 {
-auto int t;
+/*temp*/ void *temp_link;
 auto int i;
 auto short j;
 auto char k;
+auto int t;
 auto void *link;
-/*temp*/ void *temp_link;
 link= ::TopLevel::f_link1;
 k= ::TopLevel::f_k;
 j= ::TopLevel::f_j;

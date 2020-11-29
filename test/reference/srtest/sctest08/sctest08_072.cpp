@@ -1,9 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -12,15 +9,6 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ unsigned int otherhelper_link;
-/*temp*/ int helper_n;
-/*temp*/ unsigned int helper_link;
-private:
-unsigned int link;
-unsigned int helper_stack_index;
-int (n_stack[10U]);
-unsigned int (link_stack[10U]);
-public:
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
@@ -36,14 +24,25 @@ T_STATE_ENTER_otherhelper = 9U,
 };
 void T();
 private:
+unsigned int link;
+unsigned int helper_stack_index;
+unsigned int (link_stack[10U]);
+int (n_stack[10U]);
 unsigned int state;
+public:
+/*temp*/ unsigned int otherhelper_link;
+/*temp*/ int helper_n;
+/*temp*/ unsigned int helper_link;
 };
+int gvar;
+int i;
+int j;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ unsigned int temp_link;
 /*temp*/ unsigned int temp_link1;
+/*temp*/ unsigned int temp_link;
 /*temp*/ int temp_n;
 do
 {

@@ -1,5 +1,8 @@
 #include "isystemc.h"
 
+unsigned int main_stack_index = 0U;
+void *(link_stack[10U]);
+void (main)();
 int a = ((99)*({ {
 auto void *state;
 wait(SC_ZERO_TIME);
@@ -16,15 +19,12 @@ PROCEED:;
 233; }))+(44);
 int main_return;
 void *main_link;
-unsigned int main_stack_index = 0U;
-void (main)();
-void *(link_stack[10U]);
 
 void (main)()
 {
+/*temp*/ void *temp_link;
 auto void *state;
 /*temp*/ int result;
-/*temp*/ void *temp_link;
 /*temp*/ bool enabled = true;
  ::main_stack_index++;
 ( ::link_stack[ ::main_stack_index])= ::main_link;

@@ -8,10 +8,10 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 int x;
 int i;
 float fi;
+void T();
 void (f)();
 /*temp*/ int f_return;
 };
