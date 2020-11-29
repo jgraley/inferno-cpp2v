@@ -50,7 +50,7 @@ public:
     virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
-                                                bool force_common = false ) const = 0;
+                                                bool use_agent_common_DNLQ = false ) const = 0;
     virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
@@ -97,7 +97,7 @@ public:
     virtual QueryLambda StartNormalLinkedQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
-                                                bool force_common = false ) const;
+                                                bool use_agent_common_DNLQ = false ) const;
     virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;

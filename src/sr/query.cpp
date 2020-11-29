@@ -157,7 +157,7 @@ string DecidedQuery::GetTrace() const
 {
     string s;
     s += "Normal: " + TraceLinks(GetNormalLinks()) + "\n";
-    s += "Abormal: " + TraceLinks(GetAbnormalLinks()) + "\n";
+    s += "Abnormal: " + TraceLinks(GetAbnormalLinks()) + "\n";
     s += "Multiplicity: " + TraceLinks(GetMultiplicityLinks()) + "\n";
 
     ASSERT( choices.size() == decisions.size() );
@@ -169,14 +169,7 @@ string DecidedQuery::GetTrace() const
         Choice c = choices[i];
         s += SSPrintf("%d:", i);
         s += Trace(d) + ", ";
-        s += "choice=";
-        if( c.mode == Choice::BEGIN )
-            s += "BEGIN";
-        else if( d.container )
-            s += (c.iter==d.container->end() ? "END" : Trace(*(c.iter)));
-        else
-            s += Trace(*(c.iter));
-        s += ",\n";
+        s += "choice=" + c.GetTrace(d) + ",\n";
     }
     s += "]";
     return s;
@@ -468,6 +461,21 @@ string DecidedQueryCommon::Range::GetTrace() const
     s += "] ";
 
     s += ")";
+    return s;
+}
+
+
+string DecidedQueryCommon::Choice::GetTrace( const Range &d ) const
+{
+    string s;
+    if( mode == Choice::BEGIN )
+        s += "BEGIN";
+    else if( iter==d.end )
+        s += "END";
+    else if( d.container && iter==d.container->end() )
+        s += "END";
+    else
+        s += Trace(*iter);
     return s;
 }
 

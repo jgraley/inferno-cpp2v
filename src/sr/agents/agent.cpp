@@ -163,7 +163,7 @@ void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
 AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                                                               const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
-                                                              bool force_common ) const
+                                                              bool use_agent_common_DNLQ ) const
 {
     shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
     
@@ -190,7 +190,7 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 // therefore our query will hold the result 
                 shared_ptr<DecidedQuery> query = conj->GetQuery(this);
                 
-                if( force_common )
+                if( use_agent_common_DNLQ )
                     AgentCommon::DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );
                 else
                     DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
@@ -302,7 +302,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
         try
         {
             {
-                Tracer::RAIIEnable silencer( false ); /// make ref algo be quiet             
+                Tracer::RAIIEnable silencer( false ); // make ref algo be quiet             
                 ref_query = ref_lambda(); 
             }
             TRACE("Ref lambda hit #%d\n", (*ref_hits))

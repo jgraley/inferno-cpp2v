@@ -212,8 +212,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = px->begin();
-	int p_remaining;
-	for( pit = pattern->begin(), p_remaining = pattern->size(); pit != pattern->end(); ++pit, --p_remaining )
+	for( pit = pattern->begin(); pit != pattern->end(); ++pit )
 	{
  		ASSERT( xit == px->end() || *xit );
 
@@ -235,7 +234,6 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             {
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
-                ASSERT( xit == px->end() || *xit );
                 xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
             }
             
@@ -270,8 +268,6 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
         throw Mismatch();  
     else if( pit != pattern->end() )
         throw Mismatch();  
-    else 
-        ASSERT( p_remaining==0 );
 }
 
 
@@ -418,8 +414,9 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     return;
 #endif    
     INDENT("Q");
-    query.Reset();
 
+    query.last_activity = DecidedQueryCommon::QUERY;
+    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     if( base_xlink == XLink::MMAX_Link )
     {
         // Magic Match Anything node: all normal children also match anything
@@ -429,6 +426,8 @@ void StandardAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
             query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
         return;
     }   
+
+    query.Reset();
 
     // Check pre-restriction
     TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
@@ -507,11 +506,11 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = px->begin();
-	int p_remaining;
     PatternLink pending_star_plink = PatternLink();
     PatternLink pending_star_xit;
-	for( pit = pattern->begin(), p_remaining = pattern->size(); pit != pattern->end(); ++pit, --p_remaining )
+	for( pit = pattern->begin(); pit != pattern->end(); ++pit )
 	{
+        ASSERT( xit == px->end() || *xit );
         PatternLink plink( this, &*pit );
 
         if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) 
@@ -538,7 +537,6 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
                 TRACEC("Star before another star ")(plink)("\n");
-                ASSERT( xit == px->end() || *xit );
                 xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
             }
             

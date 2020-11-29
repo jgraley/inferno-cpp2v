@@ -87,6 +87,8 @@ public:
             ITER
         } mode;
         ContainerInterface::iterator iter;
+        
+        string GetTrace( const Range &d ) const;
     };
     
     typedef LocatedLink Link;

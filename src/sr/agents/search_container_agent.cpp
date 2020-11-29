@@ -157,8 +157,9 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    query.Reset();
 
+    query.last_activity = DecidedQueryCommon::QUERY;
+    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     if( base_xlink == XLink::MMAX_Link )
     {
         // Magic Match Anything node: all normal children also match anything
@@ -169,6 +170,8 @@ void StuffAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
         return;
     }   
     
+    query.Reset();
+
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
     
