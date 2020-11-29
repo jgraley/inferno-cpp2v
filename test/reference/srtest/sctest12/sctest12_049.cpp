@@ -8,26 +8,26 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
 void T();
 private:
 void *link;
 public:
-/*temp*/ int f_return;
+int x;
 /*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
 /*temp*/ void *temp_link;
-auto int switch_value1;
-auto int switch_value;
 auto void *state;
+auto int switch_value;
+auto int switch_value1;
 /*temp*/ int muxtemp;
-/*temp*/ int result;
 /*temp*/ int result1;
+/*temp*/ int result;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -39,20 +39,20 @@ if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
-switch_value1=(0);
+switch_value=(0);
 wait(SC_ZERO_TIME);
 {
-state=((switch_value1==(0)) ? (&&CASE1) : (&&PROCEED));
+state=((switch_value==(0)) ? (&&CASE1) : (&&PROCEED));
 goto *(state);
 }
 PROCEED:;
 {
-state=((switch_value1==(4)) ? (&&CASE) : (&&PROCEED1));
+state=((switch_value==(4)) ? (&&CASE) : (&&PROCEED1));
 goto *(state);
 }
 PROCEED1:;
 {
-state=((switch_value1==(1)) ? (&&PROCEED_CASE) : (&&PROCEED_CASE));
+state=((switch_value==(1)) ? (&&PROCEED_CASE) : (&&PROCEED_CASE));
 goto *(state);
 }
 PROCEED_CASE:;
@@ -75,14 +75,14 @@ state=(&&BREAK);
 goto *(state);
 }
 BREAK:;
-switch_value=(2);
+switch_value1=(2);
 {
-state=((switch_value==(2)) ? (&&CASE2) : (&&PROCEED2));
+state=((switch_value1==(2)) ? (&&CASE2) : (&&PROCEED2));
 goto *(state);
 }
 PROCEED2:;
 {
-state=((switch_value==(1)) ? (&&PROCEED_CASE1) : (&&PROCEED_CASE1));
+state=((switch_value1==(1)) ? (&&PROCEED_CASE1) : (&&PROCEED_CASE1));
 goto *(state);
 }
 PROCEED_CASE1:;
@@ -114,15 +114,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK:;
-result1= ::TopLevel::f_return;
-muxtemp=result1;
+result= ::TopLevel::f_return;
+muxtemp=result;
 {
 state=(&&ELSE);
 goto *(state);
 }
 ELSE:;
-result=muxtemp;
- ::TopLevel::x=result;
+result1=muxtemp;
+ ::TopLevel::x=result1;
 {
 state=(&&THEN_ELSE_BREAK);
 goto *(state);

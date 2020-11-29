@@ -11,27 +11,27 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_LINK = 1U,
-T_STATE_YIELD1 = 2U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_ENTER_helper = 4U,
-T_STATE_PROCEED_NEXT1 = 5U,
-T_STATE_YIELD = 6U,
-T_STATE_PROCEED_THEN_ELSE1 = 7U,
-T_STATE_LINK1 = 8U,
 T_STATE_ENTER_otherhelper = 9U,
+T_STATE_LINK = 1U,
+T_STATE_LINK1 = 8U,
+T_STATE_PROCEED_NEXT1 = 5U,
+T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
+T_STATE_PROCEED_THEN_ELSE1 = 7U,
+T_STATE_YIELD = 2U,
+T_STATE_YIELD1 = 6U,
 };
 void T();
 private:
-unsigned int link;
 unsigned int helper_stack_index;
-int (n_stack[10U]);
+unsigned int link;
 unsigned int (link_stack[10U]);
+int (n_stack[10U]);
 public:
-/*temp*/ unsigned int otherhelper_link;
-/*temp*/ int helper_n;
 /*temp*/ unsigned int helper_link;
+/*temp*/ int helper_n;
+/*temp*/ unsigned int otherhelper_link;
 };
 int gvar;
 int i;
@@ -66,10 +66,10 @@ if( state== ::TopLevel::T_STATE_LINK )
 {
  ::gvar=( ::gvar*(2));
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 continue;
 }
-if( state== ::TopLevel::T_STATE_YIELD1 )
+if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::i=( ::i+(1));
 state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
@@ -91,10 +91,10 @@ state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::To
 if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 continue;
 }
-if( state== ::TopLevel::T_STATE_YIELD )
+if( state== ::TopLevel::T_STATE_YIELD1 )
 {
  ::gvar=( ::gvar+(1));
  ::j=( ::j+(1));

@@ -8,9 +8,9 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
 void T();
 void (f)(auto int i, auto short j, auto char k);
+int x;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");

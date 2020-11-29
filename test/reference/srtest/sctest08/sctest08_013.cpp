@@ -11,11 +11,11 @@ SC_THREAD(T);
 void T();
 void (helper)();
 void (otherhelper)();
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *helper_link;
-/*temp*/ void *otherhelper_link1;
-/*temp*/ int helper_n;
 /*temp*/ void *helper_link1;
+/*temp*/ int helper_n;
+/*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
 };
 int gvar;
 int i;
@@ -49,8 +49,8 @@ return ;
 void (TopLevel::helper)()
 {
 /*temp*/ void *temp_link;
-auto int n;
 auto void *link;
+auto int n;
 link= ::TopLevel::helper_link1;
 n= ::TopLevel::helper_n;
 for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )

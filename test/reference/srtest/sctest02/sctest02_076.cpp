@@ -13,12 +13,12 @@ SC_METHOD(T);
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_THEN_ELSE = 1U,
 T_STATE_PROCEED_NEXT1 = 2U,
+T_STATE_PROCEED_THEN_ELSE = 1U,
 T_STATE_PROCEED_THEN_ELSE1 = 3U,
 };
-bool proceed;
 void T();
+bool proceed;
 private:
 unsigned int state;
 };
@@ -32,15 +32,15 @@ SC_METHOD(T);
 enum TStates
 {
 T_STATE_PROCEED_NEXT1 = 0U,
-T_STATE_PROCEED_THEN_ELSE = 1U,
 T_STATE_PROCEED_NEXT = 2U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_NEXT2 = 4U,
+T_STATE_PROCEED_THEN_ELSE = 1U,
+T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_THEN_ELSE2 = 5U,
 };
+void T();
 bool instigate;
 bool proceed;
-void T();
 private:
 unsigned int state;
 };
@@ -56,9 +56,9 @@ SC_THREAD(T);
 enum TStates
 {
 };
+void T();
  ::Adder add_inst;
  ::Multiplier mul_inst;
-void T();
 };
 int gvar;
 TopLevel top_level("top_level");

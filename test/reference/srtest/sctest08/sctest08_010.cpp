@@ -9,10 +9,10 @@ SC_CTOR( TopLevel )
 SC_THREAD(T);
 }
 void T();
-void (helper)(auto int n, auto void *link);
+void (helper)(auto void *link, auto int n);
 void (otherhelper)(auto void *link);
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *helper_link;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -26,7 +26,7 @@ for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
 {
  ::gvar=( ::gvar+ ::i);
 ({ /*temp*/ int temp_n; temp_n=(3); {
- ::TopLevel::helper(temp_n, &&LINK);
+ ::TopLevel::helper(&&LINK, temp_n);
 LINK:;
 }
 });
@@ -37,7 +37,7 @@ cease(  ::gvar );
 return ;
 }
 
-void (TopLevel::helper)(int n, void *link)
+void (TopLevel::helper)(void *link, int n)
 {
 /*temp*/ void *temp_link;
 for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )

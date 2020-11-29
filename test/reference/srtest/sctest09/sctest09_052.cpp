@@ -11,21 +11,21 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_LINK1 = 0U,
 T_STATE_ENTER_recurser = 1U,
-T_STATE_PROCEED = 2U,
+T_STATE_LINK1 = 0U,
 T_STATE_LINK = 3U,
 T_STATE_LINK_THEN_ELSE = 4U,
+T_STATE_PROCEED = 2U,
 };
-int x;
 void T();
 private:
-unsigned int recurser_stack_index;
 int (i_stack[10U]);
 unsigned int (link_stack[10U]);
+unsigned int recurser_stack_index;
 public:
-/*temp*/ unsigned int recurser_link;
+int x;
 /*temp*/ int recurser_i;
+/*temp*/ unsigned int recurser_link;
 /*temp*/ unsigned int recurser_link1;
 };
 TopLevel top_level("top_level");

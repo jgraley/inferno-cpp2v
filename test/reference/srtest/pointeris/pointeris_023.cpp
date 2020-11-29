@@ -1,6 +1,5 @@
-unsigned int main_stack_index = 0U;
 void *(link_stack[10U]);
-void (main)();
+unsigned int main_stack_index = 0U;
 int a = ((99)*({ {
 NEXT:;
 {
@@ -10,9 +9,10 @@ if( 0 )
 goto NEXT;
 }
 233; }))+(44);
-int main_return;
+void (main)();
 void *main_link;
 void *main_link1;
+int main_return;
 
 void (main)()
 {

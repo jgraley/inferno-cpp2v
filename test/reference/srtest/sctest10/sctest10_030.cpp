@@ -8,21 +8,21 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
 void T();
 private:
 int i;
 short j;
 char k;
-int t;
 void *link;
+int t;
 public:
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
+int x;
 /*temp*/ int f_i;
 /*temp*/ short f_j;
 /*temp*/ char f_k;
+/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
@@ -30,19 +30,19 @@ void TopLevel::T()
 {
  ::TopLevel::x=(0);
 {
-/*temp*/ int temp_i;
 /*temp*/ int result;
+/*temp*/ int temp_i;
 {
-/*temp*/ int temp_i1;
 /*temp*/ int result1;
+/*temp*/ int temp_i1;
 temp_i1=(0);
 {
-/*temp*/ int temp_k;
 /*temp*/ int result2;
+/*temp*/ int temp_k;
 temp_k=(0);
 {
-/*temp*/ int temp_j;
 /*temp*/ int result3;
+/*temp*/ int temp_j;
 temp_j=(0);
 {
 /*temp*/ int result4;
@@ -72,12 +72,12 @@ result1=result2;
 temp_i=result1;
 }
 {
-/*temp*/ int temp_j1;
 /*temp*/ int result5;
+/*temp*/ int temp_j1;
 temp_j1=(6);
 {
-/*temp*/ int temp_k1;
 /*temp*/ int result6;
+/*temp*/ int temp_k1;
 temp_k1=(8);
 {
 /*temp*/ int result7;
@@ -107,16 +107,16 @@ result=result5;
  ::TopLevel::x=result;
 }
 {
-/*temp*/ int temp_i2;
 /*temp*/ int result8;
+/*temp*/ int temp_i2;
 temp_i2=(1);
 {
-/*temp*/ int temp_j2;
 /*temp*/ int result9;
+/*temp*/ int temp_j2;
 temp_j2=(2);
 {
-/*temp*/ int temp_k2;
 /*temp*/ int result10;
+/*temp*/ int temp_k2;
 temp_k2=(3);
 {
 /*temp*/ int result11;

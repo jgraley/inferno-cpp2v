@@ -10,42 +10,42 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_PROCEED3 = 0U,
-T_STATE_PROCEED2 = 1U,
-T_STATE_PROCEED_CASE1 = 2U,
+T_STATE_BREAK = 5U,
 T_STATE_CASE2 = 3U,
 T_STATE_CASE1 = 4U,
-T_STATE_BREAK = 5U,
-T_STATE_PROCEED = 6U,
-T_STATE_PROCEED_CASE = 7U,
 T_STATE_CASE = 8U,
+T_STATE_ELSE = 13U,
+T_STATE_ENTER_f = 15U,
+T_STATE_LINK = 12U,
+T_STATE_PROCEED3 = 0U,
+T_STATE_PROCEED2 = 1U,
+T_STATE_PROCEED = 6U,
 T_STATE_PROCEED1 = 9U,
 T_STATE_PROCEED4 = 10U,
+T_STATE_PROCEED_CASE1 = 2U,
+T_STATE_PROCEED_CASE = 7U,
 T_STATE_THEN = 11U,
-T_STATE_LINK = 12U,
-T_STATE_ELSE = 13U,
 T_STATE_THEN_ELSE_BREAK = 14U,
-T_STATE_ENTER_f = 15U,
 };
-int x;
 void T();
 private:
 unsigned int link;
 public:
-/*temp*/ int f_return;
+int x;
 /*temp*/ unsigned int f_link;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
 /*temp*/ unsigned int temp_link;
+auto unsigned int state;
 auto int switch_value1;
 auto int switch_value;
-auto unsigned int state;
 /*temp*/ int muxtemp;
-/*temp*/ int result;
 /*temp*/ int result1;
+/*temp*/ int result;
 do
 {
 if( (sc_delta_count())==(0U) )
@@ -124,14 +124,14 @@ state= ::TopLevel::T_STATE_ENTER_f;
 }
 if( state== ::TopLevel::T_STATE_LINK )
 {
-result1= ::TopLevel::f_return;
-muxtemp=result1;
+result= ::TopLevel::f_return;
+muxtemp=result;
 state= ::TopLevel::T_STATE_ELSE;
 }
 if( state== ::TopLevel::T_STATE_ELSE )
 {
-result=muxtemp;
- ::TopLevel::x=result;
+result1=muxtemp;
+ ::TopLevel::x=result1;
 state= ::TopLevel::T_STATE_THEN_ELSE_BREAK;
 }
 if( state== ::TopLevel::T_STATE_THEN_ELSE_BREAK )

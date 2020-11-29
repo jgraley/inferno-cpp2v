@@ -10,8 +10,8 @@ SC_THREAD(U);
 }
 enum UStates
 {
-U_STATE_LINK = 0U,
 U_STATE_ENTER_HelperU = 1U,
+U_STATE_LINK = 0U,
 };
 void U();
 private:

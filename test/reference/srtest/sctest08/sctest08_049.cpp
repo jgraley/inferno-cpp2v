@@ -11,16 +11,16 @@ SC_THREAD(T);
 }
 void T();
 private:
-void *link;
 unsigned int helper_stack_index;
-int (n_stack[10U]);
+void *link;
 void *(link_stack[10U]);
+int (n_stack[10U]);
 public:
-/*temp*/ void *otherhelper_link1;
 /*temp*/ void *helper_link1;
-/*temp*/ void *otherhelper_link;
-/*temp*/ int helper_n;
 /*temp*/ void *helper_link;
+/*temp*/ int helper_n;
+/*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;

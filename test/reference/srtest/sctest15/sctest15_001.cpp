@@ -8,16 +8,16 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(U);
 }
-void U();
 void (HelperU)();
+void U();
 };
 TopLevel top_level("top_level");
+
+void (TopLevel::HelperU)()
+{
+}
 
 void TopLevel::U()
 {
  ::TopLevel::HelperU();
-}
-
-void (TopLevel::HelperU)()
-{
 }

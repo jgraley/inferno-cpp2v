@@ -11,8 +11,8 @@ SC_THREAD(U);
 /*temp*/ unsigned int temp_link;
 enum UStates
 {
-U_STATE_LINK = 0U,
 U_STATE_ENTER_HelperU = 1U,
+U_STATE_LINK = 0U,
 };
 void U();
 private:

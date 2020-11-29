@@ -11,21 +11,21 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_LINK1 = 0U,
 T_STATE_ENTER_recurser = 1U,
-T_STATE_PROCEED = 2U,
+T_STATE_LINK1 = 0U,
 T_STATE_LINK = 3U,
 T_STATE_LINK_THEN_ELSE = 4U,
+T_STATE_PROCEED = 2U,
 };
-int x;
 void T();
 private:
-unsigned int recurser_stack_index;
 int (i_stack[10U]);
 unsigned int (link_stack[10U]);
+unsigned int recurser_stack_index;
 public:
-/*temp*/ unsigned int recurser_link;
+int x;
 /*temp*/ int recurser_i;
+/*temp*/ unsigned int recurser_link;
 /*temp*/ unsigned int recurser_link1;
 };
 TopLevel top_level("top_level");
@@ -36,8 +36,8 @@ void TopLevel::T()
 static const unsigned int (lmap[]) = { &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK, &&LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK };
 auto unsigned int state;
 /*temp*/ int temp_i1;
-/*temp*/ int temp_i;
 /*temp*/ int temp_i2;
+/*temp*/ int temp_i;
  ::TopLevel::x=(0);
 temp_i1=(1);
  ::TopLevel::recurser_i=temp_i1;
@@ -61,15 +61,15 @@ state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ?  ::T
 }
 if( state== ::TopLevel::T_STATE_PROCEED )
 {
-temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i;
+temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i2;
  ::TopLevel::recurser_link1= ::TopLevel::T_STATE_LINK;
 state= ::TopLevel::T_STATE_ENTER_recurser;
 }
 if( state== ::TopLevel::T_STATE_LINK )
 {
-temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i2;
+temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i;
  ::TopLevel::recurser_link1= ::TopLevel::T_STATE_LINK_THEN_ELSE;
 state= ::TopLevel::T_STATE_ENTER_recurser;
 }

@@ -15,8 +15,8 @@ enum TStates
 T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 };
-sc_event proceed;
 void T();
+sc_event proceed;
 };
 class Multiplier : public sc_module
 {
@@ -31,25 +31,25 @@ T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 T_STATE_YIELD2 = 2U,
 };
+void T();
 sc_event instigate;
 sc_event proceed;
-void T();
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
 enum TStates
 {
 };
+void T();
  ::Adder add_inst;
  ::Multiplier mul_inst;
-void T();
 };
 int gvar;
 TopLevel top_level("top_level");

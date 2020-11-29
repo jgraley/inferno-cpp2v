@@ -11,31 +11,31 @@ SC_METHOD(T);
 /*temp*/ unsigned int temp_link;
 enum TStates
 {
-T_STATE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK = 0U,
-T_STATE_PROCEED_NEXT_CONTINUE = 1U,
-T_STATE_PROCEED_THEN_ELSE2 = 2U,
-T_STATE_PROCEED_NEXT = 3U,
-T_STATE_PROCEED_THEN_ELSE = 4U,
-T_STATE_PROCEED_NEXT1 = 5U,
-T_STATE_PROCEED_THEN_ELSE1 = 6U,
-T_STATE_PROCEED_NEXT2 = 7U,
-T_STATE_PROCEED_THEN_ELSE3 = 8U,
-T_STATE_PROCEED_NEXT4 = 9U,
-T_STATE_PROCEED_THEN_ELSE5 = 10U,
-T_STATE_PROCEED_NEXT3 = 11U,
-T_STATE_LINK = 12U,
-T_STATE_PROCEED_THEN_ELSE4 = 13U,
 T_STATE_ENTER_f = 14U,
+T_STATE_LINK = 12U,
+T_STATE_PROCEED_NEXT1 = 3U,
+T_STATE_PROCEED_NEXT = 5U,
+T_STATE_PROCEED_NEXT2 = 7U,
+T_STATE_PROCEED_NEXT4 = 9U,
+T_STATE_PROCEED_NEXT3 = 11U,
+T_STATE_PROCEED_NEXT_CONTINUE = 1U,
+T_STATE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK = 0U,
+T_STATE_PROCEED_THEN_ELSE2 = 2U,
+T_STATE_PROCEED_THEN_ELSE = 4U,
+T_STATE_PROCEED_THEN_ELSE1 = 6U,
+T_STATE_PROCEED_THEN_ELSE3 = 8U,
+T_STATE_PROCEED_THEN_ELSE5 = 10U,
+T_STATE_PROCEED_THEN_ELSE4 = 13U,
 };
-int x;
-int i;
 void T();
+int i;
 private:
 unsigned int link;
 unsigned int state;
 public:
-/*temp*/ int f_return;
+int x;
 /*temp*/ unsigned int f_link;
+/*temp*/ int f_return;
 /*temp*/ int result;
 };
 TopLevel top_level("top_level");
@@ -87,16 +87,16 @@ if( enabled )
 {
 if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE2 )
 {
- ::TopLevel::state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+ ::TopLevel::state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
  ::TopLevel::x+= ::TopLevel::i;
  ::TopLevel::i++;
- ::TopLevel::state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::TopLevel::state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
 }
 if( enabled )
@@ -104,15 +104,15 @@ if( enabled )
 if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
 {
  ::TopLevel::i=(0);
- ::TopLevel::state=((!( ::TopLevel::i< ::TopLevel::x)) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+ ::TopLevel::state=((!( ::TopLevel::i< ::TopLevel::x)) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
  ::TopLevel::i++;
- ::TopLevel::state=(( ::TopLevel::i< ::TopLevel::x) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+ ::TopLevel::state=(( ::TopLevel::i< ::TopLevel::x) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
 }
 if( enabled )

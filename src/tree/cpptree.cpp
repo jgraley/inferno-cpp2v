@@ -24,7 +24,7 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-CompareResult SpecificString::CompareContents( const Matcher *candidate ) const
+CompareResult SpecificString::CovariantCompare( const Matcher *candidate ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificString *>(candidate);    
@@ -77,7 +77,7 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificInteger::CompareContents( const Matcher *candidate ) const
+CompareResult SpecificInteger::CovariantCompare( const Matcher *candidate ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
@@ -132,7 +132,7 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloat::CompareContents( const Matcher *candidate ) const
+CompareResult SpecificFloat::CovariantCompare( const Matcher *candidate ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
@@ -196,10 +196,19 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificIdentifier::CompareContents( const Matcher *candidate ) const
+CompareResult SpecificIdentifier::CovariantCompare( const Matcher *candidate ) const
 {
     ASSERT( candidate );
-        
+    
+    if( candidate == this )
+        return false; // fast-out
+    
+    auto *c = dynamic_cast<const SpecificIdentifier *>(candidate);    
+    ASSERT(c);
+    
+    // Primary ordering on name should make renders more repeatable
+    if( name != c->name )
+        return name.compare(c->name);        
     return (int)(this > candidate) - (int)(this < candidate);
     // Note: just subtracting could overflow
 }
@@ -238,13 +247,13 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloatSemantics::CompareContents( const Matcher *candidate ) const
+CompareResult SpecificFloatSemantics::CovariantCompare( const Matcher *candidate ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     ASSERT(c);    
 
-    // Don't use any particualr ordering apart from where the 
+    // Don't use any particular ordering apart from where the 
     // llvm::fltSemantics are being stored.
     return (int)(value > c->value) - (int)(value < c->value);
     // Note: just subtracting could overflow

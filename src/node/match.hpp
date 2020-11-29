@@ -46,9 +46,9 @@ struct Matcher
         type_index r_index( typeid(*r) );
         if( l_index != r_index )
             return (l_index > r_index) ? 1 : -1;
-        return l->CompareContents(r);
+        return l->CovariantCompare(r);
     }
-    virtual CompareResult CompareContents( const Matcher *candidate ) const 
+    virtual CompareResult CovariantCompare( const Matcher *candidate ) const 
     {
         return EQUAL; // usually there are no contents
     }

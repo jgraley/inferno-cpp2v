@@ -8,17 +8,17 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-int y;
 void T();
 private:
 int i;
 void *link;
 public:
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
+int x;
+int y;
 /*temp*/ int f_i;
+/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
@@ -26,15 +26,15 @@ void TopLevel::T()
 {
 /*temp*/ void *temp_link;
 auto void *state;
-/*temp*/ bool ortemp;
 /*temp*/ bool andtemp;
 /*temp*/ int muxtemp;
-/*temp*/ bool result5;
-/*temp*/ bool result6;
-/*temp*/ int result4;
-/*temp*/ int result1;
-/*temp*/ int result3;
+/*temp*/ bool ortemp;
+/*temp*/ bool result4;
+/*temp*/ bool result1;
+/*temp*/ int result5;
 /*temp*/ int result;
+/*temp*/ int result6;
+/*temp*/ int result3;
 /*temp*/ int result2;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
@@ -51,15 +51,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK:;
-result4= ::TopLevel::f_return;
-andtemp=( ::TopLevel::y=result4);
+result5= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result5);
 {
 state=(&&THEN_ELSE);
 goto *(state);
 }
 THEN_ELSE:;
-result5=andtemp;
-result5;
+result1=andtemp;
+result1;
 ortemp=(!(++ ::TopLevel::x));
 {
 state=((!ortemp) ? (&&THEN) : (&&PROCEED_ELSE));
@@ -73,15 +73,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK1:;
-result1= ::TopLevel::f_return;
-ortemp=( ::TopLevel::y+=result1);
+result6= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result6);
 {
 state=(&&PROCEED_ELSE);
 goto *(state);
 }
 PROCEED_ELSE:;
-result6=ortemp;
-result6;
+result4=ortemp;
+result4;
  ::TopLevel::x=(0);
 {
 state=((!( ::TopLevel::x<(2))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
@@ -100,8 +100,8 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK2:;
-result= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y+=result);
+result2= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y+=result2);
 {
 state=(&&ELSE);
 goto *(state);
@@ -114,15 +114,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK3:;
-result2= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y-=result2);
+result3= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result3);
 {
 state=(&&ELSE);
 goto *(state);
 }
 ELSE:;
-result3=muxtemp;
-result3;
+result=muxtemp;
+result;
 {
 state=(( ::TopLevel::x<(2)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE));
 goto *(state);
