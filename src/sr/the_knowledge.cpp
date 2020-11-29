@@ -22,6 +22,8 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     
     AddSubtree( REQUIRE_SOLO, root_xlink );
     
+    AddSubtree( REQUIRE_SOLO, XLink::MMAX_Link );
+    
     int is = domain.size();
     ExtendDomain( root_plink );
     int es = domain.size();
@@ -29,7 +31,6 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     if( es > is )
         TRACE("Domain size %d -> %d\n", is, es);
 
-    domain.insert(XLink::MMAX_Link);
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
@@ -205,6 +206,9 @@ string TheKnowledge::Nugget::GetTrace() const
 
 const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
 {
+    ASSERT( nuggets.count(xlink) > 0 )
+          ("Knowledge: no nugget for ")(xlink)("\n")
+          ("Nuggets: ")(nuggets);
     return nuggets.at(xlink);
 }
 
