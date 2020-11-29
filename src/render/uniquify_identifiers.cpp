@@ -18,7 +18,7 @@ string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 
 void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, unsigned *n ) // note static
 {
-	char cb[256]; // hope that's big enough!
+	char cb[1024]; // hope that's big enough!
 	string original_name = i->GetRender();
 	int c = sscanf( original_name.c_str(), UID_FORMAT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
 	if( c == 2 && *n > 0 ) // note that x_0 is *not* in standard form, so it become eg x_0_1 etc

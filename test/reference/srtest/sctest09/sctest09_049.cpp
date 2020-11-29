@@ -13,8 +13,8 @@ int x;
 void T();
 private:
 unsigned int recurser_stack_index;
-void *(link_stack[10U]);
 int (i_stack[10U]);
+void *(link_stack[10U]);
 public:
 /*temp*/ void *recurser_link;
 /*temp*/ int recurser_i;
@@ -27,8 +27,8 @@ void TopLevel::T()
 /*temp*/ void *temp_link;
 auto void *state;
 /*temp*/ int temp_i2;
-/*temp*/ int temp_i1;
 /*temp*/ int temp_i;
+/*temp*/ int temp_i1;
  ::TopLevel::x=(0);
 temp_i2=(1);
  ::TopLevel::recurser_i=temp_i2;
@@ -55,16 +55,16 @@ state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&L
 goto *(state);
 }
 PROCEED:;
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i1;
+temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i;
  ::TopLevel::recurser_link1=(&&LINK1);
 {
 state=(&&ENTER_recurser);
 goto *(state);
 }
 LINK1:;
-temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i;
+temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i1;
  ::TopLevel::recurser_link1=(&&LINK_THEN_ELSE);
 {
 state=(&&ENTER_recurser);

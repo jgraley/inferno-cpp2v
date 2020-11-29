@@ -11,7 +11,7 @@ using namespace SR;
 
 //#define ERASE_USING_ITERATOR
 //#define CHECK_ITERATOR_IN_CONTAINER
-//#define FAST_DNLQ
+#define FAST_DNLQ 
 
 void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 {

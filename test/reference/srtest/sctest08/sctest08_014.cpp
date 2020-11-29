@@ -14,8 +14,8 @@ void (otherhelper)();
 private:
 void *link;
 public:
-/*temp*/ void *helper_link;
 /*temp*/ void *otherhelper_link;
+/*temp*/ void *helper_link;
 /*temp*/ void *otherhelper_link1;
 /*temp*/ int helper_n;
 /*temp*/ void *helper_link1;

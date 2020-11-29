@@ -37,13 +37,13 @@ void TopLevel::T()
 /*temp*/ int result1;
 temp_i1=(0);
 {
-/*temp*/ int temp_j;
-/*temp*/ int result2;
-temp_j=(0);
-{
 /*temp*/ int temp_k;
-/*temp*/ int result3;
+/*temp*/ int result2;
 temp_k=(0);
+{
+/*temp*/ int temp_j;
+/*temp*/ int result3;
+temp_j=(0);
 {
 /*temp*/ int result4;
 {

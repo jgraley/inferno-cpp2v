@@ -26,8 +26,8 @@ auto int switch_value1;
 auto int switch_value;
 auto void *state;
 /*temp*/ int muxtemp;
-/*temp*/ int result1;
 /*temp*/ int result;
+/*temp*/ int result1;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -114,15 +114,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK:;
-result= ::TopLevel::f_return;
-muxtemp=result;
+result1= ::TopLevel::f_return;
+muxtemp=result1;
 {
 state=(&&ELSE);
 goto *(state);
 }
 ELSE:;
-result1=muxtemp;
- ::TopLevel::x=result1;
+result=muxtemp;
+ ::TopLevel::x=result;
 {
 state=(&&THEN_ELSE_BREAK);
 goto *(state);

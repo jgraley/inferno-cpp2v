@@ -29,9 +29,9 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_THEN_ELSE = 1U,
-T_STATE_PROCEED_NEXT1 = 2U,
+T_STATE_PROCEED_NEXT = 2U,
 T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_NEXT2 = 4U,
 T_STATE_PROCEED_THEN_ELSE2 = 5U,
@@ -44,8 +44,8 @@ class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
@@ -107,13 +107,13 @@ PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_PROCEED_NEXT_PROCEED_THEN_ELSE_
 if( (sc_delta_count())==(0U) )
 {
 wait(SC_ZERO_TIME);
-state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT);
+state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT1);
 goto *(lmap[state]);
 }
-if( state== ::Multiplier::T_STATE_PROCEED_NEXT )
+if( state== ::Multiplier::T_STATE_PROCEED_NEXT1 )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
+state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
 goto *(lmap[state]);
 }
 if( state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE )
@@ -121,12 +121,12 @@ if( state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE )
  ::Multiplier::instigate=(false);
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT1);
+state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT);
 }
-if( state== ::Multiplier::T_STATE_PROCEED_NEXT1 )
+if( state== ::Multiplier::T_STATE_PROCEED_NEXT )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
+state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
 goto *(lmap[state]);
 }
 if( state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 )

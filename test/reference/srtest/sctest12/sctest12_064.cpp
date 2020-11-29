@@ -10,16 +10,16 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_PROCEED = 0U,
-T_STATE_PROCEED1 = 1U,
-T_STATE_PROCEED_CASE = 2U,
-T_STATE_CASE = 3U,
+T_STATE_PROCEED3 = 0U,
+T_STATE_PROCEED2 = 1U,
+T_STATE_PROCEED_CASE1 = 2U,
+T_STATE_CASE2 = 3U,
 T_STATE_CASE1 = 4U,
 T_STATE_BREAK = 5U,
-T_STATE_PROCEED2 = 6U,
-T_STATE_PROCEED_CASE1 = 7U,
-T_STATE_CASE2 = 8U,
-T_STATE_PROCEED3 = 9U,
+T_STATE_PROCEED = 6U,
+T_STATE_PROCEED_CASE = 7U,
+T_STATE_CASE = 8U,
+T_STATE_PROCEED1 = 9U,
 T_STATE_PROCEED4 = 10U,
 T_STATE_THEN = 11U,
 T_STATE_LINK = 12U,
@@ -33,8 +33,8 @@ private:
 unsigned int link;
 public:
 /*temp*/ int f_return;
-/*temp*/ unsigned int f_link;
 /*temp*/ unsigned int f_link1;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 
@@ -42,12 +42,12 @@ void TopLevel::T()
 {
 /*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&PROCEED4, &&PROCEED3, &&PROCEED_CASE1, &&CASE2, &&CASE1, &&BREAK, &&PROCEED2, &&PROCEED_CASE, &&CASE, &&PROCEED1, &&PROCEED, &&THEN, &&LINK, &&ELSE, &&THEN_ELSE_BREAK, &&ENTER_f };
-auto int switch_value1;
 auto int switch_value;
+auto int switch_value1;
 auto unsigned int state;
 /*temp*/ int muxtemp;
-/*temp*/ int result1;
 /*temp*/ int result;
+/*temp*/ int result1;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -59,9 +59,9 @@ if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
-switch_value1=(0);
+switch_value=(0);
 wait(SC_ZERO_TIME);
-state=((switch_value1==(0)) ?  ::TopLevel::T_STATE_CASE1 :  ::TopLevel::T_STATE_PROCEED);
+state=((switch_value==(0)) ?  ::TopLevel::T_STATE_CASE1 :  ::TopLevel::T_STATE_PROCEED3);
 ENTER_f:;
 THEN_ELSE_BREAK:;
 ELSE:;
@@ -78,20 +78,20 @@ CASE2:;
 PROCEED_CASE1:;
 PROCEED3:;
 PROCEED4:;
-if( state== ::TopLevel::T_STATE_PROCEED )
+if( state== ::TopLevel::T_STATE_PROCEED3 )
 {
-state=((switch_value1==(4)) ?  ::TopLevel::T_STATE_CASE :  ::TopLevel::T_STATE_PROCEED1);
+state=((switch_value==(4)) ?  ::TopLevel::T_STATE_CASE2 :  ::TopLevel::T_STATE_PROCEED2);
 }
-if( state== ::TopLevel::T_STATE_PROCEED1 )
+if( state== ::TopLevel::T_STATE_PROCEED2 )
 {
-state=((switch_value1==(1)) ?  ::TopLevel::T_STATE_PROCEED_CASE :  ::TopLevel::T_STATE_PROCEED_CASE);
+state=((switch_value==(1)) ?  ::TopLevel::T_STATE_PROCEED_CASE1 :  ::TopLevel::T_STATE_PROCEED_CASE1);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_CASE )
+if( state== ::TopLevel::T_STATE_PROCEED_CASE1 )
 {
  ::TopLevel::x=(99);
 state= ::TopLevel::T_STATE_BREAK;
 }
-if( state== ::TopLevel::T_STATE_CASE )
+if( state== ::TopLevel::T_STATE_CASE2 )
 {
  ::TopLevel::x=(44);
 state= ::TopLevel::T_STATE_CASE1;
@@ -104,23 +104,23 @@ state= ::TopLevel::T_STATE_BREAK;
 }
 if( state== ::TopLevel::T_STATE_BREAK )
 {
-switch_value=(2);
-state=((switch_value==(2)) ?  ::TopLevel::T_STATE_CASE2 :  ::TopLevel::T_STATE_PROCEED2);
+switch_value1=(2);
+state=((switch_value1==(2)) ?  ::TopLevel::T_STATE_CASE :  ::TopLevel::T_STATE_PROCEED);
 }
-if( state== ::TopLevel::T_STATE_PROCEED2 )
+if( state== ::TopLevel::T_STATE_PROCEED )
 {
-state=((switch_value==(1)) ?  ::TopLevel::T_STATE_PROCEED_CASE1 :  ::TopLevel::T_STATE_PROCEED_CASE1);
+state=((switch_value1==(1)) ?  ::TopLevel::T_STATE_PROCEED_CASE :  ::TopLevel::T_STATE_PROCEED_CASE);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_CASE1 )
+if( state== ::TopLevel::T_STATE_PROCEED_CASE )
 {
  ::TopLevel::x=(99);
 state= ::TopLevel::T_STATE_THEN_ELSE_BREAK;
 }
-if( state== ::TopLevel::T_STATE_CASE2 )
+if( state== ::TopLevel::T_STATE_CASE )
 {
-state=((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE_BREAK :  ::TopLevel::T_STATE_PROCEED3);
+state=((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE_BREAK :  ::TopLevel::T_STATE_PROCEED1);
 }
-if( state== ::TopLevel::T_STATE_PROCEED3 )
+if( state== ::TopLevel::T_STATE_PROCEED1 )
 {
 state=((!(false)) ?  ::TopLevel::T_STATE_THEN :  ::TopLevel::T_STATE_PROCEED4);
 }
@@ -131,19 +131,19 @@ state= ::TopLevel::T_STATE_ELSE;
 }
 if( state== ::TopLevel::T_STATE_THEN )
 {
- ::TopLevel::f_link1= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
 state= ::TopLevel::T_STATE_ENTER_f;
 }
 if( state== ::TopLevel::T_STATE_LINK )
 {
-result= ::TopLevel::f_return;
-muxtemp=result;
+result1= ::TopLevel::f_return;
+muxtemp=result1;
 state= ::TopLevel::T_STATE_ELSE;
 }
 if( state== ::TopLevel::T_STATE_ELSE )
 {
-result1=muxtemp;
- ::TopLevel::x=result1;
+result=muxtemp;
+ ::TopLevel::x=result;
 state= ::TopLevel::T_STATE_THEN_ELSE_BREAK;
 }
 if( state== ::TopLevel::T_STATE_THEN_ELSE_BREAK )
@@ -154,7 +154,7 @@ state= ::TopLevel::T_STATE_ENTER_f;
 }
 if( state== ::TopLevel::T_STATE_ENTER_f )
 {
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::f_return=(3);
 temp_link= ::TopLevel::link;
 state=temp_link;

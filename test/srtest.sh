@@ -80,3 +80,6 @@ fi
 
 exit $return_code
 
+# bcompare test/reference/srtest/ test/results/
+
+# cp -r test/results/*/ test/reference/srtest/

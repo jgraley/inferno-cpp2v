@@ -29,9 +29,9 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_THEN_ELSE = 1U,
-T_STATE_PROCEED_NEXT1 = 2U,
+T_STATE_PROCEED_NEXT = 2U,
 T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_NEXT2 = 4U,
 T_STATE_PROCEED_THEN_ELSE2 = 5U,
@@ -101,13 +101,13 @@ static const void *(lmap[]) = { &&PROCEED_NEXT, &&PROCEED_THEN_ELSE, &&PROCEED_N
 auto void *state;
 wait(SC_ZERO_TIME);
 {
-state=((!(! ::Multiplier::instigate)) ? (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE]) : (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT]));
+state=((!(! ::Multiplier::instigate)) ? (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE]) : (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT1]));
 goto *(state);
 }
 PROCEED_NEXT:;
 wait(SC_ZERO_TIME);
 {
-state=((! ::Multiplier::instigate) ? (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT]) : (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE]));
+state=((! ::Multiplier::instigate) ? (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT1]) : (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE]));
 goto *(state);
 }
 PROCEED_THEN_ELSE:;
@@ -115,13 +115,13 @@ PROCEED_THEN_ELSE:;
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
 {
-state=((!(! ::Multiplier::proceed)) ? (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE1]) : (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT1]));
+state=((!(! ::Multiplier::proceed)) ? (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE1]) : (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT]));
 goto *(state);
 }
 PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 {
-state=((! ::Multiplier::proceed) ? (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT1]) : (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE1]));
+state=((! ::Multiplier::proceed) ? (lmap[ ::Multiplier::T_STATE_PROCEED_NEXT]) : (lmap[ ::Multiplier::T_STATE_PROCEED_THEN_ELSE1]));
 goto *(state);
 }
 PROCEED_THEN_ELSE1:;

@@ -29,13 +29,13 @@ auto void *state;
 /*temp*/ bool ortemp;
 /*temp*/ bool andtemp;
 /*temp*/ int muxtemp;
-/*temp*/ bool result4;
+/*temp*/ bool result5;
 /*temp*/ bool result6;
-/*temp*/ int result5;
-/*temp*/ int result3;
-/*temp*/ int result2;
+/*temp*/ int result4;
 /*temp*/ int result1;
+/*temp*/ int result3;
 /*temp*/ int result;
+/*temp*/ int result2;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
 wait(SC_ZERO_TIME);
@@ -51,15 +51,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK:;
-result5= ::TopLevel::f_return;
-andtemp=( ::TopLevel::y=result5);
+result4= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result4);
 {
 state=(&&THEN_ELSE);
 goto *(state);
 }
 THEN_ELSE:;
-result6=andtemp;
-result6;
+result5=andtemp;
+result5;
 ortemp=(!(++ ::TopLevel::x));
 {
 state=((!ortemp) ? (&&THEN) : (&&PROCEED_ELSE));
@@ -73,15 +73,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK1:;
-result3= ::TopLevel::f_return;
-ortemp=( ::TopLevel::y+=result3);
+result1= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result1);
 {
 state=(&&PROCEED_ELSE);
 goto *(state);
 }
 PROCEED_ELSE:;
-result4=ortemp;
-result4;
+result6=ortemp;
+result6;
  ::TopLevel::x=(0);
 {
 state=((!( ::TopLevel::x<(2))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
@@ -100,8 +100,8 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK2:;
-result1= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y+=result1);
+result= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y+=result);
 {
 state=(&&ELSE);
 goto *(state);
@@ -114,15 +114,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK3:;
-result= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y-=result);
+result2= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result2);
 {
 state=(&&ELSE);
 goto *(state);
 }
 ELSE:;
-result2=muxtemp;
-result2;
+result3=muxtemp;
+result3;
 {
 state=(( ::TopLevel::x<(2)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE));
 goto *(state);

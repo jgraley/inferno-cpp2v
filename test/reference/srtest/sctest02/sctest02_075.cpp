@@ -31,9 +31,9 @@ SC_METHOD(T);
 }
 enum TStates
 {
-T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_THEN_ELSE = 1U,
-T_STATE_PROCEED_NEXT1 = 2U,
+T_STATE_PROCEED_NEXT = 2U,
 T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_NEXT2 = 4U,
 T_STATE_PROCEED_THEN_ELSE2 = 5U,
@@ -48,8 +48,8 @@ class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
@@ -105,13 +105,13 @@ void Multiplier::T()
 if( (sc_delta_count())==(0U) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT);
+ ::Multiplier::state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT1);
 return ;
 }
-if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_NEXT )
+if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_NEXT1 )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
+ ::Multiplier::state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
 return ;
 }
 if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE )
@@ -119,12 +119,12 @@ if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE )
  ::Multiplier::instigate=(false);
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
- ::Multiplier::state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT1);
+ ::Multiplier::state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT);
 }
-if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_NEXT1 )
+if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_NEXT )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
+ ::Multiplier::state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
 return ;
 }
 if(  ::Multiplier::state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 )

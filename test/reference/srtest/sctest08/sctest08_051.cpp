@@ -13,11 +13,11 @@ enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
 T_STATE_LINK = 1U,
-T_STATE_YIELD = 2U,
+T_STATE_YIELD1 = 2U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_ENTER_helper = 4U,
 T_STATE_PROCEED_NEXT1 = 5U,
-T_STATE_YIELD1 = 6U,
+T_STATE_YIELD = 6U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
 T_STATE_LINK1 = 8U,
 T_STATE_ENTER_otherhelper = 9U,
@@ -26,11 +26,11 @@ void T();
 private:
 unsigned int link;
 unsigned int helper_stack_index;
-unsigned int (link_stack[10U]);
 int (n_stack[10U]);
+unsigned int (link_stack[10U]);
 public:
-/*temp*/ unsigned int helper_link;
 /*temp*/ unsigned int otherhelper_link;
+/*temp*/ unsigned int helper_link;
 /*temp*/ unsigned int otherhelper_link1;
 /*temp*/ int helper_n;
 /*temp*/ unsigned int helper_link1;
@@ -42,8 +42,8 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ unsigned int temp_link1;
 /*temp*/ unsigned int temp_link;
+/*temp*/ unsigned int temp_link1;
 static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&LINK, &&YIELD, &&PROCEED_THEN_ELSE, &&ENTER_helper, &&PROCEED_NEXT1, &&YIELD1, &&PROCEED_THEN_ELSE1, &&LINK1, &&ENTER_otherhelper };
 auto unsigned int state;
 /*temp*/ int temp_n;
@@ -67,7 +67,7 @@ LINK:;
  ::gvar=( ::gvar*(2));
 wait(SC_ZERO_TIME);
 {
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
 YIELD:;
@@ -95,7 +95,7 @@ goto *(lmap[state]);
 PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 {
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
 YIELD1:;
@@ -112,18 +112,18 @@ state= ::TopLevel::T_STATE_ENTER_otherhelper;
 goto *(lmap[state]);
 }
 LINK1:;
-temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
 {
-state=temp_link1;
+state=temp_link;
 goto *(lmap[state]);
 }
 ENTER_otherhelper:;
  ::TopLevel::link= ::TopLevel::otherhelper_link1;
  ::gvar=( ::gvar-(1));
-temp_link= ::TopLevel::link;
+temp_link1= ::TopLevel::link;
 {
-state=temp_link;
+state=temp_link1;
 goto *(lmap[state]);
 }
 }

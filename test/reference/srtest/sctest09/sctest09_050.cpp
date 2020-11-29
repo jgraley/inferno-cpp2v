@@ -11,22 +11,22 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_LINK = 0U,
+T_STATE_LINK1 = 0U,
 T_STATE_ENTER_recurser = 1U,
 T_STATE_PROCEED = 2U,
-T_STATE_LINK1 = 3U,
+T_STATE_LINK = 3U,
 T_STATE_LINK_THEN_ELSE = 4U,
 };
 int x;
 void T();
 private:
 unsigned int recurser_stack_index;
-void *(link_stack[10U]);
 int (i_stack[10U]);
+void *(link_stack[10U]);
 public:
-/*temp*/ void *recurser_link;
-/*temp*/ int recurser_i;
 /*temp*/ void *recurser_link1;
+/*temp*/ int recurser_i;
+/*temp*/ void *recurser_link;
 };
 TopLevel top_level("top_level");
 
@@ -35,13 +35,13 @@ void TopLevel::T()
 /*temp*/ void *temp_link;
 static const void *(lmap[]) = { &&LINK, &&ENTER_recurser, &&PROCEED, &&LINK1, &&LINK_THEN_ELSE };
 auto void *state;
-/*temp*/ int temp_i2;
 /*temp*/ int temp_i1;
+/*temp*/ int temp_i2;
 /*temp*/ int temp_i;
  ::TopLevel::x=(0);
-temp_i2=(1);
- ::TopLevel::recurser_i=temp_i2;
- ::TopLevel::recurser_link1=(lmap[ ::TopLevel::T_STATE_LINK]);
+temp_i1=(1);
+ ::TopLevel::recurser_i=temp_i1;
+ ::TopLevel::recurser_link=(lmap[ ::TopLevel::T_STATE_LINK1]);
 wait(SC_ZERO_TIME);
 {
 state=(lmap[ ::TopLevel::T_STATE_ENTER_recurser]);
@@ -56,7 +56,7 @@ goto *(state);
 }
 ENTER_recurser:;
  ::TopLevel::recurser_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link1;
+( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
 ( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
  ::TopLevel::x++;
 {
@@ -64,9 +64,9 @@ state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (lma
 goto *(state);
 }
 PROCEED:;
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i1;
- ::TopLevel::recurser_link1=(lmap[ ::TopLevel::T_STATE_LINK1]);
+temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i2;
+ ::TopLevel::recurser_link=(lmap[ ::TopLevel::T_STATE_LINK]);
 {
 state=(lmap[ ::TopLevel::T_STATE_ENTER_recurser]);
 goto *(state);
@@ -74,7 +74,7 @@ goto *(state);
 LINK1:;
 temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
  ::TopLevel::recurser_i=temp_i;
- ::TopLevel::recurser_link1=(lmap[ ::TopLevel::T_STATE_LINK_THEN_ELSE]);
+ ::TopLevel::recurser_link=(lmap[ ::TopLevel::T_STATE_LINK_THEN_ELSE]);
 {
 state=(lmap[ ::TopLevel::T_STATE_ENTER_recurser]);
 goto *(state);

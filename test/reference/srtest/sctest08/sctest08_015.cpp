@@ -15,11 +15,11 @@ void (otherhelper)();
 private:
 void *link;
 unsigned int helper_stack_index;
-void *(link_stack[10U]);
 int (n_stack[10U]);
+void *(link_stack[10U]);
 public:
-/*temp*/ void *helper_link;
 /*temp*/ void *otherhelper_link;
+/*temp*/ void *helper_link;
 /*temp*/ void *otherhelper_link1;
 /*temp*/ int helper_n;
 /*temp*/ void *helper_link1;
