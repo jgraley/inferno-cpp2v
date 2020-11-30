@@ -111,7 +111,7 @@ void AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &
     
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
-    auto terminus_plink = PatternLink(this, &terminus);
+    PatternLink terminus_plink(this, &terminus);
     XLink req_terminus_xlink = required_links->at(terminus_plink); 
     query.RegisterNormalLink( terminus_plink, req_terminus_xlink ); // Note: just extracted directly from required_links
     
@@ -197,7 +197,7 @@ void StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &qu
     
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
-    auto terminus_plink = PatternLink(this, &terminus);
+    PatternLink terminus_plink(this, &terminus);
     XLink req_terminus_xlink = required_links->at(terminus_plink); 
     query.RegisterNormalLink( terminus_plink, req_terminus_xlink ); // Note: just extracted directly from required_links
     

@@ -42,23 +42,57 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     {
         const TreePtrInterface *p = &*pit; 
         ASSERT( *p );
+        PatternLink plink(this, p);
         // Context is normal because all patterns must match
         if( *p == *choice_it ) // Is this the pattern that was chosen?
         {
             // Yes, so supply the "real" x for this link. We'll really
             // test x against this pattern.
-            query.RegisterNormalLink( PatternLink(this, p), x ); // Link into X
+            query.RegisterNormalLink( plink, x ); // Link into X
         }
         else
         {
             // No, so just make sure this link matches (overall AND-rule
             // applies, reducing the outcome to that of the normal 
             // link registered above).
-            query.RegisterNormalLink( PatternLink(this, p), XLink::MMAX_Link ); // Link into MMAX
+            query.RegisterNormalLink( plink, XLink::MMAX_Link ); // Link into MMAX
         }
     }
 }
 
+
+bool MatchAnyAgent::ImplHasDNLQ() const
+{
+    return true;
+}
+
+
+void MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                     XLink base_xlink,
+                                                     const SolutionMap *required_links,
+                                                     const TheKnowledge *knowledge ) const
+{ 
+    INDENT("Q");
+    query.Reset();
+    bool found = false;
+    // Don't register a decision; instead use the required links
+    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
+    {
+        const TreePtrInterface *p = &*pit; 
+        PatternLink plink(this, p);
+        XLink req_xlink = required_links->at(plink); 
+        
+        query.RegisterNormalLink( plink, req_xlink ); // Register whatever we got
+
+        if( req_xlink == base_xlink )
+            found = true;
+        // Note: links that didn't match are allowed, but not required, to be MMAX
+        // Therefore we don't actually mention MMAX in this algo
+    }
+    
+    if( !found )
+        throw NoOptionsMatchedMismatch();
+}
 
 void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
