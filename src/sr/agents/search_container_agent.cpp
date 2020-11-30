@@ -55,6 +55,16 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }
 
 
+void SearchContainerAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
+                                                     XLink base_xlink,
+                                                     const SolutionMap *required_links,
+                                                     const TheKnowledge *knowledge ) const
+{
+    // We support NLQ, so stop AgentCommon implementing using DecidedQuery 
+    RunDecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
+}
+
+
 void SearchContainerAgent::KeyReplace( const CouplingKeysMap *coupling_keys )
 {
     terminus_key = coupling_keys->at(AsAgent(terminus)).GetChildX();
@@ -88,6 +98,33 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 {
     return XLink(base_xlink.GetChildX(), &*it);
 }
+
+
+void AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                    XLink base_xlink,
+                                                    const SolutionMap *required_links,
+                                                    const TheKnowledge *knowledge ) const
+{
+    INDENT("#");
+    ASSERT( this );
+    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+    query.Reset();
+
+    // Check pre-restriction
+    CheckLocalMatch(base_xlink.GetChildX().get());
+    
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    
+    auto terminus_plink = PatternLink(this, &terminus);
+    XLink req_terminus_xlink = required_links->at(terminus_plink); 
+    query.RegisterNormalLink( terminus_plink, req_terminus_xlink ); // Note: just extracted directly from required_links
+    
+    const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
+    if( !nugget.parent_xlink )
+        throw NoParentMismatch();                    
+    if( nugget.parent_xlink != base_xlink )      
+        throw TerminusMismatch();            
+}                                                                                        
 
 
 void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const

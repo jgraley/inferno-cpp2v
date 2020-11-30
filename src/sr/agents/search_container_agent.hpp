@@ -20,9 +20,15 @@ private:
     TreePtr<Node> terminus_key;
 
 public:
+    class TerminusMismatch : public Mismatch {};
+
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
+    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
+                                           XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const = 0;
@@ -41,8 +47,13 @@ public:
 /// being bypassed.
 class AnyNodeAgent : public SearchContainerAgent
 {
+    class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
+    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                  XLink x,
+                                                  const SolutionMap *required_links,
+                                                  const TheKnowledge *knowledge ) const;                                              
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 };
 
@@ -76,22 +87,10 @@ public:
 class StuffAgent : public SearchContainerAgent
 {
 public:
-    class TerminusMismatch : public Mismatch
-    {
-    };
-
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
-    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink base_xlink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const
-    {
-        // Stop it using DQ
-        RunDecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
-    }
     virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                   XLink x,
                                                   const SolutionMap *required_links,

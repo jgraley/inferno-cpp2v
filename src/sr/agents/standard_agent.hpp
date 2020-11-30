@@ -65,11 +65,7 @@ private:
     virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const
-    {
-        // Stop it using DQ
-        RunDecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
-    }
+                                           const TheKnowledge *knowledge ) const;
     virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                   XLink base_xlink,
                                                   const SolutionMap *required_links,
