@@ -74,14 +74,13 @@ void MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface 
     INDENT("Q");
     query.Reset();
     bool found = false;
+    
     // Don't register a decision; instead use the required links
     FOREACH( const TreePtrInterface &p, GetPatterns() )                 
     {
         PatternLink plink(this, &p);
         XLink req_xlink = required_links->at(plink); 
         
-        query.RegisterNormalLink( plink, req_xlink ); // Register whatever we got
-
         if( req_xlink == base_xlink )
             found = true;
             

@@ -113,7 +113,6 @@ void AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &
     
     PatternLink terminus_plink(this, &terminus);
     XLink req_terminus_xlink = required_links->at(terminus_plink); 
-    query.RegisterNormalLink( terminus_plink, req_terminus_xlink ); // Note: just extracted directly from required_links
     
     const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
     if( !nugget.parent_xlink )
@@ -199,7 +198,6 @@ void StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &qu
     
     PatternLink terminus_plink(this, &terminus);
     XLink req_terminus_xlink = required_links->at(terminus_plink); 
-    query.RegisterNormalLink( terminus_plink, req_terminus_xlink ); // Note: just extracted directly from required_links
     
     XLink x = req_terminus_xlink;
     bool found = false;

@@ -456,7 +456,6 @@ void StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface 
                 auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
                 
                 TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
-                query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
                 if( sing_xlink != required_links->at( sing_plink ) )
                     throw SingularMismatch();
             }
@@ -571,9 +570,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                 if( nugget.iterator != xit )
                     throw NotSuccessorSequenceMismatch();                
             }
-            
-            query.RegisterNormalLink( plink, req_xlink ); // Note: just extracted directly from required_links
-             
+                         
             // Updates after non-star link    
             prev_index = nugget.index;    
             xit = nugget.iterator;    
@@ -633,8 +630,6 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
             if( remaining_xlinks.count( req_xlink ) == 0 )
                 throw CollisionCollectionMismatch(); // Already removed this one: collision
             remaining_xlinks.erase( req_xlink );
-            
-            query.RegisterNormalLink( plink, req_xlink ); // Link into X
         }
     }
     
