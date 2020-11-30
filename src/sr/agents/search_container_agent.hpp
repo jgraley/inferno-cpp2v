@@ -25,10 +25,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
-    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink base_xlink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;
+    virtual bool ImplHasDNLQ() const;
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const = 0;

@@ -98,10 +98,7 @@ public:
                                       XLink base_xlink,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
-    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink base_xlink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+    virtual bool ImplHasDNLQ() const;                                              
     void DNLQFromDQ( DecidedQuery &query,
                      XLink base_xlink,
                      const SolutionMap *required_links,

@@ -140,12 +140,9 @@ void AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query
 }                             
 
 
-void AgentCommon::DecidedNormalLinkedQuery( DecidedQuery &query,
-                                            XLink base_xlink,
-                                            const SolutionMap *required_links,
-                                            const TheKnowledge *knowledge ) const
+bool AgentCommon::ImplHasDNLQ() const
 {    
-    DNLQFromDQ( query, base_xlink, required_links, knowledge );
+    return false;
 }
 
     
@@ -234,10 +231,10 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 // therefore our query will hold the result 
                 shared_ptr<DecidedQuery> query = conj->GetQuery(this);
                 
-                if( use_DQ )
+                if( use_DQ || !ImplHasDNLQ() )
                     DNLQFromDQ( *query, base_xlink, required_links, knowledge );
                 else
-                    DecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
+                    RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     

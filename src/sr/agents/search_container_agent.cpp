@@ -55,13 +55,9 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }
 
 
-void SearchContainerAgent::DecidedNormalLinkedQuery( DecidedQuery &query,
-                                                     XLink base_xlink,
-                                                     const SolutionMap *required_links,
-                                                     const TheKnowledge *knowledge ) const
+bool SearchContainerAgent::ImplHasDNLQ() const
 {
-    // We support NLQ, so stop AgentCommon implementing using DecidedQuery 
-    RunDecidedNormalLinkedQuery( query, base_xlink, required_links, knowledge );
+    return true;
 }
 
 

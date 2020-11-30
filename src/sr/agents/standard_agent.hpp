@@ -62,10 +62,7 @@ private:
                                  XLink base_xlink,
                                  CollectionInterface *px,
     		                     CollectionInterface *pattern ) const;
-    virtual void DecidedNormalLinkedQuery( DecidedQuery &query,
-                                           XLink base_xlink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;
+    virtual bool ImplHasDNLQ() const;
     virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                   XLink base_xlink,
                                                   const SolutionMap *required_links,
