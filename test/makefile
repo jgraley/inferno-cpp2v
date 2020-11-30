@@ -7,23 +7,23 @@ SRCASES = pointeris $(CASES)
 
 SRMINICASES = sctest15
 
-KINDS = default sr rep
+KINDS = execution sr rep
 
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(CASES:%=test/results/default/%.pass) : test/results/default/%.pass : test/examples/%.cpp test/makefile inferno.exe resource
-	@mkdir -p test/results/default
-	@rm -f test/results/default/$*.
-	test/test.sh $< -tq 2>&1 > test/results/default/$*.log 
-	touch test/results/default/$*.pass
+$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe resource
+	@mkdir -p test/results/execution
+	@rm -f test/results/execution/$*.
+	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log 
+	touch test/results/execution/$*.pass
 		
-test/results/default.pass : $(CASES:%=test/results/default/%.pass)
+test/results/execution.pass : $(CASES:%=test/results/execution/%.pass)
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
-	@echo "DEFAULT TESTS PASSED"
+	@echo "EXECUTION TESTS PASSED"
 	@spd-say -r -100 -p -100 "the tests have parssed"
 
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe

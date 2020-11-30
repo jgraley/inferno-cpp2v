@@ -103,7 +103,7 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 #
 # Run the main Inforno tests
 #
-test : test/results/default.pass
+test : test/results/execution.pass
 	
 #
 # Run the search and replace tests (requires reference outputs to be in in test/reference/srtest/)
