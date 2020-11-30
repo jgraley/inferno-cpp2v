@@ -38,13 +38,12 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     // We register a decision that actually chooses between our agents - that
     // is, the options for the OR operation.
     ContainerInterface::iterator choice_it = query.RegisterDecision( options, false );
-    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
+    FOREACH( const TreePtrInterface &p, GetPatterns() )                 
     {
-        const TreePtrInterface *p = &*pit; 
-        ASSERT( *p );
-        PatternLink plink(this, p);
+        PatternLink plink(this, &p);
+
         // Context is normal because all patterns must match
-        if( *p == *choice_it ) // Is this the pattern that was chosen?
+        if( *plink.GetPatternPtr() == *choice_it ) // Is this the pattern that was chosen?
         {
             // Yes, so supply the "real" x for this link. We'll really
             // test x against this pattern.
@@ -76,18 +75,18 @@ void MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface 
     query.Reset();
     bool found = false;
     // Don't register a decision; instead use the required links
-    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
+    FOREACH( const TreePtrInterface &p, GetPatterns() )                 
     {
-        const TreePtrInterface *p = &*pit; 
-        PatternLink plink(this, p);
+        PatternLink plink(this, &p);
         XLink req_xlink = required_links->at(plink); 
         
         query.RegisterNormalLink( plink, req_xlink ); // Register whatever we got
 
         if( req_xlink == base_xlink )
             found = true;
-        // Note: links that didn't match are allowed, but not required, to be MMAX
-        // Therefore we don't actually mention MMAX in this algo
+            
+        // Note: links that didn't match are allowed, but not required, to be MMAX.
+        // Therefore we don't actually mention MMAX in this implementation.
     }
     
     if( !found )
