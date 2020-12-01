@@ -96,10 +96,10 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
 
-void AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                    XLink base_xlink,
-                                                    const SolutionMap *required_links,
-                                                    const TheKnowledge *knowledge ) const
+Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                   XLink base_xlink,
+                                                                   const SolutionMap *required_links,
+                                                                   const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -112,13 +112,18 @@ void AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
-    XLink req_terminus_xlink = required_links->at(terminus_plink); 
-    
+    SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
+    if( req_terminus_it==required_links->end() ) 
+        return INCOMPLETE;
+    XLink req_terminus_xlink = req_terminus_it->second; 
+
     const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
     if( !nugget.parent_xlink )
         throw NoParentMismatch();                    
     if( nugget.parent_xlink != base_xlink )      
-        throw TerminusMismatch();            
+        throw TerminusMismatch();     
+        
+    return COMPLETE;
 }                                                                                        
 
 
@@ -181,10 +186,10 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-void StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                  XLink base_xlink,
-                                                  const SolutionMap *required_links,
-                                                  const TheKnowledge *knowledge ) const
+Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                 XLink base_xlink,
+                                                                 const SolutionMap *required_links,
+                                                                 const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -197,7 +202,10 @@ void StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &qu
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
-    XLink req_terminus_xlink = required_links->at(terminus_plink); 
+    SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
+    if( req_terminus_it==required_links->end() ) 
+        return INCOMPLETE;
+    XLink req_terminus_xlink = req_terminus_it->second; 
     
     XLink x = req_terminus_xlink;
     bool found = false;
@@ -232,6 +240,7 @@ void StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &qu
         XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
         query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
     }      
+    return COMPLETE;
 }                                                                                        
 
 

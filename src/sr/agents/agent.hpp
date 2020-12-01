@@ -27,6 +27,12 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
+    enum Completeness
+    {
+        COMPLETE,
+        INCOMPLETE
+    };
+    
     // Any mismatch this class throws
     class Mismatch : public ::Mismatch {};
     
@@ -90,14 +96,14 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
-    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                  XLink base_xlink,
-                                                  const SolutionMap *required_links,
-                                                  const TheKnowledge *knowledge ) const;
-    void RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink,
-                                      const SolutionMap *required_links,
-                                      const TheKnowledge *knowledge ) const;
+    virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink base_xlink,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const;
+    Completeness RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
+                                              XLink base_xlink,
+                                              const SolutionMap *required_links,
+                                              const TheKnowledge *knowledge ) const;
     virtual bool ImplHasDNLQ() const;                                              
     void DNLQFromDQ( DecidedQuery &query,
                      XLink base_xlink,

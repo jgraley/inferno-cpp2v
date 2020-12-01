@@ -24,10 +24,10 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual bool ImplHasDNLQ() const;
-    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                  XLink base_xlink,
-                                                  const SolutionMap *required_links,
-                                                  const TheKnowledge *knowledge ) const;                                              
+    virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink base_xlink,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const;                                              
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;

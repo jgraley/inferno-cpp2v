@@ -47,10 +47,10 @@ class AnyNodeAgent : public SearchContainerAgent
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
-    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                  XLink x,
-                                                  const SolutionMap *required_links,
-                                                  const TheKnowledge *knowledge ) const;                                              
+    virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink x,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const;                                              
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 };
 
@@ -88,10 +88,10 @@ public:
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
-    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                  XLink x,
-                                                  const SolutionMap *required_links,
-                                                  const TheKnowledge *knowledge ) const;                                              
+    virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink x,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const;                                              
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree

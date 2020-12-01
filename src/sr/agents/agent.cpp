@@ -105,19 +105,19 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                   XLink base_xlink,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const
+Agent::Completeness AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                  XLink base_xlink,
+                                                                  const SolutionMap *required_links,
+                                                                  const TheKnowledge *knowledge ) const
 {
     ASSERTFAIL();
 }
     
     
-void AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
-                                               XLink base_xlink,
-                                               const SolutionMap *required_links,
-                                               const TheKnowledge *knowledge ) const
+Agent::Completeness AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
+                                                              XLink base_xlink,
+                                                              const SolutionMap *required_links,
+                                                              const TheKnowledge *knowledge ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
@@ -129,13 +129,12 @@ void AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
-        for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
+        return COMPLETE;
     }   
     else
     {
         TRACE("Attempting to vcall on ")(*this)("\n");
-        this->RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+        return this->RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
     }
 }                             
 
@@ -232,9 +231,14 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 shared_ptr<DecidedQuery> query = conj->GetQuery(this);
                 
                 if( use_DQ || !ImplHasDNLQ() )
+                {
                     DNLQFromDQ( *query, base_xlink, required_links, knowledge );
+                }
                 else
-                    RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
+                {
+                    Completeness completeness = RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
+                    ASSERT( completeness==COMPLETE );
+                }                    
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     

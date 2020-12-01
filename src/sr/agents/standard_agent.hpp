@@ -63,22 +63,24 @@ private:
                                  CollectionInterface *px,
     		                     CollectionInterface *pattern ) const;
     virtual bool ImplHasDNLQ() const;
-    virtual void RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                  XLink base_xlink,
-                                                  const SolutionMap *required_links,
-                                                  const TheKnowledge *knowledge ) const;                                              
+    virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink base_xlink,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const;                                              
     void DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            SequenceInterface *px,
                                            SequenceInterface *pattern,
                                            const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;
+                                           const TheKnowledge *knowledge,
+                                           Completeness &completeness ) const;
     void DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterface &query,
                                              XLink base_xlink,
                                              CollectionInterface *px,
                                              CollectionInterface *pattern,
                                              const SolutionMap *required_links,
-                                             const TheKnowledge *knowledge ) const;
+                                             const TheKnowledge *knowledge,
+                                             Completeness &completeness ) const;
                                            
 public:
     virtual void TrackingKey( Agent *from );

@@ -66,30 +66,42 @@ bool MatchAnyAgent::ImplHasDNLQ() const
 }
 
 
-void MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                     XLink base_xlink,
-                                                     const SolutionMap *required_links,
-                                                     const TheKnowledge *knowledge ) const
+Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                    XLink base_xlink,
+                                                                    const SolutionMap *required_links,
+                                                                    const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
     query.Reset();
     bool found = false;
+    Completeness completeness = COMPLETE;
     
     // Don't register a decision; instead use the required links
     FOREACH( const TreePtrInterface &p, GetPatterns() )                 
     {
         PatternLink plink(this, &p);
-        XLink req_xlink = required_links->at(plink); 
+        SolutionMap::const_iterator req_it = required_links->find(plink);
         
-        if( req_xlink == base_xlink )
-            found = true;
+        if( req_it == required_links->end() ) 
+        {
+            completeness = INCOMPLETE; // Partial query: skip this one
+        }
+        else
+        {
+            XLink req_xlink = req_it->second; 
+            if( req_xlink == base_xlink )
+                found = true;
+        }        
             
         // Note: links that didn't match are allowed, but not required, to be MMAX.
         // Therefore we don't actually mention MMAX in this implementation.
     }
     
-    if( !found )
+    // We only really have a mismatch if query was full i.e. we tried all the options
+    if( !found && completeness==COMPLETE )
         throw NoOptionsMatchedMismatch();
+
+    return completeness;
 }
 
 void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const

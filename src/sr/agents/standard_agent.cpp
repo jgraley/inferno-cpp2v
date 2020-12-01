@@ -409,13 +409,14 @@ bool StandardAgent::ImplHasDNLQ() const
 }
 
 
-void StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                     XLink base_xlink,
-                                                     const SolutionMap *required_links,
-                                                     const TheKnowledge *knowledge ) const
+Agent::Completeness StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                    XLink base_xlink,
+                                                                    const SolutionMap *required_links,
+                                                                    const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
     query.Reset();
+    Completeness completeness = COMPLETE;
 
     // Check pre-restriction
     TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
@@ -437,14 +438,14 @@ void StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface 
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedNormalLinkedQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge );
+            DecidedNormalLinkedQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge, completeness );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedNormalLinkedQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge );
+            DecidedNormalLinkedQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge, completeness );
         }
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -456,8 +457,17 @@ void StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface 
                 auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
                 
                 TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
-                if( sing_xlink != required_links->at( sing_plink ) )
-                    throw SingularMismatch();
+                SolutionMap::const_iterator req_sing_it = required_links->find(sing_plink);
+                if( req_sing_it == required_links->end() ) 
+                {
+                    completeness = INCOMPLETE;
+                }
+                else
+                {
+                    XLink req_sing_xlink = req_sing_it->second;                 
+                    if( sing_xlink != req_sing_xlink )
+                        throw SingularMismatch();
+                }
             }
         }
         else
@@ -465,6 +475,7 @@ void StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface 
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
     }
+    return completeness;
 }
 
 
@@ -473,7 +484,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                                                       SequenceInterface *px,
                                                       SequenceInterface *pattern,
                                                       const SolutionMap *required_links,
-                                                      const TheKnowledge *knowledge ) const
+                                                      const TheKnowledge *knowledge,
+                                                      Completeness &completeness ) const
 {
     INDENT("S");
     ASSERT( plan.planned );
@@ -542,7 +554,14 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         }
         else
         {
-            XLink req_xlink = required_links->at(plink); 
+            SolutionMap::const_iterator req_it = required_links->find(plink);
+            if( req_it == required_links->end() ) 
+            {
+                completeness = INCOMPLETE;
+                return; // can't do any more in the current sequence TODO I bet you could if you tried harder
+            }
+            
+            XLink req_xlink = req_it->second; 
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE &&
                   nugget.container == px) )
@@ -595,7 +614,8 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
                                                         CollectionInterface *px,
                                                         CollectionInterface *pattern,
                                                         const SolutionMap *required_links,
-                                                        const TheKnowledge *knowledge ) const
+                                                        const TheKnowledge *knowledge,
+                                                        Completeness &completeness ) const
 {
     INDENT("C");
     
@@ -621,7 +641,14 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
         }
 	    else // not a Star so match singly...
 	    {
-            XLink req_xlink = required_links->at(plink); 
+            SolutionMap::const_iterator req_it = required_links->find(plink);
+            if( req_it == required_links->end() ) 
+            {
+                completeness = INCOMPLETE;
+                return; // can't do any more in the current sequence TODO I bet you could if you tried harder
+            }
+            
+            XLink req_xlink = req_it->second; 
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION &&
                   nugget.container == px) )
