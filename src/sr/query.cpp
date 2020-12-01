@@ -68,8 +68,8 @@ void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mu
     TRACE("Checking ")(mut_links)(" against ")(ref_links)("\n");
     
     // Multiplicity X links are not uniquified but their contents should match 
-    list<LocatedLink>::const_iterator mit = mut_links.begin();
-    list<LocatedLink>::const_iterator rit = ref_links.begin();
+    Links::const_iterator mit = mut_links.begin();
+    Links::const_iterator rit = ref_links.begin();
     while( mit != mut_links.end() || rit != ref_links.end() )
     {
         ASSERT( mit != mut_links.end() && rit != ref_links.end() );

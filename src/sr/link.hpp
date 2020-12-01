@@ -92,7 +92,7 @@ public:
     LocatedLink();
     explicit LocatedLink( const PatternLink &plink, 
                           const XLink &xlink);
-    explicit LocatedLink( const pair<PatternLink, XLink> &p ) :
+    LocatedLink( const pair<const PatternLink, XLink> &p ) :
         LocatedLink(p.first, p.second) {}
     
     bool operator<(const LocatedLink &other) const;
