@@ -408,8 +408,13 @@ void AndRuleEngine::GetNextCSPSolution()
 void AndRuleEngine::CompareLinks( Agent *agent,
                                   shared_ptr<const DecidedQuery> query ) 
 {    
-    FOREACH( const LocatedLink &link, query->GetNormalLinks() )
+    // Couplings require links in the same order as during planning (i.e. 
+    // pattern query order) so that keyers act before restricters (I think...)
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    for( PatternLink plink : pq->GetNormalLinks() )    
     {
+        LocatedLink link( plink, query->GetNormalLinks().at(plink) );
+
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
         ASSERT( knowledge->domain.count(link) > 0 )(link)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif

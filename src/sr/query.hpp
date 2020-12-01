@@ -94,7 +94,7 @@ public:
     typedef LocatedLink Link;
     typedef vector<Range> Ranges;
     typedef vector<Choice> Choices; 
-    typedef list<LocatedLink> Links;
+    typedef SolutionMap Links;
     
     virtual const Choices &GetChoices() const = 0;
     virtual const Ranges &GetDecisions() const = 0;

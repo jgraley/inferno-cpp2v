@@ -73,9 +73,9 @@ void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mu
     while( mit != mut_links.end() || rit != ref_links.end() )
     {
         ASSERT( mit != mut_links.end() && rit != ref_links.end() );
-        ASSERT( (PatternLink)*mit == (PatternLink)*rit );
-        auto mxp = mit->GetChildX().get();
-        auto rxp = rit->GetChildX().get();
+        ASSERT( mit->first == rit->first );
+        auto mxp = mit->second.GetChildX().get();
+        auto rxp = rit->second.GetChildX().get();
         
         if( auto mxssr = dynamic_cast<SubSequenceRange *>(mxp) )
         {
@@ -100,7 +100,7 @@ void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mu
         }    
         else // some other node: should match by link
         {
-            ASSERT( *mit == *rit );
+            ASSERT( mit->second == rit->second );
         }
         ++mit;
         ++rit;
@@ -197,21 +197,21 @@ void DecidedQuery::Start()
 void DecidedQuery::RegisterNormalLink( PatternLink plink, XLink xlink )
 {
     LocatedLink link( plink, xlink );
-    normal_links.push_back( link );        
+    normal_links.insert( link );        
 }
 
 
 void DecidedQuery::RegisterAbnormalLink( PatternLink plink, XLink xlink )
 {
     LocatedLink link( plink, xlink );
-    abnormal_links.push_back( link );
+    abnormal_links.insert( link );
 }
 
 
 void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLink xlink )
 {
     LocatedLink link( plink, xlink );
-    multiplicity_links.push_back( link );
+    multiplicity_links.insert( link );
 }
 
 
@@ -402,13 +402,9 @@ void DecidedQuery::Reset()
 
 DecidedQuery::Links DecidedQuery::GetAllLinks() const
 {
-    Links links;
-    for( auto link : GetNormalLinks() )
-        links.push_back( link );
-    for( auto link : GetAbnormalLinks() )
-        links.push_back( link );
-    for( auto link : GetMultiplicityLinks() )
-        links.push_back( link );
+    Links links = GetNormalLinks();
+    links = UnionOfSolo( links, GetAbnormalLinks() );
+    links = UnionOfSolo( links, GetMultiplicityLinks() );
     return links;
 }
 
