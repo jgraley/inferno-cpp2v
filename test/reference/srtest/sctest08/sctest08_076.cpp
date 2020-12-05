@@ -15,10 +15,10 @@ enum TStates
 {
 T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
-T_STATE_LINK = 1U,
-T_STATE_LINK1 = 8U,
-T_STATE_PROCEED_NEXT1 = 5U,
+T_STATE_LINK1 = 1U,
+T_STATE_LINK = 8U,
 T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 5U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
 T_STATE_YIELD = 2U,
@@ -60,13 +60,13 @@ if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
  ::gvar=( ::gvar+ ::i);
  ::TopLevel::temp_n=(3);
  ::TopLevel::helper_n= ::TopLevel::temp_n;
- ::TopLevel::helper_link= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::helper_link= ::TopLevel::T_STATE_LINK1;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_helper;
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK1 )
 {
  ::gvar=( ::gvar*(2));
 next_trigger(SC_ZERO_TIME);
@@ -125,13 +125,13 @@ if( enabled )
 {
 if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
- ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK1;
+ ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_otherhelper;
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK1 )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK )
 {
  ::TopLevel::temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;

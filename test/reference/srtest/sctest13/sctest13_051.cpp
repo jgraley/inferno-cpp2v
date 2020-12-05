@@ -12,18 +12,18 @@ enum TStates
 {
 T_STATE_ENTER_f = 14U,
 T_STATE_LINK = 12U,
-T_STATE_PROCEED_NEXT1 = 3U,
-T_STATE_PROCEED_NEXT = 5U,
-T_STATE_PROCEED_NEXT2 = 7U,
+T_STATE_PROCEED_NEXT3 = 3U,
+T_STATE_PROCEED_NEXT2 = 5U,
+T_STATE_PROCEED_NEXT1 = 7U,
 T_STATE_PROCEED_NEXT4 = 9U,
-T_STATE_PROCEED_NEXT3 = 11U,
+T_STATE_PROCEED_NEXT = 11U,
 T_STATE_PROCEED_NEXT_CONTINUE = 1U,
 T_STATE_PROCEED_PROCEED_NEXT_THEN_ELSE_BREAK = 0U,
-T_STATE_PROCEED_THEN_ELSE2 = 2U,
-T_STATE_PROCEED_THEN_ELSE = 4U,
-T_STATE_PROCEED_THEN_ELSE1 = 6U,
+T_STATE_PROCEED_THEN_ELSE1 = 2U,
+T_STATE_PROCEED_THEN_ELSE5 = 4U,
+T_STATE_PROCEED_THEN_ELSE = 6U,
 T_STATE_PROCEED_THEN_ELSE3 = 8U,
-T_STATE_PROCEED_THEN_ELSE5 = 10U,
+T_STATE_PROCEED_THEN_ELSE2 = 10U,
 T_STATE_PROCEED_THEN_ELSE4 = 13U,
 };
 void T();
@@ -71,37 +71,37 @@ break;
 }
  ::TopLevel::i=(0);
 {
-state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE2 :  ::TopLevel::T_STATE_PROCEED_NEXT_CONTINUE);
+state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT_CONTINUE);
 goto *(lmap[state]);
 }
 PROCEED_NEXT_CONTINUE:;
  ::TopLevel::i++;
 {
-state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT_CONTINUE :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE2);
+state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT_CONTINUE :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 goto *(lmap[state]);
 }
 PROCEED_THEN_ELSE:;
 {
-state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE5 :  ::TopLevel::T_STATE_PROCEED_NEXT3);
 goto *(lmap[state]);
 }
 PROCEED_NEXT:;
  ::TopLevel::x+= ::TopLevel::i;
  ::TopLevel::i++;
 {
-state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT3 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE5);
 goto *(lmap[state]);
 }
 PROCEED_THEN_ELSE1:;
  ::TopLevel::i=(0);
 {
-state=((!( ::TopLevel::i< ::TopLevel::x)) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+state=((!( ::TopLevel::i< ::TopLevel::x)) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT2);
 goto *(lmap[state]);
 }
 PROCEED_NEXT1:;
  ::TopLevel::i++;
 {
-state=(( ::TopLevel::i< ::TopLevel::x) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+state=(( ::TopLevel::i< ::TopLevel::x) ?  ::TopLevel::T_STATE_PROCEED_NEXT2 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 goto *(lmap[state]);
 }
 PROCEED_THEN_ELSE2:;
@@ -115,33 +115,33 @@ for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-=(1) )
  ::TopLevel::x+= ::TopLevel::i;
  ::TopLevel::i=(0);
 {
-state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE3 :  ::TopLevel::T_STATE_PROCEED_NEXT2);
+state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE3 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 goto *(lmap[state]);
 }
 PROCEED_NEXT2:;
  ::TopLevel::x+= ::TopLevel::i;
  ::TopLevel::i=(4);
 {
-state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT2 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE3);
+state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE3);
 goto *(lmap[state]);
 }
 PROCEED_THEN_ELSE3:;
  ::TopLevel::i=(0);
 {
-state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE5 :  ::TopLevel::T_STATE_PROCEED_NEXT4);
+state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE2 :  ::TopLevel::T_STATE_PROCEED_NEXT4);
 goto *(lmap[state]);
 }
 PROCEED_NEXT3:;
  ::TopLevel::i+=(0);
  ::TopLevel::i++;
 {
-state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT4 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE5);
+state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT4 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE2);
 goto *(lmap[state]);
 }
 PROCEED_THEN_ELSE4:;
  ::TopLevel::i=(0);
 {
-state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE4 :  ::TopLevel::T_STATE_PROCEED_NEXT3);
+state=((!( ::TopLevel::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE4 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 goto *(lmap[state]);
 }
 PROCEED_NEXT4:;
@@ -155,7 +155,7 @@ result= ::TopLevel::f_return;
  ::TopLevel::x+=result;
  ::TopLevel::i++;
 {
-state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT3 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE4);
+state=(( ::TopLevel::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE4);
 goto *(lmap[state]);
 }
 PROCEED_THEN_ELSE5:;

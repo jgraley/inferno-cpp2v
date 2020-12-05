@@ -13,10 +13,10 @@ enum TStates
 {
 T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
-T_STATE_LINK = 1U,
-T_STATE_LINK1 = 8U,
-T_STATE_PROCEED_NEXT1 = 5U,
+T_STATE_LINK1 = 1U,
+T_STATE_LINK = 8U,
 T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 5U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
 T_STATE_YIELD = 2U,
@@ -29,11 +29,11 @@ void *link;
 void *(link_stack[10U]);
 int (n_stack[10U]);
 public:
-/*temp*/ void *helper_link1;
 /*temp*/ void *helper_link;
+/*temp*/ void *helper_link1;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -58,7 +58,7 @@ PROCEED_NEXT:;
  ::gvar=( ::gvar+ ::i);
 temp_n=(3);
  ::TopLevel::helper_n=temp_n;
- ::TopLevel::helper_link=(lmap[ ::TopLevel::T_STATE_LINK]);
+ ::TopLevel::helper_link1=(lmap[ ::TopLevel::T_STATE_LINK1]);
 {
 state=(lmap[ ::TopLevel::T_STATE_ENTER_helper]);
 goto *(state);
@@ -85,7 +85,7 @@ goto *(state);
 }
 ENTER_helper:;
  ::TopLevel::helper_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
+( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link1;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
  ::j=(0);
 {
@@ -106,7 +106,7 @@ state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ? (lmap[ :
 goto *(state);
 }
 PROCEED_THEN_ELSE1:;
- ::TopLevel::otherhelper_link1=(lmap[ ::TopLevel::T_STATE_LINK1]);
+ ::TopLevel::otherhelper_link=(lmap[ ::TopLevel::T_STATE_LINK]);
 {
 state=(lmap[ ::TopLevel::T_STATE_ENTER_otherhelper]);
 goto *(state);
@@ -119,7 +119,7 @@ state=temp_link1;
 goto *(state);
 }
 ENTER_otherhelper:;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
 temp_link= ::TopLevel::link;
 {

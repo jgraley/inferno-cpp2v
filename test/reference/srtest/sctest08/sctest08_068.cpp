@@ -13,10 +13,10 @@ enum TStates
 {
 T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
-T_STATE_LINK = 1U,
-T_STATE_LINK1 = 8U,
-T_STATE_PROCEED_NEXT1 = 5U,
+T_STATE_LINK1 = 1U,
+T_STATE_LINK = 8U,
 T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 5U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
 T_STATE_YIELD = 2U,
@@ -29,11 +29,11 @@ unsigned int link;
 unsigned int (link_stack[10U]);
 int (n_stack[10U]);
 public:
-/*temp*/ unsigned int helper_link;
 /*temp*/ unsigned int helper_link1;
+/*temp*/ unsigned int helper_link;
 /*temp*/ int helper_n;
-/*temp*/ unsigned int otherhelper_link1;
 /*temp*/ unsigned int otherhelper_link;
+/*temp*/ unsigned int otherhelper_link1;
 };
 int gvar;
 int i;
@@ -42,8 +42,8 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ unsigned int temp_link1;
 /*temp*/ unsigned int temp_link;
+/*temp*/ unsigned int temp_link1;
 static const unsigned int (lmap[]) = { &&
 #error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
 , &&
@@ -82,10 +82,10 @@ if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
  ::gvar=( ::gvar+ ::i);
 temp_n=(3);
  ::TopLevel::helper_n=temp_n;
- ::TopLevel::helper_link1= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::helper_link= ::TopLevel::T_STATE_LINK1;
 state= ::TopLevel::T_STATE_ENTER_helper;
 }
-if( state== ::TopLevel::T_STATE_LINK )
+if( state== ::TopLevel::T_STATE_LINK1 )
 {
  ::gvar=( ::gvar*(2));
 wait(SC_ZERO_TIME);
@@ -106,7 +106,7 @@ state= ::TopLevel::T_STATE_ENTER_helper;
 if( state== ::TopLevel::T_STATE_ENTER_helper )
 {
  ::TopLevel::helper_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link1;
+( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
  ::j=(0);
 state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
@@ -125,21 +125,21 @@ state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLe
 }
 if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
- ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK1;
+ ::TopLevel::otherhelper_link1= ::TopLevel::T_STATE_LINK;
 state= ::TopLevel::T_STATE_ENTER_otherhelper;
 }
-if( state== ::TopLevel::T_STATE_LINK1 )
+if( state== ::TopLevel::T_STATE_LINK )
 {
-temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
-state=temp_link1;
+state=temp_link;
 }
 if( state== ::TopLevel::T_STATE_ENTER_otherhelper )
 {
- ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::TopLevel::link= ::TopLevel::otherhelper_link1;
  ::gvar=( ::gvar-(1));
-temp_link= ::TopLevel::link;
-state=temp_link;
+temp_link1= ::TopLevel::link;
+state=temp_link1;
 }
 }
 while( true );

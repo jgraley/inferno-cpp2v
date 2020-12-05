@@ -33,16 +33,16 @@ TopLevel top_level("top_level");
 void TopLevel::T()
 {
 /*temp*/ unsigned int temp_link;
-/*temp*/ int temp_i1;
-/*temp*/ int temp_i2;
 /*temp*/ int temp_i;
+/*temp*/ int temp_i2;
+/*temp*/ int temp_i1;
 do
 {
 if( (sc_delta_count())==(0U) )
 {
  ::TopLevel::x=(0);
-temp_i1=(1);
- ::TopLevel::recurser_i=temp_i1;
+temp_i=(1);
+ ::TopLevel::recurser_i=temp_i;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK1;
 wait(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
@@ -71,8 +71,8 @@ temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
 }
 if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK )
 {
-temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i;
+temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i1;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_THEN_ELSE;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }

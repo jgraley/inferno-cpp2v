@@ -14,8 +14,8 @@ T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_NEXT = 1U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 5U,
-T_STATE_YIELD = 2U,
-T_STATE_YIELD1 = 4U,
+T_STATE_YIELD1 = 2U,
+T_STATE_YIELD = 4U,
 };
 void T();
 };
@@ -46,10 +46,10 @@ state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_S
 if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
-if( state== ::TopLevel::T_STATE_YIELD )
+if( state== ::TopLevel::T_STATE_YIELD1 )
 {
  ::gvar++;
  ::j++;
@@ -59,10 +59,10 @@ if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
 {
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
-if( state== ::TopLevel::T_STATE_YIELD1 )
+if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::i++;
 state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);

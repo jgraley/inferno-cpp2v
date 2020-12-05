@@ -35,12 +35,12 @@ void TopLevel::T()
 /*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&LINK, &&ENTER_recurser, &&PROCEED, &&LINK1, &&LINK_THEN_ELSE };
 auto unsigned int state;
-/*temp*/ int temp_i1;
 /*temp*/ int temp_i2;
 /*temp*/ int temp_i;
+/*temp*/ int temp_i1;
  ::TopLevel::x=(0);
-temp_i1=(1);
- ::TopLevel::recurser_i=temp_i1;
+temp_i2=(1);
+ ::TopLevel::recurser_i=temp_i2;
  ::TopLevel::recurser_link1= ::TopLevel::T_STATE_LINK1;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_ENTER_recurser;
@@ -63,16 +63,16 @@ state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ?  ::T
 PROCEED:;
 if( state== ::TopLevel::T_STATE_PROCEED )
 {
-temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i2;
+temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i;
  ::TopLevel::recurser_link1= ::TopLevel::T_STATE_LINK;
 state= ::TopLevel::T_STATE_ENTER_recurser;
 }
 LINK1:;
 if( state== ::TopLevel::T_STATE_LINK )
 {
-temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i;
+temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i1;
  ::TopLevel::recurser_link1= ::TopLevel::T_STATE_LINK_THEN_ELSE;
 state= ::TopLevel::T_STATE_ENTER_recurser;
 }

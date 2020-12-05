@@ -25,8 +25,8 @@ void TopLevel::T()
 auto int switch_value1;
 auto int switch_value;
 /*temp*/ int muxtemp;
-/*temp*/ int result1;
 /*temp*/ int result;
+/*temp*/ int result1;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -72,11 +72,11 @@ THEN:;
  ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 LINK:;
-result= ::TopLevel::f_return;
-muxtemp=result;
+result1= ::TopLevel::f_return;
+muxtemp=result1;
 ELSE:;
-result1=muxtemp;
- ::TopLevel::x=result1;
+result=muxtemp;
+ ::TopLevel::x=result;
 goto THEN_ELSE_BREAK;
 goto THEN_ELSE_BREAK;
 THEN_ELSE_BREAK:;

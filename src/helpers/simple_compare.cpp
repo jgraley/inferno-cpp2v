@@ -1,7 +1,12 @@
 #include "simple_compare.hpp"
 #include "common/trace.hpp"
 
-//#define CHECK_NEW_OLD_NODE_COMPARE
+
+SimpleCompare::SimpleCompare( Matcher::Ordering ordering_ ) :
+    ordering( ordering_ )
+{
+}
+
 
 CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
 {   
@@ -10,19 +15,7 @@ CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
         return EQUAL;
     
     // Local comparison deals with node type and value if there is one
-    CompareResult cr = Node::Compare(x.get(), y.get());
-    
-#ifdef CHECK_NEW_OLD_NODE_COMPARE
-    bool new_uneq = (cr != EQUAL);
-    bool xlmy = x->IsLocalMatch(y.get());
-    bool ylmx = y->IsLocalMatch(x.get());
-    bool old_uneq = (!xlmy || !ylmx);
-    ASSERT( new_uneq==old_uneq )("x: ")(*x)("\n")
-                                ("y: ")(*y)("\n")
-                                ("x.LM(y): ")(xlmy)("\n")
-                                ("y.LM(x): ")(ylmx)("\n")
-                                ("Compare: %d\n", cr);
-#endif
+    CompareResult cr = Node::Compare(x.get(), y.get(), ordering);
     
     if( cr != EQUAL )
         return cr;
@@ -104,7 +97,11 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
     if( sd != EQUAL )
         return sd;
     
-    typedef set<TreePtr<Node>, SimpleCompare> SCOrdered;
+    // ORdering could be REPEATABLE which is weak, but we still want
+    // to account for the number of equivalent elements, so use multiset
+    typedef multiset<TreePtr<Node>, SimpleCompare> SCOrdered;
+    
+    // Use this object so our ordering is used.
     SCOrdered xo(*this), yo(*this);
 
     // Fill up the sets of pointers

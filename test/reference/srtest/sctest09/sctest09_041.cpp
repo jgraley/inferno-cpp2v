@@ -26,8 +26,8 @@ void TopLevel::T()
 {
 /*temp*/ void *temp_link;
 /*temp*/ int temp_i;
-/*temp*/ int temp_i1;
 /*temp*/ int temp_i2;
+/*temp*/ int temp_i1;
  ::TopLevel::x=(0);
 temp_i=(1);
  ::TopLevel::recurser_i=temp_i;
@@ -43,13 +43,13 @@ ENTER_recurser:;
  ::TopLevel::x++;
 goto *((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&LINK_THEN_ELSE) : (&&PROCEED));
 PROCEED:;
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i1;
+temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i2;
  ::TopLevel::recurser_link1=(&&LINK1);
 goto ENTER_recurser;
 LINK1:;
-temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i=temp_i2;
+temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+ ::TopLevel::recurser_i=temp_i1;
  ::TopLevel::recurser_link1=(&&LINK_THEN_ELSE);
 goto ENTER_recurser;
 LINK_THEN_ELSE:;

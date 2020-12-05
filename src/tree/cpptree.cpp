@@ -24,7 +24,7 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-CompareResult SpecificString::CovariantCompare( const Matcher *candidate ) const
+CompareResult SpecificString::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificString *>(candidate);    
@@ -77,7 +77,7 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificInteger::CovariantCompare( const Matcher *candidate ) const
+CompareResult SpecificInteger::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
@@ -132,7 +132,7 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloat::CovariantCompare( const Matcher *candidate ) const
+CompareResult SpecificFloat::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
@@ -196,21 +196,34 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificIdentifier::CovariantCompare( const Matcher *candidate ) const
+CompareResult SpecificIdentifier::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
 {
     ASSERT( candidate );
     
     if( candidate == this )
-        return false; // fast-out
+        return EQUAL; // fast-out
     
     auto *c = dynamic_cast<const SpecificIdentifier *>(candidate);    
     ASSERT(c);
-    
+        
     // Primary ordering on name should make renders more repeatable
     if( name != c->name )
-        return name.compare(c->name);        
-    return (int)(this > candidate) - (int)(this < candidate);
-    // Note: just subtracting could overflow
+        return name.compare(c->name);      
+          
+    CompareResult r;
+    switch( ordering )
+    {
+    case UNIQUE:
+        // Unique order uses address to ensure different identifiers compare differently
+        r = (int)(this > candidate) - (int)(this < candidate);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops after name check since address compare is not repeatable
+        r = EQUAL;
+        break;
+    }
+    return r;
 }
 
 
@@ -247,16 +260,27 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloatSemantics::CovariantCompare( const Matcher *candidate ) const
+CompareResult SpecificFloatSemantics::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     ASSERT(c);    
 
-    // Don't use any particular ordering apart from where the 
-    // llvm::fltSemantics are being stored.
-    return (int)(value > c->value) - (int)(value < c->value);
-    // Note: just subtracting could overflow
+    CompareResult r;
+    switch( ordering )
+    {
+    case UNIQUE:
+        // Don't use any particular ordering apart from where the 
+        // llvm::fltSemantics are being stored.
+        r = (int)(value > c->value) - (int)(value < c->value);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops at type
+        r = EQUAL;
+        break;
+    }
+    return r;
 }
 
 

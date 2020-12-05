@@ -11,6 +11,12 @@
 /// Support class allowing hierarchical type comparisons between nodes
 struct Matcher
 {
+    enum Ordering
+    {
+        UNIQUE,     // a strong_ordering in C++20 terms
+        REPEATABLE
+    };
+        
     // Any mismatch this class throws
     class Mismatch : public ::Mismatch
     {
@@ -40,17 +46,17 @@ struct Matcher
         (void)target_architype; // don't care about value of architypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_architype);
     }
-    static CompareResult Compare( const Matcher *l, const Matcher *r )
+    static CompareResult Compare( const Matcher *l, const Matcher *r, Ordering ordering = UNIQUE )
     {
         type_index l_index( typeid(*l) );
         type_index r_index( typeid(*r) );
         if( l_index != r_index )
             return (l_index > r_index) ? 1 : -1;
-        return l->CovariantCompare(r);
+        return l->CovariantCompare(r, ordering);
     }
-    virtual CompareResult CovariantCompare( const Matcher *candidate ) const 
+    virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const 
     {
-        return EQUAL; // usually there are no contents
+        return EQUAL; // usually there are no contents to compare
     }
 };
 

@@ -17,8 +17,8 @@ void U();
 private:
 unsigned int link;
 public:
-/*temp*/ unsigned int HelperU_link;
 /*temp*/ unsigned int HelperU_link1;
+/*temp*/ unsigned int HelperU_link;
 };
 TopLevel top_level("top_level");
 
@@ -27,7 +27,7 @@ void TopLevel::U()
 /*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&LINK, &&ENTER_HelperU };
 auto unsigned int state;
- ::TopLevel::HelperU_link1= ::TopLevel::U_STATE_LINK;
+ ::TopLevel::HelperU_link= ::TopLevel::U_STATE_LINK;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::U_STATE_ENTER_HelperU;
 ENTER_HelperU:;
@@ -39,7 +39,7 @@ state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
 if( state== ::TopLevel::U_STATE_ENTER_HelperU )
 {
- ::TopLevel::link= ::TopLevel::HelperU_link1;
+ ::TopLevel::link= ::TopLevel::HelperU_link;
 temp_link= ::TopLevel::link;
 state=temp_link;
 }
