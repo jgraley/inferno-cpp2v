@@ -19,8 +19,8 @@ public:
 /*temp*/ void *helper_link1;
 /*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -103,7 +103,7 @@ ELSE1:;
 }
 {
 {
- ::TopLevel::otherhelper_link1=(&&LINK1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
 goto ENTER_otherhelper;
 }
 LINK1:;
@@ -120,7 +120,7 @@ goto *(temp_link);
 ENTER_otherhelper:;
 {
 /*temp*/ void *temp_link1;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
 {
 temp_link1= ::TopLevel::link;

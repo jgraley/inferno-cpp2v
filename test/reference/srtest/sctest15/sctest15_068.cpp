@@ -17,8 +17,8 @@ void U();
 private:
 unsigned int link;
 public:
-/*temp*/ unsigned int HelperU_link;
 /*temp*/ unsigned int HelperU_link1;
+/*temp*/ unsigned int HelperU_link;
 };
 TopLevel top_level("top_level");
 
@@ -31,7 +31,7 @@ do
 {
 if( (sc_delta_count())==(0U) )
 {
- ::TopLevel::HelperU_link1= ::TopLevel::U_STATE_LINK;
+ ::TopLevel::HelperU_link= ::TopLevel::U_STATE_LINK;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::U_STATE_ENTER_HelperU;
 continue;
@@ -43,7 +43,7 @@ state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
 if(  ::TopLevel::U_STATE_ENTER_HelperU==state )
 {
- ::TopLevel::link= ::TopLevel::HelperU_link1;
+ ::TopLevel::link= ::TopLevel::HelperU_link;
 temp_link= ::TopLevel::link;
 state=temp_link;
 }

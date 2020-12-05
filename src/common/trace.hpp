@@ -153,6 +153,25 @@ string Trace(const multiset<T> &s)
     return str + "}";
 }
 
+
+template<typename TK, typename TV>
+string Trace(const multimap<TK, TV> &m) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto p : m )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += Trace(p.first);
+        str += ": ";
+        str += Trace(p.second);
+        first = false;            
+    }
+    return str + "}";
+}
+
+
 template<typename T>
 string Trace(const unordered_set<T> &s) 
 {
@@ -197,6 +216,24 @@ string Trace(const unordered_multiset<T> &s)
         if( !first )
             str += CONTAINER_SEP;
         str += Trace(x);
+        first = false;            
+    }
+    return str + "}";
+}
+
+
+template<typename TK, typename TV>
+string Trace(const unordered_multimap<TK, TV> &m) 
+{
+    string str = "{";
+    bool first = true;
+    for( auto p : m )
+    {
+        if( !first )
+            str += CONTAINER_SEP;
+        str += Trace(p.first);
+        str += ": ";
+        str += Trace(p.second);
         first = false;            
     }
     return str + "}";

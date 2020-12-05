@@ -20,8 +20,8 @@ int x;
 /*temp*/ int f_i;
 /*temp*/ short f_j;
 /*temp*/ char f_k;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -33,7 +33,7 @@ void TopLevel::T()
 {
  ::TopLevel::f_i=temp_i1;
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 {
  ::TopLevel::f_k=temp_k;
 {
@@ -49,7 +49,7 @@ LINK:;
 {
  ::TopLevel::f_i=temp_i;
 {
- ::TopLevel::f_link1=(&&LINK1);
+ ::TopLevel::f_link=(&&LINK1);
 {
  ::TopLevel::f_k=temp_k1;
 {
@@ -66,7 +66,7 @@ cease(  ::TopLevel::x+((2)*({ /*temp*/ int temp_i2; temp_i2=(1); ({ /*temp*/ int
 {
  ::TopLevel::f_i=temp_i2;
 {
- ::TopLevel::f_link1=(&&LINK2);
+ ::TopLevel::f_link=(&&LINK2);
 {
  ::TopLevel::f_k=temp_k2;
 {
@@ -85,7 +85,7 @@ ENTER_f:;
 /*temp*/ void *temp_link;
  ::TopLevel::j= ::TopLevel::f_j;
  ::TopLevel::k= ::TopLevel::f_k;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));
 {

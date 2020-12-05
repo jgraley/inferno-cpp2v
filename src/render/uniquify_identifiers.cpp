@@ -83,23 +83,123 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 	return nn;
 }
 
+//////////////////////////// IdentifierFingerprinter ///////////////////////////////
+
+IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
+    comparer( Matcher::REPEATABLE )
+{
+    int index=0;
+    ProcessNode( root_x, index );
+}
+
+
+void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
+{
+    // Record the fingerprints
+    if( auto id_x = TreePtr<SpecificIdentifier>::DynamicCast(x) )
+        fingerprints[id_x].insert(index);
+
+    // Recurse into our child nodes
+    ProcessChildren( x, index );
+            
+    index++;
+}
+
+
+void IdentifierFingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
+{
+    vector< Itemiser::Element * > x_memb = x->Itemise();
+    for( Itemiser::Element *xe : x_memb )
+    {
+        if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
+            ProcessSequence( x_seq, index );
+        else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
+            ProcessCollection( x_col, index );
+        else if( TreePtrInterface *x_sing = dynamic_cast<TreePtrInterface *>(xe) )
+            ProcessSingularNode( x_sing, index );
+        else
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
+    }
+}
+
+
+void IdentifierFingerprinter::ProcessSingularNode( const TreePtrInterface *x_sing, int &index )
+{
+    ProcessNode( (TreePtr<Node>)(*x_sing), index );
+}
+
+
+void IdentifierFingerprinter::ProcessSequence( SequenceInterface *x_seq, int &index )
+{
+    FOREACH( const TreePtrInterface &x, *x_seq )
+    {
+        ProcessNode( (TreePtr<Node>)x, index );
+    }
+}
+
+
+void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
+{
+    TreePtr<Node> prev_x;
+    int index_offset = 0;
+    int prev_start_index;
+    FOREACH( TreePtr<Node> x, comparer.GetOrdered(*x_col) )
+    {
+        if( prev_x && comparer.Compare(x, prev_x) == EQUAL )
+        {
+            // Our comparer cannot differentiate this subtree from the 
+            // previous one, so "replay" the same indexes while traversing it.  
+            int temp_start_index = prev_start_index;
+            int temp_index = temp_start_index;
+            ProcessNode( (TreePtr<Node>)x, temp_index );
+            
+            // But keep updating the "real" index so we get the same
+            // values afterwards (as if this one had not compared equal).
+            index += temp_index - temp_start_index;
+        }
+        else
+        {
+            prev_start_index = index;
+            ProcessNode( (TreePtr<Node>)x, index );        
+        }
+            
+        prev_x = x;
+    }
+}
+
+
+map< TreePtr<SpecificIdentifier>, IdentifierFingerprinter::Fingerprint > IdentifierFingerprinter::GetFingerprints()
+{
+    return fingerprints;
+}
+
+
+map< IdentifierFingerprinter::Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > IdentifierFingerprinter::GetReverseFingerprints()
+{
+    map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > rfp;
+    for( pair< TreePtr<SpecificIdentifier>, Fingerprint > p : fingerprints )
+    {
+        rfp[p.second].insert( p.first );        
+    }
+    return rfp;
+}
+
+
 //////////////////////////// UniquifyIdentifiers ///////////////////////////////
 
 void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v )
 {
+    IdentifierFingerprinter idfp( root );    
+
     list< TreePtr<SpecificIdentifier> > ids;
-    set< TreePtr<SpecificIdentifier> > reached;
-    
-    Walk t( root );
-    FOREACH( const TreePtrInterface &p, t )
+    for( auto p : idfp.GetReverseFingerprints() )
     {
-        if( auto si = TreePtr<SpecificIdentifier>::DynamicCast(p) )
-        {
-            if( reached.count(si) > 0 )
-                continue;
-            reached.insert( si );
-            ids.push_back( si );
-        }
+        ASSERT(p.second.size() == 1)
+          ("Could not differentiate between these identifiers: ")(p.second)
+          (" fingerprint ")(p.first)
+          (". Need to write some more code to uniquify the renders in this case!!\n");
+        TreePtr<SpecificIdentifier> si = *(p.second.begin());
+        ids.push_back( si );
     }
 
     for( TreePtr<SpecificIdentifier> si : ids )
@@ -108,5 +208,3 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
         insert( IdentifierNamePair( si, nn ) );
     }
 }
-
-

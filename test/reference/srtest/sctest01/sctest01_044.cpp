@@ -8,10 +8,10 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_THREAD(T2);
+SC_THREAD(T);
 }
-void T2();
-sc_event proceed1;
+void T();
+sc_event proceed;
 };
 class Multiplier : public sc_module
 {
@@ -22,7 +22,7 @@ SC_THREAD(T1);
 }
 void T1();
 sc_event instigate;
-sc_event proceed;
+sc_event proceed1;
 };
 class TopLevel : public sc_module
 {
@@ -31,23 +31,23 @@ SC_CTOR( TopLevel ) :
 add_inst("add_inst"),
 mul_inst("mul_inst")
 {
-SC_THREAD(T);
+SC_THREAD(T2);
 }
-void T();
+void T2();
  ::Adder add_inst;
  ::Multiplier mul_inst;
 };
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T2()
+void Adder::T()
 {
-wait(  ::Adder::proceed1 );
+wait(  ::Adder::proceed );
  ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-wait(  ::Adder::proceed1 );
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1).notify(SC_ZERO_TIME);
+wait(  ::Adder::proceed );
  ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1).notify(SC_ZERO_TIME);
 return ;
 }
 
@@ -55,16 +55,16 @@ void Multiplier::T1()
 {
 wait(  ::Multiplier::instigate );
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed );
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed1 );
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed );
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed1 );
 cease(  ::gvar );
 return ;
 }
 
-void TopLevel::T()
+void TopLevel::T2()
 {
  ::gvar=(1);
 ( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);

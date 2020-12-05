@@ -101,6 +101,7 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     AddChildren( mode, xlink );
 }
 
+
 void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
 {
     vector< Itemiser::Element * > x_memb = xlink.GetChildX()->Itemise();

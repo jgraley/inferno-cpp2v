@@ -16,8 +16,8 @@ public:
 int x;
 int y;
 /*temp*/ int f_i;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -38,7 +38,7 @@ PROCEED:;
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 }
@@ -71,7 +71,7 @@ THEN1:;
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK1);
+ ::TopLevel::f_link=(&&LINK1);
 goto ENTER_f;
 }
 }
@@ -105,7 +105,7 @@ PROCEED3:;
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK2);
+ ::TopLevel::f_link=(&&LINK2);
 goto ENTER_f;
 }
 }
@@ -122,7 +122,7 @@ THEN3:;
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK3);
+ ::TopLevel::f_link=(&&LINK3);
 goto ENTER_f;
 }
 }
@@ -154,7 +154,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::i= ::TopLevel::f_i;
 {
  ::TopLevel::f_return=((100)/ ::TopLevel::i);

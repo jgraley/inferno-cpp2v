@@ -19,8 +19,8 @@ public:
 /*temp*/ void *helper_link1;
 /*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -65,14 +65,14 @@ goto *(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ? (&&PROCE
 PROCEED1:;
 goto THEN_ELSE1;
 THEN_ELSE1:;
- ::TopLevel::otherhelper_link1=(&&LINK1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
 goto ENTER_otherhelper;
 LINK1:;
 temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
 goto *(temp_link);
 ENTER_otherhelper:;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
 temp_link1= ::TopLevel::link;
 goto *(temp_link1);

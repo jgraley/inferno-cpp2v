@@ -17,12 +17,12 @@ T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
 T_STATE_LINK = 1U,
 T_STATE_LINK1 = 8U,
-T_STATE_PROCEED_NEXT1 = 0U,
-T_STATE_PROCEED_NEXT = 5U,
+T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 5U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
-T_STATE_YIELD1 = 2U,
-T_STATE_YIELD = 6U,
+T_STATE_YIELD = 2U,
+T_STATE_YIELD1 = 6U,
 };
 void T();
 private:
@@ -49,10 +49,10 @@ if( (sc_delta_count())==(0U) )
  ::gvar=(1);
  ::i=(0);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+ ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 return ;
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT1== ::TopLevel::state )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
 {
  ::gvar=( ::gvar+ ::i);
  ::TopLevel::temp_n=(3);
@@ -64,13 +64,13 @@ if(  ::TopLevel::T_STATE_LINK== ::TopLevel::state )
 {
  ::gvar=((2)* ::gvar);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD1;
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
 return ;
 }
-if(  ::TopLevel::T_STATE_YIELD1== ::TopLevel::state )
+if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
 {
  ::i=((1)+ ::i);
- ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
 if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
 {
@@ -84,19 +84,19 @@ if(  ::TopLevel::T_STATE_ENTER_helper== ::TopLevel::state )
 ( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
  ::j=(0);
- ::TopLevel::state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+ ::TopLevel::state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT1== ::TopLevel::state )
 {
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD1;
 return ;
 }
-if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
+if(  ::TopLevel::T_STATE_YIELD1== ::TopLevel::state )
 {
  ::gvar=((1)+ ::gvar);
  ::j=((1)+ ::j);
- ::TopLevel::state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+ ::TopLevel::state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
 if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1== ::TopLevel::state )
 {

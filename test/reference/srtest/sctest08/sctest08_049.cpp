@@ -19,8 +19,8 @@ public:
 /*temp*/ void *helper_link1;
 /*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -29,8 +29,8 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ void *temp_link1;
 /*temp*/ void *temp_link;
+/*temp*/ void *temp_link1;
 auto void *state;
 /*temp*/ int temp_n;
  ::gvar=(1);
@@ -92,24 +92,24 @@ state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ? (&&PROCE
 goto *(state);
 }
 PROCEED_THEN_ELSE1:;
- ::TopLevel::otherhelper_link1=(&&LINK1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
 {
 state=(&&ENTER_otherhelper);
 goto *(state);
 }
 LINK1:;
-temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
 {
-state=temp_link1;
+state=temp_link;
 goto *(state);
 }
 ENTER_otherhelper:;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
-temp_link= ::TopLevel::link;
+temp_link1= ::TopLevel::link;
 {
-state=temp_link;
+state=temp_link1;
 goto *(state);
 }
 }

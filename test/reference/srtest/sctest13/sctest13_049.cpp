@@ -15,8 +15,8 @@ private:
 void *link;
 public:
 int x;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -126,7 +126,7 @@ state=((!( ::TopLevel::i<(4))) ? (&&PROCEED_THEN_ELSE5) : (&&PROCEED_NEXT4));
 goto *(state);
 }
 PROCEED_NEXT4:;
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 {
 state=(&&ENTER_f);
 goto *(state);
@@ -147,7 +147,7 @@ state=(&&ENTER_f);
 goto *(state);
 }
 ENTER_f:;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::f_return=(3);
 temp_link= ::TopLevel::link;
 {

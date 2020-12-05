@@ -8,9 +8,9 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_THREAD(T2);
+SC_THREAD(T);
 }
-void T2();
+void T();
 bool proceed;
 };
 class Multiplier : public sc_module
@@ -31,44 +31,44 @@ SC_CTOR( TopLevel ) :
 add_inst("add_inst"),
 mul_inst("mul_inst")
 {
-SC_THREAD(T);
+SC_THREAD(T2);
 }
-void T();
+void T2();
  ::Adder add_inst;
  ::Multiplier mul_inst;
 };
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T2()
+void Adder::T()
 {
-auto void *state1;
+auto void *state;
 wait(SC_ZERO_TIME);
 {
-state1=((!(! ::Adder::proceed)) ? (&&PROCEED_THEN_ELSE3) : (&&PROCEED_NEXT3));
-goto *(state1);
+state=((!(! ::Adder::proceed)) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
+goto *(state);
 }
-PROCEED_NEXT3:;
+PROCEED_NEXT:;
 wait(SC_ZERO_TIME);
 {
-state1=((! ::Adder::proceed) ? (&&PROCEED_NEXT3) : (&&PROCEED_THEN_ELSE3));
-goto *(state1);
+state=((! ::Adder::proceed) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE));
+goto *(state);
 }
-PROCEED_THEN_ELSE3:;
+PROCEED_THEN_ELSE:;
  ::Adder::proceed=(false);
  ::gvar+=(2);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
 {
-state1=((!(! ::Adder::proceed)) ? (&&PROCEED_THEN_ELSE4) : (&&PROCEED_NEXT4));
-goto *(state1);
+state=((!(! ::Adder::proceed)) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT1));
+goto *(state);
 }
-PROCEED_NEXT4:;
+PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 {
-state1=((! ::Adder::proceed) ? (&&PROCEED_NEXT4) : (&&PROCEED_THEN_ELSE4));
-goto *(state1);
+state=((! ::Adder::proceed) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE1));
+goto *(state);
 }
-PROCEED_THEN_ELSE4:;
+PROCEED_THEN_ELSE1:;
  ::Adder::proceed=(false);
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
@@ -77,53 +77,53 @@ return ;
 
 void Multiplier::T1()
 {
-auto void *state;
+auto void *state1;
 wait(SC_ZERO_TIME);
 {
-state=((!(! ::Multiplier::instigate)) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
-goto *(state);
-}
-PROCEED_NEXT:;
-wait(SC_ZERO_TIME);
-{
-state=((! ::Multiplier::instigate) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE));
-goto *(state);
-}
-PROCEED_THEN_ELSE:;
- ::Multiplier::instigate=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-{
-state=((!(! ::Multiplier::proceed1)) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT1));
-goto *(state);
-}
-PROCEED_NEXT1:;
-wait(SC_ZERO_TIME);
-{
-state=((! ::Multiplier::proceed1) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE1));
-goto *(state);
-}
-PROCEED_THEN_ELSE1:;
- ::Multiplier::proceed1=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-{
-state=((!(! ::Multiplier::proceed1)) ? (&&PROCEED_THEN_ELSE2) : (&&PROCEED_NEXT2));
-goto *(state);
+state1=((!(! ::Multiplier::instigate)) ? (&&PROCEED_THEN_ELSE2) : (&&PROCEED_NEXT2));
+goto *(state1);
 }
 PROCEED_NEXT2:;
 wait(SC_ZERO_TIME);
 {
-state=((! ::Multiplier::proceed1) ? (&&PROCEED_NEXT2) : (&&PROCEED_THEN_ELSE2));
-goto *(state);
+state1=((! ::Multiplier::instigate) ? (&&PROCEED_NEXT2) : (&&PROCEED_THEN_ELSE2));
+goto *(state1);
 }
 PROCEED_THEN_ELSE2:;
+ ::Multiplier::instigate=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+{
+state1=((!(! ::Multiplier::proceed1)) ? (&&PROCEED_THEN_ELSE3) : (&&PROCEED_NEXT3));
+goto *(state1);
+}
+PROCEED_NEXT3:;
+wait(SC_ZERO_TIME);
+{
+state1=((! ::Multiplier::proceed1) ? (&&PROCEED_NEXT3) : (&&PROCEED_THEN_ELSE3));
+goto *(state1);
+}
+PROCEED_THEN_ELSE3:;
+ ::Multiplier::proceed1=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+{
+state1=((!(! ::Multiplier::proceed1)) ? (&&PROCEED_THEN_ELSE4) : (&&PROCEED_NEXT4));
+goto *(state1);
+}
+PROCEED_NEXT4:;
+wait(SC_ZERO_TIME);
+{
+state1=((! ::Multiplier::proceed1) ? (&&PROCEED_NEXT4) : (&&PROCEED_THEN_ELSE4));
+goto *(state1);
+}
+PROCEED_THEN_ELSE4:;
  ::Multiplier::proceed1=(false);
 cease(  ::gvar );
 return ;
 }
 
-void TopLevel::T()
+void TopLevel::T2()
 {
  ::gvar=(1);
 ( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);

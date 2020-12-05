@@ -13,8 +13,8 @@ private:
 void *link;
 public:
 int x;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -26,8 +26,8 @@ auto void *state;
 auto int switch_value;
 auto int switch_value1;
 /*temp*/ int muxtemp;
-/*temp*/ int result;
 /*temp*/ int result1;
+/*temp*/ int result;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -108,7 +108,7 @@ state=(&&ELSE);
 goto *(state);
 }
 THEN:;
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 {
 state=(&&ENTER_f);
 goto *(state);
@@ -135,7 +135,7 @@ state=(&&ENTER_f);
 goto *(state);
 }
 ENTER_f:;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::f_return=(3);
 temp_link= ::TopLevel::link;
 {

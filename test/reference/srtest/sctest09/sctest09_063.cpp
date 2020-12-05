@@ -12,8 +12,8 @@ SC_THREAD(T);
 enum TStates
 {
 T_STATE_ENTER_recurser = 1U,
-T_STATE_LINK1 = 0U,
-T_STATE_LINK = 3U,
+T_STATE_LINK = 0U,
+T_STATE_LINK1 = 3U,
 T_STATE_LINK_THEN_ELSE = 4U,
 T_STATE_PROCEED = 2U,
 };
@@ -35,17 +35,17 @@ void TopLevel::T()
 /*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&LINK, &&ENTER_recurser, &&PROCEED, &&LINK1, &&LINK_THEN_ELSE };
 auto unsigned int state;
-/*temp*/ int temp_i2;
 /*temp*/ int temp_i;
 /*temp*/ int temp_i1;
+/*temp*/ int temp_i2;
  ::TopLevel::x=(0);
-temp_i2=(1);
- ::TopLevel::recurser_i=temp_i2;
- ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK1;
+temp_i=(1);
+ ::TopLevel::recurser_i=temp_i;
+ ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_ENTER_recurser;
 LINK:;
-if(  ::TopLevel::T_STATE_LINK1==state )
+if(  ::TopLevel::T_STATE_LINK==state )
 {
 cease(  ::TopLevel::x );
 return ;
@@ -63,16 +63,16 @@ state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ?  ::T
 PROCEED:;
 if(  ::TopLevel::T_STATE_PROCEED==state )
 {
-temp_i=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
- ::TopLevel::recurser_i=temp_i;
- ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK;
+temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i=temp_i1;
+ ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK1;
 state= ::TopLevel::T_STATE_ENTER_recurser;
 }
 LINK1:;
-if(  ::TopLevel::T_STATE_LINK==state )
+if(  ::TopLevel::T_STATE_LINK1==state )
 {
-temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
- ::TopLevel::recurser_i=temp_i1;
+temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i=temp_i2;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_THEN_ELSE;
 state= ::TopLevel::T_STATE_ENTER_recurser;
 }

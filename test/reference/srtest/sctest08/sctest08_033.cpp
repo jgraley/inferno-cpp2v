@@ -19,8 +19,8 @@ public:
 /*temp*/ void *helper_link1;
 /*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -29,8 +29,8 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ void *temp_link1;
 /*temp*/ void *temp_link;
+/*temp*/ void *temp_link1;
 /*temp*/ int temp_n;
  ::gvar=(1);
  ::i=(0);
@@ -73,15 +73,15 @@ PROCEED3:;
 goto ELSE1;
 THEN1:;
 ELSE1:;
- ::TopLevel::otherhelper_link1=(&&LINK1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
 goto ENTER_otherhelper;
 LINK1:;
-temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
-goto *(temp_link1);
-ENTER_otherhelper:;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
- ::gvar=( ::gvar-(1));
-temp_link= ::TopLevel::link;
 goto *(temp_link);
+ENTER_otherhelper:;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::gvar=( ::gvar-(1));
+temp_link1= ::TopLevel::link;
+goto *(temp_link1);
 }

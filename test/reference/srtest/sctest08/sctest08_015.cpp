@@ -21,8 +21,8 @@ void (otherhelper)();
 /*temp*/ void *helper_link1;
 /*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
+/*temp*/ void *otherhelper_link;
 };
 int gvar;
 int i;
@@ -56,7 +56,7 @@ return ;
 void (TopLevel::helper)()
 {
 {
-/*temp*/ void *temp_link1;
+/*temp*/ void *temp_link;
  ::TopLevel::helper_stack_index++;
 ( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
@@ -67,13 +67,13 @@ wait(SC_ZERO_TIME);
 }
 {
 {
- ::TopLevel::otherhelper_link1=(&&LINK1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
  ::TopLevel::otherhelper();
 }
 LINK1:;
 }
 {
-temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
 {
  ::TopLevel::helper_stack_index--;
 return ;
@@ -84,11 +84,11 @@ return ;
 
 void (TopLevel::otherhelper)()
 {
-/*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
+/*temp*/ void *temp_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
 {
-temp_link= ::TopLevel::link;
+temp_link1= ::TopLevel::link;
 return ;
 }
 }

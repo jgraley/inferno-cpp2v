@@ -8,19 +8,19 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_METHOD(T2);
+SC_METHOD(T);
 }
-enum TStates2
+enum TStates
 {
-T_STATE_PROCEED_NEXT4 = 0U,
-T_STATE_PROCEED_NEXT3 = 2U,
-T_STATE_PROCEED_THEN_ELSE3 = 1U,
-T_STATE_PROCEED_THEN_ELSE4 = 3U,
+T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 2U,
+T_STATE_PROCEED_THEN_ELSE = 1U,
+T_STATE_PROCEED_THEN_ELSE1 = 3U,
 };
-void T2();
-bool proceed1;
+void T();
+bool proceed;
 private:
-unsigned int state1;
+unsigned int state;
 };
 class Multiplier : public sc_module
 {
@@ -31,18 +31,18 @@ SC_METHOD(T1);
 }
 enum TStates1
 {
-T_STATE_PROCEED_NEXT1 = 0U,
-T_STATE_PROCEED_NEXT2 = 2U,
-T_STATE_PROCEED_NEXT = 4U,
-T_STATE_PROCEED_THEN_ELSE1 = 1U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_THEN_ELSE2 = 5U,
+T_STATE_PROCEED_NEXT2 = 0U,
+T_STATE_PROCEED_NEXT3 = 2U,
+T_STATE_PROCEED_NEXT4 = 4U,
+T_STATE_PROCEED_THEN_ELSE2 = 1U,
+T_STATE_PROCEED_THEN_ELSE3 = 3U,
+T_STATE_PROCEED_THEN_ELSE4 = 5U,
 };
 void T1();
 bool instigate;
-bool proceed;
+bool proceed1;
 private:
-unsigned int state;
+unsigned int state1;
 };
 class TopLevel : public sc_module
 {
@@ -51,54 +51,54 @@ SC_CTOR( TopLevel ) :
 add_inst("add_inst"),
 mul_inst("mul_inst")
 {
-SC_THREAD(T);
+SC_THREAD(T2);
 }
-enum TStates
+enum TStates2
 {
 };
-void T();
+void T2();
  ::Adder add_inst;
  ::Multiplier mul_inst;
 };
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T2()
+void Adder::T()
 {
-/*temp*/ bool enabled2 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0U) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Adder::state1=((!(! ::Adder::proceed1)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE3 :  ::Adder::T_STATE_PROCEED_NEXT4);
-enabled2=(false);
+ ::Adder::state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE :  ::Adder::T_STATE_PROCEED_NEXT);
+enabled=(false);
 }
-if( enabled2&&( ::Adder::T_STATE_PROCEED_NEXT4== ::Adder::state1) )
+if( enabled&&( ::Adder::T_STATE_PROCEED_NEXT== ::Adder::state) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Adder::state1=((! ::Adder::proceed1) ?  ::Adder::T_STATE_PROCEED_NEXT4 :  ::Adder::T_STATE_PROCEED_THEN_ELSE3);
-enabled2=(false);
+ ::Adder::state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT :  ::Adder::T_STATE_PROCEED_THEN_ELSE);
+enabled=(false);
 }
-if( enabled2&&( ::Adder::T_STATE_PROCEED_THEN_ELSE3== ::Adder::state1) )
+if( enabled&&( ::Adder::T_STATE_PROCEED_THEN_ELSE== ::Adder::state) )
 {
- ::Adder::proceed1=(false);
+ ::Adder::proceed=(false);
  ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
- ::Adder::state1=((!(! ::Adder::proceed1)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE4 :  ::Adder::T_STATE_PROCEED_NEXT3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
+ ::Adder::state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE1 :  ::Adder::T_STATE_PROCEED_NEXT1);
 }
-if( enabled2&&( ::Adder::T_STATE_PROCEED_NEXT3== ::Adder::state1) )
+if( enabled&&( ::Adder::T_STATE_PROCEED_NEXT1== ::Adder::state) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Adder::state1=((! ::Adder::proceed1) ?  ::Adder::T_STATE_PROCEED_NEXT3 :  ::Adder::T_STATE_PROCEED_THEN_ELSE4);
-enabled2=(false);
+ ::Adder::state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT1 :  ::Adder::T_STATE_PROCEED_THEN_ELSE1);
+enabled=(false);
 }
-if( enabled2&&( ::Adder::T_STATE_PROCEED_THEN_ELSE4== ::Adder::state1) )
+if( enabled&&( ::Adder::T_STATE_PROCEED_THEN_ELSE1== ::Adder::state) )
 {
- ::Adder::proceed1=(false);
+ ::Adder::proceed=(false);
  ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
-enabled2=(false);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
+enabled=(false);
 }
-if( enabled2 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }
 
@@ -108,44 +108,44 @@ void Multiplier::T1()
 if( (sc_delta_count())==(0U) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT1);
+ ::Multiplier::state1=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2 :  ::Multiplier::T_STATE_PROCEED_NEXT2);
 enabled1=(false);
 }
-if( enabled1&&( ::Multiplier::T_STATE_PROCEED_NEXT1== ::Multiplier::state) )
+if( enabled1&&( ::Multiplier::T_STATE_PROCEED_NEXT2== ::Multiplier::state1) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
+ ::Multiplier::state1=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT2 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2);
 enabled1=(false);
 }
-if( enabled1&&( ::Multiplier::T_STATE_PROCEED_THEN_ELSE1== ::Multiplier::state) )
+if( enabled1&&( ::Multiplier::T_STATE_PROCEED_THEN_ELSE2== ::Multiplier::state1) )
 {
  ::Multiplier::instigate=(false);
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1)=(true);
- ::Multiplier::state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT2);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+ ::Multiplier::state1=((!(! ::Multiplier::proceed1)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE3 :  ::Multiplier::T_STATE_PROCEED_NEXT3);
 }
-if( enabled1&&( ::Multiplier::T_STATE_PROCEED_NEXT2== ::Multiplier::state) )
+if( enabled1&&( ::Multiplier::T_STATE_PROCEED_NEXT3== ::Multiplier::state1) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT2 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
+ ::Multiplier::state1=((! ::Multiplier::proceed1) ?  ::Multiplier::T_STATE_PROCEED_NEXT3 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE3);
 enabled1=(false);
 }
-if( enabled1&&( ::Multiplier::T_STATE_PROCEED_THEN_ELSE== ::Multiplier::state) )
+if( enabled1&&( ::Multiplier::T_STATE_PROCEED_THEN_ELSE3== ::Multiplier::state1) )
 {
- ::Multiplier::proceed=(false);
+ ::Multiplier::proceed1=(false);
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1)=(true);
- ::Multiplier::state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2 :  ::Multiplier::T_STATE_PROCEED_NEXT);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+ ::Multiplier::state1=((!(! ::Multiplier::proceed1)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE4 :  ::Multiplier::T_STATE_PROCEED_NEXT4);
 }
-if( enabled1&&( ::Multiplier::T_STATE_PROCEED_NEXT== ::Multiplier::state) )
+if( enabled1&&( ::Multiplier::T_STATE_PROCEED_NEXT4== ::Multiplier::state1) )
 {
 next_trigger(SC_ZERO_TIME);
- ::Multiplier::state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2);
+ ::Multiplier::state1=((! ::Multiplier::proceed1) ?  ::Multiplier::T_STATE_PROCEED_NEXT4 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE4);
 enabled1=(false);
 }
-if( enabled1&&( ::Multiplier::T_STATE_PROCEED_THEN_ELSE2== ::Multiplier::state) )
+if( enabled1&&( ::Multiplier::T_STATE_PROCEED_THEN_ELSE4== ::Multiplier::state1) )
 {
- ::Multiplier::proceed=(false);
+ ::Multiplier::proceed1=(false);
 cease(  ::gvar );
 enabled1=(false);
 }
@@ -153,10 +153,10 @@ if( enabled1 )
 next_trigger(SC_ZERO_TIME);
 }
 
-void TopLevel::T()
+void TopLevel::T2()
 {
-/*temp*/ bool enabled = true;
+/*temp*/ bool enabled2 = true;
  ::gvar=(1);
 ( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
-enabled=(false);
+enabled2=(false);
 }

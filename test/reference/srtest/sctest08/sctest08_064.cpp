@@ -15,12 +15,12 @@ T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
 T_STATE_LINK = 1U,
 T_STATE_LINK1 = 8U,
-T_STATE_PROCEED_NEXT1 = 0U,
-T_STATE_PROCEED_NEXT = 5U,
+T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 5U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
-T_STATE_YIELD1 = 2U,
-T_STATE_YIELD = 6U,
+T_STATE_YIELD = 2U,
+T_STATE_YIELD1 = 6U,
 };
 void T();
 private:
@@ -50,7 +50,7 @@ auto unsigned int state;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 ENTER_otherhelper:;
 LINK1:;
 PROCEED_THEN_ELSE1:;
@@ -61,7 +61,7 @@ PROCEED_THEN_ELSE:;
 YIELD:;
 LINK:;
 PROCEED_NEXT:;
-if(  ::TopLevel::T_STATE_PROCEED_NEXT1==state )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
 {
  ::gvar=( ::gvar+ ::i);
 temp_n=(3);
@@ -73,13 +73,13 @@ if(  ::TopLevel::T_STATE_LINK==state )
 {
  ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
-if(  ::TopLevel::T_STATE_YIELD1==state )
+if(  ::TopLevel::T_STATE_YIELD==state )
 {
  ::i=((1)+ ::i);
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
 if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE==state )
 {
@@ -93,19 +93,19 @@ if(  ::TopLevel::T_STATE_ENTER_helper==state )
 ( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
  ::j=(0);
-state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT1==state )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
-if(  ::TopLevel::T_STATE_YIELD==state )
+if(  ::TopLevel::T_STATE_YIELD1==state )
 {
  ::gvar=((1)+ ::gvar);
  ::j=((1)+ ::j);
-state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
 if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1==state )
 {
