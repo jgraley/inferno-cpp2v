@@ -7,6 +7,8 @@ using namespace CPPTree;
 
 #define UID_FORMAT "%s%u"
 
+//////////////////////////// VisibleIdentifiers ///////////////////////////////
+
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 {
 	if( n>0 )
@@ -81,50 +83,20 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 	return nn;
 }
 
+//////////////////////////// UniquifyIdentifiers ///////////////////////////////
 
 void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v )
 {
-    bool func = false;
-    if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(root) )
-        func = !!dynamic_pointer_cast<Callable>(i->type);
-    
-    if(func)
+    Walk t( root );
+    FOREACH( const TreePtrInterface &p, t )
     {
-        // At function level just do everything together - this is the safe option,
-        // even with function inside functions. Required for Labels, which are always 
-        // whole function scope
-        Walk t( root );
-        FOREACH( const TreePtrInterface &p, t )
+        if( auto si = TreePtr<SpecificIdentifier>::DynamicCast(p) )
         {
-            if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>((TreePtr<Node>)p) )
-                if( TreePtr<Identifier> i = GetIdentifierOfDeclaration(d) )
-                    if( TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>(i) )
-                    {
-                        string nn = v.AddIdentifier( si );
-                        insert( IdentifierNamePair( si, nn ) );
-                    }
+            if( count(si) > 0 )
+                continue;
+            string nn = v.AddIdentifier( si );
+            insert( IdentifierNamePair( si, nn ) );
         }
-    }
-    else
-    {
-        // Above function level (top level, classes etc),
-        // look for declarations in the current scope (directly, not in sub scopes).
-        FlattenNode t( root );
-        FOREACH( const TreePtrInterface &p, t )
-        {
-            if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>((TreePtr<Node>)p) )
-                if( TreePtr<Identifier> i = GetIdentifierOfDeclaration(d) )
-                    if( TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>(i) )
-                    {
-                        string nn = v.AddIdentifier( si );
-                        insert( IdentifierNamePair( si, nn ) );
-                    }
-        }
-        
-        // Recurse, to find sub-scopes. Pass v by value so our copy remains the same.
-        // This means names must be local. But we will rename more conservatively.        
-        FOREACH( const TreePtrInterface &p, t )
-            UniquifyScope( (TreePtr<Node>)p, v ); 
     }
 }
 
