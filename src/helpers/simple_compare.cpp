@@ -96,13 +96,9 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
     int sd = (int)(x.size()) - (int)(y.size());
     if( sd != EQUAL )
         return sd;
-    
-    // ORdering could be REPEATABLE which is weak, but we still want
-    // to account for the number of equivalent elements, so use multiset
-    typedef multiset<TreePtr<Node>, SimpleCompare> SCOrdered;
-    
+        
     // Use this object so our ordering is used.
-    SCOrdered xo(*this), yo(*this);
+    Ordered xo(*this), yo(*this);
 
     // Fill up the sets of pointers
     FOREACH( const TreePtrInterface &xe, x )
@@ -118,4 +114,14 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
 bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl )
 {
     return Compare(xl, yl) < EQUAL;
+}
+
+
+// Make a SimpleCompare-ordered set and fill it with the elements of the collection
+SimpleCompare::Ordered SimpleCompare::GetOrderedSet( CollectionInterface &c )
+{
+    Ordered ordered( *this );
+    FOREACH( const TreePtrInterface &e, c )
+    	ordered.insert( (TreePtr<Node>)e );
+    return ordered; // hoping for a "move"
 }

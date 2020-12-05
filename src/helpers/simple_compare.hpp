@@ -11,6 +11,10 @@
 class SimpleCompare : public Traceable
 {
 public:
+    // Ordering could be REPEATABLE which is weak, but we still want
+    // to account for the number of equivalent elements, so use multiset
+    typedef multiset<TreePtr<Node>, SimpleCompare> Ordered;
+
     SimpleCompare( Matcher::Ordering ordering = Matcher::UNIQUE );
     
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
@@ -25,6 +29,9 @@ public:
     /// Less operator: for use with set, map etc
     bool operator()( TreePtr<Node> x, TreePtr<Node> y );
     
+    /// Order a collection using the current SC
+    Ordered GetOrderedSet( CollectionInterface &c );
+
 private:
     const Matcher::Ordering ordering;
 };

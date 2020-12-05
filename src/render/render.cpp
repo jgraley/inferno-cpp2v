@@ -494,9 +494,9 @@ string Render::RenderMakeRecord( TreePtr<MakeRecord> ro )
 
 
 string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
-						 TreePtr<Scope> r,
-						 string separator,
-						 bool separate_last )
+                                 TreePtr<Scope> r,
+                                 string separator,
+                                 bool separate_last )
 {
 	string s;
 
@@ -594,7 +594,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 
 
 string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
-					   bool showstorage, bool showinit, bool showscope )
+                               bool showstorage, bool showinit, bool showscope )
 {
 	string s;
     string name;
@@ -731,8 +731,8 @@ bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 
 
 string Render::RenderDeclaration( TreePtr<Declaration> declaration,
-							 string sep, TreePtr<AccessSpec> *current_access,
-						  bool showtype, bool force_incomplete, bool shownonfuncinit )
+                                  string sep, TreePtr<AccessSpec> *current_access,
+                                  bool showtype, bool force_incomplete, bool shownonfuncinit )
 {
 	TRACE();
 	string s;
@@ -943,11 +943,11 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 
 template< class ELEMENT >
 string Render::RenderSequence( Sequence<ELEMENT> spe,
-					   string separator,
-					   bool separate_last,
-					   TreePtr<AccessSpec> init_access,
-					   bool showtype,
-                       bool shownonfuncinit )
+                               string separator,
+                               bool separate_last,
+                               TreePtr<AccessSpec> init_access,
+                               bool showtype,
+                               bool shownonfuncinit )
 {
 	TRACE();
 	string s;
@@ -970,8 +970,8 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 
 
 string Render::RenderOperandSequence( Sequence<Expression> spe,
-							  string separator,
-							  bool separate_last )
+                                      string separator,
+                                      bool separate_last )
 {
 	TRACE();
 	string s;
@@ -1053,10 +1053,10 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
 
 
 string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
-									string separator,
-									bool separate_last,
-									TreePtr<AccessSpec> init_access,
-									bool showtype )
+                                            string separator,
+                                            bool separate_last,
+                                            TreePtr<AccessSpec> init_access,
+                                            bool showtype )
 {
 	TRACE();
 

@@ -30,6 +30,7 @@ struct VisibleIdentifiers
 	static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
 };
 
+
 struct UniquifyIdentifiers : public map< TreePtr<CPPTree::SpecificIdentifier>, string >
 {
 	typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
