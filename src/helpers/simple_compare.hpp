@@ -29,8 +29,8 @@ public:
     /// Less operator: for use with set, map etc
     bool operator()( TreePtr<Node> x, TreePtr<Node> y );
     
-    /// Order a collection using the current SC
-    Ordered GetOrderedSet( CollectionInterface &c );
+    /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container
+    Ordered GetOrdered( ContainerInterface &c );
 
 private:
     const Matcher::Ordering ordering;

@@ -14,8 +14,8 @@ T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_NEXT = 1U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 5U,
-T_STATE_YIELD1 = 2U,
-T_STATE_YIELD = 4U,
+T_STATE_YIELD = 2U,
+T_STATE_YIELD1 = 4U,
 };
 void T();
 };
@@ -26,19 +26,7 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-static const unsigned int (lmap[]) = { &&
-#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
-, &&
-#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
-, &&
-#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
-, &&
-#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
-, &&
-#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
-, &&
-#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT undeclared not supported in RenderIdentifier
- };
+static const unsigned int (lmap[]) = { &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT };
 auto unsigned int state;
 do
 {
@@ -50,37 +38,37 @@ wait(SC_ZERO_TIME);
 state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 continue;
 }
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT1==state )
 {
  ::gvar+= ::i;
  ::j=(0);
 state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 continue;
 }
-if( state== ::TopLevel::T_STATE_YIELD1 )
+if(  ::TopLevel::T_STATE_YIELD==state )
 {
  ::gvar++;
  ::j++;
 state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE==state )
 {
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 continue;
 }
-if( state== ::TopLevel::T_STATE_YIELD )
+if(  ::TopLevel::T_STATE_YIELD1==state )
 {
  ::i++;
 state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1==state )
 {
 cease(  ::gvar );
 return ;

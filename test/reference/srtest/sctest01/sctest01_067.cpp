@@ -8,30 +8,30 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_THREAD(T);
+SC_THREAD(T2);
 }
-enum TStates
+enum TStates2
 {
-T_STATE_YIELD = 0U,
-T_STATE_YIELD1 = 1U,
+T_STATE_YIELD3 = 0U,
+T_STATE_YIELD4 = 1U,
 };
-void T();
-sc_event proceed;
+void T2();
+sc_event proceed1;
 };
 class Multiplier : public sc_module
 {
 public:
 SC_CTOR( Multiplier )
 {
-SC_THREAD(T);
+SC_THREAD(T1);
 }
-enum TStates
+enum TStates1
 {
 T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 T_STATE_YIELD2 = 2U,
 };
-void T();
+void T1();
 sc_event instigate;
 sc_event proceed;
 };
@@ -54,31 +54,27 @@ void T();
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T()
+void Adder::T2()
 {
-static const unsigned int (lmap[]) = { &&
-#error identifier YIELD undeclared not supported in RenderIdentifier
-, &&
-#error identifier YIELD undeclared not supported in RenderIdentifier
- };
-auto unsigned int state;
+static const unsigned int (lmap2[]) = { &&YIELD1, &&YIELD1 };
+auto unsigned int state1;
 do
 {
 if( (sc_delta_count())==(0U) )
 {
-wait(  ::Adder::proceed );
-state= ::Adder::T_STATE_YIELD;
+wait(  ::Adder::proceed1 );
+state1= ::Adder::T_STATE_YIELD3;
 continue;
 }
-if( state== ::Adder::T_STATE_YIELD )
+if(  ::Adder::T_STATE_YIELD3==state1 )
 {
  ::gvar+=(2);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-wait(  ::Adder::proceed );
-state= ::Adder::T_STATE_YIELD1;
+wait(  ::Adder::proceed1 );
+state1= ::Adder::T_STATE_YIELD4;
 continue;
 }
-if( state== ::Adder::T_STATE_YIELD1 )
+if(  ::Adder::T_STATE_YIELD4==state1 )
 {
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
@@ -88,15 +84,9 @@ return ;
 while( true );
 }
 
-void Multiplier::T()
+void Multiplier::T1()
 {
-static const unsigned int (lmap[]) = { &&
-#error identifier YIELD undeclared not supported in RenderIdentifier
-, &&
-#error identifier YIELD undeclared not supported in RenderIdentifier
-, &&
-#error identifier YIELD undeclared not supported in RenderIdentifier
- };
+static const unsigned int (lmap1[]) = { &&YIELD, &&YIELD, &&YIELD };
 auto unsigned int state;
 do
 {
@@ -106,23 +96,23 @@ wait(  ::Multiplier::instigate );
 state= ::Multiplier::T_STATE_YIELD;
 continue;
 }
-if( state== ::Multiplier::T_STATE_YIELD )
+if(  ::Multiplier::T_STATE_YIELD==state )
 {
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
 state= ::Multiplier::T_STATE_YIELD1;
 continue;
 }
-if( state== ::Multiplier::T_STATE_YIELD1 )
+if(  ::Multiplier::T_STATE_YIELD1==state )
 {
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
 state= ::Multiplier::T_STATE_YIELD2;
 continue;
 }
-if( state== ::Multiplier::T_STATE_YIELD2 )
+if(  ::Multiplier::T_STATE_YIELD2==state )
 {
 cease(  ::gvar );
 return ;

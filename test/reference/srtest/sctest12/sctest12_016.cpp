@@ -28,7 +28,7 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -40,7 +40,7 @@ break;
 case 4:;
  ::TopLevel::x=(44);
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -50,7 +50,7 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 2:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : ({ {
 {
  ::TopLevel::f_link1=(&&LINK);

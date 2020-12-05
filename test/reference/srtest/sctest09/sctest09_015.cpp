@@ -20,8 +20,8 @@ unsigned int recurser_stack_index;
 public:
 int x;
 /*temp*/ int recurser_i;
-/*temp*/ void *recurser_link;
 /*temp*/ void *recurser_link1;
+/*temp*/ void *recurser_link;
 };
 TopLevel top_level("top_level");
 
@@ -32,7 +32,7 @@ void TopLevel::T()
 {
  ::TopLevel::recurser_i=temp_i;
 {
- ::TopLevel::recurser_link1=(&&LINK);
+ ::TopLevel::recurser_link=(&&LINK);
  ::TopLevel::recurser();
 }
 }
@@ -48,31 +48,31 @@ void (TopLevel::recurser)()
 {
 /*temp*/ void *temp_link;
  ::TopLevel::recurser_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link1;
+( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
 ( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
  ::TopLevel::x++;
 if( ( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5) )
 {
-({ /*temp*/ int temp_i; temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
-{
- ::TopLevel::recurser_i=temp_i;
-{
- ::TopLevel::recurser_link1=(&&LINK);
- ::TopLevel::recurser();
-}
-}
-LINK:;
-}
-});
-({ /*temp*/ int temp_i1; temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
+({ /*temp*/ int temp_i1; temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
 {
  ::TopLevel::recurser_i=temp_i1;
 {
- ::TopLevel::recurser_link1=(&&LINK1);
+ ::TopLevel::recurser_link=(&&LINK1);
  ::TopLevel::recurser();
 }
 }
 LINK1:;
+}
+});
+({ /*temp*/ int temp_i2; temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
+{
+ ::TopLevel::recurser_i=temp_i2;
+{
+ ::TopLevel::recurser_link=(&&LINK2);
+ ::TopLevel::recurser();
+}
+}
+LINK2:;
 }
 });
 }

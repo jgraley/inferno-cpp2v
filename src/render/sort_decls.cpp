@@ -195,18 +195,13 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 
 Sequence<Declaration> PreSortDecls( Sequence<Declaration> c )
 {
-    SimpleCompare sc;
-
     // Make a SimpleCompare-ordered set and fill it with the decls
-    typedef set<TreePtr<Declaration>, SimpleCompare> SCOrdered;
-    SCOrdered sco(sc);
-    FOREACH( const TreePtr<Declaration> &a, c )
-    	sco.insert( a );
+    SimpleCompare::Ordered sco = SimpleCompare(Matcher::UNIQUE).GetOrdered(c);
 
     // Extract the decls from the set, now in SimpleCompare order
 	Sequence<Declaration> s;
-    for( TreePtr<Declaration> b : sco )
-        s.push_back( b );
+    for( TreePtr<Node> e : sco )
+        s.push_back( TreePtr<Declaration>::DynamicCast(e) );
     
     return s;
 }

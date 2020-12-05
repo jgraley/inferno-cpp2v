@@ -599,6 +599,7 @@ struct PointIterator : public ContainerInterface::iterator_interface
 	}
 };
 
+
 struct CountingIterator : public ContainerInterface::iterator_interface
 {
     int element;

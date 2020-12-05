@@ -27,7 +27,7 @@ goto *(state);
 PROCEED_NEXT:;
  ::gvar+= ::i;
 {
-state=((!(( ::i%(2))==(0))) ? (&&THEN_ELSE) : (&&PROCEED));
+state=((!((0)==( ::i%(2)))) ? (&&THEN_ELSE) : (&&PROCEED));
 goto *(state);
 }
 PROCEED:;

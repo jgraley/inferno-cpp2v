@@ -55,7 +55,7 @@ state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&L
 goto *(state);
 }
 PROCEED:;
-temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
  ::TopLevel::recurser_i=temp_i;
  ::TopLevel::recurser_link1=(&&LINK1);
 {
@@ -63,7 +63,7 @@ state=(&&ENTER_recurser);
 goto *(state);
 }
 LINK1:;
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
  ::TopLevel::recurser_i=temp_i1;
  ::TopLevel::recurser_link1=(&&LINK_THEN_ELSE);
 {

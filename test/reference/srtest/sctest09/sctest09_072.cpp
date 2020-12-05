@@ -48,13 +48,13 @@ wait(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 continue;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK1 )
+if(  ::TopLevel::T_STATE_LINK1== ::TopLevel::state )
 {
 cease(  ::TopLevel::x );
 return ;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_ENTER_recurser )
+if(  ::TopLevel::T_STATE_ENTER_recurser== ::TopLevel::state )
 {
  ::TopLevel::recurser_stack_index++;
 ( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
@@ -62,21 +62,21 @@ if(  ::TopLevel::state== ::TopLevel::T_STATE_ENTER_recurser )
  ::TopLevel::x++;
  ::TopLevel::state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ?  ::TopLevel::T_STATE_LINK_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED )
+if(  ::TopLevel::T_STATE_PROCEED== ::TopLevel::state )
 {
-temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
  ::TopLevel::recurser_i=temp_i2;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK )
+if(  ::TopLevel::T_STATE_LINK== ::TopLevel::state )
 {
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
  ::TopLevel::recurser_i=temp_i1;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_THEN_ELSE;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK_THEN_ELSE )
+if(  ::TopLevel::T_STATE_LINK_THEN_ELSE== ::TopLevel::state )
 {
 temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
  ::TopLevel::recurser_stack_index--;

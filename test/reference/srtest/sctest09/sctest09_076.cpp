@@ -29,8 +29,8 @@ int x;
 /*temp*/ int recurser_i;
 /*temp*/ unsigned int recurser_link;
 /*temp*/ int temp_i;
-/*temp*/ int temp_i2;
 /*temp*/ int temp_i1;
+/*temp*/ int temp_i2;
 };
 TopLevel top_level("top_level");
 
@@ -49,7 +49,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK1 )
+if(  ::TopLevel::T_STATE_LINK1== ::TopLevel::state )
 {
 cease(  ::TopLevel::x );
 enabled=(false);
@@ -59,7 +59,7 @@ if( enabled )
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_ENTER_recurser )
+if(  ::TopLevel::T_STATE_ENTER_recurser== ::TopLevel::state )
 {
  ::TopLevel::recurser_stack_index++;
 ( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
@@ -70,27 +70,27 @@ if(  ::TopLevel::state== ::TopLevel::T_STATE_ENTER_recurser )
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED )
+if(  ::TopLevel::T_STATE_PROCEED== ::TopLevel::state )
 {
- ::TopLevel::temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i= ::TopLevel::temp_i2;
+ ::TopLevel::temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i= ::TopLevel::temp_i1;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK )
+if(  ::TopLevel::T_STATE_LINK== ::TopLevel::state )
 {
- ::TopLevel::temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i= ::TopLevel::temp_i1;
+ ::TopLevel::temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i= ::TopLevel::temp_i2;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_THEN_ELSE;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_LINK_THEN_ELSE )
+if(  ::TopLevel::T_STATE_LINK_THEN_ELSE== ::TopLevel::state )
 {
  ::TopLevel::temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
  ::TopLevel::recurser_stack_index--;

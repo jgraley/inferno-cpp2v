@@ -33,13 +33,13 @@ next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::U_STATE_LINK) )
+if( enabled&&( ::TopLevel::U_STATE_LINK== ::TopLevel::state) )
 {
 enabled=(false);
 if( enabled )
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::U_STATE_ENTER_HelperU) )
+if( enabled&&( ::TopLevel::U_STATE_ENTER_HelperU== ::TopLevel::state) )
 {
  ::TopLevel::link= ::TopLevel::HelperU_link;
  ::TopLevel::temp_link= ::TopLevel::link;

@@ -88,7 +88,7 @@ result2;
 {
  ::TopLevel::x=(0);
 {
-goto *((!( ::TopLevel::x<(2))) ? (&&THEN3) : (&&PROCEED2));
+goto *((!( ::TopLevel::x<(2))) ? (&&THEN2) : (&&PROCEED2));
 PROCEED2:;
 {
 NEXT:;
@@ -97,7 +97,7 @@ NEXT:;
 /*temp*/ int muxtemp;
 /*temp*/ int result4;
 {
-goto *((!( ::TopLevel::x++)) ? (&&THEN2) : (&&PROCEED3));
+goto *((!( ::TopLevel::x++)) ? (&&THEN3) : (&&PROCEED3));
 PROCEED3:;
 {
 /*temp*/ int result5;
@@ -115,7 +115,7 @@ result5= ::TopLevel::f_return;
 muxtemp=( ::TopLevel::y+=result5);
 }
 goto ELSE2;
-THEN2:;
+THEN3:;
 {
 /*temp*/ int result6;
 {
@@ -144,7 +144,7 @@ goto *(( ::TopLevel::x<(2)) ? (&&NEXT) : (&&PROCEED4));
 PROCEED4:;
 }
 goto ELSE3;
-THEN3:;
+THEN2:;
 ;
 ELSE3:;
 }

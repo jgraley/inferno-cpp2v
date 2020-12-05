@@ -25,7 +25,7 @@ NEXT:;
 {
 {
  ::gvar+= ::i;
-if( ( ::i%(2))==(0) )
+if( (0)==( ::i%(2)) )
 {
 wait(SC_ZERO_TIME);
  ::gvar^=(1);

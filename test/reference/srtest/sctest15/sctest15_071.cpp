@@ -34,12 +34,12 @@ wait(SC_ZERO_TIME);
 state= ::TopLevel::U_STATE_ENTER_HelperU;
 continue;
 }
-if( state== ::TopLevel::U_STATE_LINK )
+if(  ::TopLevel::U_STATE_LINK==state )
 {
 return ;
 state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
-if( state== ::TopLevel::U_STATE_ENTER_HelperU )
+if(  ::TopLevel::U_STATE_ENTER_HelperU==state )
 {
  ::TopLevel::link= ::TopLevel::HelperU_link;
 temp_link= ::TopLevel::link;

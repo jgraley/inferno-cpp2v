@@ -29,20 +29,20 @@ auto unsigned int state;
 wait(SC_ZERO_TIME);
 state=((!( ::i<(5))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT:;
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
 {
  ::gvar+= ::i;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
-if( state== ::TopLevel::T_STATE_YIELD )
+if(  ::TopLevel::T_STATE_YIELD==state )
 {
  ::gvar*=(2);
  ::i++;
 state=(( ::i<(5)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE==state )
 {
 cease(  ::gvar );
 return ;

@@ -28,20 +28,20 @@ LINK:;
 LINK1:;
 }
  ::TopLevel::f_return; }); }); }); });
-cease(  ::TopLevel::x+(({ /*temp*/ int temp_i2; temp_i2=(1); ({ /*temp*/ int temp_j2; temp_j2=(2); ({ /*temp*/ int temp_k2; temp_k2=(3); ({ {
+cease(  ::TopLevel::x+((2)*({ /*temp*/ int temp_i2; temp_i2=(1); ({ /*temp*/ int temp_j2; temp_j2=(2); ({ /*temp*/ int temp_k2; temp_k2=(3); ({ {
  ::TopLevel::f(temp_i2, temp_j2, temp_k2, &&LINK2);
 LINK2:;
 }
- ::TopLevel::f_return; }); }); }); })*(2)) );
+ ::TopLevel::f_return; }); }); }); })) );
 return ;
 }
 
 void (TopLevel::f)(int i, short j, char k, void *link)
 {
 /*temp*/ void *temp_link;
-auto int t = i+(j*(3));
+auto int t = i+((3)*j);
 {
- ::TopLevel::f_return=(t+(k*(5)));
+ ::TopLevel::f_return=(t+((5)*k));
 {
 temp_link=link;
 return ;

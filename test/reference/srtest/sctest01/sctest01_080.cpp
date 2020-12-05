@@ -8,32 +8,32 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_METHOD(T);
+SC_METHOD(T2);
 }
-enum TStates
+enum TStates2
 {
-T_STATE_YIELD = 0U,
-T_STATE_YIELD1 = 1U,
+T_STATE_YIELD3 = 0U,
+T_STATE_YIELD4 = 1U,
 };
-void T();
-sc_event proceed;
+void T2();
+sc_event proceed1;
 private:
-unsigned int state;
+unsigned int state1;
 };
 class Multiplier : public sc_module
 {
 public:
 SC_CTOR( Multiplier )
 {
-SC_METHOD(T);
+SC_METHOD(T1);
 }
-enum TStates
+enum TStates1
 {
 T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 T_STATE_YIELD2 = 2U,
 };
-void T();
+void T1();
 sc_event instigate;
 sc_event proceed;
 private:
@@ -58,64 +58,64 @@ void T();
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T()
+void Adder::T2()
 {
-/*temp*/ bool enabled = true;
+/*temp*/ bool enabled2 = true;
 if( (sc_delta_count())==(0U) )
 {
-next_trigger(  ::Adder::proceed );
- ::Adder::state= ::Adder::T_STATE_YIELD;
-enabled=(false);
+next_trigger(  ::Adder::proceed1 );
+ ::Adder::state1= ::Adder::T_STATE_YIELD3;
+enabled2=(false);
 }
-if( enabled&&( ::Adder::state== ::Adder::T_STATE_YIELD) )
+if( enabled2&&( ::Adder::T_STATE_YIELD3== ::Adder::state1) )
 {
  ::gvar+=(2);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-next_trigger(  ::Adder::proceed );
- ::Adder::state= ::Adder::T_STATE_YIELD1;
-enabled=(false);
+next_trigger(  ::Adder::proceed1 );
+ ::Adder::state1= ::Adder::T_STATE_YIELD4;
+enabled2=(false);
 }
-if( enabled&&( ::Adder::state== ::Adder::T_STATE_YIELD1) )
+if( enabled2&&( ::Adder::T_STATE_YIELD4== ::Adder::state1) )
 {
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-enabled=(false);
+enabled2=(false);
 }
-if( enabled )
+if( enabled2 )
 next_trigger(SC_ZERO_TIME);
 }
 
-void Multiplier::T()
+void Multiplier::T1()
 {
-/*temp*/ bool enabled = true;
+/*temp*/ bool enabled1 = true;
 if( (sc_delta_count())==(0U) )
 {
 next_trigger(  ::Multiplier::instigate );
  ::Multiplier::state= ::Multiplier::T_STATE_YIELD;
-enabled=(false);
+enabled1=(false);
 }
-if( enabled&&( ::Multiplier::state== ::Multiplier::T_STATE_YIELD) )
+if( enabled1&&( ::Multiplier::T_STATE_YIELD== ::Multiplier::state) )
 {
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1).notify(SC_ZERO_TIME);
 next_trigger(  ::Multiplier::proceed );
  ::Multiplier::state= ::Multiplier::T_STATE_YIELD1;
-enabled=(false);
+enabled1=(false);
 }
-if( enabled&&( ::Multiplier::state== ::Multiplier::T_STATE_YIELD1) )
+if( enabled1&&( ::Multiplier::T_STATE_YIELD1== ::Multiplier::state) )
 {
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1).notify(SC_ZERO_TIME);
 next_trigger(  ::Multiplier::proceed );
  ::Multiplier::state= ::Multiplier::T_STATE_YIELD2;
-enabled=(false);
+enabled1=(false);
 }
-if( enabled&&( ::Multiplier::state== ::Multiplier::T_STATE_YIELD2) )
+if( enabled1&&( ::Multiplier::T_STATE_YIELD2== ::Multiplier::state) )
 {
 cease(  ::gvar );
-enabled=(false);
+enabled1=(false);
 }
-if( enabled )
+if( enabled1 )
 next_trigger(SC_ZERO_TIME);
 }
 

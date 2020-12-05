@@ -16,8 +16,8 @@ private:
 void *link;
 public:
 int x;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -29,7 +29,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
-for(  ::TopLevel::i=(0);  ::TopLevel::i!=(4);  ::TopLevel::i++ )
+for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
  ::TopLevel::x+= ::TopLevel::i;
@@ -51,7 +51,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i< ::TopLevel::x;  ::TopLevel::i++ )
 {
 }
 ;
-for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=( ::TopLevel::i+(1)) )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=((1)+ ::TopLevel::i) )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i+=(1) )
  ::TopLevel::x+= ::TopLevel::i;
@@ -66,7 +66,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+=({ {
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
  ::TopLevel::f();
 }
 LINK:;
@@ -79,7 +79,7 @@ return ;
 void (TopLevel::f)()
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
 {
  ::TopLevel::f_return=(3);
 {

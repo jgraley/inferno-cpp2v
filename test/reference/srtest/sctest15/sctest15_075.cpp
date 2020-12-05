@@ -32,12 +32,12 @@ next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 return ;
 }
-if(  ::TopLevel::state== ::TopLevel::U_STATE_LINK )
+if(  ::TopLevel::U_STATE_LINK== ::TopLevel::state )
 {
 return ;
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
-if(  ::TopLevel::state== ::TopLevel::U_STATE_ENTER_HelperU )
+if(  ::TopLevel::U_STATE_ENTER_HelperU== ::TopLevel::state )
 {
  ::TopLevel::link= ::TopLevel::HelperU_link;
  ::TopLevel::temp_link= ::TopLevel::link;

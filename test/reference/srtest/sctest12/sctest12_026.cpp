@@ -28,7 +28,7 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -38,26 +38,26 @@ break;
 auto int switch_value;
 switch_value=(0);
 {
-if( switch_value==(0) )
-goto CASE2;
-if( switch_value==(4) )
-goto CASE1;
-if( switch_value==(1) )
+if( (0)==switch_value )
 goto CASE;
-CASE:;
+if( (4)==switch_value )
+goto CASE1;
+if( (1)==switch_value )
+goto CASE2;
+CASE2:;
  ::TopLevel::x=(99);
-goto BREAK1;
+goto BREAK;
 CASE1:;
  ::TopLevel::x=(44);
-CASE2:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+CASE:;
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
-goto BREAK;
+goto BREAK1;
 }
-}
-BREAK:;
 }
 BREAK1:;
+}
+BREAK:;
 }
 {
 {
@@ -65,23 +65,23 @@ BREAK1:;
 auto int switch_value1;
 switch_value1=(2);
 {
-if( switch_value1==(2) )
-goto CASE4;
-if( switch_value1==(1) )
+if( (2)==switch_value1 )
 goto CASE3;
-CASE3:;
- ::TopLevel::x=(99);
-goto BREAK3;
+if( (1)==switch_value1 )
+goto CASE4;
 CASE4:;
+ ::TopLevel::x=(99);
+goto BREAK2;
+CASE3:;
 {
-if( !(( ::TopLevel::x==(0))||( ::TopLevel::x==(2))) )
-goto THEN1;
+if( !(((0)== ::TopLevel::x)||((2)== ::TopLevel::x)) )
+goto THEN;
  ::TopLevel::x=({ /*temp*/ int muxtemp; {
 if( !(false) )
-goto THEN;
+goto THEN1;
 muxtemp=(88);
 goto ELSE;
-THEN:;
+THEN1:;
 muxtemp=({ {
 {
  ::TopLevel::f_link1=(&&LINK);
@@ -94,16 +94,16 @@ ELSE:;
 }
 muxtemp; });
 goto ELSE1;
-THEN1:;
+THEN:;
 ;
 ELSE1:;
 }
-goto BREAK2;
+goto BREAK3;
 }
-}
-BREAK2:;
 }
 BREAK3:;
+}
+BREAK2:;
 }
 cease(  ::TopLevel::x );
 return ;

@@ -18,9 +18,9 @@ TopLevel top_level("top_level");
 void TopLevel::T()
 {
  ::TopLevel::x=(0);
-({ /*temp*/ int temp_i; temp_i=(1); {
- ::TopLevel::recurser(temp_i, &&LINK);
-LINK:;
+({ /*temp*/ int temp_i2; temp_i2=(1); {
+ ::TopLevel::recurser(temp_i2, &&LINK2);
+LINK2:;
 }
 });
 cease(  ::TopLevel::x );
@@ -33,12 +33,12 @@ void (TopLevel::recurser)(int i, void *link)
  ::TopLevel::x++;
 if( i<(5) )
 {
-({ /*temp*/ int temp_i; temp_i=(i+(1)); {
+({ /*temp*/ int temp_i; temp_i=((1)+i); {
  ::TopLevel::recurser(temp_i, &&LINK);
 LINK:;
 }
 });
-({ /*temp*/ int temp_i1; temp_i1=(i+(1)); {
+({ /*temp*/ int temp_i1; temp_i1=((1)+i); {
  ::TopLevel::recurser(temp_i1, &&LINK1);
 LINK1:;
 }

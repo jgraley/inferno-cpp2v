@@ -37,31 +37,31 @@ wait(SC_ZERO_TIME);
  ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 continue;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT1== ::TopLevel::state )
 {
  ::gvar+= ::i;
  ::j=(0);
  ::TopLevel::state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
 {
 wait(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
 continue;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
+if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
 {
  ::gvar++;
  ::j++;
  ::TopLevel::state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
 {
  ::gvar*=(2);
  ::i++;
  ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1== ::TopLevel::state )
 {
 cease(  ::gvar );
 return ;

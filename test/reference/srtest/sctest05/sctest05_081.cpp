@@ -35,29 +35,29 @@ next_trigger(SC_ZERO_TIME);
  ::TopLevel::state=((!( ::i<(5))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state) )
 {
  ::gvar+= ::i;
- ::TopLevel::state=((!(( ::i%(2))==(0))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
+ ::TopLevel::state=((!((0)==( ::i%(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED== ::TopLevel::state) )
 {
 next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_YIELD) )
+if( enabled&&( ::TopLevel::T_STATE_YIELD== ::TopLevel::state) )
 {
  ::gvar^=(1);
  ::TopLevel::state= ::TopLevel::T_STATE_THEN_ELSE;
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_THEN_ELSE) )
+if( enabled&&( ::TopLevel::T_STATE_THEN_ELSE== ::TopLevel::state) )
 {
  ::gvar*=(2);
  ::i++;
  ::TopLevel::state=(( ::i<(5)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state) )
 {
 cease(  ::gvar );
 enabled=(false);

@@ -1,17 +1,17 @@
-int a = ((99)*({ do
+int a = (44)+((99)*({ do
 {
 }
-while( 0 ); 233; }))+(44);
+while( 0 ); 233; }));
 void (main)();
 int main_return;
 
 void (main)()
 {
 {
- ::main_return=((((9)*({ do
+ ::main_return=( ::a+((4)+((9)*({ do
 {
 }
-while( 0 ); 23; }))+(4))+ ::a);
+while( 0 ); 23; }))));
 return ;
 }
 }

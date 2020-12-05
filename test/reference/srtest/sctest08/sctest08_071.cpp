@@ -13,14 +13,14 @@ enum TStates
 {
 T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
-T_STATE_LINK1 = 1U,
-T_STATE_LINK = 8U,
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 5U,
+T_STATE_LINK = 1U,
+T_STATE_LINK1 = 8U,
+T_STATE_PROCEED_NEXT1 = 0U,
+T_STATE_PROCEED_NEXT = 5U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE1 = 7U,
-T_STATE_YIELD = 2U,
-T_STATE_YIELD1 = 6U,
+T_STATE_YIELD1 = 2U,
+T_STATE_YIELD = 6U,
 };
 void T();
 private:
@@ -40,8 +40,8 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ unsigned int temp_link;
 /*temp*/ unsigned int temp_link1;
+/*temp*/ unsigned int temp_link;
 auto unsigned int state;
 /*temp*/ int temp_n;
 do
@@ -51,72 +51,72 @@ if( (sc_delta_count())==(0U) )
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 continue;
 }
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT1==state )
 {
  ::gvar=( ::gvar+ ::i);
 temp_n=(3);
  ::TopLevel::helper_n=temp_n;
- ::TopLevel::helper_link= ::TopLevel::T_STATE_LINK1;
+ ::TopLevel::helper_link= ::TopLevel::T_STATE_LINK;
 state= ::TopLevel::T_STATE_ENTER_helper;
 }
-if( state== ::TopLevel::T_STATE_LINK1 )
+if(  ::TopLevel::T_STATE_LINK==state )
 {
- ::gvar=( ::gvar*(2));
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 continue;
 }
-if( state== ::TopLevel::T_STATE_YIELD )
+if(  ::TopLevel::T_STATE_YIELD1==state )
 {
- ::i=( ::i+(1));
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::i=((1)+ ::i);
+state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE==state )
 {
 cease(  ::gvar );
 return ;
 state= ::TopLevel::T_STATE_ENTER_helper;
 }
-if( state== ::TopLevel::T_STATE_ENTER_helper )
+if(  ::TopLevel::T_STATE_ENTER_helper==state )
 {
  ::TopLevel::helper_stack_index++;
 ( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
  ::j=(0);
-state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 continue;
 }
-if( state== ::TopLevel::T_STATE_YIELD1 )
+if(  ::TopLevel::T_STATE_YIELD==state )
 {
- ::gvar=( ::gvar+(1));
- ::j=( ::j+(1));
-state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+ ::gvar=((1)+ ::gvar);
+ ::j=((1)+ ::j);
+state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1==state )
 {
- ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK1;
 state= ::TopLevel::T_STATE_ENTER_otherhelper;
 }
-if( state== ::TopLevel::T_STATE_LINK )
+if(  ::TopLevel::T_STATE_LINK1==state )
 {
-temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
-state=temp_link;
+state=temp_link1;
 }
-if( state== ::TopLevel::T_STATE_ENTER_otherhelper )
+if(  ::TopLevel::T_STATE_ENTER_otherhelper==state )
 {
  ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
-temp_link1= ::TopLevel::link;
-state=temp_link1;
+temp_link= ::TopLevel::link;
+state=temp_link;
 }
 wait(SC_ZERO_TIME);
 }

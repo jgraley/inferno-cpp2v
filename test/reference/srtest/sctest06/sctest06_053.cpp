@@ -32,7 +32,7 @@ auto unsigned int state;
 wait(SC_ZERO_TIME);
 state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 PROCEED_NEXT:;
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT1==state )
 {
  ::gvar+= ::i;
  ::j=(0);

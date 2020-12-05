@@ -14,8 +14,8 @@ private:
 void *link;
 public:
 int x;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -29,7 +29,7 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -41,7 +41,7 @@ break;
 case 4:;
  ::TopLevel::x=(44);
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -51,10 +51,10 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 2:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : ({ {
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
  ::TopLevel::f();
 }
 LINK:;
@@ -69,7 +69,7 @@ return ;
 void (TopLevel::f)()
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
 {
  ::TopLevel::f_return=(3);
 {

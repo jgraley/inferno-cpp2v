@@ -20,11 +20,11 @@ TopLevel top_level("top_level");
 void TopLevel::T()
 {
  ::gvar=(1);
-for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
+for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
 {
  ::gvar=( ::gvar+ ::i);
 ({ /*temp*/ int temp_n; temp_n=(3);  ::TopLevel::helper(temp_n); });
- ::gvar=( ::gvar*(2));
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
 }
 cease(  ::gvar );
@@ -32,10 +32,10 @@ cease(  ::gvar );
 
 void (TopLevel::helper)(int n)
 {
-for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )
+for(  ::j=(0);  ::j<n;  ::j=((1)+ ::j) )
 {
 wait(SC_ZERO_TIME);
- ::gvar=( ::gvar+(1));
+ ::gvar=((1)+ ::gvar);
 }
  ::TopLevel::otherhelper();
 return ;

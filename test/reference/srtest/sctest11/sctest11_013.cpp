@@ -13,8 +13,8 @@ void (f)();
 int x;
 int y;
 /*temp*/ int f_i;
-/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
@@ -26,7 +26,7 @@ void TopLevel::T()
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
  ::TopLevel::f();
 }
 }
@@ -37,7 +37,7 @@ LINK:;
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK1);
+ ::TopLevel::f_link=(&&LINK1);
  ::TopLevel::f();
 }
 }
@@ -49,7 +49,7 @@ for(  ::TopLevel::x=(0);  ::TopLevel::x<(2);  )
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK2);
+ ::TopLevel::f_link=(&&LINK2);
  ::TopLevel::f();
 }
 }
@@ -59,7 +59,7 @@ LINK2:;
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link1=(&&LINK3);
+ ::TopLevel::f_link=(&&LINK3);
  ::TopLevel::f();
 }
 }
@@ -75,7 +75,7 @@ void (TopLevel::f)()
 /*temp*/ void *temp_link;
 auto int i;
 auto void *link;
-link= ::TopLevel::f_link1;
+link= ::TopLevel::f_link;
 i= ::TopLevel::f_i;
 {
  ::TopLevel::f_return=((100)/i);

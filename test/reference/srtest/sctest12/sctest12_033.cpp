@@ -25,8 +25,8 @@ void TopLevel::T()
 auto int switch_value1;
 auto int switch_value;
 /*temp*/ int muxtemp;
-/*temp*/ int result;
 /*temp*/ int result1;
+/*temp*/ int result;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -34,44 +34,44 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
 switch_value1=(0);
-goto *((switch_value1==(0)) ? (&&CASE2) : (&&PROCEED));
+goto *(((0)==switch_value1) ? (&&CASE) : (&&PROCEED));
 PROCEED:;
-goto *((switch_value1==(4)) ? (&&CASE1) : (&&PROCEED1));
+goto *(((4)==switch_value1) ? (&&CASE1) : (&&PROCEED1));
 PROCEED1:;
-goto *((switch_value1==(1)) ? (&&CASE) : (&&PROCEED2));
+goto *(((1)==switch_value1) ? (&&CASE2) : (&&PROCEED2));
 PROCEED2:;
-CASE:;
+CASE2:;
  ::TopLevel::x=(99);
-goto BREAK1;
+goto BREAK;
 CASE1:;
  ::TopLevel::x=(44);
-CASE2:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+CASE:;
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
-goto BREAK;
-BREAK:;
+goto BREAK1;
 BREAK1:;
+BREAK:;
 switch_value=(2);
-goto *((switch_value==(2)) ? (&&CASE4) : (&&PROCEED3));
+goto *(((2)==switch_value) ? (&&CASE3) : (&&PROCEED3));
 PROCEED3:;
-goto *((switch_value==(1)) ? (&&CASE3) : (&&PROCEED4));
+goto *(((1)==switch_value) ? (&&CASE4) : (&&PROCEED4));
 PROCEED4:;
-CASE3:;
- ::TopLevel::x=(99);
-goto BREAK3;
 CASE4:;
-goto *((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ? (&&THEN1) : (&&PROCEED5));
+ ::TopLevel::x=(99);
+goto BREAK2;
+CASE3:;
+goto *((!(((0)== ::TopLevel::x)||((2)== ::TopLevel::x))) ? (&&THEN) : (&&PROCEED5));
 PROCEED5:;
-goto *((!(false)) ? (&&THEN) : (&&PROCEED6));
+goto *((!(false)) ? (&&THEN1) : (&&PROCEED6));
 PROCEED6:;
 muxtemp=(88);
 goto ELSE;
-THEN:;
+THEN1:;
  ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 LINK:;
@@ -81,11 +81,11 @@ ELSE:;
 result=muxtemp;
  ::TopLevel::x=result;
 goto ELSE1;
-THEN1:;
+THEN:;
 ELSE1:;
-goto BREAK2;
-BREAK2:;
+goto BREAK3;
 BREAK3:;
+BREAK2:;
 cease(  ::TopLevel::x );
 return ;
 ENTER_f:;

@@ -26,7 +26,7 @@ void (TopLevel::recurser)(int i)
  ::TopLevel::x++;
 if( i<(5) )
 {
- ::TopLevel::recurser(i+(1));
- ::TopLevel::recurser(i+(1));
+ ::TopLevel::recurser((1)+i);
+ ::TopLevel::recurser((1)+i);
 }
 }

@@ -20,7 +20,7 @@ void TopLevel::T()
 for(  ::i=(0);  ::i<(5);  ::i++ )
 {
  ::gvar+= ::i;
-if( ( ::i%(2))==(0) )
+if( (0)==( ::i%(2)) )
 {
 wait(SC_ZERO_TIME);
  ::gvar^=(1);

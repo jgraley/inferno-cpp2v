@@ -18,11 +18,11 @@ void TopLevel::T()
 {
  ::TopLevel::x=(0);
  ::TopLevel::x=( ::TopLevel::f( ::TopLevel::f(0, 0, 0), 6, 8));
-cease(  ::TopLevel::x+(( ::TopLevel::f(1, 2, 3))*(2)) );
+cease(  ::TopLevel::x+((2)*( ::TopLevel::f(1, 2, 3))) );
 }
 
 int (TopLevel::f)(int i, short j, char k)
 {
-auto int t = i+(j*(3));
-return t+(k*(5));
+auto int t = i+((3)*j);
+return t+((5)*k);
 }

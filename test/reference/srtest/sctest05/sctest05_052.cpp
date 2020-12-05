@@ -33,7 +33,7 @@ state=((!( ::i<(5))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_S
 goto *(lmap[state]);
 PROCEED_NEXT:;
  ::gvar+= ::i;
-state=((!(( ::i%(2))==(0))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
+state=((!((0)==( ::i%(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 goto *(lmap[state]);
 PROCEED:;
 wait(SC_ZERO_TIME);

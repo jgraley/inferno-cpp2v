@@ -22,7 +22,7 @@ void TopLevel::T()
  ::i=(0);
 {
 if( !( ::i<(4)) )
-goto THEN1;
+goto THEN;
 {
 NEXT:;
 {
@@ -32,7 +32,7 @@ NEXT:;
  ::j=(0);
 {
 if( !( ::j<(3)) )
-goto THEN;
+goto THEN1;
 {
 NEXT1:;
 {
@@ -48,7 +48,7 @@ if(  ::j<(3) )
 goto NEXT1;
 }
 goto ELSE;
-THEN:;
+THEN1:;
 ;
 ELSE:;
 }
@@ -64,7 +64,7 @@ if(  ::i<(4) )
 goto NEXT;
 }
 goto ELSE1;
-THEN1:;
+THEN:;
 ;
 ELSE1:;
 }

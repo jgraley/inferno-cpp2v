@@ -1,6 +1,6 @@
 void *(link_stack[10U]);
 unsigned int main_stack_index = 0U;
-int a = ((99)*({ {
+int a = (44)+((99)*({ {
 NEXT:;
 {
 }
@@ -10,7 +10,7 @@ goto NEXT;
 goto PROCEED;
 PROCEED:;
 }
-233; }))+(44);
+233; }));
 void (main)();
 void *main_link;
 void *main_link1;
@@ -23,17 +23,17 @@ void (main)()
  ::main_stack_index++;
 ( ::link_stack[ ::main_stack_index])= ::main_link1;
 {
- ::main_return=((((9)*({ {
-NEXT:;
+ ::main_return=( ::a+((4)+((9)*({ {
+NEXT1:;
 {
 }
-CONTINUE:;
+CONTINUE1:;
 if( 0 )
-goto NEXT;
-goto PROCEED;
-PROCEED:;
+goto NEXT1;
+goto PROCEED1;
+PROCEED1:;
 }
-23; }))+(4))+ ::a);
+23; }))));
 {
 temp_link=( ::link_stack[ ::main_stack_index]);
 {

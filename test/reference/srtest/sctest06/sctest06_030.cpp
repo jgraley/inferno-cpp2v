@@ -21,7 +21,7 @@ void TopLevel::T()
 {
  ::i=(0);
 {
-goto *((!( ::i<(4))) ? (&&THEN1) : (&&PROCEED));
+goto *((!( ::i<(4))) ? (&&THEN) : (&&PROCEED));
 PROCEED:;
 {
 NEXT:;
@@ -31,7 +31,7 @@ NEXT:;
 {
  ::j=(0);
 {
-goto *((!( ::j<(3))) ? (&&THEN) : (&&PROCEED1));
+goto *((!( ::j<(3))) ? (&&THEN1) : (&&PROCEED1));
 PROCEED1:;
 {
 NEXT1:;
@@ -48,7 +48,7 @@ goto *(( ::j<(3)) ? (&&NEXT1) : (&&PROCEED2));
 PROCEED2:;
 }
 goto ELSE;
-THEN:;
+THEN1:;
 ;
 ELSE:;
 }
@@ -63,7 +63,7 @@ goto *(( ::i<(4)) ? (&&NEXT) : (&&PROCEED3));
 PROCEED3:;
 }
 goto ELSE1;
-THEN1:;
+THEN:;
 ;
 ELSE1:;
 }

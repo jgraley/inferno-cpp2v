@@ -50,7 +50,7 @@ ENTER_recurser:;
 goto *((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&THEN) : (&&PROCEED));
 PROCEED:;
 {
-({ /*temp*/ int temp_i1; temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
+({ /*temp*/ int temp_i1; temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
 {
  ::TopLevel::recurser_i=temp_i1;
 {
@@ -61,7 +61,7 @@ goto ENTER_recurser;
 LINK1:;
 }
 });
-({ /*temp*/ int temp_i2; temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
+({ /*temp*/ int temp_i2; temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
 {
  ::TopLevel::recurser_i=temp_i2;
 {

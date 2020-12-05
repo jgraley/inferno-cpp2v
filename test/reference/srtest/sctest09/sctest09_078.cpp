@@ -29,8 +29,8 @@ int x;
 /*temp*/ int recurser_i;
 /*temp*/ unsigned int recurser_link;
 /*temp*/ int temp_i;
-/*temp*/ int temp_i2;
 /*temp*/ int temp_i1;
+/*temp*/ int temp_i2;
 };
 TopLevel top_level("top_level");
 
@@ -47,14 +47,14 @@ next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_LINK1) )
+if( enabled&&( ::TopLevel::T_STATE_LINK1== ::TopLevel::state) )
 {
 cease(  ::TopLevel::x );
 enabled=(false);
 if( enabled )
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_ENTER_recurser) )
+if( enabled&&( ::TopLevel::T_STATE_ENTER_recurser== ::TopLevel::state) )
 {
  ::TopLevel::recurser_stack_index++;
 ( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
@@ -62,21 +62,21 @@ if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_ENTER_recurser) )
  ::TopLevel::x++;
  ::TopLevel::state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ?  ::TopLevel::T_STATE_LINK_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED== ::TopLevel::state) )
 {
- ::TopLevel::temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i= ::TopLevel::temp_i2;
+ ::TopLevel::temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i= ::TopLevel::temp_i1;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_LINK) )
+if( enabled&&( ::TopLevel::T_STATE_LINK== ::TopLevel::state) )
 {
- ::TopLevel::temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
- ::TopLevel::recurser_i= ::TopLevel::temp_i1;
+ ::TopLevel::temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i= ::TopLevel::temp_i2;
  ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_THEN_ELSE;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_LINK_THEN_ELSE) )
+if( enabled&&( ::TopLevel::T_STATE_LINK_THEN_ELSE== ::TopLevel::state) )
 {
  ::TopLevel::temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
  ::TopLevel::recurser_stack_index--;

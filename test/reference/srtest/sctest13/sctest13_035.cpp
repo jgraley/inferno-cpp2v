@@ -30,7 +30,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
-for(  ::TopLevel::i=(0);  ::TopLevel::i!=(4);  ::TopLevel::i++ )
+for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
  ::TopLevel::x+= ::TopLevel::i;
@@ -77,7 +77,7 @@ goto *(( ::TopLevel::i< ::TopLevel::x) ? (&&PROCEED_NEXT3) : (&&PROCEED3));
 PROCEED3:;
 goto THEN_ELSE2;
 THEN_ELSE2:;
-for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=( ::TopLevel::i+(1)) )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=((1)+ ::TopLevel::i) )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i+=(1) )
  ::TopLevel::x+= ::TopLevel::i;

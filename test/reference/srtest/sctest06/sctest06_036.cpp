@@ -19,23 +19,23 @@ void TopLevel::T()
 {
  ::gvar=(1);
  ::i=(0);
-goto *((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT));
+goto *((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
 PROCEED_NEXT:;
  ::gvar+= ::i;
  ::j=(0);
-goto *((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT1));
+goto *((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT1));
 PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
  ::gvar++;
  ::j++;
-goto *(( ::j<(3)) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE));
-goto PROCEED_THEN_ELSE;
-PROCEED_THEN_ELSE:;
- ::gvar*=(2);
- ::i++;
-goto *(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE1));
+goto *(( ::j<(3)) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE1));
 goto PROCEED_THEN_ELSE1;
 PROCEED_THEN_ELSE1:;
+ ::gvar*=(2);
+ ::i++;
+goto *(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE));
+goto PROCEED_THEN_ELSE;
+PROCEED_THEN_ELSE:;
 cease(  ::gvar );
 return ;
 }

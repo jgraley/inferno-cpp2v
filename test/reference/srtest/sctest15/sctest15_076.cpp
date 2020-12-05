@@ -35,7 +35,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::U_STATE_LINK )
+if(  ::TopLevel::U_STATE_LINK== ::TopLevel::state )
 {
 enabled=(false);
 if( enabled )
@@ -44,7 +44,7 @@ if( enabled )
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::U_STATE_ENTER_HelperU )
+if(  ::TopLevel::U_STATE_ENTER_HelperU== ::TopLevel::state )
 {
  ::TopLevel::link= ::TopLevel::HelperU_link;
  ::TopLevel::temp_link= ::TopLevel::link;

@@ -33,11 +33,11 @@ void TopLevel::T()
 {
  ::TopLevel::f_i=temp_i1;
 {
- ::TopLevel::f_j=temp_j;
+ ::TopLevel::f_link1=(&&LINK);
 {
  ::TopLevel::f_k=temp_k;
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_j=temp_j;
 goto ENTER_f;
 }
 }
@@ -49,11 +49,11 @@ LINK:;
 {
  ::TopLevel::f_i=temp_i;
 {
- ::TopLevel::f_j=temp_j1;
+ ::TopLevel::f_link1=(&&LINK1);
 {
  ::TopLevel::f_k=temp_k1;
 {
- ::TopLevel::f_link1=(&&LINK1);
+ ::TopLevel::f_j=temp_j1;
 goto ENTER_f;
 }
 }
@@ -62,15 +62,15 @@ goto ENTER_f;
 LINK1:;
 }
  ::TopLevel::f_return; }); }); }); });
-cease(  ::TopLevel::x+(({ /*temp*/ int temp_i2; temp_i2=(1); ({ /*temp*/ int temp_j2; temp_j2=(2); ({ /*temp*/ int temp_k2; temp_k2=(3); ({ {
+cease(  ::TopLevel::x+((2)*({ /*temp*/ int temp_i2; temp_i2=(1); ({ /*temp*/ int temp_j2; temp_j2=(2); ({ /*temp*/ int temp_k2; temp_k2=(3); ({ {
 {
  ::TopLevel::f_i=temp_i2;
 {
- ::TopLevel::f_j=temp_j2;
+ ::TopLevel::f_link1=(&&LINK2);
 {
  ::TopLevel::f_k=temp_k2;
 {
- ::TopLevel::f_link1=(&&LINK2);
+ ::TopLevel::f_j=temp_j2;
 goto ENTER_f;
 }
 }
@@ -78,18 +78,18 @@ goto ENTER_f;
 }
 LINK2:;
 }
- ::TopLevel::f_return; }); }); }); })*(2)) );
+ ::TopLevel::f_return; }); }); }); })) );
 return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link1;
- ::TopLevel::k= ::TopLevel::f_k;
  ::TopLevel::j= ::TopLevel::f_j;
+ ::TopLevel::k= ::TopLevel::f_k;
+ ::TopLevel::link= ::TopLevel::f_link1;
  ::TopLevel::i= ::TopLevel::f_i;
- ::TopLevel::t=( ::TopLevel::i+( ::TopLevel::j*(3)));
+ ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));
 {
- ::TopLevel::f_return=( ::TopLevel::t+( ::TopLevel::k*(5)));
+ ::TopLevel::f_return=( ::TopLevel::t+((5)* ::TopLevel::k));
 {
 temp_link= ::TopLevel::link;
 goto *(temp_link);

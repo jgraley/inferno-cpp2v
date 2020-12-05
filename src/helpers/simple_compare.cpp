@@ -98,13 +98,8 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
         return sd;
         
     // Use this object so our ordering is used.
-    Ordered xo(*this), yo(*this);
-
-    // Fill up the sets of pointers
-    FOREACH( const TreePtrInterface &xe, x )
-        xo.insert( (TreePtr<Node>)xe );
-    FOREACH( const TreePtrInterface &ye, x )
-        yo.insert( (TreePtr<Node>)ye );
+    Ordered xo = GetOrdered(x);
+    Ordered yo = GetOrdered(y);
 
     // Compare them (will use SimpleCompare)
     return (int)(xo > yo) - (int)(xo < yo);
@@ -117,8 +112,7 @@ bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl )
 }
 
 
-// Make a SimpleCompare-ordered set and fill it with the elements of the collection
-SimpleCompare::Ordered SimpleCompare::GetOrderedSet( CollectionInterface &c )
+SimpleCompare::Ordered SimpleCompare::GetOrdered( ContainerInterface &c )
 {
     Ordered ordered( *this );
     FOREACH( const TreePtrInterface &e, c )

@@ -35,7 +35,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
 {
  ::gvar+= ::i;
 next_trigger(SC_ZERO_TIME);
@@ -45,7 +45,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
+if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
 {
  ::gvar*=(2);
  ::i++;
@@ -54,7 +54,7 @@ if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
 {
 cease(  ::gvar );
 enabled=(false);

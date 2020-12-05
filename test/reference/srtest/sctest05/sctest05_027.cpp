@@ -21,7 +21,7 @@ void TopLevel::T()
  ::i=(0);
 {
 if( !( ::i<(5)) )
-goto THEN1;
+goto THEN;
 goto PROCEED;
 PROCEED:;
 {
@@ -30,8 +30,8 @@ NEXT:;
 {
  ::gvar+= ::i;
 {
-if( !(( ::i%(2))==(0)) )
-goto THEN;
+if( !((0)==( ::i%(2))) )
+goto THEN1;
 goto PROCEED1;
 PROCEED1:;
 {
@@ -39,7 +39,7 @@ wait(SC_ZERO_TIME);
  ::gvar^=(1);
 }
 goto ELSE;
-THEN:;
+THEN1:;
 ;
 ELSE:;
 }
@@ -55,7 +55,7 @@ goto PROCEED2;
 PROCEED2:;
 }
 goto ELSE1;
-THEN1:;
+THEN:;
 ;
 ELSE1:;
 }

@@ -8,35 +8,35 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_THREAD(T);
+SC_THREAD(T2);
 }
-enum TStates
+enum TStates2
 {
-T_STATE_PROCEED_NEXT1 = 0U,
-T_STATE_PROCEED_NEXT = 2U,
-T_STATE_PROCEED_THEN_ELSE = 1U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
+T_STATE_PROCEED_NEXT4 = 0U,
+T_STATE_PROCEED_NEXT3 = 2U,
+T_STATE_PROCEED_THEN_ELSE3 = 1U,
+T_STATE_PROCEED_THEN_ELSE4 = 3U,
 };
-void T();
-bool proceed;
+void T2();
+bool proceed1;
 };
 class Multiplier : public sc_module
 {
 public:
 SC_CTOR( Multiplier )
 {
-SC_THREAD(T);
+SC_THREAD(T1);
 }
-enum TStates
+enum TStates1
 {
 T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_NEXT2 = 2U,
 T_STATE_PROCEED_NEXT = 4U,
+T_STATE_PROCEED_THEN_ELSE1 = 1U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE2 = 5U,
-T_STATE_PROCEED_THEN_ELSE = 1U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
 };
-void T();
+void T1();
 bool instigate;
 bool proceed;
 };
@@ -44,8 +44,8 @@ class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-mul_inst("mul_inst"),
-add_inst("add_inst")
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
@@ -59,83 +59,83 @@ void T();
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T()
+void Adder::T2()
 {
-static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED_THEN_ELSE, &&PROCEED_NEXT1, &&PROCEED_THEN_ELSE1 };
-auto unsigned int state;
+static const unsigned int (lmap2[]) = { &&PROCEED_NEXT3, &&PROCEED_THEN_ELSE3, &&PROCEED_NEXT4, &&PROCEED_THEN_ELSE4 };
+auto unsigned int state1;
 wait(SC_ZERO_TIME);
-state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE :  ::Adder::T_STATE_PROCEED_NEXT1);
-PROCEED_NEXT:;
-if( state== ::Adder::T_STATE_PROCEED_NEXT1 )
+state1=((!(! ::Adder::proceed1)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE3 :  ::Adder::T_STATE_PROCEED_NEXT4);
+PROCEED_NEXT3:;
+if(  ::Adder::T_STATE_PROCEED_NEXT4==state1 )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT1 :  ::Adder::T_STATE_PROCEED_THEN_ELSE);
-goto *(lmap[state]);
+state1=((! ::Adder::proceed1) ?  ::Adder::T_STATE_PROCEED_NEXT4 :  ::Adder::T_STATE_PROCEED_THEN_ELSE3);
+goto *(lmap2[state1]);
 }
-PROCEED_THEN_ELSE:;
-if( state== ::Adder::T_STATE_PROCEED_THEN_ELSE )
+PROCEED_THEN_ELSE3:;
+if(  ::Adder::T_STATE_PROCEED_THEN_ELSE3==state1 )
 {
- ::Adder::proceed=(false);
+ ::Adder::proceed1=(false);
  ::gvar+=(2);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
-state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE1 :  ::Adder::T_STATE_PROCEED_NEXT);
+state1=((!(! ::Adder::proceed1)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE4 :  ::Adder::T_STATE_PROCEED_NEXT3);
 }
-PROCEED_NEXT1:;
-if( state== ::Adder::T_STATE_PROCEED_NEXT )
+PROCEED_NEXT4:;
+if(  ::Adder::T_STATE_PROCEED_NEXT3==state1 )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT :  ::Adder::T_STATE_PROCEED_THEN_ELSE1);
-goto *(lmap[state]);
+state1=((! ::Adder::proceed1) ?  ::Adder::T_STATE_PROCEED_NEXT3 :  ::Adder::T_STATE_PROCEED_THEN_ELSE4);
+goto *(lmap2[state1]);
 }
-goto *(lmap[state]);
-PROCEED_THEN_ELSE1:;
- ::Adder::proceed=(false);
+goto *(lmap2[state1]);
+PROCEED_THEN_ELSE4:;
+ ::Adder::proceed1=(false);
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
 return ;
 }
 
-void Multiplier::T()
+void Multiplier::T1()
 {
-static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED_THEN_ELSE, &&PROCEED_NEXT1, &&PROCEED_THEN_ELSE1, &&PROCEED_NEXT2, &&PROCEED_THEN_ELSE2 };
+static const unsigned int (lmap1[]) = { &&PROCEED_NEXT, &&PROCEED_THEN_ELSE, &&PROCEED_NEXT1, &&PROCEED_THEN_ELSE1, &&PROCEED_NEXT2, &&PROCEED_THEN_ELSE2 };
 auto unsigned int state;
 wait(SC_ZERO_TIME);
-state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT1);
+state=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT1);
 PROCEED_NEXT:;
-if( state== ::Multiplier::T_STATE_PROCEED_NEXT1 )
+if(  ::Multiplier::T_STATE_PROCEED_NEXT1==state )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
-goto *(lmap[state]);
+state=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT1 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
+goto *(lmap1[state]);
 }
 PROCEED_THEN_ELSE:;
-if( state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE )
+if(  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1==state )
 {
  ::Multiplier::instigate=(false);
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 :  ::Multiplier::T_STATE_PROCEED_NEXT2);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1)=(true);
+state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE :  ::Multiplier::T_STATE_PROCEED_NEXT2);
 }
 PROCEED_NEXT1:;
-if( state== ::Multiplier::T_STATE_PROCEED_NEXT2 )
+if(  ::Multiplier::T_STATE_PROCEED_NEXT2==state )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT2 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE1);
-goto *(lmap[state]);
+state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT2 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE);
+goto *(lmap1[state]);
 }
 PROCEED_THEN_ELSE1:;
-if( state== ::Multiplier::T_STATE_PROCEED_THEN_ELSE1 )
+if(  ::Multiplier::T_STATE_PROCEED_THEN_ELSE==state )
 {
  ::Multiplier::proceed=(false);
  ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed1)=(true);
 state=((!(! ::Multiplier::proceed)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2 :  ::Multiplier::T_STATE_PROCEED_NEXT);
 }
-goto *(lmap[state]);
+goto *(lmap1[state]);
 PROCEED_NEXT2:;
 wait(SC_ZERO_TIME);
 state=((! ::Multiplier::proceed) ?  ::Multiplier::T_STATE_PROCEED_NEXT :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2);
-goto *(lmap[state]);
+goto *(lmap1[state]);
 PROCEED_THEN_ELSE2:;
  ::Multiplier::proceed=(false);
 cease(  ::gvar );

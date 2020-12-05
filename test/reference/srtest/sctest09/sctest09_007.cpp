@@ -26,7 +26,7 @@ void (TopLevel::recurser)(int i)
  ::TopLevel::x++;
 if( i<(5) )
 {
-({ /*temp*/ int temp_i; temp_i=(i+(1));  ::TopLevel::recurser(temp_i); });
-({ /*temp*/ int temp_i1; temp_i1=(i+(1));  ::TopLevel::recurser(temp_i1); });
+({ /*temp*/ int temp_i1; temp_i1=((1)+i);  ::TopLevel::recurser(temp_i1); });
+({ /*temp*/ int temp_i2; temp_i2=((1)+i);  ::TopLevel::recurser(temp_i2); });
 }
 }

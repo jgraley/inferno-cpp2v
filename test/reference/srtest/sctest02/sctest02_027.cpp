@@ -8,9 +8,9 @@ class Adder : public sc_module
 public:
 SC_CTOR( Adder )
 {
-SC_THREAD(T);
+SC_THREAD(T2);
 }
-void T();
+void T2();
 bool proceed;
 };
 class Multiplier : public sc_module
@@ -18,11 +18,11 @@ class Multiplier : public sc_module
 public:
 SC_CTOR( Multiplier )
 {
-SC_THREAD(T);
+SC_THREAD(T1);
 }
-void T();
+void T1();
 bool instigate;
-bool proceed;
+bool proceed1;
 };
 class TopLevel : public sc_module
 {
@@ -40,57 +40,57 @@ void T();
 int gvar;
 TopLevel top_level("top_level");
 
-void Adder::T()
+void Adder::T2()
 {
 wait(SC_ZERO_TIME);
 {
 if( !(! ::Adder::proceed) )
-goto THEN;
-goto PROCEED;
-PROCEED:;
+goto THEN3;
+goto PROCEED6;
+PROCEED6:;
 {
-NEXT:;
+NEXT3:;
 wait(SC_ZERO_TIME);
-CONTINUE:;
+CONTINUE3:;
 if( ! ::Adder::proceed )
-goto NEXT;
-goto PROCEED1;
-PROCEED1:;
+goto NEXT3;
+goto PROCEED7;
+PROCEED7:;
 }
-goto ELSE;
-THEN:;
+goto ELSE3;
+THEN3:;
 ;
-ELSE:;
+ELSE3:;
 }
  ::Adder::proceed=(false);
  ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
 {
 if( !(! ::Adder::proceed) )
-goto THEN1;
-goto PROCEED2;
-PROCEED2:;
+goto THEN4;
+goto PROCEED8;
+PROCEED8:;
 {
-NEXT1:;
+NEXT4:;
 wait(SC_ZERO_TIME);
-CONTINUE1:;
+CONTINUE4:;
 if( ! ::Adder::proceed )
-goto NEXT1;
-goto PROCEED3;
-PROCEED3:;
+goto NEXT4;
+goto PROCEED9;
+PROCEED9:;
 }
-goto ELSE1;
-THEN1:;
+goto ELSE4;
+THEN4:;
 ;
-ELSE1:;
+ELSE4:;
 }
  ::Adder::proceed=(false);
  ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
 return ;
 }
 
-void Multiplier::T()
+void Multiplier::T1()
 {
 {
 if( !(! ::Multiplier::instigate) )
@@ -115,7 +115,7 @@ ELSE:;
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
 {
-if( !(! ::Multiplier::proceed) )
+if( !(! ::Multiplier::proceed1) )
 goto THEN1;
 goto PROCEED2;
 PROCEED2:;
@@ -123,7 +123,7 @@ PROCEED2:;
 NEXT1:;
 wait(SC_ZERO_TIME);
 CONTINUE1:;
-if( ! ::Multiplier::proceed )
+if( ! ::Multiplier::proceed1 )
 goto NEXT1;
 goto PROCEED3;
 PROCEED3:;
@@ -133,11 +133,11 @@ THEN1:;
 ;
 ELSE1:;
 }
- ::Multiplier::proceed=(false);
+ ::Multiplier::proceed1=(false);
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
 {
-if( !(! ::Multiplier::proceed) )
+if( !(! ::Multiplier::proceed1) )
 goto THEN2;
 goto PROCEED4;
 PROCEED4:;
@@ -145,7 +145,7 @@ PROCEED4:;
 NEXT2:;
 wait(SC_ZERO_TIME);
 CONTINUE2:;
-if( ! ::Multiplier::proceed )
+if( ! ::Multiplier::proceed1 )
 goto NEXT2;
 goto PROCEED5;
 PROCEED5:;
@@ -155,7 +155,7 @@ THEN2:;
 ;
 ELSE2:;
 }
- ::Multiplier::proceed=(false);
+ ::Multiplier::proceed1=(false);
 cease(  ::gvar );
 return ;
 }

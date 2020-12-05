@@ -7,7 +7,6 @@
 #include "tree/type_db.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/duplicate.hpp"
-#include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "tree/scope.hpp"
 #include "sort_decls.hpp"
@@ -61,7 +60,6 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	ASSERT( program );
 
 #ifdef TEST_FOR_UNMODIFIED_TREE   
-    SimpleCompare sc;
     bool before = sc(program, temp_old_program);  
 #endif
     
@@ -419,9 +417,9 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 	else if( TreePtr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(expression) )
 	{
 		Sequence<Expression> seq_operands;
-		// Operands are in collection, so move them to a container
-		FOREACH( TreePtr<Expression> o, co->operands )
-			seq_operands.push_back( o );
+		// Operands are in collection, so sort them and put them in a sequence
+		FOREACH( TreePtr<Node> o, sc.GetOrdered(co->operands) )
+			seq_operands.push_back( TreePtr<Expression>::DynamicCast(o) );
 		return before +
 			   RenderOperator( co, seq_operands ) +
 			   after;
@@ -821,13 +819,14 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 				        first = false;
 				        s += "public " + scr->GetToken();
 				    }
-					FOREACH( TreePtr<Base> b, ir->bases )
+					FOREACH( TreePtr<Node> bn, sc.GetOrdered(ir->bases) )
 					{
 						if( !first )
 							s += ", ";
 						first=false;
+                        auto b = TreePtr<Base>::DynamicCast(bn);
 						ASSERT( b );
-						s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record);
+						s += RenderAccess(b->access) + " " + RenderIdentifier(b->record);
 					}
 				}
 			}
@@ -846,7 +845,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 	else
 		s += ERROR_UNSUPPORTED(declaration);
 
-		TRACE();
+	TRACE();
 	return s;
 }
 
@@ -1001,7 +1000,8 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     }
     s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
     int first = true;             
-    FOREACH( TreePtr<Declaration> pd, m->members )
+    auto sorted_members = sc.GetOrdered(m->members);
+    FOREACH( TreePtr<Node> pd, sorted_members )
     {
         // Bodge an init list that names any fields we have that are modules
         // and initialises any fields with initialisers
@@ -1042,7 +1042,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
         }                      
     }    
     s += "\n{\n";
-    FOREACH( TreePtr<Declaration> pd, m->members )
+    FOREACH( TreePtr<Node> pd, sorted_members )
         if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
             if( TreePtr<Process> r = dynamic_pointer_cast<Process>(f->type) )
                 s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";

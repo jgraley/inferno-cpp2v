@@ -19,7 +19,7 @@ void TopLevel::method()
 /*temp*/ bool enabled = true;
  ::TopLevel::gvar++;
  ::TopLevel::tot+= ::TopLevel::gvar;
-if(  ::TopLevel::gvar==(10) )
+if( (10)== ::TopLevel::gvar )
 cease(  ::TopLevel::tot );
 next_trigger(SC_ZERO_TIME);
 enabled=(false);

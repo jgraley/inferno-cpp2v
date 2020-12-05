@@ -68,13 +68,13 @@ ortemp; });
 {
  ::TopLevel::x=(0);
 {
-goto *((!( ::TopLevel::x<(2))) ? (&&THEN3) : (&&PROCEED2));
+goto *((!( ::TopLevel::x<(2))) ? (&&THEN2) : (&&PROCEED2));
 PROCEED2:;
 {
 NEXT:;
 {
 ({ /*temp*/ int muxtemp; {
-goto *((!( ::TopLevel::x++)) ? (&&THEN2) : (&&PROCEED3));
+goto *((!( ::TopLevel::x++)) ? (&&THEN3) : (&&PROCEED3));
 PROCEED3:;
 muxtemp=( ::TopLevel::y+=({ {
 {
@@ -88,7 +88,7 @@ LINK2:;
 }
  ::TopLevel::f_return; }));
 goto ELSE2;
-THEN2:;
+THEN3:;
 muxtemp=( ::TopLevel::y-=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
@@ -111,7 +111,7 @@ goto *(( ::TopLevel::x<(2)) ? (&&NEXT) : (&&PROCEED4));
 PROCEED4:;
 }
 goto ELSE3;
-THEN3:;
+THEN2:;
 ;
 ELSE3:;
 }

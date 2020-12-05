@@ -55,7 +55,7 @@ PROCEED:;
 {
 {
 /*temp*/ int temp_i1;
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
 {
 {
  ::TopLevel::recurser_i=temp_i1;
@@ -69,7 +69,7 @@ LINK1:;
 }
 {
 /*temp*/ int temp_i2;
-temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
 {
 {
  ::TopLevel::recurser_i=temp_i2;

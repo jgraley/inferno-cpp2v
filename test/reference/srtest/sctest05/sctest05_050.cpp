@@ -36,7 +36,7 @@ goto *(state);
 PROCEED_NEXT:;
  ::gvar+= ::i;
 {
-state=((!(( ::i%(2))==(0))) ? (lmap[ ::TopLevel::T_STATE_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED]));
+state=((!((0)==( ::i%(2)))) ? (lmap[ ::TopLevel::T_STATE_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED]));
 goto *(state);
 }
 PROCEED:;
