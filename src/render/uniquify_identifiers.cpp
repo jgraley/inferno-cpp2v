@@ -87,16 +87,25 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 
 void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v )
 {
+    list< TreePtr<SpecificIdentifier> > ids;
+    set< TreePtr<SpecificIdentifier> > reached;
+    
     Walk t( root );
     FOREACH( const TreePtrInterface &p, t )
     {
         if( auto si = TreePtr<SpecificIdentifier>::DynamicCast(p) )
         {
-            if( count(si) > 0 )
+            if( reached.count(si) > 0 )
                 continue;
-            string nn = v.AddIdentifier( si );
-            insert( IdentifierNamePair( si, nn ) );
+            reached.insert( si );
+            ids.push_back( si );
         }
+    }
+
+    for( TreePtr<SpecificIdentifier> si : ids )
+    {
+        string nn = v.AddIdentifier( si );
+        insert( IdentifierNamePair( si, nn ) );
     }
 }
 
