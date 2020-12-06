@@ -60,8 +60,8 @@ void T2();
  ::Adder add_inst;
  ::Multiplier mul_inst;
 };
-int gvar;
 TopLevel top_level("top_level");
+int gvar;
 
 void Adder::T()
 {

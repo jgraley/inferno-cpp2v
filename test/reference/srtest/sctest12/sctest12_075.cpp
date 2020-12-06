@@ -30,17 +30,19 @@ T_STATE_THEN_ELSE_BREAK = 14U,
 };
 void T();
 private:
-unsigned int link;
-unsigned int state;
 int switch_value;
 int switch_value1;
 public:
 int x;
-/*temp*/ unsigned int f_link;
+private:
+unsigned int link;
+unsigned int state;
+public:
 /*temp*/ int f_return;
 /*temp*/ int muxtemp;
-/*temp*/ int result1;
 /*temp*/ int result;
+/*temp*/ int result1;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 

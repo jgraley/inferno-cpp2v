@@ -10,19 +10,21 @@ SC_THREAD(T);
 }
 void T();
 private:
-int i;
-short j;
 char k;
-void *link;
+short j;
+int i;
 int t;
 public:
 int x;
-/*temp*/ int f_i;
-/*temp*/ short f_j;
+private:
+void *link;
+public:
 /*temp*/ char f_k;
-/*temp*/ void *f_link1;
-/*temp*/ void *f_link;
+/*temp*/ short f_j;
+/*temp*/ int f_i;
 /*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 

@@ -27,15 +27,15 @@ T_STATE_PROCEED_THEN_ELSE4 = 10U,
 T_STATE_PROCEED_THEN_ELSE5 = 13U,
 };
 void T();
-float fi;
 int i;
+int x;
 private:
 void *link;
 public:
-int x;
-/*temp*/ void *f_link1;
-/*temp*/ void *f_link;
+float fi;
 /*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 

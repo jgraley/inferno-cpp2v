@@ -17,8 +17,8 @@ void U();
 private:
 unsigned int link;
 public:
-/*temp*/ unsigned int HelperU_link1;
 /*temp*/ unsigned int HelperU_link;
+/*temp*/ unsigned int HelperU_link1;
 };
 TopLevel top_level("top_level");
 

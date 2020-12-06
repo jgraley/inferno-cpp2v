@@ -10,19 +10,21 @@ SC_THREAD(T);
 }
 void T();
 private:
-int i;
-short j;
 char k;
-void *link;
+short j;
+int i;
 int t;
 public:
 int x;
-/*temp*/ int f_i;
-/*temp*/ short f_j;
+private:
+void *link;
+public:
 /*temp*/ char f_k;
-/*temp*/ void *f_link1;
-/*temp*/ void *f_link;
+/*temp*/ short f_j;
+/*temp*/ int f_i;
 /*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -30,20 +32,20 @@ void TopLevel::T()
 {
 /*temp*/ void *temp_link;
 auto void *state;
-/*temp*/ int result7;
-/*temp*/ int result2;
-/*temp*/ int result3;
 /*temp*/ int result;
 /*temp*/ int result1;
-/*temp*/ int result6;
-/*temp*/ int result5;
-/*temp*/ int result4;
 /*temp*/ int result10;
 /*temp*/ int result11;
-/*temp*/ int result9;
+/*temp*/ int result2;
+/*temp*/ int result3;
+/*temp*/ int result4;
+/*temp*/ int result5;
+/*temp*/ int result6;
+/*temp*/ int result7;
 /*temp*/ int result8;
-/*temp*/ int temp_i1;
+/*temp*/ int result9;
 /*temp*/ int temp_i;
+/*temp*/ int temp_i1;
 /*temp*/ int temp_i2;
 /*temp*/ int temp_j;
 /*temp*/ int temp_j1;

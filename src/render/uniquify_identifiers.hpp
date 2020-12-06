@@ -11,7 +11,7 @@
 // Check identifiers for duplication
 // Policy is to dedupe with a simple scheme like <name>_<unique number> or even without the underscore
 // This or any scheme could clash with existing names. BUT if we bring existing names that happen to be
-// the same form into our scheme, as it we created them, then uniqueness is guaranteed (but we will sometimes
+// the same form into our scheme, as if we created them, then uniqueness is guaranteed (but we will sometimes
 // want to change the number, so what started as foo_2 could become foo_3 by the time we're done with it).
 
 typedef set< unsigned > NameUsage;
@@ -29,6 +29,17 @@ struct VisibleIdentifiers
 
 	static string MakeUniqueName( string b, unsigned n );
 	static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
+};
+
+
+class UniquifyCompare : public SimpleCompare
+{
+public:
+    UniquifyCompare( const UniquifyIdentifiers *unique );
+    virtual CompareResult Compare( TreePtr<Node> a, TreePtr<Node> b ) override;
+    
+private:
+    const UniquifyIdentifiers * const unique;
 };
 
 ///

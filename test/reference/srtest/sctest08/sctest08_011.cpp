@@ -11,16 +11,16 @@ SC_THREAD(T);
 void T();
 void (helper)();
 void (otherhelper)();
-/*temp*/ void *helper_link1;
-/*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link1;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link1;
 /*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
 };
+TopLevel top_level("top_level");
 int gvar;
 int i;
 int j;
-TopLevel top_level("top_level");
 
 void TopLevel::T()
 {

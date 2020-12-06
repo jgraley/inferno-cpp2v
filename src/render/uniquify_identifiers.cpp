@@ -83,6 +83,31 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 	return nn;
 }
 
+//////////////////////////// UniquifyCompare ///////////////////////////////
+
+UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
+    SimpleCompare(Matcher::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
+    unique( unique_ )
+{
+}
+
+
+CompareResult UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b )
+{
+    //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
+    auto id_a = TreePtr<SpecificIdentifier>::DynamicCast(a);
+    auto id_b = TreePtr<SpecificIdentifier>::DynamicCast(b);
+    
+    if( !(id_a && id_b) )
+        return SimpleCompare::Compare(a, b);
+        
+    string ustr_a = unique->at(id_a);
+    string ustr_b = unique->at(id_b);
+    //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
+    
+    return ustr_a.compare(ustr_b);
+}
+
 //////////////////////////// IdentifierFingerprinter ///////////////////////////////
 
 IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
@@ -208,5 +233,5 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
     {
         string nn = v.AddIdentifier( si );
         insert( IdentifierNamePair( si, nn ) );
-    }
+    }        
 }

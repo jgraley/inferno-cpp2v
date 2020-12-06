@@ -28,24 +28,24 @@ T_STATE_THEN = 11U,
 T_STATE_THEN_ELSE_BREAK = 14U,
 };
 void T();
+int x;
 private:
 unsigned int link;
 public:
-int x;
-/*temp*/ unsigned int f_link;
 /*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
 /*temp*/ unsigned int temp_link;
-auto unsigned int state;
 auto int switch_value;
 auto int switch_value1;
+auto unsigned int state;
 /*temp*/ int muxtemp;
-/*temp*/ int result1;
 /*temp*/ int result;
+/*temp*/ int result1;
 do
 {
 if( (sc_delta_count())==(0U) )

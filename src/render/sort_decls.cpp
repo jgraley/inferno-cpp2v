@@ -132,7 +132,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 }
 
 
-Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record )
+Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers *unique )
 {
 	Sequence<Declaration> s;
     int ocs = c.size();
@@ -147,7 +147,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 	//cc = JumbleDecls( cc );
 
     // Sort using SimpleCompare first: this should improve reproducibility
-    cc = PreSortDecls( cc );
+    cc = PreSortDecls( cc, unique );
 
 	// Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
@@ -193,15 +193,28 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 }
 
 
-Sequence<Declaration> PreSortDecls( Sequence<Declaration> c )
+Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdentifiers *unique )
 {
+    //FTRACE("PreSortDecls()\n");
+
     // Make a SimpleCompare-ordered set and fill it with the decls
-    SimpleCompare::Ordered sco = SimpleCompare(Matcher::UNIQUE).GetOrdered(c);
+    auto comparer = UniquifyCompare(unique);
+    SimpleCompare::Ordered sco = comparer.GetOrdered(c);
+    //SimpleCompare(Matcher::REPEATABLE).GetOrdered(c);
 
     // Extract the decls from the set, now in SimpleCompare order
 	Sequence<Declaration> s;
     for( TreePtr<Node> e : sco )
-        s.push_back( TreePtr<Declaration>::DynamicCast(e) );
+    {
+        auto d = TreePtr<Declaration>::DynamicCast(e);
+        s.push_back(d);
+        //if( auto inst = TreePtr<Instance>::DynamicCast(d) )
+        //{
+        //    auto sid = TreePtr<SpecificIdentifier>::DynamicCast(inst->identifier);
+        //    string ustr = unique->at(sid);
+        //    FTRACEC(inst)("(")(ustr)(", ")(inst->type)(", ")(inst->initialiser)(")\n");
+        //}
+    }
     
     return s;
 }

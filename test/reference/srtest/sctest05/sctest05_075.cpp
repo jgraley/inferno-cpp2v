@@ -20,9 +20,9 @@ void T();
 private:
 unsigned int state;
 };
+TopLevel top_level("top_level");
 int gvar;
 int i;
-TopLevel top_level("top_level");
 
 void TopLevel::T()
 {

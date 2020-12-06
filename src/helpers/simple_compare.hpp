@@ -12,13 +12,14 @@ class SimpleCompare : public Traceable
 {
 public:
     // Ordering could be REPEATABLE which is weak, but we still want
-    // to account for the number of equivalent elements, so use multiset
-    typedef multiset<TreePtr<Node>, SimpleCompare> Ordered;
+    // to account for the number of equivalent elements, so use multiset.
+    // Use a reference to SimpleCompare so derived classes can use it.
+    typedef multiset<TreePtr<Node>, SimpleCompare &> Ordered;
 
     SimpleCompare( Matcher::Ordering ordering = Matcher::UNIQUE );
     
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
-    CompareResult Compare( TreePtr<Node> x, TreePtr<Node> y );
+    virtual CompareResult Compare( TreePtr<Node> x, TreePtr<Node> y );
     
     /// Pass in two sequences of pointers to nodes, which can point to subtrees. Result is true if they match. O(n) locally.
     CompareResult Compare( SequenceInterface &x, SequenceInterface &y );

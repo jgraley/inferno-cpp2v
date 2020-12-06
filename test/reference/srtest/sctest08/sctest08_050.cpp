@@ -24,21 +24,21 @@ T_STATE_YIELD1 = 6U,
 };
 void T();
 private:
-unsigned int helper_stack_index;
-void *link;
-void *(link_stack[10U]);
 int (n_stack[10U]);
+void *(link_stack[10U]);
+void *link;
+unsigned int helper_stack_index;
 public:
-/*temp*/ void *helper_link1;
-/*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link1;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link1;
 /*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
 };
+TopLevel top_level("top_level");
 int gvar;
 int i;
 int j;
-TopLevel top_level("top_level");
 
 void TopLevel::T()
 {

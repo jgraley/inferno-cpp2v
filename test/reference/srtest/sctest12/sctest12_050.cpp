@@ -28,13 +28,13 @@ T_STATE_THEN = 11U,
 T_STATE_THEN_ELSE_BREAK = 14U,
 };
 void T();
+int x;
 private:
 void *link;
 public:
-int x;
-/*temp*/ void *f_link1;
-/*temp*/ void *f_link;
 /*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -42,12 +42,12 @@ void TopLevel::T()
 {
 /*temp*/ void *temp_link;
 static const void *(lmap[]) = { &&PROCEED, &&PROCEED1, &&PROCEED_CASE, &&CASE, &&CASE1, &&BREAK, &&PROCEED2, &&PROCEED_CASE1, &&CASE2, &&PROCEED3, &&PROCEED4, &&THEN, &&LINK, &&ELSE, &&THEN_ELSE_BREAK, &&ENTER_f };
-auto void *state;
 auto int switch_value;
 auto int switch_value1;
+auto void *state;
 /*temp*/ int muxtemp;
-/*temp*/ int result1;
 /*temp*/ int result;
+/*temp*/ int result1;
  ::TopLevel::x=(0);
 switch( 0 )
 {

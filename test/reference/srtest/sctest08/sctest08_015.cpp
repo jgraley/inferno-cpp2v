@@ -10,24 +10,26 @@ helper_stack_index(0U)
 SC_THREAD(T);
 }
 void T();
+private:
+int (n_stack[10U]);
+void *(link_stack[10U]);
+void *link;
+public:
 void (helper)();
+void (otherhelper)();
 private:
 unsigned int helper_stack_index;
-void *link;
-void *(link_stack[10U]);
-int (n_stack[10U]);
 public:
-void (otherhelper)();
-/*temp*/ void *helper_link1;
-/*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link1;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link1;
 /*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
 };
+TopLevel top_level("top_level");
 int gvar;
 int i;
 int j;
-TopLevel top_level("top_level");
 
 void TopLevel::T()
 {

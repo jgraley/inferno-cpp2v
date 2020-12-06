@@ -21,10 +21,12 @@ void T();
 private:
 int (i_stack[10U]);
 unsigned int (link_stack[10U]);
+public:
+int x;
+private:
 unsigned int recurser_stack_index;
 unsigned int state;
 public:
-int x;
 /*temp*/ int recurser_i;
 /*temp*/ unsigned int recurser_link;
 };

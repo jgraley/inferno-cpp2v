@@ -18,10 +18,10 @@ T_STATE_YIELD = 2U,
 };
 void T();
 };
+TopLevel top_level("top_level");
 int gvar;
 int i;
 int j;
-TopLevel top_level("top_level");
 
 void TopLevel::T()
 {

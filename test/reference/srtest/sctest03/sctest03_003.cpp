@@ -8,12 +8,12 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(method);
 }
-int gvar;
 void method();
+int gvar;
 int tot;
 };
-int gvar1 = 0;
 TopLevel top_level("top_level");
+int gvar1 = 0;
 int tot1 = 0;
 
 void TopLevel::method()

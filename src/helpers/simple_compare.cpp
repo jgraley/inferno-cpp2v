@@ -10,10 +10,12 @@ SimpleCompare::SimpleCompare( Matcher::Ordering ordering_ ) :
 
 CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
 {   
+    //FTRACE("SC::Compare ")(x)(" - ")(y)("\n");
+
     // If we are asked to do a trivial compare, return immediately reporting success
     if( x==y )
         return EQUAL;
-    
+        
     // Local comparison deals with node type and value if there is one
     CompareResult cr = Node::Compare(x.get(), y.get(), ordering);
     
@@ -108,6 +110,7 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
 
 bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl )
 {
+    //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
     return Compare(xl, yl) < EQUAL;
 }
 

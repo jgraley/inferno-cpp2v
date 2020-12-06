@@ -28,13 +28,15 @@ T_STATE_THEN_ELSE = 2U,
 void T();
 private:
 int i;
-unsigned int link;
 public:
 int x;
 int y;
+private:
+unsigned int link;
+public:
 /*temp*/ int f_i;
-/*temp*/ unsigned int f_link;
 /*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
 };
 TopLevel top_level("top_level");
 
@@ -42,16 +44,16 @@ void TopLevel::T()
 {
 /*temp*/ unsigned int temp_link;
 auto unsigned int state;
-/*temp*/ bool andtemp;
 /*temp*/ int muxtemp;
-/*temp*/ bool ortemp;
-/*temp*/ bool result5;
 /*temp*/ int result;
-/*temp*/ bool result6;
 /*temp*/ int result1;
-/*temp*/ int result4;
 /*temp*/ int result2;
 /*temp*/ int result3;
+/*temp*/ int result4;
+/*temp*/ bool andtemp;
+/*temp*/ bool ortemp;
+/*temp*/ bool result5;
+/*temp*/ bool result6;
 do
 {
 if( (sc_delta_count())==(0U) )

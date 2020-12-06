@@ -13,12 +13,14 @@ void T();
 private:
 int (i_stack[10U]);
 void *(link_stack[10U]);
-unsigned int recurser_stack_index;
 public:
 int x;
+private:
+unsigned int recurser_stack_index;
+public:
 /*temp*/ int recurser_i;
-/*temp*/ void *recurser_link1;
 /*temp*/ void *recurser_link;
+/*temp*/ void *recurser_link1;
 };
 TopLevel top_level("top_level");
 

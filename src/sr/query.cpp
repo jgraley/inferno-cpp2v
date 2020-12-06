@@ -68,14 +68,15 @@ void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mu
     TRACE("Checking ")(mut_links)(" against ")(ref_links)("\n");
     
     // Multiplicity X links are not uniquified but their contents should match 
-    Links::const_iterator mit = mut_links.begin();
-    Links::const_iterator rit = ref_links.begin();
-    while( mit != mut_links.end() || rit != ref_links.end() )
+    ASSERT( mut_links.size() == ref_links.size() );
+    for( pair<const PatternLink, XLink> rp : ref_links )
     {
-        ASSERT( mit != mut_links.end() && rit != ref_links.end() );
-        ASSERT( mit->first == rit->first );
-        auto mxp = mit->second.GetChildX().get();
-        auto rxp = rit->second.GetChildX().get();
+        PatternLink plink = rp.first;
+        XLink ref_xlink = rp.second;
+        ASSERT( mut_links.count(plink) == 1 );
+        XLink mut_xlink = mut_links.at(plink);
+        auto mxp = mut_xlink.GetChildX().get();
+        auto rxp = ref_xlink.GetChildX().get();
         
         if( auto mxssr = dynamic_cast<SubSequenceRange *>(mxp) )
         {
@@ -100,19 +101,21 @@ void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mu
         }    
         else // some other node: should match by link
         {
-            ASSERT( mit->second == rit->second );
+            ASSERT( mut_xlink == ref_xlink );
         }
-        ++mit;
-        ++rit;
     }
 }
 
 
 string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
 {      
+    bool firstlink = true;
     string s = "[";
     for( LocatedLink link : links )
     {
+        if( !firstlink )
+            s += ",\n";
+        firstlink = false;
         auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() );
         
         s += Trace((PatternLink)link) + ":=";
@@ -122,31 +125,47 @@ string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
             ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
             ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
             
+            bool firstx = true;
             s += "SubContainerRange[";
             FOREACH( const TreePtrInterface &xe_node, *xci )
             {
+                if( !firstx )
+                    s += ", ";
+                firstx = false;
                 XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-                s += Trace(xe_link) + ", ";
+                s += Trace(xe_link);
             }
-            s += "],\n";
+            s += "]";
         }
         else if( auto xscl = dynamic_cast<SubCollection *>(xsc) )
         {
-            s += "SubCollection[";
+            bool firstx = true;
+            s += "SubCollection{";
             for( XLink xe_link : xscl->elts )
-                s += Trace(xe_link) + ", ";
-            s += "],\n";
+            {
+                if( !firstx )
+                    s += ", ";
+                firstx = false;
+                s += Trace(xe_link);
+            }
+            s += "}";
         }
         else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
         {
+            bool firstx = true;
             s += "SubSequence[";
             for( XLink xe_link : xssl->elts )
-                s += Trace(xe_link) + ", ";
-            s += "],\n";
+            {
+                if( !firstx )
+                    s += ", ";
+                firstx = false;
+                s += Trace(xe_link);
+            }
+            s += "]";
         }    
         else
         {
-            s += Trace((XLink)link) + ",\n";
+            s += Trace((XLink)link);
         }
     }
     return s + "]";
@@ -162,14 +181,18 @@ string DecidedQuery::GetTrace() const
 
     ASSERT( choices.size() == decisions.size() );
 
+    bool first = true;
     s += "Decisions: [";
     for( int i=0; i<decisions.size(); i++ )
     {
+        if( !first )
+            s += ",\n";
+        first = false;
         Range d = decisions[i];
         Choice c = choices[i];
-        s += SSPrintf("%d:", i);
+        s += SSPrintf("(%d:", i);
         s += Trace(d) + ", ";
-        s += "choice=" + c.GetTrace(d) + ",\n";
+        s += "choice=" + c.GetTrace(d) + ")";
     }
     s += "]";
     return s;

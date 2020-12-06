@@ -28,14 +28,16 @@ T_STATE_THEN_ELSE = 2U,
 void T();
 private:
 int i;
-unsigned int link;
 public:
 int x;
 int y;
+private:
+unsigned int link;
+public:
 /*temp*/ int f_i;
-/*temp*/ unsigned int f_link1;
-/*temp*/ unsigned int f_link;
 /*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
+/*temp*/ unsigned int f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -44,16 +46,16 @@ void TopLevel::T()
 /*temp*/ unsigned int temp_link;
 static const unsigned int (lmap[]) = { &&PROCEED, &&LINK, &&THEN_ELSE, &&THEN, &&LINK1, &&PROCEED_ELSE, &&PROCEED_NEXT, &&PROCEED1, &&LINK2, &&THEN1, &&LINK3, &&ELSE, &&PROCEED_THEN_ELSE, &&ENTER_f };
 auto unsigned int state;
-/*temp*/ bool andtemp;
 /*temp*/ int muxtemp;
-/*temp*/ bool ortemp;
-/*temp*/ bool result5;
 /*temp*/ int result;
-/*temp*/ bool result6;
 /*temp*/ int result1;
-/*temp*/ int result4;
 /*temp*/ int result2;
 /*temp*/ int result3;
+/*temp*/ int result4;
+/*temp*/ bool andtemp;
+/*temp*/ bool ortemp;
+/*temp*/ bool result5;
+/*temp*/ bool result6;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
 wait(SC_ZERO_TIME);

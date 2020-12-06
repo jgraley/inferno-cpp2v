@@ -22,15 +22,17 @@ void T();
 private:
 int (i_stack[10U]);
 unsigned int (link_stack[10U]);
+public:
+int x;
+private:
 unsigned int recurser_stack_index;
 unsigned int state;
 public:
-int x;
 /*temp*/ int recurser_i;
-/*temp*/ unsigned int recurser_link;
 /*temp*/ int temp_i;
 /*temp*/ int temp_i1;
 /*temp*/ int temp_i2;
+/*temp*/ unsigned int recurser_link;
 };
 TopLevel top_level("top_level");
 

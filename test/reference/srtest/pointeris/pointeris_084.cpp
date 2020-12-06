@@ -17,15 +17,15 @@ PROCEED:;
 }
 233; }));
 void (main)();
-void *main_link;
 int main_return;
+void *main_link;
 
 void (main)()
 {
 /*temp*/ void *temp_link;
 auto void *state1;
-/*temp*/ bool enabled = true;
 /*temp*/ int result;
+/*temp*/ bool enabled = true;
  ::main_stack_index++;
 ( ::link_stack[ ::main_stack_index])= ::main_link;
 wait(SC_ZERO_TIME);

@@ -13,9 +13,9 @@ PROCEED:;
 }
 233; }));
 void (main)();
-void *main_link1;
-void *main_link;
 int main_return;
+void *main_link;
+void *main_link1;
 
 void (main)()
 {
