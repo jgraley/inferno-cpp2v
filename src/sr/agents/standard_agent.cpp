@@ -507,12 +507,12 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
 	ContainerInterface::iterator xit = px->begin();
     PatternLink pending_star_plink = PatternLink();
     PatternLink pending_star_xit;
-	for( pit = pattern->begin(); pit != pattern->end(); ++pit )
+	for( pit = pattern->begin(); pit != pattern->end(); ++pit ) // --------------- loop -------------------
 	{
         ASSERT( xit == px->end() || *xit );
         PatternLink plink( this, &*pit );
 
-        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) 
+        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) // ------------ STAR ---------------
         {
             ASSERT( !pending_star_plink );
             // We have a Star type wildcard that can match multiple elements.
@@ -552,7 +552,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                 xit = xit_star_end;
             }
         }
-        else
+        else // -------------------------------- NOT STAR ----------------------------------------
         {
             SolutionMap::const_iterator req_it = required_links->find(plink);
             if( req_it == required_links->end() ) 
@@ -601,7 +601,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             ASSERT(xit_star_limit != px->end());
             ++xit_star_limit;    
         }
-    }
+    } // ----------------------------------------------- end of loop ------------------------------------------------------
+    
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern->end() );
     if( xit != px->end() )

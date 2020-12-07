@@ -95,16 +95,22 @@ UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
 CompareResult UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b )
 {
     //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
+    
+    // We're ovreridden the node entrypoint of SimpleCompare. If we're not
+    // dealing with two SpecificIdentifiers, call back into that function
+    // explicitly to get normal compare behaviour.
     auto id_a = TreePtr<SpecificIdentifier>::DynamicCast(a);
     auto id_b = TreePtr<SpecificIdentifier>::DynamicCast(b);
-    
     if( !(id_a && id_b) )
         return SimpleCompare::Compare(a, b);
         
+    // We have two SpecificIdentifiers, so get their unique names
     string ustr_a = unique->at(id_a);
     string ustr_b = unique->at(id_b);
     //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
     
+    // Compare those. This is like a REPEATABLE SC but using the
+    // uniquified names instead.
     return ustr_a.compare(ustr_b);
 }
 
