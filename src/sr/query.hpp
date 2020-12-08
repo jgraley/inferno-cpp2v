@@ -106,7 +106,7 @@ public:
         CONJECTURE
     } last_activity = NEW;
     
-    static void CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
+    static void AssertMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
                                     const DecidedQueryCommon::Links &ref_links );
     static string TraceLinks( const DecidedQueryCommon::Links &links );    
 };

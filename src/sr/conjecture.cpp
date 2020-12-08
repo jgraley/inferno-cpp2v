@@ -128,22 +128,23 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
     
     DecidedQueryCommon::Choice back_choice = query->GetChoices()[bc];
     const auto &back_decision = query->GetDecisions()[bc];
-    
-    TRACE("Conjecture examines decision %d: decision=", bc)(back_decision)
-         (" choice=")(back_choice.GetTrace(back_decision))("\n");
+   
+    // bit noisy
+    //TRACE("Conjecture examines decision %d: decision=", bc)(back_decision)
+    //     (" choice=")(back_choice.GetTrace(back_decision))("\n");
     
     if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN )
     {
         back_choice.iter = back_decision.begin;
         back_choice.mode = DecidedQueryCommon::Choice::ITER;
-        TRACEC("Decay BEGIN\n");
+        //TRACEC("Decay BEGIN\n");
     }
     
     // Inclusive case - we let the choice go to end but we won't go any further
     // Also do this check in Exclusive mode in case already at end
     if( back_choice.iter == back_decision.end )
     {
-        TRACEC("Early END\n");
+        //TRACEC("Early END\n");
         query->Invalidate(bc);
         if( bc==0 )
             return false;
@@ -153,16 +154,16 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
 
 	if( back_choice.iter != back_decision.end ) 
 	{
-        TRACEC("Increment iterator\n");
+        //TRACEC("Increment iterator\n");
         ++back_choice.iter; 
         query->SetChoice( bc, back_choice );
-        TRACEC("Choice=")(back_choice.GetTrace(back_decision))("\n");
+        //TRACEC("Choice=")(back_choice.GetTrace(back_decision))("\n");
     }
 		
     // Exclusive case - we don't let the choice be end
     if( !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
-        TRACEC("Late END\n");
+        //TRACEC("Late END\n");
         query->Invalidate(bc);
         if( bc==0 )
             return false;
@@ -187,23 +188,23 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
         switch( query->last_activity )
         {
             case DecidedQueryCommon::NEW:
-                TRACEC("last_activity=NEW\n");
+                //TRACEC("last_activity=NEW\n");
                 break;
                 
             case DecidedQueryCommon::QUERY:
-                TRACEC("last_activity=QUERY\n");
+                //TRACEC("last_activity=QUERY\n");
                 ok = IncrementAgent( rit, pq->GetDecisions().size() - 1 );
                 query->last_activity = DecidedQueryCommon::CONJECTURE;
                 break;
                 
             case DecidedQueryCommon::CONJECTURE:
-                TRACEC("last_activity=CONJECTURE\n");
+                //TRACEC("last_activity=CONJECTURE\n");
                 break;
         }
     }
     else
     {
-        TRACEC("Conjecture has no decisions\n");
+        //TRACEC("Conjecture has no decisions\n");
     }
 
     if( !ok )

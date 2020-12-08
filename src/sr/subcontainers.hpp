@@ -17,6 +17,13 @@ namespace SR
 struct SubContainer : Node // TODO #69
 {
     NODE_FUNCTIONS
+    
+    // XLinks to these are often created using CreateDistinct()
+    // (putting them in the domain would make the domain too big).
+    // These functions operate on links held within the subcontainer,
+    // which typically will be in the domain.
+    virtual string GetContentsTrace() { return ""; } 
+    virtual void AssertMatchingContents( TreePtr<Node> other ) { ASSERTFAIL(); }
 };
 
 
@@ -57,6 +64,8 @@ public:
     virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
     virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
     virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequenceRange"); }  
+    virtual string GetContentsTrace(); 
+    virtual void AssertMatchingContents( TreePtr<Node> other );    
 };
 
 
@@ -77,6 +86,8 @@ struct SubSequence : Sequence<Node>,
         (void)Sequence<Node>::operator=(o);
         return *this;
     }
+    virtual string GetContentsTrace(); 
+    virtual void AssertMatchingContents( TreePtr<Node> other );    
 
     list<XLink> elts;
 };
@@ -91,6 +102,8 @@ struct SubCollection : Collection<Node>,
         (void)Collection<Node>::operator=(o);
         return *this;
     }
+    virtual string GetContentsTrace(); 
+    virtual void AssertMatchingContents( TreePtr<Node> other );    
     
     set<XLink> elts;
 };       

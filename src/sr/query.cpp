@@ -8,6 +8,8 @@
 
 using namespace SR;
 
+//////////////////////////// PatternQuery ///////////////////////////////
+
 PatternQuery::PatternQuery( const Agent *base_agent_ ) :
     base_agent( base_agent_ )
 {
@@ -61,9 +63,10 @@ PatternQuery::Links PatternQuery::GetAllLinks() const
     return links;
 }
 
+//////////////////////////// DecidedQueryCommon ///////////////////////////////
 
-void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
-                                             const DecidedQueryCommon::Links &ref_links )
+void DecidedQueryCommon::AssertMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
+                                              const DecidedQueryCommon::Links &ref_links )
 {    
     TRACE("Checking ")(mut_links)(" against ")(ref_links)("\n");
     
@@ -74,103 +77,34 @@ void DecidedQueryCommon::CheckMatchingLinks( const DecidedQueryCommon::Links &mu
         PatternLink plink = rp.first;
         XLink ref_xlink = rp.second;
         ASSERT( mut_links.count(plink) == 1 );
-        XLink mut_xlink = mut_links.at(plink);
-        auto mxp = mut_xlink.GetChildX().get();
-        auto rxp = ref_xlink.GetChildX().get();
-        
-        if( auto mxssr = dynamic_cast<SubSequenceRange *>(mxp) )
-        {
-            auto rxssr = dynamic_cast<SubSequenceRange *>(rxp);
-            ASSERT( rxssr );
-            ASSERT( mxssr->begin() == rxssr->begin() );
-            ASSERT( mxssr->end() == rxssr->end() );
-        }
-        else if( auto mxscl = dynamic_cast<SubCollection *>(mxp) )
-        {
-            auto rxscl = dynamic_cast<SubCollection *>(rxp);
-            ASSERT( rxscl );
-            ASSERT( mxscl->elts == rxscl->elts )
-                  (mxscl->elts)(" != ")(rxscl->elts);
-         }
-        else if( auto mxssl = dynamic_cast<SubSequence *>(mxp) )
-        {
-            auto rxssl = dynamic_cast<SubSequence *>(rxp);
-            ASSERT( rxssl );
-            ASSERT( mxssl->elts == rxssl->elts )
-                  (mxssl->elts)(" != ")(rxssl->elts);
-        }    
-        else // some other node: should match by link
-        {
-            ASSERT( mut_xlink == ref_xlink );
-        }
+        XLink mut_xlink = mut_links.at(plink);        
+        if( auto mxssr = dynamic_cast<SubContainer *>(mut_xlink.GetChildX().get()) )        
+            mxssr->AssertMatchingContents( ref_xlink.GetChildX() ); // only the contents will actually match        
+        else // some other node: should match by link        
+            ASSERT( mut_xlink == ref_xlink );        
     }
 }
 
 
 string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
 {      
-    bool firstlink = true;
-    string s = "[";
+    bool first = true;
+    string s = "Links[";
     for( LocatedLink link : links )
     {
-        if( !firstlink )
+        if( !first )
             s += ",\n";
-        firstlink = false;
-        auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() );
-        
+        first = false;                
         s += Trace((PatternLink)link) + ":=";
-        if( auto xscr = dynamic_cast<SubContainerRange *>(xsc) )
-        {
-            ASSERT( link );
-            ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
-            ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
-            
-            bool firstx = true;
-            s += "SubContainerRange[";
-            FOREACH( const TreePtrInterface &xe_node, *xci )
-            {
-                if( !firstx )
-                    s += ", ";
-                firstx = false;
-                XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-                s += Trace(xe_link);
-            }
-            s += "]";
-        }
-        else if( auto xscl = dynamic_cast<SubCollection *>(xsc) )
-        {
-            bool firstx = true;
-            s += "SubCollection{";
-            for( XLink xe_link : xscl->elts )
-            {
-                if( !firstx )
-                    s += ", ";
-                firstx = false;
-                s += Trace(xe_link);
-            }
-            s += "}";
-        }
-        else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
-        {
-            bool firstx = true;
-            s += "SubSequence[";
-            for( XLink xe_link : xssl->elts )
-            {
-                if( !firstx )
-                    s += ", ";
-                firstx = false;
-                s += Trace(xe_link);
-            }
-            s += "]";
-        }    
+        if( auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() ) )
+            s += xsc->GetContentsTrace(); // normal trace is not enough info
         else
-        {
             s += Trace((XLink)link);
-        }
     }
     return s + "]";
 }
 
+//////////////////////////// DecidedQuery ///////////////////////////////
 
 string DecidedQuery::GetTrace() const
 {
@@ -458,11 +392,8 @@ bool DecidedQueryCommon::Range::operator==(const Range &o) const // Only require
 string DecidedQueryCommon::Range::GetTrace() const 
 {
     string s;
-    s += "(";
-    if( container )
-        s += SSPrintf("container=%p", container.get()) + ", ";
-    else
-        s += SSPrintf("container=%p", container.get()) + ", ";
+    s += "Range(";
+    s += SSPrintf("container=%p", container.get()) + ", ";
             
     if( container )
         s += "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) + ", ";
@@ -471,12 +402,18 @@ string DecidedQueryCommon::Range::GetTrace() const
         s += "end=@" + (end==container->end() ? string("END") : Trace(*end)) + ", ";
     
     s += "inclusive=" + Trace(inclusive) + ", ";
-    
-    s += "range=[";
+        
+    s += "which is [";
+    bool first = true;
     for( ContainerInterface::iterator it = begin;
          it != end;
          ++it )
-        s += Trace(*it) + ", ";
+    {
+        if( !first )
+            s += ", ";
+        first = false;
+        s += Trace(*it);
+    }
     s += "] ";
 
     s += ")";

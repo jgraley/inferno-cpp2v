@@ -367,11 +367,11 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
             
         
         // Don't check normal links - NLQ implementations are not required to register them
-        //DecidedQueryCommon::CheckMatchingLinks( mut_query->GetNormalLinks(), ref_query->GetNormalLinks() );
+        //DecidedQueryCommon::AssertMatchingLinks( mut_query->GetNormalLinks(), ref_query->GetNormalLinks() );
 
         // Now to check the links the two algos put in their query objects
-        DecidedQueryCommon::CheckMatchingLinks( mut_query->GetAbnormalLinks(), ref_query->GetAbnormalLinks() );
-        DecidedQueryCommon::CheckMatchingLinks( mut_query->GetMultiplicityLinks(), ref_query->GetMultiplicityLinks() );
+        DecidedQueryCommon::AssertMatchingLinks( mut_query->GetAbnormalLinks(), ref_query->GetAbnormalLinks() );
+        DecidedQueryCommon::AssertMatchingLinks( mut_query->GetMultiplicityLinks(), ref_query->GetMultiplicityLinks() );
         return mut_query;
     };
     
