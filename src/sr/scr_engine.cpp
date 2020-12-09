@@ -67,9 +67,15 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines );    
-    CreateMyEngines( master_agents, my_agents_needing_engines );    
+
+    // Configure agents on the way down
     ConfigureAgents();
+
+    // This recurses SCR engine planning
+    CreateMyEngines( master_agents, my_agents_needing_engines );    
     
+    // Make and-rule engines on the way back up - by now, hopefully all
+    // the agents this and-rule engine sees have been configured.
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_agents);
 } 
 

@@ -26,7 +26,7 @@
 
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
-#define NLQ_TEST
+//#define NLQ_TEST
 
 
 using namespace SR;

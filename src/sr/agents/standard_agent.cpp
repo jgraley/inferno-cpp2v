@@ -14,8 +14,8 @@ using namespace SR;
 
 void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 {
-    AgentCommon::AgentConfigure(master_scr_engine);
     plan.DoPlan( this );    
+    AgentCommon::AgentConfigure(master_scr_engine);
 }
 
 
@@ -29,7 +29,7 @@ void StandardAgent::Plan::DoPlan( StandardAgent *algo_ )
             SequencePlanning(pattern_seq);
     }
     
-    planned = true;
+    algo->planned = true;
 }
 
 
@@ -67,6 +67,7 @@ void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
+    ASSERT( planned )("I need to do my planning before you can do yours...\n");
     auto pq = make_shared<PatternQuery>(this);
     const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
@@ -193,7 +194,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 		                                  SequenceInterface *pattern ) const
 {
     INDENT("S");
-    ASSERT( plan.planned );
+    ASSERT( planned );
     
     int pattern_num_non_star = plan.sequence_pattern_num_non_star.at(pattern);
     ContainerInterface::iterator p_last_star = plan.sequence_p_last_star.at(pattern);
@@ -488,7 +489,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                                                       Completeness &completeness ) const
 {
     INDENT("S");
-    ASSERT( plan.planned );
+    ASSERT( planned );
 
     TheKnowledge::Nugget::IndexType prev_index = -1; 
     

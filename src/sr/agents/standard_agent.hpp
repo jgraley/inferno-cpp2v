@@ -42,7 +42,6 @@ public:
         void SequencePlanning( SequenceInterface *pattern );
 
         StandardAgent *algo;
-        bool planned = false;
         map<SequenceInterface *, int> sequence_pattern_num_non_star;
         map<SequenceInterface *, ContainerInterface::iterator> sequence_p_last_star;
         set<PatternLink> stars_preceding_non_stars;
@@ -91,6 +90,7 @@ private:
     TreePtr<Node> BuildReplaceNormal();
     
     Plan plan; // can't be const because children added after construct
+    bool planned = false;
 };
 
 
