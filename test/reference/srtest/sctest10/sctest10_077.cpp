@@ -68,8 +68,8 @@ if( (sc_delta_count())==(0U) )
  ::TopLevel::temp_j=(0);
  ::TopLevel::f_i= ::TopLevel::temp_i;
  ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
- ::TopLevel::f_k= ::TopLevel::temp_k;
  ::TopLevel::f_j= ::TopLevel::temp_j;
+ ::TopLevel::f_k= ::TopLevel::temp_k;
 next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 enabled=(false);
@@ -85,8 +85,8 @@ if( enabled&&( ::TopLevel::T_STATE_LINK== ::TopLevel::state) )
  ::TopLevel::temp_k1=(8);
  ::TopLevel::f_i= ::TopLevel::temp_i1;
  ::TopLevel::f_link= ::TopLevel::T_STATE_LINK1;
- ::TopLevel::f_k= ::TopLevel::temp_k1;
  ::TopLevel::f_j= ::TopLevel::temp_j1;
+ ::TopLevel::f_k= ::TopLevel::temp_k1;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
 if( enabled&&( ::TopLevel::T_STATE_LINK1== ::TopLevel::state) )
@@ -101,8 +101,8 @@ if( enabled&&( ::TopLevel::T_STATE_LINK1== ::TopLevel::state) )
  ::TopLevel::temp_k2=(3);
  ::TopLevel::f_i= ::TopLevel::temp_i2;
  ::TopLevel::f_link= ::TopLevel::T_STATE_LINK2;
- ::TopLevel::f_k= ::TopLevel::temp_k2;
  ::TopLevel::f_j= ::TopLevel::temp_j2;
+ ::TopLevel::f_k= ::TopLevel::temp_k2;
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
 if( enabled&&( ::TopLevel::T_STATE_LINK2== ::TopLevel::state) )
@@ -118,8 +118,8 @@ if( enabled )
 }
 if( enabled&&( ::TopLevel::T_STATE_ENTER_f== ::TopLevel::state) )
 {
- ::TopLevel::j= ::TopLevel::f_j;
  ::TopLevel::k= ::TopLevel::f_k;
+ ::TopLevel::j= ::TopLevel::f_j;
  ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));

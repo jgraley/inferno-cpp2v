@@ -14,12 +14,12 @@ using namespace SR;
 
 void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 {
-    plan.DoPlan( this );    
+    plan.ConstructPlan( this );    
     AgentCommon::AgentConfigure(master_scr_engine);
 }
 
 
-void StandardAgent::Plan::DoPlan( StandardAgent *algo_ )
+void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
 {
     algo = algo_;
     const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
@@ -28,9 +28,80 @@ void StandardAgent::Plan::DoPlan( StandardAgent *algo_ )
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
             SequencePlanning(pattern_seq);
     }
-    
+    MakePatternQuery();
     algo->planned = true;
 }
+
+
+void StandardAgent::Plan::MakePatternQuery()
+{
+    // Clear it just in case
+    pattern_query = make_shared<PatternQuery>(algo);
+
+    const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
+    FOREACH( Itemiser::Element *ie, pattern_memb )
+    {
+        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
+        {
+            int num_stars = 0;
+   			FOREACH( const TreePtrInterface &pe, *pattern_seq )
+            {
+                ASSERT( pe );
+                if( dynamic_pointer_cast<StarAgent>((TreePtr<Node>)pe) )
+                    num_stars++;
+            }
+            num_stars--; // Don't register a decision for the last Star
+   			for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
+   			{
+                const TreePtrInterface *pe = &*pit; 
+                ASSERT( pe );
+                if( dynamic_cast<StarAgent *>(pe->get()) )
+                {
+                    if( num_stars>0 )
+                        pattern_query->RegisterDecision( true ); // Inclusive, please.
+                    num_stars--;
+                    pattern_query->RegisterAbnormalLink(PatternLink(algo, pe));    
+                }
+                else
+                {
+                    pattern_query->RegisterNormalLink(PatternLink(algo, pe));    
+                }
+            }
+        }
+        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
+        {
+   			const TreePtrInterface *p_star = nullptr;
+   			for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
+   			{
+                const TreePtrInterface *pe = &*pit; 
+				if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
+				{
+                    p_star = pe;
+                }
+				else
+                {
+                    pattern_query->RegisterDecision( false ); // Exclusive, please
+				    pattern_query->RegisterNormalLink(PatternLink(algo, pe));    	     
+                }
+		    }
+            if( p_star )
+            {
+                pattern_query->RegisterAbnormalLink(PatternLink(algo, p_star));   		                    
+            }
+        }
+        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
+        {
+            if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be nullptr meaning no restriction            
+                pattern_query->RegisterNormalLink(PatternLink(algo, pattern_ptr));
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+        }
+    }
+}
+
+
 
 
 void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
@@ -67,70 +138,7 @@ void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
-    ASSERT( planned )("I need to do my planning before you can do yours...\n");
-    auto pq = make_shared<PatternQuery>(this);
-    const vector< Itemiser::Element * > pattern_memb = Itemise();
-    FOREACH( Itemiser::Element *ie, pattern_memb )
-    {
-        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
-        {
-            int num_stars = 0;
-   			FOREACH( const TreePtrInterface &pe, *pattern_seq )
-            {
-                ASSERT( pe );
-                if( dynamic_pointer_cast<StarAgent>((TreePtr<Node>)pe) )
-                    num_stars++;
-            }
-            num_stars--; // Don't register a decision for the last Star
-   			for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
-   			{
-                const TreePtrInterface *pe = &*pit; 
-                ASSERT( pe );
-                if( dynamic_cast<StarAgent *>(pe->get()) )
-                {
-                    if( num_stars>0 )
-                        pq->RegisterDecision( true ); // Inclusive, please.
-                    num_stars--;
-                    pq->RegisterAbnormalLink(PatternLink(this, pe));    
-                }
-                else
-                {
-                    pq->RegisterNormalLink(PatternLink(this, pe));    
-                }
-            }
-        }
-        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
-        {
-   			const TreePtrInterface *p_star = nullptr;
-   			for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
-   			{
-                const TreePtrInterface *pe = &*pit; 
-				if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
-				{
-                    p_star = pe;
-                }
-				else
-                {
-                    pq->RegisterDecision( false ); // Exclusive, please
-				    pq->RegisterNormalLink(PatternLink(this, pe));    	     
-                }
-		    }
-            if( p_star )
-            {
-                pq->RegisterAbnormalLink(PatternLink(this, p_star));   		                    
-            }
-        }
-        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
-        {
-            if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be nullptr meaning no restriction            
-                pq->RegisterNormalLink(PatternLink(this, pattern_ptr));
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
-        }
-    }
-    return pq;
+    return plan.pattern_query;
 }
 
 

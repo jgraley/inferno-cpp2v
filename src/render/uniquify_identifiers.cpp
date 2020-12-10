@@ -126,14 +126,13 @@ IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
 
 void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 {
-    // Record the fingerprints
+    // Record the fingerprints and increment index on the way down
     if( auto id_x = TreePtr<SpecificIdentifier>::DynamicCast(x) )
         fingerprints[id_x].insert(index);
+    index++;
 
     // Recurse into our child nodes
     ProcessChildren( x, index );
-            
-    index++;
 }
 
 
