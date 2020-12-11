@@ -27,6 +27,8 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
             sequences.emplace( make_pair(pattern_seq, Sequence(this, pattern_seq)) );
+        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
+            collections.emplace( make_pair(pattern_col, Collection(this, pattern_col)) );
     }
     MakePatternQuery();
     algo->planned = true;
@@ -60,6 +62,12 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
         p_prev = pit;       
     }
     p_last_star = p_prev_star;
+}
+
+
+StandardAgent::Plan::Collection::Collection( Plan *plan, CollectionInterface *pattern )
+{
+    // nothing yet but there surely shall be
 }
 
 
@@ -199,9 +207,9 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 {
     INDENT("S");
     ASSERT( planned );
-    const Plan::Sequence &splan = plan.sequences.at(pattern);
-    int pattern_num_non_star = splan.pattern_num_non_star;
-    ContainerInterface::iterator p_last_star = splan.p_last_star;
+    const Plan::Sequence &plan_seq = plan.sequences.at(pattern);
+    int pattern_num_non_star = plan_seq.pattern_num_non_star;
+    ContainerInterface::iterator p_last_star = plan_seq.p_last_star;
 
     if( px->size() < pattern_num_non_star )
     {
@@ -281,6 +289,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 		 					                CollectionInterface *pattern ) const
 {
     INDENT("C");
+
+    const Plan::Collection &plan_col = plan.collections.at(pattern);
     
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -495,11 +505,11 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     INDENT("S");
     ASSERT( planned );
 
-    TheKnowledge::Nugget::IndexType prev_index = -1; 
+    const Plan::Sequence &plan_seq = plan.sequences.at(pattern);
+    int pattern_num_non_star = plan_seq.pattern_num_non_star;
+    ContainerInterface::iterator p_last_star = plan_seq.p_last_star;
 
-    const Plan::Sequence &splan = plan.sequences.at(pattern);
-    int pattern_num_non_star = splan.pattern_num_non_star;
-    ContainerInterface::iterator p_last_star = splan.p_last_star;
+    TheKnowledge::Nugget::IndexType prev_index = -1; 
 
     TRACEC("DNLQ sequence: %d plinks of which %d are non-star\n", pattern->size(), pattern_num_non_star);
 
@@ -524,7 +534,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             // We have a Star type wildcard that can match multiple elements.
             ContainerInterface::iterator xit_star_end;
                 
-            if( splan.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
+            if( plan_seq.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
             {
                 TRACEC("Star before non-star ")(plink)("\n");
                 // Next will be non-star; wait for that
@@ -625,6 +635,8 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
                                                         Completeness &completeness ) const
 {
     INDENT("C");
+    
+    const Plan::Collection &plan_col = plan.collections.at(pattern);
     
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder

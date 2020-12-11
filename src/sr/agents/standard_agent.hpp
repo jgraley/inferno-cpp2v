@@ -50,8 +50,14 @@ public:
             set<PatternLink> stars_preceding_non_stars;
         };
         
+        struct Collection
+        {
+            Collection( Plan *plan, CollectionInterface *pattern );
+        };
+        
         StandardAgent *algo;
         map<SequenceInterface *, Sequence> sequences;
+        map<CollectionInterface *, Collection> collections;
         shared_ptr<PatternQuery> pattern_query;
     };
     
