@@ -39,14 +39,20 @@ public:
     struct Plan
     {
         void ConstructPlan( StandardAgent *algo );
-        void SequencePlanning( SequenceInterface *pattern );
         void MakePatternQuery();
-
+        
+        struct Sequence
+        {
+            Sequence( Plan *plan, SequenceInterface *pattern );
+            
+            int pattern_num_non_star;
+            ContainerInterface::iterator p_last_star;
+            set<PatternLink> stars_preceding_non_stars;
+        };
+        
         StandardAgent *algo;
+        map<SequenceInterface *, Sequence> sequences;
         shared_ptr<PatternQuery> pattern_query;
-        map<SequenceInterface *, int> sequence_pattern_num_non_star;
-        map<SequenceInterface *, ContainerInterface::iterator> sequence_p_last_star;
-        set<PatternLink> stars_preceding_non_stars;
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;

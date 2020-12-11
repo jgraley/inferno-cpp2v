@@ -25,11 +25,41 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
     const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
-        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
-            SequencePlanning(pattern_seq);
+        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
+            sequences.emplace( make_pair(pattern_seq, Sequence(this, pattern_seq)) );
     }
     MakePatternQuery();
     algo->planned = true;
+}
+
+
+StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern )
+{
+    bool prev_is_star = false;
+    pattern_num_non_star = 0;
+    ContainerInterface::iterator p_prev_star;
+    ContainerInterface::iterator p_prev;
+	for( ContainerInterface::iterator pit = pattern->begin(); 
+         pit != pattern->end(); 
+         ++pit ) 
+    {
+		TreePtr<Node> pe( *pit );
+		ASSERT( pe );
+        if( dynamic_pointer_cast<StarAgent>(pe) )
+        {               
+            p_prev_star = pit;
+            prev_is_star = true;
+        }
+        else
+        {
+            if( prev_is_star )
+                stars_preceding_non_stars.insert( PatternLink(plan->algo, &*p_prev) );
+            pattern_num_non_star++;
+            prev_is_star = false;
+        }     
+        p_prev = pit;       
+    }
+    p_last_star = p_prev_star;
 }
 
 
@@ -102,40 +132,6 @@ void StandardAgent::Plan::MakePatternQuery()
 }
 
 
-
-
-void StandardAgent::Plan::SequencePlanning( SequenceInterface *pattern )
-{
-    bool prev_is_star = false;
-    int pattern_num_non_star = 0;
-    ContainerInterface::iterator p_prev_star;
-    ContainerInterface::iterator p_prev;
-	for( ContainerInterface::iterator pit = pattern->begin(); 
-         pit != pattern->end(); 
-         ++pit ) 
-    {
-		TreePtr<Node> pe( *pit );
-		ASSERT( pe );
-        if( dynamic_pointer_cast<StarAgent>(pe) )
-        {               
-            p_prev_star = pit;
-            prev_is_star = true;
-        }
-        else
-        {
-            if( prev_is_star )
-                stars_preceding_non_stars.insert( PatternLink(algo, &*p_prev) );
-            pattern_num_non_star++;
-            prev_is_star = false;
-        }     
-        p_prev = pit;       
-    }
-
-    sequence_pattern_num_non_star[pattern] = pattern_num_non_star;
-    sequence_p_last_star[pattern] = p_prev_star;
-}
-
-
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     return plan.pattern_query;
@@ -203,9 +199,9 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 {
     INDENT("S");
     ASSERT( planned );
-    
-    int pattern_num_non_star = plan.sequence_pattern_num_non_star.at(pattern);
-    ContainerInterface::iterator p_last_star = plan.sequence_p_last_star.at(pattern);
+    const Plan::Sequence &splan = plan.sequences.at(pattern);
+    int pattern_num_non_star = splan.pattern_num_non_star;
+    ContainerInterface::iterator p_last_star = splan.p_last_star;
 
     if( px->size() < pattern_num_non_star )
     {
@@ -500,9 +496,10 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     ASSERT( planned );
 
     TheKnowledge::Nugget::IndexType prev_index = -1; 
-    
-    int pattern_num_non_star = plan.sequence_pattern_num_non_star.at(pattern);
-    ContainerInterface::iterator p_last_star = plan.sequence_p_last_star.at(pattern);
+
+    const Plan::Sequence &splan = plan.sequences.at(pattern);
+    int pattern_num_non_star = splan.pattern_num_non_star;
+    ContainerInterface::iterator p_last_star = splan.p_last_star;
 
     TRACEC("DNLQ sequence: %d plinks of which %d are non-star\n", pattern->size(), pattern_num_non_star);
 
@@ -527,7 +524,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             // We have a Star type wildcard that can match multiple elements.
             ContainerInterface::iterator xit_star_end;
                 
-            if( plan.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
+            if( splan.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
             {
                 TRACEC("Star before non-star ")(plink)("\n");
                 // Next will be non-star; wait for that
