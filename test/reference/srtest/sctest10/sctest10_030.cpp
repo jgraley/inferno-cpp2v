@@ -75,12 +75,12 @@ temp_i=result1;
 }
 {
 /*temp*/ int result5;
-/*temp*/ int temp_j1;
-temp_j1=(6);
-{
-/*temp*/ int result6;
 /*temp*/ int temp_k1;
 temp_k1=(8);
+{
+/*temp*/ int result6;
+/*temp*/ int temp_j1;
+temp_j1=(6);
 {
 /*temp*/ int result7;
 {

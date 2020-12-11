@@ -23,7 +23,7 @@ void TopLevel::T()
  ::TopLevel::f(temp_k, temp_j, temp_i1, &&LINK);
 LINK:;
 }
- ::TopLevel::f_return; }); }); }); }); ({ /*temp*/ int temp_j1; temp_j1=(6); ({ /*temp*/ int temp_k1; temp_k1=(8); ({ {
+ ::TopLevel::f_return; }); }); }); }); ({ /*temp*/ int temp_k1; temp_k1=(8); ({ /*temp*/ int temp_j1; temp_j1=(6); ({ {
  ::TopLevel::f(temp_k1, temp_j1, temp_i, &&LINK1);
 LINK1:;
 }

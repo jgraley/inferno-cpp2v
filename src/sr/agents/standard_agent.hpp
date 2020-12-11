@@ -45,14 +45,18 @@ public:
         {
             Sequence( Plan *plan, SequenceInterface *pattern );
             
-            int pattern_num_non_star;
-            ContainerInterface::iterator p_last_star;
+            int num_non_star;
+            int num_stars;
+            ContainerInterface::iterator pit_last_star;
             set<PatternLink> stars_preceding_non_stars;
         };
         
         struct Collection
         {
             Collection( Plan *plan, CollectionInterface *pattern );
+            
+            const TreePtrInterface *p_star;
+            PatternLink star_plink;
         };
         
         StandardAgent *algo;

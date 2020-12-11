@@ -80,8 +80,8 @@ if(  ::TopLevel::T_STATE_LINK== ::TopLevel::state )
  ::TopLevel::result2= ::TopLevel::result1;
  ::TopLevel::result3= ::TopLevel::result2;
  ::TopLevel::temp_i1= ::TopLevel::result3;
- ::TopLevel::temp_j1=(6);
  ::TopLevel::temp_k1=(8);
+ ::TopLevel::temp_j1=(6);
  ::TopLevel::f_i= ::TopLevel::temp_i1;
  ::TopLevel::f_link= ::TopLevel::T_STATE_LINK1;
  ::TopLevel::f_j= ::TopLevel::temp_j1;

@@ -38,10 +38,10 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
 StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern )
 {
     bool prev_is_star = false;
-    pattern_num_non_star = 0;
-    ContainerInterface::iterator p_prev_star;
-    ContainerInterface::iterator p_prev;
-	for( ContainerInterface::iterator pit = pattern->begin(); 
+    num_non_star = 0;
+    num_stars = 0;
+    SequenceInterface::iterator pit_prev;
+	for( SequenceInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 
          ++pit ) 
     {
@@ -49,25 +49,41 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
 		ASSERT( pe );
         if( dynamic_pointer_cast<StarAgent>(pe) )
         {               
-            p_prev_star = pit;
+            pit_last_star = pit;
+            num_stars++;
             prev_is_star = true;
         }
         else
         {
             if( prev_is_star )
-                stars_preceding_non_stars.insert( PatternLink(plan->algo, &*p_prev) );
-            pattern_num_non_star++;
+                stars_preceding_non_stars.insert( PatternLink(plan->algo, &*pit_prev) );
+            num_non_star++;
             prev_is_star = false;
         }     
-        p_prev = pit;       
+        pit_prev = pit;       
     }
-    p_last_star = p_prev_star;
 }
 
 
 StandardAgent::Plan::Collection::Collection( Plan *plan, CollectionInterface *pattern )
 {
-    // nothing yet but there surely shall be
+    p_star = nullptr;
+    for( CollectionInterface::iterator pit = pattern->begin(); 
+         pit != pattern->end(); 
+         ++pit )                 
+    {
+        const TreePtrInterface *pe = &*pit; 
+        auto plink = PatternLink(plan->algo, &*pit);
+		ASSERT( pe );
+        if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
+        {
+            // No, could be in replace pattern, where many stars are permitted TODO resolve
+            // ASSERT( !p_star )("Only one star allowed in collection");
+            
+            p_star = pe;
+            star_plink = plink;
+        }
+    }
 }
 
 
@@ -81,23 +97,16 @@ void StandardAgent::Plan::MakePatternQuery()
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
         {
-            int num_stars = 0;
-   			FOREACH( const TreePtrInterface &pe, *pattern_seq )
-            {
-                ASSERT( pe );
-                if( dynamic_pointer_cast<StarAgent>((TreePtr<Node>)pe) )
-                    num_stars++;
-            }
-            num_stars--; // Don't register a decision for the last Star
+            const Plan::Sequence &plan_seq = sequences.at(pattern_seq);
+
    			for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
    			{
                 const TreePtrInterface *pe = &*pit; 
                 ASSERT( pe );
                 if( dynamic_cast<StarAgent *>(pe->get()) )
                 {
-                    if( num_stars>0 )
+                    if( pit != plan_seq.pit_last_star )
                         pattern_query->RegisterDecision( true ); // Inclusive, please.
-                    num_stars--;
                     pattern_query->RegisterAbnormalLink(PatternLink(algo, pe));    
                 }
                 else
@@ -108,23 +117,20 @@ void StandardAgent::Plan::MakePatternQuery()
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
-   			const TreePtrInterface *p_star = nullptr;
+            const Plan::Collection &plan_col = collections.at(pattern_col);
+
    			for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
    			{
                 const TreePtrInterface *pe = &*pit; 
-				if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
-				{
-                    p_star = pe;
-                }
-				else
+				if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
                 {
                     pattern_query->RegisterDecision( false ); // Exclusive, please
 				    pattern_query->RegisterNormalLink(PatternLink(algo, pe));    	     
                 }
 		    }
-            if( p_star )
+            if( plan_col.star_plink )
             {
-                pattern_query->RegisterAbnormalLink(PatternLink(algo, p_star));   		                    
+                pattern_query->RegisterAbnormalLink( plan_col.star_plink );   		                    
             }
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
@@ -208,17 +214,17 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
     INDENT("S");
     ASSERT( planned );
     const Plan::Sequence &plan_seq = plan.sequences.at(pattern);
-    int pattern_num_non_star = plan_seq.pattern_num_non_star;
-    ContainerInterface::iterator p_last_star = plan_seq.p_last_star;
+    int num_non_star = plan_seq.num_non_star;
+    ContainerInterface::iterator pit_last_star = plan_seq.pit_last_star;
 
-    if( px->size() < pattern_num_non_star )
+    if( px->size() < num_non_star )
     {
         throw Mismatch();     // TODO break to get the final trace?
     }
 
 	ContainerInterface::iterator pit, npit, nnpit, nxit;            
     ContainerInterface::iterator xit_star_limit = px->end();            
-    for( int i=0; i<pattern_num_non_star; i++ )
+    for( int i=0; i<num_non_star; i++ )
         --xit_star_limit;                
         
 	// Attempt to match all the elements between start and the end of the sequence; stop
@@ -237,7 +243,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             ContainerInterface::iterator xit_star_end;
                 
             // The last Star does not need a decision            
-            if( pit == p_last_star )
+            if( pit == pit_last_star )
             {
                 // No more stars, so skip ahead to the end of the possible star range. 
                 xit_star_end = xit_star_limit;
@@ -299,102 +305,96 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     FOREACH( const TreePtrInterface &xe, *px )
         xremaining.insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
     
-    const TreePtrInterface *p_star = nullptr;
-
     for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
     {
+		TreePtr<Node> pe( *pit );
+        if( dynamic_pointer_cast<StarAgent>(pe) )
+            continue; // Looping over non-stars only
+            
     	TRACE("Collection compare %d remain out of %d; looking at ",
                 xremaining.size(),
-                pattern->size() )(**pit)(" in pattern\n" );
-		TreePtr<Node> pe( *pit );
-        if( dynamic_pointer_cast<StarAgent>(pe) ) // Star in pattern collection?
-        {
-        	ASSERT(!p_star)("Only one Star node (or nullptr ptr) allowed in a search pattern Collection");
-            p_star = &*pit; // remember for later and skip to next pattern
-        }
-	    else if( !xremaining.empty() ) // not a Star so match singly...
-	    {
-	    	// We have to decide which node in the tree to match, so use the present conjecture
-	    	// Note: would like to use xremaining, but it will fall out of scope
-	    	// Report a block for the chosen node
-            ContainerInterface::iterator xit;
-
-            if( query.IsNextChoiceValid() )
-            {
-                // Decision already in conjecture and valid. 
-                const Conjecture::Range &old_decision = query.GetNextOldDecision();
-                
-                // Now take a copy. 
-                xremaining.clear();
-                FOREACH( const TreePtrInterface &tp, *old_decision.container )
-                    xremaining.insert((TreePtr<Node>)tp);
-                    
-                // re-submit the exact same decision.
-                xit = query.SkipDecision();
-            }
-            else
-            {
-                // New decision: take a copy of xremaining and pass it to the query.
-                // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
-                // in future calls.
-                auto x_decision = make_shared< Collection<Node> >();
-                *x_decision = xremaining;
-                xit = query.RegisterDecision( x_decision, false );
-            }
-            
-            // Find the TreePtr in our collection that points to the same
-            // node as *xit, in order to preserve uniqueness properties of links.
-            // TODO #167 should remove the ened for this
-            const TreePtrInterface *my_real_ppx = nullptr;
-            FOREACH( const TreePtrInterface &ppx, *px )
-            {
-                if( ppx == *xit )
-                    my_real_ppx = &ppx;
-            }
-            ASSERT( my_real_ppx );            
-            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), my_real_ppx) ); // Link into X
-
-	    	// Remove the chosen element from the remaineder collection. 
-#ifdef CHECK_ITERATOR_IN_CONTAINER
-            bool found = false;
-            for( ContainerInterface::iterator checkit=xremaining.begin(); checkit != xremaining.end(); ++checkit )
-                if( checkit==xit )
-                    found=true;
-            ASSERT( found ); // If not found, we have a detached iterator, see #167
-#endif
-#ifdef ERASE_USING_ITERATOR
-            xremaining.erase( xit );
-#else           
-            int n = xremaining.erase( *xit );
-	    	if( n == 0 )
-            {
-                ASSERT(!"failed to remove element from collection");
-            }
-            if( n > 1 )
-            {
-                ASSERT(false)("Removed ")(n)(" elements\n");
-            }
-#endif        
-	    }
-	    else // ran out of x elements - local mismatch
+                pattern->size() )(**pit)(" in pattern\n" );        
+        if( xremaining.empty() ) // not a Star so match singly...
         {
             TRACE("mismatch - x ran out\n");
             throw Mismatch();  
         }
+            
+        // We have to decide which node in the tree to match, so use the present conjecture
+        // Note: would like to use xremaining, but it will fall out of scope
+        // Report a block for the chosen node
+        ContainerInterface::iterator xit;
+
+        if( query.IsNextChoiceValid() )
+        {
+            // Decision already in conjecture and valid. 
+            const Conjecture::Range &old_decision = query.GetNextOldDecision();
+            
+            // Now take a copy. 
+            xremaining.clear();
+            FOREACH( const TreePtrInterface &tp, *old_decision.container )
+                xremaining.insert((TreePtr<Node>)tp);
+                
+            // re-submit the exact same decision.
+            xit = query.SkipDecision();
+        }
+        else
+        {
+            // New decision: take a copy of xremaining and pass it to the query.
+            // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
+            // in future calls.
+            auto x_decision = make_shared< Collection<Node> >();
+            *x_decision = xremaining;
+            xit = query.RegisterDecision( x_decision, false );
+        }
+        
+        // Find the TreePtr in our collection that points to the same
+        // node as *xit, in order to preserve uniqueness properties of links.
+        // TODO #167 should remove the ened for this
+        const TreePtrInterface *my_real_ppx = nullptr;
+        FOREACH( const TreePtrInterface &ppx, *px )
+        {
+            if( ppx == *xit )
+                my_real_ppx = &ppx;
+        }
+        ASSERT( my_real_ppx );            
+        query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), my_real_ppx) ); // Link into X
+
+        // Remove the chosen element from the remaineder collection. 
+#ifdef CHECK_ITERATOR_IN_CONTAINER
+        bool found = false;
+        for( ContainerInterface::iterator checkit=xremaining.begin(); checkit != xremaining.end(); ++checkit )
+            if( checkit==xit )
+                found=true;
+        ASSERT( found ); // If not found, we have a detached iterator, see #167
+#endif
+#ifdef ERASE_USING_ITERATOR
+        xremaining.erase( xit );
+#else           
+        int n = xremaining.erase( *xit );
+        if( n == 0 )
+        {
+            ASSERT(!"failed to remove element from collection");
+        }
+        if( n > 1 )
+        {
+            ASSERT(false)("Removed ")(n)(" elements\n");
+        }
+#endif        
     }
 
     // Now handle the p_star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
 
-    if( !xremaining.empty() && !p_star )
+    if( !xremaining.empty() && !plan_col.star_plink )
     {
         TRACE("mismatch - x left over\n");
         throw Mismatch();   // there were elements left over and no p_star to match them against
     }
 
-    TRACE("seen_star %d size of xremaining %d\n", !!p_star, xremaining.size() );
+    TRACE("seen_star %d size of xremaining %d\n", !!plan_col.star_plink, xremaining.size() );
     
-    if( p_star )
+    if( plan_col.star_plink )
     {
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
@@ -412,7 +412,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 x_subcollection->elts.insert( XLink(base_xlink.GetChildX(), &ppx) );
         }
  
-        query.RegisterAbnormalLink( PatternLink(this, p_star), XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
+        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
     }
     TRACE("matched\n");
 }
@@ -506,16 +506,16 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     ASSERT( planned );
 
     const Plan::Sequence &plan_seq = plan.sequences.at(pattern);
-    int pattern_num_non_star = plan_seq.pattern_num_non_star;
-    ContainerInterface::iterator p_last_star = plan_seq.p_last_star;
+    int num_non_star = plan_seq.num_non_star;
+    ContainerInterface::iterator pit_last_star = plan_seq.pit_last_star;
 
     TheKnowledge::Nugget::IndexType prev_index = -1; 
 
-    TRACEC("DNLQ sequence: %d plinks of which %d are non-star\n", pattern->size(), pattern_num_non_star);
+    TRACEC("DNLQ sequence: %d plinks of which %d are non-star\n", pattern->size(), num_non_star);
 
 	ContainerInterface::iterator pit, npit, nnpit, nxit, pending_star_xit_begin;            
     ContainerInterface::iterator xit_star_limit = px->end();            
-    for( int i=0; i<pattern_num_non_star; i++ )
+    for( int i=0; i<num_non_star; i++ )
         --xit_star_limit;                
         
 	// Attempt to match all the elements between start and the end of the sequence; stop
@@ -541,7 +541,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                 pending_star_plink = plink;
                 pending_star_xit_begin = xit;
             }
-            else if( pit == p_last_star ) // The last Star does not need a decision
+            else if( pit == pit_last_star ) // The last Star does not need a decision
             {
                 TRACEC("Last star ")(plink)("\n");
                 // No more stars, so skip ahead to the end of the possible star range. 
@@ -650,47 +650,43 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
     for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
     {
         auto plink = PatternLink(this, &*pit);
+        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) 
+            continue; // Looping over non-stars only
+
     	TRACE("Collection compare %d remain out of %d; looking at ",
                 remaining_xlinks.size(),
                 pattern->size() )(**pit)(" in pattern\n" );
-        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) // Star in pattern collection?
-        {
-        	ASSERT(!star_plink)("Only one Star node (or nullptr ptr) allowed in a search pattern Collection");
-            star_plink = plink; // remember for later and skip to next pattern
-        }
-	    else // not a Star so match singly...
-	    {
-            SolutionMap::const_iterator req_it = required_links->find(plink);
-            if( req_it == required_links->end() ) 
-            {
-                completeness = INCOMPLETE;
-                return; // can't do any more in the current sequence TODO I bet you could if you tried harder
-            }
             
-            XLink req_xlink = req_it->second; 
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION &&
-                  nugget.container == px) )
-                throw WrongContainerCollectionMismatch(); // Be in the right collection
-                
-            if( remaining_xlinks.count( req_xlink ) == 0 )
-                throw CollisionCollectionMismatch(); // Already removed this one: collision
-            remaining_xlinks.erase( req_xlink );
+        SolutionMap::const_iterator req_it = required_links->find(plink);
+        if( req_it == required_links->end() ) 
+        {
+            completeness = INCOMPLETE;
+            return; // can't do any more in the current sequence TODO I bet you could if you tried harder
         }
+        
+        XLink req_xlink = req_it->second; 
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
+        if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION &&
+              nugget.container == px) )
+            throw WrongContainerCollectionMismatch(); // Be in the right collection
+            
+        if( remaining_xlinks.count( req_xlink ) == 0 )
+            throw CollisionCollectionMismatch(); // Already removed this one: collision
+        remaining_xlinks.erase( req_xlink );
     }
     
     // Now handle the p_star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
 
-    if( !remaining_xlinks.empty() && !star_plink )
+    if( !remaining_xlinks.empty() && !plan_col.star_plink )
     {
         TRACE("mismatch - x left over\n");
         throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
     }
 
-    TRACE("seen_star %d size of xremaining %d\n", !!star_plink, remaining_xlinks.size() );
+    TRACE("seen_star %d size of xremaining %d\n", !!plan_col.star_plink, remaining_xlinks.size() );
     
-    if( star_plink )
+    if( plan_col.star_plink )
     {
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
@@ -704,7 +700,7 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
         // For solver...
         x_subcollection->elts = remaining_xlinks;
  
-        query.RegisterAbnormalLink( star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
+        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
     }    
 }
 
