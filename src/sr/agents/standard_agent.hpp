@@ -48,11 +48,14 @@ public:
             
             int num_non_star;
             int num_stars;
+            ContainerInterface::iterator pit_back;
             ContainerInterface::iterator pit_last_star;
-            set<PatternLink> stars_preceding_non_stars;
-            set<PatternLink> non_stars;
-            set< pair<PatternLink, PatternLink> > adjacent_non_stars;
-            set< pair<PatternLink, PatternLink> > gapped_non_stars;
+            set<PatternLink> non_stars;            
+            set< pair<PatternLink, PatternLink> > adjacent_non_stars; // ...??...
+            set< pair<PatternLink, PatternLink> > gapped_non_stars; // ...?...?...
+            map<PatternLink, PatternLink> adjacent_non_star_star; // ...?*...
+            map<PatternLink, PatternLink> adjacent_star_non_star; // ...*?...
+            map<PatternLink, PatternLink> gapped_star_non_star;  // ...*...?...
             PatternLink non_star_at_front;
             PatternLink non_star_at_back;
         };

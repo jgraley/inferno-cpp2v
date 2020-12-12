@@ -37,12 +37,13 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
 
 StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern )
 {
-    bool prev_is_star = false;
     num_non_star = 0;
     num_stars = 0;
     SequenceInterface::iterator pit_prev;
+    TreePtr<Node> pe_prev;
     PatternLink plink_prev;
-    PatternLink plink_prev_non_star;
+    PatternLink non_star_queue;
+    list<PatternLink> stars_queue;
 	for( SequenceInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 
          ++pit ) 
@@ -55,27 +56,36 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
         {               
             pit_last_star = pit;
             num_stars++;
-            prev_is_star = true;
+            stars_queue.push_back( plink );
+            if( plink_prev && !dynamic_pointer_cast<StarAgent>(pe_prev) )
+                adjacent_non_star_star.insert( make_pair( plink, plink_prev ) );
         }
         else
         {
-            non_stars.insert( plink );
-            if( prev_is_star )
-                stars_preceding_non_stars.insert( plink_prev );
-            if( plink_prev_non_star )
+            if( non_star_queue ) 
             {
-                auto non_star_pair = make_pair( plink_prev_non_star, plink );
-                if( prev_is_star )                
+                auto non_star_pair = make_pair( non_star_queue, plink );
+                if( stars_queue.size() > 0 )                
                     gapped_non_stars.insert( non_star_pair );                                
                 else            
                     adjacent_non_stars.insert( non_star_pair );                
             }
+            while( stars_queue.size() >= 1 )
+            {
+                auto star_pair = make_pair( stars_queue.front(), plink );
+                if( stars_queue.size() > 1 )
+                    gapped_star_non_star.insert( star_pair );
+                else
+                    adjacent_star_non_star.insert( star_pair );                
+                stars_queue.pop_front();
+            }
+            non_stars.insert( plink );
                     
             num_non_star++;
-            prev_is_star = false;
-            plink_prev_non_star = plink;
+            non_star_queue = plink;
         }     
         pit_prev = pit;      
+        pe_prev = pe;
         plink_prev = plink; 
     }
     
@@ -84,11 +94,11 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
         TreePtr<Node> pfront( *(pattern->begin()) );
         if( !dynamic_pointer_cast<StarAgent>(pfront) )
             non_star_at_front = PatternLink(plan->algo, &*(pattern->begin()));
-        SequenceInterface::iterator it = pattern->end();
-        --it;
-        TreePtr<Node> pback( *(pattern->begin()) );
+        pit_back = pattern->end();
+        --pit_back;
+        TreePtr<Node> pback( *pit_back );
         if( !dynamic_pointer_cast<StarAgent>(pback) )
-            non_star_at_back = PatternLink(plan->algo, &*it);        
+            non_star_at_back = PatternLink(plan->algo, &*pit_back);        
     }
 }
 
@@ -603,98 +613,100 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
              throw NotAfterSequenceMismatch();
     }
 
-
-	ContainerInterface::iterator pit, npit, nnpit, nxit, pending_star_xit_begin;            
-    ContainerInterface::iterator xit_star_limit = px->end();            
-    for( int i=0; i<num_non_star; i++ )
-        --xit_star_limit;                
-        
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
-	ContainerInterface::iterator xit = px->begin();
-    PatternLink pending_star_plink = PatternLink();
-    PatternLink pending_star_xit;
-	for( pit = pattern->begin(); pit != pattern->end(); ++pit ) // --------------- loop -------------------
+	ContainerInterface::iterator xit;
+	for( ContainerInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit ) // --------------- loop -------------------
 	{
-        ASSERT( xit == px->end() || *xit );
         PatternLink plink( this, &*pit );
 
         if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) // ------------ STAR ---------------
         {
-            ASSERT( !pending_star_plink );
             // We have a Star type wildcard that can match multiple elements.
             ContainerInterface::iterator xit_star_end;
+            PatternLink limit_plink;
+            bool register_decision;
                 
-            if( plan_seq.stars_preceding_non_stars.count( plink ) > 0 ) // Next plink is a non-star
+            if( plan_seq.adjacent_star_non_star.count( plink ) > 0 ) // Next plink is a non-star
             {
-                TRACEC("Star before non-star ")(plink)("\n");
-                // Next will be non-star; wait for that
-                pending_star_plink = plink;
-                pending_star_xit_begin = xit;
-            }
-            else if( pit == pit_last_star ) // The last Star does not need a decision
+                TRACEC("Star adjacent non-star ")(plink)(" ")(limit_plink)("\n");               
+                limit_plink = plan_seq.adjacent_star_non_star.at(plink);
+                register_decision = false;
+            }            
+            else if( plan_seq.gapped_star_non_star.count( plink ) > 0 ) // Next plink is a star but a non-star exists after here
             {
-                TRACEC("Last star ")(plink)("\n");
+                TRACEC("Star gapped non-star ")(plink)(" ")(limit_plink)("\n");
+                limit_plink = plan_seq.gapped_star_non_star.at(plink);               
+                register_decision = true;
+            }	
+            else if( pit == plan_seq.pit_back ) // Star at back does not need a decision or a bounding non-star
+            {
                 // No more stars, so skip ahead to the end of the possible star range. 
-                xit_star_end = xit_star_limit;
-            }				
+                TRACEC("Star at back ")(plink)("\n");
+                register_decision = false;
+            }	
             else // Next plink is another star
             {
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
                 TRACEC("Star before another star ")(plink)("\n");
-                xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
+                register_decision = true;
             }
             
-            if( !pending_star_plink )
+            ContainerInterface::iterator xit_star_begin;
+            if( plan_seq.adjacent_non_star_star.count( plink ) > 0 ) // prev was a non-star
             {
-                // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
-                TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit, xit_star_end ) );
-
-                // Apply couplings to this Star and matched range
-                // Restrict to pre-restriction or pattern restriction
-                query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass
-                 
-                // Resume at the first element after the matched range
+                PatternLink begin_plink = plan_seq.adjacent_non_star_star.at(plink);               
+                SolutionMap::const_iterator begin_it = required_links->find(begin_plink);
+                if( begin_it == required_links->end() )         
+                    return; // can't do any more in the current sequence TODO I bet you could if you tried harder                    
+                XLink begin_xlink = begin_it->second; 
+                const TheKnowledge::Nugget &begin_nugget( knowledge->GetNugget(begin_xlink) );                        
+                xit_star_begin = begin_nugget.iterator;
+                ++xit_star_begin; // get past the non-star
+            }
+            else if( pit == pattern->begin() ) // no prev, so begin at the beginning of x
+            {
+                xit_star_begin = px->begin();
+            }
+            else // prev was star, we need to start where it left off, so need xit from last decision
+            {
+                xit_star_begin = xit;
+            }
+                        
+            ContainerInterface::iterator xit_star_limit;
+            if( limit_plink ) // there's a non-star after us which will set a limit
+            {
+                SolutionMap::const_iterator limit_it = required_links->find(limit_plink);
+                if( limit_it == required_links->end() )         
+                    return; // can't do any more in the current sequence TODO I bet you could if you tried harder                    
+                XLink limit_xlink = limit_it->second; 
+                const TheKnowledge::Nugget &limit_nugget( knowledge->GetNugget(limit_xlink) );                        
+                xit_star_limit = limit_nugget.iterator;
+            }
+            else // No more non-stars after us so limit is the end of x 
+            {
+                xit_star_limit = px->end();
+            }
+            
+            if( register_decision ) // Another star follows this one, forcing a decision
+            {
+                xit_star_end = query.RegisterDecision( xit_star_begin, xit_star_limit, true );
                 xit = xit_star_end;
             }
-        }
-        else // -------------------------------- NOT STAR ----------------------------------------
-        {                        
-            if( pending_star_plink ) // Previous iteration was a star
-            {                
-                SolutionMap::const_iterator req_it = required_links->find(plink);
-                if( req_it == required_links->end() )         
-                    return; // can't do any more in the current sequence TODO I bet you could if you tried harder                    
-                XLink req_xlink = req_it->second; 
-                const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-
-                TRACEC("Non-star after star ")(plink)("\n");
-                // Star ends just before this link
-                ContainerInterface::iterator xit_star_end = nugget.iterator;
-                TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), pending_star_xit_begin, xit_star_end ) );
-
-                // Apply couplings to this Star and matched range
-                // Restrict to pre-restriction or pattern restriction
-                query.RegisterAbnormalLink( pending_star_plink, XLink::CreateDistinct(xss) ); // Only used in after-pass                
-
-                xit = xit_star_end;    
-                
-                pending_star_plink = PatternLink();    
+            else // No decision needed, we go all the way up to the limit
+            {
+                xit_star_end = xit_star_limit;
             }
-                         
-            // Updates after non-star link    
-            ++xit;
             
-            // Every non-star pattern node we pass means there's one fewer remaining
-            // and we can match a star one step further
-            ASSERT(xit_star_limit != px->end());
-            ++xit_star_limit;    
+            // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
+
+            // Apply couplings to this Star and matched range
+            // Restrict to pre-restriction or pattern restriction
+            query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass
         }
     } // ----------------------------------------------- end of loop ------------------------------------------------------
-    
-    // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern->end() );
 }
 
 
