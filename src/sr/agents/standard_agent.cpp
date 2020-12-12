@@ -41,12 +41,16 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
     num_non_star = 0;
     num_stars = 0;
     SequenceInterface::iterator pit_prev;
+    PatternLink plink_prev;
+    PatternLink plink_prev_non_star;
 	for( SequenceInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 
          ++pit ) 
     {
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
+        PatternLink plink(plan->algo, &*pit);
+        ASSERT( plink );
         if( dynamic_pointer_cast<StarAgent>(pe) )
         {               
             pit_last_star = pit;
@@ -55,12 +59,36 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
         }
         else
         {
+            non_stars.insert( plink );
             if( prev_is_star )
-                stars_preceding_non_stars.insert( PatternLink(plan->algo, &*pit_prev) );
+                stars_preceding_non_stars.insert( plink_prev );
+            if( plink_prev_non_star )
+            {
+                auto non_star_pair = make_pair( plink_prev_non_star, plink );
+                if( prev_is_star )                
+                    gapped_non_stars.insert( non_star_pair );                                
+                else            
+                    adjacent_non_stars.insert( non_star_pair );                
+            }
+                    
             num_non_star++;
             prev_is_star = false;
+            plink_prev_non_star = plink;
         }     
-        pit_prev = pit;       
+        pit_prev = pit;      
+        plink_prev = plink; 
+    }
+    
+    if( (SequenceInterface::iterator)(pattern->begin()) != pattern->end() )
+    {        
+        TreePtr<Node> pfront( *(pattern->begin()) );
+        if( !dynamic_pointer_cast<StarAgent>(pfront) )
+            non_star_at_front = PatternLink(plan->algo, &*(pattern->begin()));
+        SequenceInterface::iterator it = pattern->end();
+        --it;
+        TreePtr<Node> pback( *(pattern->begin()) );
+        if( !dynamic_pointer_cast<StarAgent>(pback) )
+            non_star_at_back = PatternLink(plan->algo, &*it);        
     }
 }
 
@@ -509,9 +537,72 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     int num_non_star = plan_seq.num_non_star;
     ContainerInterface::iterator pit_last_star = plan_seq.pit_last_star;
 
-    TheKnowledge::Nugget::IndexType prev_index = -1; 
-
     TRACEC("DNLQ sequence: %d plinks of which %d are non-star\n", pattern->size(), num_non_star);
+
+    for( PatternLink plink : plan_seq.non_stars ) // depends on px
+    {
+        SolutionMap::const_iterator it = required_links->find(plink);
+        if( it == required_links->end() ) 
+        {
+            completeness = INCOMPLETE;
+            continue;
+        }
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+        if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE &&
+              nugget.container == px) )
+            throw WrongContainerSequenceMismatch(); // Be in the right sequence
+    }
+    
+    if( plan_seq.non_star_at_front ) // depends on px
+    {
+        SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_front);
+        if( it != required_links->end() ) 
+        {        
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            if( nugget.iterator != px->begin() )
+                throw NotAtFrontMismatch();
+        }
+    }
+
+    if( plan_seq.non_star_at_back ) // depends on px
+    {
+        SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_back);
+        if( it != required_links->end() ) 
+        {
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            ContainerInterface::iterator it_incremented = nugget.iterator;
+            ++it_incremented;        
+            if( it_incremented != px->end() )
+                throw NotAtBackMismatch();
+        }
+    }
+
+    for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of px
+    {
+        SolutionMap::const_iterator a_it = required_links->find(p.first);
+        SolutionMap::const_iterator b_it = required_links->find(p.second);
+        if( a_it == required_links->end() || b_it == required_links->end() ) 
+            continue;
+        const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_it->second) );        
+        const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_it->second) );       
+        ContainerInterface::iterator a_it_incremented = a_nugget.iterator;
+        ++a_it_incremented;
+        if( a_it_incremented != b_nugget.iterator )
+             throw NotSuccessorSequenceMismatch();
+    }
+    
+    for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of px
+    {
+        SolutionMap::const_iterator a_it = required_links->find(p.first);
+        SolutionMap::const_iterator b_it = required_links->find(p.second);
+        if( a_it == required_links->end() || b_it == required_links->end() ) 
+            continue;
+        const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_it->second) );        
+        const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_it->second) );        
+        if( a_nugget.index >= b_nugget.index )
+             throw NotAfterSequenceMismatch();
+    }
+
 
 	ContainerInterface::iterator pit, npit, nnpit, nxit, pending_star_xit_begin;            
     ContainerInterface::iterator xit_star_limit = px->end();            
@@ -569,27 +660,16 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             }
         }
         else // -------------------------------- NOT STAR ----------------------------------------
-        {
-            SolutionMap::const_iterator req_it = required_links->find(plink);
-            if( req_it == required_links->end() ) 
-            {
-                completeness = INCOMPLETE;
-                return; // can't do any more in the current sequence TODO I bet you could if you tried harder
-            }
-            
-            XLink req_xlink = req_it->second; 
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE &&
-                  nugget.container == px) )
-                throw WrongContainerSequenceMismatch(); // Be in the right sequence
-                        
+        {                        
             if( pending_star_plink ) // Previous iteration was a star
-            {
-                TRACEC("Non-star after star ")(plink)("\n");
-                // The range must end to the right of where it started
-                if( nugget.index <= prev_index )
-                    throw NotAfterSequenceMismatch();
+            {                
+                SolutionMap::const_iterator req_it = required_links->find(plink);
+                if( req_it == required_links->end() )         
+                    return; // can't do any more in the current sequence TODO I bet you could if you tried harder                    
+                XLink req_xlink = req_it->second; 
+                const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
 
+                TRACEC("Non-star after star ")(plink)("\n");
                 // Star ends just before this link
                 ContainerInterface::iterator xit_star_end = nugget.iterator;
                 TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), pending_star_xit_begin, xit_star_end ) );
@@ -597,20 +677,14 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
                 // Apply couplings to this Star and matched range
                 // Restrict to pre-restriction or pattern restriction
                 query.RegisterAbnormalLink( pending_star_plink, XLink::CreateDistinct(xss) ); // Only used in after-pass                
-            }
-            else // previous was a non-star
-            {
-                TRACEC("Non-star after non-star ")(plink)("\n");
-                // We must be in the next slot
-                if( nugget.iterator != xit )
-                    throw NotSuccessorSequenceMismatch();                
+
+                xit = xit_star_end;    
+                
+                pending_star_plink = PatternLink();    
             }
                          
             // Updates after non-star link    
-            prev_index = nugget.index;    
-            xit = nugget.iterator;    
             ++xit;
-            pending_star_plink = PatternLink();    
             
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
@@ -621,8 +695,6 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern->end() );
-    if( xit != px->end() )
-        throw SurplusXSequenceMismatch();  
 }
 
 

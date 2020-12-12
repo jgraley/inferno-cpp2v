@@ -25,9 +25,10 @@ public:
     
     class SequenceMismatch : public Mismatch {};
     class WrongContainerSequenceMismatch : public SequenceMismatch {}; 
+    class NotAtFrontMismatch : public SequenceMismatch {};
+    class NotAtBackMismatch : public SequenceMismatch {};
     class NotAfterSequenceMismatch : public SequenceMismatch {};
     class NotSuccessorSequenceMismatch : public SequenceMismatch {};
-    class SurplusXSequenceMismatch : public SequenceMismatch {};
     
     class CollectionMismatch : public Mismatch {};
     class WrongContainerCollectionMismatch : public CollectionMismatch {};
@@ -49,6 +50,11 @@ public:
             int num_stars;
             ContainerInterface::iterator pit_last_star;
             set<PatternLink> stars_preceding_non_stars;
+            set<PatternLink> non_stars;
+            set< pair<PatternLink, PatternLink> > adjacent_non_stars;
+            set< pair<PatternLink, PatternLink> > gapped_non_stars;
+            PatternLink non_star_at_front;
+            PatternLink non_star_at_back;
         };
         
         struct Collection
