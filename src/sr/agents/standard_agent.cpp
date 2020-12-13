@@ -550,6 +550,9 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
 
     TRACEC("DNLQ sequence: %d plinks\n", pattern->size());
 
+    // The only true unary constraint is that every child x link
+    // is in some sequence (because that can be read directly off the
+    // nugget).
     for( PatternLink plink : plan_seq.non_stars )  // independent of px
     {
         SolutionMap::const_iterator it = required_links->find(plink);
@@ -563,6 +566,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             throw WrongContainerSequenceMismatch(); // Be in the right sequence
     }
     
+    // If the pattern begins with a non-star, constrain the child x to be the 
+    // front node in the collection at our base x. Uses bases so a binary constraint.
     if( plan_seq.non_star_at_front ) // depends on px
     {
         SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_front);
@@ -574,6 +579,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         }
     }
 
+    // If the pattern ends with a non-star, constrain the child x to be the 
+    // back node in the collection at our base x. Uses bases so a binary constraint.
     if( plan_seq.non_star_at_back ) // depends on px
     {
         SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_back);
@@ -587,6 +594,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         }
     }
 
+    // Adjacent pairs of non-stars in the pattern should correspond to adjacent
+    // pairs of child x nodes. Only needs the two child x nodes, so binary constraint.
     for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of px
     {
         SolutionMap::const_iterator a_it = required_links->find(p.first);
@@ -601,6 +610,9 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
              throw NotSuccessorSequenceMismatch();
     }
     
+    // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
+    // correspond to pairs of child x nodes that are ordered correctly. Only needs 
+    // the two child x nodes, so binary constraint.    
     for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of px
     {
         SolutionMap::const_iterator a_it = required_links->find(p.first);
@@ -613,6 +625,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
              throw NotAfterSequenceMismatch();
     }
 
+    // We now look at the runs of star patterns. Each is bounded by some cobination
+    // of the bounds of the x sequence and the surrounding non-star child x values. 
     for( shared_ptr<Plan::Sequence::Run> run : plan_seq.star_runs )
     {
       	ContainerInterface::iterator xit, xit_star_limit;
@@ -621,7 +635,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         {
             SolutionMap::const_iterator pred_it = required_links->find(run->predecessor);
             if( pred_it == required_links->end() )         
-                break; // can't do any more in the current sequence TODO I bet you could if you tried harder                    
+                break; // can't do any more in the current run
             XLink pred_xlink = pred_it->second; 
             const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
             xit = pred_nugget.iterator;
@@ -636,7 +650,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         {
             SolutionMap::const_iterator succ_it = required_links->find(run->successor);
             if( succ_it == required_links->end() )         
-                break; // can't do any more in the current sequence TODO I bet you could if you tried harder                    
+                break; // can't do any more in the current run
             XLink succ_xlink = succ_it->second; 
             const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
             xit_star_limit = succ_nugget.iterator;
@@ -646,6 +660,8 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
             xit_star_limit = px->end();
         }
         
+        // Within a run of star patterns, register decisions for all but the last
+        // and for all of them register a subsequence range as an abnormal link.
         for( PatternLink plink : run->elts )
         {
             // We have a Star type wildcard that can match multiple elements.
