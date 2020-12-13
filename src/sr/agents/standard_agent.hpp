@@ -45,19 +45,23 @@ public:
         struct Sequence
         {
             Sequence( Plan *plan, SequenceInterface *pattern );
+            struct Run
+            {
+                PatternLink predecessor; // nonstar before run or NULL of at start
+                list<PatternLink> elts;  // run of stars, in order
+                PatternLink successor;   // nonstar after run or NULL of at end
+            };
             
             int num_non_star;
-            int num_stars;
-            ContainerInterface::iterator pit_back;
             ContainerInterface::iterator pit_last_star;
-            set<PatternLink> non_stars;            
+            PatternLink plink_front; // ?...
+            PatternLink plink_back;  // ...?
+            set<PatternLink> non_stars;    // ...?...        
             set< pair<PatternLink, PatternLink> > adjacent_non_stars; // ...??...
             set< pair<PatternLink, PatternLink> > gapped_non_stars; // ...?...?...
-            map<PatternLink, PatternLink> adjacent_non_star_star; // ...?*...
-            map<PatternLink, PatternLink> adjacent_star_non_star; // ...*?...
-            map<PatternLink, PatternLink> gapped_star_non_star;  // ...*...?...
-            PatternLink non_star_at_front;
-            PatternLink non_star_at_back;
+            PatternLink non_star_at_front; // ?...
+            PatternLink non_star_at_back;  // ...?
+            set< shared_ptr<Run> > star_runs; // ...?***?...
         };
         
         struct Collection
