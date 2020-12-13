@@ -550,7 +550,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
 
     TRACEC("DNLQ sequence: %d plinks\n", pattern->size());
 
-    for( PatternLink plink : plan_seq.non_stars ) // depends on px
+    for( PatternLink plink : plan_seq.non_stars )  // independent of px
     {
         SolutionMap::const_iterator it = required_links->find(plink);
         if( it == required_links->end() ) 
