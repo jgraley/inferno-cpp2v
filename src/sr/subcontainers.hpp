@@ -30,42 +30,44 @@ struct SubContainer : Node // TODO #69
 // This kind of subcontainer carries a range (begin/end pair) on the 
 // parent X node's container, as well as a pointer to the parent. This
 // is sufficient to enable the correct XLinks to be built when needed.
-struct SubContainerRange : SubContainer
+struct SubContainerRange : SubContainer,
+                           virtual ContainerInterface // virtual required to allow subclasses to use my impl for interfaces they bring in
+                           
 {    
     NODE_FUNCTIONS
     
-    SubContainerRange( TreePtr<Node> parent_x_ = nullptr ) :
-        parent_x( parent_x_ )
-    {
-    }
+    SubContainerRange() {}
+    TreePtr<Node> parent_x;
+    shared_ptr<iterator_interface> my_begin;
+    shared_ptr<iterator_interface> my_end;
+public:
+    SubContainerRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e );
+    virtual const iterator_interface &begin();
+    virtual const iterator_interface &end();
+    virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    virtual void clear()                                { ASSERTFAIL("Cannot modify SubContainerRange"); }    
+    virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubContainerRange"); }  
+    virtual string GetContentsTrace(); 
+    virtual void AssertMatchingContents( TreePtr<Node> other );    
     
     TreePtr<Node> GetParentX()
     {
         return parent_x;
-    }
-    
-    TreePtr<Node> parent_x;
+    }    
 };
 
 
-struct SubSequenceRange : SequenceInterface,
-                          SubContainerRange
+struct SubSequenceRange : SubContainerRange,
+                          SequenceInterface
 {
-    NODE_FUNCTIONS_FINAL 
-
     SubSequenceRange() {}
-    shared_ptr<iterator_interface> my_begin;
-    shared_ptr<iterator_interface> my_end;
-public:
-    SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e );
-    virtual const iterator_interface &begin();
-    virtual const iterator_interface &end();
-    virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubSequenceRange"); }
-    virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
-    virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
-    virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequenceRange"); }  
-    virtual string GetContentsTrace(); 
-    virtual void AssertMatchingContents( TreePtr<Node> other );    
+    SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e ) :
+        SubContainerRange( parent_x, b, e )
+    {
+    }
+    
+    NODE_FUNCTIONS_FINAL 
 };
 
 

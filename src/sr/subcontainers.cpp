@@ -7,10 +7,10 @@
     
 using namespace SR;    
     
-//////////////////////////// SubSequenceRange ///////////////////////////////
+//////////////////////////// SubContainerRange ///////////////////////////////
 
-SubSequenceRange::SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e ) : 
-    SubContainerRange( parent_x ),
+SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b, const iterator &e ) : 
+    parent_x( parent_x_ ),
     my_begin(b.Clone()), 
     my_end(e.Clone())
 {           
@@ -19,24 +19,24 @@ SubSequenceRange::SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, c
 }
 
 
-const SubSequenceRange::iterator_interface &SubSequenceRange::begin() 
+const SubContainerRange::iterator_interface &SubContainerRange::begin() 
 { 
     return *my_begin; 
 }
 
 
-const SubSequenceRange::iterator_interface &SubSequenceRange::end()
+const SubContainerRange::iterator_interface &SubContainerRange::end()
 {
     return *my_end; 
 }
 
 
-string SubSequenceRange::GetContentsTrace()
+string SubContainerRange::GetContentsTrace()
 {
     ContainerInterface *this_ci = dynamic_cast<ContainerInterface *>(this);
     
     bool first = true;
-    string s = "SubContainerRange[";
+    string s = "SubContainerRange(";
     FOREACH( const TreePtrInterface &e_node, *this_ci )
     {
         if( !first )
@@ -45,14 +45,14 @@ string SubSequenceRange::GetContentsTrace()
         XLink e_link = XLink(GetParentX(), &e_node);
         s += Trace(e_link);
     }
-    s += "]";
+    s += ")";
     return s;
 }
 
 
-void SubSequenceRange::AssertMatchingContents( TreePtr<Node> other )
+void SubContainerRange::AssertMatchingContents( TreePtr<Node> other )
 {
-    auto other_ssr = dynamic_cast<SubSequenceRange *>(other.get());
+    auto other_ssr = dynamic_cast<SubContainerRange *>(other.get());
     ASSERT( other_ssr );
     ASSERT( begin() == other_ssr->begin() );
     ASSERT( end() == other_ssr->end() );
