@@ -567,7 +567,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     }
     
     // If the pattern begins with a non-star, constrain the child x to be the 
-    // front node in the collection at our base x. Uses bases so a binary constraint.
+    // front node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_front ) // depends on px
     {
         SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_front);
@@ -580,7 +580,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     }
 
     // If the pattern ends with a non-star, constrain the child x to be the 
-    // back node in the collection at our base x. Uses bases so a binary constraint.
+    // back node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_back ) // depends on px
     {
         SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_back);
@@ -625,7 +625,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
              throw NotAfterSequenceMismatch();
     }
 
-    // We now look at the runs of star patterns. Each is bounded by some cobination
+    // We now look at the runs of star patterns. Each is bounded by some combination
     // of the bounds of the x sequence and the surrounding non-star child x values. 
     for( shared_ptr<Plan::Sequence::Run> run : plan_seq.star_runs )
     {
