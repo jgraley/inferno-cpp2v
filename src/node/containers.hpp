@@ -50,7 +50,7 @@ public:
 	// and forwards all the operations using co-variance where possible. These can be passed around
 	// by value, and have copy-on-write semantics, so big iterators will actually get optimised
 	// (in your face, Stepanov!)
-	class iterator : public Traceable
+	class iterator : public iterator_interface
 	{
 	public:
 		typedef forward_iterator_tag iterator_category;
@@ -102,13 +102,23 @@ public:
 			return pib->operator->();
 		}
 
-		bool operator==( const iterator &i ) const
+		bool operator==( const iterator_interface &o ) const // isovariant param
+		{
+			return pib->operator==( o );
+        }
+
+		bool operator==( const iterator &i ) const // covariant param
 		{
 			ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
 			return pib->operator==( *(i.pib) );
 		}
 
-		bool operator!=( const iterator &i ) const
+		bool operator!=( const iterator_interface &o ) const // isovariant param
+		{
+			return !operator==( o );
+		}
+        
+		bool operator!=( const iterator &i ) const // covariant param
 		{
 			ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
 			return !operator==( i );
@@ -138,7 +148,7 @@ public:
 				return nullptr;
 		}
 		
-		virtual shared_ptr<iterator_interface> Clone() const // TODO does this need to be virtual?
+		virtual shared_ptr<iterator_interface> Clone() const 
 		{
 			ASSERT(pib)("Attempt to Clone() uninitialised iterator");
 			return pib->Clone();
@@ -149,7 +159,7 @@ public:
 		    if( pib )
 		        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
 		    else 
-		        return (string)("no-Impl");
+		        return (string)("UNINITIALISED");
 		}
 	private:
 		void EnsureUnique()
