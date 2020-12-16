@@ -96,7 +96,7 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
         if( !dynamic_pointer_cast<StarAgent>(pfront) )
             non_star_at_front = plink_front;
             
-        ContainerInterface::iterator pit_back = pattern->end();
+        SequenceInterface::iterator pit_back = pattern->end();
         --pit_back;
         TreePtr<Node> pback( *pit_back );
         plink_back = PatternLink(plan->algo, &*pit_back);

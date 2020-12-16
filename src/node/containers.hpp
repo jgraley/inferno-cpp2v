@@ -62,15 +62,20 @@ public:
 		iterator() :
 			pib( shared_ptr<iterator_interface>() ) {}
 
-		iterator( const iterator_interface &ib ) :
-			pib( ib.Clone() ) {} // Deep copy because from unmanaged source
+		iterator( const iterator_interface &ib ) 
+        {
+            if( typeid(*this)==typeid(ib) )
+                pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+            else
+                pib = ib.Clone(); // Deep copy because from unmanaged source
+        }
 
-		iterator( const iterator &i ) :
-			pib( i.pib ) {} // Shallow copy
-
-		iterator &operator=( const iterator &i )
+		iterator &operator=( const iterator_interface &ib )
 		{
-			pib = i.pib; // Shallow copy
+            if( typeid(*this)==typeid(ib) )
+                pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+            else
+                pib = ib.Clone(); // Deep copy because from unmanaged source
 			return *this;
 		}
 
@@ -102,9 +107,12 @@ public:
 			return pib->operator->();
 		}
 
-		bool operator==( const iterator_interface &o ) const // isovariant param
+		bool operator==( const iterator_interface &ib ) const // isovariant param
 		{
-			return pib->operator==( o );
+            if( typeid(*this)==typeid(ib) )
+                return operator==(dynamic_cast<const iterator &>(ib));
+            else
+                return pib->operator==(ib); 
         }
 
 		bool operator==( const iterator &i ) const // covariant param
@@ -113,9 +121,9 @@ public:
 			return pib->operator==( *(i.pib) );
 		}
 
-		bool operator!=( const iterator_interface &o ) const // isovariant param
+		bool operator!=( const iterator_interface &ib ) const // isovariant param
 		{
-			return !operator==( o );
+			return !operator==( ib );
 		}
         
 		bool operator!=( const iterator &i ) const // covariant param
@@ -150,8 +158,7 @@ public:
 		
 		virtual shared_ptr<iterator_interface> Clone() const 
 		{
-			ASSERT(pib)("Attempt to Clone() uninitialised iterator");
-			return pib->Clone();
+			return make_shared<iterator>(*this);
 		}
 		
 		operator string()
@@ -167,7 +174,7 @@ public:
 			// Call this before modifying the underlying iterator - Performs a deep copy
 			// if required to make sure there are no other refs.
 			if( pib && !pib.unique() )
-				pib = Clone();
+				pib = pib->Clone();
 			ASSERT( !pib || pib.unique() );
 		}
 
