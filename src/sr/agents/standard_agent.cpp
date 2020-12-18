@@ -701,12 +701,6 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
     
     const Plan::Collection &plan_col = plan.collections.at(pattern);
     
-    // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
-	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
-	// after decisions.
-    set<XLink> remaining_xlinks;
-    FOREACH( const TreePtrInterface &xe, *px )
-        remaining_xlinks.insert( XLink( base_xlink.GetChildX(), &xe ) ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
     SubCollectionRange::ExclusionSet excluded_x;
     
     PatternLink star_plink;
@@ -717,8 +711,8 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
         if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) 
             continue; // Looping over non-stars only
 
-    	TRACE("Collection compare %d remain out of %d; looking at ",
-                remaining_xlinks.size(),
+    	TRACE("Collection compare %d excluded out of %d; looking at ",
+                excluded_x.size(),
                 pattern->size() )(**pit)(" in pattern\n" );
             
         SolutionMap::const_iterator req_it = required_links->find(plink);
@@ -734,22 +728,16 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
               nugget.container == px) )
             throw WrongContainerCollectionMismatch(); // Be in the right collection
             
-        if( remaining_xlinks.count( req_xlink ) == 0 )
+        if( excluded_x.count( req_xlink.GetXPtr() ) > 0 )
             throw CollisionCollectionMismatch(); // Already removed this one: collision
-        remaining_xlinks.erase( req_xlink );
         excluded_x.insert( req_xlink.GetXPtr() );
     }
     
     // Now handle the p_star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
 
-    if( !remaining_xlinks.empty() && !plan_col.star_plink )
-    {
-        TRACE("mismatch - x left over\n");
-        throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
-    }
 
-    TRACE("seen_star %d size of xremaining %d\n", !!plan_col.star_plink, remaining_xlinks.size() );
+    TRACE("seen_star %d size of excluded %d\n", !!plan_col.star_plink, excluded_x.size() );
     
     if( plan_col.star_plink )
     {
@@ -757,6 +745,14 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    
+    else
+    {
+        if( excluded_x.size() != px->size() )
+        {
+            TRACE("mismatch - x left over\n");
+            throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
+        }
+    }
 }
 
 
