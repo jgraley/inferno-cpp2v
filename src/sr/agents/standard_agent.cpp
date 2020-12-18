@@ -9,9 +9,6 @@
 
 using namespace SR;
 
-//#define ERASE_USING_ITERATOR
-//#define CHECK_ITERATOR_IN_CONTAINER
-
 void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
 {
     plan.ConstructPlan( this );    
@@ -329,7 +326,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
         throw Mismatch();  
 }
 
-
+#define DQ_EXCLUDES
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             XLink base_xlink,
                                             CollectionInterface *px,
@@ -346,6 +343,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     FOREACH( const TreePtrInterface &xe, *px )
         xremaining.insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
     
+    SubCollectionRange::ExclusionSet excluded_x;
+    
     for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
     {
 		TreePtr<Node> pe( *pit );
@@ -355,7 +354,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     	TRACE("Collection compare %d remain out of %d; looking at ",
                 xremaining.size(),
                 pattern->size() )(**pit)(" in pattern\n" );        
-        if( xremaining.empty() ) // not a Star so match singly...
+        if( excluded_x.size() == px->size() ) // not a Star so match singly...
         {
             TRACE("mismatch - x ran out\n");
             throw Mismatch();  
@@ -366,6 +365,13 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Report a block for the chosen node
         ContainerInterface::iterator xit;
 
+#ifdef DQ_EXCLUDES
+            auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), px->begin(), px->end() );
+            x_decision->SetExclusions( excluded_x );                                  
+            // No need to provide the container x_decision; iterators will keep it alive and are
+            // not invalidated by re-construction of the container (they're proxies for iterators on px).
+            xit = query.RegisterDecision( px->begin(), px->end(), false );
+#else
         if( query.IsNextChoiceValid() )
         {
             // Decision already in conjecture and valid. 
@@ -388,7 +394,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
             *x_decision = xremaining;
             xit = query.RegisterDecision( x_decision, false );
         }
-        
+#endif
+
         // Find the TreePtr in our collection that points to the same
         // node as *xit, in order to preserve uniqueness properties of links.
         // TODO #167 should remove the ened for this
@@ -401,17 +408,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         ASSERT( my_real_ppx );            
         query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), my_real_ppx) ); // Link into X
 
-        // Remove the chosen element from the remaineder collection. 
-#ifdef CHECK_ITERATOR_IN_CONTAINER
-        bool found = false;
-        for( ContainerInterface::iterator checkit=xremaining.begin(); checkit != xremaining.end(); ++checkit )
-            if( checkit==xit )
-                found=true;
-        ASSERT( found ); // If not found, we have a detached iterator, see #167
-#endif
-#ifdef ERASE_USING_ITERATOR
-        xremaining.erase( xit );
-#else           
+#ifndef DQ_EXCLUDES
+        // Remove the chosen element from the remaineder collection.          
         int n = xremaining.erase( *xit );
         if( n == 0 )
         {
@@ -422,21 +420,19 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
             ASSERT(false)("Removed ")(n)(" elements\n");
         }
 #endif        
+        excluded_x.insert( &*xit );        
     }
 
     // Now handle the p_star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
-
-    if( !xremaining.empty() && !plan_col.star_plink )
-    {
-        TRACE("mismatch - x left over\n");
-        throw Mismatch();   // there were elements left over and no p_star to match them against
-    }
-
-    TRACE("seen_star %d size of xremaining %d\n", !!plan_col.star_plink, xremaining.size() );
+    TRACE("seen_star %d size of excluded_x %d\n", !!plan_col.star_plink, excluded_x.size() );
     
     if( plan_col.star_plink )
     {
+#ifdef DQ_EXCLUDES
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), px->begin(), px->end() ) );
+        x_subcollection->SetExclusions( excluded_x );                                                             
+#else        
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
  
@@ -452,9 +448,18 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
             if( xremaining.count(ppx) > 0 )
                 x_subcollection->elts.insert( XLink(base_xlink.GetChildX(), &ppx) );
         }
- 
-        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
+#endif
+        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!
     }
+    else
+    {
+        if( excluded_x.size() != px->size() )
+        {
+            TRACE("mismatch - x left over\n");
+            throw Mismatch();   // there were elements left over and no p_star to match them against
+        }
+    }
+    
     TRACE("matched\n");
 }
 
@@ -700,10 +705,9 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
     INDENT("C");
     
     const Plan::Collection &plan_col = plan.collections.at(pattern);
-    
-    SubCollectionRange::ExclusionSet excluded_x;
-    
+        
     PatternLink star_plink;
+    SubCollectionRange::ExclusionSet excluded_x;
 
     for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
     {
