@@ -363,7 +363,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                    
         // No need to provide the container x_decision; iterators will keep it alive and are
         // not invalidated by re-construction of the container (they're proxies for iterators on px).
-        xit = query.RegisterDecision( px->begin(), px->end(), false );  // BUG! should use x_decision
+        xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false ); 
 
         // Find the TreePtr in our collection that points to the same
         // node as *xit, in order to preserve uniqueness properties of links.
