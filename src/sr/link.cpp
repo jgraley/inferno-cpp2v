@@ -228,6 +228,12 @@ TreePtr<Node> XLink::GetChildX() const
 }
 
 
+const TreePtrInterface *XLink::GetXPtr() const
+{
+    return asp_x.get();
+}
+
+
 string XLink::GetTrace() const // used for debug
 {
     string s = SSPrintf("%p->", asp_x.get());

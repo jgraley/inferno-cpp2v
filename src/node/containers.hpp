@@ -168,7 +168,7 @@ public:
 		    else 
 		        return (string)("UNINITIALISED");
 		}
-	private:
+	protected:
 		void EnsureUnique()
 		{
 			// Call this before modifying the underlying iterator - Performs a deep copy

@@ -67,6 +67,7 @@ public:
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
     TreePtr<Node> GetChildX() const;
+    const TreePtrInterface *GetXPtr() const;
     string GetTrace() const; // used for debug
 
 private: friend class LocatedLink;

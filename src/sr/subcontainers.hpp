@@ -31,8 +31,7 @@ struct SubContainer : Node // TODO #69
 // parent X node's container, as well as a pointer to the parent. This
 // is sufficient to enable the correct XLinks to be built when needed.
 struct SubContainerRange : SubContainer,
-                           virtual ContainerInterface // virtual required to allow subclasses to use my impl for interfaces they bring in
-                           
+                           virtual ContainerInterface // virtual required to allow subclasses to use my impl for interfaces they bring in                        
 {    
     NODE_FUNCTIONS
     
@@ -58,12 +57,88 @@ public:
 };
 
 
+struct SubContainerRangeExclusions : SubContainerRange
+{
+    typedef set<const TreePtrInterface *> ExclusionSet;
+
+	class exclusion_iterator : public ContainerInterface::iterator_interface
+	{
+	public:    
+		typedef forward_iterator_tag iterator_category;
+		typedef TreePtrInterface value_type;
+		typedef int difference_type;
+		typedef const value_type *pointer;
+		typedef const value_type &reference;
+
+		exclusion_iterator();
+		exclusion_iterator( const exclusion_iterator &i );
+		exclusion_iterator( const iterator_interface &ib,
+                            shared_ptr<const SubContainerRangeExclusions> container_ );
+		exclusion_iterator &operator=( const iterator_interface &ib );
+		exclusion_iterator &operator++();
+		exclusion_iterator &operator--();
+		const value_type &operator*() const;
+		const value_type *operator->() const;
+		bool operator==( const iterator_interface &ib ) const;
+		bool operator==( const exclusion_iterator &i ) const;
+		bool operator!=( const iterator_interface &ib ) const;
+		bool operator!=( const exclusion_iterator &i ) const;
+		void Overwrite( const value_type *v ) const;
+		const bool IsOrdered() const;
+		const int GetCount() const;
+		iterator_interface *GetUnderlyingIterator() const;
+		virtual shared_ptr<iterator_interface> Clone() const ;
+		operator string();
+
+	private:
+        void NormaliseForward();
+        void NormaliseReverse();
+		shared_ptr<iterator_interface> pib;
+        shared_ptr<const SubContainerRangeExclusions> container;
+	};        
+    
+    SubContainerRangeExclusions() {}
+    SubContainerRangeExclusions( TreePtr<Node> parent_x, 
+                                 const iterator &b, 
+                                 const iterator &e );
+    void SetExclusions( const ExclusionSet &exclusions_ );
+    
+    virtual const iterator_interface &begin();
+    virtual const iterator_interface &end();
+    string GetContentsTrace();
+
+private: 
+    friend class exclusion_iterator;
+    virtual bool IsExcluded( const iterator_interface &ib ) const;  
+
+    shared_ptr<const ExclusionSet> exclusions;
+    shared_ptr<iterator_interface> my_exclusive_begin;
+    shared_ptr<iterator_interface> my_exclusive_end;
+    
+    NODE_FUNCTIONS 
+};
+
+
+
 struct SubSequenceRange : SubContainerRange,
                           SequenceInterface
 {
     SubSequenceRange() {}
     SubSequenceRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e ) :
         SubContainerRange( parent_x, b, e )
+    {
+    }
+    
+    NODE_FUNCTIONS_FINAL 
+};
+
+
+struct SubCollectionRange : SubContainerRangeExclusions,
+                            CollectionInterface
+{
+    SubCollectionRange() {}
+    SubCollectionRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e ) :
+        SubContainerRangeExclusions( parent_x, b, e )
     {
     }
     

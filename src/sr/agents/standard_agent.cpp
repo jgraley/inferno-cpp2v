@@ -683,7 +683,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass
+            query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass AND REPLACE!!
         }
     } 
 }
@@ -707,6 +707,7 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
     set<XLink> remaining_xlinks;
     FOREACH( const TreePtrInterface &xe, *px )
         remaining_xlinks.insert( XLink( base_xlink.GetChildX(), &xe ) ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
+    SubCollectionRange::ExclusionSet excluded_x;
     
     PatternLink star_plink;
 
@@ -736,6 +737,7 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
         if( remaining_xlinks.count( req_xlink ) == 0 )
             throw CollisionCollectionMismatch(); // Already removed this one: collision
         remaining_xlinks.erase( req_xlink );
+        excluded_x.insert( req_xlink.GetXPtr() );
     }
     
     // Now handle the p_star if there was one; all the non-star matches have been erased from
@@ -751,19 +753,9 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
     
     if( plan_col.star_plink )
     {
-        // Apply pre-restriction to the star
-        TreePtr<SubCollection> x_subcollection( new SubCollection );
- 
-        // For replace...  
-        for( XLink xlink : remaining_xlinks )
-        {            
-            x_subcollection->insert( xlink.GetChildX() );
-        }
-
-        // For solver...
-        x_subcollection->elts = remaining_xlinks;
- 
-        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), px->begin(), px->end() ) );
+        x_subcollection->SetExclusions( excluded_x );                                                             
+        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    
 }
 

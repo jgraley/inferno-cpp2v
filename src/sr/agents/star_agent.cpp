@@ -65,6 +65,9 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( CouplingKey keylink )
     ASSERT( psc )("Star node ")(*this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");  
     TRACE("Walking container length %d\n", psc->size() );
     
+    if( auto sc = dynamic_cast<SubContainer *>(keynode.get()) )    
+        TRACE("SubContainer found ")(sc->GetContentsTrace())("\n");
+        
     TreePtr<SubContainer> dest;
     ContainerInterface *dest_container;
     if( dynamic_cast<SequenceInterface *>(keynode.get()) )
@@ -77,6 +80,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( CouplingKey keylink )
     dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     FOREACH( const TreePtrInterface &pp, *psc )
     {
+        TRACE("Building ")(pp)("\n");
         TreePtr<Node> nn = DuplicateSubtree( (TreePtr<Node>)pp );
         dest_container->insert( nn );
     }

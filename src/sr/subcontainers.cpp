@@ -19,13 +19,13 @@ SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b
 }
 
 
-const SubContainerRange::iterator_interface &SubContainerRange::begin() 
+const ContainerInterface::iterator_interface &SubContainerRange::begin() 
 { 
     return *my_begin; 
 }
 
 
-const SubContainerRange::iterator_interface &SubContainerRange::end()
+const ContainerInterface::iterator_interface &SubContainerRange::end()
 {
     return *my_end; 
 }
@@ -56,6 +56,221 @@ void SubContainerRange::AssertMatchingContents( TreePtr<Node> other )
     ASSERT( other_ssr );
     ASSERT( begin() == other_ssr->begin() );
     ASSERT( end() == other_ssr->end() );
+}
+
+//////////////////////////// SubContainerRangeExclusions ///////////////////////////////
+
+
+SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator() :
+    pib( shared_ptr<iterator_interface>() ) 
+{
+}
+
+
+SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator( const exclusion_iterator &i ) :
+    container(i.container)
+{
+    pib = i.pib->Clone(); // Note we are not clone-on-write, so clone here for in case we write later
+}
+
+
+SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator( const iterator_interface &ib,
+                                                                     shared_ptr<const SubContainerRangeExclusions> container_ ) :
+    container(container_)
+{            
+    pib = ib.Clone(); // Note we are not clone-on-write, so clone here for in case we write later
+    NormaliseForward();
+}
+
+
+SubContainerRangeExclusions::exclusion_iterator &SubContainerRangeExclusions::exclusion_iterator::operator=( const iterator_interface &ib )
+{
+    pib = ib.Clone(); // Note we are not clone-on-write, so clone here for in case we write later
+    auto i = dynamic_cast<const exclusion_iterator &>(ib);
+    container = i.container;
+    return *this;
+}
+
+
+SubContainerRangeExclusions::exclusion_iterator &SubContainerRangeExclusions::exclusion_iterator::operator++()
+{
+    ASSERT(pib)("Attempt to increment uninitialised iterator");
+    pib->operator++();
+    NormaliseForward();
+    return *this;
+}
+
+
+SubContainerRangeExclusions::exclusion_iterator &SubContainerRangeExclusions::exclusion_iterator::operator--()
+{
+    ASSERT(pib)("Attempt to increment uninitialised iterator");
+    pib->operator--();
+    NormaliseReverse();
+    return *this;
+}
+
+
+const SubContainerRangeExclusions::exclusion_iterator::value_type &SubContainerRangeExclusions::exclusion_iterator::operator*() const 
+{
+    ASSERT(pib)("Attempt to dereference uninitialised iterator");
+    return pib->operator*();
+}
+
+
+const SubContainerRangeExclusions::exclusion_iterator::value_type *SubContainerRangeExclusions::exclusion_iterator::operator->() const
+{
+    ASSERT(pib)("Attempt to dereference uninitialised iterator");
+    return pib->operator->();
+}
+
+
+bool SubContainerRangeExclusions::exclusion_iterator::operator==( const iterator_interface &ib ) const // isovariant param
+{
+    ASSERT( typeid(*this)==typeid(ib) );
+    return operator==(dynamic_cast<const exclusion_iterator &>(ib));
+}
+
+
+bool SubContainerRangeExclusions::exclusion_iterator::operator==( const exclusion_iterator &i ) const // covariant param
+{
+    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
+    return pib->operator==( *(i.pib) );
+}
+
+
+bool SubContainerRangeExclusions::exclusion_iterator::operator!=( const iterator_interface &ib ) const // isovariant param
+{
+    return !operator==( ib );
+}
+
+
+bool SubContainerRangeExclusions::exclusion_iterator::operator!=( const exclusion_iterator &i ) const // covariant param
+{
+    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
+    return !operator==( i );
+}
+
+
+void SubContainerRangeExclusions::exclusion_iterator::Overwrite( const value_type *v ) const
+{
+    ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
+    pib->Overwrite( v );
+}
+
+        
+const bool SubContainerRangeExclusions::exclusion_iterator::IsOrdered() const
+{
+    return pib->IsOrdered();
+}
+
+
+const int SubContainerRangeExclusions::exclusion_iterator::GetCount() const
+{
+    return pib->GetCount();
+}
+
+
+ContainerInterface::iterator_interface *SubContainerRangeExclusions::exclusion_iterator::GetUnderlyingIterator() const
+{
+    if( pib )
+        return pib.get();
+    else
+        return nullptr;
+}
+
+
+shared_ptr<ContainerInterface::iterator_interface> SubContainerRangeExclusions::exclusion_iterator::Clone() const 
+{
+    return make_shared<exclusion_iterator>(*pib, container);
+}
+
+
+SubContainerRangeExclusions::exclusion_iterator::operator string()
+{   
+    if( pib )
+        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
+    else 
+        return (string)("UNINITIALISED");
+}
+
+
+void SubContainerRangeExclusions::exclusion_iterator::NormaliseForward()
+{
+    while( container->IsExcluded(*pib) )
+        pib->operator++();
+}
+
+
+void SubContainerRangeExclusions::exclusion_iterator::NormaliseReverse()
+{
+    while( container->IsExcluded(*pib) )
+        pib->operator--();
+}
+
+
+SubContainerRangeExclusions::SubContainerRangeExclusions( TreePtr<Node> parent_x, 
+                                                          const iterator &b, 
+                                                          const iterator &e ) :
+    SubContainerRange( parent_x, b, e )
+{
+}
+
+
+void SubContainerRangeExclusions::SetExclusions( const ExclusionSet &exclusions_ )
+{    
+    exclusions = make_shared<const ExclusionSet>( exclusions_ );
+    
+    auto sp_this = dynamic_pointer_cast<SubContainerRangeExclusions>(shared_from_this());
+    ASSERT( sp_this );
+    my_exclusive_begin = make_shared<exclusion_iterator>( *my_begin, sp_this );
+    my_exclusive_end = make_shared<exclusion_iterator>( *my_end, sp_this );
+}
+
+
+const ContainerInterface::iterator_interface &SubContainerRangeExclusions::begin() 
+{ 
+    return *my_exclusive_begin; 
+}
+
+
+const ContainerInterface::iterator_interface &SubContainerRangeExclusions::end()
+{
+    return *my_exclusive_end; 
+}
+
+
+bool SubContainerRangeExclusions::IsExcluded( const iterator_interface &ib ) const
+{
+    if(ib == *my_end) 
+    {
+        return false; // can't dereference end iterator - but can't exclude it either
+    }
+    else
+    {
+        bool exc = exclusions->count( &*ib );
+        return exc > 0;
+    }
+}
+
+
+string SubContainerRangeExclusions::GetContentsTrace()
+{
+    ContainerInterface *this_ci = dynamic_cast<ContainerInterface *>(this);
+    
+    string s = "SubContainerRangeExclusions";
+
+    s += "(";
+    bool first = true;
+    FOREACH( const TreePtrInterface &e_node, *this_ci )
+    {
+        if( !first )
+            s += ", ";
+        first = false;
+        XLink e_link = XLink(GetParentX(), &e_node);
+        s += Trace(e_link);
+    }
+    s += ")";
+    return s;
 }
 
 //////////////////////////// SubSequence ///////////////////////////////
