@@ -304,25 +304,13 @@ void SubSequence::AssertMatchingContents( TreePtr<Node> other )
 
 string SubCollection::GetContentsTrace()
 {
-    bool first = true;
-    string s = "SubCollection{";
-    for( XLink e_link : elts )
-    {
-        if( !first )
-            s += ", ";
-        first = false;
-        s += Trace(e_link);
-    }
-    s += "}";
+    string s = "SubCollection{DEPRACATED}";
     return s;
 }
 
 
 void SubCollection::AssertMatchingContents( TreePtr<Node> other )
 {
-    auto other_scl = dynamic_cast<SubCollection *>(other.get());
-    ASSERT( other_scl );
-    ASSERT( elts == other_scl->elts )
-          (elts)(" != ")(other_scl->elts);
+    ASSERT(!"DEPRACATED");
 }
 

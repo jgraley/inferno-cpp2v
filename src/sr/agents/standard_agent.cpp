@@ -354,28 +354,15 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         }
             
         // We have to decide which node in the tree to match, so use the present conjecture
-        // Note: would like to use xremaining, but it will fall out of scope
-        // Report a block for the chosen node
+        // Make a SubCollectionRange excluding x elements we already matched
         ContainerInterface::iterator xit;
-
         auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), px->begin(), px->end() );
         x_decision->SetExclusions( excluded_x );                       
                    
         // No need to provide the container x_decision; iterators will keep it alive and are
         // not invalidated by re-construction of the container (they're proxies for iterators on px).
-        xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false ); 
-
-        // Find the TreePtr in our collection that points to the same
-        // node as *xit, in order to preserve uniqueness properties of links.
-        // TODO #167 should remove the ened for this
-        const TreePtrInterface *my_real_ppx = nullptr;
-        FOREACH( const TreePtrInterface &ppx, *px )
-        {
-            if( ppx == *xit )
-                my_real_ppx = &ppx;
-        }
-        ASSERT( my_real_ppx );            
-        query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), my_real_ppx) ); // Link into X
+        xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false );    
+        query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
   
         excluded_x.insert( &*xit );        
     }

@@ -548,14 +548,6 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
             e->Compare( xe_link, subordinate_keys, knowledge );
         }
     }
-    else if( auto xscl = dynamic_cast<SubCollection *>(xsc) )
-    {
-        for( XLink xe_link : xscl->elts )
-        {
-            TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, subordinate_keys, knowledge );
-        }
-    }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
     {
         for( XLink xe_link : xssl->elts )

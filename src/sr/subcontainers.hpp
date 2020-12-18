@@ -182,7 +182,7 @@ struct SubCollection : Collection<Node>,
     virtual string GetContentsTrace(); 
     virtual void AssertMatchingContents( TreePtr<Node> other );    
     
-    set<XLink> elts;
+    //set<XLink> elts; // DEPRACATED for use anywhere but in replace
 };       
 
 };
