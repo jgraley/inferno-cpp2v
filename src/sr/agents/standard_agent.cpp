@@ -326,7 +326,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
         throw Mismatch();  
 }
 
-#define DQ_EXCLUDES
+
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             XLink base_xlink,
                                             CollectionInterface *px,
@@ -335,14 +335,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     INDENT("C");
 
     const Plan::Collection &plan_col = plan.collections.at(pattern);
-    
-    // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
-	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
-	// after decisions.
-    Collection<Node> xremaining;
-    FOREACH( const TreePtrInterface &xe, *px )
-        xremaining.insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
-    
+
     SubCollectionRange::ExclusionSet excluded_x;
     
     for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
@@ -351,8 +344,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         if( dynamic_pointer_cast<StarAgent>(pe) )
             continue; // Looping over non-stars only
             
-    	TRACE("Collection compare %d remain out of %d; looking at ",
-                xremaining.size(),
+    	TRACE("Collection compare %d excluded out of %d; looking at ",
+                excluded_x.size(),
                 pattern->size() )(**pit)(" in pattern\n" );        
         if( excluded_x.size() == px->size() ) // not a Star so match singly...
         {
@@ -365,36 +358,12 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Report a block for the chosen node
         ContainerInterface::iterator xit;
 
-#ifdef DQ_EXCLUDES
-            auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), px->begin(), px->end() );
-            x_decision->SetExclusions( excluded_x );                                  
-            // No need to provide the container x_decision; iterators will keep it alive and are
-            // not invalidated by re-construction of the container (they're proxies for iterators on px).
-            xit = query.RegisterDecision( px->begin(), px->end(), false );
-#else
-        if( query.IsNextChoiceValid() )
-        {
-            // Decision already in conjecture and valid. 
-            const Conjecture::Range &old_decision = query.GetNextOldDecision();
-            
-            // Now take a copy. 
-            xremaining.clear();
-            FOREACH( const TreePtrInterface &tp, *old_decision.container )
-                xremaining.insert((TreePtr<Node>)tp);
-                
-            // re-submit the exact same decision.
-            xit = query.SkipDecision();
-        }
-        else
-        {
-            // New decision: take a copy of xremaining and pass it to the query.
-            // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
-            // in future calls.
-            auto x_decision = make_shared< Collection<Node> >();
-            *x_decision = xremaining;
-            xit = query.RegisterDecision( x_decision, false );
-        }
-#endif
+        auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), px->begin(), px->end() );
+        x_decision->SetExclusions( excluded_x );                       
+                   
+        // No need to provide the container x_decision; iterators will keep it alive and are
+        // not invalidated by re-construction of the container (they're proxies for iterators on px).
+        xit = query.RegisterDecision( px->begin(), px->end(), false );  // BUG! should use x_decision
 
         // Find the TreePtr in our collection that points to the same
         // node as *xit, in order to preserve uniqueness properties of links.
@@ -407,19 +376,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         }
         ASSERT( my_real_ppx );            
         query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), my_real_ppx) ); // Link into X
-
-#ifndef DQ_EXCLUDES
-        // Remove the chosen element from the remaineder collection.          
-        int n = xremaining.erase( *xit );
-        if( n == 0 )
-        {
-            ASSERT(!"failed to remove element from collection");
-        }
-        if( n > 1 )
-        {
-            ASSERT(false)("Removed ")(n)(" elements\n");
-        }
-#endif        
+  
         excluded_x.insert( &*xit );        
     }
 
@@ -429,26 +386,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     
     if( plan_col.star_plink )
     {
-#ifdef DQ_EXCLUDES
         TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), px->begin(), px->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
-#else        
-        // Apply pre-restriction to the star
-        TreePtr<SubCollection> x_subcollection( new SubCollection );
- 
-        // For replace...
-        *x_subcollection = xremaining;
-
-        // For solver...
-        // Find the TreePtrs in our collection that point to the same
-        // nodes as xremaining, in order to preserve uniqueness properties of links.
-        // TODO #167 should remove the ened for this   
-        FOREACH( const TreePtrInterface &ppx, *px )
-        {
-            if( xremaining.count(ppx) > 0 )
-                x_subcollection->elts.insert( XLink(base_xlink.GetChildX(), &ppx) );
-        }
-#endif
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!
     }
     else
