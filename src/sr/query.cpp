@@ -239,8 +239,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
     {
         case Choice::ITER:
             // We have an iterator already: any decision submitted here must match the previous one
-            // so that the iterator remains valid. See range::operator==(). If this cannot be achieved, 
-            // then the agent must use IsNextChoiceValid() and if it returns true, call SkipDecision()
+            // so that the iterator remains valid. See range::operator==().
             it = next_choice->iter; // Use the iterator that was given to us
             ASSERT( r == *next_decision );
             break;
@@ -295,43 +294,6 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Collection<No
     //auto p_myit = dynamic_cast<const Collection<Node>::iterator *>(query_it.GetUnderlyingIterator()); // for #109
     return query_it;
 }                                                      
-
-
-bool DecidedQuery::IsNextChoiceValid() const
-{
-    return next_choice->mode == Choice::ITER;
-}
-
-
-const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
-{
-    ASSERT( next_decision != decisions.end() )
-          ("%d [%p %p ... %p] %p\n", decisions.size(), &decisions[0], &decisions[1], &decisions.back(), &*next_decision);
-    return *next_decision;
-}
-
-
-ContainerInterface::iterator DecidedQuery::SkipDecision()
-{
-    ContainerInterface::iterator it;
-    ASSERT( next_decision != decisions.end() ); // run out of decisions? Shouldn't happen now.
-    ASSERT( next_choice != choices.end() );
-    switch( next_choice->mode )
-    {
-        case Choice::ITER:
-            it = next_choice->iter; // Use the iterator that was given to us
-            break;
-        
-        case Choice::BEGIN:
-            it = next_decision->begin; // we have been asked to use begin
-            break;
-    }
-    ASSERT( it == next_decision->end || *it )("A choice cannot be a nullptr");
-    ++next_decision; 
-    ++next_choice;
-    
-    return it;
-}
 
 
 void DecidedQuery::CompleteDecisionsWithEmpty()

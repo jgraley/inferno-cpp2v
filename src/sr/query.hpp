@@ -123,9 +123,6 @@ public:
                                                            bool inclusive,
                                                            std::shared_ptr<ContainerInterface> container=nullptr ) = 0; 
     virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
-    virtual bool IsNextChoiceValid() const = 0;
-    virtual const Range &GetNextOldDecision() const = 0;
-    virtual ContainerInterface::iterator SkipDecision() = 0;
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
@@ -185,9 +182,6 @@ public:
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
     ContainerInterface::iterator RegisterDecision( const Sequence<Node> &container, bool inclusive );
     ContainerInterface::iterator RegisterDecision( const Collection<Node> &container, bool inclusive );
-    bool IsNextChoiceValid() const;
-    const Range &GetNextOldDecision() const;
-    ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
     void RegisterNormalLink( PatternLink plink, XLink xlink ); 

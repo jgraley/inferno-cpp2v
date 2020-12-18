@@ -34,6 +34,7 @@ public:
     class WrongContainerCollectionMismatch : public CollectionMismatch {};
     class CollisionCollectionMismatch : public CollectionMismatch {};
     class SurplusXCollectionMismatch : public CollectionMismatch {};
+    class InsufficientXCollectionMismatch : public CollectionMismatch {};
     
 	virtual void AgentConfigure( const SCREngine *master_scr_engine );
 

@@ -341,29 +341,29 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
     {
 		TreePtr<Node> pe( *pit );
-        if( dynamic_pointer_cast<StarAgent>(pe) )
+        if( dynamic_pointer_cast<StarAgent>(pe) ) 
             continue; // Looping over non-stars only
             
     	TRACE("Collection compare %d excluded out of %d; looking at ",
                 excluded_x.size(),
                 pattern->size() )(**pit)(" in pattern\n" );        
-        if( excluded_x.size() == px->size() ) // not a Star so match singly...
-        {
-            TRACE("mismatch - x ran out\n");
-            throw Mismatch();  
-        }
-            
+
         // We have to decide which node in the tree to match, so use the present conjecture
         // Make a SubCollectionRange excluding x elements we already matched
         ContainerInterface::iterator xit;
         auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), px->begin(), px->end() );
         x_decision->SetExclusions( excluded_x );                       
                    
+        // An empty decision would imply we ran out of elements in px
+        if( x_decision->empty() )
+            throw InsufficientXCollectionMismatch();                 
+                   
         // No need to provide the container x_decision; iterators will keep it alive and are
         // not invalidated by re-construction of the container (they're proxies for iterators on px).
         xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false );    
+        
+        // We have our x element
         query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
-  
         excluded_x.insert( &*xit );        
     }
 
@@ -377,13 +377,9 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!
     }
-    else
+    else if( excluded_x.size() != px->size() )
     {
-        if( excluded_x.size() != px->size() )
-        {
-            TRACE("mismatch - x left over\n");
-            throw Mismatch();   // there were elements left over and no p_star to match them against
-        }
+        throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
     }
     
     TRACE("matched\n");
@@ -662,26 +658,20 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
             throw CollisionCollectionMismatch(); // Already removed this one: collision
         excluded_x.insert( req_xlink.GetXPtr() );
     }
-    
-    // Now handle the p_star if there was one; all the non-star matches have been erased from
-    // the collection, leaving only the star matches.
-
 
     TRACE("seen_star %d size of excluded %d\n", !!plan_col.star_plink, excluded_x.size() );
     
     if( plan_col.star_plink )
     {
+        // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
         TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), px->begin(), px->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    
-    else
+    else if( excluded_x.size() != px->size() )
     {
-        if( excluded_x.size() != px->size() )
-        {
-            TRACE("mismatch - x left over\n");
-            throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
-        }
+        TRACE("mismatch - x left over\n");
+        throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
     }
 }
 
