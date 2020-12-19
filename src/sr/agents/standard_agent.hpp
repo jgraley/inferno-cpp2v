@@ -41,7 +41,6 @@ public:
     struct Plan
     {
         void ConstructPlan( StandardAgent *algo );
-        void MakePatternQuery();
         
         struct Sequence
         {
@@ -76,7 +75,6 @@ public:
         StandardAgent *algo;
         map<SequenceInterface *, Sequence> sequences;
         map<CollectionInterface *, Collection> collections;
-        shared_ptr<PatternQuery> pattern_query;
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;

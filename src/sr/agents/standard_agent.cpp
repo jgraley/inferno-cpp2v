@@ -27,7 +27,6 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
             collections.emplace( make_pair(pattern_col, Collection(this, pattern_col)) );
     }
-    MakePatternQuery();
     algo->planned = true;
 }
 
@@ -125,17 +124,17 @@ StandardAgent::Plan::Collection::Collection( Plan *plan, CollectionInterface *pa
 }
 
 
-void StandardAgent::Plan::MakePatternQuery()
+shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     // Clear it just in case
-    pattern_query = make_shared<PatternQuery>(algo);
+    auto pattern_query = make_shared<PatternQuery>(this);
 
-    const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
+    const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
         {
-            const Plan::Sequence &plan_seq = sequences.at(pattern_seq);
+            const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
 
    			for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
    			{
@@ -145,17 +144,17 @@ void StandardAgent::Plan::MakePatternQuery()
                 {
                     if( pit != plan_seq.pit_last_star )
                         pattern_query->RegisterDecision( true ); // Inclusive, please.
-                    pattern_query->RegisterAbnormalLink(PatternLink(algo, pe));    
+                    pattern_query->RegisterAbnormalLink(PatternLink(this, pe));    
                 }
                 else
                 {
-                    pattern_query->RegisterNormalLink(PatternLink(algo, pe));    
+                    pattern_query->RegisterNormalLink(PatternLink(this, pe));    
                 }
             }
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
-            const Plan::Collection &plan_col = collections.at(pattern_col);
+            const Plan::Collection &plan_col = plan.collections.at(pattern_col);
 
    			for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
    			{
@@ -163,7 +162,7 @@ void StandardAgent::Plan::MakePatternQuery()
 				if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
                 {
                     pattern_query->RegisterDecision( false ); // Exclusive, please
-				    pattern_query->RegisterNormalLink(PatternLink(algo, pe));    	     
+				    pattern_query->RegisterNormalLink(PatternLink(this, pe));    	     
                 }
 		    }
             if( plan_col.star_plink )
@@ -174,19 +173,15 @@ void StandardAgent::Plan::MakePatternQuery()
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be nullptr meaning no restriction            
-                pattern_query->RegisterNormalLink(PatternLink(algo, pattern_ptr));
+                pattern_query->RegisterNormalLink(PatternLink(this, pattern_ptr));
         }
         else
         {
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
     }
-}
-
-
-shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
-{
-    return plan.pattern_query;
+    
+    return pattern_query;
 }
 
 
