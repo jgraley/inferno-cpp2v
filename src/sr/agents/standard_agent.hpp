@@ -70,6 +70,7 @@ public:
             
             const TreePtrInterface *p_star;
             PatternLink star_plink;
+            set<PatternLink> non_stars;
         };
         
         StandardAgent *algo;

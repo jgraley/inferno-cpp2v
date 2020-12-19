@@ -120,11 +120,14 @@ StandardAgent::Plan::Collection::Collection( Plan *plan, Phase phase, Collection
 		ASSERT( pe );
         if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
-            // No, could be in replace pattern, where many stars are permitted TODO resolve
-            // ASSERT( !p_star )("Only one star allowed in collection");
+            ASSERT( !p_star )("Only one star allowed in collections when in compare pattern");
             
             p_star = pe;
             star_plink = plink;
+        }
+        else
+        {
+            non_stars.insert( plink );
         }
     }
 }
@@ -339,15 +342,13 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 
     SubCollectionRange::ExclusionSet excluded_x;
     
-    for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
+    for( PatternLink plink : plan_col.non_stars )
     {
-		TreePtr<Node> pe( *pit );
-        if( dynamic_pointer_cast<StarAgent>(pe) ) 
-            continue; // Looping over non-stars only
-            
-    	TRACE("Collection compare %d excluded out of %d; looking at ",
-                excluded_x.size(),
-                pattern->size() )(**pit)(" in pattern\n" );        
+    	TRACE( "Collection compare %d excluded out of %d; looking at ",
+               excluded_x.size(),
+               pattern->size() )
+             (plink)
+             (" in pattern\n" );        
 
         // We have to decide which node in the tree to match, so use the present conjecture
         // Make a SubCollectionRange excluding x elements we already matched
@@ -364,7 +365,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false );    
         
         // We have our x element
-        query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
+        query.RegisterNormalLink( plink, XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
         excluded_x.insert( &*xit );        
     }
 
@@ -477,21 +478,29 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     const Plan::Sequence &plan_seq = plan.sequences.at(pattern);
 
     TRACEC("DNLQ sequence: %d plinks\n", pattern->size());
+    bool incomplete = false;
 
+    for( PatternLink plink : plan_seq.non_stars )  // independent of px
+    {
+        if( required_links->find(plink) == required_links->end() ) 
+        {
+            completeness = INCOMPLETE;
+            incomplete = true;
+        }
+    }
+    
     // The only true unary constraint is that every child x link
     // is in some sequence (because that can be read directly off the
     // nugget).
     for( PatternLink plink : plan_seq.non_stars )  // independent of px
     {
         SolutionMap::const_iterator it = required_links->find(plink);
-        if( it == required_links->end() ) 
+        if( it != required_links->end() ) 
         {
-            completeness = INCOMPLETE;
-            continue;
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE) )
+                throw WrongContainerSequenceMismatch(); // Be in the right sequence        
         }
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
-        if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE) )
-            throw WrongContainerSequenceMismatch(); // Be in the right sequence
     }
     
     // If the pattern begins with a non-star, constrain the child x to be the 
@@ -552,6 +561,9 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         if( !(a_nugget.container == b_nugget.container && a_nugget.index < b_nugget.index) )
              throw NotAfterSequenceMismatch();
     }
+
+    if( incomplete )
+        return;
 
     // We now look at the runs of star patterns. Each is bounded by some combination
     // of the bounds of the x sequence and the surrounding non-star child x values. 
@@ -626,54 +638,79 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
                                                         Completeness &completeness ) const
 {
     INDENT("C");
-    
+    bool incomplete = false;
     const Plan::Collection &plan_col = plan.collections.at(pattern);
-        
-    PatternLink star_plink;
-    SubCollectionRange::ExclusionSet excluded_x;
 
-    for( CollectionInterface::iterator pit = pattern->begin(); pit != pattern->end(); ++pit )
+    // The only true unary constraint is that every child x link
+    // is in some collection (because that can be read directly off the
+    // nugget).
+    for( PatternLink plink : plan_col.non_stars )  // independent of px
     {
-        auto plink = PatternLink(this, &*pit);
-        if( dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*pit)) ) 
-            continue; // Looping over non-stars only
-
-    	TRACE("Collection compare %d excluded out of %d; looking at ",
-                excluded_x.size(),
-                pattern->size() )(**pit)(" in pattern\n" );
-            
-        SolutionMap::const_iterator req_it = required_links->find(plink);
-        if( req_it == required_links->end() ) 
+        SolutionMap::const_iterator it = required_links->find(plink);
+        if( it != required_links->end() ) 
         {
-            completeness = INCOMPLETE;
-            return; // can't do any more in the current sequence TODO I bet you could if you tried harder
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION) )
+                throw WrongContainerCollectionMismatch(); // Be in a sequence
         }
-        
-        XLink req_xlink = req_it->second; 
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-        if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION &&
-              nugget.container == px) )
-            throw WrongContainerCollectionMismatch(); // Be in the right collection
-            
-        if( excluded_x.count( req_xlink.GetXPtr() ) > 0 )
-            throw CollisionCollectionMismatch(); // Already removed this one: collision
-        excluded_x.insert( req_xlink.GetXPtr() );
     }
 
-    TRACE("seen_star %d size of excluded %d\n", !!plan_col.star_plink, excluded_x.size() );
+    // Require that every child x link is in the correct collection.
+    for( PatternLink plink : plan_col.non_stars )  // depends on px
+    {
+        SolutionMap::const_iterator it = required_links->find(plink);
+        if( it != required_links->end() ) 
+        {
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            if( nugget.container != px )
+                throw WrongContainerCollectionMismatch(); // Be in the right sequence
+        }
+    }
+
+    // Require that every child x link is different (alldiff).
+    SubCollectionRange::ExclusionSet x_so_far;
+    for( PatternLink plink : plan_col.non_stars ) // independent of px
+    {
+        SolutionMap::const_iterator req_it = required_links->find(plink);
+        if( req_it != required_links->end() ) 
+        {
+            XLink req_xlink = req_it->second; 
+            if( x_so_far.count( req_xlink.GetXPtr() ) > 0 )
+                throw CollisionCollectionMismatch(); // Already removed this one: collision
+            x_so_far.insert( req_xlink.GetXPtr() );
+        }
+    }
+
+    // Require that there are no leftover x of no star. Depends on px.
+    if( !plan_col.star_plink )
+    {
+        if( px->size() > plan_col.non_stars.size() )
+        {
+            TRACE("mismatch - x left over\n");
+            throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
+        }
+    }
+    
+    for( PatternLink plink : plan_col.non_stars )  // independent of px
+    {
+        if( required_links->find(plink) == required_links->end() ) 
+        {
+            completeness = INCOMPLETE;
+            return;
+        }
+    }
     
     if( plan_col.star_plink )
     {
+        SubCollectionRange::ExclusionSet excluded_x;
+        for( PatternLink plink : plan_col.non_stars ) // independent of px
+            excluded_x.insert( required_links->find(plink)->second.GetXPtr() );
+
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
         TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), px->begin(), px->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    
-    else if( excluded_x.size() != px->size() )
-    {
-        TRACE("mismatch - x left over\n");
-        throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
-    }
 }
 
 
