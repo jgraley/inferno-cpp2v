@@ -503,6 +503,20 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         }
     }
     
+    // Require that every child x link is in the correct collection.
+    // Note: checking px only on non_star_at_front and non_star_at_back
+    // is insufficient - they might both be stars.
+    for( PatternLink plink : plan_seq.non_stars )  // depends on px
+    {
+        SolutionMap::const_iterator it = required_links->find(plink);
+        if( it != required_links->end() ) 
+        {
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            if( !(nugget.container == px) )
+                throw WrongContainerSequenceMismatch(); // Be in the right sequence        
+        }
+    }
+    
     // If the pattern begins with a non-star, constrain the child x to be the 
     // front node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_front ) // depends on px
@@ -564,6 +578,11 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
 
     if( incomplete )
         return;
+
+    // If we got this far with an undersized px, something has gone wrong 
+    // in the logic, and the following code will crash into px->end(). 
+    // And I mean "crash" literally.
+    ASSERT(px->size() >= plan_seq.num_non_star); 
 
     // We now look at the runs of star patterns. Each is bounded by some combination
     // of the bounds of the x sequence and the surrounding non-star child x values. 

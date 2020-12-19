@@ -167,6 +167,7 @@ void AgentCommon::DNLQFromDQ( DecidedQuery &query,
     for( LocatedLink alink : actual_links )
     {
         auto plink = (PatternLink)alink;
+        ASSERT(required_links->count(plink))(*this)(" NLQ needs links for all children, got ")(*required_links);
         LocatedLink rlink( plink, required_links->at(plink) );
         ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
         if( (XLink)alink == XLink::MMAX_Link )
@@ -240,7 +241,6 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 else
                 {
                     Completeness completeness = RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
-                    ASSERT( completeness==COMPLETE );
                 }                    
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");

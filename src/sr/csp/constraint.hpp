@@ -46,12 +46,19 @@ public:
     virtual int GetFreeDegree() const = 0;
     
     /**
-     * Get the degree of the constraint.
+     * Get the free variables.
      * 
      * @return A list of free variables affecteed by this constraint. Size equals the return from GetFreeDegree()
      */
     virtual list<VariableId> GetFreeVariables() const = 0;
     
+    /**
+     * Get the free variables that must be assigned when calling Test.
+     * 
+     * @return A list of free variables required by Test().
+     */
+    virtual list<VariableId> GetRequiredVariables() const = 0;
+
     /**
      * Write info about the problem to log via TRACE
      */
@@ -63,7 +70,7 @@ public:
      * @param forces [in] a map from varaibles to forced values
      */    
     virtual void Start( const Assignments &forces, 
-                            const SR::TheKnowledge *knowledge ) = 0;    
+                        const SR::TheKnowledge *knowledge ) = 0;    
     
     /**
      * Test a list of free variable values for inclusion in the constraint.
@@ -74,7 +81,7 @@ public:
      * @retval true the values are in the constraint, same ordering as return of GetFreeVariables().
      * @retval false the values are not in the constraint
      */
-    virtual bool Test( list< Value > values ) = 0;        
+    virtual bool Test( Assignments frees_map ) = 0;        
 };
 
 };

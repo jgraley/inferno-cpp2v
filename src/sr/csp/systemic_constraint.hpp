@@ -74,10 +74,11 @@ public:
 private:
     int GetFreeDegree() const;
     list<VariableId> GetFreeVariables() const;
+    list<VariableId> GetRequiredVariables() const;
     void TraceProblem() const;
     virtual void Start( const Assignments &forces, 
                         const SR::TheKnowledge *knowledge );    
-    bool Test( list< Value > values );
+    bool Test( Assignments frees_map );
         
     class ByLocationLinkMismatch : public ::Mismatch
     {
@@ -103,6 +104,7 @@ private:
     } plan;
     
     list<Value> forces;
+    Assignments forces_map;
     const SR::TheKnowledge *knowledge;
     
     virtual string GetTrace() const;

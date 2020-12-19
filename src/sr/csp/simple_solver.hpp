@@ -51,7 +51,6 @@ private:
 
     bool TryVariable( list<VariableId>::const_iterator current );
     bool Test( const Assignments &assigns );
-    list<Value> GetValuesForConstraint( shared_ptr<Constraint> c, const Assignments &a );    
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();

@@ -62,6 +62,7 @@ public:
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
+    
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const = 0;                                                
@@ -73,6 +74,7 @@ public:
     virtual QueryLambda TestStartNormalLinkedQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
+    virtual bool ImplHasDNLQ() const = 0;                                              
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
     virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
     // function<XLink(XLink)> deduplicator

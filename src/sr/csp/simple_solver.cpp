@@ -87,6 +87,7 @@ void SimpleSolver::Run( ReportageObserver *holder_,
                         const Assignments &forces,
                         const SR::TheKnowledge *knowledge )
 {
+    INDENT("S");
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
     initial_domain = initial_domain_;
@@ -135,9 +136,9 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
     for( Value v : initial_domain )
     {
         assignments[*current] = v;
+        try_counts.back()++;
      
         bool ok = Test( assignments );
-        try_counts.back()++;
         
         if( !ok )
         {
@@ -172,14 +173,18 @@ bool SimpleSolver::Test( const Assignments &assigns )
 {
     bool ok = true; // AND-rule
     for( shared_ptr<Constraint> c : plan.constraints )
-    {
-        list<Value> vals = GetValuesForConstraint( c, assignments );
-
-        if( vals.size() < c->GetFreeDegree() )
-            continue; // There were unassigned variables, don't bother testing this constraint
-            
+    {      
+        bool requirements_met = true;
+        list<VariableId> required_vars = c->GetRequiredVariables();
+        for( VariableId rv : required_vars )
+            if( assignments.count(rv) == 0 )
+                requirements_met = false; // There were unassigned variables, don't bother testing this constraint
+           
+        if( !requirements_met )
+            continue;
+        
         TimedOperations(); // overhead should be hidden by Constraint::Test()
-        ok = c->Test(vals); 
+        ok = c->Test(assignments); 
         
         if( !ok )
             break;
@@ -194,22 +199,6 @@ bool SimpleSolver::Test( const Assignments &assigns )
     } 
 
     return ok;
-}
-
-
-list<Value> SimpleSolver::GetValuesForConstraint( shared_ptr<Constraint> c, const Assignments &a )
-{
-    list<VariableId> vars = c->GetFreeVariables();
-    list<Value> vals;
-    for( VariableId var : vars )
-    {
-        if( a.count(var) > 0 )
-        {
-            Value val = a.at(var); 
-            vals.push_back( val );
-        }
-    }    
-    return vals;
 }
 
 
@@ -233,26 +222,28 @@ void SimpleSolver::CheckLocalMatch( const Assignments &assignments, VariableId v
 
 void SimpleSolver::ShowBestAssignment()
 {
+    Assignments &assignments_to_show = assignments;
     INDENT("B");
-    if( best_assignments.empty() )
+    if( assignments_to_show.empty() )
         return; // didn't get around to updating it yet
-    TRACE("Best assignment assigned %d of %d variables:\n", best_assignments.size(), plan.variables.size());
+    TRACE("Assigned %d of %d variables:\n", assignments_to_show.size(), plan.variables.size());
     for( VariableId var : plan.variables )
     {
-        if( best_assignments.count(var) > 0 )
+        if( assignments_to_show.count(var) > 0 )
         {
-            TRACEC("Variable ")(var)(" assigned ")(best_assignments.at(var));
-            if( var.GetChildAgent()->IsLocalMatch(best_assignments.at(var).GetChildX().get()) )
+            TRACEC("Variable ")(var)(" assigned ")(assignments_to_show.at(var));
+            if( var.GetChildAgent()->IsLocalMatch(assignments_to_show.at(var).GetChildX().get()) || 
+                assignments_to_show.at(var) == SR::XLink::MMAX_Link )
             {
                 TRACEC(" is a local match\n");
             }
             else
             {
                 TRACEC(" is not a local match (two reasons this might be OK)\n");            
-                ASSERT(best_assignments.size() < plan.variables.size())("local mismatch in passing complete assignment");
+                ASSERT(assignments_to_show.size() < plan.variables.size())("local mismatch in passing complete assignment");
             }
             // Reason 1: At the point we gave up, no constraint containing this 
-            // variable was complete (ie had a full set of assigned variables)
+            // variable had all of its required variables assigned.
             // Reason 2: Complete constraints contained this variable but that
             // didn't include one which had the variable as its base, and so 
             // local match was not enforced.
@@ -260,7 +251,6 @@ void SimpleSolver::ShowBestAssignment()
         else 
         {
             TRACEC("Variable ")(var)(" could not be assigned a consistent value.\n");
-            break; // later ones won't even have been tried
         }
     }
     TRACEC("Try counts: ")(try_counts)("\n");

@@ -80,6 +80,32 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 }
 
 
+list<VariableId> SystemicConstraint::GetRequiredVariables() const
+{ 
+    list<VariableId> free_vars;
+    for( auto var : plan.all_variables )
+    {
+        // We require the free keyer if there is one (otherwise it will be a force)
+        if( var.flags.freedom != Freedom::FREE )
+            continue;
+             
+        switch( var.kind )
+        {
+        case Kind::KEYER:
+            free_vars.push_back( var.id );
+            break;
+        case Kind::RESIDUAL:
+            break;
+        case Kind::CHILD:
+            if( !plan.agent->ImplHasDNLQ() )
+                free_vars.push_back( var.id );
+            break;
+        }        
+    }
+    return free_vars;
+}
+
+
 void SystemicConstraint::TraceProblem() const
 {
     TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.all_variables.size(), GetFreeDegree());
@@ -90,57 +116,56 @@ void SystemicConstraint::TraceProblem() const
 }
 
 
-void SystemicConstraint::Start( const Assignments &forces_map, 
-                                    const SR::TheKnowledge *knowledge_ )
+void SystemicConstraint::Start( const Assignments &forces_map_, 
+                                const SR::TheKnowledge *knowledge_ )
 {
+    forces_map = forces_map_;
+    knowledge = knowledge_;
+    ASSERT( knowledge );
+    
     forces.clear();
     for( auto var : plan.all_variables )
     {
         switch( var.flags.freedom )
         {
         case Freedom::FREE:
-            ASSERT( !forces_map.count( var.id ) )
+            ASSERT( forces_map.count( var.id ) == 0 )
                   (*this)("\n")
                   (Trace(var))(" should not be in forces: ")(forces_map)("\n");
             break;
             
         case Freedom::FORCED:
-            ASSERT( forces_map.count( var.id ) )
+            ASSERT( forces_map.count( var.id ) == 1 )
                   (*this)("\n")
                   (Trace(var))(" missing from forces: ")(forces_map)("\n"); 
             forces.push_back( forces_map.at( var.id ) );            
             break;
         }
     }    
-    
-    knowledge = knowledge_;
-    ASSERT( knowledge );
 }   
 
 
-bool SystemicConstraint::Test( list< Value > values )
-{
-    ASSERT( values.size() == GetFreeDegree() );
-    
+bool SystemicConstraint::Test( Assignments frees_map )
+{   
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
     Value x;
     SR::SolutionMap required_links;
     multiset<SR::XLink> coupling_links;
     list<Value>::const_iterator forceit = forces.begin();
-    list<Value>::const_iterator valit = values.begin();
-    list<VariableId>::const_iterator patit = plan.pq->GetNormalLinks().begin();
     for( auto var : plan.all_variables )
     {
         Value v;
         switch( var.flags.freedom )
         {
         case Freedom::FORCED:
-            v = *forceit++;
+            v = forces_map.at(var.id);
             break;
         
         case Freedom::FREE:
-            v = *valit++;
+            if( frees_map.count(var.id)==0 )
+                continue; // value not supplied
+            v = frees_map.at(var.id);
             break;
         }
         
@@ -156,10 +181,12 @@ bool SystemicConstraint::Test( list< Value > values )
             break;
             
         case Kind::CHILD:
-            required_links[*patit++] = v;     
+            required_links[var.id] = v;     
             break;
         }
     }    
+    ASSERT( x ); // The keyer is required
+    //required_links = UnionOfSolo(forces_map, frees_map);
 
     try
     {
