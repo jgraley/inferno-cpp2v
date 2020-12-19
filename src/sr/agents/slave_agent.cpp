@@ -54,9 +54,9 @@ void SlaveAgent::GetGraphInfo( vector<string> *labels,
 }
 
 
-void SlaveAgent::AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_scr_engine_ )
+void SlaveAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine, SCREngine *my_scr_engine_ )
 {
-    AgentCommon::AgentConfigure(master_scr_engine);
+    AgentCommon::AgentConfigure( phase, master_scr_engine );
     my_scr_engine = my_scr_engine_;
 }
 
@@ -97,7 +97,7 @@ void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) c
 }
 
 
-shared_ptr<ContainerInterface> SlaveAgent::GetVisibleChildren() const
+shared_ptr<ContainerInterface> SlaveAgent::GetVisibleChildren( Path v ) const
 {
 	// it's a slave, so set up a container containing only "through", not "compare" or "replace"
 	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );

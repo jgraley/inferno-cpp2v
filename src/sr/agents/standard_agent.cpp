@@ -9,30 +9,33 @@
 
 using namespace SR;
 
-void StandardAgent::AgentConfigure( const SCREngine *master_scr_engine )
+void StandardAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine )
 {
-    plan.ConstructPlan( this );    
-    AgentCommon::AgentConfigure(master_scr_engine);
+    plan.ConstructPlan( this, phase );    
+    AgentCommon::AgentConfigure(phase, master_scr_engine);
 }
 
 
-void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_ )
+void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 {
     algo = algo_;
     const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
-            sequences.emplace( make_pair(pattern_seq, Sequence(this, pattern_seq)) );
+            sequences.emplace( make_pair(pattern_seq, Sequence(this, phase, pattern_seq)) );
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
-            collections.emplace( make_pair(pattern_col, Collection(this, pattern_col)) );
+            collections.emplace( make_pair(pattern_col, Collection(this, phase, pattern_col)) );
     }
     algo->planned = true;
 }
 
 
-StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern )
+StandardAgent::Plan::Sequence::Sequence( Plan *plan, Phase phase, SequenceInterface *pattern )
 {
+    if( phase == IN_REPLACE_ONLY )
+        return;
+    
     num_non_star = 0;
     SequenceInterface::iterator pit_prev;
     TreePtr<Node> pe_prev;
@@ -102,8 +105,11 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, SequenceInterface *pattern 
 }
 
 
-StandardAgent::Plan::Collection::Collection( Plan *plan, CollectionInterface *pattern )
+StandardAgent::Plan::Collection::Collection( Plan *plan, Phase phase, CollectionInterface *pattern )
 {
+    if( phase == IN_REPLACE_ONLY )
+        return;
+
     p_star = nullptr;
     for( CollectionInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 

@@ -8,6 +8,7 @@
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
 #include "the_knowledge.hpp"
+#include "agents/agent.hpp"
 #include <set>
 
 
@@ -57,9 +58,10 @@ private:
         PatternLink root_plink;
         Agent *root_agent;
         const SCREngine *master_ptr;
-        std::shared_ptr< unordered_set<Agent *> > my_agents;   
-        std::shared_ptr< unordered_set<PatternLink> > my_agent_links;   
-        std::map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
+        shared_ptr< unordered_set<Agent *> > my_agents;   
+        shared_ptr< unordered_set<PatternLink> > my_agent_links;   
+        map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
+        map< Agent *, Agent::Phase > my_agents_phases;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
 public:
@@ -96,18 +98,20 @@ private:
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the
 		nodes under the same engine as the root. Based on UniqueWalk, so each node only
-		visited once. */
+		visited once. Restrict according to visibility category v. Note: setting v to
+        IN_COMPARE_AND_REPLACE may not work as expected because couplings will be missed. */
 	class VisibleWalk_iterator : public UniqueWalk::iterator
 	{
 	public:
-		VisibleWalk_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
+		VisibleWalk_iterator( TreePtr<Node> &root, Agent::Path v_ ) : UniqueWalk::iterator(root), v(v_) {}        
 		VisibleWalk_iterator() : UniqueWalk::iterator() {}
 		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
 	private:
 		virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const;
+        Agent::Path v;
 	};
 
-	typedef ContainerFromIterator< VisibleWalk_iterator, TreePtr<Node> > VisibleWalk;       
+	typedef ContainerFromIterator< VisibleWalk_iterator, TreePtr<Node>, Agent::Path > VisibleWalk;       
 };
 
 };

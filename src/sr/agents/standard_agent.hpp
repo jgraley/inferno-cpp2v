@@ -36,15 +36,15 @@ public:
     class SurplusXCollectionMismatch : public CollectionMismatch {};
     class InsufficientXCollectionMismatch : public CollectionMismatch {};
     
-	virtual void AgentConfigure( const SCREngine *master_scr_engine );
+	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
 
     struct Plan
     {
-        void ConstructPlan( StandardAgent *algo );
+        void ConstructPlan( StandardAgent *algo, Phase phase );
         
         struct Sequence
         {
-            Sequence( Plan *plan, SequenceInterface *pattern );
+            Sequence( Plan *plan, Phase phase, SequenceInterface *pattern );
             struct Run
             {
                 PatternLink predecessor; // nonstar before run or NULL of at start
@@ -66,7 +66,7 @@ public:
         
         struct Collection
         {
-            Collection( Plan *plan, CollectionInterface *pattern );
+            Collection( Plan *plan, Phase phase, CollectionInterface *pattern );
             
             const TreePtrInterface *p_star;
             PatternLink star_plink;

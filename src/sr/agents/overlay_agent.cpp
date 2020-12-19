@@ -25,6 +25,32 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
+void OverlayAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+{
+	// The Overlay node is shown as a small triangle, with the through block on the right and the overlay block
+	// coming out of the bottom.
+	*bold = true;
+	*shape = "triangle";
+	*text = string(""); 
+}
+
+
+shared_ptr<ContainerInterface> OverlayAgent::GetVisibleChildren( Path v ) const
+{	
+	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+    switch(v)
+    {
+    case COMPARE_PATH:
+        seq->push_back( *GetThrough() );
+        break;
+    case REPLACE_PATH:
+        seq->push_back( *GetOverlay() );
+        break;
+    }
+	return seq;
+}
+
+
 TreePtr<Node> OverlayAgent::BuildReplaceImpl( CouplingKey keylink ) 
 {
     INDENT("O");    
@@ -35,14 +61,3 @@ TreePtr<Node> OverlayAgent::BuildReplaceImpl( CouplingKey keylink )
     TRACE("Overlay node through=")(*(*GetThrough()))(" overlay=")(*(*GetOverlay()))("\n");
     return AsAgent((TreePtr<Node>)*GetOverlay())->BuildReplace();
 }
-
-
-void OverlayAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
-{
-	// The Overlay node is shown as a small triangle, with the through block on the right and the overlay block
-	// coming out of the bottom.
-	*bold = true;
-	*shape = "triangle";
-	*text = string(""); 
-}
-

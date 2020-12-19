@@ -86,6 +86,22 @@ inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 }    
 
 
+// Intersect set with complement, any compatible associative 
+// containers, ordered or otherwise. s2 must be subset of s1.
+template< typename S1, typename S2 >
+inline S1 DifferenceOfSolo( const S1 &s1, const S2 &s2 )
+{
+    S1 result;
+    result = s1;
+    for( auto x : s2 )
+    {
+        int n = result.erase(x);                 
+        ASSERT( n > 0 );
+    }
+    return result; // There, much nicer!
+}    
+
+
 template< typename T0, typename T1 >
 inline list< pair<typename T0::value_type, typename T1::value_type> > Zip( const T0 &x0, const T1 &x1 )
 {

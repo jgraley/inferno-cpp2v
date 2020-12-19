@@ -32,7 +32,7 @@ public:
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
 #ifdef DECISIONISED_MATCH_ANY
-    virtual void AgentConfigure( const SCREngine *master_scr_engine );
+    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
     shared_ptr< Collection<Node> > options;
 #else
     class BooleanEvaluatorOr : public BooleanEvaluator

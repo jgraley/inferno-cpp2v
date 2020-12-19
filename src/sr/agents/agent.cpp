@@ -46,7 +46,7 @@ AgentCommon::AgentCommon() :
 }
 
 
-void AgentCommon::AgentConfigure( const SCREngine *e )
+void AgentCommon::AgentConfigure( Phase phase, const SCREngine *e )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
@@ -58,12 +58,15 @@ void AgentCommon::AgentConfigure( const SCREngine *e )
     ASSERT(e);
     master_scr_engine = e;
     
-    pattern_query = GetPatternQuery();
-    num_decisions = pattern_query->GetDecisions().size();
+    if( phase != IN_REPLACE_ONLY )
+    {
+        pattern_query = GetPatternQuery();
+        num_decisions = pattern_query->GetDecisions().size();
+    }
 }
 
 
-shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
+shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren( Path v ) const
 {
 	// Normally all children should be visible 
    typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;

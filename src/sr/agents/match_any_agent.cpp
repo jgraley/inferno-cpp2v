@@ -4,9 +4,9 @@
 
 using namespace SR;
 
-void MatchAnyAgent::AgentConfigure( const SCREngine *master_scr_engine )
+void MatchAnyAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine )
 {
-    AgentCommon::AgentConfigure(master_scr_engine);
+    AgentCommon::AgentConfigure(phase, master_scr_engine);
 
     options = make_shared< Collection<Node> >();
     FOREACH( const TreePtrInterface &p, GetPatterns() )

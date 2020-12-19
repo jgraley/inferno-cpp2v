@@ -68,12 +68,12 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines );    
 
-    // Configure agents on the way down
-    ConfigureAgents();
-
     // This recurses SCR engine planning
     CreateMyEngines( master_agents, my_agents_needing_engines );    
     
+    // Configure agents on the way down
+    ConfigureAgents();
+
     // Make and-rule engines on the way back up - by now, hopefully all
     // the agents this and-rule engine sees have been configured.
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_agents);
@@ -120,25 +120,39 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
                                       set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
-    // So that the compare and replace subtrees of slaves are "obsucured" and not visible
-    VisibleWalk tp(root_pattern); 
-    unordered_set<Agent *> visible_agents;
-    for( VisibleWalk::iterator it = tp.begin(); it != tp.end(); ++it )
-    {
-        auto n = (TreePtr<Node>)*it;
-        visible_agents.insert( Agent::AsAgent(n) );
-    //    visible_plinks.insert( FromWalkIterator( it, PatternLink root )
-    }
+    // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
+    // compare and replace sets separately.
+    unordered_set<Agent *> visible_agents_compare, visible_agents_replace;
+    
+    VisibleWalk tp_compare(root_pattern, Agent::COMPARE_PATH); 
+    for( const TreePtrInterface &n : tp_compare )
+        visible_agents_compare.insert( Agent::AsAgent((TreePtr<Node>)n) );    
+    
+    VisibleWalk tp_replace(root_pattern, Agent::REPLACE_PATH); 
+    for( const TreePtrInterface &n : tp_replace )
+        visible_agents_replace.insert( Agent::AsAgent((TreePtr<Node>)n) );
     
     // Determine which ones really belong to us (some might be visible from one of our masters, 
-    // in which case it should be in the supplied set.        
+    // in which case it should be in the supplied set.      
+    visible_agents_compare = DifferenceOf( visible_agents_compare, master_agents );      
+    visible_agents_replace = DifferenceOf( visible_agents_replace, master_agents );      
+
     my_agents = make_shared< unordered_set<Agent *> >();
-    *my_agents = DifferenceOf( visible_agents, master_agents );         
+    *my_agents = UnionOf( visible_agents_compare, visible_agents_replace );
 
     // Determine who our slaves are
     FOREACH( Agent *a, *my_agents )
-        if( AgentCommonNeedSCREngine *sa = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
-            my_agents_needing_engines.insert( sa );
+    {
+        if( visible_agents_compare.count(a) == 0 )
+            my_agents_phases[a] = Agent::IN_REPLACE_ONLY;
+        else if( visible_agents_replace.count(a) == 0 )
+            my_agents_phases[a] = Agent::IN_COMPARE_ONLY;
+        else
+            my_agents_phases[a] = Agent::IN_COMPARE_AND_REPLACE;
+
+        if( auto ae = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
+            my_agents_needing_engines.insert( ae );
+    }
 }
 
 
@@ -148,20 +162,15 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
     // Determine which agents our slaves should not configure
     unordered_set<Agent *> surrounding_agents = UnionOf( master_agents, *my_agents ); 
             
-    FOREACH( AgentCommonNeedSCREngine *a, my_agents_needing_engines )
+    FOREACH( AgentCommonNeedSCREngine *ae, my_agents_needing_engines )
     {
-        my_engines[a] = make_shared<SCREngine>( a->IsSearch(),
-                                                overall_master_ptr, 
-                                                a->GetSearchPattern(),
-                                                a->GetReplacePattern(),
-                                                surrounding_agents, 
-                                                algo );
-                            
-        //TRACE("Recursing to configure slave ")(*p.first)("\n");
-        a->AgentConfigure( algo, 
-                           &*my_engines.at(a) );
-    }
-        
+        my_engines[ae] = make_shared<SCREngine>( ae->IsSearch(),
+                                                 overall_master_ptr, 
+                                                 ae->GetSearchPattern(),
+                                                 ae->GetReplacePattern(),
+                                                 surrounding_agents, 
+                                                 algo );                                
+    }        
 }
 
 
@@ -170,10 +179,17 @@ void SCREngine::Plan::ConfigureAgents()
     // Give agents pointers to here and our coupling keys
     FOREACH( Agent *a, *my_agents )
     {        
-        if( dynamic_cast<AgentCommonNeedSCREngine *>(a) )
-            continue; // TODO yuck, should determine this in CategoriseSubs()
-        //TRACE("Configuring agent ")(*a)("\n");
-        a->AgentConfigure( algo );             
+        if( auto ae = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
+        {
+            ae->AgentConfigure( my_agents_phases[a],
+                                algo, 
+                                &*my_engines.at(ae) );
+        }
+        else
+        {
+            a->AgentConfigure( my_agents_phases[a],
+                               algo );             
+        }
     }    
 }
 
@@ -376,6 +392,6 @@ shared_ptr<ContainerInterface::iterator_interface> SCREngine::VisibleWalk_iterat
 
 shared_ptr<ContainerInterface> SCREngine::VisibleWalk_iterator::GetChildContainer( TreePtr<Node> n ) const
 {
-	return Agent::AsAgent(n)->GetVisibleChildren(); 
+	return Agent::AsAgent(n)->GetVisibleChildren(v); 
 }
 

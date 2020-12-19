@@ -33,6 +33,19 @@ public:
         INCOMPLETE
     };
     
+    enum Phase
+    {
+        IN_COMPARE_ONLY,
+        IN_COMPARE_AND_REPLACE,
+        IN_REPLACE_ONLY
+    };
+    
+    enum Path
+    {
+        COMPARE_PATH,
+        REPLACE_PATH
+    };
+    
     // Any mismatch this class throws
     class Mismatch : public ::Mismatch {};
     
@@ -44,7 +57,7 @@ public:
     class CouplingMismatch : public Mismatch {};
     
     Agent& operator=(Agent& other);
-	virtual void AgentConfigure( const SCREngine *master_scr_engine ) = 0;
+	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
 
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -72,7 +85,7 @@ public:
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
                                             TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
-    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
+    virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const = 0;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
 	static Agent *AsAgent( shared_ptr<Node> node );
@@ -91,8 +104,8 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    virtual void AgentConfigure( const SCREngine *master_scr_engine );
-    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
+    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
+    virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
@@ -153,7 +166,7 @@ public:
 	virtual bool IsSearch() const = 0;
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
-    virtual void AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_engine ) = 0;
+    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine, SCREngine *my_engine ) = 0;
     virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
 };
 
