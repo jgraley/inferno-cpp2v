@@ -7,6 +7,20 @@
 class TypeOf : public OutOfPlaceTransformation
 {
 public:
+    class UnsupportedMismatch : public Mismatch {};
+    class UnsupportedExpressionMismatch : public UnsupportedMismatch {};
+    class UnsupportedOperatorMismatch : public UnsupportedMismatch {};
+    class UnsupportedThisMismatch : public UnsupportedMismatch {}; // TODO add support
+    class UnsupportedSpecialMismatch : public UnsupportedMismatch {};
+    class UnsupportedLiteralMismatch : public UnsupportedMismatch {};
+    class UsageMismatch : public Mismatch {};
+    class NumericalOperatorUsageMismatch : public UsageMismatch {};
+    class NumericalOperatorUsageMismatch1 : public NumericalOperatorUsageMismatch {};
+    class NumericalOperatorUsageMismatch2 : public NumericalOperatorUsageMismatch {};
+    class NumericalOperatorUsageMismatch3 : public NumericalOperatorUsageMismatch {};
+    class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
+    class DereferenceUsageMismatch : public UsageMismatch {};
+
     virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )
     {
     	context = c;

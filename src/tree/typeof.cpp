@@ -101,8 +101,9 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else 
     {
-        ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");
-        ASSERTFAIL("");
+        throw UnsupportedExpressionMismatch();
+        //ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");
+        //ASSERTFAIL("");
     }
 }
 
@@ -188,8 +189,9 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 #include "tree/operator_db.inc"
     else
     {
-        ASSERT(0)("Unknown operator ")(*op)(" (not in operator_db.inc), please add to TypeOf class");
-        ASSERTFAIL("");
+        throw UnsupportedOperatorMismatch();
+        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_db.inc), please add to TypeOf class");
+        //ASSERTFAIL("");
     }
 }
 
@@ -203,11 +205,12 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 	if( nums.size() == optypes.size() )
 		return GetStandard( nums );
 
-	if( optypes.size() == 2 )
-		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
-	else
-		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
-    ASSERTFAIL();
+    throw NumericalOperatorUsageMismatch1();
+//	if( optypes.size() == 2 )
+//		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
+//	else
+//		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
+//    ASSERTFAIL();
 }
 
 
@@ -235,11 +238,15 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 
 		// Should only have Integrals from here on
 		TreePtr<Integral> intop = dynamic_pointer_cast<Integral>(optype);
-        ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
+        if( !intop )
+            throw NumericalOperatorUsageMismatch2();
+        //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
 
         // Do a max algorithm on the width
 		TreePtr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
-		ASSERT( width )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
+        if( !width )
+            throw NumericalOperatorUsageMismatch3();
+		//ASSERT( width )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
 
 		if( dynamic_pointer_cast<Signed>(optype) )
 		{
@@ -252,7 +259,10 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 				maxwidth_unsigned = width;
 		}
 		else
-			ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to TypeOf class");
+        {
+            throw NumericalOperatorUsageMismatch4();
+			//ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to TypeOf class");
+        }
 	}
 
 	if( maxwidth_float )
@@ -287,7 +297,8 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
         else if( TreePtr<Array> o2 = dynamic_pointer_cast<Array>( optypes.front() ) )
             return o2->element;
         else
-            ASSERTFAIL( "dereferencing non-pointer" );
+            throw DereferenceUsageMismatch();
+            //ASSERTFAIL( "dereferencing non-pointer" );
     }
     else if( dynamic_pointer_cast<AddressOf>(op) )
     {
@@ -297,7 +308,6 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
     }
     else if( dynamic_pointer_cast<Comma>(op) )
     {
-        ASSERT( optypes.size() == 2 );
         return optypes.back();
     }
     else if( dynamic_pointer_cast<Multiplexor>(op) )
@@ -308,12 +318,14 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
 	}
     else if( dynamic_pointer_cast<This>(op) )
     {
-    	ASSERTFAIL(""); // TODO
+    	throw UnsupportedThisMismatch(); // TODO add support
+        //ASSERTFAIL(""); 
     }
     else
     {
-        ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to TypeOf class");
-        ASSERTFAIL("");
+        throw UnsupportedSpecialMismatch();
+        //ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to TypeOf class");
+        //ASSERTFAIL("");
     }
 }
 
@@ -356,8 +368,9 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     }
     else
     {
-        ASSERT(0)("Unknown literal ")(*l)(", please add to TypeOf class");
-        ASSERTFAIL("");
+        throw UnsupportedLiteralMismatch();
+        //ASSERT(0)("Unknown literal ")(*l)(", please add to TypeOf class");
+        //ASSERTFAIL("");
     }
 }
 

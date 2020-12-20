@@ -8,7 +8,6 @@ using namespace SR;
 
 void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 {
-    INDENT("K");
     DetermineDomain( root_plink, root_xlink );
 }
 
@@ -42,12 +41,13 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 void TheKnowledge::ExtendDomain( PatternLink plink )
 {
     // Extend locally first and then pass that into children.
-
-    unordered_set<XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );          
-    for( XLink exlink : extra )
+    map<XLink, XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );    
+    if( !extra.empty() )
+        TRACE("There are extra x domain elements for ")(plink)(":\n");
+    for( pair<XLink, XLink> p : extra )
     {
-        TRACE("Extra item for ")(plink)(" is ")(exlink)("\n");
-        AddSubtree( STOP_IF_ALREADY_IN, exlink ); // set to REQUIRE_SOLO to replicate #218
+        TRACEC(p)("\n");
+        AddSubtree( STOP_IF_ALREADY_IN, p.second ); // set to REQUIRE_SOLO to replicate #218
     }
     
     // Visit couplings repeatedly TODO union over couplings and
@@ -81,7 +81,6 @@ void TheKnowledge::AddLink( SubtreeMode mode,
                             XLink xlink, 
                             Nugget nugget )
 {
-    INDENT(">");
     // This will also prevent recursion into xlink
     if( mode==STOP_IF_ALREADY_IN && domain.count(xlink) > 0 )
         return; // Terminate into the existing domain

@@ -97,8 +97,6 @@ list<VariableId> SystemicConstraint::GetRequiredVariables() const
         case Kind::RESIDUAL:
             break;
         case Kind::CHILD:
-            if( !plan.agent->ImplHasDNLQ() )
-                free_vars.push_back( var.id );
             break;
         }        
     }
@@ -221,7 +219,7 @@ string SystemicConstraint::GetTrace() const
 {
     string s = string("SystemicConstraint(");
     
-    s += plan.agent->GetTrace() + ", ";
+    s += plan.agent->GetTrace() + ": ";
     
     switch( plan.action )
     {
@@ -233,6 +231,8 @@ string SystemicConstraint::GetTrace() const
         s += "COUPLING";
         break;
     }
+
+    s += SSPrintf(" req=%d/%d", GetRequiredVariables().size(), GetFreeVariables().size());
 
     s += ")";
     return s;

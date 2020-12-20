@@ -209,7 +209,7 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
 
     if( !ok )
     {
-        TRACEC("More records? ")(record.previous_agent != plan.agent_records.end())("\n");
+        //TRACEC("More records? ")(record.previous_agent != plan.agent_records.end())("\n");
         if( record.previous_agent != plan.agent_records.end() )
             return IncrementConjecture( record.previous_agent );
         else
@@ -222,7 +222,7 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
 
 bool Conjecture::Increment()
 {
-    TRACE("Conjecture has records? ")(plan.last_agent != plan.agent_records.end())("\n");
+    //TRACE("Conjecture has records? ")(plan.last_agent != plan.agent_records.end())("\n");
     if( plan.last_agent != plan.agent_records.end() )
         return IncrementConjecture(plan.last_agent);
     else

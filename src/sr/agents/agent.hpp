@@ -76,7 +76,7 @@ public:
                                                     const TheKnowledge *knowledge ) const = 0;
     virtual bool ImplHasDNLQ() const = 0;                                              
     virtual void CouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
-    virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
+    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
     // function<XLink(XLink)> deduplicator
 
     virtual CouplingKey GetKey() = 0;                                  
@@ -132,7 +132,7 @@ public:
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
     virtual void CouplingQuery( multiset<XLink> candidate_links );                                       
-    virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return unordered_set<XLink>(); /* implement in agents that can expand the domain */ }
+    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return map<XLink, XLink>(); /* implement in agents that can expand the domain */ }
 
 protected:
     void SetKey( CouplingKey x );
@@ -175,7 +175,7 @@ public:
 
 class AgentCommonDomainExtender : public AgentCommon
 {
-    virtual unordered_set<XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
+    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
 };
 
 

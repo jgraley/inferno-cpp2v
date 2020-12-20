@@ -10,8 +10,6 @@
 
 #include <stdexcept>
 
-//#define CHECK_LINKS_COMPARISON
-
 using namespace SR;
 
 // C++11 fix
@@ -161,44 +159,22 @@ void AgentCommon::DNLQFromDQ( DecidedQuery &query,
     // over both and check that they refer to the same x nodes
     // we were passed. Mismatch will throw, same as in DQ.
     auto actual_links = query.GetNormalLinks();
-    TRACEC("Actual   ")(actual_links)("\n");
+    TRACE("Actual   ")(actual_links)("\n");
     ASSERT( actual_links.size() == pattern_query->GetNormalLinks().size() );
     
     for( LocatedLink alink : actual_links )
     {
         auto plink = (PatternLink)alink;
-        ASSERT(required_links->count(plink))(*this)(" NLQ needs links for all children, got ")(*required_links);
+        if(required_links->count(plink)==0)
+            continue; // partial query support
+            
         LocatedLink rlink( plink, required_links->at(plink) );
         ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
         if( (XLink)alink == XLink::MMAX_Link )
-            continue;
+            continue; // only happens when agent pushes out MMAX, as with MatchAnyAgent
+            
         // Compare by location
-#ifdef CHECK_LINKS_COMPARISON
-        if( alink.GetChildX() == rlink.GetChildX() )
-        {
-            if( !TreePtr<CPPTree::Identifier>::DynamicCast( alink.GetChildX() ) )
-            {
-                if( auto tp = dynamic_cast<const TransformOfAgent *>(this) )
-                {
-                    ASSERT( (XLink)alink == (XLink)rlink )
-                          ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
-                          ("Actual   ")(alink)("\n")
-                          ("Required ")(rlink)("\n")
-                          ("TransformOfAgent's cache ")(tp->cache.cache)("\n");
-                }
-                else
-                {
-                    ASSERT( (XLink)alink == (XLink)rlink )
-                          ("Found conflicting X links for ")(alink.GetChildAgent())("\n")
-                          ("Actual   ")(alink)("\n")
-                          ("Required ")(rlink)("\n");
-                }
-            }
-        }
-        else
-#else                
-        if( (XLink)alink != (XLink)rlink )
-#endif                
+        if( (XLink)alink != (XLink)rlink )              
             throw SlowNLQLinksMismatch(); // value of links mismatches                                
     }            
 }                           
@@ -564,11 +540,11 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 }
 
 
-unordered_set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
+map<XLink, XLink> AgentCommonDomainExtender::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
 {
     Conjecture conj(this);            
 
-    unordered_set<XLink> extra;
+    map<XLink, XLink> extra;
     for( XLink xlink : xlinks )
     {
         conj.Start();
@@ -582,8 +558,8 @@ unordered_set<XLink> AgentCommonDomainExtender::ExpandNormalDomain( const unorde
                     RunDecidedQuery( *query, xlink );
                 }
                 
-                for( LocatedLink link : query->GetNormalLinks() )
-                    extra.insert( (XLink)link );
+                for( LocatedLink new_link : query->GetNormalLinks() )
+                    extra[xlink] = (XLink)new_link;
             }
             catch( ::Mismatch & ) {}
         }

@@ -517,9 +517,10 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         i++;
     }
     
-	TRACE("Evaluating ");
+	TRACE("Evaluating: ");
 	FOREACH(bool b, compare_results)
 	    TRACEC(b)(" ");
+    TRACEC("\n");
 	if( !(*evaluator)( compare_results ) )
         throw EvaluatorFalse();
 }
@@ -569,9 +570,8 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 {
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
-    TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(base_xlink)("\n");    
+    TRACE("Trying to regenerate ")(*agent)(" at ")(base_xlink)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-    TRACEC("My solution ")(basic_solution)("\n");    
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
     if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain    
@@ -589,60 +589,61 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
     int i=0;
     while(1)
     {
-
         shared_ptr<SR::DecidedQuery> query = nlq_lambda();
         i++;
                 
-        Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
+        TRACE("Try out query, attempt %d (1-based)\n", i);    
 
         try
         {
-            TRACE("Try out query, attempt %d (1-based)\n", i);    
-            SolutionMap solution_for_evaluators;
-            CouplingKeysMap provisional_external_keys;
-            
-            // Try matching the abnormal links (free and evaluator).
-            FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
-                ASSERT( link );
-                // Actions if evaluator link
-                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )                
-                    InsertSolo( solution_for_evaluators, link );                
+                Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
+                SolutionMap solution_for_evaluators;
+                CouplingKeysMap provisional_external_keys;
                 
-                // Actions if free link
-                if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
+                // Try matching the abnormal links (free and evaluator).
+                FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
                 {
-                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    e->Compare( link, &subordinate_keys, knowledge );
+                    ASSERT( link );
+                    // Actions if evaluator link
+                    if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )                
+                        InsertSolo( solution_for_evaluators, link );                
                     
-                    // Replace needs these keys
-                    KeyCoupling( provisional_external_keys, link );
+                    // Actions if free link
+                    if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
+                    {
+                        shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
+                        e->Compare( link, &subordinate_keys, knowledge );
+                        
+                        // Replace needs these keys
+                        KeyCoupling( provisional_external_keys, link );
+                    }
+                }                    
+                
+                // Try matching the multiplicity links.
+                FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
+                {
+                    if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
+                        InsertSolo( solution_for_evaluators, link );                
+
+                    if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
+                        CompareMultiplicityLinks( link, &subordinate_keys );  
                 }
-            }                    
-            
-            // Try matching the multiplicity links.
-            FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
-            {
-                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
-                    InsertSolo( solution_for_evaluators, link );                
 
-                if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
-                    CompareMultiplicityLinks( link, &subordinate_keys );  
+                // Try matching the evaluator agents.
+                if( plan.my_evaluators.count( agent ) )
+                    CompareEvaluatorLinks( agent, &subordinate_keys, &solution_for_evaluators );            
+            
+                // If we got here, we're done!
+                external_keys = UnionOfSolo( provisional_external_keys, external_keys );                  
             }
-
-            // Try matching the evaluator agents.
-            if( plan.my_evaluators.count( agent ) )
-                CompareEvaluatorLinks( agent, &subordinate_keys, &solution_for_evaluators );            
-            
-            // If we got here, we're done!
-            external_keys = UnionOfSolo( provisional_external_keys, external_keys );      
-            
-            TRACE("Leaving while loop after %d tries\n", i);    
+            TRACE("Success after %d tries\n", i);    
             break;
         }
         catch( const ::Mismatch& mismatch )
         {
-        }         
+            TRACE("Caught Mismatch exception, retrying the lambda\n", i);    
+        }                             
     } 
 }      
 
@@ -650,8 +651,10 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 void AndRuleEngine::RegenerationPass()
 {
     INDENT("R");
-    const CouplingKeysMap subordinate_keys = UnionOfSolo( *master_keys, external_keys );          
+    const CouplingKeysMap subordinate_keys = UnionOfSolo( *master_keys, external_keys );   
+    TRACE("---------------- Regeneration ----------------\n");      
     TRACEC("Subordinate keys ")(subordinate_keys)("\n");       
+    TRACEC("Basic solution ")(basic_solution)("\n");    
 
     for( auto plink : plan.coupling_keyer_links )
     {
@@ -659,6 +662,8 @@ void AndRuleEngine::RegenerationPass()
                                basic_solution.at(plink), 
                                subordinate_keys );
     }
+
+    TRACE("Regeneration complete\n");
 }
 
 

@@ -40,11 +40,13 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
     
     if( variables_ == nullptr )
     {
+        TRACE("Variables not supplied by engine: using own");
         // No variables list was supplied, so return the one we generated
         variables = my_variables;
     }
     else
     {
+        TRACE("Variables supplied by engine: cross-checking");
         // A variables list was supplied and it must have the same set of variables
         for( VariableId v : *variables_ )
             ASSERT( variables_check_set.count(v) == 1 );
@@ -116,10 +118,6 @@ void SimpleSolver::Run( ReportageObserver *holder_,
         TryVariable( plan.variables.begin() );    
     }
 
-#ifdef TRACK_BEST_ASSIGNMENT    
-    ShowBestAssignment();
-#endif
-
     holder = nullptr;
 }
 
@@ -158,9 +156,17 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 #endif
         
         if( complete )
+        {
+#ifdef TRACK_BEST_ASSIGNMENT    
+            TRACE("Reporting CSP solution\n");
+            ShowBestAssignment();
+#endif            
             holder->ReportSolution( assignments );
+        }
         else
+        {
             TryVariable( next );
+        }
     }
 
     try_counts.pop_back();
@@ -171,23 +177,38 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 
 bool SimpleSolver::Test( const Assignments &assigns )
 {
-    bool ok = true; // AND-rule
+    bool ok = true; // AND-rule    
+    report = "";
     for( shared_ptr<Constraint> c : plan.constraints )
     {      
-        bool requirements_met = true;
+        report += Trace(*c);
+        int requirements_met = 0;
         list<VariableId> required_vars = c->GetRequiredVariables();
         for( VariableId rv : required_vars )
-            if( assignments.count(rv) == 0 )
-                requirements_met = false; // There were unassigned variables, don't bother testing this constraint
+            if( assignments.count(rv) > 0 )
+                requirements_met++;
            
-        if( !requirements_met )
+        if( requirements_met < required_vars.size() )
+        {
+            report += SSPrintf(" rmet=%d ABORT\n", requirements_met);
             continue;
+        }
         
-        TimedOperations(); // overhead should be hidden by Constraint::Test()
+        int free_met = 0;
+        list<VariableId> free_vars = c->GetFreeVariables();
+        for( VariableId rv : free_vars )
+            if( assignments.count(rv) > 0 )
+                free_met++;
+        report += SSPrintf(" fmet=%d", free_met);
+        
         ok = c->Test(assignments); 
         
         if( !ok )
+        {
+            report += SSPrintf(" MISS\n");
             break;
+        }
+        report += SSPrintf(" HIT\n");
                             
         // Only expected to pass for base (which we only know about if 
         // it's FREE). We don't check whether the other 
@@ -197,6 +218,7 @@ bool SimpleSolver::Test( const Assignments &assigns )
         // for( VariableId var : c->GetFreeVariables() )
         //     CheckLocalMatch( assigns, var );   
     } 
+    TimedOperations(); // overhead should be hidden by Constraint::Test()
 
     return ok;
 }
@@ -204,12 +226,14 @@ bool SimpleSolver::Test( const Assignments &assigns )
 
 void SimpleSolver::TraceProblem() const
 {
-    TRACEC("SimpleSolver; %d constraints", plan.constraints.size());
     INDENT("T");
-    for( shared_ptr<Constraint> c : plan.constraints )
-    {
-        c->TraceProblem();
-    }
+
+    TRACE("SimpleSolver; %d constraints:", plan.constraints.size());
+    for( shared_ptr<Constraint> c : plan.constraints )    
+        c->TraceProblem();   
+    TRACEC("%d variables:", plan.variables.size());        
+    for( VariableId var : plan.variables )
+        TRACEC(var)("\n");
 }
 
 
@@ -240,7 +264,7 @@ void SimpleSolver::ShowBestAssignment()
             else
             {
                 TRACEC(" is not a local match (two reasons this might be OK)\n");            
-                ASSERT(assignments_to_show.size() < plan.variables.size())("local mismatch in passing complete assignment");
+                ASSERT(assignments_to_show.size() <= plan.variables.size())("local mismatch in passing complete assignment");
             }
             // Reason 1: At the point we gave up, no constraint containing this 
             // variable had all of its required variables assigned.
@@ -254,6 +278,7 @@ void SimpleSolver::ShowBestAssignment()
         }
     }
     TRACEC("Try counts: ")(try_counts)("\n");
+    TRACEC(report);
 }
 
 
@@ -263,6 +288,7 @@ void SimpleSolver::TimedOperations()
     auto since = now - last_report;
     if( since > chrono::seconds(3) )
     {
+        TRACE("Intermediate CSP snapshot\n");
         ShowBestAssignment();
         last_report = now;
     }

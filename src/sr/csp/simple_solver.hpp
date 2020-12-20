@@ -66,6 +66,7 @@ private:
     // Only needed for debug output
     Assignments best_assignments;
     int best_num_assignments;
+    string report;
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;
