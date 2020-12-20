@@ -1,9 +1,14 @@
 
-# Slower ones first
-CASES = sctest13 sctest11 sctest12 sctest08 sctest10 sctest02
-CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
+# Slower ones first for optimial multi-core usage (whole suite time)
+#CASES = sctest13 sctest11 sctest12 sctest08 sctest10 sctest02
+#CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
-SRCASES = pointeris $(CASES)
+# Quicker ones first for exploratory (max results ASAP)
+CASES =  sctest09 sctest15 sctest06 sctest07 sctest04 sctest05 sctest01 sctest03
+CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
+
+# Use pointeris (very quick to test) as "canary"
+SRCASES = pointeris $(CASES) 
 
 SRMINICASES = sctest15
 

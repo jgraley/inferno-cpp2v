@@ -19,6 +19,7 @@ class MatchAnyAgent : public virtual AgentCommon
 {
 public:
     class NoOptionsMatchedMismatch : public Mismatch {};
+    class MMAXRequiredOnUntakenOptionMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,

@@ -240,11 +240,22 @@ void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
 {
     INDENT("K");   
         
+    TRACE("My agents coupling status:\n");
     FOREACH( Agent *a, *plan.my_agents )
     {
-        TRACE(*a)(coupling_keys->count( a )?" is in coupling_keys ":" is not in coupling_keys")
-             (a->GetKey()?" and is self-coupled\n":" and is not self-coupled\n");
-        if( coupling_keys->count( a ) > 0 && !a->GetKey() )
+        TRACEC(*a);
+        bool keyed = ( coupling_keys->count( a ) > 0 );
+        if( keyed )
+            TRACEC(" is in coupling_keys: ")(coupling_keys->at( a ));
+        else
+            TRACEC(" is not in coupling_keys");
+        CouplingKey self_coupled = a->GetKey();
+        if( self_coupled )
+            TRACEC(" and is self-coupled: ")(self_coupled)("\n");
+        else
+            TRACEC(" and is not self-coupled\n");
+            
+        if( keyed && !self_coupled )
             a->KeyReplace(coupling_keys);
     }
 }

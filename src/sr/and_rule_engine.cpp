@@ -391,11 +391,11 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 
 void AndRuleEngine::GetNextCSPSolution()
 {
+    TRACE("GetNextCSPSolution()\n");
     SolutionMap csp_solution;
     bool match = plan.solver->GetNextSolution( &csp_solution );        
     if( !match )
         throw NoSolution();
-    TRACE("GetNextCSPSolution()\n");
 
     // Recreate my_coupling_keys
     for( pair< PatternLink, XLink > pxp : csp_solution )
@@ -759,7 +759,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
             TRACE("Miss after recursion, trying next solution\n");
             continue; // Get another solution from the solver
 #else
-            TRACE("AndRuleEngine miss, trying increment conjecture\n");
+            TRACE("Miss after recursion, trying increment conjecture\n");
             if( plan.conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
@@ -768,7 +768,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
 #endif            
         }
         // We got a match so we're done. 
-        TRACE("SCREngine hit\n");
+        TRACE("AndRuleEngine hit\n");
         break; // Success
     }
     

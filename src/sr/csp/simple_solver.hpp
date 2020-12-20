@@ -49,7 +49,7 @@ private:
         list<VariableId> variables;
     } plan;
 
-    bool TryVariable( list<VariableId>::const_iterator current );
+    bool TryVariable( list<VariableId>::const_iterator current_it );
     bool Test( const Assignments &assigns );
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
@@ -61,7 +61,7 @@ private:
     // Used during solve - depends on pattern and x
     unordered_set<Value> initial_domain;    
     Assignments assignments;
-    list<int> try_counts; // just for tracing
+    map<VariableId, int> try_counts; // just for tracing
     
     // Only needed for debug output
     Assignments best_assignments;

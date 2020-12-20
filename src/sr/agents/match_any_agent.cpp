@@ -80,7 +80,7 @@ Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
     FOREACH( const TreePtrInterface &p, GetPatterns() )                 
     {
         PatternLink plink(this, &p);
-        SolutionMap::const_iterator req_it = required_links->find(plink);
+        SolutionMap::const_iterator req_it = required_links->find(plink); // TODO hangover from when it was a list
         
         if( req_it == required_links->end() ) 
         {
@@ -91,8 +91,12 @@ Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
             XLink req_xlink = req_it->second; 
             if( req_xlink == base_xlink )
                 found = true;
+#ifdef STRICT_MMAX_POLICY
+            else if( req_xlink != XLink::MMAX_Link )
+                throw MMAXRequiredOnUntakenOptionMismatch();
+#endif                            
         }        
-            
+                    
         // Note: links that didn't match are allowed, but not required, to be MMAX.
         // Therefore we don't actually mention MMAX in this implementation.
     }

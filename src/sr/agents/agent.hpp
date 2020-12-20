@@ -15,6 +15,9 @@
 #include <boost/type_traits.hpp>
 #include <functional>
 
+#define STRICT_MMAX_POLICY
+
+
 namespace SR
 { 
 class SpecialBase;
@@ -55,6 +58,8 @@ public:
     class SlowNLQLinksMismatch : public NLQMismatch {};
     
     class CouplingMismatch : public Mismatch {};
+    
+    class MMAXRequiredUnderMMAX : public Mismatch {};
     
     Agent& operator=(Agent& other);
 	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;

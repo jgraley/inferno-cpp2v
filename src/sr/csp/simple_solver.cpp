@@ -122,25 +122,25 @@ void SimpleSolver::Run( ReportageObserver *holder_,
 }
 
 
-bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
+bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 {
-    ASSERT( current != plan.variables.end() );
+    ASSERT( current_it != plan.variables.end() );
     
-    list<VariableId>::const_iterator next = current;
-    ++next;
-    bool complete = (next == plan.variables.end());
+    list<VariableId>::const_iterator next_it = current_it;
+    ++next_it;
+    bool complete = (next_it == plan.variables.end());
     
-    try_counts.push_back(0);
+    int i=0;
     for( Value v : initial_domain )
     {
-        assignments[*current] = v;
-        try_counts.back()++;
+        assignments[*current_it] = v;
+        try_counts[*current_it] = i;
      
         bool ok = Test( assignments );
         
         if( !ok )
         {
-            assignments.erase(*current); // remove failed variable 
+            assignments.erase(*current_it); // remove failed variable 
             continue; // backtrack
         }
             
@@ -165,11 +165,10 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
         }
         else
         {
-            TryVariable( next );
+            TryVariable( next_it );
         }
+        i++;
     }
-
-    try_counts.pop_back();
 
     return false;
 }
@@ -250,12 +249,15 @@ void SimpleSolver::ShowBestAssignment()
     INDENT("B");
     if( assignments_to_show.empty() )
         return; // didn't get around to updating it yet
-    TRACE("Assigned %d of %d variables:\n", assignments_to_show.size(), plan.variables.size());
+    TRACE("VARIABLES: assigned %d of %d:\n", assignments_to_show.size(), plan.variables.size());
     for( VariableId var : plan.variables )
     {
+        if( try_counts.count(var) > 0 )
+            TRACEC("[%03d] ", try_counts.at(var));
+        TRACEC(var);
         if( assignments_to_show.count(var) > 0 )
         {
-            TRACEC("Variable ")(var)(" assigned ")(assignments_to_show.at(var));
+            TRACE(" assigned ")(assignments_to_show.at(var));
             if( var.GetChildAgent()->IsLocalMatch(assignments_to_show.at(var).GetChildX().get()) || 
                 assignments_to_show.at(var) == SR::XLink::MMAX_Link )
             {
@@ -272,12 +274,13 @@ void SimpleSolver::ShowBestAssignment()
             // didn't include one which had the variable as its base, and so 
             // local match was not enforced.
         }
-        else 
+        else
         {
-            TRACEC("Variable ")(var)(" could not be assigned a consistent value.\n");
+            TRACEC(" could not be assigned a consistent value.\n");
+            break; // solver gives up
         }
     }
-    TRACEC("Try counts: ")(try_counts)("\n");
+    TRACEC("CONSTRAINTS:\n");
     TRACEC(report);
 }
 

@@ -123,20 +123,36 @@ Agent::Completeness AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentI
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    
+    Completeness completeness = COMPLETE;
     if( base_xlink == XLink::MMAX_Link )
     {
+#ifdef STRICT_MMAX_POLICY
+        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
+        {
+            if( required_links->count(plink) == 0 )
+            {
+                completeness = INCOMPLETE;
+            }
+            else
+            {
+                XLink req_xlink = required_links->at(plink);
+                if( req_xlink != XLink::MMAX_Link )
+                    throw MMAXRequiredUnderMMAX();
+            }
+        }
+#else
         query.Reset();
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
-        return COMPLETE;
+#endif        
     }   
     else
     {
         TRACE("Attempting to vcall on ")(*this)("\n");
-        return this->RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+        completeness = this->RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
     }
+    return completeness;
 }                             
 
 
@@ -425,7 +441,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
 {
     INDENT("B");
     ASSERT(this);
-    ASSERT(master_scr_engine)("Agent ")(*this)(" at appears not to have been configured");
+    ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
