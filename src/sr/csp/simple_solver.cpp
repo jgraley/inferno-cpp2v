@@ -180,35 +180,39 @@ bool SimpleSolver::Test( const Assignments &assigns )
     report = "";
     for( shared_ptr<Constraint> c : plan.constraints )
     {      
-        report += Trace(*c);
+        if( Tracer::IsEnabled() )
+            report += Trace(*c);
+            
         int requirements_met = 0;
         list<VariableId> required_vars = c->GetRequiredVariables();
         for( VariableId rv : required_vars )
             if( assignments.count(rv) > 0 )
                 requirements_met++;
            
+        if( Tracer::IsEnabled() && requirements_met < required_vars.size())
+            report += SSPrintf(" rmet=%d SKIP\n", requirements_met);        
+           
         if( requirements_met < required_vars.size() )
-        {
-            report += SSPrintf(" rmet=%d SKIP\n", requirements_met);
-            continue;
-        }
+            continue;        
         
-        int free_met = 0;
-        list<VariableId> free_vars = c->GetFreeVariables();
-        for( VariableId rv : free_vars )
-            if( assignments.count(rv) > 0 )
-                free_met++;
-        report += SSPrintf(" fmet=%d", free_met);
+        if( Tracer::IsEnabled() )
+        {
+            int free_met = 0;
+            list<VariableId> free_vars = c->GetFreeVariables();
+            for( VariableId rv : free_vars )
+                if( assignments.count(rv) > 0 )
+                    free_met++;
+            report += SSPrintf(" fmet=%d", free_met);
+        }
         
         ok = c->Test(assignments); 
         
+        if( Tracer::IsEnabled() )
+            report += SSPrintf(ok?" HIT\n":" MISS\n");
+
         if( !ok )
-        {
-            report += SSPrintf(" MISS\n");
             break;
-        }
-        report += SSPrintf(" HIT\n");
-                            
+                                    
         // Only expected to pass for base (which we only know about if 
         // it's FREE). We don't check whether the other 
         // values accepted by the constraint are compatible with the 
