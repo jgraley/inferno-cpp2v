@@ -120,6 +120,13 @@ void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
 
 void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink )
 {
+    ASSERT( x_sing );
+    // MakeValueArchitype() can generate nodes with NULL pointers (eg in PointerIs)
+    // and these get into the domain even though they are not allowed in input trees.
+    // In this case, stop recursing since there's no child to build knowledge for.    
+    if( !*x_sing )
+        return;
+        
     XLink child_xlink( xlink.GetChildX(), x_sing );        
     Nugget nugget;
     nugget.cadence = Nugget::SINGULAR;

@@ -17,7 +17,7 @@ KINDS = execution sr rep
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe resource
+$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe resource test/test.sh
 	@mkdir -p test/results/execution
 	@rm -f test/results/execution/$*.
 	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log 
@@ -31,7 +31,7 @@ test/results/execution.pass : $(CASES:%=test/results/execution/%.pass)
 	@echo "EXECUTION TESTS PASSED"
 	@spd-say -r -100 -p -100 "the tests have parssed"
 
-$(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
+$(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
 	test/srtest.sh $< test/reference/srtest -tq
@@ -45,7 +45,7 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@echo "SR TESTS PASSED"
 	@spd-say -r -100 -p -100 "the tests have parssed"
 
-$(SRMINICASES:%=test/results/srmini/%.pass) : test/results/srmini/%.pass : test/examples/%.cpp test/makefile inferno.exe
+$(SRMINICASES:%=test/results/srmini/%.pass) : test/results/srmini/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p test/results/srmini
 	@rm -f test/results/srmini/$*.
 	test/srtest.sh $< test/reference/srminitest -t -q0.3
@@ -59,7 +59,7 @@ test/results/srmini.pass : $(SRMINICASES:%=test/results/srmini/%.pass)
 	@echo "SR MINI TESTS PASSED"
 	@spd-say -r -100 -p -100 "the tests have parssed"
 
-$(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe
+$(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh
 	@mkdir -p test/results/rep
 	@rm -f test/results/rep/$*.
 	test/reptest.sh $< -tq 2>&1 > test/results/rep/$*.log 

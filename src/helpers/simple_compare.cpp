@@ -10,6 +10,10 @@ SimpleCompare::SimpleCompare( Matcher::Ordering ordering_ ) :
 
 CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
 {   
+    // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
+    ASSERT(x);
+    ASSERT(y);
+
     //FTRACE("SC::Compare ")(x)(" - ")(y)("\n");
 
     // If we are asked to do a trivial compare, return immediately reporting success
@@ -55,6 +59,14 @@ CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
         {
             TreePtrInterface *y_ptr = dynamic_cast<TreePtrInterface *>(y_memb[i]);
             ASSERT( y_ptr );
+            
+            // MakeValueArchitype() can generate nodes with NULL pointers (eg in PointerIs)
+            // and these get SimpleCompared even though they are not allowed in input trees.
+            // In this case, order on the non-null-ness of x and y.
+            if( !(TreePtr<Node>)*x_ptr || !(TreePtr<Node>)*y_ptr )
+                return (int)(!(TreePtr<Node>)*y_ptr) - (int)(!(TreePtr<Node>)*x_ptr);                
+            
+            // Both non-null, so we are allowed to recurse
             CompareResult cr = Compare( (TreePtr<Node>)*x_ptr, (TreePtr<Node>)*y_ptr );
             if( cr != EQUAL )
                 return cr;                

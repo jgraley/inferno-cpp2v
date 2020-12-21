@@ -46,9 +46,10 @@ ires=1000
 dres=1000
  
 return_code=1 
-echo Transform... 
+command="$inferno -s -f -i$infile -o$outbase $iargs"
+echo "$command"
 # Always do self-test
-time $inferno -s -f -i$infile -o$outbase $iargs
+time $command
 ires=$?
 
 dres=0
