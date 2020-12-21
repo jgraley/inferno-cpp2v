@@ -189,7 +189,7 @@ bool SimpleSolver::Test( const Assignments &assigns )
            
         if( requirements_met < required_vars.size() )
         {
-            report += SSPrintf(" rmet=%d ABORT\n", requirements_met);
+            report += SSPrintf(" rmet=%d SKIP\n", requirements_met);
             continue;
         }
         
