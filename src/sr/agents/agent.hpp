@@ -164,6 +164,8 @@ private:
     CouplingKey coupling_key;    
     int num_decisions;
     EquivalenceRelation equivalence_relation;
+    shared_ptr<Conjecture> nlq_conjecture;
+    Phase phase;
 };
 
 

@@ -44,7 +44,7 @@ AgentCommon::AgentCommon() :
 }
 
 
-void AgentCommon::AgentConfigure( Phase phase, const SCREngine *e )
+void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
@@ -55,11 +55,16 @@ void AgentCommon::AgentConfigure( Phase phase, const SCREngine *e )
                               ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(e);
     master_scr_engine = e;
+    phase = phase_;
     
     if( phase != IN_REPLACE_ONLY )
     {
         pattern_query = GetPatternQuery();
         num_decisions = pattern_query->GetDecisions().size();
+
+        // We will need a conjecture, so that we can iterate through multiple 
+        // potentially valid values for the abnormals and multiplicities.
+        nlq_conjecture = make_shared<Conjecture>(this);            
     }
 }
 
@@ -201,20 +206,21 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                                                               const TheKnowledge *knowledge,
                                                               bool use_DQ ) const
 {
-    shared_ptr<SR::DecidedQuery> query = CreateDecidedQuery();
-    
-    // We will need a conjecture, so that we can iterate through multiple 
-    // potentially valid values for the abnormals and multiplicities.
-    auto conj = make_shared<Conjecture>(this, query);            
-    conj->Start();
+    ASSERT( nlq_conjecture )(phase);
+    nlq_conjecture->Start();
     bool first = true;
     
     QueryLambda lambda = [=]()mutable->shared_ptr<DecidedQuery>
     { 
+        shared_ptr<DecidedQuery> query;
+        
+        // The trouble with using a lambda is that you have to return a potential
+        // hit to caller and then iterate _if_ you get called again. A coroutine
+        // would make it possible to do this more cleanly.
         if( !first )
         {
             TRACE("Trying conjecture increment\n");
-            if( !conj->Increment() )
+            if( !nlq_conjecture->Increment() )
                 throw NLQConjOutAfterHitMismatch(); // Conjecture has run out of choices to try.            
         }
 
@@ -224,7 +230,7 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
             {
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
-                shared_ptr<DecidedQuery> query = conj->GetQuery(this);
+                query = nlq_conjecture->GetQuery(this);
                 
                 if( use_DQ || !ImplHasDNLQ() )
                 {
@@ -245,14 +251,14 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 // own comparison of the normal links. Permit the conjecture
                 // to move to a new set of choices.
                 //FTRACE("Rethrowing ")(e)("\n");
-                if( !conj->Increment() )
+                if( !nlq_conjecture->Increment() )
                     throw e; // Conjecture has run out of choices to try.
                 // Conjecture would like us to try again with new choices
             }
         }     
         first = false;
         
-        return query; 
+        return query;
     };
     return lambda;
 }   
