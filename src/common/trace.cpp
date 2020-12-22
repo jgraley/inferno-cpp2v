@@ -8,6 +8,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -78,9 +79,27 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
     InfernoAbort();
 }
 
+////////////////////////// NewtonsCradle //////////////////////////
+
+NewtonsCradle &NewtonsCradle::operator()()
+{
+    return operator()(string());
+}
+
+
+NewtonsCradle &NewtonsCradle::operator()(const char *fmt, ...)
+{
+    va_list vl;
+    va_start( vl, fmt );
+    string s = VSSPrintf( fmt, vl );
+    va_end( vl );
+
+    return operator()(s);
+}
+
 ////////////////////////// Tracer //////////////////////////
 
-Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) :
+Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *cond ) :
     file( f ),
     line( l ),
     function( fu ),
@@ -92,7 +111,7 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) 
         MaybePrintEndl();
         clog << endl;
         PrintPrefix();
-        clog << SSPrintf( "----ASSERTION FAILED: %s", c ) << endl;
+        clog << SSPrintf( "----ASSERTION FAILED: %s", cond ) << endl;
         MaybePrintBanner();
     }
 }
@@ -142,17 +161,6 @@ Tracer &Tracer::operator()(const string &s)
     
     require_endl = (s.empty() || s.back() != '\n');
     return *this;    
-}
-
-
-Tracer &Tracer::operator()(const char *fmt, ...)
-{
-    va_list vl;
-    va_start( vl, fmt );
-    string s = VSSPrintf( fmt, vl );
-    va_end( vl );
-
-    return operator()(s);
 }
 
 
@@ -247,7 +255,6 @@ void Tracer::MaybePrintBanner()
     }    
 }
 
-
 int Tracer::current_step = -4; // -4 is disable
 bool Tracer::require_endl = false;
 bool Tracer::require_banner = true;
@@ -255,3 +262,29 @@ bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
 string Tracer::Descend::pre;
 string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
 
+////////////////////////// TraceTo //////////////////////////
+
+TraceTo::TraceTo( string &str ) :
+    p_str( &str ),
+    p_osm( nullptr )
+{
+}
+
+
+TraceTo::TraceTo( ostream &osm ) :
+    p_str( nullptr ),
+    p_osm( &osm )
+{
+}
+
+
+TraceTo &TraceTo::operator()(const string &s)
+{
+    if( p_str )
+        *p_str += s;
+    else if( p_osm )
+        *p_osm << s;
+    else
+        ASSERTFAIL();
+    return *this;
+} 

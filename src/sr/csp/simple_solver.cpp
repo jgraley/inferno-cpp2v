@@ -180,8 +180,7 @@ bool SimpleSolver::Test( const Assignments &assigns )
     report = "";
     for( shared_ptr<Constraint> c : plan.constraints )
     {      
-        if( Tracer::IsEnabled() )
-            report += Trace(*c);
+        TRACE_TO(report)(*c);
             
         int requirements_met = 0;
         list<VariableId> required_vars = c->GetRequiredVariables();
@@ -189,8 +188,8 @@ bool SimpleSolver::Test( const Assignments &assigns )
             if( assignments.count(rv) > 0 )
                 requirements_met++;
            
-        if( Tracer::IsEnabled() && requirements_met < required_vars.size())
-            report += SSPrintf(" rmet=%d SKIP\n", requirements_met);        
+        if( requirements_met < required_vars.size())
+            TRACE_TO(report)(" rmet=%d SKIP\n", requirements_met);        
            
         if( requirements_met < required_vars.size() )
             continue;        
@@ -202,13 +201,12 @@ bool SimpleSolver::Test( const Assignments &assigns )
             for( VariableId rv : free_vars )
                 if( assignments.count(rv) > 0 )
                     free_met++;
-            report += SSPrintf(" fmet=%d", free_met);
+            TRACE_TO(report)(" fmet=%d", free_met);
         }
         
         ok = c->Test(assignments); 
         
-        if( Tracer::IsEnabled() )
-            report += SSPrintf(ok?" HIT\n":" MISS\n");
+        TRACE_TO(report)(ok?" HIT\n":" MISS\n");
 
         if( !ok )
             break;
