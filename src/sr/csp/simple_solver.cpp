@@ -89,6 +89,7 @@ void SimpleSolver::Run( ReportageObserver *holder_,
                         const Assignments &forces,
                         const SR::TheKnowledge *knowledge )
 {
+    TRACE("Simple solver begins\n");
     INDENT("S");
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
@@ -119,13 +120,15 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     }
 
     holder = nullptr;
+    TRACE("Simple solver ends\n");    
 }
 
 
 bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 {
+    INDENT("T");
     ASSERT( current_it != plan.variables.end() );
-    
+   
     list<VariableId>::const_iterator next_it = current_it;
     ++next_it;
     bool complete = (next_it == plan.variables.end());
@@ -133,6 +136,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     int i=0;
     for( Value v : initial_domain )
     {
+        TRACE("Trying variable ")(*current_it)(" := ")(v)("\n");
         assignments[*current_it] = v;
         try_counts[*current_it] = i;
      
@@ -169,6 +173,11 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         }
         i++;
     }
+    
+    // Need to do this to avoid old assignments hanging around, being 
+    // picked up by partial NLQs and causing mismatches that don't get
+    // resolved beacuse this assignment won't be getting incremented.
+    assignments.erase(*current_it);
 
     return false;
 }
@@ -209,7 +218,10 @@ bool SimpleSolver::Test( const Assignments &assigns )
         TRACE_TO(report)(ok?" HIT\n":" MISS\n");
 
         if( !ok )
+        {
+            TRACEC("Constraint says no: ")(*c)("\n")(assignments)("\n")(report)("\n");
             break;
+        }
                                     
         // Only expected to pass for base (which we only know about if 
         // it's FREE). We don't check whether the other 

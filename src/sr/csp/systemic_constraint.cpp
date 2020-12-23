@@ -207,9 +207,10 @@ bool SystemicConstraint::Test( Assignments frees_map )
 
         return true;
     }
-    catch( ::Mismatch & )
+    catch( const ::Mismatch &e )
     {
         // CouplingQuery() or StartNormalLinkedQuery() couldn't match.
+        TRACEC("Got exception: ")(e)("\n");
         return false; 
     }               
 }

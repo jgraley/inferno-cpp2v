@@ -250,9 +250,8 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 // We will get here on a mismatch, whether detected by DQ or our
                 // own comparison of the normal links. Permit the conjecture
                 // to move to a new set of choices.
-                //FTRACE("Rethrowing ")(e)("\n");
                 if( !nlq_conjecture->Increment() )
-                    throw e; // Conjecture has run out of choices to try.
+                    throw; // Conjecture has run out of choices to try.
                 // Conjecture would like us to try again with new choices
             }
         }     
@@ -291,7 +290,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
         catch( ::Mismatch &e ) 
         {
             // Passed test: both threw Mismatch
-            throw e;
+            throw;
         }        
     }
     // FastStartNormalLinkedQuery() didn't throw
@@ -341,7 +340,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
             }
             catch( ::Mismatch &e ) 
             {
-                throw e;
+                throw;
             }                
         }
         // Didn't throw
