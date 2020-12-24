@@ -25,13 +25,13 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void OverlayAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void OverlayAgent::GetGraphInfo( vector<string> *labels, 
+                                 vector< TreePtr<Node> > *blocks ) const
 {
-	// The Overlay node is shown as a small triangle, with the through block on the right and the overlay block
-	// coming out of the bottom.
-	*bold = true;
-	*shape = "triangle";
-	*text = string(""); 
+    labels->push_back("through");
+    blocks->push_back((TreePtr<Node>)*GetThrough());
+    labels->push_back("overlay");
+    blocks->push_back((TreePtr<Node>)*GetOverlay());
 }
 
 

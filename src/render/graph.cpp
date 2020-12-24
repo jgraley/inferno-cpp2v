@@ -8,7 +8,6 @@
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "sr/search_replace.hpp"
-#include "sr/agents/all.hpp"
 #include "sr/scr_engine.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
@@ -44,6 +43,8 @@ using namespace CPPTree;
 #define NS_SMALL "0.4"
 //#define FONT "Arial"
 
+#include <functional>
+
 Graph::Graph( string of ) :
     outfile(of)
 {
@@ -69,9 +70,9 @@ string Graph::MakeGraphTx(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += UniqueWalk( cr->GetRootEngine(), Id(root), false, cr->GetRootEngine() );
+	    s += UniqueWalkBlock( cr->GetRootEngine(), Id(root), false );
         unique_filter.Reset();
-	    s += UniqueWalk( cr->GetRootEngine(), Id(root), true, cr->GetRootEngine() );
+	    s += UniqueWalkBlock( cr->GetRootEngine(), Id(root), true );
 	}
 	else
     {
@@ -88,9 +89,9 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	string s;
 	s += Header();
     unique_filter.Reset();
-	s += UniqueWalk( root, false );
+	s += UniqueWalkNode( root, false );
     unique_filter.Reset();
-	s += UniqueWalk( root, true );
+	s += UniqueWalkNode( root, true );
 	s += Footer();
 	Disburse( s );
 
@@ -140,7 +141,7 @@ void Graph::Disburse( string s )
 }
 
 
-string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
+string Graph::UniqueWalkNode( TreePtr<Node> root, bool links_pass )
 {
 	string s;
     TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
@@ -154,25 +155,28 @@ string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass, const Graphable *g )
+string Graph::UniqueWalkBlock( const Graphable *g, string id, bool links_pass )
 {
 	string s;
     s += links_pass ? DoBlockLinks(g, id) : DoBlock(g, id);
     
-    struct : public Filter
+    typedef function<bool(TreePtr<Node>, TreePtr<Node>)> FilterLambda;
+    FilterLambda filter_lambda = [&](TreePtr<Node> context,
+                                     TreePtr<Node> root) -> bool
     {
+        return !ShouldDoBlock(root); // Stop where we will do blocks        
+    };
+    
+    struct BlockFilter : public Filter
+    {
+        BlockFilter( FilterLambda lambda_ ) : lambda( lambda_ ) {}
         virtual bool IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
         {
-            vector<string> labels;
-            vector< TreePtr<Node> > links;
-            Graphable *g = dynamic_cast<Graphable *>(root.get());
-            if( !g )
-                return true; // Can graph Node without Graphable
-            g->GetGraphInfo( &labels, &links );
-            return labels.empty() && links.empty(); // Stop if there are labels and links
+            return lambda(context, root);
         }
-    } no_tx_filter;
+        FilterLambda lambda;
+    } no_tx_filter(filter_lambda);
     
     vector<string> labels;
     vector< TreePtr<Node> > links;
@@ -186,11 +190,31 @@ string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass, const Grapha
             Walk w( (TreePtr<Node>)pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
             FOREACH( const TreePtrInterface &n, w )
             {              
-                s += links_pass ? DoNodeLinks((TreePtr<Node>)n) : DoNode((TreePtr<Node>)n);
+                Graphable *g = ShouldDoBlock((TreePtr<Node>)n);
+                if( g )
+                    s += UniqueWalkBlock( g, Id( n.get() ), links_pass );
+                else
+                    s += links_pass ? DoNodeLinks((TreePtr<Node>)n) : DoNode((TreePtr<Node>)n);
             }
         }
     }
 	return s;
+}
+
+
+Graphable *Graph::ShouldDoBlock( TreePtr<Node> node )
+{
+    Graphable *g = dynamic_cast<Graphable *>(node.get());
+    if( !g )
+        return nullptr; // Need Graphable to do a block
+        
+    vector<string> labels;
+    vector< TreePtr<Node> > links;        
+    g->GetGraphInfo( &labels, &links );
+    if( labels.empty() && links.empty() ) // Don't do block if it would be devoid of labels    
+        return nullptr;
+        
+    return g;
 }
 
 
@@ -446,9 +470,6 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-    if( SlaveAgent *s = dynamic_cast<SlaveAgent *>(n.get()) )
-	    return UniqueWalk( s->GetSCREngine(), Id( n.get() ), false, s );
-
 	string s;
 	bool bold;
 	string shape;
@@ -491,9 +512,6 @@ string Graph::DoNode( TreePtr<Node> n )
 
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
-    if( SlaveAgent *s = dynamic_cast<SlaveAgent *>(n.get()) )
-        return UniqueWalk( s->GetSCREngine(), Id( n.get() ), true, s );
-
     string s;
     TRACE("Itemising\n");
 	vector< Itemiser::Element * > members = n->Itemise();
@@ -553,20 +571,6 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetRender() + "\"\n";
 			}
 	}
-    else if( dynamic_pointer_cast<StuffAgent>(from) )
-    {
-        if( field == "porta0" )
-            s+= ":n";
-        else
-            s+= ":e";
-    }
-    else if( dynamic_pointer_cast<OverlayAgent>(from) )
-    {
-        if( field == "portb0" )
-            s+= ":s";
-        else
-            s+= ":e";
-    }
 
 	s += " -> ";
 	s += Id(to.get());

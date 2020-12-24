@@ -21,9 +21,10 @@ private:
     string Footer();
     string MakeGraphTx(Transformation *root);
     void Disburse( string s );
-    string UniqueWalk( TreePtr<Node> root, bool links_pass );
-    string UniqueWalk( SR::SCREngine *e, string id, bool links_pass, const Graphable *g );
-	string DoBlock( const Graphable *e, string id );
+    string UniqueWalkNode( TreePtr<Node> root, bool links_pass );
+    string UniqueWalkBlock( const Graphable *g, string id, bool links_pass );
+    Graphable *ShouldDoBlock( TreePtr<Node> node ); 
+	string DoBlock( const Graphable *g, string id );
 	string DoBlockLinks( const Graphable *e, string id );
     string Id( void *p );
     string SeqField( int i, int j=0 );
