@@ -3,6 +3,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "node/graphable.hpp"
+#include <functional>
 
 // TODO For in-place, use (*pcontext, *proot) rather than (context, *root). This 
 // way the caller has to decide whether the context node is the same as the root node, 
@@ -89,5 +90,18 @@ public:
     bool IsMatch( TreePtr<Node> root );
 };
 
+
+// If you wish to use a lambda...
+struct LambdaFilter : public Filter
+{
+    typedef function<bool(TreePtr<Node>, TreePtr<Node>)> Lambda;
+    LambdaFilter( const Lambda &lambda_ ) : lambda( lambda_ ) {}
+    virtual bool IsMatch( TreePtr<Node> context,
+                          TreePtr<Node> root )
+    {
+        return lambda(context, root);
+    }
+    Lambda lambda;
+};
 
 #endif

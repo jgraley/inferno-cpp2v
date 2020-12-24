@@ -160,24 +160,13 @@ string Graph::UniqueWalkBlock( const Graphable *g, string id, bool links_pass )
 	string s;
     s += links_pass ? DoBlockLinks(g, id) : DoBlock(g, id);
     
-    typedef function<bool(TreePtr<Node>, TreePtr<Node>)> FilterLambda;
-    FilterLambda filter_lambda = [&](TreePtr<Node> context,
-                                     TreePtr<Node> root) -> bool
+    
+    LambdaFilter block_filter( [&](TreePtr<Node> context,
+                                   TreePtr<Node> root) -> bool
     {
         return !ShouldDoBlock(root); // Stop where we will do blocks        
-    };
-    
-    struct BlockFilter : public Filter
-    {
-        BlockFilter( FilterLambda lambda_ ) : lambda( lambda_ ) {}
-        virtual bool IsMatch( TreePtr<Node> context,
-                              TreePtr<Node> root )
-        {
-            return lambda(context, root);
-        }
-        FilterLambda lambda;
-    } no_tx_filter(filter_lambda);
-    
+    });
+        
     vector<string> labels;
     vector< TreePtr<Node> > links;
     g->GetGraphInfo( &labels, &links );
@@ -187,7 +176,7 @@ string Graph::UniqueWalkBlock( const Graphable *g, string id, bool links_pass )
         if( pattern )
         {
             TRACE("Walking transform pattern ")(*pattern)("\n");
-            Walk w( (TreePtr<Node>)pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
+            Walk w( (TreePtr<Node>)pattern, &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
             FOREACH( const TreePtrInterface &n, w )
             {              
                 Graphable *g = ShouldDoBlock((TreePtr<Node>)n);
