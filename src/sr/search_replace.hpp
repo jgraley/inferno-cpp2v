@@ -16,7 +16,7 @@ class SpecialBase;
 class SCREngine;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
-class CompareReplace : public virtual Traceable,
+class CompareReplace : public virtual Graphable,
                        virtual public InPlaceTransformation
 {  
 public:

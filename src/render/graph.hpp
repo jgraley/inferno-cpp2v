@@ -22,12 +22,12 @@ private:
     string MakeGraphTx(Transformation *root);
     void Disburse( string s );
     string UniqueWalk( TreePtr<Node> root, bool links_pass );
-    string UniqueWalk( SR::SCREngine *e, string id, bool links_pass );
-	string DoEngine( SR::SCREngine *e, string id );
-	string DoEngineLinks( SR::SCREngine *e, string id );
+    string UniqueWalk( SR::SCREngine *e, string id, bool links_pass, const Graphable *g );
+	string DoBlock( const Graphable *e, string id );
+	string DoBlockLinks( const Graphable *e, string id );
     string Id( void *p );
     string SeqField( int i, int j=0 );
-    string Sanitise( string s, bool remove_tp=false );
+    string Sanitise( string s, bool remove_template=false );
     string Name( TreePtr<Node> sp, bool *bold, string *shape );   // TODO put stringize capabilities into the Property nodes as virtual methods
     string Colour( TreePtr<Node> n );
     string HTMLLabel( string name, TreePtr<Node> n );

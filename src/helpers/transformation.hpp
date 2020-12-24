@@ -2,6 +2,7 @@
 #define TRANSFORMATION_HPP
 
 #include "node/specialise_oostd.hpp"
+#include "node/graphable.hpp"
 
 // TODO For in-place, use (*pcontext, *proot) rather than (context, *root). This 
 // way the caller has to decide whether the context node is the same as the root node, 
@@ -13,7 +14,7 @@
 // and CompareReplace. Really, this TODO is just to use these two local 
 // policies as the general policy.
 
-class Transformation : public virtual Traceable
+class Transformation : public virtual Graphable
 {
 public:
     // Apply this transformation to tree at root, using context for decls etc.

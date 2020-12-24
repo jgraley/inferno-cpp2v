@@ -15,6 +15,7 @@
 #include "graph.hpp"
 #include "steps/inferno_agents.hpp"
 #include <inttypes.h>
+#include "node/graphable.hpp"
 
 using namespace CPPTree;
 
@@ -68,9 +69,9 @@ string Graph::MakeGraphTx(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += UniqueWalk( cr->GetRootEngine(), Id(root), false );
+	    s += UniqueWalk( cr->GetRootEngine(), Id(root), false, cr->GetRootEngine() );
         unique_filter.Reset();
-	    s += UniqueWalk( cr->GetRootEngine(), Id(root), true );
+	    s += UniqueWalk( cr->GetRootEngine(), Id(root), true, cr->GetRootEngine() );
 	}
 	else
     {
@@ -153,23 +154,29 @@ string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass )
+string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass, const Graphable *g )
 {
 	string s;
-    s += links_pass ? DoEngineLinks(e, id) : DoEngine(e, id);
+    s += links_pass ? DoBlockLinks(g, id) : DoBlock(g, id);
     
     struct : public Filter
     {
         virtual bool IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
         {
-            return !dynamic_cast<SCREngine*>(root.get());
+            vector<string> labels;
+            vector< TreePtr<Node> > links;
+            Graphable *g = dynamic_cast<Graphable *>(root.get());
+            if( !g )
+                return true; // Can graph Node without Graphable
+            g->GetGraphInfo( &labels, &links );
+            return labels.empty() && links.empty(); // Stop if there are labels and links
         }
     } no_tx_filter;
     
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    (void)e->GetGraphInfo( &labels, &links );
+    g->GetGraphInfo( &labels, &links );
     
     FOREACH( const TreePtrInterface &pattern, links )
     {
@@ -187,14 +194,14 @@ string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass )
 }
 
 
-string Graph::DoEngine( SCREngine *e,
-                        string id )
+string Graph::DoBlock( const Graphable *g,
+                       string id )
 {    
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    e->GetGraphInfo( &labels, &links );
+    g->GetGraphInfo( &labels, &links );
         
-    string name = e->GetName(); 
+    string name = g->GetName(); 
     int n;
     for( n=0; n<name.size(); n++ )
     {
@@ -230,11 +237,11 @@ string Graph::DoEngine( SCREngine *e,
 }
 
 
-string Graph::DoEngineLinks( SCREngine *e, string id )
+string Graph::DoBlockLinks( const Graphable *g, string id )
 {
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    e->GetGraphInfo( &labels, &links );
+    g->GetGraphInfo( &labels, &links );
 
     string s;
     for( int i=0; i<labels.size(); i++ )        
@@ -260,11 +267,22 @@ string Graph::SeqField( int i, int j )
 }
 
 
-string Graph::Sanitise( string s, bool remove_tp )
+string Graph::Sanitise( string s, bool remove_template )
 {
+	if( remove_template ) // get rid of templates
+    {
+        while(true)
+        {
+            string::size_type iopen = s.find("<");
+            string::size_type iclose = s.find(">");
+            if( iopen == std::string::npos || iclose == std::string::npos )
+                break; // done
+            iopen++; // get past <
+            s = s.substr( iopen, iclose-iopen );
+        }
+    }
+
 	string o;
-	if( remove_tp ) // get rid of TreePtr<>
-	    s = s.substr( 8, s.size()-9 );
 	int n = s.find("::");
 	if( n != string::npos )
 	    s = s.substr( n+2 );
@@ -311,8 +329,8 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 	*shape = "plaintext";//"record";
     
     // Permit agents to set their own appearance
-    if( Agent *agent = dynamic_cast<Agent *>(sp.get()) )
-		agent->GetGraphAppearance( bold, &text, shape );
+    if( Graphable *graphable = dynamic_cast<Graphable *>(sp.get()) )
+		graphable->GetGraphAppearance( bold, &text, shape );
 
     return text;
 }
@@ -350,7 +368,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 {
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
 	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name) + "</FONT></TD>\n";
+	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name, true) + "</FONT></TD>\n";
 	s += "  <TD></TD>\n";
 	s += " </TR>\n";
 	vector< Itemiser::Element * > members = n->Itemise();
@@ -363,30 +381,31 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 				char c[20];
 				sprintf(c, "%d", j);
 				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(seq->GetName(), true) + "[" + string(c) + "]</TD>\n";
-				s += "  <TD PORT=\"" + SeqField( i, j ) + "\"></TD>\n";
+				s += "  <TD>" + Sanitise(seq->GetName(), true) + "</TD>\n";
+				s += "  <TD PORT=\"" + SeqField( i, j ) + "\">[" + string(c) + "]</TD>\n";
 				s += " </TR>\n";
 			}
+		}
+		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
+		{
+            string dots;
+            for( int j=0; j<col->size(); j++ )
+                dots += ".";
+            
+			s += " <TR>\n";
+			s += "  <TD>" + Sanitise(col->GetName(), true) + "</TD>\n";
+			s += "  <TD PORT=\"" + SeqField( i ) + "\">{" + dots + "}</TD>\n";
+			s += " </TR>\n";
 		}
 		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
 			if( *ptr )
 			{
 				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(ptr->GetName(), true) + "</TD>\n";
+				s += "  <TD>" + Sanitise(ptr->GetName(), true) + "</TD>\n"; 
 				s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
 				s += " </TR>\n";
 		   }
-		}
-		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
-		{
-			s += " <TR>\n";
-			s += "  <TD>" + Sanitise(col->GetName(), true) + "{";
-            for( int j=0; j<col->size(); j++ )
-                s += ".";
-            s += "}</TD>\n";
-			s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
-			s += " </TR>\n";
 		}
 		else
 		{
@@ -428,7 +447,7 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 string Graph::DoNode( TreePtr<Node> n )
 {
     if( SlaveAgent *s = dynamic_cast<SlaveAgent *>(n.get()) )
-	    return UniqueWalk( s->GetSCREngine(), Id( n.get() ), false );
+	    return UniqueWalk( s->GetSCREngine(), Id( n.get() ), false, s );
 
 	string s;
 	bool bold;
@@ -473,7 +492,7 @@ string Graph::DoNode( TreePtr<Node> n )
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
     if( SlaveAgent *s = dynamic_cast<SlaveAgent *>(n.get()) )
-        return UniqueWalk( s->GetSCREngine(), Id( n.get() ), true );
+        return UniqueWalk( s->GetSCREngine(), Id( n.get() ), true, s );
 
     string s;
     TRACE("Itemising\n");
@@ -515,6 +534,7 @@ bool Graph::IsRecord( TreePtr<Node> n )
 	Name( n, &bold, &shape );
 	return shape=="record" || shape=="plaintext";
 }
+
 
 string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts, const TreePtrInterface *ptr )
 {

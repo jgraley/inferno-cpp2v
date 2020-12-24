@@ -14,6 +14,7 @@
 #include <vector>
 #include <boost/type_traits.hpp>
 #include <functional>
+#include "node/graphable.hpp"
 
 #define STRICT_MMAX_POLICY
 
@@ -26,7 +27,7 @@ class Agent;
 class TheKnowledge;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
-class Agent : public virtual Traceable,
+class Agent : public virtual Graphable,
               public virtual Node
 {
 public:
@@ -93,7 +94,6 @@ public:
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
                                             TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const = 0;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
 	static Agent *AsAgent( shared_ptr<Node> node );
 	static const Agent *AsAgentConst( shared_ptr<const Node> node );

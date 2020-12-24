@@ -9,6 +9,7 @@
 #include "common/mismatch.hpp"
 #include "the_knowledge.hpp"
 #include "agents/agent.hpp"
+#include "node/graphable.hpp"
 #include <set>
 
 
@@ -23,7 +24,7 @@ class CompareReplace;
 class AndRuleEngine;
 
 /// Common implementation for search+replace, compare+replace and slaves
-class SCREngine : public virtual Traceable
+class SCREngine : public virtual Graphable
 {      
 public:
     SCREngine( bool is_search,
