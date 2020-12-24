@@ -154,6 +154,8 @@ public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
+    virtual string GetTrace() const;
+
 protected:                                  
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;                                      

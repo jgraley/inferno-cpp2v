@@ -804,6 +804,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
     // Duplicate the key node since it is at least as specialised    
     dest = DuplicateNode( keynode, true );
 
+    ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
+
     // Loop over the elements of pattern and dest, limited to elements
     // present in pattern, which is a non-strict subclass of keynode and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
@@ -940,11 +942,13 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
  
 	// Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.
-    // Identifiers that have multiple referneces in the pattern will be coupled, and  
+    // Identifiers that have multiple references in the pattern will be coupled, and  
     // after the first hit, BuildReplaceOverlay() will handle the rest and it uses Duplicate()
     shared_ptr<Cloner> dup_dest = Clone();
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     master_scr_engine->GetOverallMaster()->dirty_grass.insert( dest );
+
+    ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
@@ -991,9 +995,9 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*this)(" was nullptr when not overlaying\n");
-            *dest_ptr = AsAgent((TreePtr<Node>)*pattern_ptr)->BuildReplace();
-            ASSERT( *dest_ptr );
-            ASSERT( (**dest_ptr).IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n"); 
+            Agent *agent = AsAgent((TreePtr<Node>)*pattern_ptr);  
+            TreePtr<Node> dest_child = agent->BuildReplace();
+            *dest_ptr = dest_child;
         }
         else
         {

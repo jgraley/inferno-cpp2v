@@ -164,6 +164,12 @@ public:
     {
         return shared_from_this();
     }    
+    
+    // disambiguate between Agent and Node: Agent wins
+    virtual string GetTrace() const 
+    {
+        return StandardAgent::GetTrace();
+    }
 };
 
 

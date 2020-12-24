@@ -409,6 +409,9 @@ void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
 void AgentCommon::SetKey( CouplingKey keylink )
 {
     ASSERT(keylink);
+    if( phase != IN_COMPARE_ONLY )
+        ASSERT(keylink.GetChildX()->IsFinal() )(*this)(" trying to key with non-final ")(keylink)("\n"); 
+   
     if( !coupling_key )
     { 
         coupling_key = keylink;
@@ -445,14 +448,22 @@ void AgentCommon::TrackingKey( Agent *from )
 TreePtr<Node> AgentCommon::BuildReplace()
 {
     INDENT("B");
+    
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
+    //ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
     CouplingKey keylink = GetKey();
     
-    return BuildReplaceImpl( keylink );    
+    ASSERT( !keylink || keylink.GetChildX()->IsFinal() )(*this)(" keyed with non-final ")(keylink)("\n"); 
+    
+    TreePtr<Node> dest = BuildReplaceImpl( keylink );    
+    ASSERT( dest );
+    ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
+    
+    return dest;
 }
 
 
@@ -558,6 +569,25 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
     }
     
     return dest;
+}
+
+
+string AgentCommon::GetTrace() const
+{
+    string s = Traceable::GetTrace();
+    switch( phase )
+    {
+    case IN_COMPARE_ONLY:
+        s += "IN_COMPARE_ONLY";
+        break;
+    case IN_COMPARE_AND_REPLACE:
+        s += "IN_COMPARE_AND_REPLACE";
+        break;
+    case IN_REPLACE_ONLY:
+        s += "IN_REPLACE_ONLY";
+        break;
+    }
+    return s;
 }
 
 
