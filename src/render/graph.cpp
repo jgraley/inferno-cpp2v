@@ -149,7 +149,7 @@ string Graph::UniqueWalkNode( TreePtr<Node> root, bool links_pass )
 	FOREACH( const TreePtrInterface &n, w )
 	{
 		if( n )
-			s += links_pass ? DoNodeLinks((TreePtr<Node>)n) : DoNode((TreePtr<Node>)n);
+			s += links_pass ? DoNodeLinks((TreePtr<Node>)n, "") : DoNode((TreePtr<Node>)n);
 	}
 	return s;
 }
@@ -167,23 +167,21 @@ string Graph::UniqueWalkBlock( const Graphable *g, string id, bool links_pass )
         return !ShouldDoBlock(root); // Stop where we will do blocks        
     });
         
-    vector<string> labels;
-    vector< TreePtr<Node> > links;
-    g->GetGraphInfo( &labels, &links );
+    list<Graphable::SubBlock> sub_blocks = g->GetGraphBlockInfo();
     
-    FOREACH( const TreePtrInterface &pattern, links )
+    FOREACH( const Graphable::SubBlock &sub_block, sub_blocks )
     {
-        if( pattern )
+        if( sub_block.child )
         {
-            TRACE("Walking transform pattern ")(*pattern)("\n");
-            Walk w( (TreePtr<Node>)pattern, &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
+            TRACE("Walking transform pattern ")(*(sub_block.child))("\n");
+            Walk w( (TreePtr<Node>)(sub_block.child), &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
             FOREACH( const TreePtrInterface &n, w )
             {              
                 Graphable *g = ShouldDoBlock((TreePtr<Node>)n);
                 if( g )
                     s += UniqueWalkBlock( g, Id( n.get() ), links_pass );
                 else
-                    s += links_pass ? DoNodeLinks((TreePtr<Node>)n) : DoNode((TreePtr<Node>)n);
+                    s += links_pass ? DoNodeLinks((TreePtr<Node>)n, sub_block.atts) : DoNode((TreePtr<Node>)n);
             }
         }
     }
@@ -196,11 +194,8 @@ Graphable *Graph::ShouldDoBlock( TreePtr<Node> node )
     Graphable *g = dynamic_cast<Graphable *>(node.get());
     if( !g )
         return nullptr; // Need Graphable to do a block
-        
-    vector<string> labels;
-    vector< TreePtr<Node> > links;        
-    g->GetGraphInfo( &labels, &links );
-    if( labels.empty() && links.empty() ) // Don't do block if it would be devoid of labels    
+           
+    if( g->GetGraphBlockInfo().empty() ) // Don't do block if it would be devoid of labels    
         return nullptr;
         
     return g;
@@ -212,7 +207,7 @@ string Graph::DoBlock( const Graphable *g,
 {    
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    g->GetGraphInfo( &labels, &links );
+    list<Graphable::SubBlock> sub_blocks = g->GetGraphBlockInfo();
         
     string name = g->GetName(); 
     int n;
@@ -237,8 +232,8 @@ string Graph::DoBlock( const Graphable *g,
 	s += " [\n";
 
     s += "label = \"<fixed> " + Sanitise( name );
-	for( int i=0; i<labels.size(); i++ )        
-		s += " | <" + labels[i] + "> " + labels[i];
+	for( Graphable::SubBlock sub_block : sub_blocks )
+		s += " | <" + sub_block.label + "> " + sub_block.label;
 	s += "\"\n";
 
 	s += "shape = \"record\"\n"; // nodes can be split into fields
@@ -254,11 +249,15 @@ string Graph::DoBlockLinks( const Graphable *g, string id )
 {
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    g->GetGraphInfo( &labels, &links );
+    list<Graphable::SubBlock> sub_blocks = g->GetGraphBlockInfo();
 
     string s;
-    for( int i=0; i<labels.size(); i++ )        
-        s += id + ":" + labels[i] + " -> " + Id(links[i].get()) + " [];\n";
+	for( Graphable::SubBlock sub_block : sub_blocks )
+    {
+        s += id + ":" + sub_block.label;
+        s += " -> " + Id(sub_block.child.get());
+        s += " [" + sub_block.atts + "];\n";
+    }
 
     return s;
 }
@@ -343,7 +342,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
     
     // Permit agents to set their own appearance
     if( Graphable *graphable = dynamic_cast<Graphable *>(sp.get()) )
-		graphable->GetGraphAppearance( bold, &text, shape );
+		graphable->GetGraphNodeAppearance( bold, &text, shape );
 
     return text;
 }
@@ -499,7 +498,7 @@ string Graph::DoNode( TreePtr<Node> n )
 }
 
 
-string Graph::DoNodeLinks( TreePtr<Node> n )
+string Graph::DoNodeLinks( TreePtr<Node> n, string atts )
 {
     string s;
     TRACE("Itemising\n");
@@ -510,19 +509,19 @@ string Graph::DoNodeLinks( TreePtr<Node> n )
 		if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			FOREACH( const TreePtrInterface &p, *col )
-				s += DoLink( n, SeqField(i), (TreePtr<Node>)p, string(), &p );
+				s += DoLink( n, SeqField(i), (TreePtr<Node>)p, atts, &p );
 		}
 		else if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
 		{
 			int j=0;
 			FOREACH( const TreePtrInterface &p, *seq )
-				s += DoLink( n, SeqField(i, j++), (TreePtr<Node>)p, string(), &p );
+				s += DoLink( n, SeqField(i, j++), (TreePtr<Node>)p, atts, &p );
 		}
 		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
             //TRACE("TreePtr %d is @%p\n", i, ptr );
 			if( *ptr )
-				s += DoLink( n, SeqField(i), (TreePtr<Node>)*ptr, string(), ptr );
+				s += DoLink( n, SeqField(i), (TreePtr<Node>)*ptr, atts, ptr );
 		}
 		else
 		{
@@ -550,8 +549,7 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 	if( field != "" && IsRecord(from) )
 	{
 		s += ":" + field;
-		atts = "dir = \"both\"\n";
-        atts = "arrowtail = \"dot\"\n";
+        atts += "arrowtail = \"dot\"\n";
       //  atts = "sametail = \"" + field + "\"\n";
 		if( ptr )									// is normal tree link
 		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
@@ -560,6 +558,8 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetRender() + "\"\n";
 			}
 	}
+    
+    atts += "weight=2\n"; // Make these links neater relative to the block ones
 
 	s += " -> ";
 	s += Id(to.get());

@@ -16,14 +16,6 @@ void Transformation::operator()( TreePtr<Node> *proot )
 }
 
 
-// Provide information for the graph plotter, so it can draw the tx as a node
-// with 0 or more links to TreePtrs
-void Transformation::GetGraphInfo( vector<string> *labels, 
-                                   vector< TreePtr<Node> > *links ) const 
-{
-}
-
-
 void Transformation::SetStopAfter( vector<int> ssa, int depth )
 {
 }

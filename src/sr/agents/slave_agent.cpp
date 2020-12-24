@@ -45,12 +45,11 @@ void SlaveAgent::TrackingKey( Agent *from )
 }
 
 
-void SlaveAgent::GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *blocks ) const
+list<Graphable::SubBlock> SlaveAgent::GetGraphBlockInfo() const
 {
-    labels->push_back("through");
-    blocks->push_back((TreePtr<Node>)*GetThrough());
-    my_scr_engine->GetGraphInfo( labels, blocks );
+    list<SubBlock> sub_blocks = my_scr_engine->GetGraphBlockInfo();
+    sub_blocks.push_front( {"through", (TreePtr<Node>)*GetThrough(), "" } );
+    return sub_blocks;
 }
 
 
@@ -87,9 +86,9 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( CouplingKey keylink )
 }
 
 
-void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void SlaveAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
-    ASSERTFAIL(); // Slaves are identified as Engines and plotted seperately. See GetGraphInfo().
+    ASSERTFAIL(); // Slaves are identified as Engines and plotted seperately. See GetGraphBlockInfo().
     // Note from graph plotter: SearchReplace, CompareReplace, SlaveSearchReplace or 
     // SlaveCompareReplace appear in sharp-cornered rectangles, with the name at the top and the
     // member TreePtr names below. These may be some combination of search, compare, replace and through

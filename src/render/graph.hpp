@@ -34,7 +34,7 @@ private:
     string HTMLLabel( string name, TreePtr<Node> n );
     string SimpleLabel( string name, TreePtr<Node> n );
     string DoNode( TreePtr<Node> n );
-    string DoNodeLinks( TreePtr<Node> n );
+    string DoNodeLinks( TreePtr<Node> n, string atts );
     bool IsRecord( TreePtr<Node> n );
     string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string(), const TreePtrInterface *ptr=nullptr );
     UniqueFilter unique_filter;

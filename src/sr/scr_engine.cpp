@@ -207,9 +207,10 @@ void SCREngine::SetStopAfter( vector<int> ssa, int d )
 }
 
 
-void SCREngine::GetGraphInfo( vector<string> *labels, 
-                              vector< TreePtr<Node> > *blocks ) const
+list<Graphable::SubBlock> SCREngine::GetGraphBlockInfo() const
 {
+    list<SubBlock> sub_blocks;
+    
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
     // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
     // should error on them?
@@ -223,16 +224,14 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
     TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(original_pattern);
     if( overlay )
     {        
-        labels->push_back(plan.is_search?"search":"compare");    
-        blocks->push_back(overlay->through);
-        labels->push_back("replace");
-        blocks->push_back(overlay->overlay);
+        sub_blocks.push_back( {plan.is_search?"search":"compare", overlay->through, ""} );    
+        sub_blocks.push_back( {"replace", overlay->overlay, "style=\"dashed\"\n"} );
     }
     else
     {
-        labels->push_back(plan.is_search?"search_replace":"compare_replace");    
-        blocks->push_back(original_pattern);
+        sub_blocks.push_back( {plan.is_search?"search_replace":"compare_replace", original_pattern, ""} );
     }
+    return sub_blocks;
 }
 
 

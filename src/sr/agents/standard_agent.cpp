@@ -1008,7 +1008,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
 }
 
 
-void StandardAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void StandardAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The graph plotter pre-loads the variables with the appearance of a standard node
 	// that will be used when plotting input/output trees that have not been 

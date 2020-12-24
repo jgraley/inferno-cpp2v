@@ -32,11 +32,6 @@ public:
 
     void operator()( TreePtr<Node> *proot );
     
-    // Provide information for the graph plotter, so it can draw the tx as a node
-    // with 0 or more links to TreePtrs
-    virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const;
-    
     virtual void SetStopAfter( vector<int> ssa, int depth=0 );
 };
 

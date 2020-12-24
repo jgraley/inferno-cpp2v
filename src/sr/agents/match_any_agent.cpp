@@ -108,7 +108,7 @@ Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
     return completeness;
 }
 
-void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void MatchAnyAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
 	// on the right.

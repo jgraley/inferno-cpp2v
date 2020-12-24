@@ -76,8 +76,7 @@ private:
     TreePtr<Node> Replace() const;
 
 public:
-    virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *blocks ) const;
+    virtual list<Graphable::SubBlock> GetGraphBlockInfo() const;
 
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
     const CompareReplace * GetOverallMaster() const;

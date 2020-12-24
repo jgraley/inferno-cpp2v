@@ -29,12 +29,11 @@ public:
                                       XLink x ) const;                  
     virtual void TrackingKey( Agent *from );
     virtual const TreePtrInterface *GetThrough() const = 0;    
-    virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *blocks ) const;
+    virtual list<SubBlock> GetGraphBlockInfo() const;
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine, SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }

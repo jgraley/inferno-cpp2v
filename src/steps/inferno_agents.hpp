@@ -35,7 +35,7 @@ struct BuildIdentifierAgent : public virtual AgentCommon
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -106,7 +106,7 @@ private:
 struct IdentifierByNameAgent : public virtual AgentCommon
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
@@ -170,7 +170,7 @@ struct NestedAgent : public virtual AgentCommonDomainExtender
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     virtual XLink Advance( XLink x, 
                            string *depth ) const = 0;
     
@@ -240,7 +240,7 @@ private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
 	TreePtr<Node> BuildReplaceImpl( CouplingKey keylink );
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
 }; 
 
 //---------------------------------- IsLabelReachedAgent ------------------------------------    
@@ -262,7 +262,7 @@ struct IsLabelReachedAgent : public virtual AgentCommon,
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            
 private:

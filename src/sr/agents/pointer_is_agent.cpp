@@ -72,7 +72,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void PointerIsAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void PointerIsAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The PointerIs node appears as a slightly flattened pentagon.
 	*bold = true;

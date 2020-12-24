@@ -38,11 +38,10 @@ void CompareReplace::SetMaxReps( int n, bool e )
 }
 
 
-void CompareReplace::GetGraphInfo( vector<string> *labels, 
-                                   vector< TreePtr<Node> > *blocks ) const
+list<Graphable::SubBlock> CompareReplace::GetGraphBlockInfo() const
 {
-    // Disambiguate conflict between Transformation and SCREngine
-    scr_engine->GetGraphInfo( labels, blocks );
+    // We want out name (via GetName()) but SCREngine's layout
+    return scr_engine->GetGraphBlockInfo();
 }
 
 

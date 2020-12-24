@@ -41,7 +41,7 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void TransformOfAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void TransformOfAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
 	// kind of Transformation class inside it.

@@ -51,7 +51,7 @@ class AnyNodeAgent : public SearchContainerAgent
                                                           XLink x,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
 };
 
 
@@ -92,7 +92,7 @@ public:
                                                           XLink x,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
+	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };

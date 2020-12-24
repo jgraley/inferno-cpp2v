@@ -28,8 +28,7 @@ public:
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;
     virtual const TreePtrInterface *GetOverlay() const = 0;    
-    virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *blocks ) const;
+    virtual list<SubBlock> GetGraphBlockInfo() const;
 };
 
 

@@ -24,7 +24,7 @@ void BuildIdentifierAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }   
 
 
-void BuildIdentifierAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void BuildIdentifierAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
@@ -130,7 +130,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( CouplingKey keylink )
 
 //---------------------------------- IdentifierByName ------------------------------------    
 
-void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void IdentifierByNameAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.

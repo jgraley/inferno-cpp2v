@@ -127,7 +127,7 @@ Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryA
 }                                                                                        
 
 
-void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void AnyNodeAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The AnyNode node appears as a small circle with a ? sign in it. The terminus block emerges from the
 	// right of the circle. ? implies the tendancy to match exactly one thing.
@@ -244,7 +244,7 @@ Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAge
 }                                                                                        
 
 
-void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void StuffAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The Stuff node appears as a small circle with a # character inside it. The terminus block emerges from the
 	// right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction block 

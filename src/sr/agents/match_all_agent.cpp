@@ -38,7 +38,7 @@ void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void MatchAllAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The MatchAll node appears as a small circle with an & character inside it. The affected subtrees are 
 	// on the right.

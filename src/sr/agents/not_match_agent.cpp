@@ -31,7 +31,7 @@ void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void NotMatchAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void NotMatchAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
 	// on the right.
