@@ -70,9 +70,9 @@ string Graph::MakeGraphTx(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += UniqueWalkBlock( cr->GetRootEngine(), Id(root), false );
+	    s += UniqueWalkBlock( cr, Id(root), false );
         unique_filter.Reset();
-	    s += UniqueWalkBlock( cr->GetRootEngine(), Id(root), true );
+	    s += UniqueWalkBlock( cr, Id(root), true );
 	}
 	else
     {
