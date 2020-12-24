@@ -28,8 +28,8 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 list<Graphable::SubBlock> OverlayAgent::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;
-    sub_blocks.push_back( {"through", (TreePtr<Node>)*GetThrough(), "" } );
-    sub_blocks.push_back( {"overlay", (TreePtr<Node>)*GetOverlay(), "style=\"dashed\"\n" } );
+    sub_blocks.push_back( {"through", (TreePtr<Node>)*GetThrough(), "", PatternLink(this, GetThrough()).GetName() } );
+    sub_blocks.push_back( {"overlay", (TreePtr<Node>)*GetOverlay(), "style=\"dashed\"\n", PatternLink(this, GetOverlay()).GetName() } );
     return sub_blocks;
 }
 

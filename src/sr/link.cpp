@@ -135,6 +135,17 @@ string PatternLink::GetTrace() const
 }
 
 
+string PatternLink::GetName() const
+{
+    string s = SSPrintf("%p->", asp_pattern.get());
+    if(asp_pattern==nullptr)
+        s += "NULL";
+    else
+        s += GetChildAgent()->GetAddr();
+    return s;
+}
+
+
 PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
                          void *whodat_) :
     asp_pattern( ppattern )

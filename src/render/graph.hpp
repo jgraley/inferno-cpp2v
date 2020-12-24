@@ -37,6 +37,7 @@ private:
     string DoNodeLinks( TreePtr<Node> n, string atts );
     bool IsRecord( TreePtr<Node> n );
     string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string(), const TreePtrInterface *ptr=nullptr );
+    
     UniqueFilter unique_filter;
     const string outfile; // empty means stdout
 };

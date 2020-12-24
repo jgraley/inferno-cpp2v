@@ -60,10 +60,15 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     overall_master_ptr = overall_master;
     master_ptr = master;
     
+    user_sc_plink = PatternLink();    
+    user_r_plink = PatternLink();        
+    
     InstallRootAgents(cp, rp);
             
     // For closure under full arrowhead model, we need a link to root
     root_plink = PatternLink::CreateDistinct( root_pattern );
+    if( !user_sc_plink )
+        user_sc_plink = user_r_plink = root_plink;
     
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines );    
@@ -88,7 +93,9 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     // If only a search pattern is supplied, make the replace pattern the same
     // so they couple and then an overlay node can split them apart again.
     if( !rp )
+    {
         rp = cp;
+    }
 
     if( rp != cp ) 
     {
@@ -98,6 +105,8 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
         overlay->through = cp;
         overlay->overlay = rp;
         cp = rp = overlay; 
+        user_sc_plink = PatternLink(overlay, &overlay->through);
+        user_r_plink = PatternLink(overlay, &overlay->overlay);
     }
 
     if( is_search )
@@ -105,9 +114,11 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
         // Obtain search and replace semaintics from a compare and replace engine
         // by inserting a stuff node at root
         ASSERT( cp==rp );
-        MakePatternPtr< Stuff<Node> > stuff;
+        MakePatternPtr< Stuff<Node> > stuff;        
         stuff->terminus = cp;
         cp = rp = stuff;
+        if( !user_sc_plink )
+            user_sc_plink = user_r_plink = PatternLink(stuff, &stuff->terminus);        
     }
     
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
@@ -224,12 +235,12 @@ list<Graphable::SubBlock> SCREngine::GetGraphBlockInfo() const
     TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(original_pattern);
     if( overlay )
     {        
-        sub_blocks.push_back( {plan.is_search?"search":"compare", overlay->through, ""} );    
-        sub_blocks.push_back( {"replace", overlay->overlay, "style=\"dashed\"\n"} );
+        sub_blocks.push_back( {plan.is_search?"search":"compare", overlay->through, "", plan.user_sc_plink.GetName()} );    
+        sub_blocks.push_back( {"replace", overlay->overlay, "style=\"dashed\"\n", plan.user_r_plink.GetName()} );
     }
     else
     {
-        sub_blocks.push_back( {plan.is_search?"search_replace":"compare_replace", original_pattern, ""} );
+        sub_blocks.push_back( {plan.is_search?"search_replace":"compare_replace", original_pattern, "", plan.user_sc_plink.GetName()} );
     }
     return sub_blocks;
 }

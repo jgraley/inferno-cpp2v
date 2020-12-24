@@ -58,6 +58,8 @@ private:
         TreePtr<Node> root_pattern;
         PatternLink root_plink;
         Agent *root_agent;
+        PatternLink user_sc_plink;
+        PatternLink user_r_plink;
         const SCREngine *master_ptr;
         shared_ptr< unordered_set<Agent *> > my_agents;   
         shared_ptr< unordered_set<PatternLink> > my_agent_links;   

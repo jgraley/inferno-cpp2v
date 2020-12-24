@@ -11,6 +11,7 @@ string VSSPrintf(const char *fmt, va_list vl)
     return string(cs);
 }
 
+
 string SSPrintf(const char *fmt, ...)
 {
     va_list vl;
@@ -20,6 +21,7 @@ string SSPrintf(const char *fmt, ...)
     
     return s;
 }
+
 
 void CommonTest()
 {
@@ -114,6 +116,7 @@ int SerialNumber::current_step;
 map<void *, SerialNumber::SNType> SerialNumber::location_serial;
 map<void *, SerialNumber::SNType> SerialNumber::master_serial;
 
+
 void SerialNumber::Construct()
 {
     // Get the point in the code where we were constructed 
@@ -138,6 +141,7 @@ void SerialNumber::Construct()
     master_serial[lp]++;
 }    
 
+
 void SerialNumber::SetStep( int s )
 {
     current_step = s;
@@ -145,6 +149,7 @@ void SerialNumber::SetStep( int s )
     location_serial = map<void *, SNType>();
     master_serial = map<void *, SNType>();
 }
+
 
 string SerialNumber::GetAddr() const
 {

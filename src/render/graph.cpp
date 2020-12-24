@@ -15,6 +15,7 @@
 #include "steps/inferno_agents.hpp"
 #include <inttypes.h>
 #include "node/graphable.hpp"
+#include "sr/link.hpp"
 
 using namespace CPPTree;
 
@@ -37,6 +38,7 @@ using namespace CPPTree;
 // Secondary: Normal nodes and special nodes that occupy space
 // Tertiary: CompareReplace and special nodes that do not occupy space
 
+#define FS_TINY "8"
 #define FS_SMALL "12"
 #define FS_MIDDLE "14"
 #define FS_LARGE "16"
@@ -254,9 +256,11 @@ string Graph::DoBlockLinks( const Graphable *g, string id )
     string s;
 	for( Graphable::SubBlock sub_block : sub_blocks )
     {
+        string atts = sub_block.atts;
+        atts += "label = \""+Sanitise(sub_block.link_name)+"\"\n";
         s += id + ":" + sub_block.label;
         s += " -> " + Id(sub_block.child.get());
-        s += " [" + sub_block.atts + "];\n";
+        s += " [" + atts + "];\n";
     }
 
     return s;
@@ -336,13 +340,13 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 	// for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
 	// always come from some way in from the right edge, and if they are angled up or down, they can appear
 	// to be coming from the wrong place.        
-	string text = sp->GetRender(); 
+	string text = sp->GetRender();     
 	*bold = false;
 	*shape = "plaintext";//"record";
     
     // Permit agents to set their own appearance
     if( Graphable *graphable = dynamic_cast<Graphable *>(sp.get()) )
-		graphable->GetGraphNodeAppearance( bold, &text, shape );
+		graphable->GetGraphNodeAppearance( bold, &text, shape );    
 
     return text;
 }
@@ -383,6 +387,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name, true) + "</FONT></TD>\n";
 	s += "  <TD></TD>\n";
 	s += " </TR>\n";
+
 	vector< Itemiser::Element * > members = n->Itemise();
 	for( int i=0; i<members.size(); i++ )
 	{
@@ -549,16 +554,23 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 	if( field != "" && IsRecord(from) )
 	{
 		s += ":" + field;
-        atts += "arrowtail = \"dot\"\n";
+      //  atts += "arrowtail = \"dot\"\n";
       //  atts = "sametail = \"" + field + "\"\n";
-		if( ptr )									// is normal tree link
-		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
-		        if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
-			{
-			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetRender() + "\"\n";
-			}
-	}
+    }
+    if( ptr )		// is normal tree link
+    {
+        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
+        {
+            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
+            {
+                atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetRender() + "\"\n";
+            }
+        }
+    }
     
+    PatternLink plink( from, ptr );
+    atts += "label = \""+Sanitise(plink.GetName())+"\"\n";
+
     atts += "weight=2\n"; // Make these links neater relative to the block ones
 
 	s += " -> ";
