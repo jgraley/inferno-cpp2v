@@ -50,15 +50,35 @@ using namespace CPPTree;
 Graph::Graph( string of ) :
     outfile(of)
 {
+	if( !outfile.empty() )
+	{
+		filep = fopen( outfile.c_str(), "wt" );
+		ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
+    }
+    
+    string s;
+    s += DoHeader();
+	Disburse( s );
+}
+
+
+Graph::~Graph()
+{
+    string s;
+  	s += DoFooter();
+	Disburse( s );
+
+    if( !outfile.empty() )
+    {
+        fclose( filep );
+    }
 }
 
 
 void Graph::operator()( Transformation *root )
 {    
     string s;
-    s += DoHeader();
     s += PopulateFromTransformation(root);	
-	s += DoFooter();
 	Disburse( s );
 }
 
@@ -68,12 +88,10 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	(void)context; // Not needed!!
 
 	string s;
-	s += DoHeader();
     unique_filter.Reset();
 	s += PopulateFromNode( root, false );
     unique_filter.Reset();
 	s += PopulateFromNode( root, true );
-	s += DoFooter();
 	Disburse( s );
 
 	return root; // no change
@@ -604,10 +622,7 @@ void Graph::Disburse( string s )
 	}
 	else
 	{
-		FILE *fp = fopen( outfile.c_str(), "wt" );
-		ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
-		fputs( s.c_str(), fp );
-		fclose( fp );
+		fputs( s.c_str(), filep );
 	}
 }
 

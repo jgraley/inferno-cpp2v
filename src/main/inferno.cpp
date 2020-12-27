@@ -165,35 +165,41 @@ int main( int argc, char *argv[] )
     if( ReadArgs::documentation_graphs )
         GenerateDocumentationGraphs();
     
-    // get the transformations, in sequence, in a vector
+    // If a pattern graph was requested, generate it now
     vector< shared_ptr<Transformation> > sequence;
     BuildSequence( &sequence );
     
-    if( !ReadArgs::pattern_graph_name.empty() )
+    if( !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1 )
     {
-        ReadArgs::pattern_graph_index = 0;
-        FOREACH( shared_ptr<Transformation> t, sequence )
+        if( ReadArgs::pattern_graph_name.back()=='/' )
         {
-            if( t->GetName() == ReadArgs::pattern_graph_name )
-                break;
-            ReadArgs::pattern_graph_index++;
+            for( shared_ptr<Transformation> t : sequence )
+                Graph( ReadArgs::pattern_graph_name+t->GetName()+".dot" )( t.get() );
         }
-        if( ReadArgs::pattern_graph_index == sequence.size() )
+        else
         {
-            fprintf(stderr, "Cannot find step named %s. Known step names:\n", ReadArgs::pattern_graph_name.c_str() );  
-            FOREACH( shared_ptr<Transformation> t, sequence )
-                fprintf(stderr, "%s\n", t->GetName().c_str() );
-            ASSERT(false);
+            if( !ReadArgs::pattern_graph_name.empty() )
+            {
+                ReadArgs::pattern_graph_index = 0;
+                for( shared_ptr<Transformation> t : sequence )
+                {
+                    if( t->GetName() == ReadArgs::pattern_graph_name )
+                        break;
+                    ReadArgs::pattern_graph_index++;
+                }
+                if( ReadArgs::pattern_graph_index == sequence.size() )
+                {
+                    fprintf(stderr, "Cannot find step named %s. Known step names:\n", ReadArgs::pattern_graph_name.c_str() );  
+                    for( shared_ptr<Transformation> t : sequence )
+                        fprintf(stderr, "%s\n", t->GetName().c_str() );
+                    ASSERT(false);
+                }
+            }
+            ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
+            ASSERT( ReadArgs::pattern_graph_index < sequence.size() )("There are only %d steps at present\n", sequence.size() );
+            Graph g( ReadArgs::outfile );
+            g( sequence[ReadArgs::pattern_graph_index].get() );
         }
-    }
-    
-    // If a pattern graph was requested, generate it now
-    if( ReadArgs::pattern_graph_index != -1 )
-    {
-        ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-        ASSERT( ReadArgs::pattern_graph_index < sequence.size() )("There are only %d steps at present\n", sequence.size() );
-        Graph g( ReadArgs::outfile );
-        g( sequence[ReadArgs::pattern_graph_index].get() );
     }        
     
     // If there was no input program then there's nothing more to do

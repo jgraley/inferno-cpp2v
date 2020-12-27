@@ -15,6 +15,7 @@ public:
 	using Transformation::operator();
 
     Graph( string of = string() );
+    ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
@@ -58,6 +59,7 @@ private:
     
     UniqueFilter unique_filter;
     const string outfile; // empty means stdout
+    FILE *filep;
 };
 
 #endif
