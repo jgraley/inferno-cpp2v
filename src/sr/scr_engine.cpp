@@ -60,15 +60,10 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     overall_master_ptr = overall_master;
     master_ptr = master;
     
-    user_sc_plink = PatternLink();    
-    user_r_plink = PatternLink();        
-    
     InstallRootAgents(cp, rp);
             
     // For closure under full arrowhead model, we need a link to root
     root_plink = PatternLink::CreateDistinct( root_pattern );
-    if( !user_sc_plink )
-        user_sc_plink = user_r_plink = root_plink;
     
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines );    
@@ -105,8 +100,6 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
         overlay->through = cp;
         overlay->overlay = rp;
         cp = rp = overlay; 
-        user_sc_plink = PatternLink(overlay, &overlay->through);
-        user_r_plink = PatternLink(overlay, &overlay->overlay);
     }
 
     if( is_search )
@@ -116,9 +109,7 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
         ASSERT( cp==rp );
         MakePatternPtr< Stuff<Node> > stuff;        
         stuff->terminus = cp;
-        cp = rp = stuff;
-        if( !user_sc_plink )
-            user_sc_plink = user_r_plink = PatternLink(stuff, &stuff->terminus);        
+        cp = rp = stuff;   
     }
     
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
@@ -218,9 +209,20 @@ void SCREngine::SetStopAfter( vector<int> ssa, int d )
 }
 
 
-list<Graphable::SubBlock> SCREngine::GetGraphBlockInfo() const
+Graphable::Block SCREngine::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;
+    if( ReadArgs::graph_trace )
+    {
+        // Actually much simpler in graph trace mode - just show the root node and plink
+        sub_blocks.push_back( { "root", 
+                                "",
+                                { { plan.root_pattern.get(), 
+                                    plan.root_pattern, 
+                                    SOLID, 
+                                    {plan.root_plink.GetName()} } } } );
+        return { this, false, GetName(), "", "", ENUMERATED, sub_blocks };
+    }
     
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
     // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
@@ -235,14 +237,29 @@ list<Graphable::SubBlock> SCREngine::GetGraphBlockInfo() const
     TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(original_pattern);
     if( overlay )
     {        
-        sub_blocks.push_back( {plan.is_search?"search":"compare", overlay->through, "", plan.user_sc_plink.GetName()} );    
-        sub_blocks.push_back( {"replace", overlay->overlay, "style=\"dashed\"\n", plan.user_r_plink.GetName()} );
+        sub_blocks.push_back( { plan.is_search?"search":"compare", 
+                                "",
+                                { { overlay->through.get(),
+                                    overlay->through, 
+                                    SOLID, 
+                                    {} } } } );    
+        sub_blocks.push_back( { "replace", 
+                                "",
+                                { { overlay->overlay.get(),
+                                    overlay->overlay, 
+                                    DASHED, 
+                                    {} } } } );
     }
     else
     {
-        sub_blocks.push_back( {plan.is_search?"search_replace":"compare_replace", original_pattern, "", plan.user_sc_plink.GetName()} );
+        sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
+                                "",
+                                { { original_pattern.get(),
+                                    original_pattern, 
+                                    SOLID, 
+                                    {} } } } );
     }
-    return sub_blocks;
+    return { this, false, GetName(), "", "", ENUMERATED, sub_blocks };
 }
 
 

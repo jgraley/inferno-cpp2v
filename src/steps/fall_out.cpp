@@ -593,8 +593,8 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr<StateLabel> label1;
-    MakePatternPtr<Label> label2, sx_post_label;
+    MakePatternPtr<StateLabel> item_name;
+    MakePatternPtr<Label> item_extra, sx_post_label;
     MakePatternPtr<If> iif;
     MakePatternPtr<Equal> equal;   
     MakePatternPtr< NotMatch<Statement> > sx_post;
@@ -602,9 +602,9 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     MakePatternPtr< Star<Label> > label_star;    
         
     s_comp->members = r_comp->members = (decls);
-    s_comp->statements = (pre, label1, iif, label2, label_star, post);
-    r_comp->statements = (pre, label2, label_star, label1, iif, post);
-    label1->state = state_id;
+    s_comp->statements = (pre, item_name, iif, item_extra, label_star, post);
+    r_comp->statements = (pre, item_extra, label_star, item_name, iif, post);
+    item_name->state = state_id;
     iif->condition = equal;
     equal->operands = (state_var_id, state_id);
     post->restriction = sx_post;

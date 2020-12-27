@@ -64,179 +64,108 @@ string Trace(shared_ptr<T> p)
 template<typename TF, typename TS>
 string Trace(const pair<TF, TS> &p) 
 {
-    string str = "(";
-    str += Trace(p.first);
-    str += ", ";
-    str += Trace(p.second);
-    return str + ")";
+    vector<string> elts = { Trace(p.first), Trace(p.second) };
+    return Join(elts, "(", ", ", ")");
 }
 
 
 template<typename T>
 string Trace(const vector<T> &l) 
 {
-    string str = "[";
-    bool first = true;
+    vector<string> elts;
     for( auto x : l )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;
-    }
-    return str + "]";
+        elts.push_back( Trace(x) );
+    return Join( elts, "[", CONTAINER_SEP, "]" );
 }
 
 
 template<typename T>
 string Trace(const list<T> &l) 
 {
-    string str = "[";
-    bool first = true;
+    vector<string> elts;
     for( auto x : l )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;
-    }
-    return str + "]";
+        elts.push_back( Trace(x) );
+    return Join( elts, "[", CONTAINER_SEP, "]" );
 }
 
 
 template<typename T>
 string Trace(const set<T> &s) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto x : s )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(x) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename TK, typename TV>
 string Trace(const map<TK, TV> &m) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto p : m )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(p.first);
-        str += ": ";
-        str += Trace(p.second);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename T>
 string Trace(const multiset<T> &s) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto x : s )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(x) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename TK, typename TV>
 string Trace(const multimap<TK, TV> &m) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto p : m )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(p.first);
-        str += ": ";
-        str += Trace(p.second);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename T>
 string Trace(const unordered_set<T> &s) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto x : s )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(x) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename TK, typename TV>
 string Trace(const unordered_map<TK, TV> &m) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto p : m )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(p.first);
-        str += ": ";
-        str += Trace(p.second);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename T>
 string Trace(const unordered_multiset<T> &s) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto x : s )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(x);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(x) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 
 template<typename TK, typename TV>
 string Trace(const unordered_multimap<TK, TV> &m) 
 {
-    string str = "{";
-    bool first = true;
+    vector<string> elts;
     for( auto p : m )
-    {
-        if( !first )
-            str += CONTAINER_SEP;
-        str += Trace(p.first);
-        str += ": ";
-        str += Trace(p.second);
-        first = false;            
-    }
-    return str + "}";
+        elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
+    return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
 ////////////////////////// NewtonsCradle //////////////////////////

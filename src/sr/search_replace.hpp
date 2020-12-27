@@ -41,7 +41,7 @@ public:
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext && *pcontext); return *pcontext; }
     mutable set< TreePtr<Node> > dirty_grass;    
-    virtual list<SubBlock> GetGraphBlockInfo() const;    
+    virtual Block GetGraphBlockInfo() const;    
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();
     

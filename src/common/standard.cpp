@@ -171,3 +171,18 @@ string SerialNumber::GetAddr() const
     }
     return ss;
 }
+
+
+string Join( const vector<string> &v, string pre, string sep, string post )
+{
+    bool first = true;
+    string s;
+    for( string si : v )
+    {
+        if( !first )
+            s += sep;
+        first = false;
+        s += si;
+    }
+    return s;
+} 

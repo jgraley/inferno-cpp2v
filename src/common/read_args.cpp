@@ -1,5 +1,6 @@
 
 #include "read_args.hpp"
+#include "trace.hpp"
 #include <string.h>
 #include <string>
 #include <stdlib.h>
@@ -14,6 +15,7 @@ string ReadArgs::outfile;
 bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph_index = -1; // -1 disables
 string ReadArgs::pattern_graph_name = ""; // "" disables
+bool ReadArgs::graph_trace = false;
 bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
@@ -44,9 +46,10 @@ void ReadArgs::Usage()
                     "-q<n>       Stop after step <n>.\n"    
                     "            Note: -q<n> makes -t and -r operate only on step n.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
-	                "-gi         Generate Graphviz dot file for output or intermediate if used with -q.\n"
-	                "-gp<n>      Generate dot file for specified transformation step n or by name.\n"
-	                "-gd         Generate dot files for documentation; -o specifies directory.\n"
+	                "-g[t]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
+	                "-g[t]p<n>   Generate dot file for specified transformation step n or by name.\n"
+	                "-g[t]d      Generate dot files for documentation; -o specifies directory.\n"
+	                "            Note: t enables graph-trace mode: internals shown in graph.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates. <outfile> is path/basename.\n"
@@ -93,44 +96,58 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='t' )
         {
-            char option2 = argv[curarg][2];
-            if( option2=='\0' )
+            char trace_option = argv[curarg][2];
+            if( trace_option=='\0' )
                 trace = true;
-            else if( option2=='h' )
+            else if( trace_option=='h' )
             {                
                 trace_hits = true;
                 hits_format = GetArg(2);
             }
-            else if( option2=='q' )
+            else if( trace_option=='q' )
                 trace_quiet = true;
             else
                 Usage();
         }
         else if( option=='g' )
         {
-            char option2 = argv[curarg][2];
-            if( option2=='i' )
-                intermediate_graph = true;
-            else if( option2=='p' )
+            int ai = 2;
+            char graph_option = argv[curarg][ai];
+            if( graph_option=='t' )
             {
-                string s = GetArg(2);
+                graph_trace = true;
+                ai++;
+                graph_option = argv[curarg][ai];
+            }
+                
+            if( graph_option=='i' )
+            {
+                intermediate_graph = true;
+            }
+            else if( graph_option=='p' )
+            {
+                string s = GetArg(ai);
                 int v = strtoul( s.c_str(), nullptr, 10 );
                 if( v==0 && s!="0" ) // Did strtoul fail?
                     pattern_graph_name = s;
                 else
                     pattern_graph_index = v;
             }
-            else if( option2=='d' )
+            else if( graph_option=='d' )
+            {
                 documentation_graphs = true;
+            }
             else
+            {
                 Usage();
+            }
         }
         else if( option=='r' )
         {
-            char option2 = argv[curarg][2];
-            if( option2=='e' )
+            char reps_option = argv[curarg][2];
+            if( reps_option=='e' )
                 rep_error = true;
-            else if( option2=='n' )
+            else if( reps_option=='n' )
                 rep_error = false;
             else
                 Usage();
@@ -142,8 +159,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='a' )
         {
-            char option2 = argv[curarg][2];
-            if( option2=='p' )
+            char assert_option = argv[curarg][2];
+            if( assert_option=='p' )
                 assert_pedigree = true;
             else
                 Usage();

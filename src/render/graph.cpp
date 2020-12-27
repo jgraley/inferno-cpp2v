@@ -52,29 +52,48 @@ Graph::Graph( string of ) :
 {
 }
 
+
 void Graph::operator()( Transformation *root )
 {    
     string s;
-    s += Header();
-    s += MakeGraphTx(root);	
-	s += Footer();
+    s += DoHeader();
+    s += PopulateFromTransformation(root);	
+	s += DoFooter();
 	Disburse( s );
 }
 
-string Graph::MakeGraphTx(Transformation *root)
+
+TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
+{
+	(void)context; // Not needed!!
+
+	string s;
+	s += DoHeader();
+    unique_filter.Reset();
+	s += PopulateFromNode( root, false );
+    unique_filter.Reset();
+	s += PopulateFromNode( root, true );
+	s += DoFooter();
+	Disburse( s );
+
+	return root; // no change
+}
+
+
+string Graph::PopulateFromTransformation(Transformation *root)
 {
     string s;
     if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
     {
         FOREACH( shared_ptr<Transformation> t, *tv )
-            s = MakeGraphTx( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
+            s = PopulateFromTransformation( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
     }
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += UniqueWalkBlock( cr, Id(root), false );
+	    s += PopulateFromEngine( cr, Id(root), false );
         unique_filter.Reset();
-	    s += UniqueWalkBlock( cr, Id(root), true );
+	    s += PopulateFromEngine( cr, Id(root), true );
 	}
 	else
     {
@@ -84,106 +103,32 @@ string Graph::MakeGraphTx(Transformation *root)
 }
 
 
-TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
-{
-	(void)context; // Not needed!!
-
-	string s;
-	s += Header();
-    unique_filter.Reset();
-	s += UniqueWalkNode( root, false );
-    unique_filter.Reset();
-	s += UniqueWalkNode( root, true );
-	s += Footer();
-	Disburse( s );
-
-	return root; // no change
-}
-
-
-string Graph::Header()
+string Graph::PopulateFromEngine( const Graphable *g, string id, bool links_pass )
 {
 	string s;
-	s += "digraph Inferno {\n"; // g is name of graph
-	s += "graph [\n";
-	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
-	s += "size = \"14,20\"\n"; // make it smaller
-  //  s += "concentrate = \"true\"\n"; 
-	s += "];\n";
-	s += "node [\n";
-#ifdef FONT
-    s += "fontname = \"" FONT "\"\n";
-#endif    
-	s += "];\n";
-	return s;
-}
-
-
-string Graph::Footer()
-{
-	string s;
-	s += "}\n";
-	return s;
-}
-
-
-void Graph::Disburse( string s )
-{
-	if( outfile.empty() )
-	{
-		puts( s.c_str() );
-	}
-	else
-	{
-		FILE *fp = fopen( outfile.c_str(), "wt" );
-		ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
-		fputs( s.c_str(), fp );
-		fclose( fp );
-	}
-}
-
-
-string Graph::UniqueWalkNode( TreePtr<Node> root, bool links_pass )
-{
-	string s;
-    TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
-	::UniqueWalk w( root );
-	FOREACH( const TreePtrInterface &n, w )
-	{
-		if( n )
-			s += links_pass ? DoNodeLinks((TreePtr<Node>)n, "") : DoNode((TreePtr<Node>)n);
-	}
-	return s;
-}
-
-
-string Graph::UniqueWalkBlock( const Graphable *g, string id, bool links_pass )
-{
-	string s;
-    s += links_pass ? DoBlockLinks(g, id) : DoBlock(g, id);
-    
-    
+    s += links_pass ? DoEngineLinks(g, id) : DoEngine(g, id);
+        
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
     {
         return !ShouldDoBlock(root); // Stop where we will do blocks        
     });
         
-    list<Graphable::SubBlock> sub_blocks = g->GetGraphBlockInfo();
+    Graphable::Block block = g->GetGraphBlockInfo();
     
-    FOREACH( const Graphable::SubBlock &sub_block, sub_blocks )
+    for( const Graphable::SubBlock &sub_block : block.sub_blocks )
     {
-        if( sub_block.child )
+        const Graphable::Link &link = sub_block.links.front(); // TODO loop over these
+        if( link.child_node )
         {
-            TRACE("Walking transform pattern ")(*(sub_block.child))("\n");
-            Walk w( (TreePtr<Node>)(sub_block.child), &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
+            Walk w( (TreePtr<Node>)(link.child_node), &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
             FOREACH( const TreePtrInterface &n, w )
             {              
                 Graphable *g = ShouldDoBlock((TreePtr<Node>)n);
                 if( g )
-                    s += UniqueWalkBlock( g, Id( n.get() ), links_pass );
+                    s += PopulateFromEngine( g, Id( n.get() ), links_pass );
                 else
-                    s += links_pass ? DoNodeLinks((TreePtr<Node>)n, sub_block.atts) : DoNode((TreePtr<Node>)n);
+                    s += links_pass ? DoNodeLinks((TreePtr<Node>)n, link.link_style) : DoNode((TreePtr<Node>)n);
             }
         }
     }
@@ -191,27 +136,28 @@ string Graph::UniqueWalkBlock( const Graphable *g, string id, bool links_pass )
 }
 
 
-Graphable *Graph::ShouldDoBlock( TreePtr<Node> node )
+string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 {
-    Graphable *g = dynamic_cast<Graphable *>(node.get());
-    if( !g )
-        return nullptr; // Need Graphable to do a block
-           
-    if( g->GetGraphBlockInfo().empty() ) // Don't do block if it would be devoid of labels    
-        return nullptr;
-        
-    return g;
+	string s;
+    TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
+	::UniqueWalk w( root );
+	FOREACH( const TreePtrInterface &n, w )
+	{
+		if( n )
+			s += links_pass ? DoNodeLinks((TreePtr<Node>)n, Graphable::SOLID) : DoNode((TreePtr<Node>)n);
+	}
+	return s;
 }
 
 
-string Graph::DoBlock( const Graphable *g,
-                       string id )
+string Graph::DoEngine( const Graphable *g,
+                        string id )
 {    
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    list<Graphable::SubBlock> sub_blocks = g->GetGraphBlockInfo();
+    Graphable::Block block = g->GetGraphBlockInfo();
         
-    string name = g->GetName(); 
+    string name = block.title; 
     int n;
     for( n=0; n<name.size(); n++ )
     {
@@ -234,8 +180,13 @@ string Graph::DoBlock( const Graphable *g,
 	s += " [\n";
 
     s += "label = \"<fixed> " + Sanitise( name );
-	for( Graphable::SubBlock sub_block : sub_blocks )
-		s += " | <" + sub_block.label + "> " + sub_block.label;
+    int k=0;
+	for( Graphable::SubBlock sub_block : block.sub_blocks )
+    {
+        string label_text = sub_block.item_name + sub_block.item_extra;
+		s += " | <" +  SeqField(k) + "> " + label_text;
+        k++;
+    }
 	s += "\"\n";
 
 	s += "shape = \"record\"\n"; // nodes can be split into fields
@@ -247,81 +198,253 @@ string Graph::DoBlock( const Graphable *g,
 }
 
 
-string Graph::DoBlockLinks( const Graphable *g, string id )
+string Graph::DoEngineLinks( const Graphable *g, string id )
 {
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    list<Graphable::SubBlock> sub_blocks = g->GetGraphBlockInfo();
+    Graphable::Block block = g->GetGraphBlockInfo();
 
     string s;
-	for( Graphable::SubBlock sub_block : sub_blocks )
+    int k=0;
+	for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
-        string atts = sub_block.atts;
-        atts += "label = \""+Sanitise(sub_block.link_name)+"\"\n";
-        s += id + ":" + sub_block.label;
-        s += " -> " + Id(sub_block.child.get());
+        const Graphable::Link &link = sub_block.links.front(); // TODO loop over these
+
+        // Atts
+        string atts;
+        atts += LinkStyleAtt(link.link_style);                        
+        if( !link.link_labels.empty() )
+            atts += "label = \""+Sanitise(Join(link.link_labels))+"\"\n";             
+   
+        // GraphViz output
+        s += id;
+        if( block.port_type==Graphable::ENUMERATED )
+            s += ":" +  SeqField(k);
+        s += " -> " + Id(link.child);
         s += " [" + atts + "];\n";
+        k++;
     }
 
     return s;
 }
 
 
-string Graph::Id( void *p )
+string Graph::DoNode( TreePtr<Node> n )
 {
-	char s[20];
-	sprintf(s, "\"%p\"", p );
-	return s;
-}
+	string s;
+	bool bold;
+	string shape;
+	s += Id(n.get()) + " [\n";
 
+    Graphable::Block block = GetDefaultNodeBlockInfo( n );
 
-string Graph::SeqField( int i, int j )
-{
-	char s[20];
-	sprintf( s, "port%c%d", 'a'+i, j );
-	return s;
-}
-
-
-string Graph::Sanitise( string s, bool remove_template )
-{
-	if( remove_template ) // get rid of templates
-    {
-        while(true)
-        {
-            string::size_type iopen = s.find("<");
-            string::size_type iclose = s.find(">");
-            if( iopen == std::string::npos || iclose == std::string::npos )
-                break; // done
-            iopen++; // get past <
-            s = s.substr( iopen, iclose-iopen );
-        }
-    }
-
-	string o;
-	int n = s.find("::");
-	if( n != string::npos )
-	    s = s.substr( n+2 );
-	for( int i=0; i<s.size(); i++ )
+	s += "shape = \"" + block.shape + "\"\n";
+	if(shape == "record" || block.shape == "plaintext")
 	{
-		if( s[i] == '\"' )
+		s += "label = " + DoHTMLLabel( block.title, block.sub_blocks );
+		s += "style = \"rounded,filled\"\n";
+		s += "fontsize = \"" FS_SMALL "\"\n";
+	}
+	else
+	{
+		s += "label = \"" + block.title + "\"\n";// TODO causes errors because links go to targets meant for records
+		s += "style = \"filled\"\n";
+
+		if( block.shape == "circle" || block.shape=="triangle" )
 		{
-			o += "\\\"";
-		}
-		else if( s[i] == '<' )
-		{
-			o += "&lt;";
-		}
-		else if( s[i] == '>' )
-		{
-			o += "&gt;";
+			s += "fixedsize = true\n";
+			s += "width = " NS_SMALL "\n";
+			s += "height = " NS_SMALL "\n";
+			s += "fontsize = \"" FS_LARGE "\"\n";
 		}
 		else
 		{
-			o += s[i];
+			s += "fontsize = \"" FS_MIDDLE "\"\n";
 		}
 	}
-	return o;
+
+	if(block.colour != "")
+		s += "fillcolor = " + block.colour + "\n";
+
+	s += "];\n";
+	return s;
+}
+
+
+string Graph::DoNodeLinks( TreePtr<Node> n, Graphable::LinkStyle link_style )
+{
+    Graphable::Block block = GetDefaultNodeBlockInfo( n );
+    string s;
+    
+    int porti=0;    
+    for( Graphable::SubBlock sub_block : block.sub_blocks )
+    {
+        for( Graphable::Link link : sub_block.links )
+            s += DoLink( porti, block, sub_block, link );
+        porti++;
+    }
+
+	return s;
+}
+
+
+string Graph::DoLink( int port_index, 
+                      const Graphable::Block &block, 
+                      const Graphable::SubBlock &sub_block, 
+                      const Graphable::Link &link )
+{
+    // Atts
+    string atts;
+    atts += LinkStyleAtt(link.link_style);
+    if( !link.link_labels.empty() )
+        atts += "label = \""+Sanitise(Join(link.link_labels))+"\"\n";    
+
+    // GraphViz output
+	string s;
+	s += Id(block.base);
+	if( block.port_type==Graphable::ENUMERATED )
+        s += ":" + SeqField(port_index);
+	s += " -> ";
+	s += Id(link.child);
+	s += " ["+atts+"];\n";
+	return s;
+}
+
+
+Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
+{
+	Graphable::Block block;
+    block.title = Name( n, &block.bold, &block.shape );
+    if( IsRecord(n) )
+        block.port_type = Graphable::ENUMERATED;
+    else
+        block.port_type = Graphable::SHARED;   
+    block.colour = Colour( n );
+    block.base = n.get();
+
+    vector< Itemiser::Element * > members = n->Itemise();
+	for( int i=0; i<members.size(); i++ )
+	{
+		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
+		{
+            int j=0;
+			FOREACH( const TreePtrInterface &p, *seq )
+			{
+                Graphable::SubBlock sub_block = { Sanitise(seq->GetName(), true), 
+                                                  SSPrintf("[%d]", j++),
+                                                  {} };
+                Graphable::Link link;
+                link.link_labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                    
+                if( ReadArgs::graph_trace )
+                    link.link_labels.push_back( PatternLink( n, &p ).GetName() );
+                link.child = p.get();
+                link.child_node = (TreePtr<Node>)p;
+                sub_block.links.push_back( link );
+                block.sub_blocks.push_back( sub_block );
+			}
+		}
+		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
+		{
+            string dots;
+            for( int j=0; j<col->size(); j++ )
+                dots += ".";
+            
+            Graphable::SubBlock sub_block = { Sanitise(col->GetName(), true), 
+                                              "{" + dots + "}",
+                                              {} };
+			FOREACH( const TreePtrInterface &p, *col )
+            {
+                Graphable::Link link;
+                link.link_labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                                    
+                if( ReadArgs::graph_trace )
+                    link.link_labels.push_back( PatternLink( n, &p ).GetName() );
+                link.child = p.get();
+                link.child_node = (TreePtr<Node>)p;
+                sub_block.links.push_back( link );
+            }
+            block.sub_blocks.push_back( sub_block );
+		}
+		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
+		{
+			if( *ptr )
+			{
+                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
+                                                  "",
+                                                  {} };
+                Graphable::Link link;
+                link.link_labels.push_back( GetPreRestriction( (TreePtr<Node>)*ptr, ptr ) );                    
+                if( ReadArgs::graph_trace )
+                    link.link_labels.push_back( PatternLink( n, ptr ).GetName() );          
+                link.child = ptr->get();
+                link.child_node = (TreePtr<Node>)*ptr;
+                sub_block.links.push_back( link );
+                block.sub_blocks.push_back( sub_block );
+   		    }
+            else if( ReadArgs::graph_trace )
+			{
+                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
+                                                  "NULL",
+                                                  {} };
+                block.sub_blocks.push_back( sub_block );
+            }
+		}
+		else
+		{
+			ASSERT(0);
+		}
+	}
+    
+    return block;
+}
+
+
+string Graph::DoHTMLLabel( string name, const list<Graphable::SubBlock> &sub_blocks )
+{
+    
+	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
+	s += " <TR>\n";
+	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name, true) + "</FONT></TD>\n";
+	s += "  <TD></TD>\n";
+	s += " </TR>\n";
+    
+    int porti=0;
+    for( Graphable::SubBlock sub_block : sub_blocks )
+    {
+        s += " <TR>\n";
+        s += "  <TD>" + sub_block.item_name + "</TD>\n";
+        s += "  <TD PORT=\"" + SeqField( porti ) + "\">" + sub_block.item_extra + "</TD>\n";
+        s += " </TR>\n";
+        porti++;
+    }
+    
+	s += "</TABLE>>\n";
+	return s;
+}
+
+
+string Graph::DoHeader()
+{
+	string s;
+	s += "digraph Inferno {\n"; // g is name of graph
+	s += "graph [\n";
+	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
+	s += "size = \"14,20\"\n"; // make it smaller
+  //  s += "concentrate = \"true\"\n"; 
+	s += "];\n";
+	s += "node [\n";
+#ifdef FONT
+    s += "fontname = \"" FONT "\"\n";
+#endif    
+	s += "];\n";
+	return s;
+}
+
+
+string Graph::DoFooter()
+{
+	string s;
+	s += "}\n";
+	return s;
 }
 
 
@@ -380,163 +503,6 @@ string Graph::Colour( TreePtr<Node> n )
 }
 
 
-string Graph::HTMLLabel( string name, TreePtr<Node> n )
-{
-	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
-	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name, true) + "</FONT></TD>\n";
-	s += "  <TD></TD>\n";
-	s += " </TR>\n";
-
-	vector< Itemiser::Element * > members = n->Itemise();
-	for( int i=0; i<members.size(); i++ )
-	{
-		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
-		{
-			for( int j=0; j<seq->size(); j++ )
-			{
-				char c[20];
-				sprintf(c, "%d", j);
-				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(seq->GetName(), true) + "</TD>\n";
-				s += "  <TD PORT=\"" + SeqField( i, j ) + "\">[" + string(c) + "]</TD>\n";
-				s += " </TR>\n";
-			}
-		}
-		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
-		{
-            string dots;
-            for( int j=0; j<col->size(); j++ )
-                dots += ".";
-            
-			s += " <TR>\n";
-			s += "  <TD>" + Sanitise(col->GetName(), true) + "</TD>\n";
-			s += "  <TD PORT=\"" + SeqField( i ) + "\">{" + dots + "}</TD>\n";
-			s += " </TR>\n";
-		}
-		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
-		{
-			if( *ptr )
-			{
-				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(ptr->GetName(), true) + "</TD>\n"; 
-				s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
-				s += " </TR>\n";
-		   }
-		}
-		else
-		{
-			ASSERT(0);
-		}
-	}
-	s += "</TABLE>>\n";
-	return s;
-}
-
-
-string Graph::SimpleLabel( string name, TreePtr<Node> n )
-{
-	string s = "\"<fixed> " + Sanitise(name);
-	vector< Itemiser::Element * > members = n->Itemise();
-	for( int i=0; i<members.size(); i++ )
-	{
-		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
-		{
-			for( int j=0; j<seq->size(); j++ )
-			{
-				s += " | <" + SeqField( i, j ) + "> ";
-			}
-		}
-		else  if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
-		{
-			s += " | <" + SeqField( i ) + "> ";
-		}
-		else // Collection
-		{
-			s += " | <" + SeqField( i ) + "> ";// \\{\\}";
-		}
-	}
-	s += "\"\n";
-	return s;
-}
-
-
-string Graph::DoNode( TreePtr<Node> n )
-{
-	string s;
-	bool bold;
-	string shape;
-	s += Id(n.get()) + " [\n";
-	string name = Name(n, &bold, &shape);
-
-	s += "shape = \"" + shape + "\"\n";
-	if(shape == "record" || shape == "plaintext")
-	{
-		s += "label = " + HTMLLabel( name, n );
-		s += "style = \"rounded,filled\"\n";
-		s += "fontsize = \"" FS_SMALL "\"\n";
-	}
-	else
-	{
-		s += "label = \"" + name + "\"\n";// TODO causes errors because links go to targets meant for records
-		s += "style = \"filled\"\n";
-
-		if( shape == "circle" || shape=="triangle" )
-		{
-			s += "fixedsize = true\n";
-			s += "width = " NS_SMALL "\n";
-			s += "height = " NS_SMALL "\n";
-			s += "fontsize = \"" FS_LARGE "\"\n";
-		}
-		else
-		{
-			s += "fontsize = \"" FS_MIDDLE "\"\n";
-		}
-	}
-
-	string c = Colour(n);
-	if(c!="")
-		s += "fillcolor = " + c + "\n";
-
-	s += "];\n";
-	return s;
-}
-
-
-string Graph::DoNodeLinks( TreePtr<Node> n, string atts )
-{
-    string s;
-    TRACE("Itemising\n");
-	vector< Itemiser::Element * > members = n->Itemise();
-    TRACE("Doing links for ")(*n)(" size is %d\n", members.size() );
-    for( int i=0; i<members.size(); i++ )
-	{
-		if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
-		{
-			FOREACH( const TreePtrInterface &p, *col )
-				s += DoLink( n, SeqField(i), (TreePtr<Node>)p, atts, &p );
-		}
-		else if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
-		{
-			int j=0;
-			FOREACH( const TreePtrInterface &p, *seq )
-				s += DoLink( n, SeqField(i, j++), (TreePtr<Node>)p, atts, &p );
-		}
-		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
-		{
-            //TRACE("TreePtr %d is @%p\n", i, ptr );
-			if( *ptr )
-				s += DoLink( n, SeqField(i), (TreePtr<Node>)*ptr, atts, ptr );
-		}
-		else
-		{
-			ASSERT(0)("got something from itemise that isnt a sequence, collection or a shared pointer");
-		}
-	}
-	return s;
-}
-
-
 bool Graph::IsRecord( TreePtr<Node> n )
 {
 	bool bold;
@@ -547,35 +513,120 @@ bool Graph::IsRecord( TreePtr<Node> n )
 }
 
 
-string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts, const TreePtrInterface *ptr )
+Graphable *Graph::ShouldDoBlock( TreePtr<Node> node )
 {
-	string s;
-	s += Id(from.get());
-	if( field != "" && IsRecord(from) )
-	{
-		s += ":" + field;
-      //  atts += "arrowtail = \"dot\"\n";
-      //  atts = "sametail = \"" + field + "\"\n";
-    }
-    if( ptr )		// is normal tree link
-    {
-        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
-        {
-            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
-            {
-                atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetRender() + "\"\n";
-            }
-        }
-    }
-    
-    PatternLink plink( from, ptr );
-    atts += "label = \""+Sanitise(plink.GetName())+"\"\n";
+    Graphable *g = dynamic_cast<Graphable *>(node.get());
+    if( !g )
+        return nullptr; // Need Graphable to do a block
+           
+    if( g->GetGraphBlockInfo().sub_blocks.empty() ) // Don't do block if it would be devoid of sub-blocks    
+        return nullptr;
+        
+    return g;
+}
 
-    atts += "weight=2\n"; // Make these links neater relative to the block ones
 
-	s += " -> ";
-	s += Id(to.get());
-	s += " ["+atts+"];\n";
+string Graph::Id( const void *p )
+{
+	char s[20];
+	sprintf(s, "\"%p\"", p );
 	return s;
 }
 
+
+string Graph::SeqField( int i )
+{
+	char s[20];
+	sprintf( s, "port%d", i );
+	return s;
+}
+
+
+string Graph::Sanitise( string s, bool remove_template )
+{
+	if( remove_template ) // get rid of templates
+    {
+        while(true)
+        {
+            string::size_type iopen = s.find("<");
+            string::size_type iclose = s.find(">");
+            if( iopen == std::string::npos || iclose == std::string::npos )
+                break; // done
+            iopen++; // get past <
+            s = s.substr( iopen, iclose-iopen );
+        }
+    }
+
+	string o;
+	int n = s.find("::");
+	if( n != string::npos )
+	    s = s.substr( n+2 );
+	for( int i=0; i<s.size(); i++ )
+	{
+		if( s[i] == '\"' )
+		{
+			o += "\\\"";
+		}
+		else if( s[i] == '<' )
+		{
+			o += "&lt;";
+		}
+		else if( s[i] == '>' )
+		{
+			o += "&gt;";
+		}
+		else
+		{
+			o += s[i];
+		}
+	}
+	return o;
+}
+
+
+void Graph::Disburse( string s )
+{
+	if( outfile.empty() )
+	{
+		puts( s.c_str() );
+	}
+	else
+	{
+		FILE *fp = fopen( outfile.c_str(), "wt" );
+		ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
+		fputs( s.c_str(), fp );
+		fclose( fp );
+	}
+}
+
+
+string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
+{
+    string atts;
+    switch(link_style)
+    {
+    case Graphable::SOLID:
+        atts += "style=\"solid\"\n";
+        break;
+    case Graphable::DASHED:
+        atts += "style=\"dashed\"\n";
+        break;
+    }
+    return atts;
+}
+
+
+string Graph::GetPreRestriction(TreePtr<Node> node, const TreePtrInterface *ptr)
+{
+    if( ptr )		// is normal tree link
+    {
+        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(node) )   // is to a special node
+        {
+            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
+            {
+                return (**(sbs->GetPreRestrictionArchitype())).GetRender();
+            }
+        }
+    }
+    return "";
+}

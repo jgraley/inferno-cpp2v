@@ -18,6 +18,7 @@ public:
     static bool intermediate_graph;
     static int pattern_graph_index;
     static std::string pattern_graph_name;
+    static bool graph_trace;
     void Usage();
     std::string GetArg( int al=1 );
     ReadArgs( int argc, char *argv[] );

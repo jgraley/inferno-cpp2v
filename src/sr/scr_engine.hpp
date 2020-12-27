@@ -58,8 +58,6 @@ private:
         TreePtr<Node> root_pattern;
         PatternLink root_plink;
         Agent *root_agent;
-        PatternLink user_sc_plink;
-        PatternLink user_r_plink;
         const SCREngine *master_ptr;
         shared_ptr< unordered_set<Agent *> > my_agents;   
         shared_ptr< unordered_set<PatternLink> > my_agent_links;   
@@ -78,7 +76,7 @@ private:
     TreePtr<Node> Replace() const;
 
 public:
-    virtual list<Graphable::SubBlock> GetGraphBlockInfo() const;
+    virtual Block GetGraphBlockInfo() const;
 
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
     const CompareReplace * GetOverallMaster() const;

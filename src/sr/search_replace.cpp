@@ -38,10 +38,12 @@ void CompareReplace::SetMaxReps( int n, bool e )
 }
 
 
-list<Graphable::SubBlock> CompareReplace::GetGraphBlockInfo() const
+Graphable::Block CompareReplace::GetGraphBlockInfo() const
 {
-    // We want out name (via GetName()) but SCREngine's layout
-    return scr_engine->GetGraphBlockInfo();
+    // We want our name (via GetName()) but SCREngine's layout
+    Graphable::Block block = scr_engine->GetGraphBlockInfo();
+    block.title = GetName();
+    return block;
 }
 
 

@@ -45,11 +45,18 @@ void SlaveAgent::TrackingKey( Agent *from )
 }
 
 
-list<Graphable::SubBlock> SlaveAgent::GetGraphBlockInfo() const
+Graphable::Block SlaveAgent::GetGraphBlockInfo() const
 {
-    list<SubBlock> sub_blocks = my_scr_engine->GetGraphBlockInfo();
-    sub_blocks.push_front( {"through", (TreePtr<Node>)*GetThrough(), "", PatternLink(this, GetThrough()).GetName() } );
-    return sub_blocks;
+    Block block = my_scr_engine->GetGraphBlockInfo();
+    block.sub_blocks.push_front( { "through", 
+                                   "",
+                                   { { GetThrough()->get(), 
+                                       (TreePtr<Node>)*GetThrough(), 
+                                       SOLID, 
+                                       {ReadArgs::graph_trace ? PatternLink(this, GetThrough()).GetName() : ""} } } } );
+    block.title = GetName();
+    block.base = this;
+    return block;
 }
 
 

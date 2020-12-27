@@ -97,4 +97,7 @@ public:
     static void SetStep( int s );
 };
 
+
+string Join( const vector<string> &v, string pre="", string sep=" ", string post="" );
+
 #endif
