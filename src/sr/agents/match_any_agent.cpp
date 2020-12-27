@@ -108,7 +108,7 @@ Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
     return completeness;
 }
 
-void MatchAnyAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block MatchAnyAgent::GetGraphBlockInfo() const
 {
 	// The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
 	// on the right.
@@ -116,7 +116,18 @@ void MatchAnyAgent::GetGraphNodeAppearance( bool *bold, string *text, string *sh
     // a node that represents a boolean operation in the program being processed. Those nodes would 
     // appear as rounded rectangles with the name at the top. Their names may be found in
 	// src/tree/operator_db.txt  
-	*bold = true;
-	*shape = "circle";
-	*text = string("|");
+    Block block;
+	block.bold = true;
+	block.title = string("|");
+	block.shape = "circle";
+    block.block_type = Graphable::NODE;
+    block.sub_blocks = { { "patterns", 
+                           "", 
+                           {} } };
+    FOREACH( const TreePtrInterface &p, GetPatterns() )
+        block.sub_blocks.front().links.push_back( { (TreePtr<Node>)p, 
+                                                    SOLID, 
+                                                    {},
+                                                    {PatternLink(this, &p).GetShortName()} } );
+    return block;
 }

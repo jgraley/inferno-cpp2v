@@ -37,7 +37,8 @@ public:
     TreePtr<Node> GetPattern() const;
     const TreePtrInterface *GetPatternPtr() const;
     string GetTrace() const; // used for debug
-    string GetName() const; // used for graphing
+    string GetName() const;
+    string GetShortName() const;
     
 private: friend class LocatedLink;
     PatternLink( shared_ptr<const TreePtrInterface> ppattern, 

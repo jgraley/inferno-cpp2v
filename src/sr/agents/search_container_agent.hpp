@@ -32,6 +32,7 @@ public:
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const {};
+    virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
@@ -51,7 +52,7 @@ class AnyNodeAgent : public SearchContainerAgent
                                                           XLink x,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
+    virtual Block GetGraphBlockInfo() const;
 };
 
 
@@ -92,7 +93,7 @@ public:
                                                           XLink x,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
+    virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };

@@ -72,11 +72,20 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void PointerIsAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
 {
 	// The PointerIs node appears as a slightly flattened pentagon.
-	*bold = true;
-	*shape = "pentagon";
-	*text = string("pointer is"); 
+    Block block;
+	block.bold = true;
+	block.title = string("pointer is"); 
+	block.shape = "pentagon";
+    block.block_type = Graphable::NODE;
+    block.sub_blocks = { { "pointer", 
+                           "", 
+                           { { (TreePtr<Node>)*GetPointer(), 
+                               SOLID, 
+                               {},
+                               {PatternLink(this, GetPointer()).GetShortName()} } } } };
+    return block;
 }
 

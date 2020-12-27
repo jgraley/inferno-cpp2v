@@ -19,7 +19,7 @@ class GreenGrassAgent : public virtual AgentCommon
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
+    virtual Block GetGraphBlockInfo() const;
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
     virtual const TreePtrInterface *GetThrough() const = 0;
 };

@@ -173,11 +173,11 @@ string SerialNumber::GetAddr() const
 }
 
 
-string Join( const vector<string> &v, string pre, string sep, string post )
+string Join( const list<string> &ls, string pre, string sep, string post )
 {
     bool first = true;
     string s;
-    for( string si : v )
+    for( string si : ls )
     {
         if( !first )
             s += sep;

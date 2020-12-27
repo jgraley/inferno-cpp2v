@@ -9,7 +9,7 @@
 
 using namespace CPPTree;
 
-//---------------------------------- BuildIdentifier ------------------------------------    
+//---------------------------------- BuildIdentifierAgent ------------------------------------    
 
 shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
 { 
@@ -24,14 +24,17 @@ void BuildIdentifierAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }   
 
 
-void BuildIdentifierAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
 	// TODO indicate whether it's building instance, label or type identifier
-	*bold = true;
-	*shape = "parallelogram";
-	*text = format;
+    Block block;
+	block.bold = true;
+	block.title = format;
+	block.shape = "parallelogram";
+    block.block_type = Graphable::NODE;
+    return block;
 }
 
 
@@ -128,16 +131,19 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( CouplingKey keylink )
     return DuplicateSubtree(keylink.GetChildX());   
 }                                                   
 
-//---------------------------------- IdentifierByName ------------------------------------    
+//---------------------------------- IdentifierByNameAgent ------------------------------------    
 
-void IdentifierByNameAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 {
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.
 	// TODO indicate whether it's matching instance, label or type identifier
-	*bold = true;
-	*shape = "trapezium";
-	*text = name;
+    Block block;
+	block.bold = true;
+	block.title = name;
+	block.shape = "trapezium";
+    block.block_type = Graphable::NODE;
+    return block;
 }
 
 
@@ -167,7 +173,7 @@ void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &que
 }                                
 
 
-//---------------------------------- Nested ------------------------------------    
+//---------------------------------- NestedAgent ------------------------------------    
 
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {

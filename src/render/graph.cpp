@@ -91,9 +91,9 @@ string Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, Id(root), false );
+	    s += PopulateFromEngine( cr, nullptr, Id(root), false );
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, Id(root), true );
+	    s += PopulateFromEngine( cr, nullptr, Id(root), true );
 	}
 	else
     {
@@ -103,38 +103,45 @@ string Graph::PopulateFromTransformation(Transformation *root)
 }
 
 
-string Graph::PopulateFromEngine( const Graphable *g, string base_id, bool links_pass )
+string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string base_id, bool links_pass )
 {
-    Graphable::Block block = g->GetGraphBlockInfo();
+    Graphable::Block gblock = g->GetGraphBlockInfo();
+    MyBlock block = PreProcessBlock( gblock, nbase );
+    //MyBlock block; (Graphable::Block &)block = gblock;    
+    
 	string s;
     s += links_pass ? DoLinks(block, base_id) : DoEngine(block, base_id);
         
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
     {
-        return !ShouldDoBlock(root); // Stop where we will do blocks        
+        return !ShouldDoEngine(root); // Stop where we will do blocks        
     });
             
     for( const Graphable::SubBlock &sub_block : block.sub_blocks )
     {
-        const Graphable::Link &link = sub_block.links.front(); // TODO loop over these
-        if( link.child_node )
+        for( const Graphable::Link &link : sub_block.links )
         {
-            Walk w( (TreePtr<Node>)(link.child_node), &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
-            FOREACH( const TreePtrInterface &n, w )
-            {              
-                Graphable *g = ShouldDoBlock((TreePtr<Node>)n);
-                if( g )
-                {
-                    s += PopulateFromEngine( g, Id(n.get()), links_pass );
-                }
-                else
-                {
-                    Graphable::Block child_block = GetDefaultNodeBlockInfo( (TreePtr<Node>)n );
-                    if( links_pass )
-                        s += DoLinks(child_block, Id(n.get()));
+            if( link.child_node )
+            {
+                Walk w( (TreePtr<Node>)(link.child_node), &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
+                FOREACH( const TreePtrInterface &ni, w )
+                {              
+                    TreePtr<Node> node = (TreePtr<Node>)ni;
+                    Graphable *g = ShouldDoEngine(node);
+                    if( g )
+                    {
+                        s += PopulateFromEngine( g, node, Id(node.get()), links_pass );
+                    }
                     else
-                        s += DoNode(child_block, Id(n.get()));
+                    {
+                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node );
+                        OverrideLinkStyle( child_block, link.link_style );
+                        if( links_pass )
+                            s += DoLinks(child_block, Id(node.get()));
+                        else
+                            s += DoNode(child_block, Id(node.get()));
+                    }
                 }
             }
         }
@@ -153,7 +160,7 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 		if( !n )
             continue;
             
-        Graphable::Block child_block = GetDefaultNodeBlockInfo( (TreePtr<Node>)n );
+        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( (TreePtr<Node>)n ), (TreePtr<Node>)n );
         if( links_pass )
             s += DoLinks(child_block, Id(n.get()));
         else
@@ -163,7 +170,119 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::DoEngine( const Graphable::Block &block,
+Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<Node> n )
+{
+    MyBlock my_block;
+    (Graphable::Block &)my_block = block;
+    
+    if( ReadArgs::graph_trace && n )
+    {
+        string s = n->GetAddr();
+        my_block.sub_blocks.push_back( { s, 
+                                         "", 
+                                         {} } );
+    }
+    
+    if( my_block.sub_blocks.size() > 1 )
+        my_block.shape = "plaintext";
+
+    my_block.specify_ports = (my_block.shape=="record" || my_block.shape=="plaintext");  
+    
+    return my_block;    
+}
+
+
+Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> n )
+{
+    Graphable::Block block;
+    if( dynamic_pointer_cast<SpecialBase>(n) )
+    {
+        (Graphable::Block &)block = Agent::AsAgent(n)->GetGraphBlockInfo();
+        if( !block.title.empty() )
+            return block;
+    }
+    
+    return GetDefaultNodeBlockInfo(n);
+}
+
+
+Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
+{    
+	Graphable::Block block;
+    block.title = Name( n, &block.bold, &block.shape );  
+    block.colour = Colour( n );
+        
+    vector< Itemiser::Element * > members = n->Itemise();
+	for( int i=0; i<members.size(); i++ )
+	{
+		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
+		{
+            int j=0;
+			FOREACH( const TreePtrInterface &p, *seq )
+			{
+                Graphable::SubBlock sub_block = { Sanitise(seq->GetName(), true), 
+                                                  SSPrintf("[%d]", j++),
+                                                  {} };
+                Graphable::Link link;
+                link.labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                    
+                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.child_node = (TreePtr<Node>)p;
+                sub_block.links.push_back( link );
+                block.sub_blocks.push_back( sub_block );
+			}
+		}
+		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
+		{
+            string dots;
+            for( int j=0; j<col->size(); j++ )
+                dots += ".";
+            
+            Graphable::SubBlock sub_block = { Sanitise(col->GetName(), true), 
+                                              "{" + dots + "}",
+                                              {} };
+			FOREACH( const TreePtrInterface &p, *col )
+            {
+                Graphable::Link link;
+                link.labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                                    
+                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.child_node = (TreePtr<Node>)p;
+                sub_block.links.push_back( link );
+            }
+            block.sub_blocks.push_back( sub_block );
+		}
+		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
+		{
+			if( *ptr )
+			{
+                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
+                                                  "",
+                                                  {} };
+                Graphable::Link link;
+                link.labels.push_back( GetPreRestriction( (TreePtr<Node>)*ptr, ptr ) );                    
+                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
+                link.child_node = (TreePtr<Node>)*ptr;
+                sub_block.links.push_back( link );
+                block.sub_blocks.push_back( sub_block );
+   		    }
+            else if( ReadArgs::graph_trace )
+			{
+                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
+                                                  "NULL",
+                                                  {} };
+                block.sub_blocks.push_back( sub_block );
+            }
+		}
+		else
+		{
+			ASSERT(0);
+		}
+	}
+    
+    return block;
+}
+
+
+string Graph::DoEngine( const MyBlock &block,
                         string base_id )
 {    
     string name = block.title; 
@@ -191,7 +310,7 @@ string Graph::DoEngine( const Graphable::Block &block,
     s += "label = \"<fixed> " + Sanitise( name );
     int k=0;
 	for( Graphable::SubBlock sub_block : block.sub_blocks )
-    {
+    {        
         string label_text = sub_block.item_name + sub_block.item_extra;
 		s += " | <" +  SeqField(k) + "> " + label_text;
         k++;
@@ -207,15 +326,13 @@ string Graph::DoEngine( const Graphable::Block &block,
 }
 
 
-string Graph::DoNode( const Graphable::Block &block, string base_id )
+string Graph::DoNode( const MyBlock &block, string base_id )
 {
 	string s;
-	bool bold;
-	string shape;
 	s += base_id + " [\n";
 
 	s += "shape = \"" + block.shape + "\"\n";
-	if(shape == "record" || block.shape == "plaintext")
+	if( block.shape == "record" || block.shape == "plaintext" )
 	{
 		s += "label = " + DoHTMLLabel( block.title, block.sub_blocks );
 		s += "style = \"rounded,filled\"\n";
@@ -247,7 +364,7 @@ string Graph::DoNode( const Graphable::Block &block, string base_id )
 }
 
 
-string Graph::DoLinks( const Graphable::Block &block, string base_id )
+string Graph::DoLinks( const MyBlock &block, string base_id )
 {
     string s;
     
@@ -264,112 +381,32 @@ string Graph::DoLinks( const Graphable::Block &block, string base_id )
 
 
 string Graph::DoLink( int port_index, 
-                      const Graphable::Block &block, 
+                      const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
                       const Graphable::Link &link,
                       string base_id )
 {
+    // Labels
+    list<string> labels = link.labels;
+    if( ReadArgs::graph_trace )
+        for( string l : link.trace_labels )
+            labels.push_back( l );
+            
     // Atts
     string atts;
     atts += LinkStyleAtt(link.link_style);
-    if( !link.link_labels.empty() )
-        atts += "label = \""+Sanitise(Join(link.link_labels))+"\"\n";    
+    if( !labels.empty() )
+        atts += "label = \""+Sanitise(Join(labels))+"\"\n";    
 
     // GraphViz output
 	string s;
 	s += base_id;
-	if( block.port_type==Graphable::ENUMERATED )
+    if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += Id(link.child);
+	s += Id(link.child_node.get());
 	s += " ["+atts+"];\n";
 	return s;
-}
-
-
-Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
-{
-	Graphable::Block block;
-    block.title = Name( n, &block.bold, &block.shape );
-    if( IsRecord(n) )
-        block.port_type = Graphable::ENUMERATED;
-    else
-        block.port_type = Graphable::SHARED;   
-    block.colour = Colour( n );
-
-    vector< Itemiser::Element * > members = n->Itemise();
-	for( int i=0; i<members.size(); i++ )
-	{
-		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
-		{
-            int j=0;
-			FOREACH( const TreePtrInterface &p, *seq )
-			{
-                Graphable::SubBlock sub_block = { Sanitise(seq->GetName(), true), 
-                                                  SSPrintf("[%d]", j++),
-                                                  {} };
-                Graphable::Link link;
-                link.link_labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                    
-                if( ReadArgs::graph_trace )
-                    link.link_labels.push_back( PatternLink( n, &p ).GetName() );
-                link.child = p.get();
-                link.child_node = (TreePtr<Node>)p;
-                sub_block.links.push_back( link );
-                block.sub_blocks.push_back( sub_block );
-			}
-		}
-		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
-		{
-            string dots;
-            for( int j=0; j<col->size(); j++ )
-                dots += ".";
-            
-            Graphable::SubBlock sub_block = { Sanitise(col->GetName(), true), 
-                                              "{" + dots + "}",
-                                              {} };
-			FOREACH( const TreePtrInterface &p, *col )
-            {
-                Graphable::Link link;
-                link.link_labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                                    
-                if( ReadArgs::graph_trace )
-                    link.link_labels.push_back( PatternLink( n, &p ).GetName() );
-                link.child = p.get();
-                link.child_node = (TreePtr<Node>)p;
-                sub_block.links.push_back( link );
-            }
-            block.sub_blocks.push_back( sub_block );
-		}
-		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
-		{
-			if( *ptr )
-			{
-                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
-                                                  "",
-                                                  {} };
-                Graphable::Link link;
-                link.link_labels.push_back( GetPreRestriction( (TreePtr<Node>)*ptr, ptr ) );                    
-                if( ReadArgs::graph_trace )
-                    link.link_labels.push_back( PatternLink( n, ptr ).GetName() );          
-                link.child = ptr->get();
-                link.child_node = (TreePtr<Node>)*ptr;
-                sub_block.links.push_back( link );
-                block.sub_blocks.push_back( sub_block );
-   		    }
-            else if( ReadArgs::graph_trace )
-			{
-                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
-                                                  "NULL",
-                                                  {} };
-                block.sub_blocks.push_back( sub_block );
-            }
-		}
-		else
-		{
-			ASSERT(0);
-		}
-	}
-    
-    return block;
 }
 
 
@@ -441,10 +478,6 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 	string text = sp->GetRender();     
 	*bold = false;
 	*shape = "plaintext";//"record";
-    
-    // Permit agents to set their own appearance
-    if( Graphable *graphable = dynamic_cast<Graphable *>(sp.get()) )
-		graphable->GetGraphNodeAppearance( bold, &text, shape );    
 
     return text;
 }
@@ -488,13 +521,13 @@ bool Graph::IsRecord( TreePtr<Node> n )
 }
 
 
-Graphable *Graph::ShouldDoBlock( TreePtr<Node> node )
+Graphable *Graph::ShouldDoEngine( TreePtr<Node> node )
 {
     Graphable *g = dynamic_cast<Graphable *>(node.get());
     if( !g )
         return nullptr; // Need Graphable to do a block
            
-    if( g->GetGraphBlockInfo().sub_blocks.empty() ) // Don't do block if it would be devoid of sub-blocks    
+    if( g->GetGraphBlockInfo().block_type == Graphable::NODE )
         return nullptr;
         
     return g;
@@ -550,6 +583,10 @@ string Graph::Sanitise( string s, bool remove_template )
 		{
 			o += "&gt;";
 		}
+		else if( s[i] == '&' )
+		{
+			o += "&amp;";
+		}
 		else
 		{
 			o += s[i];
@@ -604,4 +641,12 @@ string Graph::GetPreRestriction(TreePtr<Node> node, const TreePtrInterface *ptr)
         }
     }
     return "";
+}
+
+
+void Graph::OverrideLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
+{
+    for( Graphable::SubBlock &sub_block : dest.sub_blocks )    
+        for( Graphable::Link &link : sub_block.links )
+            link.link_style = link_style;    
 }

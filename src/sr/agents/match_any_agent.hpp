@@ -29,7 +29,7 @@ public:
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
+    virtual Block GetGraphBlockInfo() const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
 #ifdef DECISIONISED_MATCH_ANY

@@ -80,6 +80,23 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( CouplingKey keylink )
 }
 
 
+Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
+{
+    Block block;
+	block.bold = true;
+    block.shape = "circle";
+    block.block_type = Graphable::NODE;
+    block.sub_blocks = { { "terminus", 
+                           "", 
+                           { { terminus, 
+                               SOLID, 
+                               {},
+                               {PatternLink(this, &terminus).GetShortName()} } } } };
+    return block;
+}
+
+
+
 //---------------------------------- AnyNode ------------------------------------    
 
 shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink base_xlink ) const
@@ -127,13 +144,13 @@ Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryA
 }                                                                                        
 
 
-void AnyNodeAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 {
 	// The AnyNode node appears as a small circle with a ? sign in it. The terminus block emerges from the
 	// right of the circle. ? implies the tendancy to match exactly one thing.
-	*bold = true;
-	*shape = "circle";
-	*text = string("?"); 
+    Block block = SearchContainerAgent::GetGraphBlockInfo();
+	block.title = string("?"); 
+    return block;
 }
 
 //---------------------------------- Stuff ------------------------------------    
@@ -244,17 +261,20 @@ Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAge
 }                                                                                        
 
 
-void StuffAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block StuffAgent::GetGraphBlockInfo() const
 {
 	// The Stuff node appears as a small circle with a # character inside it. The terminus block emerges from the
 	// right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction block 
 	// emerges from the top of the egg shape. # is chosen (as is the name Stuff) for its similarity to * because
 	// the nodes are both able to wildcard multiple nodes in the tree.
-	*bold = true;
-	if( recurse_restriction )
-		*shape = "egg";
-	else
-		*shape = "circle";
-	*text = string("#"); 
+    Block block = SearchContainerAgent::GetGraphBlockInfo();
+	block.title = string("#"); 
+    if( recurse_restriction )
+        block.sub_blocks.push_back( { "recurse_restriction", 
+                                      "", 
+                                      { { recurse_restriction, 
+                                          SOLID, 
+                                          {},
+                                          {PatternLink(this, &recurse_restriction).GetShortName()} } } } );
+    return block;
 }
-

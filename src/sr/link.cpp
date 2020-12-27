@@ -123,11 +123,7 @@ const TreePtrInterface *PatternLink::GetPatternPtr() const
 
 string PatternLink::GetTrace() const
 {
-    string s = SSPrintf("%p->", asp_pattern.get());
-    if(asp_pattern==nullptr)
-        s += "NULL";
-    else
-        s += GetChildAgent()->GetTrace();
+    string s = GetName();
 #ifdef KEEP_WHODAT_INFO    
     s += SSPrintf("@%lX", (unsigned long)whodat);
 #endif
@@ -137,11 +133,20 @@ string PatternLink::GetTrace() const
 
 string PatternLink::GetName() const
 {
-    string s = SSPrintf("%p->", asp_pattern.get());
+    string s = GetShortName() + "->";
     if(asp_pattern==nullptr)
         s += "NULL";
     else
         s += GetChildAgent()->GetAddr();
+    return s;
+}
+
+
+string PatternLink::GetShortName() const
+{
+    string s = SSPrintf("%p", asp_pattern.get());
+    if( s.substr(0, 2)=="0x" )
+        s = s.substr(2);
     return s;
 }
 

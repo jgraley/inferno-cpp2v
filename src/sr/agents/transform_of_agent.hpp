@@ -23,7 +23,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
+    virtual Block GetGraphBlockInfo() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;
     TransformOfAgent( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :

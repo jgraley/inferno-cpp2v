@@ -15,11 +15,14 @@ void PlaceholderAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-void PlaceholderAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block PlaceholderAgent::GetGraphBlockInfo() const
 {
 	// The PlaceholderAgent node appears as a small circle with a . character inside it.
     // It should not appear in any graphs, however.
-	*bold = true;
-	*shape = "circle";
-	*text = string(".");
+    Block block;
+	block.bold = true;
+	block.title = string(".");
+	block.shape = "circle";
+    block.block_type = Graphable::NODE;
+    return block;
 }

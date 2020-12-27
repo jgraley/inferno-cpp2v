@@ -44,12 +44,21 @@ TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( CouplingKey keylink )
 }
 
 
-void GreenGrassAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
 	// The GreenGrass node appears as a small circle containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
 	// tired.
-	*bold = true;
-	*shape = "circle";
-	*text = string("||||");
+    Block block;
+	block.bold = true;
+	block.title = string("||||");
+	block.shape = "circle";
+    block.block_type = Graphable::NODE;
+    block.sub_blocks = { { "through", 
+                           "", 
+                           { { (TreePtr<Node>)*GetThrough(), 
+                               SOLID, 
+                               {},
+                               {PatternLink(this, GetThrough()).GetShortName()} } } } };
+    return block;
 }

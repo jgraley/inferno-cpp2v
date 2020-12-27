@@ -30,17 +30,17 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
     list<SubBlock> sub_blocks;
     sub_blocks.push_back( { "through", 
                             "",
-                            { { GetThrough()->get(), 
-                                (TreePtr<Node>)*GetThrough(), 
+                            { { (TreePtr<Node>)*GetThrough(), 
                                 SOLID, 
-                                {ReadArgs::graph_trace ? PatternLink(this, GetThrough()).GetName() : ""} } } } );
+                                {},
+                                {PatternLink(this, GetThrough()).GetShortName()} } } } );
     sub_blocks.push_back( { "overlay", 
                             "",
-                            { { GetOverlay()->get(), 
-                                (TreePtr<Node>)*GetOverlay(), 
+                            { { (TreePtr<Node>)*GetOverlay(), 
                                 DASHED, 
-                                {ReadArgs::graph_trace ? PatternLink(this, GetOverlay()).GetName() : ""} } } } );
-    return { false, GetName(), "", "", ENUMERATED, sub_blocks };
+                                {},
+                                {PatternLink(this, GetOverlay()).GetShortName()} } } } );
+    return { false, GetName(), "", "", ENGINE, sub_blocks };
 }
 
 

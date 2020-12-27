@@ -89,12 +89,22 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( CouplingKey keylink )
 }
 
 
-void StarAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block StarAgent::GetGraphBlockInfo() const
 {
 	// The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
 	// filename wildcarding, which is semantically equiviant only when used in a Sequence.
-	*bold = true;
-	*shape = "circle";
-	*text = string("*");
+    Block block;
+	block.bold = true;
+	block.title = string("*");
+	block.shape = "circle";
+    block.block_type = Graphable::NODE;
+    if( *GetRestriction() )
+        block.sub_blocks.push_back( { "restriction", 
+                                      "", 
+                                      { { (TreePtr<Node>)*GetRestriction(), 
+                                          SOLID, 
+                                          {},
+                                          {PatternLink(this, GetRestriction()).GetShortName()} } } } );
+    return block;
 }
 

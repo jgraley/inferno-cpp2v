@@ -29,7 +29,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
+    virtual Block GetGraphBlockInfo() const;
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
 

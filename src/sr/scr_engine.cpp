@@ -217,11 +217,11 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
         // Actually much simpler in graph trace mode - just show the root node and plink
         sub_blocks.push_back( { "root", 
                                 "",
-                                { { plan.root_pattern.get(), 
-                                    plan.root_pattern, 
+                                { { plan.root_pattern, 
                                     SOLID, 
-                                    {plan.root_plink.GetName()} } } } );
-        return { false, GetName(), "", "", ENUMERATED, sub_blocks };
+                                    {},
+                                    {plan.root_plink.GetShortName()} } } } );
+        return { false, GetName(), "", "", ENGINE, sub_blocks };
     }
     
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
@@ -239,27 +239,27 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
     {        
         sub_blocks.push_back( { plan.is_search?"search":"compare", 
                                 "",
-                                { { overlay->through.get(),
-                                    overlay->through, 
+                                { { overlay->through, 
                                     SOLID, 
+                                    {},
                                     {} } } } );    
         sub_blocks.push_back( { "replace", 
                                 "",
-                                { { overlay->overlay.get(),
-                                    overlay->overlay, 
+                                { { overlay->overlay, 
                                     DASHED, 
+                                    {},
                                     {} } } } );
     }
     else
     {
         sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
                                 "",
-                                { { original_pattern.get(),
-                                    original_pattern, 
+                                { { original_pattern, 
                                     SOLID, 
+                                    {},
                                     {} } } } );
     }
-    return { false, GetName(), "", "", ENUMERATED, sub_blocks };
+    return { false, GetName(), "", "", ENGINE, sub_blocks };
 }
 
 

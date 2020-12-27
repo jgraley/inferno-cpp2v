@@ -2,6 +2,7 @@
 #define STANDARD_HPP
 
 #include <vector>
+#include <list>
 #include <stack>
 #include <map>
 #include <set>
@@ -98,6 +99,6 @@ public:
 };
 
 
-string Join( const vector<string> &v, string pre="", string sep=" ", string post="" );
+string Join( const list<string> &v, string pre="", string sep=" ", string post="" );
 
 #endif

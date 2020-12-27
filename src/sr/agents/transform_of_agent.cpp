@@ -41,11 +41,20 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void TransformOfAgent::GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const
+Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
 {
+    Block block;
 	// The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
 	// kind of Transformation class inside it.
-	*bold = true;
-	*shape = "hexagon";
-	*text = transformation->GetName();
+	block.bold = true;
+	block.title = transformation->GetName();
+	block.shape = "hexagon";
+    block.block_type = Graphable::NODE;
+    block.sub_blocks = { { "pattern", 
+                           "", 
+                           { { pattern, 
+                               SOLID, 
+                               {},
+                               {PatternLink(this, &pattern).GetShortName()} } } } };
+    return block;
 }

@@ -81,7 +81,6 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
-	virtual void GetGraphNodeAppearance( bool *bold, string *text, string *shape ) const;
 
 private:
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
