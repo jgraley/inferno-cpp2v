@@ -31,7 +31,7 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                          XLink x ) const
 {
-    INDENT("|");
+    INDENT("∨");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
     query.Reset(); 
     
@@ -118,7 +118,7 @@ Graphable::Block MatchAnyAgent::GetGraphBlockInfo() const
 	// src/tree/operator_db.txt  
     Block block;
 	block.bold = true;
-	block.title = string("|");
+	block.title = string("∨");
 	block.shape = "circle";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "patterns", 
