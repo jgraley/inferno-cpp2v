@@ -221,7 +221,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
                                     plan.root_pattern, 
                                     SOLID, 
                                     {plan.root_plink.GetName()} } } } );
-        return { this, false, GetName(), "", "", ENUMERATED, sub_blocks };
+        return { false, GetName(), "", "", ENUMERATED, sub_blocks };
     }
     
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
@@ -259,7 +259,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
                                     SOLID, 
                                     {} } } } );
     }
-    return { this, false, GetName(), "", "", ENUMERATED, sub_blocks };
+    return { false, GetName(), "", "", ENUMERATED, sub_blocks };
 }
 
 

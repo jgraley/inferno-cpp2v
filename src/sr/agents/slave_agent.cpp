@@ -55,7 +55,6 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
                                        SOLID, 
                                        {ReadArgs::graph_trace ? PatternLink(this, GetThrough()).GetName() : ""} } } } );
     block.title = GetName();
-    block.base = this;
     return block;
 }
 

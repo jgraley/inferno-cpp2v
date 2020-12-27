@@ -103,19 +103,18 @@ string Graph::PopulateFromTransformation(Transformation *root)
 }
 
 
-string Graph::PopulateFromEngine( const Graphable *g, string id, bool links_pass )
+string Graph::PopulateFromEngine( const Graphable *g, string base_id, bool links_pass )
 {
+    Graphable::Block block = g->GetGraphBlockInfo();
 	string s;
-    s += links_pass ? DoEngineLinks(g, id) : DoEngine(g, id);
+    s += links_pass ? DoLinks(block, base_id) : DoEngine(block, base_id);
         
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
     {
         return !ShouldDoBlock(root); // Stop where we will do blocks        
     });
-        
-    Graphable::Block block = g->GetGraphBlockInfo();
-    
+            
     for( const Graphable::SubBlock &sub_block : block.sub_blocks )
     {
         const Graphable::Link &link = sub_block.links.front(); // TODO loop over these
@@ -126,9 +125,17 @@ string Graph::PopulateFromEngine( const Graphable *g, string id, bool links_pass
             {              
                 Graphable *g = ShouldDoBlock((TreePtr<Node>)n);
                 if( g )
-                    s += PopulateFromEngine( g, Id( n.get() ), links_pass );
+                {
+                    s += PopulateFromEngine( g, Id(n.get()), links_pass );
+                }
                 else
-                    s += links_pass ? DoNodeLinks((TreePtr<Node>)n, link.link_style) : DoNode((TreePtr<Node>)n);
+                {
+                    Graphable::Block child_block = GetDefaultNodeBlockInfo( (TreePtr<Node>)n );
+                    if( links_pass )
+                        s += DoLinks(child_block, Id(n.get()));
+                    else
+                        s += DoNode(child_block, Id(n.get()));
+                }
             }
         }
     }
@@ -143,20 +150,22 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 	::UniqueWalk w( root );
 	FOREACH( const TreePtrInterface &n, w )
 	{
-		if( n )
-			s += links_pass ? DoNodeLinks((TreePtr<Node>)n, Graphable::SOLID) : DoNode((TreePtr<Node>)n);
+		if( !n )
+            continue;
+            
+        Graphable::Block child_block = GetDefaultNodeBlockInfo( (TreePtr<Node>)n );
+        if( links_pass )
+            s += DoLinks(child_block, Id(n.get()));
+        else
+            s += DoNode(child_block, Id(n.get()));
 	}
 	return s;
 }
 
 
-string Graph::DoEngine( const Graphable *g,
-                        string id )
+string Graph::DoEngine( const Graphable::Block &block,
+                        string base_id )
 {    
-    vector<string> labels;
-    vector< TreePtr<Node> > links;
-    Graphable::Block block = g->GetGraphBlockInfo();
-        
     string name = block.title; 
     int n;
     for( n=0; n<name.size(); n++ )
@@ -176,7 +185,7 @@ string Graph::DoEngine( const Graphable *g,
     }
         
     string s;
-	s += id;
+	s += base_id;
 	s += " [\n";
 
     s += "label = \"<fixed> " + Sanitise( name );
@@ -198,45 +207,12 @@ string Graph::DoEngine( const Graphable *g,
 }
 
 
-string Graph::DoEngineLinks( const Graphable *g, string id )
-{
-    vector<string> labels;
-    vector< TreePtr<Node> > links;
-    Graphable::Block block = g->GetGraphBlockInfo();
-
-    string s;
-    int k=0;
-	for( Graphable::SubBlock sub_block : block.sub_blocks )
-    {
-        const Graphable::Link &link = sub_block.links.front(); // TODO loop over these
-
-        // Atts
-        string atts;
-        atts += LinkStyleAtt(link.link_style);                        
-        if( !link.link_labels.empty() )
-            atts += "label = \""+Sanitise(Join(link.link_labels))+"\"\n";             
-   
-        // GraphViz output
-        s += id;
-        if( block.port_type==Graphable::ENUMERATED )
-            s += ":" +  SeqField(k);
-        s += " -> " + Id(link.child);
-        s += " [" + atts + "];\n";
-        k++;
-    }
-
-    return s;
-}
-
-
-string Graph::DoNode( TreePtr<Node> n )
+string Graph::DoNode( const Graphable::Block &block, string base_id )
 {
 	string s;
 	bool bold;
 	string shape;
-	s += Id(n.get()) + " [\n";
-
-    Graphable::Block block = GetDefaultNodeBlockInfo( n );
+	s += base_id + " [\n";
 
 	s += "shape = \"" + block.shape + "\"\n";
 	if(shape == "record" || block.shape == "plaintext")
@@ -271,16 +247,15 @@ string Graph::DoNode( TreePtr<Node> n )
 }
 
 
-string Graph::DoNodeLinks( TreePtr<Node> n, Graphable::LinkStyle link_style )
+string Graph::DoLinks( const Graphable::Block &block, string base_id )
 {
-    Graphable::Block block = GetDefaultNodeBlockInfo( n );
     string s;
     
     int porti=0;    
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
         for( Graphable::Link link : sub_block.links )
-            s += DoLink( porti, block, sub_block, link );
+            s += DoLink( porti, block, sub_block, link, base_id );
         porti++;
     }
 
@@ -291,7 +266,8 @@ string Graph::DoNodeLinks( TreePtr<Node> n, Graphable::LinkStyle link_style )
 string Graph::DoLink( int port_index, 
                       const Graphable::Block &block, 
                       const Graphable::SubBlock &sub_block, 
-                      const Graphable::Link &link )
+                      const Graphable::Link &link,
+                      string base_id )
 {
     // Atts
     string atts;
@@ -301,7 +277,7 @@ string Graph::DoLink( int port_index,
 
     // GraphViz output
 	string s;
-	s += Id(block.base);
+	s += base_id;
 	if( block.port_type==Graphable::ENUMERATED )
         s += ":" + SeqField(port_index);
 	s += " -> ";
@@ -320,7 +296,6 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
     else
         block.port_type = Graphable::SHARED;   
     block.colour = Colour( n );
-    block.base = n.get();
 
     vector< Itemiser::Element * > members = n->Itemise();
 	for( int i=0; i<members.size(); i++ )

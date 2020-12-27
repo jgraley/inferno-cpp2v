@@ -40,7 +40,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
                                 (TreePtr<Node>)*GetOverlay(), 
                                 DASHED, 
                                 {ReadArgs::graph_trace ? PatternLink(this, GetOverlay()).GetName() : ""} } } } );
-    return { this, false, GetName(), "", "", ENUMERATED, sub_blocks };
+    return { false, GetName(), "", "", ENUMERATED, sub_blocks };
 }
 
 

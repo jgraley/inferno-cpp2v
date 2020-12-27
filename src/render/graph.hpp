@@ -23,14 +23,14 @@ private:
     string PopulateFromEngine( const Graphable *g, string id, bool links_pass );
     string PopulateFromNode( TreePtr<Node> root, bool links_pass );
 
-	string DoEngine( const Graphable *g, string id );
-	string DoEngineLinks( const Graphable *e, string id );
-    string DoNode( TreePtr<Node> n );
-    string DoNodeLinks( TreePtr<Node> n, Graphable::LinkStyle link_style );
+	string DoEngine( const Graphable::Block &block, string base_id );
+    string DoNode( const Graphable::Block &block, string base_id );
+    string DoLinks( const Graphable::Block &block, string base_id );
     string DoLink( int port_index, 
                    const Graphable::Block &block, 
                    const Graphable::SubBlock &sub_block, 
-                   const Graphable::Link &link );
+                   const Graphable::Link &link, 
+                   string base_id );
     Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n );
     string DoHTMLLabel( string name, const list<Graphable::SubBlock> &sub_blocks );
     string DoHeader();
