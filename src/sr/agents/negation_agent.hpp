@@ -13,7 +13,7 @@ namespace SR
 /// Boolean node that matches if the sub-pattern at `pattern` does 
 /// not match i.e. a "not" operation. `pattern` points to an abnormal 
 /// context since in an overall match, the sub-pattern does not match.
-class NotMatchAgent : public virtual AgentCommon 
+class NegationAgent : public virtual AgentCommon 
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
@@ -33,7 +33,7 @@ private:
 
 template<class PRE_RESTRICTION>
 class NotMatch : public Special<PRE_RESTRICTION>,
-                 public NotMatchAgent
+                 public NegationAgent
 {
 public:
     SPECIAL_NODE_FUNCTIONS

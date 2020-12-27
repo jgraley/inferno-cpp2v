@@ -7,7 +7,7 @@
 #include "common/mismatch.hpp"
 #include "agents/agent.hpp"
 #include "agents/placeholder_agent.hpp"
-#include "agents/match_all_agent.hpp"
+#include "agents/conjunction_agent.hpp"
 #include "link.hpp"
 #include "the_knowledge.hpp"
 

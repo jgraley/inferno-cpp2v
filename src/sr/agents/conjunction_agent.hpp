@@ -13,7 +13,7 @@ namespace SR
 /// Boolean node that matches if all of the sub-patterns at the pointers in
 /// `patterns` do match i.e. an "and" operation. `patterns` point to  
 /// normal contexts, since the global and-rule is preserved.
-class MatchAllAgent : public virtual AgentCommon 
+class ConjunctionAgent : public virtual AgentCommon 
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
@@ -27,7 +27,7 @@ private:
 
 template<class PRE_RESTRICTION>
 class MatchAll : public Special<PRE_RESTRICTION>,
-                 public MatchAllAgent
+                 public ConjunctionAgent
 {
 public:
     SPECIAL_NODE_FUNCTIONS

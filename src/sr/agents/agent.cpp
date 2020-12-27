@@ -192,7 +192,7 @@ void AgentCommon::DNLQFromDQ( DecidedQuery &query,
         LocatedLink rlink( plink, required_links->at(plink) );
         ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
         if( (XLink)alink == XLink::MMAX_Link )
-            continue; // only happens when agent pushes out MMAX, as with MatchAnyAgent
+            continue; // only happens when agent pushes out MMAX, as with DisjunctionAgent
             
         // Compare by location
         if( (XLink)alink != (XLink)rlink )              

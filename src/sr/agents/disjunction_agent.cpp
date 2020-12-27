@@ -1,10 +1,10 @@
-#include "match_any_agent.hpp"
+#include "disjunction_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
 
 using namespace SR;
 
-void MatchAnyAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine )
+void DisjunctionAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine )
 {
     AgentCommon::AgentConfigure(phase, master_scr_engine);
 
@@ -14,7 +14,7 @@ void MatchAnyAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_eng
 }
 
 
-shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
     pq->RegisterDecision(false); // Exclusive, please
@@ -28,7 +28,7 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 }
 
 
-void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                          XLink x ) const
 {
     INDENT("∨");
@@ -60,13 +60,13 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-bool MatchAnyAgent::ImplHasDNLQ() const
+bool DisjunctionAgent::ImplHasDNLQ() const
 {
     return true;
 }
 
 
-Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+Agent::Completeness DisjunctionAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                                     XLink base_xlink,
                                                                     const SolutionMap *required_links,
                                                                     const TheKnowledge *knowledge ) const
@@ -108,7 +108,8 @@ Agent::Completeness MatchAnyAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
     return completeness;
 }
 
-Graphable::Block MatchAnyAgent::GetGraphBlockInfo() const
+
+Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 {
 	// The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
 	// on the right.

@@ -13,7 +13,7 @@
 #include "agents/search_container_agent.hpp"
 #include "agents/star_agent.hpp"
 #include "common/common.hpp"
-#include "agents/match_any_agent.hpp"
+#include "agents/disjunction_agent.hpp"
 #include "link.hpp"
 #include "tree/cpptree.hpp"
 #include "equivalence.hpp"
@@ -230,7 +230,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
     coupling_keyer_links.insert(plink);
     agent_to_keyer[plink.GetChildAgent()] = plink;
 
-    if( dynamic_cast<MatchAnyAgent *>(plink.GetChildAgent()) )
+    if( dynamic_cast<DisjunctionAgent *>(plink.GetChildAgent()) )
     {
         matchany_agents->insert( plink.GetChildAgent() );
         return;

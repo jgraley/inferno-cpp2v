@@ -1,10 +1,10 @@
-#include "not_match_agent.hpp"
+#include "negation_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
 
 using namespace SR;
 
-shared_ptr<PatternQuery> NotMatchAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterAbnormalLink( PatternLink(this, GetPattern()) );
@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> NotMatchAgent::GetPatternQuery() const
 }
 
 
-void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                          XLink x ) const
 {
     INDENT("¬");
@@ -31,7 +31,7 @@ void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Graphable::Block NotMatchAgent::GetGraphBlockInfo() const
+Graphable::Block NegationAgent::GetGraphBlockInfo() const
 {
 	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
 	// on the right.
@@ -54,7 +54,7 @@ Graphable::Block NotMatchAgent::GetGraphBlockInfo() const
 }
 
 
-bool NotMatchAgent::BooleanEvaluatorNot::operator()( list<bool> &inputs ) const
+bool NegationAgent::BooleanEvaluatorNot::operator()( list<bool> &inputs ) const
 {
 	ASSERT( inputs.size() == 1 ); // we should remember one block
 	return !inputs.front();

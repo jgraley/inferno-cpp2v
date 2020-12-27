@@ -15,7 +15,7 @@ namespace SR
 /// Boolean node that matches if any of the sub-patterns at the pointers in
 /// `patterns` do match i.e. an "or" operation. `patterns` point to abnormal 
 /// contexts since in an overall match, some sub-patterns may not match.
-class MatchAnyAgent : public virtual AgentCommon 
+class DisjunctionAgent : public virtual AgentCommon 
 {
 public:
     class NoOptionsMatchedMismatch : public Mismatch {};
@@ -30,6 +30,7 @@ public:
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
+    
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
 #ifdef DECISIONISED_MATCH_ANY
@@ -47,7 +48,7 @@ private:
 
 template<class PRE_RESTRICTION>
 class MatchAny : public Special<PRE_RESTRICTION>,
-                 public MatchAnyAgent
+                 public DisjunctionAgent
 {
 public:
     SPECIAL_NODE_FUNCTIONS

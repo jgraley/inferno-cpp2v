@@ -1,10 +1,10 @@
-#include "match_all_agent.hpp"
+#include "conjunction_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
 
 using namespace SR;
 
-shared_ptr<PatternQuery> MatchAllAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
     for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
@@ -17,7 +17,7 @@ shared_ptr<PatternQuery> MatchAllAgent::GetPatternQuery() const
 }
 
 
-void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void ConjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                          XLink x ) const
 { 
     INDENT("∧");
@@ -38,7 +38,7 @@ void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-Graphable::Block MatchAllAgent::GetGraphBlockInfo() const
+Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
 {
 	// The MatchAll node appears as a small circle with an & character inside it. The affected subtrees are 
 	// on the right.
