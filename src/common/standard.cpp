@@ -114,6 +114,7 @@ string Traceable::GetTrace() const
 SerialNumber::SNType SerialNumber::master_location_serial;
 int SerialNumber::current_step;
 map<void *, SerialNumber::SNType> SerialNumber::location_serial;
+map<SerialNumber::SNType, void *> SerialNumber::location_readback;
 map<void *, SerialNumber::SNType> SerialNumber::master_serial;
 
 
@@ -128,6 +129,7 @@ void SerialNumber::Construct()
     {
         // We don't know about this location, so produce a new location serial number and start the construction count 
         location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
+        location_readback[master_location_serial] = lp;
         master_serial.insert( pair<void *, SerialNumber::SNType>(lp, 0) );
         master_location_serial++;
     }
@@ -173,6 +175,19 @@ string SerialNumber::GetAddr() const
 }
 
 
+void *SerialNumber::GetLocation( SNType location )
+{
+    return location_readback.at(location);
+}
+
+
+void *location(SerialNumber::SNType location) // for GCC
+{
+    return SerialNumber::GetLocation(location);
+}
+
+////////////////////////// Misc free functions //////////////////////////
+
 string Join( const list<string> &ls, string pre, string sep, string post )
 {
     bool first = true;
@@ -186,3 +201,4 @@ string Join( const list<string> &ls, string pre, string sep, string post )
     }
     return s;
 } 
+

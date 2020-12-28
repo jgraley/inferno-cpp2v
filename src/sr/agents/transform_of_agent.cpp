@@ -23,12 +23,17 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         // Transform the candidate expression, sharing the overall S&R context so that
         // things like GetDeclaration can work (they search the whole program tree).
         TreePtr<Node> x = xlink.GetChildX();
-        TreePtr<Node> xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x );
-        if( xt )
+        TreePtr<Node> child_xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x );
+        if( child_xt )
         {
+            ASSERT( child_xt->IsFinal() )(*this)(" computed non-final ")(*child_xt)(" from ")(xlink)("\n"); 
+            
             // Punt it back into the search/replace engine
-            XLink new_xlink = XLink::CreateDistinct(xt);  // Cache will un-distinct
-            return master_scr_engine->UniquifyDomainExtension(new_xlink);
+            XLink child_xlink = XLink::CreateDistinct(child_xt);  // Cache will un-distinct
+            ASSERT( child_xlink.GetChildX()->IsFinal() )(*this)(" computed non-final ")(child_xlink)("\n"); 
+            
+            XLink unique_child_xlink = master_scr_engine->UniquifyDomainExtension(child_xlink);
+            return unique_child_xlink;
         }
         else
         {
@@ -37,7 +42,8 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             throw Mismatch();  
         }
     };
-    query.RegisterNormalLink( PatternLink(this, &pattern), cache( xlink, op ) );    
+    XLink cached_child_xlink = cache( xlink, op );
+    query.RegisterNormalLink( PatternLink(this, &pattern), cached_child_xlink );    
 }
 
 

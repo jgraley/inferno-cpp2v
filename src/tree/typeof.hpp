@@ -13,6 +13,7 @@ public:
     class UnsupportedThisMismatch : public UnsupportedMismatch {}; // TODO add support
     class UnsupportedSpecialMismatch : public UnsupportedMismatch {};
     class UnsupportedLiteralMismatch : public UnsupportedMismatch {};
+    class DeleteUnsupportedMismatch : public UnsupportedMismatch {};
     class UsageMismatch : public Mismatch {};
     class NumericalOperatorUsageMismatch : public UsageMismatch {};
     class NumericalOperatorUsageMismatch1 : public NumericalOperatorUsageMismatch {};
@@ -20,6 +21,9 @@ public:
     class NumericalOperatorUsageMismatch3 : public NumericalOperatorUsageMismatch {};
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
+    class StatementExpressionUsageMismatch : public UsageMismatch {};
+    class StatementExpressionEmptyMismatch : public StatementExpressionUsageMismatch {};
+    class StatementExpressionLastNotExprMismatch : public StatementExpressionUsageMismatch {};
 
     virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )
     {

@@ -55,10 +55,14 @@ public:
 //
 class SerialNumber
 {
+public:
     typedef uint64_t SNType;
+    
+private:    
     static SNType master_location_serial;
     static int current_step;
     static map<void *, SNType> location_serial;
+    static map<SNType, void *> location_readback;
     static map<void *, SNType> master_serial;
     SNType serial;
     SNType location;
@@ -96,6 +100,7 @@ protected:
     }
 public:
     static void SetStep( int s );
+    static void *GetLocation( SNType location );
 };
 
 

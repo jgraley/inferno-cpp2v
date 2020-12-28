@@ -173,8 +173,15 @@ int main( int argc, char *argv[] )
     {
         if( ReadArgs::pattern_graph_name.back()=='/' )
         {
+            string dir = ReadArgs::pattern_graph_name;
+            int index = 0;
             for( shared_ptr<Transformation> t : sequence )
-                Graph( ReadArgs::pattern_graph_name+t->GetName()+".dot" )( t.get() );
+            {
+                string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
+                Graph g( filepath );
+                g( t.get() );
+                index++;
+            }
         }
         else
         {
@@ -242,7 +249,7 @@ int main( int argc, char *argv[] )
             
             bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
             if( !ReadArgs::trace_quiet )
-                fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
+                fprintf(stderr, "%s step %03d-%s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
             Tracer::Enable( ReadArgs::trace && allow ); 
             HitCount::Enable( ReadArgs::trace_hits && allow ); 
             if( allow )

@@ -66,7 +66,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( dynamic_pointer_cast<LabelIdentifier>(o) )
     {
-        return MakeTreePtr<Type>(); // TODO labels need a type
+        return MakeTreePtr<Labeley>(); 
     }
     else if( dynamic_pointer_cast<SizeOf>(o) || dynamic_pointer_cast<AlignOf>(o))
     {
@@ -87,17 +87,17 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( dynamic_pointer_cast<Delete>(o) )
     {
-        return MakeTreePtr<Type>();
+        throw DeleteUnsupportedMismatch();
     }
     else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast<CompoundExpression>(o) )
     {
         if( ce->statements.empty() )
-            return MakeTreePtr<Type>();
+            throw StatementExpressionEmptyMismatch();
         TreePtr<Statement> last = ce->statements.back();
         if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(last) )
             return Get(e);
         else
-            return MakeTreePtr<Type>();
+            throw StatementExpressionLastNotExprMismatch();
     }
     else 
     {
