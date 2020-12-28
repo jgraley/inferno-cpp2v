@@ -67,6 +67,7 @@ TreePtr<Node> OverlayAgent::BuildReplaceImpl( CouplingKey keylink )
     // Key as many nodes as possible on the replace side
     TRACE(*this)(" transferring key from ")(*AsAgent((TreePtr<Node>)*GetThrough()))(" to ")(AsAgent((TreePtr<Node>)*GetOverlay()));
     AsAgent((TreePtr<Node>)*GetOverlay())->TrackingKey(AsAgent((TreePtr<Node>)*GetThrough()));
+    
     TRACE("Overlay node through=")(*(*GetThrough()))(" overlay=")(*(*GetOverlay()))("\n");
     return AsAgent((TreePtr<Node>)*GetOverlay())->BuildReplace();
 }
