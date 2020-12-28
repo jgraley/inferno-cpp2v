@@ -26,6 +26,22 @@ public:
                     TreePtr<Node> rp = TreePtr<Node>(),
                     bool is_search=false );
                     
+private:
+    struct Plan 
+    {          
+        Plan( CompareReplace *algo, 
+              bool is_search );
+        void Configure( TreePtr<Node> cp,
+                        TreePtr<Node> rp );
+        void CategoriseAgents();
+
+        CompareReplace * const algo;
+        const bool is_search;   
+        //map< Agent *, Agent::Phase > agents_phases;                 
+        shared_ptr<SCREngine> scr_engine;
+    } plan;
+
+public:
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
     static void SetMaxReps( int n, bool e );
@@ -44,11 +60,9 @@ public:
     virtual Block GetGraphBlockInfo() const;    
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();
-    
+    TreePtr<Node> *pcontext;    
 private:
-    TreePtr<Node> *pcontext;
-    const bool is_search;
-    shared_ptr<SCREngine> scr_engine;
+
 };
 
 

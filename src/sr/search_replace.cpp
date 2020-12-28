@@ -12,23 +12,42 @@ using namespace SR;
 
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
-                                bool is_search_ ) :
-    is_search(is_search_)
+                                bool is_search ) :
+    plan( this, is_search )
 {
     // If cp and rp are provided, do an instant configuration
     if( cp )
     {
-        scr_engine = make_shared<SCREngine>(is_search, this, cp, rp);
+        plan.Configure( cp, rp );
     }
 }    
+
+
+CompareReplace::Plan::Plan( CompareReplace *algo_, bool is_search_ ) :
+    algo( algo_ ),
+    is_search(is_search_)
+{
+}
+
+
+void CompareReplace::Plan::Configure( TreePtr<Node> cp,
+                                      TreePtr<Node> rp )
+{
+    TRACE(algo->GetName());
+    scr_engine = make_shared<SCREngine>(is_search, algo, cp, rp);
+}                                      
+
+                            
+void CompareReplace::Plan::CategoriseAgents()
+{
+}
 
 
 void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
-    TRACE(GetName());
     INDENT("P");
-    scr_engine = make_shared<SCREngine>(is_search, this, cp, rp);
+    plan.Configure( cp, rp );
 }
 
 
@@ -41,7 +60,7 @@ void CompareReplace::SetMaxReps( int n, bool e )
 Graphable::Block CompareReplace::GetGraphBlockInfo() const
 {
     // We want our name (via GetName()) but SCREngine's layout
-    Graphable::Block block = scr_engine->GetGraphBlockInfo();
+    Graphable::Block block = plan.scr_engine->GetGraphBlockInfo();
     block.title = GetName();
     return block;
 }
@@ -49,13 +68,13 @@ Graphable::Block CompareReplace::GetGraphBlockInfo() const
 
 void CompareReplace::SetStopAfter( vector<int> ssa, int d )
 {
-    scr_engine->SetStopAfter( ssa, d );
+    plan.scr_engine->SetStopAfter( ssa, d );
 }
 
 
 SCREngine *CompareReplace::GetRootEngine() 
 { 
-    return scr_engine.get(); 
+    return plan.scr_engine.get(); 
 }
 
 
@@ -88,7 +107,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     
     CouplingKeysMap empty;
     
-    (void)scr_engine->RepeatingCompareReplace( proot, &empty );   
+    (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty );   
 
     pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
 }
