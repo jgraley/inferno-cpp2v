@@ -116,7 +116,7 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl();
 
 private:	
-	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr
+	TreePtr<Node> BuildReplaceOverlay(); // under substitution if not nullptr
     TreePtr<Node> BuildReplaceNormal();
     
     Plan plan; // can't be const because children added after construct

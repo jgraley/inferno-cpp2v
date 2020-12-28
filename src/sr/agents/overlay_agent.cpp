@@ -64,10 +64,11 @@ TreePtr<Node> OverlayAgent::BuildReplaceImpl()
 {
     INDENT("O");    
     ASSERT( *GetOverlay() );          
-    // Key as many nodes as possible on the replace side
-    TRACE(*this)(" transferring key from ")(*AsAgent((TreePtr<Node>)*GetThrough()))(" to ")(AsAgent((TreePtr<Node>)*GetOverlay()));
-    AsAgent((TreePtr<Node>)*GetOverlay())->KeyForOverlay(AsAgent((TreePtr<Node>)*GetThrough()));
+    Agent *overlay_agent = AsAgent((TreePtr<Node>)*GetOverlay());
+    Agent *through_agent = AsAgent((TreePtr<Node>)*GetThrough());
     
-    TRACE("Overlay node through=")(*(*GetThrough()))(" overlay=")(*(*GetOverlay()))("\n");
-    return AsAgent((TreePtr<Node>)*GetOverlay())->BuildReplace();
+    // Key as many nodes as possible on the replace side
+    TRACE(*this)(" transferring key from ")(*through_agent)(" to ")(*overlay_agent);
+    overlay_agent->KeyForOverlay(through_agent);
+    return overlay_agent->BuildReplace();
 }
