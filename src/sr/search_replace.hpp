@@ -5,6 +5,7 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+#include "agents/agent.hpp"
 #include <set>
 
 /// SR namespace contains the search and replace implementation
@@ -20,6 +21,8 @@ class CompareReplace : public virtual Graphable,
                        virtual public InPlaceTransformation
 {  
 public:
+    typedef map< Agent *, Agent::Phase > AgentPhases;
+    
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
     CompareReplace( TreePtr<Node> cp = TreePtr<Node>(),
@@ -33,12 +36,11 @@ private:
               bool is_search );
         void Configure( TreePtr<Node> cp,
                         TreePtr<Node> rp );
-        void CategoriseAgents();
-
+                        
         CompareReplace * const algo;
         const bool is_search;   
-        //map< Agent *, Agent::Phase > agents_phases;                 
         shared_ptr<SCREngine> scr_engine;
+        AgentPhases agent_phases;   
     } plan;
 
 public:
@@ -60,9 +62,8 @@ public:
     virtual Block GetGraphBlockInfo() const;    
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();
-    TreePtr<Node> *pcontext;    
+    TreePtr<Node> *pcontext;   
 private:
-
 };
 
 

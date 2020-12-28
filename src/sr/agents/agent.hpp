@@ -39,9 +39,9 @@ public:
     
     enum Phase
     {
-        IN_COMPARE_ONLY,
-        IN_COMPARE_AND_REPLACE,
-        IN_REPLACE_ONLY
+        IN_COMPARE_ONLY = 0x1,
+        IN_COMPARE_AND_REPLACE = 0x11,
+        IN_REPLACE_ONLY = 0x10
     };
     
     enum Path

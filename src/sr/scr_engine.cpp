@@ -32,11 +32,12 @@ bool SCREngine::rep_error;
 // engines, it's the most masterish one that "owns" it).
 SCREngine::SCREngine( bool is_search_,
                       const CompareReplace *overall_master,
+                       CompareReplace::AgentPhases &agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
                       const unordered_set<Agent *> &master_agents,
                       const SCREngine *master ) :
-    plan(this, is_search_, overall_master, cp, rp, master_agents, master),
+    plan(this, is_search_, overall_master, agent_phases, cp, rp, master_agents, master),
     depth( 0 )
 {
 }
@@ -45,13 +46,15 @@ SCREngine::SCREngine( bool is_search_,
 SCREngine::Plan::Plan( SCREngine *algo_,
                        bool is_search_,
                        const CompareReplace *overall_master,
+                       CompareReplace::AgentPhases &agent_phases,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
-                       const unordered_set<Agent *> &master_agents,
+                       const unordered_set<Agent *> &master_agents_,
                        const SCREngine *master ) :
     algo( algo_ ),
     is_search( is_search_ ),
-    master_ptr( nullptr )
+    master_ptr( nullptr ),
+    master_agents( master_agents_ )
 {
     TRACE(GetName());
     INDENT("P");
@@ -66,15 +69,23 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     root_plink = PatternLink::CreateDistinct( root_pattern );
     
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
-    CategoriseSubs( master_agents, my_agents_needing_engines );    
+    CategoriseSubs( master_agents, my_agents_needing_engines, agent_phases );    
 
     // This recurses SCR engine planning
-    CreateMyEngines( master_agents, my_agents_needing_engines );    
-    
-    // Configure agents on the way down
-    ConfigureAgents();
+    CreateMyEngines( master_agents, my_agents_needing_engines, agent_phases );    
+}
 
-    // Make and-rule engines on the way back up - by now, hopefully all
+    
+void SCREngine::Plan::InitPartTwo(const CompareReplace::AgentPhases &agent_phases)
+{
+    // Recurse into subordinate SCREngines
+    for( pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+        p.second->InitPartTwo(agent_phases);                                      
+
+    // Configure agents on the way out
+    ConfigureAgents(agent_phases);
+
+    // Make and-rule engines on the way out - by now, hopefully all
     // the agents this and-rule engine sees have been configured.
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_agents);
 } 
@@ -119,7 +130,8 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     
 
 void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agents, 
-                                      set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+                                      set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                                      CompareReplace::AgentPhases &agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
@@ -133,25 +145,31 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     VisibleWalk tp_replace(root_pattern, Agent::REPLACE_PATH); 
     for( const TreePtrInterface &n : tp_replace )
         visible_agents_replace.insert( Agent::AsAgent((TreePtr<Node>)n) );
+
+    // Determine all the agents we can see (can only see though slave "through", 
+    // not into the slave's pattern)
+    unordered_set<Agent *>  visible_agents = UnionOf( visible_agents_compare, visible_agents_replace );
+    
+    FOREACH( Agent *a, visible_agents )
+    {
+        unsigned int phase = (unsigned int)agent_phases[a];
+        if( visible_agents_compare.count(a) == 0 )
+            phase |= Agent::IN_REPLACE_ONLY;
+        else if( visible_agents_replace.count(a) == 0 )
+            phase |= Agent::IN_COMPARE_ONLY;
+        else
+            phase |= Agent::IN_COMPARE_AND_REPLACE;
+        agent_phases[a] = (Agent::Phase)phase;
+    }
     
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.      
-    visible_agents_compare = DifferenceOf( visible_agents_compare, master_agents );      
-    visible_agents_replace = DifferenceOf( visible_agents_replace, master_agents );      
-
     my_agents = make_shared< unordered_set<Agent *> >();
-    *my_agents = UnionOf( visible_agents_compare, visible_agents_replace );
+    *my_agents = DifferenceOf( visible_agents, master_agents );
 
     // Determine who our slaves are
     FOREACH( Agent *a, *my_agents )
     {
-        if( visible_agents_compare.count(a) == 0 )
-            my_agents_phases[a] = Agent::IN_REPLACE_ONLY;
-        else if( visible_agents_replace.count(a) == 0 )
-            my_agents_phases[a] = Agent::IN_COMPARE_ONLY;
-        else
-            my_agents_phases[a] = Agent::IN_COMPARE_AND_REPLACE;
-
         if( auto ae = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
             my_agents_needing_engines.insert( ae );
     }
@@ -159,7 +177,8 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
 
 
 void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agents, 
-                                       const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+                                       const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                                       CompareReplace::AgentPhases &agent_phases )
 {
     // Determine which agents our slaves should not configure
     unordered_set<Agent *> surrounding_agents = UnionOf( master_agents, *my_agents ); 
@@ -168,6 +187,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
     {
         my_engines[ae] = make_shared<SCREngine>( ae->IsSearch(),
                                                  overall_master_ptr, 
+                                                 agent_phases,
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
                                                  surrounding_agents, 
@@ -176,20 +196,20 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
 }
 
 
-void SCREngine::Plan::ConfigureAgents()
+void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_phases)
 {
     // Give agents pointers to here and our coupling keys
     FOREACH( Agent *a, *my_agents )
     {        
         if( auto ae = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
         {
-            ae->AgentConfigure( my_agents_phases[a],
+            ae->AgentConfigure( agent_phases.at(a),
                                 algo, 
                                 &*my_engines.at(ae) );
         }
         else
         {
-            a->AgentConfigure( my_agents_phases[a],
+            a->AgentConfigure( agent_phases.at(a),
                                algo );             
         }
     }    

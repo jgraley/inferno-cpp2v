@@ -10,6 +10,8 @@
 #include "the_knowledge.hpp"
 #include "agents/agent.hpp"
 #include "node/graphable.hpp"
+#include "search_replace.hpp"
+
 #include <set>
 
 
@@ -20,7 +22,6 @@ class Agent;
 class AgentCommonNeedSCREngine;
 class Conjecture;
 class SpecialBase;
-class CompareReplace;
 class AndRuleEngine;
 
 /// Common implementation for search+replace, compare+replace and slaves
@@ -29,28 +30,37 @@ class SCREngine : public virtual Graphable
 public:
     SCREngine( bool is_search,
                const CompareReplace *overall_master,
+               CompareReplace::AgentPhases &agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
                const unordered_set<Agent *> &master_agents = unordered_set<Agent *>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
+    void InitPartTwo( const CompareReplace::AgentPhases &agent_phases )
+    {
+        plan.InitPartTwo(agent_phases); 
+    }
                     
 private:
-    const struct Plan : public virtual Traceable
+    struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
               bool is_search,
               const CompareReplace *overall_master,
+              CompareReplace::AgentPhases &agent_phases,
               TreePtr<Node> cp,
               TreePtr<Node> rp,
               const unordered_set<Agent *> &master_agents,                            
               const SCREngine *master ); /* if null, you are overall master */ 
+        void InitPartTwo(const CompareReplace::AgentPhases &agent_phases); // Part one is the constructor
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<Agent *> &master_agents, 
-                             set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+                             set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                             CompareReplace::AgentPhases &agent_phases );
         void CreateMyEngines( const unordered_set<Agent *> &master_agents,                       
-                              const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-        void ConfigureAgents();
+                              const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                              CompareReplace::AgentPhases &agent_phases );
+        void ConfigureAgents(const CompareReplace::AgentPhases &agent_phases);
 
         SCREngine * const algo;
         const bool is_search;    
@@ -59,10 +69,10 @@ private:
         PatternLink root_plink;
         Agent *root_agent;
         const SCREngine *master_ptr;
+        const unordered_set<Agent *> master_agents;
         shared_ptr< unordered_set<Agent *> > my_agents;   
         shared_ptr< unordered_set<PatternLink> > my_agent_links;   
         map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
-        map< Agent *, Agent::Phase > my_agents_phases;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
 public:

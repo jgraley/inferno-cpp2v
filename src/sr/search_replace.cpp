@@ -34,13 +34,15 @@ void CompareReplace::Plan::Configure( TreePtr<Node> cp,
                                       TreePtr<Node> rp )
 {
     TRACE(algo->GetName());
-    scr_engine = make_shared<SCREngine>(is_search, algo, cp, rp);
+    // Two-part init for SCREngine: 
+    // First, add extra root nodes, categorise, create subordinate 
+    // SCREngines and recurse into them
+    // This allows the phases of the agents to be determined correctly
+    scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, cp, rp);
+    FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
+    // Second, configure the agents and create subordinate AndRuleEngines
+    scr_engine->InitPartTwo(agent_phases);
 }                                      
-
-                            
-void CompareReplace::Plan::CategoriseAgents()
-{
-}
 
 
 void CompareReplace::Configure( TreePtr<Node> cp,
