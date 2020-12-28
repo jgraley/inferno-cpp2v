@@ -451,7 +451,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
     
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
-    //ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
+    ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.   

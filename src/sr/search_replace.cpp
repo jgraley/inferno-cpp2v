@@ -39,7 +39,7 @@ void CompareReplace::Plan::Configure( TreePtr<Node> cp,
     // SCREngines and recurse into them
     // This allows the phases of the agents to be determined correctly
     scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, cp, rp);
-    FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
+    //FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
     // Second, configure the agents and create subordinate AndRuleEngines
     scr_engine->InitPartTwo(agent_phases);
 }                                      
