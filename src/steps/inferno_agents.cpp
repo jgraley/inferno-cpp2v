@@ -82,53 +82,53 @@ string BuildIdentifierAgent::GetNewName()
 
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( CouplingKey keylink ) 
+TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl() 
 {
     INDENT("%");
     if( !GetKey() )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) ) );
+        CouplingKey keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) ) );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keylink.GetChildX());   
+    return DuplicateSubtree(GetKey().GetChildX());   
 }                                                   
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( CouplingKey keylink ) 
+TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl() 
 {
     INDENT("%");
     if( !GetKey() )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) ) );
+        CouplingKey keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) ) );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keylink.GetChildX());   
+    return DuplicateSubtree(GetKey().GetChildX());   
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( CouplingKey keylink ) 
+TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl() 
 {
     INDENT("%");
     if( !GetKey() )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) ) );
+        CouplingKey keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) ) );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keylink.GetChildX());   
+    return DuplicateSubtree(GetKey().GetChildX());   
 }                                                   
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -263,7 +263,7 @@ void BuildContainerSizeAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &q
 }   
 
 
-TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( CouplingKey keylink ) 
+TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl() 
 {
 	INDENT("%");
 	if( !GetKey() )
@@ -274,12 +274,12 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( CouplingKey keylink )
 		ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 		ASSERT( n_container );
 		int size = n_container->size();
-        keylink = XLink::CreateDistinct( MakePatternPtr<SpecificInteger>(size) );
+        CouplingKey keylink = XLink::CreateDistinct( MakePatternPtr<SpecificInteger>(size) );
 		SetKey( keylink );
 	}
 	// Note that the keylink could have been set via coupling - but still not
 	// likely to do anything sensible, so explicitly check
-	return DuplicateSubtree(keylink.GetChildX());   
+	return DuplicateSubtree(GetKey().GetChildX());   
 }                                                   
 
 //---------------------------------- IsLabelReachedAgent ------------------------------------    

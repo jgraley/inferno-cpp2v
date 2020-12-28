@@ -112,8 +112,8 @@ private:
                                              Completeness &completeness ) const;
                                            
 public:
-    virtual void TrackingKey( Agent *from );
-    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
+    virtual void KeyForOverlay( Agent *from );
+    virtual TreePtr<Node> BuildReplaceImpl();
 
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr

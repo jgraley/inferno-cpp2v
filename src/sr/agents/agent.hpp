@@ -88,7 +88,7 @@ public:
     virtual CouplingKey GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
-    virtual void TrackingKey( Agent *from ) = 0;
+    virtual void KeyForOverlay( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
@@ -146,9 +146,9 @@ public:
     CouplingKey GetKey();                                  
     void ResetKey();    
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys );
-    virtual void TrackingKey( Agent *from );
+    virtual void KeyForOverlay( Agent *from );
     virtual TreePtr<Node> BuildReplace();
-    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
+    virtual TreePtr<Node> BuildReplaceImpl();
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

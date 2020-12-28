@@ -24,7 +24,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
-    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
+    virtual TreePtr<Node> BuildReplaceImpl();
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;
     virtual const TreePtrInterface *GetOverlay() const = 0;    

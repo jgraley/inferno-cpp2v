@@ -57,7 +57,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 private:
     
-	TreePtr<Node> BuildReplaceImpl( CouplingKey keylink );
+	TreePtr<Node> BuildReplaceImpl();
 };
 
 
@@ -73,7 +73,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
     
     BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-	TreePtr<Node> BuildReplaceImpl( CouplingKey keylink );       
+	TreePtr<Node> BuildReplaceImpl();       
 };
 
 
@@ -90,7 +90,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
     BuildLabelIdentifierAgent() : BuildIdentifierAgent("UNNAMED") {}
     BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-	TreePtr<Node> BuildReplaceImpl( CouplingKey keylink );   
+	TreePtr<Node> BuildReplaceImpl();   
 };
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -239,7 +239,7 @@ private:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
-	TreePtr<Node> BuildReplaceImpl( CouplingKey keylink );
+	TreePtr<Node> BuildReplaceImpl();
 	// TODO give own appearance
 }; 
 

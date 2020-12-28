@@ -68,7 +68,7 @@ void SearchContainerAgent::KeyReplace( const CouplingKeysMap *coupling_keys )
 }
 
 
-TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( CouplingKey keylink ) 
+TreePtr<Node> SearchContainerAgent::BuildReplaceImpl() 
 {
     INDENT("#");
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
@@ -76,7 +76,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( CouplingKey keylink )
     ASSERT(terminus_key);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(keylink.GetChildX(), terminus_key, term);   
+    return DuplicateSubtree(GetKey().GetChildX(), terminus_key, term);   
 }
 
 

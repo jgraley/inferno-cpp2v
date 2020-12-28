@@ -28,7 +28,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
-    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
+    virtual TreePtr<Node> BuildReplaceImpl();
     virtual Block GetGraphBlockInfo() const;
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;

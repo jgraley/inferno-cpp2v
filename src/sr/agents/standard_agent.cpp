@@ -733,13 +733,13 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
 }
 
 
-void StandardAgent::TrackingKey( Agent *from )
+void StandardAgent::KeyForOverlay( Agent *from )
 {
     INDENT("T");
     ASSERT( from );
-    CouplingKey key = from->GetKey();
-    ASSERT( key );
-    TRACE(*this)("::TrackingKey(")(key)(" from ")(*(from))(")\n");
+    CouplingKey from_key = from->GetKey();
+    ASSERT( from_key );
+    TRACE(*this)("::KeyForOverlay(")(from_key)(" from ")(*(from))(")\n");
     
     if( GetKey() )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
@@ -747,7 +747,7 @@ void StandardAgent::TrackingKey( Agent *from )
     if( !IsLocalMatch(from) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    SetKey( key );
+    SetKey( from_key );
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from keynode into dest.
@@ -770,18 +770,18 @@ void StandardAgent::TrackingKey( Agent *from )
             if( *pattern_ptr )
             {
                 ASSERT(*keyer_ptr)("Cannot key intermediate because correpsonding search node is nullptr");
-                AsAgent((TreePtr<Node>)*pattern_ptr)->TrackingKey( AsAgent((TreePtr<Node>)*keyer_ptr) );
+                AsAgent((TreePtr<Node>)*pattern_ptr)->KeyForOverlay( AsAgent((TreePtr<Node>)*keyer_ptr) );
             }
         }
     }
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceImpl( CouplingKey keylink ) 
+TreePtr<Node> StandardAgent::BuildReplaceImpl() 
 {
     INDENT("B");
-    if( keylink && IsLocalMatch(keylink.GetChildX().get()) ) 
-        return BuildReplaceOverlay( keylink.GetChildX() );
+    if( GetKey() && IsLocalMatch(GetKey().GetChildX().get()) ) 
+        return BuildReplaceOverlay( GetKey().GetChildX() );
     else
         return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
 }

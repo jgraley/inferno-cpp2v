@@ -437,7 +437,7 @@ void AgentCommon::KeyReplace( const CouplingKeysMap *coupling_keys )
 }
 
 
-void AgentCommon::TrackingKey( Agent *from )
+void AgentCommon::KeyForOverlay( Agent *from )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...
@@ -454,12 +454,10 @@ TreePtr<Node> AgentCommon::BuildReplace()
     //ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
     // See if the pattern node is coupled to anything. The keynode that was passed
-    // in is just a suggestion and will be overriden if we are keyed.
-    CouplingKey keylink = GetKey();
+    // in is just a suggestion and will be overriden if we are keyed.   
+    ASSERT( !GetKey() || GetKey().GetChildX()->IsFinal() )(*this)(" keyed with non-final ")(GetKey())("\n"); 
     
-    ASSERT( !keylink || keylink.GetChildX()->IsFinal() )(*this)(" keyed with non-final ")(keylink)("\n"); 
-    
-    TreePtr<Node> dest = BuildReplaceImpl( keylink );    
+    TreePtr<Node> dest = BuildReplaceImpl();    
     ASSERT( dest );
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
     
@@ -467,10 +465,10 @@ TreePtr<Node> AgentCommon::BuildReplace()
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplaceImpl( CouplingKey keylink )
+TreePtr<Node> AgentCommon::BuildReplaceImpl()
 {
-    ASSERT(keylink)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(keylink.GetChildX());   
+    ASSERT(GetKey())("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(GetKey().GetChildX());   
 }
 
 

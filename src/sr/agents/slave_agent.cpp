@@ -36,12 +36,12 @@ void SlaveAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void SlaveAgent::TrackingKey( Agent *from )
+void SlaveAgent::KeyForOverlay( Agent *from )
 {
     INDENT("l");
     // Make slaves "invisible" to Overlay key propagation
     SetKey( from->GetKey() );
-    AsAgent((TreePtr<Node>)*GetThrough())->TrackingKey(from);   
+    AsAgent((TreePtr<Node>)*GetThrough())->KeyForOverlay(from);   
 }
 
 
@@ -72,7 +72,7 @@ void SlaveAgent::SetMasterCouplingKeys( const CouplingKeysMap &keys )
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( CouplingKey keylink )
+TreePtr<Node> SlaveAgent::BuildReplaceImpl()
 {
     INDENT("l");
     ASSERT( *GetThrough() );   

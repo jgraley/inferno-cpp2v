@@ -27,7 +27,7 @@ public:
                                       XLink base_xlink ) const;                  
     virtual bool ImplHasDNLQ() const;
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
-    virtual TreePtr<Node> BuildReplaceImpl( CouplingKey keylink=CouplingKey() );
+    virtual TreePtr<Node> BuildReplaceImpl();
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const = 0;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
