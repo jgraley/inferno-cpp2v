@@ -238,34 +238,39 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
         sub_blocks.push_back( { "root", 
                                 "",
                                 { { plan.root_pattern, 
+                                    nullptr,
                                     SOLID, 
                                     {},
                                     {plan.root_plink.GetShortName()} } } } );
-        return { false, GetName(), "", "", ENGINE, sub_blocks };
+        return { false, GetName(), "", ENGINE, sub_blocks };
     }
     
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
     // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
     // should error on them?
     TreePtr<Node> original_pattern = plan.root_pattern;
+    const TreePtrInterface *original_ptr = nullptr;
     if( plan.is_search )
     {
         TreePtr< Stuff<Node> > stuff = dynamic_pointer_cast< Stuff<Node> >(original_pattern);
         ASSERT( stuff );
-        original_pattern = stuff->terminus;
+        original_pattern = *stuff->GetTerminus();
+        original_ptr = stuff->GetTerminus();
     }
     TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(original_pattern);
     if( overlay )
     {        
         sub_blocks.push_back( { plan.is_search?"search":"compare", 
                                 "",
-                                { { overlay->through, 
+                                { { (TreePtr<Node>)*overlay->GetThrough(), 
+                                    overlay->GetThrough(),
                                     SOLID, 
                                     {},
                                     {} } } } );    
         sub_blocks.push_back( { "replace", 
                                 "",
-                                { { overlay->overlay, 
+                                { { (TreePtr<Node>)*overlay->GetOverlay(),
+                                    overlay->GetOverlay(),
                                     DASHED, 
                                     {},
                                     {} } } } );
@@ -275,11 +280,12 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
         sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
                                 "",
                                 { { original_pattern, 
+                                    original_ptr,
                                     SOLID, 
                                     {},
                                     {} } } } );
     }
-    return { false, GetName(), "", "", ENGINE, sub_blocks };
+    return { false, GetName(), "", ENGINE, sub_blocks };
 }
 
 

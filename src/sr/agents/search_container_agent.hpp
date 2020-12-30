@@ -35,6 +35,10 @@ public:
     virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+    virtual const TreePtrInterface *GetTerminus() const
+    {
+        return &terminus;
+    }
 };
 
 //---------------------------------- AnyNode ------------------------------------    

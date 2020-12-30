@@ -188,24 +188,45 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 }
 
 
-Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<Node> n )
+Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<Node> node )
 {
+    // Fill in everything in block 
     MyBlock my_block;
     (Graphable::Block &)my_block = block;
     
-    if( ReadArgs::graph_trace && n )
+    // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
+    if( ReadArgs::graph_trace && node )
     {
-        string s = n->GetAddr();
-        my_block.sub_blocks.push_back( { s, 
+        my_block.sub_blocks.push_back( { node->GetAddr(), 
                                          "", 
                                          {} } );
     }
     
+    // If there is more than one sub-block, use the rounded rectangle form for clarity
     if( my_block.sub_blocks.size() > 1 )
         my_block.shape = "plaintext";
 
+    // These kinds of blocks require port names to be to be specified so links can tell them apart
     my_block.specify_ports = (my_block.shape=="record" || my_block.shape=="plaintext");  
     
+    // Colour the block in accordance with the node if there is one otherwise leave it blank.
+    // See #258: "block colour shall be dictated by the node type only"
+    if( node )
+        my_block.colour = Colour( node );
+
+    // Actions for sub-blocks
+    for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
+    {
+        // Actions for links
+        for( Graphable::Link &link : sub_block.links )
+        {
+            // Detect pre-restrictions and add to link labels
+            string pr = GetPreRestriction( link.ptr );
+            if( !pr.empty() )
+                link.labels.push_back( pr );                    
+        }
+    }
+
     return my_block;    
 }
 
@@ -228,7 +249,6 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 {    
 	Graphable::Block block;
     block.title = Name( n, &block.bold, &block.shape );  
-    block.colour = Colour( n );
         
     vector< Itemiser::Element * > members = n->Itemise();
 	for( int i=0; i<members.size(); i++ )
@@ -242,9 +262,9 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
                                                   SSPrintf("[%d]", j++),
                                                   {} };
                 Graphable::Link link;
-                link.labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                    
                 link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
+                link.ptr = &p;
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -261,9 +281,9 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
-                link.labels.push_back( GetPreRestriction( (TreePtr<Node>)p, &p ) );                                    
                 link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
+                link.ptr = &p;
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -276,9 +296,9 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
                                                   "",
                                                   {} };
                 Graphable::Link link;
-                link.labels.push_back( GetPreRestriction( (TreePtr<Node>)*ptr, ptr ) );                    
                 link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
                 link.child_node = (TreePtr<Node>)*ptr;
+                link.ptr = ptr;
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }
@@ -338,7 +358,9 @@ string Graph::DoEngine( const MyBlock &block,
 	s += "shape = \"record\"\n"; // nodes can be split into fields
 	s += "style = \"filled\"\n";
 	s += "fontsize = \"" FS_MIDDLE "\"\n";
-	s += "];\n";
+	if(block.colour != "")
+		s += "fillcolor = " + block.colour + "\n";
+    s += "];\n";
 
 	return s;
 }
@@ -643,13 +665,13 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 }
 
 
-string Graph::GetPreRestriction(TreePtr<Node> node, const TreePtrInterface *ptr)
+string Graph::GetPreRestriction(const TreePtrInterface *ptr)
 {
     if( ptr )		// is normal tree link
     {
-        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(node) )   // is to a special node
+        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*ptr) )   // is to a special node
         {
-            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
+            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )    // pre-restrictor is nontrivial
             {
                 return (**(sbs->GetPreRestrictionArchitype())).GetRender();
             }

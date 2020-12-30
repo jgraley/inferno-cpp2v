@@ -83,6 +83,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
     block.sub_blocks = { { "pointer", 
                            "", 
                            { { (TreePtr<Node>)*GetPointer(), 
+                               GetPointer(),
                                SOLID, 
                                {},
                                {PatternLink(this, GetPointer()).GetShortName()} } } } };

@@ -102,6 +102,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
         block.sub_blocks.push_back( { "restriction", 
                                       "", 
                                       { { (TreePtr<Node>)*GetRestriction(), 
+                                          GetRestriction(),
                                           SOLID, 
                                           {},
                                           {PatternLink(this, GetRestriction()).GetShortName()} } } } );

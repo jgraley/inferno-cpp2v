@@ -31,16 +31,18 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
     sub_blocks.push_back( { "through", 
                             "",
                             { { (TreePtr<Node>)*GetThrough(), 
+                                GetThrough(),
                                 SOLID, 
                                 {},
                                 {PatternLink(this, GetThrough()).GetShortName()} } } } );
     sub_blocks.push_back( { "overlay", 
                             "",
                             { { (TreePtr<Node>)*GetOverlay(), 
+                                GetOverlay(),
                                 DASHED, 
                                 {},
                                 {PatternLink(this, GetOverlay()).GetShortName()} } } } );
-    return { false, GetName(), "", "", ENGINE, sub_blocks };
+    return { false, GetName(), "", ENGINE, sub_blocks };
 }
 
 

@@ -88,7 +88,8 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "terminus", 
                            "", 
-                           { { terminus, 
+                           { { (TreePtr<Node>)*GetTerminus(),
+                               GetTerminus(), 
                                SOLID, 
                                {},
                                {PatternLink(this, &terminus).GetShortName()} } } } };
@@ -272,7 +273,8 @@ Graphable::Block StuffAgent::GetGraphBlockInfo() const
     if( recurse_restriction )
         block.sub_blocks.push_back( { "recurse_restriction", 
                                       "", 
-                                      { { recurse_restriction, 
+                                      { { recurse_restriction,
+                                          &recurse_restriction, 
                                           SOLID, 
                                           {},
                                           {PatternLink(this, &recurse_restriction).GetShortName()} } } } );

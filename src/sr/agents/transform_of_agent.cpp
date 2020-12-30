@@ -59,6 +59,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
     block.sub_blocks = { { "pattern", 
                            "", 
                            { { pattern, 
+                               &pattern,
                                SOLID, 
                                {},
                                {PatternLink(this, &pattern).GetShortName()} } } } };

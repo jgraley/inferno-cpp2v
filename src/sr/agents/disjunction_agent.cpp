@@ -127,6 +127,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
                            {} } };
     FOREACH( const TreePtrInterface &p, GetPatterns() )
         block.sub_blocks.front().links.push_back( { (TreePtr<Node>)p, 
+                                                    &p,
                                                     SOLID, 
                                                     {},
                                                     {PatternLink(this, &p).GetShortName()} } );

@@ -56,7 +56,8 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "through", 
                            "", 
-                           { { (TreePtr<Node>)*GetThrough(), 
+                           { { (TreePtr<Node>)*GetThrough(),
+                               GetThrough(), 
                                SOLID, 
                                {},
                                {PatternLink(this, GetThrough()).GetShortName()} } } } };

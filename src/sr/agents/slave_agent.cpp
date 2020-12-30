@@ -50,7 +50,8 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
     Block block = my_scr_engine->GetGraphBlockInfo();
     block.sub_blocks.push_front( { "through", 
                                    "",
-                                   { { (TreePtr<Node>)*GetThrough(), 
+                                   { { (TreePtr<Node>)*GetThrough(),
+                                       GetThrough(), 
                                        SOLID, 
                                        {},
                                        {PatternLink(this, GetThrough()).GetShortName()} } } } );

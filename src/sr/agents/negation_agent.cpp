@@ -46,7 +46,8 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pattern", 
                            "", 
-                           { { (TreePtr<Node>)*GetPattern(), 
+                           { { (TreePtr<Node>)*GetPattern(),
+                               GetPattern(), 
                                SOLID, 
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()} } } } };

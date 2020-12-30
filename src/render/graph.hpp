@@ -22,6 +22,7 @@ public:
 private:
     struct MyBlock : Graphable::Block
     {
+        string colour;
         bool specify_ports;
     };
 
@@ -54,7 +55,7 @@ private:
     string Sanitise( string s, bool remove_template=false );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
-    string GetPreRestriction(TreePtr<Node> node, const TreePtrInterface *ptr);
+    string GetPreRestriction(const TreePtrInterface *ptr);
     void OverrideLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     
     UniqueFilter unique_filter;
