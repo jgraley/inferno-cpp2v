@@ -87,17 +87,17 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( dynamic_pointer_cast<Delete>(o) )
     {
-        throw DeleteUnsupportedMismatch();
+        return MakeTreePtr<Void>(); 
     }
     else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast<CompoundExpression>(o) )
     {
         if( ce->statements.empty() )
-            throw StatementExpressionEmptyMismatch();
+            return MakeTreePtr<Void>(); 
         TreePtr<Statement> last = ce->statements.back();
         if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(last) )
             return Get(e);
         else
-            throw StatementExpressionLastNotExprMismatch();
+            return MakeTreePtr<Void>(); 
     }
     else 
     {
