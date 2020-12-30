@@ -26,8 +26,8 @@ AutosToModule::AutosToModule()
     MakePatternPtr<Type> type;
     MakePatternPtr<InstanceIdentifier> var_id;
     MakePatternPtr<Initialiser> init;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Compound> > sx_not;
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Compound> > sx_not;
     MakePatternPtr< Stuff<Compound> > sx_stuff;
     MakePatternPtr<Call> sx_call;
         
@@ -66,7 +66,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     MakePatternPtr<Scope> s_rec, r_rec;
     MakePatternPtr< Star<Declaration> > decls, vdecls;
     MakePatternPtr< Star<Statement> > vstmts;
-    MakePatternPtr< MatchAny<Instance> > var;
+    MakePatternPtr< Disjunction<Instance> > var;
     MakePatternPtr<Temporary> tempvar;
     MakePatternPtr<Static> staticvar;
     MakePatternPtr<Field> fn;
@@ -184,7 +184,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     MakePatternPtr<Callable> s_callable;
     MakePatternPtr<Compound> s_comp, r_comp, m_comp;
     MakePatternPtr< Overlay<Compound> > over_comp;
-    MakePatternPtr< MatchAll<Instance> > s_all;
+    MakePatternPtr< Conjunction<Instance> > s_all;
     MakePatternPtr< Stuff<Instance> > s_stuff;
     MakePatternPtr<Return> s_return, ls_return, m_return;
     MakePatternPtr< Star<Declaration> > decls, m_decls;
@@ -197,7 +197,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     MakePatternPtr<Uninitialised> s_uninit, ls_uninit, m_uninit;
     MakePatternPtr<Assign> lr_assign;
     MakePatternPtr< Stuff<Statement> > m_stuff;
-    MakePatternPtr< NotMatch<Statement> > ms_affected;
+    MakePatternPtr< Negation<Statement> > ms_affected;
     MakePatternPtr<If> ms_if, mr_if;
     MakePatternPtr< Overlay<Statement> > m_over;
     

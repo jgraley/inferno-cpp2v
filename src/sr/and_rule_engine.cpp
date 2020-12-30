@@ -223,10 +223,10 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
         return; // will be fixed values for our solver
     senior_agents->insert( plink.GetChildAgent() );
 
-    // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
+    // See #129, can fail on legal patterns - will also fail on illegal Disjunction couplings
     for( PatternLink l : coupling_keyer_links )        
         ASSERT( l.GetChildAgent() != plink.GetChildAgent() )
-              ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
+              ("Conflicting coupling in and-rule pattern: check Disjunction nodes\n");
 
     coupling_keyer_links.insert(plink);
     agent_to_keyer[plink.GetChildAgent()] = plink;
@@ -248,16 +248,16 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
 void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
                                            unordered_set<Agent *> senior_agents ) 
 {
-    // Scan the senior region. We wish to break off at MatchAny nodes. Senior is the
-    // region up to and including a MatchAny; junior is the region under each of its
+    // Scan the senior region. We wish to break off at Disjunction nodes. Senior is the
+    // region up to and including a Disjunction; junior is the region under each of its
     // links.
     unordered_set<Agent *> my_matchany_agents;
     DetermineKeyersModuloMatchAny( plink, &senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
-    // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
+    // - my_match_any_agents has the Disjunction agents that we saw, BUT SKIPPED
     
-    // Now do all the links under the MatchAny nodes' links. Keying is allowed in each
+    // Now do all the links under the Disjunction nodes' links. Keying is allowed in each
     // of these junior regions individually, but no cross-keying is allowed if not keyed already.
     // Where that happens, there will be a conflict writing to coupling_nontrivial_keyer_links and the
     // ASSERT will fail.

@@ -22,15 +22,15 @@ struct CombableBreak : Break { NODE_FUNCTIONS_FINAL };
 
 DetectUncombableSwitch::DetectUncombableSwitch()
 {
-    MakePatternPtr< MatchAll<Switch> > s_all;
-    MakePatternPtr< NotMatch<Switch> > sx_not;
+    MakePatternPtr< Conjunction<Switch> > s_all;
+    MakePatternPtr< Negation<Switch> > sx_not;
     MakePatternPtr<UncombableSwitch> sx_uswitch;
     MakePatternPtr<Switch> s_switch;
     MakePatternPtr<Expression> expr;
     MakePatternPtr<Compound> comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< NotMatch<Statement> > x_not;
+    MakePatternPtr< Negation<Statement> > x_not;
     MakePatternPtr<Break> x_break;
     MakePatternPtr<SwitchTarget> target;
     MakePatternPtr<UncombableSwitch> r_uswitch;
@@ -54,8 +54,8 @@ DetectUncombableSwitch::DetectUncombableSwitch()
 // way, and can avoid a top-level NOT
 MakeAllForUncombable::MakeAllForUncombable()
 {
-    MakePatternPtr< MatchAll<For> > s_all;
-    MakePatternPtr< NotMatch<For> > s_not;
+    MakePatternPtr< Conjunction<For> > s_all;
+    MakePatternPtr< Negation<For> > s_not;
     MakePatternPtr<UncombableFor> sx_ufor;
     MakePatternPtr<For> s_for;
     MakePatternPtr<Statement> init;
@@ -84,14 +84,14 @@ DetectCombableFor::DetectCombableFor()
 {
     MakePatternPtr<UncombableFor> s_ufor;
     MakePatternPtr<Assign> init;
-    MakePatternPtr< MatchAny<Operator> > test;
+    MakePatternPtr< Disjunction<Operator> > test;
     MakePatternPtr<Less> lt;
     MakePatternPtr<LessOrEqual> le;
     MakePatternPtr<Greater> gt;
     MakePatternPtr<GreaterOrEqual> ge;
     MakePatternPtr<NotEqual> ne;    
     MakePatternPtr<Integer> init_val;
-    MakePatternPtr< MatchAny<AssignmentOperator> > inc;
+    MakePatternPtr< Disjunction<AssignmentOperator> > inc;
     MakePatternPtr<PostIncrement> postinc; 
     MakePatternPtr<PreIncrement> preinc; 
     MakePatternPtr<PostDecrement> postdec; 
@@ -101,7 +101,7 @@ DetectCombableFor::DetectCombableFor()
     MakePatternPtr<Assign> assign1, assign2;
     MakePatternPtr<Add> add;
     MakePatternPtr<Subtract> sub;    
-    MakePatternPtr< NotMatch<Statement> > body;
+    MakePatternPtr< Negation<Statement> > body;
     MakePatternPtr< Stuff<Statement> > astuff;
     MakePatternPtr<AssignmentOperator> assignop;
     
@@ -149,7 +149,7 @@ DetectCombableFor::DetectCombableFor()
 // way, and can avoid a top-level NOT
 MakeAllBreakUncombable::MakeAllBreakUncombable()
 {
-    MakePatternPtr< NotMatch<Break> > s_not;
+    MakePatternPtr< Negation<Break> > s_not;
     MakePatternPtr<UncombableBreak> sx_ubreak;
     MakePatternPtr<Break> s_break;
     MakePatternPtr<Statement> init;
@@ -170,8 +170,8 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
 // under constructs like if
 DetectCombableBreak::DetectCombableBreak()
 {
-    MakePatternPtr< MatchAll<Switch> > all;
-    MakePatternPtr< NotMatch<Switch> > x_not;
+    MakePatternPtr< Conjunction<Switch> > all;
+    MakePatternPtr< Negation<Switch> > x_not;
     MakePatternPtr<UncombableSwitch> uswitch;
     MakePatternPtr<Switch> swtch;
     MakePatternPtr<Expression> expr;
@@ -220,7 +220,7 @@ ForToWhile::ForToWhile()
     MakePatternPtr<Compound> r_outer, r_body;
     MakePatternPtr< Stuff<Statement> > l_stuff;
     MakePatternPtr< Overlay<Statement> > l_overlay;
-    MakePatternPtr< NotMatch<Statement> > l_s_not;
+    MakePatternPtr< Negation<Statement> > l_s_not;
     MakePatternPtr< Loop > l_s_loop;
     
     MakePatternPtr<Continue> l_s_cont;
@@ -281,11 +281,11 @@ IfToIfGoto::IfToIfGoto()
     // to a more specific kind (the condiitonal goto pattern) we have to 
     // exclude the conditional goto explicitly using and-not in the search 
     // pattern. Otherwise we would spin forever expanding them over and over.
-    MakePatternPtr< MatchAll<Statement> > s_and;    
+    MakePatternPtr< Conjunction<Statement> > s_and;    
     MakePatternPtr<If> s_if, l_r_if, r_if;
     MakePatternPtr<Statement> body, else_body;
     MakePatternPtr<Expression> cond;
-    MakePatternPtr< NotMatch<Statement> > l_r_not;
+    MakePatternPtr< Negation<Statement> > l_r_not;
     MakePatternPtr<Goto> l_r_goto, r_goto, r_goto_else;
     MakePatternPtr<Nop> l_r_nop, r_nop;
     MakePatternPtr<Compound> r_comp;
@@ -455,7 +455,7 @@ DoToIfGoto::DoToIfGoto()
     MakePatternPtr< Stuff<Statement> > l_stuff;
     MakePatternPtr< Overlay<Statement> > l_overlay;
     MakePatternPtr<Continue> l_s_cont;
-    MakePatternPtr< NotMatch<Statement> > l_s_not;
+    MakePatternPtr< Negation<Statement> > l_s_not;
     MakePatternPtr< Loop > l_s_loop;
 
     l_s_not->pattern = l_s_loop;
@@ -492,7 +492,7 @@ BreakToGoto::BreakToGoto()
     MakePatternPtr<Breakable> breakable, sx_breakable;
     MakePatternPtr< Stuff<Statement> > stuff;
     MakePatternPtr< Overlay<Statement> > overlay;
-    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Break> s_break;
     MakePatternPtr<Goto> r_goto;
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("BREAK");
@@ -613,8 +613,8 @@ ExtractCallParams::ExtractCallParams()
     MakePatternPtr<Type> type;
     MakePatternPtr<Expression> callee;
     MakePatternPtr<InstanceIdentifier> id;
-    MakePatternPtr< MatchAll<Expression> > all;
-    MakePatternPtr< NotMatch<Expression> > x_not;
+    MakePatternPtr< Conjunction<Expression> > all;
+    MakePatternPtr< Negation<Expression> > x_not;
     MakePatternPtr<InstanceIdentifier> x_id;
     
     s_call->operands = (params, s_param);

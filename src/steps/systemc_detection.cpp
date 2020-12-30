@@ -371,7 +371,7 @@ public:
         MakePatternPtr<Program> s_scope, r_scope;
         MakePatternPtr< Star<Declaration> > decls;
         MakePatternPtr<Static> s_instance;
-        MakePatternPtr< MatchAny<Type> > s_any;
+        MakePatternPtr< Disjunction<Type> > s_any;
         MakePatternPtr<CallableParams> s_callable;
         MakePatternPtr< Star<Instance> > s_params;
         MakePatternPtr<Instance> s_void_param;

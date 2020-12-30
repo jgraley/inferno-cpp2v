@@ -21,9 +21,9 @@ void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    TRACE("NotMatch: local match check: ")(*this)(" vs ")(x)("\n");
+    TRACE("Negation: local match check: ")(*this)(" vs ")(x)("\n");
     CheckLocalMatch(x.GetChildX().get());
-    TRACE("NotMatch: local match check OK\n");
+    TRACE("Negation: local match check OK\n");
     
     // Context is abnormal because patterns must not match
     query.RegisterAbnormalLink( PatternLink(this, GetPattern()), x ); // Link into X, abnormal
@@ -33,7 +33,7 @@ void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
 Graphable::Block NegationAgent::GetGraphBlockInfo() const
 {
-	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
+	// The Negation node appears as a small circle with an ! character inside it. The affected subtree is 
 	// on the right.
 	// NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
     // a node that represents a boolean operation in the program being processed. Those nodes would 

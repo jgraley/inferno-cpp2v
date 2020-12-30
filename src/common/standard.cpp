@@ -61,8 +61,8 @@ string Traceable::Denamespace( string s )
 
     // We wish to strip off namespaces to reduce clutter, but
     // we don't want to break template representations.
-    // I.e. we'd like to turn "SR::MatchAny<CPPTree::Type>"
-    // into "MatchAny<Type>". 
+    // I.e. we'd like to turn "SR::Disjunction<CPPTree::Type>"
+    // into "Disjunction<Type>". 
     list<string> parts;
     while(1)
     {

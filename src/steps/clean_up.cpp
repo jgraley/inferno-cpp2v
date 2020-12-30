@@ -35,16 +35,16 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
      // first.
     MakePatternPtr< Stuff<Node> > root_stuff;
     MakePatternPtr< Overlay<Node> > root_overlay;
-    MakePatternPtr< NotMatch<Node> > root_not;
+    MakePatternPtr< Negation<Node> > root_not;
     MakePatternPtr< CompoundExpression > root_ce;
           
-    MakePatternPtr< MatchAll<Statement> > s_all;
+    MakePatternPtr< Conjunction<Statement> > s_all;
     MakePatternPtr< PointerIs<Statement> > sx_pointeris;
-    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Expression> sx_expr;
     
     MakePatternPtr< Stuff<Statement> > stuff;
-    MakePatternPtr< NotMatch<Statement> > sr_not;
+    MakePatternPtr< Negation<Statement> > sr_not;
     MakePatternPtr<SequentialScope> sr_comp;
     MakePatternPtr< Star<Declaration> > sr_cdecls;
     MakePatternPtr< Star<Statement> > sr_cstmts;
@@ -123,8 +123,8 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
-    MakePatternPtr< MatchAll<Statement> > all;    
-    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr< Conjunction<Statement> > all;    
+    MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Instance> sx_instance;
     MakePatternPtr< AnyNode<Statement> > node;
     MakePatternPtr< Overlay<Statement> > over;   
@@ -188,7 +188,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<LabelIdentifier> s_labelid1, s_labelid2;
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
-    MakePatternPtr< MatchAny<LabelIdentifier> > l_s_orrule;
+    MakePatternPtr< Disjunction<LabelIdentifier> > l_s_orrule;
     MakePatternPtr<InstanceIdentifier> identifier;
     MakePatternPtr<Callable> type;
     
@@ -243,7 +243,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<LabelIdentifier> s_labelid1, s_labelid2;
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
-    MakePatternPtr< MatchAny<LabelIdentifier> > l_s_orrule;
+    MakePatternPtr< Disjunction<LabelIdentifier> > l_s_orrule;
     MakePatternPtr<InstanceIdentifier> identifier;
     MakePatternPtr<Callable> type;
     MakePatternPtr<Goto> s_goto, r_goto;
@@ -319,9 +319,9 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<LabelIdentifier> labelid;
     MakePatternPtr<Goto> sx_goto;
-    MakePatternPtr< MatchAll<Compound> > s_andrule;
-    MakePatternPtr< NotMatch<Compound> > sx_notrule;
-    MakePatternPtr< NotMatch<Node> > sxx_notrule;        
+    MakePatternPtr< Conjunction<Compound> > s_andrule;
+    MakePatternPtr< Negation<Compound> > sx_notrule;
+    MakePatternPtr< Negation<Node> > sxx_notrule;        
     MakePatternPtr< Label > sxx_label;        
     MakePatternPtr<InstanceIdentifier> identifier;
     MakePatternPtr<Callable> type;
@@ -357,8 +357,8 @@ CleanUpDeadCode::CleanUpDeadCode()
     MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< NotMatch<Statement> > s_dead_not;
-    MakePatternPtr< MatchAny<Statement> > s_dead_any, s_exit_any;
+    MakePatternPtr< Negation<Statement> > s_dead_not;
+    MakePatternPtr< Disjunction<Statement> > s_dead_any, s_exit_any;
     MakePatternPtr<Case> casee;
     MakePatternPtr<Break> breakk;
      
@@ -379,9 +379,9 @@ ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
     MakePatternPtr<CompoundExpression> s_ce;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > stmts;
-    MakePatternPtr< NotMatch<Statement> > last;
+    MakePatternPtr< Negation<Statement> > last;
     MakePatternPtr< TransformOf<Expression> > sx_expr( &TypeOf::instance );
-    MakePatternPtr< NotMatch<Type> > sx_type_not;
+    MakePatternPtr< Negation<Type> > sx_type_not;
     MakePatternPtr<Void> sx_void;
     MakePatternPtr<Compound> r_comp;
     
@@ -399,22 +399,22 @@ ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
 
 CleanupUnusedVariables::CleanupUnusedVariables()
 {
-    MakePatternPtr< MatchAll<Scope> > s_all;
+    MakePatternPtr< Conjunction<Scope> > s_all;
     MakePatternPtr<Scope> s_scope, r_scope;
     MakePatternPtr< Overlay<Scope> > over_scope; 
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr<Instance> inst;
     MakePatternPtr<NestedArrayAgent> nested_array;
-    MakePatternPtr< NotMatch<Type> > sx_not;
-    MakePatternPtr< MatchAny<Type> > sx_any;
+    MakePatternPtr< Negation<Type> > sx_not;
+    MakePatternPtr< Disjunction<Type> > sx_any;
     MakePatternPtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance ); // TODO should be modulo typedefs
     MakePatternPtr<InstanceIdentifier> id;
     MakePatternPtr< Stuff<Scope> > stuff1, s_stuff2;
-    MakePatternPtr< MatchAll<Node> > s_antip;
+    MakePatternPtr< Conjunction<Node> > s_antip;
     MakePatternPtr< AnyNode<Node> > s_anynode;
-    MakePatternPtr< NotMatch<Node> > s_nm;
+    MakePatternPtr< Negation<Node> > s_nm;
     MakePatternPtr<InheritanceRecord> sx_ir;     
-    MakePatternPtr< NotMatch<Scope> > s_nscope;
+    MakePatternPtr< Negation<Scope> > s_nscope;
     
     s_all->patterns = (stuff1, s_nscope);
     stuff1->terminus = over_scope;

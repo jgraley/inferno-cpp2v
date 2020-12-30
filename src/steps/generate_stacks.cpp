@@ -25,11 +25,11 @@ ExplicitiseReturn::ExplicitiseReturn()
     MakePatternPtr< Star<Declaration> > decls, sx_decls;
     MakePatternPtr< Overlay<Compound> > over;
     MakePatternPtr<Return> sx_return, r_return;
-    MakePatternPtr< MatchAny<Callable> > s_any;
+    MakePatternPtr< Disjunction<Callable> > s_any;
     MakePatternPtr<Function> s_func;
     MakePatternPtr<Procedure> s_proc;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Compound> > s_not;
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Compound> > s_not;
         
     fi->type = s_any;
     s_any->patterns = (s_func, s_proc, MakePatternPtr<Subroutine>() );
@@ -58,7 +58,7 @@ UseTempForReturnValue::UseTempForReturnValue()
 {
     // search for return statement in a compound (TODO don't think we need the outer compound)
     TreePtr<Return> s_return( new Return );
-    TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
+    TreePtr< Conjunction<Expression> > s_and( new Conjunction<Expression> );
     s_return->return_value = s_and;
     MakePatternPtr< TransformOf<Expression> > retval( &TypeOf::instance );
     MakePatternPtr<Type> type;
@@ -100,7 +100,7 @@ ReturnViaTemp::ReturnViaTemp()
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Base> > bases;
     MakePatternPtr<Function> cp;
-    MakePatternPtr< NotMatch<Type> > return_type;
+    MakePatternPtr< Negation<Type> > return_type;
     MakePatternPtr<Void> sx_void;
     MakePatternPtr<Compound> s_body, r_body, lr_comp;
     MakePatternPtr< Star<Statement> > statements;
@@ -174,7 +174,7 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr<BuildInstanceIdentifierAgent> lr_retaddr_id("link");
     MakePatternPtr<TempReturnAddress> lr_temp_retaddr;
     MakePatternPtr<BuildInstanceIdentifierAgent> lr_temp_retaddr_id("temp_link");
-    MakePatternPtr< NotMatch<Declaration> > s_nm, ls_nm;
+    MakePatternPtr< Negation<Declaration> > s_nm, ls_nm;
     MakePatternPtr< GreenGrass<Declaration> > gg;
     MakePatternPtr<Instance> l_inst;
     MakePatternPtr< Overlay<Compound> > l_over;
@@ -186,9 +186,9 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr<Compound> mr_comp, msx_comp;
     MakePatternPtr<Label> mr_label;
     MakePatternPtr<BuildLabelIdentifierAgent> mr_labelid("LINK");
-    MakePatternPtr< MatchAll<Statement> > m_all;
+    MakePatternPtr< Conjunction<Statement> > m_all;
     MakePatternPtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
-    MakePatternPtr< NotMatch<Statement> > ms_not;
+    MakePatternPtr< Negation<Statement> > ms_not;
     MakePatternPtr< Overlay<Statement> > m_over;
     MakePatternPtr< Overlay<Function> > l_func_over;
     MakePatternPtr<Function> ls_func, lr_func;
@@ -197,9 +197,9 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr<Return> ll_return;
     MakePatternPtr<Compound> llr_comp, llsx_comp;
     MakePatternPtr<Assign> llr_assign, llsx_assign;
-    MakePatternPtr< MatchAll<Statement> > ll_all;
+    MakePatternPtr< Conjunction<Statement> > ll_all;
     MakePatternPtr< AnyNode<Statement> > ll_any;
-    MakePatternPtr< NotMatch<Statement> > lls_not;
+    MakePatternPtr< Negation<Statement> > lls_not;
     MakePatternPtr< Overlay<Statement> > ll_over;
     MakePatternPtr< GreenGrass<Statement> > m_gg, ll_gg;
     MakePatternPtr<MapOperand> mr_operand;
@@ -345,9 +345,9 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr<Instance> s_fi, r_fi, l_fi;
     MakePatternPtr<Thread> sx_thread;
     MakePatternPtr<Method> sx_method;
-    MakePatternPtr< MatchAny<Type> > sx_any;
-    MakePatternPtr< NotMatch<Type> > s_not;
-    MakePatternPtr< MatchAll<Initialiser> > s_and;
+    MakePatternPtr< Disjunction<Type> > sx_any;
+    MakePatternPtr< Negation<Type> > s_not;
+    MakePatternPtr< Conjunction<Initialiser> > s_and;
     MakePatternPtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
     MakePatternPtr< Star<Declaration> > top_decls;
     MakePatternPtr< Star<Statement> > top_pre;
@@ -364,7 +364,7 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr<Array> r_array;
     MakePatternPtr<Return> ret;
     MakePatternPtr<Subscript> l_r_sub;
-    MakePatternPtr< MatchAll<Node> > s_and3;
+    MakePatternPtr< Conjunction<Node> > s_and3;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_index_identifier("%s_stack_index");
     MakePatternPtr<BuildInstanceIdentifierAgent> r_identifier("%s_stack");
     MakePatternPtr< GreenGrass<Statement> > s_gg;
@@ -482,7 +482,7 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr<Instance> fi;
     MakePatternPtr< Overlay<Initialiser> > oinit;
     MakePatternPtr<Callable> s_func;
-    MakePatternPtr< MatchAll<Initialiser> > s_and;
+    MakePatternPtr< Conjunction<Initialiser> > s_and;
     MakePatternPtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
     MakePatternPtr< Star<Declaration> > top_decls;
     MakePatternPtr< Star<Statement> > top_pre;
@@ -498,7 +498,7 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr<Array> r_array;
     MakePatternPtr<Return> ret;
     MakePatternPtr<Subscript> l_r_sub;
-    MakePatternPtr< MatchAll<Node> > s_and3;
+    MakePatternPtr< Conjunction<Node> > s_and3;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_index_identifier("%s_stack_index");
     MakePatternPtr<BuildInstanceIdentifierAgent> r_identifier("%s_stack");
     MakePatternPtr< GreenGrass<Statement> > s_gg;
@@ -588,7 +588,7 @@ MergeFunctions::MergeFunctions()
     MakePatternPtr<InstanceIdentifier> func_id;
     MakePatternPtr<Label> r_label;
     MakePatternPtr< BuildLabelIdentifierAgent > r_label_id("ENTER_%s");
-    MakePatternPtr< MatchAll<Compound> > s_all;
+    MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr< Stuff<Compound> > s_stuff, func_stuff;
     MakePatternPtr<TypeIdentifier> module_id;
     MakePatternPtr<Goto> lr_goto, mr_goto;

@@ -42,7 +42,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<Switch> l_switch;     
     MakePatternPtr< Overlay<Enum> > l_over_enum;     
     MakePatternPtr<Enum> ls_enum, lr_enum;     
-    MakePatternPtr< NotMatch<Statement> > xs_rr;
+    MakePatternPtr< Negation<Statement> > xs_rr;
     MakePatternPtr<Static> lr_state_decl;    
     MakePatternPtr<BuildInstanceIdentifierAgent> lr_state_id("%s_STATE_%s");
     MakePatternPtr<Case> lr_case;
@@ -50,8 +50,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<BuildContainerSizeAgent> lr_count;
     MakePatternPtr<LabelIdentifier> ls_label_id;
     MakePatternPtr<Instance> var_decl, l_var_decl;
-    MakePatternPtr< MatchAll<Node> > ll_all;
-    MakePatternPtr< NotMatch<Node> > lls_not1, lls_not2;    
+    MakePatternPtr< Conjunction<Node> > ll_all;
+    MakePatternPtr< Negation<Node> > lls_not1, lls_not2;    
     MakePatternPtr< AnyNode<Node> > ll_any;
     MakePatternPtr< Overlay<Node> > ll_over, ll_all_over;
     MakePatternPtr<Goto> lls_goto;    
@@ -62,7 +62,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<Equal> lr_equal;
     MakePatternPtr<Loop> l_loop;
     MakePatternPtr< Overlay<Statement> > l_over;
-    MakePatternPtr< NotMatch<Statement> > l_not;             
+    MakePatternPtr< Negation<Statement> > l_not;             
     MakePatternPtr< Stuff<Scope> > m_stuff_func;
     MakePatternPtr<Scope> l_module;
     MakePatternPtr<Field> l_func;
@@ -73,7 +73,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< Overlay<Expression> > l_mover;
     MakePatternPtr< Stuff<Statement> > l_stuff;
     MakePatternPtr< Star<Expression> > l_existing;
-    MakePatternPtr< NotMatch<Expression> > l_mnot;
+    MakePatternPtr< Negation<Expression> > l_mnot;
     MakePatternPtr< Subscript > ll_sub;
     MakePatternPtr<Compound> s_comp, r_comp, l_comp;
     MakePatternPtr< Overlay<Compound> > over_comp;
@@ -186,17 +186,17 @@ LabelTypeToEnum::LabelTypeToEnum()
     MakePatternPtr<Const> lmap_const;
     MakePatternPtr<Array> lmap_type;
     MakePatternPtr<InstanceIdentifier> lmap_id; 
-    MakePatternPtr< MatchAll<Node> > apall, l_apall;
-    MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
+    MakePatternPtr< Conjunction<Node> > apall, l_apall;
+    MakePatternPtr< Negation<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
     MakePatternPtr< Overlay<Node> > l_apall_over;
     MakePatternPtr< Overlay<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
     MakePatternPtr<Goto> ns_goto, nr_goto;
-    MakePatternPtr< NotMatch<Expression> > n_dest_expr;
+    MakePatternPtr< Negation<Expression> > n_dest_expr;
     MakePatternPtr<Unsigned> l_enum; // TODO use the real enum!!
-    MakePatternPtr< MatchAll<Scope> > all;
+    MakePatternPtr< Conjunction<Scope> > all;
     MakePatternPtr<Record> record;
     MakePatternPtr< Star<Declaration> > decls;
     
@@ -248,16 +248,16 @@ RemoveLabelSubscript::RemoveLabelSubscript()
     MakePatternPtr<Const> lmap_const;
     MakePatternPtr<Array> lmap_type;
     MakePatternPtr<InstanceIdentifier> lmap_id; 
-    MakePatternPtr< MatchAll<Node> > apall, l_apall;
-    MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
+    MakePatternPtr< Conjunction<Node> > apall, l_apall;
+    MakePatternPtr< Negation<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
     MakePatternPtr< Overlay<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
     MakePatternPtr<Goto> ns_goto, nr_goto;
-    MakePatternPtr< NotMatch<Expression> > n_dest_expr;
+    MakePatternPtr< Negation<Expression> > n_dest_expr;
     MakePatternPtr<Unsigned> l_enum; // TODO use the real enum!!
-    MakePatternPtr< MatchAll<Scope> > all;
+    MakePatternPtr< Conjunction<Scope> > all;
     MakePatternPtr<Record> record;
     MakePatternPtr< Star<Declaration> > decls;
     
@@ -275,16 +275,16 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     MakePatternPtr<Const> lmap_const;
     MakePatternPtr<Array> lmap_type;
     MakePatternPtr<InstanceIdentifier> lmap_id; 
-    MakePatternPtr< MatchAll<Node> > apall, l_apall;
-    MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
+    MakePatternPtr< Conjunction<Node> > apall, l_apall;
+    MakePatternPtr< Negation<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
     MakePatternPtr< Overlay<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
     MakePatternPtr<Goto> ns_goto, nr_goto;
-    MakePatternPtr< NotMatch<Expression> > n_dest_expr;
+    MakePatternPtr< Negation<Expression> > n_dest_expr;
     MakePatternPtr<Unsigned> l_enum; // TODO use the real enum!!
-    MakePatternPtr< MatchAll<Scope> > all;
+    MakePatternPtr< Conjunction<Scope> > all;
     MakePatternPtr<Record> record;
     MakePatternPtr< Star<Declaration> > decls;
     
@@ -316,23 +316,23 @@ LabelInstancesToEnum::LabelInstancesToEnum()
 
 LabelVarsToEnum::LabelVarsToEnum()
 {
-    MakePatternPtr< MatchAll<Scope> > s_all;
-    MakePatternPtr< MatchAll<Statement> > sx_all;
+    MakePatternPtr< Conjunction<Scope> > s_all;
+    MakePatternPtr< Conjunction<Statement> > sx_all;
     MakePatternPtr< Stuff<Scope> > scope;
     MakePatternPtr<Instance> var;
     MakePatternPtr<InstanceIdentifier> var_id;
     MakePatternPtr< Stuff<Scope> > s_stuff, sx_stuff;
     MakePatternPtr<Assign> s_assign, sx_assign, l_assign;
     MakePatternPtr<Subscript> s_sub, sx_sub, ls_sub, mr_sub, msx_sub;
-    MakePatternPtr< NotMatch<Scope> > sx_not1;
+    MakePatternPtr< Negation<Scope> > sx_not1;
     MakePatternPtr<AssignmentOperator> sx_asop, ms_asop;
-    MakePatternPtr< NotMatch<Statement> > sx_not2, msx_not, msx_not2, msx_not3;
+    MakePatternPtr< Negation<Statement> > sx_not2, msx_not, msx_not2, msx_not3;
     MakePatternPtr< Overlay<Type> > over;
     MakePatternPtr< TransformOf<Expression> > s_index( &TypeOf::instance );
     MakePatternPtr<TypeIdentifier> type; 
     MakePatternPtr< Overlay<Expression> > l_over, m_over;
     MakePatternPtr<Expression> l_index;
-    MakePatternPtr< MatchAll<Node> > ms_all;
+    MakePatternPtr< Conjunction<Node> > ms_all;
     MakePatternPtr< AnyNode<Node> > ms_anynode;    
     MakePatternPtr<NestedArrayAgent> nested_array;
     MakePatternPtr<NestedSubscriptLookupAgent> nested_subscript, nested_subscript2, nested_subscript3;
@@ -433,7 +433,7 @@ AddStateEnumVar::AddStateEnumVar()
     MakePatternPtr<Goto> ls_goto, lr_goto, s_goto;
     MakePatternPtr<Assign> lr_assign;
     MakePatternPtr<Automatic> state_var;
-    MakePatternPtr< NotMatch<Expression> > lx_not;
+    MakePatternPtr< Negation<Expression> > lx_not;
     MakePatternPtr< BuildInstanceIdentifierAgent > state_var_id("state");
     MakePatternPtr< GreenGrass<Compound> > s_gg;
     MakePatternPtr<Subscript> s_sub, ls_sub, lr_sub;
@@ -478,7 +478,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     MakePatternPtr<Subscript> sub;
     MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
     MakePatternPtr<StateLabel> label;
-    MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body;
+    MakePatternPtr< Negation<Statement> > sx_pre, sx_body;
     MakePatternPtr<Uncombable> sx_uncombable;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;   
@@ -515,7 +515,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     MakePatternPtr<Subscript> sub;
     MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
     MakePatternPtr<StateLabel> label;
-    MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body1, sx_body2;
+    MakePatternPtr< Negation<Statement> > sx_pre, sx_body1, sx_body2;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;   
     MakePatternPtr<Wait> wait;
@@ -555,7 +555,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     MakePatternPtr<Subscript> sub;
     MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
     MakePatternPtr<StateLabel> label;
-    MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body;
+    MakePatternPtr< Negation<Statement> > sx_pre, sx_body;
     MakePatternPtr<If> r_if, r_if2;
     MakePatternPtr<Equal> r_equal;   
     MakePatternPtr<NotEqual> r_not_equal;   
@@ -597,7 +597,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     MakePatternPtr<Label> item_extra, sx_post_label;
     MakePatternPtr<If> iif;
     MakePatternPtr<Equal> equal;   
-    MakePatternPtr< NotMatch<Statement> > sx_post;
+    MakePatternPtr< Negation<Statement> > sx_post;
     MakePatternPtr<InstanceIdentifier> state_var_id, state_id;
     MakePatternPtr< Star<Label> > label_star;    
         
@@ -615,12 +615,12 @@ ApplyLabelPolicy::ApplyLabelPolicy()
 
 ApplyTopPolicy::ApplyTopPolicy()
 {
-    MakePatternPtr< MatchAll<Compound> > s_all;
+    MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > body1, body2, post;
     MakePatternPtr<Label> label, sx_label, sx_label2;
-    MakePatternPtr< NotMatch<Statement> > sx_stmt;
+    MakePatternPtr< Negation<Statement> > sx_stmt;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;   
     MakePatternPtr<DeltaCount> r_delta_count;
@@ -628,7 +628,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     MakePatternPtr<Wait> wait;
     MakePatternPtr< Stuff<Compound> > s_stuff;
     MakePatternPtr<Goto> gotoo;
-    MakePatternPtr< NotMatch<Statement> > sx_body1, sx_body2;
+    MakePatternPtr< Negation<Statement> > sx_body1, sx_body2;
     MakePatternPtr<Uncombable> sx_uncombable1, sx_uncombable2;
        
     s_all->patterns = (s_comp, s_stuff);
@@ -657,8 +657,8 @@ EnsureResetYield::EnsureResetYield()
     MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< NotMatch<Statement> > sx_not;
-    MakePatternPtr< MatchAny<Statement> > sx_any;
+    MakePatternPtr< Negation<Statement> > sx_not;
+    MakePatternPtr< Disjunction<Statement> > sx_any;
     MakePatternPtr<Goto> gotoo;
     MakePatternPtr<WaitDelta> r_yield;
     
@@ -683,7 +683,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     MakePatternPtr<If> s_ifgoto;
     MakePatternPtr<Goto> s_goto;
     MakePatternPtr<Expression> cond;
-    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Do> r_do;
     MakePatternPtr< Overlay<Compound> > over;
     
@@ -730,8 +730,8 @@ InsertInferredYield::InsertInferredYield()
     MakePatternPtr<WaitDelta> r_yield;
     MakePatternPtr<Loop> loop;
     MakePatternPtr<If> r_if, sx_if;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Compound> > s_notmatch;
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Compound> > s_notmatch;
     MakePatternPtr< LogicalNot > r_not, sx_not;
     MakePatternPtr< Assign > assign;
           

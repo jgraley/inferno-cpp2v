@@ -32,7 +32,7 @@ private:
 
 
 template<class PRE_RESTRICTION>
-class NotMatch : public Special<PRE_RESTRICTION>,
+class Negation : public Special<PRE_RESTRICTION>,
                  public NegationAgent
 {
 public:

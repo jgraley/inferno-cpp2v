@@ -40,7 +40,7 @@ void ConjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
 Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
 {
-	// The MatchAll node appears as a small circle with an & character inside it. The affected subtrees are 
+	// The Conjunction node appears as a small circle with an & character inside it. The affected subtrees are 
 	// on the right.
 	// NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
     // a node that represents a boolean operation in the program being processed. Those nodes would 

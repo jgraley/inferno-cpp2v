@@ -26,8 +26,8 @@ private:
 
 
 template<class PRE_RESTRICTION>
-class MatchAll : public Special<PRE_RESTRICTION>,
-                 public ConjunctionAgent
+class Conjunction : public Special<PRE_RESTRICTION>,
+                    public ConjunctionAgent
 {
 public:
     SPECIAL_NODE_FUNCTIONS

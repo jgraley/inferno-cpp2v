@@ -29,8 +29,8 @@ GotoAfterWait::GotoAfterWait()
     MakePatternPtr< Star<Declaration> > sx_decls;
     MakePatternPtr< Star<Statement> > sx_pre, sx_post;    
     MakePatternPtr<Wait> wait;
-    MakePatternPtr< NotMatch<Statement> > notmatch;
-    MakePatternPtr< MatchAll<Statement> > all;
+    MakePatternPtr< Negation<Statement> > notmatch;
+    MakePatternPtr< Conjunction<Statement> > all;
     MakePatternPtr< AnyNode<Statement> > anynode;
     MakePatternPtr< Overlay<Statement> > over, all_over;
     MakePatternPtr<Goto> sx_goto, r_goto;
@@ -62,7 +62,7 @@ GotoAfterWait::GotoAfterWait()
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<Wait> wait;
-    MakePatternPtr< NotMatch<Statement> > notmatch;
+    MakePatternPtr< Negation<Statement> > notmatch;
     MakePatternPtr<Goto> sx_goto, r_goto;
     MakePatternPtr<Label> r_label;
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("YIELD");
@@ -91,8 +91,8 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     MakePatternPtr< Multiplexor > mult;
     MakePatternPtr< Label > label;    
     MakePatternPtr< BuildLabelIdentifierAgent > label_id("PROCEED");
-    MakePatternPtr< MatchAll<Statement> > s_all;
-    MakePatternPtr< NotMatch<Statement> > sx_not;    
+    MakePatternPtr< Conjunction<Statement> > s_all;
+    MakePatternPtr< Negation<Statement> > sx_not;    
     
     s_all->patterns = (s_comp, sx_not);
     sx_not->pattern = sx_comp;    
@@ -150,8 +150,8 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     MakePatternPtr< Multiplexor > mult;
     MakePatternPtr< Label > label;    
     MakePatternPtr< LabelIdentifier > label_id;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Compound> > s_not;
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Compound> > s_not;
         
     s_all->patterns = (s_comp, s_not);
     s_not->pattern = sx_comp;
@@ -184,15 +184,15 @@ EnsureBootstrap::EnsureBootstrap()
     MakePatternPtr<Instance> fn;
     MakePatternPtr<Thread> thread;
     MakePatternPtr< Overlay<Compound> > over;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Compound> > s_not;    
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Compound> > s_not;    
     MakePatternPtr<Compound> s_body, r_body, sx_body;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, sx_pre, post;
     MakePatternPtr<Goto> r_goto;
     MakePatternPtr<Label> r_label;    
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("BOOTSTRAP");
-    MakePatternPtr< NotMatch<Statement> > stop;
+    MakePatternPtr< Negation<Statement> > stop;
     MakePatternPtr<Goto> sx_goto;
         
     fn->type = thread;
@@ -228,7 +228,7 @@ AddStateLabelVar::AddStateLabelVar()
     MakePatternPtr<Goto> ls_goto, lr_goto, sx_goto;
     MakePatternPtr<Assign> lr_assign;
     MakePatternPtr<Automatic> state_var;
-    MakePatternPtr< NotMatch<Expression> > sx_not, lsx_not;
+    MakePatternPtr< Negation<Expression> > sx_not, lsx_not;
     MakePatternPtr< BuildInstanceIdentifierAgent > state_var_id("state");
     
     ls_goto->destination = lsx_not;
@@ -260,8 +260,8 @@ EnsureSuperLoop::EnsureSuperLoop()
     MakePatternPtr<Instance> fn;
     MakePatternPtr<Thread> thread;
     MakePatternPtr< Overlay<Compound> > over;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Statement> > sx_not, s_limit;    
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Statement> > sx_not, s_limit;    
     MakePatternPtr< Stuff<Compound> > sx_stuff;
     MakePatternPtr< Goto > sx_goto, first_goto;
     MakePatternPtr<Compound> s_body, r_body, r_loop_body;
@@ -334,7 +334,7 @@ InsertSwitch::InsertSwitch()
     MakePatternPtr<Label> ls_label; 
     MakePatternPtr<Switch> r_switch, l_switch;     
     MakePatternPtr<Enum> r_enum, ls_enum, lr_enum;         
-    MakePatternPtr< NotMatch<Statement> > s_prenot, s_postnot, xs_rr;
+    MakePatternPtr< Negation<Statement> > s_prenot, s_postnot, xs_rr;
     MakePatternPtr<BuildTypeIdentifierAgent> r_enum_id("%sStates");
     MakePatternPtr<Static> lr_state_decl;    
     MakePatternPtr<BuildInstanceIdentifierAgent> lr_state_id("STATE_%s");
@@ -347,8 +347,8 @@ InsertSwitch::InsertSwitch()
     MakePatternPtr< Overlay<Type> > var_over;  
     MakePatternPtr<Label> xs_pre_label;
     MakePatternPtr<IsLabelReachedAgent> xs_pre_reach;
-    MakePatternPtr< MatchAll<Node> > ll_all;
-    MakePatternPtr< NotMatch<Node> > lls_not1, lls_not2;    
+    MakePatternPtr< Conjunction<Node> > ll_all;
+    MakePatternPtr< Negation<Node> > lls_not1, lls_not2;    
     MakePatternPtr< AnyNode<Node> > ll_any;
     MakePatternPtr< Overlay<Node> > ll_over;
     MakePatternPtr<Goto> lls_goto;    
@@ -445,8 +445,8 @@ SwitchCleanUp::SwitchCleanUp()
     MakePatternPtr< Star<Statement> > main, tail;
     MakePatternPtr<Label> label;
     MakePatternPtr<Expression> cond;
-    MakePatternPtr< NotMatch<Statement> > sx_not_tail, sx_not_main;
-    MakePatternPtr< MatchAny<Statement> > sx_any_tail;
+    MakePatternPtr< Negation<Statement> > sx_not_tail, sx_not_main;
+    MakePatternPtr< Disjunction<Statement> > sx_any_tail;
 
     s_switch->condition = cond;
     s_switch->body = s_body;
@@ -502,7 +502,7 @@ FixFallthrough::FixFallthrough()
     MakePatternPtr< Star<Statement> > pre, cb1, cb2, post;
     MakePatternPtr<Case> case1, case2;
     MakePatternPtr<Break> breakk;
-    MakePatternPtr< NotMatch<Statement> > s_not1, s_not2;
+    MakePatternPtr< Negation<Statement> > s_not1, s_not2;
     
     s_comp->members = (decls);
     s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
@@ -540,8 +540,8 @@ AddYieldFlag::AddYieldFlag()
     MakePatternPtr<Temporary> r_flag_decl;
     MakePatternPtr<Assign> r_flag_init, mr_assign, msx_assign;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_flag_id("yield_flag");
-    MakePatternPtr< MatchAll<Compound> > ms_all;
-    MakePatternPtr< NotMatch<Compound> > ms_not;
+    MakePatternPtr< Conjunction<Compound> > ms_all;
+    MakePatternPtr< Negation<Compound> > ms_not;
     
     MakePatternPtr< SlaveSearchReplace<Compound> > slavem( r_func_comp, ms_all, mr_comp );
     MakePatternPtr< SlaveSearchReplace<Compound> > slave( r_comp, ls_if, lr_if );  
@@ -604,8 +604,8 @@ AddInferredYield::AddInferredYield()
     MakePatternPtr<WaitDelta> r_yield;
     MakePatternPtr<Loop> loop;
     MakePatternPtr<If> r_if, sx_if;
-    MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr< NotMatch<Compound> > s_notmatch;
+    MakePatternPtr< Conjunction<Compound> > s_all;
+    MakePatternPtr< Negation<Compound> > s_notmatch;
     MakePatternPtr< LogicalNot > r_not, sx_not;
     MakePatternPtr< Assign > assign;
           
@@ -697,17 +697,17 @@ LoopRotation::LoopRotation()
     MakePatternPtr< Star<If> > loop_body, pre_yield, post_yield;
     MakePatternPtr<Equal> r_equal;
     MakePatternPtr< Overlay<Compound> > func_over, over;    
-    MakePatternPtr< MatchAll<Compound> > s_all;
+    MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr<Enum> s_enum;
     MakePatternPtr<TypeIdentifier> s_enum_id;
     MakePatternPtr< Stuff<Expression> > loop_top_stuff, outer_top_stuff;
     MakePatternPtr<Equal> loop_top_equal, outer_top_equal;
     MakePatternPtr< Stuff<Statement> > loop_bottom_stuff_enum, outer_bottom_stuff_enum, 
                                     loop_bottom_stuff_noyield, yield_stuff, outer_bottom_stuff_noyield;
-    MakePatternPtr< MatchAll<Statement> > loop_bottom_matchall, outer_bottom_matchall;
-    MakePatternPtr< NotMatch<Statement> > loop_bottom_notmatch, outer_bottom_notmatch;
-    MakePatternPtr< NotMatch<Compound> > s_notmatch;
-    MakePatternPtr< MatchAny<If> > inner_state;
+    MakePatternPtr< Conjunction<Statement> > loop_bottom_matchall, outer_bottom_matchall;
+    MakePatternPtr< Negation<Statement> > loop_bottom_notmatch, outer_bottom_notmatch;
+    MakePatternPtr< Negation<Compound> > s_notmatch;
+    MakePatternPtr< Disjunction<If> > inner_state;
     
     fn->type = thread;
     fn->initialiser = func_comp;

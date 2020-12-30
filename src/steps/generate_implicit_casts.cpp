@@ -42,7 +42,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	MakePatternPtr< TransformOf<Expression> > s_arg_value( &TypeOf::instance );
 	s_arg->value = s_arg_value;
 	//s_arg_value->pattern = MakePatternPtr< Type >();
-	MakePatternPtr< NotMatch<Type> > s_arg_type;
+	MakePatternPtr< Negation<Type> > s_arg_type;
 	s_arg_value->pattern = s_arg_type;
 	s_arg_type->pattern = type;
 	MakePatternPtr< Star<MapOperand> > other_args;

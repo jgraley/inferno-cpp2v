@@ -47,8 +47,8 @@ private:
 
 
 template<class PRE_RESTRICTION>
-class MatchAny : public Special<PRE_RESTRICTION>,
-                 public DisjunctionAgent
+class Disjunction : public Special<PRE_RESTRICTION>,
+                    public DisjunctionAgent
 {
 public:
     SPECIAL_NODE_FUNCTIONS
