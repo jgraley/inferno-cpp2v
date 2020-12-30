@@ -223,7 +223,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
             // Detect pre-restrictions and add to link labels
             string pr = GetPreRestriction( link.ptr );
             if( !pr.empty() )
-                link.labels.push_back( pr );                    
+                link.labels.push_back( pr );
         }
     }
 
@@ -262,7 +262,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
                                                   SSPrintf("[%d]", j++),
                                                   {} };
                 Graphable::Link link;
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.head_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 sub_block.links.push_back( link );
@@ -281,7 +281,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.head_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 sub_block.links.push_back( link );
@@ -296,7 +296,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
                                                   "",
                                                   {} };
                 Graphable::Link link;
-                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
+                link.head_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
                 link.child_node = (TreePtr<Node>)*ptr;
                 link.ptr = ptr;
                 sub_block.links.push_back( link );
@@ -425,18 +425,17 @@ string Graph::DoLink( int port_index,
                       const Graphable::SubBlock &sub_block, 
                       const Graphable::Link &link,
                       string base_id )
-{
-    // Labels
-    list<string> labels = link.labels;
-    if( ReadArgs::graph_trace )
-        for( string l : link.trace_labels )
-            labels.push_back( l );
-            
+{          
     // Atts
     string atts;
     atts += LinkStyleAtt(link.link_style);
-    if( !labels.empty() )
-        atts += "label = \""+Sanitise(Join(labels))+"\"\n";    
+    if( !link.labels.empty() )
+        atts += "label = \""+Sanitise(Join(link.labels))+"\"\n"; 
+    else if( !link.head_labels.empty() )
+       atts += "label = \"     \"\n"; // Make a little room for head label
+
+    if( !link.head_labels.empty() )
+        atts += "headlabel = \""+Sanitise(Join(link.head_labels))+"\"\n";    
 
     // GraphViz output
 	string s;
