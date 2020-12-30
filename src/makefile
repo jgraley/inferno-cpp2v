@@ -25,7 +25,8 @@ SR_AGENTS_MODULES += $(SR_AGENTS)/transform_of_agent $(SR_AGENTS)/pointer_is_age
 SR_CSP_MODULES = $(SR_CSP)/constraint $(SR_CSP)/systemic_constraint $(SR_CSP)/solver $(SR_CSP)/simple_solver $(SR_CSP)/solver_holder
 PARSE_MODULES = $(PARSE)/identifier_tracker $(PARSE)/rc_hold
 RENDER_MODULES = $(RENDER)/sort_decls $(RENDER)/graph $(RENDER)/render $(RENDER)/uniquify_identifiers $(RENDER)/doc_graphs
-STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/slave_test $(STEPS)/lower_control_flow $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out
+STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/slave_test $(STEPS)/lower_control_flow 
+STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out
 MAIN_MODULES = $(MAIN)/inferno
 
 ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(SR_CSP_MODULES) $(SR_AGENTS_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 

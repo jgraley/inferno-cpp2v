@@ -137,7 +137,7 @@ string PatternLink::GetName() const
     if(asp_pattern==nullptr)
         s += "NULL";
     else
-        s += GetChildAgent()->GetAddr();
+        s += GetChildAgent()->GetTrace();
     return s;
 }
 

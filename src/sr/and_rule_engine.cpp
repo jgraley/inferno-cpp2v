@@ -23,7 +23,7 @@
 //#define TEST_PATTERN_QUERY
 
 //#define USE_SOLVER
-
+ 
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
 //#define NLQ_TEST
@@ -463,9 +463,9 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     // Run the compare implementation to get the links based on the choices
     TRACE("RunDecidedQuery() with ")(link)("\n");     
     agent->RunDecidedQuery( *query, link );
-    TRACEC("Normal ")(query->GetNormalLinks())("\n")
-          ("Abormal ")(query->GetAbnormalLinks())("\n")
-          ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
+    TRACE("Normal ")(query->GetNormalLinks())("\n")
+         ("Abormal ")(query->GetAbnormalLinks())("\n")
+         ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
 #ifdef TEST_PATTERN_QUERY
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     ASSERT( pq->GetNormalLinks() == query->GetNormalLinks() &&
@@ -753,13 +753,13 @@ void AndRuleEngine::Compare( XLink root_xlink,
 
             RegenerationPass();
         }
-        catch( const ::Mismatch& mismatch )
+        catch( const ::Mismatch& e )
         {                
 #ifdef USE_SOLVER
-            TRACE("Miss after recursion, trying next solution\n");
+            TRACE(e)(" after recursion, trying next solution\n");
             continue; // Get another solution from the solver
 #else
-            TRACE("Miss after recursion, trying increment conjecture\n");
+            TRACE(e)(" after recursion, trying increment conjecture\n");
             if( plan.conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 

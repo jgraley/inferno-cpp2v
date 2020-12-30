@@ -3,7 +3,7 @@
 #CASES = sctest13 sctest11 sctest12 sctest08 sctest10 sctest02
 #CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
-# Quicker ones first for exploratory (max results ASAP)
+# Quicker ones first for exploratory (max feedback ASAP)
 CASES =  sctest09 sctest15 sctest06 sctest07 sctest04 sctest05 sctest01 sctest03
 CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
 

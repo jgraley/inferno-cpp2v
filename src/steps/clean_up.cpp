@@ -25,7 +25,19 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
      //
      // Temp is used to preserve sequence point after c. This step assumes that
      // all sequence points that need preserving co-incide with the semicolons
-     // in a Compound or CompundExpression. It also requires that there be no loops.
+     // in a Compound or CompoundExpression. It also requires that there be no loops.
+     //
+     // Everything in a CompoundExpression is a Statement, even the final one that
+     // gets evaluated (by order of gcc). If this is not an Expression then the type
+     // of the CompoundExpression is Void. However, this looks like an "evaluate and
+     // discard" kind of statement, and we could act on it accordingly (in the case 
+     // of a SE ending in another nested SE). So we have to ensure we do outermost 
+     // first.
+    MakePatternPtr< Stuff<Node> > root_stuff;
+    MakePatternPtr< Overlay<Node> > root_overlay;
+    MakePatternPtr< NotMatch<Node> > root_not;
+    MakePatternPtr< CompoundExpression > root_ce;
+          
     MakePatternPtr< MatchAll<Statement> > s_all;
     MakePatternPtr< PointerIs<Statement> > sx_pointeris;
     MakePatternPtr< NotMatch<Statement> > sx_not;
@@ -48,6 +60,14 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     MakePatternPtr< Overlay<Expression> > overlay;
     MakePatternPtr<Type> r_type;
 
+    root_stuff->terminus = root_overlay;
+    root_stuff->recurse_restriction = root_not;
+    root_not->pattern = root_ce;
+    root_ce->members = ( MakePatternPtr< Star<Declaration> >() );
+    root_ce->statements = ( MakePatternPtr< Star<Statement> >() );
+    root_overlay->through = s_all;
+    root_overlay->overlay = r_comp;
+    
     s_all->patterns = (stuff, sx_pointeris);
     sx_pointeris->pointer = sx_not;
     sx_not->pattern = sx_expr;
@@ -58,8 +78,8 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     
     stuff->terminus = overlay;
     overlay->through = s_ce;
-    s_ce->statements = ( body, last );
     s_ce->members = ( decls );
+    s_ce->statements = ( body, last );
     
     r_comp->statements = ( body, r_assign, stuff );
     r_comp->members = ( decls, r_temp );
@@ -70,7 +90,7 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     last->pattern = r_type;
     overlay->overlay = r_temp_id;        
     
-    Configure( s_all, r_comp );
+    Configure( root_stuff );
 }
 
 

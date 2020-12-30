@@ -92,6 +92,8 @@ then
     echo Run output...
     test/results/"$fb"_out.exe
     r2res=$?
+    echo From inferno $r2res
+    echo Expected $r1res
     cmpres=1
     if test $r1res -eq $r2res
     then

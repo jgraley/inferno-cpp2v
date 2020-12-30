@@ -33,8 +33,6 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
     
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
-
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
     // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
@@ -48,7 +46,10 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( PatternLink(this, &terminus), GetXLinkFromIterator(base_xlink, thistime) ); // Link into X
+    XLink terminus_xlink = GetXLinkFromIterator(base_xlink, thistime);
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(terminus_xlink)("\n");
+
+    query.RegisterNormalLink( PatternLink(this, &terminus), terminus_xlink ); // Link into X
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime, base_xlink );
@@ -150,7 +151,7 @@ Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
 	// right of the circle. 1 implies the tendancy to match exactly one thing. See #256.
     Block block = SearchContainerAgent::GetGraphBlockInfo();
-	block.title = string("#==1"); 
+	block.title = string("#=1"); 
     return block;
 }
 

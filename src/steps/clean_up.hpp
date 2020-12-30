@@ -15,7 +15,7 @@ namespace Steps {
 using namespace SR;
 
 /// Find compound statements inside compund statements and flatten
-class CleanupCompoundExpression : public SearchReplace
+class CleanupCompoundExpression : public CompareReplace
 {    
 public:
     CleanupCompoundExpression();

@@ -576,13 +576,13 @@ string AgentCommon::GetTrace() const
     switch( phase )
     {
     case IN_COMPARE_ONLY:
-        s += "IN_COMPARE_ONLY";
+        s += "/C";
         break;
     case IN_COMPARE_AND_REPLACE:
-        s += "IN_COMPARE_AND_REPLACE";
+        s += "/CR";
         break;
     case IN_REPLACE_ONLY:
-        s += "IN_REPLACE_ONLY";
+        s += "/R";
         break;
     }
     return s;
