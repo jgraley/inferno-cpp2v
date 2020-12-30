@@ -22,7 +22,8 @@
 
 //#define TEST_PATTERN_QUERY
 
-#define USE_SOLVER
+// This now works!
+//#define USE_SOLVER
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
