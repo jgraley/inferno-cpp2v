@@ -77,7 +77,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
 	// The PointerIs node appears as a slightly flattened pentagon.
     Block block;
 	block.bold = true;
-	block.title = string("pointer is"); 
+	block.title = string("PointerIs"); 
 	block.shape = "pentagon";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pointer", 

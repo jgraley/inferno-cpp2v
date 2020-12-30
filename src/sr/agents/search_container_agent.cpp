@@ -146,10 +146,10 @@ Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryA
 
 Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 {
-	// The AnyNode node appears as a small circle with a ? sign in it. The terminus block emerges from the
-	// right of the circle. ? implies the tendancy to match exactly one thing.
+	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
+	// right of the circle. 1 implies the tendancy to match exactly one thing. See #256.
     Block block = SearchContainerAgent::GetGraphBlockInfo();
-	block.title = string("?"); 
+	block.title = string("#==1"); 
     return block;
 }
 
