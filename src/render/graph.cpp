@@ -19,24 +19,13 @@
 
 using namespace CPPTree;
 
-// Graph Documantation
+// Graph Documentation
 //
 // The shapes and contents of the displayed nodes is explained in comments in the function 
 // Graph::Name(), which may be found below. Ordinary tree nodes are always rectangles with
 // soft corners, so this function mainly deals with special nodes as used by Search and Replace.
-// The colours are defined in Graph::Colour, which categorises nodes (all nodes, including Special)
-// by whether they are derived from particular intermediate nodes, which are easily seen in
-// the code of the function.
-
-
-// TODO indicate pre-restriction by putting class name over the link. Only when type is not that
-// of the pointer, ie a non-trivial pre-estriction
-// TODO indicate Stuff restrictor by making it come out of the top of the circle (note that it will
-// be used on search, and usually search Stuff is coupled to replace Stuff, which will be below.
-// TODO force ranking to space out graph as
-// Primary: Stuff nodes, SearchReplace
-// Secondary: Normal nodes and special nodes that occupy space
-// Tertiary: CompareReplace and special nodes that do not occupy space
+// The colours are defined by the nodes themselves and always reflect the node type of a
+// block, if applicable.
 
 #define FS_TINY "8"
 #define FS_SMALL "12"
@@ -203,10 +192,10 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
                                          {} } );
     }
     
-    // Colour the block in accordance with the node if there is one otherwise leave it blank.
+    // Colour the block in accordance with the node if there is one otherwise leave the colour blank.
     // See #258: "block colour shall be dictated by the node type only"
     if( node )
-        my_block.colour = Colour( node );
+        my_block.colour = node->GetColour();
 
     // Make the titles more wieldy by removing template stuff - note:
     // different policies for engine blocks vs node blocks.
@@ -550,34 +539,6 @@ string Graph::DoFooter()
 	string s;
 	s += "}\n";
 	return s;
-}
-
-
-// Colours are GraphVis colours as listed at http://www.graphviz.org/doc/info/colors.html
-string Graph::Colour( TreePtr<Node> n )
-{
-	if( dynamic_pointer_cast<Identifier>(n) )
-		return "gray60";
-	else if( dynamic_pointer_cast<Declaration>(n) )
-		return "plum";
-	else if( dynamic_pointer_cast<Initialiser>(n) )
-		return "plum";
-	else if( dynamic_pointer_cast<MapOperand>(n) )
-		return "goldenrod2";
-	else if( dynamic_pointer_cast<Type>(n) )
-		return "seagreen1";
-	else if( dynamic_pointer_cast<Literal>(n) )
-		return "goldenrod2";
-	else if( dynamic_pointer_cast<Expression>(n) )
-		return "chocolate1";
-	else if( dynamic_pointer_cast<Property>(n) )
-		return "olivedrab3";
-	else if( dynamic_pointer_cast<Statement>(n) )
-		return "brown1";
-	else if( dynamic_pointer_cast<Scope>(n) )
-		return "cyan";
-	else
-		return "";
 }
 
 

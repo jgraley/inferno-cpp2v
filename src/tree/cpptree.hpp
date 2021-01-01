@@ -24,14 +24,21 @@ namespace CPPTree {
  etc). The intermediates should be the target of SharedPtrs and may be used in
  search patterns. The actual tree nodes for a program should always be the leaf
  node type. */
-struct Property : virtual Node { NODE_FUNCTIONS };
+struct Property : virtual Node 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "olivedrab3"; }
+};
 
 /// Variable initialiser or function body
 /** This intermediate is used for an initial value for for a variable/object in
  which case it will be an Expression, or for the implementation of a Callable
  in which case it will be a Compound. For an uninitialised variable/object
  or a function declaration, it will be Uninitialised. */
-struct Initialiser : virtual Node { NODE_FUNCTIONS };
+struct Initialiser : virtual Node 
+{ 
+    NODE_FUNCTIONS 
+};
 
 /// an uninitialised Instance.
 struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; 
@@ -40,22 +47,38 @@ struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL };
 /** Basically anything 
  that ends with a ; inside a function body, as well as labels (which we consider as 
  statements in their own right). */
-struct Statement : virtual Node { NODE_FUNCTIONS };
+struct Statement : virtual Node 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "brown1"; }    
+};
 
 /// An expression that computes a result value. 
 /** Can be used anywhere a statement can, per C syntax rules. */
 struct Expression : virtual Statement,
-                    Initialiser { NODE_FUNCTIONS };
+                    Initialiser 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "chocolate1"; }    
+};
 
 /// Any abstract data type
 /** Any abstract data type including fundamentals, structs, function prototypes
  and user-named types. */
-struct Type : virtual Node { NODE_FUNCTIONS };
+struct Type : virtual Node 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "cyan"; }    
+};
 
 /// A declaration specifies the creation of a UserType or an Instance. 
 /** Declaration can appear where statements can and also inside structs etc
  and at top level. */
-struct Declaration : virtual Node { NODE_FUNCTIONS };
+struct Declaration : virtual Node 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "plum"; }
+};
 
 /// A scope is any space in a program where declarations may appear. Declarations
 /** in the collection are associated with the scope node but unordered. Scopes
@@ -77,12 +100,13 @@ struct Uncombable : virtual Node { NODE_FUNCTIONS };
 //////////////////////////// Literals ///////////////////////////////
 
 /// A property that can also be used as a literal in a program
-/** There are also used as properties, so that we do not need to 
+/** These are also used as properties, so that we do not need to 
  duplicate literals and properties. */
 struct Literal : Expression,
                  Property
 {
     NODE_FUNCTIONS
+    virtual string GetColour() const { return Expression::GetColour(); } // Expression wins
 };
 
 /// Intermediate property node that represents a string of any value.
@@ -167,7 +191,7 @@ struct True : Bool
 struct False : Bool
 {
 	NODE_FUNCTIONS_FINAL
-	virtual string GetRender() const { return "false"; } ///< Produce a string for debug
+	virtual string GetRender() const { return "false"; } 
 };
 
 //////////////////////////// Declarations /////////////////////
@@ -182,7 +206,11 @@ struct False : Bool
  identity via topology. We store a string, but it isn't strictly 
  needed and there's no need to uniquify it (it's really just 
  a hint for users examining the output). */
-struct Identifier : virtual Property { NODE_FUNCTIONS };
+struct Identifier : virtual Property 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "goldenrod2"; }    
+};
 
 /// Property for a specific identifier, linked to by a particular Declaration
 /** This is for unquoted strings, as opposed to String. Strictly,
@@ -206,7 +234,11 @@ private:
 
 /// Identifier for any Instance (variable or object or function)
 struct InstanceIdentifier : Identifier,
-                            Expression { NODE_FUNCTIONS };
+                            Expression 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+};
                                
 /// Identifier for a specific Instance, linked to by a particular Declaration                           
 struct SpecificInstanceIdentifier : InstanceIdentifier,
@@ -220,7 +252,11 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
 
 /// Identifier for any user defined type.
 struct TypeIdentifier : Identifier,
-                        Type { NODE_FUNCTIONS };
+                        Type 
+{ 
+    NODE_FUNCTIONS
+    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+};
                            
 /// Identifier for a specific user defined type, linked to by a particular Declaration.
 struct SpecificTypeIdentifier : TypeIdentifier,
@@ -298,6 +334,7 @@ struct Instance : Declaration,
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
+    virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -363,7 +400,11 @@ struct Base : Declaration
     does not require any representation of && or * - Labels
     and expressions may be mixed directly. */
 struct LabelIdentifier : Identifier,
-                         Expression { NODE_FUNCTIONS };
+                         Expression 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+};
 
 /// Identifier for a specific label that has been declared somewhere.
 struct SpecificLabelIdentifier : LabelIdentifier,
@@ -384,6 +425,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<LabelIdentifier> identifier; ///< a handle for the label to be referenced elewhere
+    virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
 };
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -698,6 +740,7 @@ struct MapOperand : virtual Node
 	NODE_FUNCTIONS_FINAL
 	TreePtr<InstanceIdentifier> identifier; ///< the handle for this particualar operand
 	TreePtr<Expression> value; ///< the Expression for this operand
+    virtual string GetColour() const { return "seagreen1"; }    
 };
 
 /// An operator with operands whose order is established by mapping
@@ -757,8 +800,8 @@ struct SequentialScope : Scope,
 };
 
 /// Declarations and Statements inside {} or begin/end. 
-struct Compound : SequentialScope,      ///< Local declarations go in here (preferably)
-                  Initialiser ///< Can "initialise" a function (with the body) 
+struct Compound : SequentialScope,  ///< Local declarations go in here (preferably)
+                  Initialiser       ///< Can "initialise" a function (with the body) 
 {
     NODE_FUNCTIONS_FINAL
 };                   
@@ -770,6 +813,7 @@ struct CompoundExpression : Expression, ///< Evaluates to whatever the last stat
                             SequentialScope       ///< Local declarations go in here (preferably)
 {
     NODE_FUNCTIONS_FINAL
+    virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
 };                   
 
 /// The return statement of a function

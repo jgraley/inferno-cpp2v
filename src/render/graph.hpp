@@ -69,7 +69,6 @@ private:
     string DoHeader();
     string DoFooter();
 
-    string Colour( TreePtr<Node> n );
     Graphable *ShouldDoEngine( TreePtr<Node> node ); 
     string Id( const void *p );
     string SeqField( int i );

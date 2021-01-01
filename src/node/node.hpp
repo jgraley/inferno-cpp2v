@@ -8,6 +8,7 @@
 #include "common/magic.hpp"
 #include "match.hpp"
 #include "renderable.hpp"
+#include "coloured.hpp"
 
 #include <memory>
 
@@ -20,6 +21,7 @@
 /// The node support classes all collected together for convenience
 struct NodeBases : Magic,
                    virtual Renderable,
+                   Coloured,
                    Matcher,
                    Itemiser,
                    Cloner,
