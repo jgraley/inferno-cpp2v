@@ -496,15 +496,16 @@ string Graph::DoLink( int port_index,
     // Atts
     string atts;
     atts += LinkStyleAtt(link.link_style);
-    bool trace_lables_to_head = !link.trace_labels.empty() && ReadArgs::graph_trace;
-    if( !link.labels.empty() )
-        atts += "label = \""+EscapeForGraphviz(Join(link.labels))+"\"\n"; 
-    else if( trace_lables_to_head )
-       atts += "label = \"     \"\n"; // Make a little room for head label
 
-    if( trace_lables_to_head )
-        atts += "headlabel = \""+EscapeForGraphviz(Join(link.trace_labels))+"\"\n";    
-
+    // Labels
+    list<string> labels;
+    if( ReadArgs::graph_trace )
+        labels = link.labels + link.trace_labels;
+    else
+        labels = link.labels;
+    if( !labels.empty() )
+        atts += "label = \""+EscapeForGraphviz(Join(labels))+"\"\n"; 
+    
     // GraphViz output
 	string s;
 	s += base_id;
