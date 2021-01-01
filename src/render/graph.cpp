@@ -257,7 +257,9 @@ Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> n )
 Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 {    
 	Graphable::Block block;
-    block.title = Name( n, &block.bold, &block.shape );  
+	block.title = n->GetRender();     
+	block.bold = false;
+	block.shape = "plaintext";
         
     vector< Itemiser::Element * > members = n->Itemise();
 	for( int i=0; i<members.size(); i++ )
@@ -414,17 +416,13 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
         // is assumed that the title is sufficietly informative
 		s += "label = \"" + block.title + "\"\n";// TODO causes errors because links go to targets meant for records
 		s += "style = \"filled\"\n";
+			s += "fontsize = \"" FS_LARGE "\"\n";
 
-		if( block.title.size() <= 2 ) // can fit about 2 chars in standard small shape
+		if( block.title.size() <= 3 ) // can fit about 3 chars in standard small shape
 		{
 			s += "fixedsize = true\n";
 			s += "width = " NS_SMALL "\n";
 			s += "height = " NS_SMALL "\n";
-			s += "fontsize = \"" FS_LARGE "\"\n";
-		}
-		else
-		{
-			s += "fontsize = \"" FS_LARGE "\"\n";
 		}
 	}
 
@@ -545,29 +543,6 @@ string Graph::DoFooter()
 }
 
 
-string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
-{
-	// normal nodes and agents are represented as a rectangle with curved corners. At the top of the rectangle, 
-	// in large font, is the name of the node's type OR the identifier name if the node is a kind of 
-	// SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
-	// smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
-	// this). 
-	// Collections appear once and are followed by {...} where the number of dots equals the number of 
-	// elements in the Collection.
-	// Sequences appear once for each element in the sequence. Each appearance is followed by [i] where
-	// i is the index, starting from 0.
-	// All child pointers emerge from *approximately* the right of the corresponding member name. I cannot
-	// for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
-	// always come from some way in from the right edge, and if they are angled up or down, they can appear
-	// to be coming from the wrong place.        
-	string text = sp->GetRender();     
-	*bold = false;
-	*shape = "plaintext";//"record";
-
-    return text;
-}
-
-
 // Colours are GraphVis colours as listed at http://www.graphviz.org/doc/info/colors.html
 string Graph::Colour( TreePtr<Node> n )
 {
@@ -593,16 +568,6 @@ string Graph::Colour( TreePtr<Node> n )
 		return "cyan";
 	else
 		return "";
-}
-
-
-bool Graph::IsRecord( TreePtr<Node> n )
-{
-	bool bold;
-	string shape;
-	bool fport, tport;
-	Name( n, &bold, &shape );
-	return shape=="record" || shape=="plaintext";
 }
 
 
