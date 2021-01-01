@@ -101,6 +101,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
     if( *GetRestriction() )
         block.sub_blocks.push_back( { "restriction", 
                                       "", 
+                                      false,
                                       { { (TreePtr<Node>)*GetRestriction(), 
                                           GetRestriction(),
                                           SOLID, 

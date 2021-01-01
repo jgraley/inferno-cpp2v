@@ -237,6 +237,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
         // Actually much simpler in graph trace mode - just show the root node and plink
         sub_blocks.push_back( { "root", 
                                 "",
+                                true,
                                 { { plan.root_pattern, 
                                     nullptr,
                                     SOLID, 
@@ -262,6 +263,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
     {        
         sub_blocks.push_back( { plan.is_search?"search":"compare", 
                                 "",
+                                false,
                                 { { (TreePtr<Node>)*overlay->GetThrough(), 
                                     overlay->GetThrough(),
                                     SOLID, 
@@ -269,6 +271,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
                                     {} } } } );    
         sub_blocks.push_back( { "replace", 
                                 "",
+                                false,
                                 { { (TreePtr<Node>)*overlay->GetOverlay(),
                                     overlay->GetOverlay(),
                                     DASHED, 
@@ -279,6 +282,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
     {
         sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
                                 "",
+                                true,
                                 { { original_pattern, 
                                     original_ptr,
                                     SOLID, 

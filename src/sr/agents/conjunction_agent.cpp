@@ -53,6 +53,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "patterns", 
                            "", 
+                           true,
                            {} } };
     FOREACH( const TreePtrInterface &p, GetPatterns() )
         block.sub_blocks.front().links.push_back( { (TreePtr<Node>)p, 

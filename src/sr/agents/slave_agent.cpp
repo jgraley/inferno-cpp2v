@@ -50,6 +50,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
     Block block = my_scr_engine->GetGraphBlockInfo();
     block.sub_blocks.push_front( { "through", 
                                    "",
+                                   true,
                                    { { (TreePtr<Node>)*GetThrough(),
                                        GetThrough(), 
                                        SOLID, 

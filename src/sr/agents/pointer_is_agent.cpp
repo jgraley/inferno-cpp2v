@@ -82,6 +82,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pointer", 
                            "", 
+                           true,
                            { { (TreePtr<Node>)*GetPointer(), 
                                GetPointer(),
                                SOLID, 

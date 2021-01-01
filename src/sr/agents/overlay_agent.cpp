@@ -30,6 +30,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
     list<SubBlock> sub_blocks;
     sub_blocks.push_back( { "through", 
                             "",
+                            false,
                             { { (TreePtr<Node>)*GetThrough(), 
                                 GetThrough(),
                                 SOLID, 
@@ -37,6 +38,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
                                 {PatternLink(this, GetThrough()).GetShortName()} } } } );
     sub_blocks.push_back( { "overlay", 
                             "",
+                            false,
                             { { (TreePtr<Node>)*GetOverlay(), 
                                 GetOverlay(),
                                 DASHED, 

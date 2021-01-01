@@ -58,6 +58,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pattern", 
                            "", 
+                           true,
                            { { pattern, 
                                &pattern,
                                SOLID, 

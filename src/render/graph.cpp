@@ -199,6 +199,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
     {
         my_block.sub_blocks.push_back( { node->GetAddr(), 
                                          "", 
+                                         false, 
                                          {} } );
     }
     
@@ -271,6 +272,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 			{
                 Graphable::SubBlock sub_block = { GetInnermostTemplateParam(seq->GetName()), 
                                                   SSPrintf("[%d]", j++),
+                                                  false,
                                                   {} };
                 Graphable::Link link;
                 if( ReadArgs::graph_trace )
@@ -289,6 +291,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
             
             Graphable::SubBlock sub_block = { GetInnermostTemplateParam(col->GetName()), 
                                               "{" + dots + "}",
+                                              false,
                                               {} };
 			FOREACH( const TreePtrInterface &p, *col )
             {
@@ -306,6 +309,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 			{
                 Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
                                                   "",
+                                                  false,
                                                   {} };
                 Graphable::Link link;
                 link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
@@ -318,6 +322,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 			{
                 Graphable::SubBlock sub_block = { EscapeForGraphviz(GetInnermostTemplateParam(ptr->GetName())), 
                                                   "NULL",
+                                                  false, 
                                                   {} };
                 block.sub_blocks.push_back( sub_block );
             }
@@ -384,9 +389,13 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
 	s += base_id;
 	s += " [\n";
     
-    // If there is more than one sub-block, use a form that can accomodate multiple sub-blocks
+    // Can we hide sub-blocks?
+    bool sub_blocks_hideable = ( block.sub_blocks.size() == 0 || 
+                                 (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
+
+    // If not, make sure we're using a shape that allows for sub_blocks
     string shape = block.shape;
-    if( block.sub_blocks.size() > 1 && !(shape == "plaintext" || shape == "record") )
+    if( !sub_blocks_hideable && !(shape == "plaintext" || shape == "record") )
         shape = "plaintext";
 
 	s += "shape = \"" + shape + "\"\n";
