@@ -28,7 +28,8 @@ infile=$1
 shift
 iargs=$*
 fb=`basename $infile`
-outfile=test/results/$fb
+outdir=test/results
+outfile=$outdir/$fb
 
 echo
 echo -------------- $fb ----------------
@@ -50,7 +51,7 @@ cmpres=1000
 return_code=1 
  
 echo Compile input...
-resource/script/compile.sh $infile test/results/"$fb"_in.o
+resource/script/compile.sh $infile $outdir/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
@@ -60,7 +61,7 @@ then
 fi
 
 echo Link input...
-resource/script/link.sh test/results/"$fb"_in.o test/results/"$fb"_in.exe
+resource/script/link.sh $outdir/"$fb"_in.o $outdir/"$fb"_in.exe
 l1res=$?
 if test $l1res -eq 0
 then
@@ -78,19 +79,19 @@ ires=$?
 if test $ires -eq 0
 then
  echo Compile output...
- resource/script/compile.sh $outfile test/results/"$fb"_out.o
+ resource/script/compile.sh $outfile $outdir/"$fb"_out.o
  c2res=$?
  if test $c2res -eq 0
  then
   if test $l1res -eq 0
   then
    echo Link output...
-   resource/script/link.sh test/results/"$fb"_out.o test/results/"$fb"_out.exe
+   resource/script/link.sh $outdir/"$fb"_out.o $outdir/"$fb"_out.exe
    l2res=$?
    if test $l2res -eq 0
    then
     echo Run output...
-    test/results/"$fb"_out.exe
+    $outdir/"$fb"_out.exe
     r2res=$?
     echo From inferno $r2res
     echo Expected $r1res

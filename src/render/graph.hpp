@@ -30,12 +30,15 @@ private:
     string PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string id, bool links_pass );
     string PopulateFromNode( TreePtr<Node> root, bool links_pass );
 
-    MyBlock PreProcessBlock( const Graphable::Block &block, TreePtr<Node> n );
+    MyBlock PreProcessBlock( const Graphable::Block &block, TreePtr<Node> n, bool for_engine_block );
     Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
     Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n );
-    
-    string DoEngine( const MyBlock &block, string base_id );
-    string DoNode( const MyBlock &block, string base_id );
+    string GetInnermostTemplateParam( string s );
+    string RemoveAllTemplateParam( string s );
+    string RemoveOneOuterScope( string s );
+
+    string DoEngineBlock( const MyBlock &block, string base_id );
+    string DoNodeBlock( const MyBlock &block, string base_id );
     string DoLinks( const MyBlock &block, string base_id );
     string DoLink( int port_index, 
                    const MyBlock &block, 
@@ -52,7 +55,7 @@ private:
     Graphable *ShouldDoEngine( TreePtr<Node> node ); 
     string Id( const void *p );
     string SeqField( int i );
-    string Sanitise( string s, bool remove_template=false );
+    string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     string GetPreRestriction(const TreePtrInterface *ptr);

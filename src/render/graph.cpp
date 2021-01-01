@@ -124,11 +124,11 @@ string Graph::PopulateFromTransformation(Transformation *root)
 string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string base_id, bool links_pass )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
-    MyBlock block = PreProcessBlock( gblock, nbase );
+    MyBlock block = PreProcessBlock( gblock, nbase, true );
     //MyBlock block; (Graphable::Block &)block = gblock;    
     
 	string s;
-    s += links_pass ? DoLinks(block, base_id) : DoEngine(block, base_id);
+    s += links_pass ? DoLinks(block, base_id) : DoEngineBlock(block, base_id);
         
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
@@ -153,12 +153,12 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
                     }
                     else
                     {
-                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node );
+                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false );
                         OverrideLinkStyle( child_block, link.link_style );
                         if( links_pass )
                             s += DoLinks(child_block, Id(node.get()));
                         else
-                            s += DoNode(child_block, Id(node.get()));
+                            s += DoNodeBlock(child_block, Id(node.get()));
                     }
                 }
             }
@@ -178,17 +178,17 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 		if( !n )
             continue;
             
-        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( (TreePtr<Node>)n ), (TreePtr<Node>)n );
+        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( (TreePtr<Node>)n ), (TreePtr<Node>)n, false );
         if( links_pass )
             s += DoLinks(child_block, Id(n.get()));
         else
-            s += DoNode(child_block, Id(n.get()));
+            s += DoNodeBlock(child_block, Id(n.get()));
 	}
 	return s;
 }
 
 
-Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<Node> node )
+Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<Node> node, bool for_engine_block )
 {
     // Fill in everything in block 
     MyBlock my_block;
@@ -214,6 +214,18 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
     if( node )
         my_block.colour = Colour( node );
 
+    // Make the titles more wieldy by removing template stuff - note:
+    // different policies for engine blocks vs node blocks.
+    if( for_engine_block )
+    {
+        my_block.title = RemoveAllTemplateParam(my_block.title); 
+        my_block.title = RemoveOneOuterScope(my_block.title); 
+    }
+    else
+    {
+        my_block.title = GetInnermostTemplateParam(my_block.title);
+    }
+    
     // Actions for sub-blocks
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {
@@ -258,11 +270,12 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
             int j=0;
 			FOREACH( const TreePtrInterface &p, *seq )
 			{
-                Graphable::SubBlock sub_block = { Sanitise(seq->GetName(), true), 
+                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(seq->GetName()), 
                                                   SSPrintf("[%d]", j++),
                                                   {} };
                 Graphable::Link link;
-                link.head_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                if( ReadArgs::graph_trace )
+                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 sub_block.links.push_back( link );
@@ -275,13 +288,13 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
             for( int j=0; j<col->size(); j++ )
                 dots += ".";
             
-            Graphable::SubBlock sub_block = { Sanitise(col->GetName(), true), 
+            Graphable::SubBlock sub_block = { GetInnermostTemplateParam(col->GetName()), 
                                               "{" + dots + "}",
                                               {} };
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
-                link.head_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 sub_block.links.push_back( link );
@@ -292,11 +305,11 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 		{
 			if( *ptr )
 			{
-                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
+                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
                                                   "",
                                                   {} };
                 Graphable::Link link;
-                link.head_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
+                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
                 link.child_node = (TreePtr<Node>)*ptr;
                 link.ptr = ptr;
                 sub_block.links.push_back( link );
@@ -304,7 +317,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
    		    }
             else if( ReadArgs::graph_trace )
 			{
-                Graphable::SubBlock sub_block = { Sanitise(ptr->GetName(), true), 
+                Graphable::SubBlock sub_block = { EscapeForGraphviz(GetInnermostTemplateParam(ptr->GetName())), 
                                                   "NULL",
                                                   {} };
                 block.sub_blocks.push_back( sub_block );
@@ -320,36 +333,64 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 }
 
 
-string Graph::DoEngine( const MyBlock &block,
-                        string base_id )
-{    
-    string name = block.title; 
-    int n;
-    for( n=0; n<name.size(); n++ )
+string Graph::GetInnermostTemplateParam( string s )
+{
+    while(true)
     {
-        if( name[n] == '<' )        
+        string::size_type iopen = s.find("<");
+        string::size_type iclose = s.rfind(">");
+        if( iopen == std::string::npos || iclose == std::string::npos )
+            break; // done
+        iopen++; // get past <
+        s = s.substr( iopen, iclose-iopen );
+    }
+    return s;
+}
+
+
+string Graph::RemoveAllTemplateParam( string s )
+{
+    int n;
+    for( n=0; n<s.size(); n++ )
+    {
+        if( s[n] == '<' )        
         {
             int nn;
-            for( nn=n; nn<name.size(); nn++ )
+            for( nn=n; nn<s.size(); nn++ )
             {            
-                if( name[nn] == '>' )        
+                if( s[nn] == '>' )        
                 {
-                    name = name.substr( 0, n ) + name.substr( nn+1 );
+                    s = s.substr( 0, n ) + s.substr( nn+1 );
                     break;
                 }
             }
         }
     }
-        
+    return s;
+}
+
+
+string Graph::RemoveOneOuterScope( string s )
+{
+    int n = s.find("::");
+	if( n != string::npos )
+	    s = s.substr( n+2 );
+    return s;
+}
+
+
+string Graph::DoEngineBlock( const MyBlock &block,
+                        string base_id )
+{            
     string s;
 	s += base_id;
 	s += " [\n";
 
-    s += "label = \"<fixed> " + Sanitise( name );
+    s += "label = \"<fixed> " + EscapeForGraphviz( block.title );
     int k=0;
 	for( Graphable::SubBlock sub_block : block.sub_blocks )
     {        
-        string label_text = sub_block.item_name + sub_block.item_extra;
+        string label_text = EscapeForGraphviz(sub_block.item_name + sub_block.item_extra);
 		s += " | <" +  SeqField(k) + "> " + label_text;
         k++;
     }
@@ -366,7 +407,7 @@ string Graph::DoEngine( const MyBlock &block,
 }
 
 
-string Graph::DoNode( const MyBlock &block, string base_id )
+string Graph::DoNodeBlock( const MyBlock &block, string base_id )
 {
 	string s;
 	s += base_id + " [\n";
@@ -429,13 +470,14 @@ string Graph::DoLink( int port_index,
     // Atts
     string atts;
     atts += LinkStyleAtt(link.link_style);
+    bool trace_lables_to_head = !link.trace_labels.empty() && ReadArgs::graph_trace;
     if( !link.labels.empty() )
-        atts += "label = \""+Sanitise(Join(link.labels))+"\"\n"; 
-    else if( !link.head_labels.empty() )
+        atts += "label = \""+EscapeForGraphviz(Join(link.labels))+"\"\n"; 
+    else if( trace_lables_to_head )
        atts += "label = \"     \"\n"; // Make a little room for head label
 
-    if( !link.head_labels.empty() )
-        atts += "headlabel = \""+Sanitise(Join(link.head_labels))+"\"\n";    
+    if( trace_lables_to_head )
+        atts += "headlabel = \""+EscapeForGraphviz(Join(link.trace_labels))+"\"\n";    
 
     // GraphViz output
 	string s;
@@ -454,7 +496,7 @@ string Graph::DoHTMLLabel( string name, const list<Graphable::SubBlock> &sub_blo
     
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
 	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name, true) + "</FONT></TD>\n";
+	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + EscapeForGraphviz(name) + "</FONT></TD>\n";
 	s += "  <TD></TD>\n";
 	s += " </TR>\n";
     
@@ -462,8 +504,8 @@ string Graph::DoHTMLLabel( string name, const list<Graphable::SubBlock> &sub_blo
     for( Graphable::SubBlock sub_block : sub_blocks )
     {
         s += " <TR>\n";
-        s += "  <TD>" + sub_block.item_name + "</TD>\n";
-        s += "  <TD PORT=\"" + SeqField( porti ) + "\">" + sub_block.item_extra + "</TD>\n";
+        s += "  <TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>\n";
+        s += "  <TD PORT=\"" + SeqField( porti ) + "\">" + EscapeForGraphviz(sub_block.item_extra) + "</TD>\n";
         s += " </TR>\n";
         porti++;
     }
@@ -589,25 +631,9 @@ string Graph::SeqField( int i )
 }
 
 
-string Graph::Sanitise( string s, bool remove_template )
+string Graph::EscapeForGraphviz( string s )
 {
-	if( remove_template ) // get rid of templates
-    {
-        while(true)
-        {
-            string::size_type iopen = s.find("<");
-            string::size_type iclose = s.find(">");
-            if( iopen == std::string::npos || iclose == std::string::npos )
-                break; // done
-            iopen++; // get past <
-            s = s.substr( iopen, iclose-iopen );
-        }
-    }
-
-	string o;
-	int n = s.find("::");
-	if( n != string::npos )
-	    s = s.substr( n+2 );
+    string o;
 	for( int i=0; i<s.size(); i++ )
 	{
 		if( s[i] == '\"' )
