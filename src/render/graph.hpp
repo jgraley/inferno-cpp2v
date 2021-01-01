@@ -38,14 +38,15 @@ private:
     string RemoveOneOuterScope( string s );
 
     string DoEngineBlock( const MyBlock &block, string base_id );
-    string DoNodeBlock( const MyBlock &block, string base_id );
+    string DoBlock( const MyBlock &block, string base_id );
+    string DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
+    string DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
     string DoLinks( const MyBlock &block, string base_id );
     string DoLink( int port_index, 
                    const MyBlock &block, 
                    const Graphable::SubBlock &sub_block, 
                    const Graphable::Link &link, 
                    string base_id );
-    string DoHTMLLabel( string name, const list<Graphable::SubBlock> &sub_blocks );
     string DoHeader();
     string DoFooter();
 

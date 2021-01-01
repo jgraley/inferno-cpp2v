@@ -128,7 +128,7 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
     //MyBlock block; (Graphable::Block &)block = gblock;    
     
 	string s;
-    s += links_pass ? DoLinks(block, base_id) : DoEngineBlock(block, base_id);
+    s += links_pass ? DoLinks(block, base_id) : DoBlock(block, base_id);
         
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
@@ -158,7 +158,7 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
                         if( links_pass )
                             s += DoLinks(child_block, Id(node.get()));
                         else
-                            s += DoNodeBlock(child_block, Id(node.get()));
+                            s += DoBlock(child_block, Id(node.get()));
                     }
                 }
             }
@@ -182,7 +182,7 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
         if( links_pass )
             s += DoLinks(child_block, Id(n.get()));
         else
-            s += DoNodeBlock(child_block, Id(n.get()));
+            s += DoBlock(child_block, Id(n.get()));
 	}
 	return s;
 }
@@ -202,13 +202,6 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
                                          {} } );
     }
     
-    // If there is more than one sub-block, use the rounded rectangle form for clarity
-    if( my_block.sub_blocks.size() > 1 )
-        my_block.shape = "plaintext";
-
-    // These kinds of blocks require port names to be to be specified so links can tell them apart
-    my_block.specify_ports = (my_block.shape=="record" || my_block.shape=="plaintext");  
-    
     // Colour the block in accordance with the node if there is one otherwise leave it blank.
     // See #258: "block colour shall be dictated by the node type only"
     if( node )
@@ -220,11 +213,15 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
     {
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
+        my_block.shape = "record";
     }
     else
     {
         my_block.title = GetInnermostTemplateParam(my_block.title);
     }
+    
+    // These kinds of blocks require port names to be to be specified so links can tell them apart
+    my_block.specify_ports = (my_block.shape=="record" || my_block.shape=="plaintext");  
     
     // Actions for sub-blocks
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
@@ -379,52 +376,46 @@ string Graph::RemoveOneOuterScope( string s )
 }
 
 
-string Graph::DoEngineBlock( const MyBlock &block,
-                        string base_id )
-{            
-    string s;
-	s += base_id;
-	s += " [\n";
-
-    s += "label = \"<fixed> " + EscapeForGraphviz( block.title );
-    int k=0;
-	for( Graphable::SubBlock sub_block : block.sub_blocks )
-    {        
-        string label_text = EscapeForGraphviz(sub_block.item_name + sub_block.item_extra);
-		s += " | <" +  SeqField(k) + "> " + label_text;
-        k++;
-    }
-	s += "\"\n";
-
-	s += "shape = \"record\"\n"; // nodes can be split into fields
-	s += "style = \"filled\"\n";
-	s += "fontsize = \"" FS_MIDDLE "\"\n";
-	if(block.colour != "")
-		s += "fillcolor = " + block.colour + "\n";
-    s += "];\n";
-
-	return s;
-}
-
-
-string Graph::DoNodeBlock( const MyBlock &block, string base_id )
+string Graph::DoBlock( const MyBlock &block, string base_id )
 {
 	string s;
-	s += base_id + " [\n";
+	s += base_id;
+	s += " [\n";
+    
+    // If there is more than one sub-block, use a form that can accomodate multiple sub-blocks
+    string shape = block.shape;
+    if( block.sub_blocks.size() > 1 && !(shape == "plaintext" || shape == "record") )
+        shape = "plaintext";
 
-	s += "shape = \"" + block.shape + "\"\n";
-	if( block.shape == "record" || block.shape == "plaintext" )
+	s += "shape = \"" + shape + "\"\n";
+	if(block.colour != "")
+		s += "fillcolor = " + block.colour + "\n";
+
+    // shape=plaintext triggers HTML label generation. From Graphviz docs:
+    // "Adding HTML labels to record-based shapes (record and Mrecord) is 
+    // discouraged and may lead to unexpected behavior because of their 
+    // conflicting label schemas and overlapping functionality."
+    // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
+	if( shape == "plaintext" )
 	{
 		s += "label = " + DoHTMLLabel( block.title, block.sub_blocks );
 		s += "style = \"rounded,filled\"\n";
 		s += "fontsize = \"" FS_SMALL "\"\n";
 	}
-	else
+	else if( shape == "record" )
+    {
+        s += "label = " + DoRecordLabel( block.title, block.sub_blocks );
+        s += "style = \"filled\"\n";
+        s += "fontsize = \"" FS_MIDDLE "\"\n";
+    }
+    else
 	{
+        // Ignoring sub-block (above check means there will only be one: it
+        // is assumed that the title is sufficietly informative
 		s += "label = \"" + block.title + "\"\n";// TODO causes errors because links go to targets meant for records
 		s += "style = \"filled\"\n";
 
-		if( block.shape == "circle" || block.shape=="triangle" )
+		if( block.title.size() <= 2 ) // can fit about 2 chars in standard small shape
 		{
 			s += "fixedsize = true\n";
 			s += "width = " NS_SMALL "\n";
@@ -433,14 +424,51 @@ string Graph::DoNodeBlock( const MyBlock &block, string base_id )
 		}
 		else
 		{
-			s += "fontsize = \"" FS_MIDDLE "\"\n";
+			s += "fontsize = \"" FS_LARGE "\"\n";
 		}
 	}
 
-	if(block.colour != "")
-		s += "fillcolor = " + block.colour + "\n";
-
 	s += "];\n";
+	return s;
+}
+
+
+string Graph::DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks )
+{
+    string s;
+    s += "\"<fixed> " + EscapeForGraphviz( title );
+    int k=0;
+    for( Graphable::SubBlock sub_block : sub_blocks )
+    {        
+        string label_text = EscapeForGraphviz(sub_block.item_name + sub_block.item_extra);
+        s += " | <" +  SeqField(k) + "> " + label_text;
+        k++;
+    }
+    s += "\"\n";
+    return s;
+}
+
+
+string Graph::DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks )
+{
+    
+	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
+	s += " <TR>\n";
+	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + EscapeForGraphviz(title) + "</FONT></TD>\n";
+	s += "  <TD></TD>\n";
+	s += " </TR>\n";
+    
+    int porti=0;
+    for( Graphable::SubBlock sub_block : sub_blocks )
+    {
+        s += " <TR>\n";
+        s += "  <TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>\n";
+        s += "  <TD PORT=\"" + SeqField( porti ) + "\">" + EscapeForGraphviz(sub_block.item_extra) + "</TD>\n";
+        s += " </TR>\n";
+        porti++;
+    }
+    
+	s += "</TABLE>>\n";
 	return s;
 }
 
@@ -487,30 +515,6 @@ string Graph::DoLink( int port_index,
 	s += " -> ";
 	s += Id(link.child_node.get());
 	s += " ["+atts+"];\n";
-	return s;
-}
-
-
-string Graph::DoHTMLLabel( string name, const list<Graphable::SubBlock> &sub_blocks )
-{
-    
-	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
-	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + EscapeForGraphviz(name) + "</FONT></TD>\n";
-	s += "  <TD></TD>\n";
-	s += " </TR>\n";
-    
-    int porti=0;
-    for( Graphable::SubBlock sub_block : sub_blocks )
-    {
-        s += " <TR>\n";
-        s += "  <TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>\n";
-        s += "  <TD PORT=\"" + SeqField( porti ) + "\">" + EscapeForGraphviz(sub_block.item_extra) + "</TD>\n";
-        s += " </TR>\n";
-        porti++;
-    }
-    
-	s += "</TABLE>>\n";
 	return s;
 }
 
