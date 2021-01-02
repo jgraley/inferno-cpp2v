@@ -16,6 +16,7 @@ bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph_index = -1; // -1 disables
 string ReadArgs::pattern_graph_name = ""; // "" disables
 bool ReadArgs::graph_trace = false;
+bool ReadArgs::graph_dark = false;
 bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
@@ -46,10 +47,10 @@ void ReadArgs::Usage()
                     "-q<n>       Stop after step <n>.\n"    
                     "            Note: -q<n> makes -t and -r operate only on step n.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
-	                "-g[t]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
-	                "-g[t]p<n>   Generate dot file for specified transformation step n or by name.\n"
-	                "-g[t]d      Generate dot files for documentation; -o specifies directory.\n"
-	                "            Note: t enables graph-trace mode: internals shown in graph.\n"
+	                "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
+	                "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name.\n"
+	                "-g[t][k]d      Generate dot files for documentation; -o specifies directory.\n"
+	                "            Note: t enables trace details in graph; k enables dark colour-scheme.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates. <outfile> is path/basename.\n"
@@ -116,6 +117,12 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             if( graph_option=='t' )
             {
                 graph_trace = true;
+                ai++;
+                graph_option = argv[curarg][ai];
+            }
+            if( graph_option=='k' )
+            {
+                graph_dark = true;
                 ai++;
                 graph_option = argv[curarg][ai];
             }

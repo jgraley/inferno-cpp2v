@@ -197,6 +197,7 @@ string PatternLink::GetShortName() const
 
 PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
                          void *whodat_) :
+    LinkId( &*ppattern ),
     asp_pattern( ppattern )
 {
 #ifdef KEEP_WHODAT_INFO
@@ -311,6 +312,7 @@ string XLink::GetTrace() const // used for debug
 
 XLink::XLink( shared_ptr<const TreePtrInterface> px,
               void *whodat_ ) :
+    LinkId( &*px ),
     asp_x( px )
 {
     ASSERT(px);

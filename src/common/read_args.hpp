@@ -19,6 +19,7 @@ public:
     static int pattern_graph_index;
     static std::string pattern_graph_name;
     static bool graph_trace;
+    static bool graph_dark;
     void Usage();
     std::string GetArg( int al=1 );
     ReadArgs( int argc, char *argv[] );

@@ -415,6 +415,12 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
         s += "label = " + DoRecordLabel( block.title, block.sub_blocks );
         s += "style = \"filled\"\n";
         s += "fontsize = \"" FS_MIDDLE "\"\n";
+        if( ReadArgs::graph_dark )
+        {
+            s += "fillcolor = gray15\n";
+            s += "fontcolor = white\n";
+            s += "color = gray70\n";
+        }
     }
     else
 	{
@@ -515,7 +521,13 @@ string Graph::DoLink( int port_index,
         atts += "label = \""+EscapeForGraphviz(Join(labels))+"\"\n"; 
         atts += "decorate = true\n";
     }
-    
+
+    if( ReadArgs::graph_dark )
+    {
+        atts += "color = gray70\n";
+        atts += "fontcolor = white\n";
+    }
+
     // GraphViz output
 	string s;
 	s += base_id;
@@ -536,6 +548,16 @@ string Graph::DoHeader()
 	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
 	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
+    if( ReadArgs::graph_dark )
+    {
+        s += "bgcolor = gray15\n";
+        s += "color = gray70\n";
+        s += "fontcolor = white\n";    
+    }
+    else
+    {
+        s += "bgcolor = antiquewhite1\n";
+    }
 	s += "];\n";
 	s += "node [\n";
 #ifdef FONT
