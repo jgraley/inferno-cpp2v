@@ -33,7 +33,7 @@ void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
 Graphable::Block NegationAgent::GetGraphBlockInfo() const
 {
-	// The Negation node appears as a small circle with an ! character inside it. The affected subtree is 
+	// The Negation node appears as a diamond with a ¬ character inside it. The affected subtree is 
 	// on the right.
 	// NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
     // a node that represents a boolean operation in the program being processed. Those nodes would 
@@ -42,14 +42,14 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
     Block block;
 	block.bold = true;
 	block.title = string("¬");
-	block.shape = "circle";
+	block.shape = "diamond";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,
                            { { (TreePtr<Node>)*GetPattern(),
                                GetPattern(), 
-                               SOLID, 
+                               THROUGH, 
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()} } } } };
     return block;

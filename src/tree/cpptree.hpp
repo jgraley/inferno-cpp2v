@@ -27,7 +27,7 @@ namespace CPPTree {
 struct Property : virtual Node 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "olivedrab3"; }
+    virtual string GetColour() const { return "/set28/7"; }
 };
 
 /// Variable initialiser or function body
@@ -50,7 +50,7 @@ struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL };
 struct Statement : virtual Node 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "brown1"; }    
+    virtual string GetColour() const { return "/set28/2"; }    
 };
 
 /// An expression that computes a result value. 
@@ -59,7 +59,7 @@ struct Expression : virtual Statement,
                     Initialiser 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "chocolate1"; }    
+    virtual string GetColour() const { return "/set28/6"; }    
 };
 
 /// Any abstract data type
@@ -68,7 +68,7 @@ struct Expression : virtual Statement,
 struct Type : virtual Node 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "cyan"; }    
+    virtual string GetColour() const { return "/set28/3"; }    
 };
 
 /// A declaration specifies the creation of a UserType or an Instance. 
@@ -77,7 +77,7 @@ struct Type : virtual Node
 struct Declaration : virtual Node 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "plum"; }
+    virtual string GetColour() const { return "/set28/1"; }
 };
 
 /// A scope is any space in a program where declarations may appear. Declarations
@@ -87,6 +87,7 @@ struct Scope : virtual Node
 {
     NODE_FUNCTIONS
     Collection<Declaration> members; /// The declarations in this scope
+    virtual string GetColour() const { return "/set28/4"; }
 };
 
 /// The top level of a program
@@ -209,7 +210,7 @@ struct False : Bool
 struct Identifier : virtual Property 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "goldenrod2"; }    
+    virtual string GetColour() const { return "/set28/5"; }    
 };
 
 /// Property for a specific identifier, linked to by a particular Declaration
@@ -447,6 +448,7 @@ struct CallableParams : Callable,
                         Scope // For the parameters
 {
     NODE_FUNCTIONS
+    virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 };
 
 /// Anything that can be called and has parameters and return value
@@ -595,6 +597,7 @@ struct Record : UserType,
                 Scope // Member declarations go in here
 {
     NODE_FUNCTIONS
+    virtual string GetColour() const { return UserType::GetColour(); } // UserType wins
 };
 
 /// A union, as per Record.
@@ -740,7 +743,7 @@ struct MapOperand : virtual Node
 	NODE_FUNCTIONS_FINAL
 	TreePtr<InstanceIdentifier> identifier; ///< the handle for this particualar operand
 	TreePtr<Expression> value; ///< the Expression for this operand
-    virtual string GetColour() const { return "seagreen1"; }    
+    virtual string GetColour() const { return "/set28/8"; }    
 };
 
 /// An operator with operands whose order is established by mapping
@@ -797,6 +800,7 @@ struct SequentialScope : Scope,
 {
     NODE_FUNCTIONS
     Sequence<Statement> statements; ///< Can contain local declarations and code
+    virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 };
 
 /// Declarations and Statements inside {} or begin/end. 

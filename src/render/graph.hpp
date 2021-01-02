@@ -46,7 +46,7 @@ private:
     };
 
     string PopulateFromTransformation(Transformation *root);
-    string PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string id, bool links_pass );
+    string PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string id, Graphable::LinkStyle default_link_style, bool links_pass );
     string PopulateFromNode( TreePtr<Node> root, bool links_pass );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, TreePtr<Node> n, bool for_engine_block );
@@ -76,7 +76,7 @@ private:
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     string GetPreRestriction(const TreePtrInterface *ptr);
-    void OverrideLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
+    void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     
     UniqueFilter unique_filter;
     const string outfile; // empty means stdout

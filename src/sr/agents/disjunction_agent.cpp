@@ -111,7 +111,7 @@ Agent::Completeness DisjunctionAgent::RunDecidedNormalLinkedQueryImpl( DecidedQu
 
 Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 {
-	// The Disjunction node appears as a small circle with an | character inside it. The affected subtrees are 
+	// The Disjunction node appears as a diamond with a ∨ character inside it. The affected subtrees are 
 	// on the right.
 	// NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
     // a node that represents a boolean operation in the program being processed. Those nodes would 
@@ -120,7 +120,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
     Block block;
 	block.bold = true;
 	block.title = string("∨");
-	block.shape = "circle";
+	block.shape = "diamond";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "patterns", 
                            "", 
@@ -129,7 +129,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
     FOREACH( const TreePtrInterface &p, GetPatterns() )
         block.sub_blocks.front().links.push_back( { (TreePtr<Node>)p, 
                                                     &p,
-                                                    SOLID, 
+                                                    THROUGH, 
                                                     {},
                                                     {PatternLink(this, &p).GetShortName()} } );
     return block;

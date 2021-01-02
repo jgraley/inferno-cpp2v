@@ -50,18 +50,18 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
 {
     Block block;
-	// The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
+	// The TransformOf node appears as a slightly flattened octagon, with the name of the specified 
 	// kind of Transformation class inside it.
 	block.bold = true;
 	block.title = transformation->GetName();
-	block.shape = "hexagon";
+	block.shape = "octagon";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,
                            { { pattern, 
                                &pattern,
-                               SOLID, 
+                               THROUGH, 
                                {},
                                {PatternLink(this, &pattern).GetShortName()} } } } };
     return block;

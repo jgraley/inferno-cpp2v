@@ -98,9 +98,9 @@ string Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, nullptr, Id(root), false );
+	    s += PopulateFromEngine( cr, nullptr, Id(root), Graphable::THROUGH, false );
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, nullptr, Id(root), true );
+	    s += PopulateFromEngine( cr, nullptr, Id(root), Graphable::THROUGH, true );
 	}
 	else
     {
@@ -110,12 +110,14 @@ string Graph::PopulateFromTransformation(Transformation *root)
 }
 
 
-string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string base_id, bool links_pass )
+string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string base_id, Graphable::LinkStyle default_link_style, bool links_pass )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
     MyBlock block = PreProcessBlock( gblock, nbase, true );
     //MyBlock block; (Graphable::Block &)block = gblock;    
-    
+
+    PropagateLinkStyle( block, default_link_style );
+
 	string s;
     s += links_pass ? DoLinks(block, base_id) : DoBlock(block, base_id);
         
@@ -138,12 +140,12 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
                     Graphable *g = ShouldDoEngine(node);
                     if( g )
                     {
-                        s += PopulateFromEngine( g, node, Id(node.get()), links_pass );
+                        s += PopulateFromEngine( g, node, Id(node.get()), link.link_style, links_pass );
                     }
                     else
                     {
                         MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false );
-                        OverrideLinkStyle( child_block, link.link_style );
+                        PropagateLinkStyle( child_block, link.link_style );
                         if( links_pass )
                             s += DoLinks(child_block, Id(node.get()));
                         else
@@ -196,6 +198,9 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
     // See #258: "block colour shall be dictated by the node type only"
     if( node )
         my_block.colour = node->GetColour();
+    else
+        my_block.colour = "transparent";
+
 
     // Make the titles more wieldy by removing template stuff - note:
     // different policies for engine blocks vs node blocks.
@@ -264,10 +269,10 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
                                                   false,
                                                   {} };
                 Graphable::Link link;
-                if( ReadArgs::graph_trace )
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
+                link.link_style = Graphable::THROUGH;
+                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -285,9 +290,10 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
+                link.link_style = Graphable::THROUGH;                
+                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -301,9 +307,10 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
                                                   false,
                                                   {} };
                 Graphable::Link link;
-                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
                 link.child_node = (TreePtr<Node>)*ptr;
                 link.ptr = ptr;
+                link.link_style = Graphable::THROUGH;                
+                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }
@@ -389,7 +396,7 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
 
 	s += "shape = \"" + shape + "\"\n";
 	if(block.colour != "")
-		s += "fillcolor = " + block.colour + "\n";
+		s += "fillcolor = \"" + block.colour + "\"\n";
 
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
     // "Adding HTML labels to record-based shapes (record and Mrecord) is 
@@ -414,7 +421,8 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
         // is assumed that the title is sufficietly informative
 		s += "label = \"" + block.title + "\"\n";// TODO causes errors because links go to targets meant for records
 		s += "style = \"filled\"\n";
-			s += "fontsize = \"" FS_LARGE "\"\n";
+        s += "fontsize = \"" FS_LARGE "\"\n";
+        s += "penwidth = 0.0\n";
 
 		if( block.title.size() <= 3 ) // can fit about 3 chars in standard small shape
 		{
@@ -625,6 +633,9 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
     case Graphable::DASHED:
         atts += "style=\"dashed\"\n";
         break;
+    case Graphable::THROUGH:
+        ASSERT(false);
+        break;
     }
     return atts;
 }
@@ -646,9 +657,14 @@ string Graph::GetPreRestriction(const TreePtrInterface *ptr)
 }
 
 
-void Graph::OverrideLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
+void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 {
-    for( Graphable::SubBlock &sub_block : dest.sub_blocks )    
+    for( Graphable::SubBlock &sub_block : dest.sub_blocks ) 
+    {  
         for( Graphable::Link &link : sub_block.links )
-            link.link_style = link_style;    
+        {
+            if( link.link_style == Graphable::THROUGH )
+                link.link_style = link_style;    
+        }
+    }
 }

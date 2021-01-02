@@ -53,7 +53,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
                                    true,
                                    { { (TreePtr<Node>)*GetThrough(),
                                        GetThrough(), 
-                                       SOLID, 
+                                       THROUGH, 
                                        {},
                                        {PatternLink(this, GetThrough()).GetShortName()} } } } );
     block.title = GetName();

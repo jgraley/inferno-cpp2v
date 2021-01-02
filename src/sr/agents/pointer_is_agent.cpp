@@ -78,14 +78,14 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
     Block block;
 	block.bold = true;
 	block.title = string("PointerIs"); 
-	block.shape = "pentagon";
+	block.shape = "house";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "pointer", 
                            "", 
                            true,
                            { { (TreePtr<Node>)*GetPointer(), 
                                GetPointer(),
-                               SOLID, 
+                               THROUGH, 
                                {},
                                {PatternLink(this, GetPointer()).GetShortName()} } } } };
     return block;

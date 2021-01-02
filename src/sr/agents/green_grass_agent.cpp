@@ -46,20 +46,20 @@ TreePtr<Node> GreenGrassAgent::BuildReplaceImpl()
 
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
-	// The GreenGrass node appears as a small circle containing four vertical line characters,
+	// The GreenGrass node appears as a triangle containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
 	// tired.
     Block block;
 	block.bold = true;
 	block.title = string("||||");
-	block.shape = "circle";
+	block.shape = "triangle";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "through", 
                            "", 
                            true,
                            { { (TreePtr<Node>)*GetThrough(),
                                GetThrough(), 
-                               SOLID, 
+                               THROUGH, 
                                {},
                                {PatternLink(this, GetThrough()).GetShortName()} } } } };
     return block;
