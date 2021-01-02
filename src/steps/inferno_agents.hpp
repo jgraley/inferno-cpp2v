@@ -170,9 +170,9 @@ struct NestedAgent : public virtual AgentCommonDomainExtender
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
-	// TODO give own appearance
     virtual XLink Advance( XLink x, 
                            string *depth ) const = 0;
+    virtual Block GetGraphBlockInfo() const;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
@@ -240,7 +240,7 @@ private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
 	TreePtr<Node> BuildReplaceImpl();
-	// TODO give own appearance
+    virtual Block GetGraphBlockInfo() const;
 }; 
 
 //---------------------------------- IsLabelReachedAgent ------------------------------------    
@@ -262,7 +262,7 @@ struct IsLabelReachedAgent : public virtual AgentCommon,
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;
-	// TODO give own appearance
+    virtual Block GetGraphBlockInfo() const;
     TreePtr<CPPTree::Expression> pattern;           
            
 private:

@@ -31,7 +31,7 @@ Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 	// TODO indicate whether it's building instance, label or type identifier
     Block block;
 	block.bold = true;
-	block.title = format;
+	block.title = "'"+format+"'"; // text from program code, so use single quotes
 	block.shape = "parallelogram";
     block.block_type = Graphable::NODE;
     return block;
@@ -219,6 +219,35 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
+Graphable::Block NestedAgent::GetGraphBlockInfo() const
+{
+    Block block;
+	block.bold = false;
+	block.title = GetName();
+	block.shape = "plaintext";
+    block.block_type = Graphable::NODE;
+    if( terminus )
+        block.sub_blocks.push_back( { "terminus", 
+                                      "", 
+                                      false,
+                                      { { terminus, 
+                                          &terminus,
+                                          THROUGH, 
+                                          {},
+                                          {PatternLink(this, &terminus).GetShortName()} } } } );
+    if( depth )
+        block.sub_blocks.push_back( { "depth", 
+                                      "", 
+                                      false,
+                                      { { depth, 
+                                          &depth,
+                                          THROUGH, 
+                                          {},
+                                          {PatternLink(this, &depth).GetShortName()} } } } );
+    return block;
+}
+
+
 XLink NestedArrayAgent::Advance( XLink x, 
                                  string *depth ) const
 {
@@ -281,6 +310,27 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl()
 	// likely to do anything sensible, so explicitly check
 	return DuplicateSubtree(GetKey().GetChildX());   
 }                                                   
+
+
+Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo() const
+{
+
+    Block block;
+	block.bold = false;
+	block.title = GetName();
+	block.shape = "egg";
+    block.block_type = Graphable::NODE;
+    if( container )
+        block.sub_blocks.push_back( { "container", 
+                                      "", 
+                                      false,
+                                      { { (TreePtr<Node>)container, 
+                                          nullptr,
+                                          THROUGH, 
+                                          {},
+                                          {} } } } );
+    return block;
+}
 
 //---------------------------------- IsLabelReachedAgent ------------------------------------    
 
@@ -413,3 +463,22 @@ bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 	return r;
 }
 
+Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo() const
+{
+
+    Block block;
+	block.bold = false;
+	block.title = GetName();
+	block.shape = "egg";
+    block.block_type = Graphable::NODE;
+    if( pattern )
+        block.sub_blocks.push_back( { "pattern", 
+                                      "", 
+                                      false,
+                                      { { pattern, 
+                                          &pattern,
+                                          THROUGH, 
+                                          {},
+                                          {PatternLink(this, &pattern).GetShortName()} } } } );
+    return block;
+}
