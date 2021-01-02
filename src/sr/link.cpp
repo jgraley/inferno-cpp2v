@@ -14,6 +14,52 @@ using namespace SR;
 
 //#define TEST_ASSERT_NOT_ON_STACK
 
+//////////////////////////// LinkId ///////////////////////////////
+
+LinkId::LinkId()
+{
+    id = -1;
+}
+
+
+LinkId::LinkId( const TreePtrInterface *p )
+{
+    if( !p || !*p )
+        return; // Let link constructor deal with this case
+    TreePtr<Node> node = (TreePtr<Node>)*p;
+    pair<SNType, SNType> sn = node->GetSerialNumber();
+    IDsByLink &ids_by_link = ids_by_child_node[sn.first][sn.second];
+    if( ids_by_link.count(p) == 0 )
+    {
+        id = (IDType)(ids_by_link.size());
+        ids_by_link[p] = id;
+        TRACE("%p ", p)(node)(": %p : %llu-%llu %d ADDED\n", &ids_by_link, sn.first, sn.second, id);
+    }
+    else
+    {
+        id = ids_by_link.at(p);
+        TRACE("%p ", p)(node)(": %p : %llu-%llu %d FOUND\n", &ids_by_link, sn.first, sn.second, id);
+    }
+}
+
+
+string LinkId::GetIdString() const
+{
+    if( id==-1 )
+        return "NULL";
+    else
+        return SSPrintf("%d", id);
+}
+
+
+void LinkId::Dump()
+{
+    FTRACE(ids_by_child_node)("\n");
+}
+
+
+LinkId::IDsByNodeSerial LinkId::ids_by_child_node;    
+
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink()
@@ -27,6 +73,7 @@ PatternLink::PatternLink()
 PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
                          const TreePtrInterface *ppattern, 
                          void *whodat_) :
+    LinkId( ppattern ),
     asp_pattern( parent_pattern, ppattern )
 {
     ASSERT( parent_pattern );
@@ -144,10 +191,7 @@ string PatternLink::GetName() const
 
 string PatternLink::GetShortName() const
 {
-    string s = SSPrintf("%p", asp_pattern.get());
-    if( s.substr(0, 2)=="0x" )
-        s = s.substr(2);
-    return s;
+    return GetIdString();
 }
 
 
@@ -174,6 +218,7 @@ XLink::XLink() :
 XLink::XLink( shared_ptr<const Node> parent_x,
               const TreePtrInterface *px,
               void *whodat_ ) :
+    LinkId( px ),
     asp_x( parent_x, px )              
 {
     ASSERT( parent_x );
@@ -252,7 +297,7 @@ const TreePtrInterface *XLink::GetXPtr() const
 
 string XLink::GetTrace() const // used for debug
 {
-    string s = SSPrintf("%p->", asp_x.get());
+    string s = GetIdString() + "->";
     if(asp_x==nullptr)
         s += "NULL";
     else

@@ -14,7 +14,29 @@ class Agent;
 class LocatedLink;
 class XLink;
 
-class PatternLink : public Traceable
+class LinkId
+{
+public:
+    typedef SerialNumber::SNType SNType;
+    typedef int IDType;
+    
+    LinkId();
+    explicit LinkId( const TreePtrInterface *p );
+    string GetIdString() const;
+    static void Dump();
+    
+private:
+    typedef map<const TreePtrInterface *, IDType> IDsByLink;
+    // Index by location, then serial. Serial scales with inptu tree size so 
+    // use unordered_map for that.
+    typedef map< SNType, unordered_map< SNType, IDsByLink > > IDsByNodeSerial;
+    static IDsByNodeSerial ids_by_child_node;    
+    IDType id;
+};
+
+
+class PatternLink : public Traceable, 
+                    public LinkId
 {
 public:
     PatternLink();
@@ -51,7 +73,8 @@ private: friend class LocatedLink;
 }; 
 
 
-class XLink : public Traceable
+class XLink : public Traceable, 
+              public LinkId
 {
 public:
     XLink();

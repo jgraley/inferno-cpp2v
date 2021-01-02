@@ -90,7 +90,7 @@ void HitCount::Dump()
                 break;
                 
                 case 'I':
-                printf("%s", p.first.instance->GetSerial().c_str() );                   
+                printf("%s", p.first.instance->GetSerialString().c_str() );                   
                 break;
                 
                 case 'N':

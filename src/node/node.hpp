@@ -27,9 +27,9 @@ struct NodeBases : Magic,
                    Cloner,
                    SerialNumber
 {
-    string GetSerial() const
+    string GetSerialString() const
     {
-        return SerialNumber::GetSerial(); // avoiding the need for virtual inheritance
+        return SerialNumber::GetSerialString(); // avoiding the need for virtual inheritance
     }
 };
 
@@ -60,6 +60,12 @@ struct Node : NodeBases,
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds
     // without making Node ambiguous
+    
+    virtual string GetGraphName() const
+    {
+        return GetRender();
+    }
+    
 };
 
 

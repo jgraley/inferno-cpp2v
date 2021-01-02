@@ -227,6 +227,7 @@ struct SpecificIdentifier : virtual Property
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const; /// Overloaded comparison for search&replace
 	virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
+    virtual string GetGraphName() const;
     virtual string GetTrace() const;
 
 private:

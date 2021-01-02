@@ -19,6 +19,11 @@ public:
     {
         return "";
     };
+    
+    virtual string GetGraphName() const
+    {
+        return "";
+    };
 };    
 
 #endif

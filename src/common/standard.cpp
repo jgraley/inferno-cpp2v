@@ -99,7 +99,7 @@ string Traceable::GetName() const
 }
 
 
-string Traceable::GetSerial() const
+string Traceable::GetSerialString() const
 {
     return string();
 }
@@ -107,7 +107,7 @@ string Traceable::GetSerial() const
 
 string Traceable::GetTrace() const
 {
-    return GetName() + GetSerial(); // name plus pointer
+    return GetName() + GetSerialString(); // name plus pointer
 }
 
 
@@ -153,7 +153,13 @@ void SerialNumber::SetStep( int s )
 }
 
 
-string SerialNumber::GetSerial() const
+void *SerialNumber::GetLocation( SNType location )
+{
+    return location_readback.at(location);
+}
+
+
+string SerialNumber::GetSerialString() const
 {
     string ss;
     switch( step )
@@ -172,12 +178,6 @@ string SerialNumber::GetSerial() const
             break;
     }
     return ss;
-}
-
-
-void *SerialNumber::GetLocation( SNType location )
-{
-    return location_readback.at(location);
 }
 
 

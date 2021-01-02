@@ -172,7 +172,6 @@ void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &que
     throw Mismatch();  
 }                                
 
-
 //---------------------------------- NestedAgent ------------------------------------    
 
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const

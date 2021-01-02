@@ -170,6 +170,7 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
             continue;
             
         MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( (TreePtr<Node>)n ), (TreePtr<Node>)n, false );
+        PropagateLinkStyle( child_block, Graphable::SOLID );
         if( links_pass )
             s += DoLinks(child_block, Id(n.get()));
         else
@@ -188,7 +189,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && node )
     {
-        my_block.sub_blocks.push_back( { node->GetSerial(), 
+        my_block.sub_blocks.push_back( { node->GetSerialString(), 
                                          "", 
                                          false, 
                                          {} } );
@@ -252,7 +253,7 @@ Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> n )
 Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 {    
 	Graphable::Block block;
-	block.title = n->GetRender();     
+	block.title = n->GetGraphName();     
 	block.bold = false;
 	block.shape = "plaintext";
         
@@ -510,7 +511,10 @@ string Graph::DoLink( int port_index,
     else
         labels = link.labels;
     if( !labels.empty() )
+    {
         atts += "label = \""+EscapeForGraphviz(Join(labels))+"\"\n"; 
+        atts += "decorate = true\n";
+    }
     
     // GraphViz output
 	string s;
@@ -649,7 +653,7 @@ string Graph::GetPreRestriction(const TreePtrInterface *ptr)
         {
             if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )    // pre-restrictor is nontrivial
             {
-                return (**(sbs->GetPreRestrictionArchitype())).GetRender();
+                return (**(sbs->GetPreRestrictionArchitype())).GetName();
             }
         }
     }

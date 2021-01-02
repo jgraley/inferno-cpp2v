@@ -180,9 +180,9 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
     //{
     //    return SerialNumber::operator<(other);
     //}    
-    //string GetSerial() const
+    //string GetSerialString() const
     //{
-    //    return SerialNumber::GetSerial(); // avoiding the need for virtual inheritance
+    //    return SerialNumber::GetSerialString(); // avoiding the need for virtual inheritance
    // }
 };
 

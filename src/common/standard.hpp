@@ -35,7 +35,7 @@ public:
     
     virtual string GetTypeName() const; 
     virtual string GetName() const; // used by parse, render etc
-    virtual string GetSerial() const; 
+    virtual string GetSerialString() const; 
     virtual string GetTrace() const; // used for debug
 };
 
@@ -84,11 +84,6 @@ protected:
         // Identity semantics: ignore "other"
         return *this;
     }
-    inline SNType GetSerialNumber() const 
-    {
-        return serial;
-    }
-    string GetSerial() const; 
     inline bool operator<( const SerialNumber &o )
     {
         if( step != o.step )
@@ -101,6 +96,11 @@ protected:
 public:
     static void SetStep( int s );
     static void *GetLocation( SNType location );
+    inline pair<SNType, SNType> GetSerialNumber() const 
+    {
+        return make_pair(location, serial); // This is enough for uniqueness
+    }
+    string GetSerialString() const; 
 };
 
 
