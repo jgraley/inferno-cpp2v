@@ -99,7 +99,7 @@ string Traceable::GetName() const
 }
 
 
-string Traceable::GetAddr() const
+string Traceable::GetSerial() const
 {
     return string();
 }
@@ -107,7 +107,7 @@ string Traceable::GetAddr() const
 
 string Traceable::GetTrace() const
 {
-    return GetName() + GetAddr(); // name plus pointer
+    return GetName() + GetSerial(); // name plus pointer
 }
 
 
@@ -153,7 +153,7 @@ void SerialNumber::SetStep( int s )
 }
 
 
-string SerialNumber::GetAddr() const
+string SerialNumber::GetSerial() const
 {
     string ss;
     switch( step )

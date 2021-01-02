@@ -188,7 +188,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && node )
     {
-        my_block.sub_blocks.push_back( { node->GetAddr(), 
+        my_block.sub_blocks.push_back( { node->GetSerial(), 
                                          "", 
                                          false, 
                                          {} } );

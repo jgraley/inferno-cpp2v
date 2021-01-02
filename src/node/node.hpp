@@ -27,9 +27,9 @@ struct NodeBases : Magic,
                    Cloner,
                    SerialNumber
 {
-    string GetAddr() const
+    string GetSerial() const
     {
-        return SerialNumber::GetAddr(); // avoiding the need for virtual inheritance
+        return SerialNumber::GetSerial(); // avoiding the need for virtual inheritance
     }
 };
 

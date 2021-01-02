@@ -42,7 +42,7 @@ string SpecificString::GetRender() const
 
 string SpecificString::GetTrace() const
 {
-    return GetName() + "(" + GetRender() + ")" + GetAddr();
+    return GetName() + "(" + GetRender() + ")" + GetSerial();
 }
 
 //////////////////////////// SpecificInteger ///////////////////////////////
@@ -104,7 +104,7 @@ string SpecificInteger::GetRender() const /// Produce a string for debug
 
 string SpecificInteger::GetTrace() const
 {
-    return GetName() + "(" + GetRender() + ")" + GetAddr();
+    return GetName() + "(" + GetRender() + ")" + GetSerial();
 }
 
 //////////////////////////// SpecificFloat ///////////////////////////////
@@ -166,7 +166,7 @@ string SpecificFloat::GetRender() const
 
 string SpecificFloat::GetTrace() const
 {
-    return GetName() + "(" + GetRender() + ")" + GetAddr();
+    return GetName() + "(" + GetRender() + ")" + GetSerial();
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -236,7 +236,7 @@ string SpecificIdentifier::GetRender() const
 string SpecificIdentifier::GetTrace() const
 {
     // Since this is text from the program, use single quotes
-    return GetName() + "('" + GetRender() + "')" + GetAddr();
+    return GetName() + "('" + GetRender() + "')" + GetSerial();
 }
 
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////

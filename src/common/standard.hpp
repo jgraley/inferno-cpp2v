@@ -35,7 +35,7 @@ public:
     
     virtual string GetTypeName() const; 
     virtual string GetName() const; // used by parse, render etc
-    virtual string GetAddr() const; 
+    virtual string GetSerial() const; 
     virtual string GetTrace() const; // used for debug
 };
 
@@ -88,7 +88,7 @@ protected:
     {
         return serial;
     }
-    string GetAddr() const; 
+    string GetSerial() const; 
     inline bool operator<( const SerialNumber &o )
     {
         if( step != o.step )
