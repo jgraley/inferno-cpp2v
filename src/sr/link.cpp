@@ -14,24 +14,24 @@ using namespace SR;
 
 //#define TEST_ASSERT_NOT_ON_STACK
 
-//////////////////////////// LinkId ///////////////////////////////
+//////////////////////////// LinkSerial ///////////////////////////////
 
-LinkId::LinkId()
+LinkSerial::LinkSerial()
 {
     id = -1;
 }
 
 
-LinkId::LinkId( const TreePtrInterface *p )
+LinkSerial::LinkSerial( const TreePtrInterface *p )
 {
     if( !p || !*p )
         return; // Let link constructor deal with this case
     TreePtr<Node> node = (TreePtr<Node>)*p;
-    pair<SNType, SNType> sn = node->GetSerialNumber();
+    pair<SerialNumber::SNType, SerialNumber::SNType> sn = node->GetSerialNumber();
     IDsByLink &ids_by_link = ids_by_child_node[sn.first][sn.second];
     if( ids_by_link.count(p) == 0 )
     {
-        id = (IDType)(ids_by_link.size());
+        id = (LinkSNType)(ids_by_link.size());
         ids_by_link[p] = id;
         TRACE("%p ", p)(node)(": %p : %llu-%llu %d ADDED\n", &ids_by_link, sn.first, sn.second, id);
     }
@@ -43,7 +43,7 @@ LinkId::LinkId( const TreePtrInterface *p )
 }
 
 
-string LinkId::GetIdString() const
+string LinkSerial::GetIdString() const
 {
     if( id==-1 )
         return "NULL";
@@ -52,13 +52,13 @@ string LinkId::GetIdString() const
 }
 
 
-void LinkId::Dump()
+void LinkSerial::Dump()
 {
     FTRACE(ids_by_child_node)("\n");
 }
 
 
-LinkId::IDsByNodeSerial LinkId::ids_by_child_node;    
+LinkSerial::IDsByNodeSerial LinkSerial::ids_by_child_node;    
 
 //////////////////////////// PatternLink ///////////////////////////////
 
@@ -73,7 +73,7 @@ PatternLink::PatternLink()
 PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
                          const TreePtrInterface *ppattern, 
                          void *whodat_) :
-    LinkId( ppattern ),
+    LinkSerial( ppattern ),
     asp_pattern( parent_pattern, ppattern )
 {
     ASSERT( parent_pattern );
@@ -197,7 +197,7 @@ string PatternLink::GetShortName() const
 
 PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
                          void *whodat_) :
-    LinkId( &*ppattern ),
+    LinkSerial( &*ppattern ),
     asp_pattern( ppattern )
 {
 #ifdef KEEP_WHODAT_INFO
@@ -219,7 +219,7 @@ XLink::XLink() :
 XLink::XLink( shared_ptr<const Node> parent_x,
               const TreePtrInterface *px,
               void *whodat_ ) :
-    LinkId( px ),
+    LinkSerial( px ),
     asp_x( parent_x, px )              
 {
     ASSERT( parent_x );
@@ -312,7 +312,7 @@ string XLink::GetTrace() const // used for debug
 
 XLink::XLink( shared_ptr<const TreePtrInterface> px,
               void *whodat_ ) :
-    LinkId( &*px ),
+    LinkSerial( &*px ),
     asp_x( px )
 {
     ASSERT(px);
