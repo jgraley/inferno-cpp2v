@@ -124,7 +124,7 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
     {
-        return !ShouldDoEngine(root); // Stop where we will do blocks        
+        return !ShouldDoControlBlock(root); // Stop where we will do blocks        
     });
             
     for( const Graphable::SubBlock &sub_block : block.sub_blocks )
@@ -137,7 +137,7 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
                 FOREACH( const TreePtrInterface &ni, w )
                 {              
                     TreePtr<Node> node = (TreePtr<Node>)ni;
-                    Graphable *g = ShouldDoEngine(node);
+                    Graphable *g = ShouldDoControlBlock(node);
                     if( g )
                     {
                         s += PopulateFromEngine( g, node, Id(node.get()), link.link_style, links_pass );
@@ -550,7 +550,7 @@ string Graph::DoFooter()
 }
 
 
-Graphable *Graph::ShouldDoEngine( TreePtr<Node> node )
+Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
 {
     Graphable *g = dynamic_cast<Graphable *>(node.get());
     if( !g )

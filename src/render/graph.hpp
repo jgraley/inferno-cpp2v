@@ -56,7 +56,7 @@ private:
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
 
-    string DoEngineBlock( const MyBlock &block, string base_id );
+    string DoControlBlock( const MyBlock &block, string base_id );
     string DoBlock( const MyBlock &block, string base_id );
     string DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
     string DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
@@ -69,7 +69,7 @@ private:
     string DoHeader();
     string DoFooter();
 
-    Graphable *ShouldDoEngine( TreePtr<Node> node ); 
+    Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
     string Id( const void *p );
     string SeqField( int i );
     string EscapeForGraphviz( string s );

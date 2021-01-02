@@ -44,7 +44,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
                                 DASHED, 
                                 {},
                                 {PatternLink(this, GetOverlay()).GetShortName()} } } } );
-    return { false, GetName(), "", ENGINE, sub_blocks };
+    return { false, GetName(), "", CONTROL, sub_blocks };
 }
 
 
