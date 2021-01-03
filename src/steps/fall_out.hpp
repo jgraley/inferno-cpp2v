@@ -29,10 +29,10 @@ public:
 };
 
 /// Find c ? a[i] : a[j] and replace with a[ c ? i : j ]
-class SwapSubscriptMultiplex : public SearchReplace
+class SwapSubscriptConditionalOperator : public SearchReplace
 {
 public:
-    SwapSubscriptMultiplex();
+    SwapSubscriptConditionalOperator();
 };
 
 /// Insert state variable as an enum

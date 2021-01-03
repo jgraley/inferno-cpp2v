@@ -168,7 +168,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
 }
 
 // New better way of propogating lmap through variables. This supercedes LabelVarsToEnum
-// and SwapSubscriptMultiplex. It works by just changing all appearances of the Labeley 
+// and SwapSubscriptConditionalOperator. It works by just changing all appearances of the Labeley 
 // type (except in the decl of the lvar). 
 // TODO Use local node for enum, so that we can change to this, and not unsigned int
 // TODO does not handle the case where there are two threads in a module, one of 
@@ -407,7 +407,7 @@ LabelVarsToEnum::LabelVarsToEnum()
 }
 
 
-SwapSubscriptMultiplex::SwapSubscriptMultiplex()
+SwapSubscriptConditionalOperator::SwapSubscriptConditionalOperator()
 {
     MakePatternPtr<ConditionalOperator> s_mux, r_mux;
     MakePatternPtr<Subscript> s_sub1, s_sub2, r_sub;

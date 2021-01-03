@@ -108,10 +108,10 @@ public:
 };
 
 /** Reduce ?: to an if, due to its conditional execution and sequence point behaviour */
-class MultiplexorToIf : public SearchReplace
+class ConditionalOperatorToIf : public SearchReplace
 {
 public:
-    MultiplexorToIf();
+    ConditionalOperatorToIf();
 };
 
 /** Evaluate the arguments to a funciton into temps first, and then pass the temps

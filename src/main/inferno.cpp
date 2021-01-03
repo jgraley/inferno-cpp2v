@@ -61,7 +61,7 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
         
         sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new ConditionalOperatorToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
         sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) );  
         sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
@@ -103,7 +103,7 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
         for( int i=0; i<2; i++ )
         {
             sequence->push_back( shared_ptr<Transformation>( new LabelVarsToEnum ) ); 
-            sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
+            sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptConditionalOperator ) );        
         }
 #endif        
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );

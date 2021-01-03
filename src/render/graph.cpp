@@ -421,6 +421,10 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
             s += "fontcolor = white\n";
             s += "color = gray70\n";
         }
+        else
+        {
+            s += "fillcolor = antiquewhite1\n";
+        }
     }
     else
 	{

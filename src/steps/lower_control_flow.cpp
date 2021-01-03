@@ -570,7 +570,7 @@ LogicalOrToIf::LogicalOrToIf()
 }
 
 
-MultiplexorToIf::MultiplexorToIf()
+ConditionalOperatorToIf::ConditionalOperatorToIf()
 {
     MakePatternPtr<ConditionalOperator> s_mux;
     MakePatternPtr<Expression> op1, op3;
