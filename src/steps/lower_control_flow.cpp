@@ -518,7 +518,7 @@ LogicalAndToIf::LogicalAndToIf()
 {
     MakePatternPtr<LogicalAnd> s_and;
     MakePatternPtr<Expression> op1, op2;
-    MakePatternPtr<CompoundExpression> r_comp;
+    MakePatternPtr<StatementExpression> r_comp;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("andtemp");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<Boolean> r_boolean;
@@ -546,7 +546,7 @@ LogicalOrToIf::LogicalOrToIf()
 {
     MakePatternPtr<LogicalOr> s_or;
     MakePatternPtr<Expression> op1, op2;
-    MakePatternPtr<CompoundExpression> r_comp;
+    MakePatternPtr<StatementExpression> r_comp;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("ortemp");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<Boolean> r_boolean;
@@ -572,9 +572,9 @@ LogicalOrToIf::LogicalOrToIf()
 
 MultiplexorToIf::MultiplexorToIf()
 {
-    MakePatternPtr<Multiplexor> s_mux;
+    MakePatternPtr<ConditionalOperator> s_mux;
     MakePatternPtr<Expression> op1, op3;
-    MakePatternPtr<CompoundExpression> r_comp;
+    MakePatternPtr<StatementExpression> r_comp;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("muxtemp");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr< TransformOf<Expression> > op2( &TypeOf::instance );
@@ -605,7 +605,7 @@ ExtractCallParams::ExtractCallParams()
     MakePatternPtr<Call> s_call, r_call;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("temp_%s");
     MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr<CompoundExpression> r_ce;
+    MakePatternPtr<StatementExpression> r_ce;
     MakePatternPtr<Assign> r_assign;
     MakePatternPtr< Star<MapOperand> > params;
     MakePatternPtr<MapOperand> s_param, r_param;

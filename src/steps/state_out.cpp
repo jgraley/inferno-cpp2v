@@ -88,7 +88,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     MakePatternPtr< Goto > then_goto, s_else_goto, r_goto, sx_goto;// TODO sx_goto could be any departure, like Return or Cease etc
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, sx_pre, post, sx_post;
-    MakePatternPtr< Multiplexor > mult;
+    MakePatternPtr< ConditionalOperator > mult;
     MakePatternPtr< Label > label;    
     MakePatternPtr< BuildLabelIdentifierAgent > label_id("PROCEED");
     MakePatternPtr< Conjunction<Statement> > s_all;
@@ -120,7 +120,7 @@ CompactGotos::CompactGotos()
     MakePatternPtr< Goto > s_then_goto, s_else_goto, r_goto;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< Multiplexor > mult;
+    MakePatternPtr< ConditionalOperator > mult;
     
     s_then_goto->destination = MakePatternPtr<Expression>();    
     s_else_goto->destination = MakePatternPtr<Expression>();
@@ -147,7 +147,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     MakePatternPtr< Goto > r_goto;
     MakePatternPtr< Star<Declaration> > decls, sx_decls;
     MakePatternPtr< Star<Statement> > pre, post, sx_pre, sx_post;
-    MakePatternPtr< Multiplexor > mult;
+    MakePatternPtr< ConditionalOperator > mult;
     MakePatternPtr< Label > label;    
     MakePatternPtr< LabelIdentifier > label_id;
     MakePatternPtr< Conjunction<Compound> > s_all;

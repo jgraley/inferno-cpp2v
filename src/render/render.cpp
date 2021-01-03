@@ -154,7 +154,7 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id )
 		return RenderScopedIdentifier( r->identifier ) + "::";
 	else if( dynamic_pointer_cast<CallableParams>( scope ) ||  // <- this is for params
              dynamic_pointer_cast<Compound>( scope ) ||    // <- this is for locals in body
-             dynamic_pointer_cast<CompoundExpression>( scope ) )    // <- this is for locals in body
+             dynamic_pointer_cast<StatementExpression>( scope ) )    // <- this is for locals in body
 		return string();
 	else
 		return ERROR_UNSUPPORTED( scope );
@@ -312,7 +312,7 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
     {
 		s = "{ " + RenderOperandSequence( operands, ", ", false ) + " }";
     }
-	else if( dynamic_pointer_cast< Multiplexor >(op) )
+	else if( dynamic_pointer_cast< ConditionalOperator >(op) )
     {
 		s = RenderExpression( *operands_it, true ) + " ? ";
         ++operands_it;
@@ -388,7 +388,7 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 
 	if( dynamic_pointer_cast< Uninitialised >(expression) )
 		return string();
-    else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast< CompoundExpression >(expression) )
+    else if( TreePtr<StatementExpression> ce = dynamic_pointer_cast< StatementExpression >(expression) )
     {
         AutoPush< TreePtr<Scope> > cs( scope_stack, ce );
         string s = "({ ";

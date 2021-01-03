@@ -89,7 +89,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     {
         return MakeTreePtr<Void>(); 
     }
-    else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast<CompoundExpression>(o) )
+    else if( TreePtr<StatementExpression> ce = dynamic_pointer_cast<StatementExpression>(o) )
     {
         if( ce->statements.empty() )
             return MakeTreePtr<Void>(); 
@@ -310,7 +310,7 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
     {
         return optypes.back();
     }
-    else if( dynamic_pointer_cast<Multiplexor>(op) )
+    else if( dynamic_pointer_cast<ConditionalOperator>(op) )
 	{
         Sequence<Type>::iterator optypes_it = optypes.begin();
         ++optypes_it;

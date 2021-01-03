@@ -814,8 +814,8 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
 /// GCC extension for compound statements that return a value
 /** The returned value is that returned by the last statement if it
     is an expresison. Otherwise evaluates to void */
-struct CompoundExpression : Expression, ///< Evaluates to whatever the last statement evaluates to
-                            SequentialScope       ///< Local declarations go in here (preferably)
+struct StatementExpression : Expression, ///< Evaluates to whatever the last statement evaluates to
+                             SequentialScope       ///< Local declarations go in here (preferably)
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    

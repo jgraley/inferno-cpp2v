@@ -1059,7 +1059,7 @@ private:
 			clang::SourceLocation ColonLoc,
 			ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
 	{
-		TreePtr<Multiplexor> co(new Multiplexor);
+		TreePtr<ConditionalOperator> co(new ConditionalOperator);
 		co->operands.push_back( hold_expr.FromRaw(Cond) );
 		ASSERT(LHS )( "gnu extension not supported");
 		co->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -2069,7 +2069,7 @@ private:
 		TreePtr<Compound> cb( dynamic_pointer_cast<Compound>( hold_stmt.FromRaw( SubStmt ) ) );
         ASSERT(cb); // Let's hope the only statement Clang gives us is a compound
 
-		TreePtr<CompoundExpression> ce( new CompoundExpression );
+		TreePtr<StatementExpression> ce( new StatementExpression );
 		ce->statements = cb->statements;
 		return hold_expr.ToRaw( ce );
     }

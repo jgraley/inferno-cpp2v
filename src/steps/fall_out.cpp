@@ -409,7 +409,7 @@ LabelVarsToEnum::LabelVarsToEnum()
 
 SwapSubscriptMultiplex::SwapSubscriptMultiplex()
 {
-    MakePatternPtr<Multiplexor> s_mux, r_mux;
+    MakePatternPtr<ConditionalOperator> s_mux, r_mux;
     MakePatternPtr<Subscript> s_sub1, s_sub2, r_sub;
     MakePatternPtr<Expression> cond, index1, index2;
     MakePatternPtr<InstanceIdentifier> array; // Instance used to prevent side effects, which would go out of sequence

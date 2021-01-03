@@ -115,7 +115,7 @@ ReturnViaTemp::ReturnViaTemp()
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("%s_return");
     MakePatternPtr<Return> ls_return, lr_return;
     MakePatternPtr<Expression> l_return_value;
-    MakePatternPtr<CompoundExpression> mr_comp;
+    MakePatternPtr<StatementExpression> mr_comp;
     MakePatternPtr< GreenGrass<Call> > ms_gg;
     MakePatternPtr< Overlay<Type> > overcp;
     MakePatternPtr< Overlay<Initialiser> > overi;

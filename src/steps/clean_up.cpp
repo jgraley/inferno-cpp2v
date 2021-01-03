@@ -25,18 +25,18 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
      //
      // Temp is used to preserve sequence point after c. This step assumes that
      // all sequence points that need preserving co-incide with the semicolons
-     // in a Compound or CompoundExpression. It also requires that there be no loops.
+     // in a Compound or StatementExpression. It also requires that there be no loops.
      //
-     // Everything in a CompoundExpression is a Statement, even the final one that
+     // Everything in a StatementExpression is a Statement, even the final one that
      // gets evaluated (by order of gcc). If this is not an Expression then the type
-     // of the CompoundExpression is Void. However, this looks like an "evaluate and
+     // of the StatementExpression is Void. However, this looks like an "evaluate and
      // discard" kind of statement, and we could act on it accordingly (in the case 
      // of a SE ending in another nested SE). So we have to ensure we do outermost 
      // first.
     MakePatternPtr< Stuff<Node> > root_stuff;
     MakePatternPtr< Overlay<Node> > root_overlay;
     MakePatternPtr< Negation<Node> > root_not;
-    MakePatternPtr< CompoundExpression > root_ce;
+    MakePatternPtr< StatementExpression > root_ce;
           
     MakePatternPtr< Conjunction<Statement> > s_all;
     MakePatternPtr< PointerIs<Statement> > sx_pointeris;
@@ -49,7 +49,7 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     MakePatternPtr< Star<Declaration> > sr_cdecls;
     MakePatternPtr< Star<Statement> > sr_cstmts;
     
-    MakePatternPtr<CompoundExpression> s_ce;
+    MakePatternPtr<StatementExpression> s_ce;
     MakePatternPtr<Compound> r_comp;
     MakePatternPtr< Star<Statement> > s_pre, s_post, body;
     MakePatternPtr< Star<Declaration> > decls;
@@ -376,7 +376,7 @@ CleanUpDeadCode::CleanUpDeadCode()
 
 ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
 {
-    MakePatternPtr<CompoundExpression> s_ce;
+    MakePatternPtr<StatementExpression> s_ce;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > stmts;
     MakePatternPtr< Negation<Statement> > last;
