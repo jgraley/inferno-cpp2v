@@ -131,7 +131,6 @@ Agent::Completeness AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentI
     Completeness completeness = COMPLETE;
     if( base_xlink == XLink::MMAX_Link )
     {
-#ifdef STRICT_MMAX_POLICY
         for( PatternLink plink : pattern_query->GetNormalLinks() ) 
         {
             if( required_links->count(plink) == 0 )
@@ -142,15 +141,9 @@ Agent::Completeness AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentI
             {
                 XLink req_xlink = required_links->at(plink);
                 if( req_xlink != XLink::MMAX_Link )
-                    throw MMAXRequiredUnderMMAX();
+                    throw MMAXPropagationMismatch();
             }
-        }
-#else
-        query.Reset();
-        // Magic Match Anything node: all normal children also match anything
-        // This is just to keep normal-domain solver happy, so we 
-        // only need normals. 
-#endif        
+        }   
     }   
     else
     {

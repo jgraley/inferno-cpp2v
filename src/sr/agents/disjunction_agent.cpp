@@ -91,10 +91,8 @@ Agent::Completeness DisjunctionAgent::RunDecidedNormalLinkedQueryImpl( DecidedQu
             XLink req_xlink = req_it->second; 
             if( req_xlink == base_xlink )
                 found = true;
-#ifdef STRICT_MMAX_POLICY
             else if( req_xlink != XLink::MMAX_Link )
                 throw MMAXRequiredOnUntakenOptionMismatch();
-#endif                            
         }        
                     
         // Note: links that didn't match are allowed, but not required, to be MMAX.
