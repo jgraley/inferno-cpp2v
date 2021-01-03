@@ -76,8 +76,8 @@ Agent::Completeness DisjunctionAgent::RunDecidedNormalLinkedQueryImpl( DecidedQu
     bool found = false;
     Completeness completeness = COMPLETE;
     
-    // Don't register a decision; instead use the required links
-    FOREACH( const TreePtrInterface &p, GetPatterns() )                 
+    // Loop over the options for this disjunction
+    FOREACH( const TreePtrInterface &p, GetPatterns() )           
     {
         PatternLink plink(this, &p);
         SolutionMap::const_iterator req_it = required_links->find(plink); // TODO hangover from when it was a list
@@ -90,13 +90,10 @@ Agent::Completeness DisjunctionAgent::RunDecidedNormalLinkedQueryImpl( DecidedQu
         {
             XLink req_xlink = req_it->second; 
             if( req_xlink == base_xlink )
-                found = true;
+                found = true; // This is the taken option
             else if( req_xlink != XLink::MMAX_Link )
                 throw MMAXRequiredOnUntakenOptionMismatch();
         }        
-                    
-        // Note: links that didn't match are allowed, but not required, to be MMAX.
-        // Therefore we don't actually mention MMAX in this implementation.
     }
     
     // We only really have a mismatch if query was full i.e. we tried all the options
