@@ -64,6 +64,7 @@ private:
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
 
+    string DoAll();
     string DoBlock( const MyBlock &block );
     string DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
     string DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
@@ -86,6 +87,8 @@ private:
     UniqueFilter unique_filter;
     const string outfile; // empty means stdout
     FILE *filep;
+    
+    list<MyBlock> my_blocks;
 };
 
 #endif

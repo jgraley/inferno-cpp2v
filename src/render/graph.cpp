@@ -19,6 +19,8 @@
 
 using namespace CPPTree;
 
+#define DEFER_DO
+
 // Graph Documentation
 //
 // The shapes and contents of the displayed nodes is explained in comments in the function 
@@ -79,8 +81,13 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	string s;
     unique_filter.Reset();
 	s += PopulateFromNode( root, false );
+#ifdef DEFER_DO    
+    ASSERT( s.empty() );
+    s = DoAll();
+#else    
     unique_filter.Reset();
 	s += PopulateFromNode( root, true );
+#endif    
 	Disburse( s );
 
 	return root; // no change
@@ -99,8 +106,13 @@ string Graph::PopulateFromTransformation(Transformation *root)
     {
         unique_filter.Reset();
 	    s += PopulateFromEngine( cr, nullptr, Graphable::THROUGH, false );
+#ifdef DEFER_DO    
+        ASSERT( s.empty() );
+        s = DoAll();
+#else    
         unique_filter.Reset();
 	    s += PopulateFromEngine( cr, nullptr, Graphable::THROUGH, true );
+#endif        
 	}
 	else
     {
@@ -117,11 +129,14 @@ string Graph::PopulateFromEngine( const Graphable *g,
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
     MyBlock block = PreProcessBlock( gblock, nbase, true, default_link_style );
-    //MyBlock block; (Graphable::Block &)block = gblock;    
 
 	string s;
+#ifdef DEFER_DO
+    my_blocks.push_back( block );
+#else    
     s += links_pass ? DoLinks(block) : DoBlock(block);
-        
+#endif
+
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
     {
@@ -146,10 +161,14 @@ string Graph::PopulateFromEngine( const Graphable *g,
                     else
                     {
                         MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false, link.link_style );
+#ifdef DEFER_DO
+                        my_blocks.push_back( child_block );
+#else    
                         if( links_pass )
                             s += DoLinks(child_block);
                         else
                             s += DoBlock(child_block);
+#endif                        
                     }
                 }
             }
@@ -171,10 +190,14 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
             
         TreePtr<Node> node = (TreePtr<Node>)ni;
         MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false, Graphable::SOLID );
+#ifdef DEFER_DO
+        my_blocks.push_back( child_block );
+#else
         if( links_pass )
             s += DoLinks(child_block);
         else
             s += DoBlock(child_block);
+#endif
 	}
 	return s;
 }
@@ -404,6 +427,20 @@ string Graph::RemoveOneOuterScope( string s )
     int n = s.find("::");
 	if( n != string::npos )
 	    s = s.substr( n+2 );
+    return s;
+}
+
+
+string Graph::DoAll()
+{
+    string s;
+    
+    for( const MyBlock &block : my_blocks )
+        s += DoBlock(block);
+
+    for( const MyBlock &block : my_blocks )
+        s += DoLinks(block);
+    
     return s;
 }
 
