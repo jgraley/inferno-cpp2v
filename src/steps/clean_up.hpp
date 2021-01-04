@@ -15,10 +15,10 @@ namespace Steps {
 using namespace SR;
 
 /// Find compound statements inside compund statements and flatten
-class CleanupCompoundExpression : public CompareReplace
+class CleanupStatementExpression : public CompareReplace
 {    
 public:
-    CleanupCompoundExpression();
+    CleanupStatementExpression();
 };
    
 /// Find compound statements inside compund statements and flatten
@@ -80,10 +80,10 @@ public:
 };
 
 /** turn a compound expression that does not end in an expression into an ordinary compound */
-class ReduceVoidCompoundExpression : public SearchReplace
+class ReduceVoidStatementExpression : public SearchReplace
 {
 public:
-    ReduceVoidCompoundExpression();
+    ReduceVoidStatementExpression();
 };
 
 /** Remove instances not used anywhere - except Callables and instances of InheritanceRecord since

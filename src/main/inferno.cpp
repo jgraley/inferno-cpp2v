@@ -72,12 +72,12 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
     }        
     { // big round of cleaning up
-        sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new ReduceVoidStatementExpression ) ); 
         //for( int i=0; i<2; i++ )
         // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
         // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
         // removal of unused labels - we must repeat because dead code removal can generate unused labels.
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundExpression ) ); // TODO only safe in SSP, so don't call this a cleanup!
+        sequence->push_back( shared_ptr<Transformation>( new CleanupStatementExpression ) ); // TODO only safe in SSP, so don't call this a cleanup!
         for( int i=0; i<2; i++ )
         {
             sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );

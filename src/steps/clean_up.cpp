@@ -17,7 +17,7 @@ using namespace CPPTree;
 using namespace Steps;
 
 // Removing superfluous CompundExpression blocks to clean up the code
-CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in body not allowed
+CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in body not allowed
 {
      // Lowering compound expressions
      //
@@ -374,7 +374,7 @@ CleanUpDeadCode::CleanUpDeadCode()
 }
 
 
-ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
+ReduceVoidStatementExpression::ReduceVoidStatementExpression()
 {
     MakePatternPtr<StatementExpression> s_ce;
     MakePatternPtr< Star<Declaration> > decls;
