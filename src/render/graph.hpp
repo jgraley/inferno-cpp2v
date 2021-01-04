@@ -43,40 +43,45 @@ private:
     {
         string colour;
         bool specify_ports;
+        string base_id;
     };
 
     string PopulateFromTransformation(Transformation *root);
-    string PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string id, Graphable::LinkStyle default_link_style, bool links_pass );
+    string PopulateFromEngine( const Graphable *g,
+                               TreePtr<Node> nbase, 
+                               Graphable::LinkStyle default_link_style, 
+                               bool links_pass );
     string PopulateFromNode( TreePtr<Node> root, bool links_pass );
 
-    MyBlock PreProcessBlock( const Graphable::Block &block, TreePtr<Node> n, bool for_engine_block );
+    MyBlock PreProcessBlock( const Graphable::Block &block, 
+                             TreePtr<Node> n, 
+                             bool for_engine_block, 
+                             Graphable::LinkStyle link_style );
+    void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
     Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n );
     string GetInnermostTemplateParam( string s );
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
 
-    string DoControlBlock( const MyBlock &block, string base_id );
-    string DoBlock( const MyBlock &block, string base_id );
+    string DoBlock( const MyBlock &block );
     string DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
     string DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
-    string DoLinks( const MyBlock &block, string base_id );
+    string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 
                    const Graphable::SubBlock &sub_block, 
-                   const Graphable::Link &link, 
-                   string base_id );
+                   const Graphable::Link &link );
     string DoHeader();
     string DoFooter();
 
     Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
-    string Id( const void *p );
+    string Id( TreePtr<Node> node );
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     string GetPreRestriction(const TreePtrInterface *ptr);
-    void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     
     UniqueFilter unique_filter;
     const string outfile; // empty means stdout

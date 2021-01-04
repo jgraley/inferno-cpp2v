@@ -98,9 +98,9 @@ string Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, nullptr, Id(root), Graphable::THROUGH, false );
+	    s += PopulateFromEngine( cr, nullptr, Graphable::THROUGH, false );
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, nullptr, Id(root), Graphable::THROUGH, true );
+	    s += PopulateFromEngine( cr, nullptr, Graphable::THROUGH, true );
 	}
 	else
     {
@@ -110,16 +110,17 @@ string Graph::PopulateFromTransformation(Transformation *root)
 }
 
 
-string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, string base_id, Graphable::LinkStyle default_link_style, bool links_pass )
+string Graph::PopulateFromEngine( const Graphable *g,
+                                  TreePtr<Node> nbase, 
+                                  Graphable::LinkStyle default_link_style, 
+                                  bool links_pass )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
-    MyBlock block = PreProcessBlock( gblock, nbase, true );
+    MyBlock block = PreProcessBlock( gblock, nbase, true, default_link_style );
     //MyBlock block; (Graphable::Block &)block = gblock;    
 
-    PropagateLinkStyle( block, default_link_style );
-
 	string s;
-    s += links_pass ? DoLinks(block, base_id) : DoBlock(block, base_id);
+    s += links_pass ? DoLinks(block) : DoBlock(block);
         
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
@@ -140,16 +141,15 @@ string Graph::PopulateFromEngine( const Graphable *g, TreePtr<Node> nbase, strin
                     Graphable *g = ShouldDoControlBlock(node);
                     if( g )
                     {
-                        s += PopulateFromEngine( g, node, Id(node.get()), link.link_style, links_pass );
+                        s += PopulateFromEngine( g, node, link.link_style, links_pass );
                     }
                     else
                     {
-                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false );
-                        PropagateLinkStyle( child_block, link.link_style );
+                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false, link.link_style );
                         if( links_pass )
-                            s += DoLinks(child_block, Id(node.get()));
+                            s += DoLinks(child_block);
                         else
-                            s += DoBlock(child_block, Id(node.get()));
+                            s += DoBlock(child_block);
                     }
                 }
             }
@@ -164,27 +164,32 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 	string s;
     TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
 	::UniqueWalk w( root );
-	FOREACH( const TreePtrInterface &n, w )
+	FOREACH( const TreePtrInterface &ni, w )
 	{
-		if( !n )
+		if( !ni )
             continue;
             
-        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( (TreePtr<Node>)n ), (TreePtr<Node>)n, false );
-        PropagateLinkStyle( child_block, Graphable::SOLID );
+        TreePtr<Node> node = (TreePtr<Node>)ni;
+        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false, Graphable::SOLID );
         if( links_pass )
-            s += DoLinks(child_block, Id(n.get()));
+            s += DoLinks(child_block);
         else
-            s += DoBlock(child_block, Id(n.get()));
+            s += DoBlock(child_block);
 	}
 	return s;
 }
 
 
-Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<Node> node, bool for_engine_block )
+Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
+                                       TreePtr<Node> node, 
+                                       bool for_engine_block, 
+                                       Graphable::LinkStyle link_style )
 {
     // Fill in everything in block 
     MyBlock my_block;
     (Graphable::Block &)my_block = block;
+    
+    my_block.base_id = Id(node);
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && node )
@@ -240,7 +245,22 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
         }
     }
 
+    PropagateLinkStyle( my_block, link_style );
+
     return my_block;    
+}
+
+
+void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
+{
+    for( Graphable::SubBlock &sub_block : dest.sub_blocks ) 
+    {  
+        for( Graphable::Link &link : sub_block.links )
+        {
+            if( link.link_style == Graphable::THROUGH )
+                link.link_style = link_style;    
+        }
+    }
 }
 
 
@@ -388,10 +408,10 @@ string Graph::RemoveOneOuterScope( string s )
 }
 
 
-string Graph::DoBlock( const MyBlock &block, string base_id )
+string Graph::DoBlock( const MyBlock &block )
 {
 	string s;
-	s += base_id;
+	s += "\""+block.base_id+"\"";
 	s += " [\n";
     
 	s += "shape = \"" + block.shape + "\"\n";
@@ -487,7 +507,7 @@ string Graph::DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_bl
 }
 
 
-string Graph::DoLinks( const MyBlock &block, string base_id )
+string Graph::DoLinks( const MyBlock &block )
 {
     string s;
     
@@ -495,7 +515,7 @@ string Graph::DoLinks( const MyBlock &block, string base_id )
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
         for( Graphable::Link link : sub_block.links )
-            s += DoLink( porti, block, sub_block, link, base_id );
+            s += DoLink( porti, block, sub_block, link );
         porti++;
     }
 
@@ -506,8 +526,7 @@ string Graph::DoLinks( const MyBlock &block, string base_id )
 string Graph::DoLink( int port_index, 
                       const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
-                      const Graphable::Link &link,
-                      string base_id )
+                      const Graphable::Link &link )
 {          
     // Atts
     string atts;
@@ -533,11 +552,11 @@ string Graph::DoLink( int port_index,
 
     // GraphViz output
 	string s;
-	s += base_id;
+	s += "\""+block.base_id+"\"";
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += Id(link.child_node.get());
+	s += "\""+Id(link.child_node)+"\"";
 	s += " ["+atts+"];\n";
 	return s;
 }
@@ -592,11 +611,9 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
 }
 
 
-string Graph::Id( const void *p )
+string Graph::Id( TreePtr<Node> node )
 {
-	char s[20];
-	sprintf(s, "\"%p\"", p );
-	return s;
+	return node ? node->GetSerialString() : "root_engine";
 }
 
 
@@ -683,17 +700,4 @@ string Graph::GetPreRestriction(const TreePtrInterface *ptr)
         }
     }
     return "";
-}
-
-
-void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
-{
-    for( Graphable::SubBlock &sub_block : dest.sub_blocks ) 
-    {  
-        for( Graphable::Link &link : sub_block.links )
-        {
-            if( link.link_style == Graphable::THROUGH )
-                link.link_style = link_style;    
-        }
-    }
 }
