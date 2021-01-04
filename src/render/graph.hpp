@@ -46,14 +46,15 @@ private:
         string base_id;
     };
 
-    string PopulateFromTransformation(Transformation *root);
-    string PopulateFromEngine( const Graphable *g,
-                               TreePtr<Node> nbase, 
-                               Graphable::LinkStyle default_link_style, 
-                               bool links_pass );
-    string PopulateFromNode( TreePtr<Node> root, bool links_pass );
+    void PopulateFromTransformation(Transformation *root);
+    void PopulateFromEngine( const Graphable *g,
+                             TreePtr<Node> nbase, 
+                             Graphable::LinkStyle default_link_style, 
+                             bool links_pass );
+    void PopulateFromNode( TreePtr<Node> root, bool links_pass );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
+                             const Graphable *g,
                              TreePtr<Node> n, 
                              bool for_engine_block, 
                              Graphable::LinkStyle link_style );
@@ -64,7 +65,7 @@ private:
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
 
-    string DoAll();
+    string DoGraphBody();
     string DoBlock( const MyBlock &block );
     string DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
     string DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
@@ -77,7 +78,7 @@ private:
     string DoFooter();
 
     Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
-    string Id( TreePtr<Node> node );
+    string Id( const Graphable *g, TreePtr<Node> node );
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );

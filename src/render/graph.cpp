@@ -19,8 +19,6 @@
 
 using namespace CPPTree;
 
-#define DEFER_DO
-
 // Graph Documentation
 //
 // The shapes and contents of the displayed nodes is explained in comments in the function 
@@ -68,8 +66,8 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {    
-    string s;
-    s += PopulateFromTransformation(root);	
+    PopulateFromTransformation(root);	
+    string s = DoGraphBody();
 	Disburse( s );
 }
 
@@ -78,64 +76,43 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
 	(void)context; // Not needed!!
 
-	string s;
     unique_filter.Reset();
-	s += PopulateFromNode( root, false );
-#ifdef DEFER_DO    
-    ASSERT( s.empty() );
-    s = DoAll();
-#else    
-    unique_filter.Reset();
-	s += PopulateFromNode( root, true );
-#endif    
+	PopulateFromNode( root, false );
+    string s = DoGraphBody();
 	Disburse( s );
 
 	return root; // no change
 }
 
 
-string Graph::PopulateFromTransformation(Transformation *root)
-{
-    string s;
+void Graph::PopulateFromTransformation(Transformation *root)
+{    
     if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
     {
-        FOREACH( shared_ptr<Transformation> t, *tv )
-            s = PopulateFromTransformation( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
+        FOREACH( shared_ptr<Transformation> t, *tv ) // TODO loop backwards so they come out in the right order in graph
+            PopulateFromTransformation( t.get() );
     }
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += PopulateFromEngine( cr, nullptr, Graphable::THROUGH, false );
-#ifdef DEFER_DO    
-        ASSERT( s.empty() );
-        s = DoAll();
-#else    
-        unique_filter.Reset();
-	    s += PopulateFromEngine( cr, nullptr, Graphable::THROUGH, true );
-#endif        
+	    PopulateFromEngine( cr, nullptr, Graphable::THROUGH, false );
 	}
 	else
     {
         ASSERTFAIL("Unknown kind of transformation in graph plotter");
     }
-	return s;
 }
 
 
-string Graph::PopulateFromEngine( const Graphable *g,
-                                  TreePtr<Node> nbase, 
-                                  Graphable::LinkStyle default_link_style, 
-                                  bool links_pass )
+void Graph::PopulateFromEngine( const Graphable *g,
+                                TreePtr<Node> nbase, 
+                                Graphable::LinkStyle default_link_style, 
+                                bool links_pass )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
-    MyBlock block = PreProcessBlock( gblock, nbase, true, default_link_style );
-
-	string s;
-#ifdef DEFER_DO
+    MyBlock block = PreProcessBlock( gblock, g, nbase, true, default_link_style );
+	
     my_blocks.push_back( block );
-#else    
-    s += links_pass ? DoLinks(block) : DoBlock(block);
-#endif
 
     LambdaFilter block_filter( [&](TreePtr<Node> context,
                                    TreePtr<Node> root) -> bool
@@ -156,31 +133,22 @@ string Graph::PopulateFromEngine( const Graphable *g,
                     Graphable *g = ShouldDoControlBlock(node);
                     if( g )
                     {
-                        s += PopulateFromEngine( g, node, link.link_style, links_pass );
+                        PopulateFromEngine( g, node, link.link_style, links_pass );
                     }
                     else
                     {
-                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false, link.link_style );
-#ifdef DEFER_DO
+                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), nullptr, node, false, link.link_style );
                         my_blocks.push_back( child_block );
-#else    
-                        if( links_pass )
-                            s += DoLinks(child_block);
-                        else
-                            s += DoBlock(child_block);
-#endif                        
                     }
                 }
             }
         }
     }
-	return s;
 }
 
 
-string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
+void Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 {
-	string s;
     TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
 	::UniqueWalk w( root );
 	FOREACH( const TreePtrInterface &ni, w )
@@ -189,21 +157,14 @@ string Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
             continue;
             
         TreePtr<Node> node = (TreePtr<Node>)ni;
-        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), node, false, Graphable::SOLID );
-#ifdef DEFER_DO
+        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), nullptr, node, false, Graphable::SOLID );
         my_blocks.push_back( child_block );
-#else
-        if( links_pass )
-            s += DoLinks(child_block);
-        else
-            s += DoBlock(child_block);
-#endif
 	}
-	return s;
 }
 
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
+                                       const Graphable *g,
                                        TreePtr<Node> node, 
                                        bool for_engine_block, 
                                        Graphable::LinkStyle link_style )
@@ -212,7 +173,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     MyBlock my_block;
     (Graphable::Block &)my_block = block;
     
-    my_block.base_id = Id(node);
+    my_block.base_id = Id(g, node);
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && node )
@@ -431,7 +392,7 @@ string Graph::RemoveOneOuterScope( string s )
 }
 
 
-string Graph::DoAll()
+string Graph::DoGraphBody()
 {
     string s;
     
@@ -593,7 +554,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += "\""+Id(link.child_node)+"\"";
+	s += "\""+Id(nullptr, link.child_node)+"\"";
 	s += " ["+atts+"];\n";
 	return s;
 }
@@ -648,9 +609,9 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
 }
 
 
-string Graph::Id( TreePtr<Node> node )
+string Graph::Id( const Graphable *g, TreePtr<Node> node )
 {
-	return node ? node->GetSerialString() : "root_engine";
+	return node ? node->GetSerialString() : SSPrintf("Graphable@%p", g);
 }
 
 
