@@ -216,6 +216,14 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, TreePtr<No
         my_block.title = GetInnermostTemplateParam(my_block.title);
     }
     
+    // Can we hide sub-blocks?
+    bool sub_blocks_hideable = ( my_block.sub_blocks.size() == 0 || 
+                                 (my_block.sub_blocks.size() == 1 && my_block.sub_blocks.front().hideable) );
+
+    // If not, make sure we're using a shape that allows for sub_blocks
+    if( !sub_blocks_hideable && !(my_block.shape == "plaintext" || my_block.shape == "record") )
+        my_block.shape = "plaintext";      
+    
     // These kinds of blocks require port names to be to be specified so links can tell them apart
     my_block.specify_ports = (my_block.shape=="record" || my_block.shape=="plaintext");  
     
@@ -386,16 +394,7 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
 	s += base_id;
 	s += " [\n";
     
-    // Can we hide sub-blocks?
-    bool sub_blocks_hideable = ( block.sub_blocks.size() == 0 || 
-                                 (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
-
-    // If not, make sure we're using a shape that allows for sub_blocks
-    string shape = block.shape;
-    if( !sub_blocks_hideable && !(shape == "plaintext" || shape == "record") )
-        shape = "plaintext";
-
-	s += "shape = \"" + shape + "\"\n";
+	s += "shape = \"" + block.shape + "\"\n";
 	if(block.colour != "")
 		s += "fillcolor = \"" + block.colour + "\"\n";
 
@@ -404,13 +403,13 @@ string Graph::DoBlock( const MyBlock &block, string base_id )
     // discouraged and may lead to unexpected behavior because of their 
     // conflicting label schemas and overlapping functionality."
     // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
-	if( shape == "plaintext" )
+	if( block.shape == "plaintext" )
 	{
 		s += "label = " + DoHTMLLabel( block.title, block.sub_blocks );
 		s += "style = \"rounded,filled\"\n";
 		s += "fontsize = \"" FS_SMALL "\"\n";
 	}
-	else if( shape == "record" )
+	else if( block.shape == "record" )
     {
         s += "label = " + DoRecordLabel( block.title, block.sub_blocks );
         s += "style = \"filled\"\n";
