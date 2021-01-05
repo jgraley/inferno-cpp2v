@@ -18,7 +18,7 @@ using namespace SR;
 
 LinkSerial::LinkSerial()
 {
-    id = -1;
+    serial = -1;
 }
 
 
@@ -28,37 +28,37 @@ LinkSerial::LinkSerial( const TreePtrInterface *p )
         return; // Let link constructor deal with this case
     TreePtr<Node> node = (TreePtr<Node>)*p;
     pair<SerialNumber::SNType, SerialNumber::SNType> sn = node->GetSerialNumber();
-    IDsByLink &ids_by_link = ids_by_child_node[sn.first][sn.second];
-    if( ids_by_link.count(p) == 0 )
+    SerialByLink &serial_by_link = serial_by_child_node[sn.first][sn.second];
+    if( serial_by_link.count(p) == 0 )
     {
-        id = (LinkSNType)(ids_by_link.size());
-        ids_by_link[p] = id;
-        TRACE("%p ", p)(node)(": %p : %llu-%llu %d ADDED\n", &ids_by_link, sn.first, sn.second, id);
+        serial = (LinkSNType)(serial_by_link.size());
+        serial_by_link[p] = serial;
+        TRACE("%p ", p)(node)(": %p : %llu-%llu %d ADDED\n", &serial_by_link, sn.first, sn.second, serial);
     }
     else
     {
-        id = ids_by_link.at(p);
-        TRACE("%p ", p)(node)(": %p : %llu-%llu %d FOUND\n", &ids_by_link, sn.first, sn.second, id);
+        serial = serial_by_link.at(p);
+        TRACE("%p ", p)(node)(": %p : %llu-%llu %d FOUND\n", &serial_by_link, sn.first, sn.second, serial);
     }
 }
 
 
-string LinkSerial::GetIdString() const
+string LinkSerial::GetSerialString() const
 {
-    if( id==-1 )
+    if( serial==-1 )
         return "NULL";
     else
-        return SSPrintf("%d", id);
+        return SSPrintf("#%d", serial);
 }
 
 
 void LinkSerial::Dump()
 {
-    FTRACE(ids_by_child_node)("\n");
+    FTRACE(serial_by_child_node)("\n");
 }
 
 
-LinkSerial::IDsByNodeSerial LinkSerial::ids_by_child_node;    
+LinkSerial::SerialByNodeSerial LinkSerial::serial_by_child_node;    
 
 //////////////////////////// PatternLink ///////////////////////////////
 
@@ -191,7 +191,7 @@ string PatternLink::GetName() const
 
 string PatternLink::GetShortName() const
 {
-    return GetIdString();
+    return GetSerialString();
 }
 
 
@@ -298,7 +298,7 @@ const TreePtrInterface *XLink::GetXPtr() const
 
 string XLink::GetTrace() const // used for debug
 {
-    string s = GetIdString() + "->";
+    string s = GetSerialString() + "->";
     if(asp_x==nullptr)
         s += "NULL";
     else

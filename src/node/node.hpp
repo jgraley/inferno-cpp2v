@@ -27,10 +27,6 @@ struct NodeBases : Magic,
                    Cloner,
                    SerialNumber
 {
-    string GetSerialString() const
-    {
-        return SerialNumber::GetSerialString(); // avoiding the need for virtual inheritance
-    }
 };
 
 // Base class for all tree nodes and nodes in search/replace

@@ -99,15 +99,9 @@ string Traceable::GetName() const
 }
 
 
-string Traceable::GetSerialString() const
-{
-    return string();
-}
-
-
 string Traceable::GetTrace() const
 {
-    return GetName() + GetSerialString(); // name plus pointer
+    return GetName();
 }
 
 

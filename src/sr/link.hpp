@@ -21,16 +21,16 @@ public:
     
     LinkSerial();
     explicit LinkSerial( const TreePtrInterface *p );
-    string GetIdString() const;
+    string GetSerialString() const;
     static void Dump();
     
 private:
-    typedef map<const TreePtrInterface *, LinkSNType> IDsByLink;
+    typedef map<const TreePtrInterface *, LinkSNType> SerialByLink;
     // Index by location, then serial. Serial scales with inptu tree size so 
     // use unordered_map for that.
-    typedef map< SerialNumber::SNType, unordered_map< SerialNumber::SNType, IDsByLink > > IDsByNodeSerial;
-    static IDsByNodeSerial ids_by_child_node;    
-    LinkSNType id;
+    typedef map< SerialNumber::SNType, unordered_map< SerialNumber::SNType, SerialByLink > > SerialByNodeSerial;
+    static SerialByNodeSerial serial_by_child_node;    
+    LinkSNType serial;
 };
 
 
