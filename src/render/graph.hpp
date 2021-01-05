@@ -41,6 +41,7 @@ public:
 private:
     struct MyBlock : Graphable::Block
     {
+        TreePtr<Node> as_node;
         string colour;
         bool specify_ports;
         string base_id;
@@ -64,6 +65,8 @@ private:
     string GetInnermostTemplateParam( string s );
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
+    
+    void PostProcessBlocks();
 
     string DoGraphBody();
     string DoBlock( const MyBlock &block );
@@ -83,13 +86,15 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
-    string GetPreRestriction(const TreePtrInterface *ptr);
-    
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
+    string GetPreRestrictionName(TreePtr<Node> node);
+
     UniqueFilter unique_filter;
     const string outfile; // empty means stdout
     FILE *filep;
     
     list<MyBlock> my_blocks;
+    set<string> block_ids_show_prerestriction;
 };
 
 #endif

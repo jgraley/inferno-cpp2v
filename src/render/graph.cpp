@@ -67,6 +67,7 @@ Graph::~Graph()
 void Graph::operator()( Transformation *root )
 {    
     PopulateFromTransformation(root);	
+    PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
 }
@@ -78,6 +79,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 
     unique_filter.Reset();
 	PopulateFromNode( root, false );
+    PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
 
@@ -173,7 +175,11 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     MyBlock my_block;
     (Graphable::Block &)my_block = block;
     
+    // Fill in the GraphViz ID that the block will use
     my_block.base_id = Id(g, node);
+    
+    // Capture the node (if there is one: might be NULL)
+    my_block.as_node = node;
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && node )
@@ -205,17 +211,6 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         my_block.title = GetInnermostTemplateParam(my_block.title);
     }
     
-    // Can we hide sub-blocks?
-    bool sub_blocks_hideable = ( my_block.sub_blocks.size() == 0 || 
-                                 (my_block.sub_blocks.size() == 1 && my_block.sub_blocks.front().hideable) );
-
-    // If not, make sure we're using a shape that allows for sub_blocks
-    if( !sub_blocks_hideable && !(my_block.shape == "plaintext" || my_block.shape == "record") )
-        my_block.shape = "plaintext";      
-    
-    // These kinds of blocks require port names to be to be specified so links can tell them apart
-    my_block.specify_ports = (my_block.shape=="record" || my_block.shape=="plaintext");  
-    
     // Actions for sub-blocks
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {
@@ -223,12 +218,14 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         for( Graphable::Link &link : sub_block.links )
         {
             // Detect pre-restrictions and add to link labels
-            string pr = GetPreRestriction( link.ptr );
-            if( !pr.empty() )
-                link.labels.push_back( pr );
+            if( IsNonTrivialPreRestriction( link.ptr ) )
+            {
+                block_ids_show_prerestriction.insert( Id(nullptr, link.child_node) );
+            }
         }
     }
 
+    // Apply current link style to links as a default
     PropagateLinkStyle( my_block, link_style );
 
     return my_block;    
@@ -389,6 +386,35 @@ string Graph::RemoveOneOuterScope( string s )
 	if( n != string::npos )
 	    s = s.substr( n+2 );
     return s;
+}
+
+
+void Graph::PostProcessBlocks()
+{
+    for( MyBlock &block : my_blocks )
+    {
+        if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
+        {
+            string prs = GetPreRestrictionName( block.as_node );
+            
+            // Note: using push_front to get pre-restriction near the top (under title)
+            block.sub_blocks.push_front( { "("+prs+")", 
+                                           "", 
+                                           false, 
+                                           {} } );
+        }
+        
+        // Can we hide sub-blocks?
+        bool sub_blocks_hideable = ( block.sub_blocks.size() == 0 || 
+                                     (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
+
+        // If not, make sure we're using a shape that allows for sub_blocks
+        if( !sub_blocks_hideable && !(block.shape == "plaintext" || block.shape == "record") )
+            block.shape = "plaintext";      
+        
+        // These kinds of blocks require port names to be to be specified so links can tell them apart
+        block.specify_ports = (block.shape=="record" || block.shape=="plaintext");              
+    }
 }
 
 
@@ -566,6 +592,7 @@ string Graph::DoHeader()
 	s += "digraph Inferno {\n"; // g is name of graph
 	s += "graph [\n";
 	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
+	s += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
 	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
     if( ReadArgs::graph_dark )
@@ -685,7 +712,7 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 }
 
 
-string Graph::GetPreRestriction(const TreePtrInterface *ptr)
+bool Graph::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
 {
     if( ptr )		// is normal tree link
     {
@@ -693,9 +720,19 @@ string Graph::GetPreRestriction(const TreePtrInterface *ptr)
         {
             if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )    // pre-restrictor is nontrivial
             {
-                return (**(sbs->GetPreRestrictionArchitype())).GetName();
+                return true;
             }
         }
+    }
+    return false;
+}
+
+
+string Graph::GetPreRestrictionName(TreePtr<Node> node)
+{
+    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(node) )   // is to a special node
+    {
+        return (**(sbs->GetPreRestrictionArchitype())).GetName();
     }
     return "";
 }
