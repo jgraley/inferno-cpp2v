@@ -51,7 +51,8 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 	// tired.
     Block block;
 	block.bold = true;
-	block.title = string("||||");
+    block.title = "GreenGrass";
+	block.symbol = "||||";
 	block.shape = "triangle";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "through", 

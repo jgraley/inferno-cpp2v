@@ -31,6 +31,7 @@ using namespace CPPTree;
 #define FS_SMALL "12"
 #define FS_MIDDLE "14"
 #define FS_LARGE "16"
+#define FS_HUGE "18"
 #define NS_SMALL "0.4"
 //#define FONT "Arial"
 
@@ -224,6 +225,12 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
             }
         }
     }
+    
+    // Italic title OR symbol designates a special agent 
+    bool special = node && dynamic_pointer_cast<SpecialBase>(node);
+    my_block.italic_title = special;
+    if( !special )
+        ASSERT( my_block.symbol.empty() );
 
     // Apply current link style to links as a default
     PropagateLinkStyle( my_block, link_style );
@@ -449,13 +456,13 @@ string Graph::DoBlock( const MyBlock &block )
     // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
 	if( block.shape == "plaintext" )
 	{
-		s += "label = " + DoHTMLLabel( block.title, block.sub_blocks );
+		s += "label = " + DoHTMLLabel( block );
 		s += "style = \"rounded,filled\"\n";
 		s += "fontsize = \"" FS_SMALL "\"\n";
 	}
 	else if( block.shape == "record" )
     {
-        s += "label = " + DoRecordLabel( block.title, block.sub_blocks );
+        s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
         s += "fontsize = \"" FS_MIDDLE "\"\n";
         if( ReadArgs::graph_dark )
@@ -471,14 +478,23 @@ string Graph::DoBlock( const MyBlock &block )
     }
     else
 	{
-        // Ignoring sub-block (above check means there will only be one: it
+        string lt;
+        if( !block.symbol.empty() )
+            lt = EscapeForGraphviz( block.symbol );
+        else if( block.italic_title )        
+            lt = "<I>" + EscapeForGraphviz( block.title ) + "</I>";
+        else
+            lt = EscapeForGraphviz( block.title );        // Ignoring sub-block (above check means there will only be one: it
         // is assumed that the title is sufficietly informative
-		s += "label = \"" + block.title + "\"\n";// TODO causes errors because links go to targets meant for records
+		s += "label = <" + lt + ">\n";// TODO causes errors because links go to targets meant for records
 		s += "style = \"filled\"\n";
-        s += "fontsize = \"" FS_LARGE "\"\n";
+        if( !block.symbol.empty() )
+            s += "fontsize = \"" FS_HUGE "\"\n";
+        else
+            s += "fontsize = \"" FS_LARGE "\"\n";
         s += "penwidth = 0.0\n";
 
-		if( block.title.size() <= 3 ) // can fit about 3 chars in standard small shape
+		if( !block.symbol.empty() )
 		{
 			s += "fixedsize = true\n";
 			s += "width = " NS_SMALL "\n";
@@ -491,12 +507,13 @@ string Graph::DoBlock( const MyBlock &block )
 }
 
 
-string Graph::DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks )
+string Graph::DoRecordLabel( const MyBlock &block )
 {
+    string lt = EscapeForGraphviz( block.symbol.empty() ? block.title : block.symbol );
     string s;
-    s += "\"<fixed> " + EscapeForGraphviz( title );
+    s += "\"<fixed> " + lt;
     int k=0;
-    for( Graphable::SubBlock sub_block : sub_blocks )
+    for( Graphable::SubBlock sub_block : block.sub_blocks )
     {        
         string label_text = EscapeForGraphviz(sub_block.item_name + sub_block.item_extra);
         s += " | <" +  SeqField(k) + "> " + label_text;
@@ -507,17 +524,25 @@ string Graph::DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_
 }
 
 
-string Graph::DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks )
+string Graph::DoHTMLLabel( const MyBlock &block )
 {
+    string lt;
+    if( !block.symbol.empty() )
+        lt = EscapeForGraphviz( block.symbol );
+    else if( block.italic_title )        
+        lt = "<I>" + EscapeForGraphviz( block.title ) + "</I>";
+    else
+        lt = EscapeForGraphviz( block.title );
+        
     
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
 	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + EscapeForGraphviz(title) + "</FONT></TD>\n";
+	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + lt + "</FONT></TD>\n";
 	s += "  <TD></TD>\n";
 	s += " </TR>\n";
     
     int porti=0;
-    for( Graphable::SubBlock sub_block : sub_blocks )
+    for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
         s += " <TR>\n";
         s += "  <TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>\n";

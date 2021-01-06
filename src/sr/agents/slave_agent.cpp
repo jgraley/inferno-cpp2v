@@ -48,6 +48,7 @@ void SlaveAgent::KeyForOverlay( Agent *from )
 Graphable::Block SlaveAgent::GetGraphBlockInfo() const
 {
     Block block = my_scr_engine->GetGraphBlockInfo();
+    block.title = "Slave";
     block.sub_blocks.push_front( { "through", 
                                    "",
                                    true,
@@ -56,7 +57,6 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
                                        THROUGH, 
                                        {},
                                        {PatternLink(this, GetThrough()).GetShortName()} } } } );
-    block.title = GetName();
     return block;
 }
 

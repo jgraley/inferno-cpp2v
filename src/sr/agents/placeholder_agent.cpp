@@ -21,7 +21,8 @@ Graphable::Block PlaceholderAgent::GetGraphBlockInfo() const
     // It should not appear in any graphs, however.
     Block block;
 	block.bold = true;
-	block.title = string(".");
+	block.title = "Placeholder";
+	block.symbol = ".";
 	block.shape = "circle";
     block.block_type = Graphable::NODE;
     return block;

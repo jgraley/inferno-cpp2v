@@ -152,7 +152,8 @@ Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
 	// right of the circle. 1 implies the tendancy to match exactly one thing. See #256.
     Block block = SearchContainerAgent::GetGraphBlockInfo();
-	block.title = string("#=1"); 
+    block.title = "AnyNode";
+	block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
 }
 
@@ -270,7 +271,8 @@ Graphable::Block StuffAgent::GetGraphBlockInfo() const
 	// right of the circle. # is chosen (as is the name Stuff) for its similarity to * because
 	// the nodes are both able to wildcard multiple nodes in the input tree.
     Block block = SearchContainerAgent::GetGraphBlockInfo();
-	block.title = string("#"); 
+	block.title = "Stuff"; 
+	block.symbol = "#"; 
     if( recurse_restriction )
         block.sub_blocks.push_back( { "recurse_restriction", 
                                       "", 

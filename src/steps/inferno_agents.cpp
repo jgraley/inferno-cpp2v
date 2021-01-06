@@ -31,7 +31,8 @@ Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 	// TODO indicate whether it's building instance, label or type identifier
     Block block;
 	block.bold = true;
-	block.title = "'"+format+"'"; // text from program code, so use single quotes
+	block.title = "BuildIdentifier"; 
+	block.symbol = "'"+format+"'"; // text from program code, so use single quotes
 	block.shape = "parallelogram";
     block.block_type = Graphable::NODE;
     return block;
@@ -138,9 +139,11 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.
 	// TODO indicate whether it's matching instance, label or type identifier
+    // Update: PreRestriction indicator seems to be doing that now
     Block block;
 	block.bold = true;
-	block.title = name;
+    block.title = "IdentifierByName";
+	block.symbol = "'" + name + "'";
 	block.shape = "trapezium";
     block.block_type = Graphable::NODE;
     return block;

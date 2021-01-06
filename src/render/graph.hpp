@@ -45,6 +45,7 @@ private:
         string colour;
         bool specify_ports;
         string base_id;
+        bool italic_title;
     };
 
     void PopulateFromTransformation(Transformation *root);
@@ -70,8 +71,8 @@ private:
 
     string DoGraphBody();
     string DoBlock( const MyBlock &block );
-    string DoRecordLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
-    string DoHTMLLabel( string title, const list<Graphable::SubBlock> &sub_blocks );
+    string DoRecordLabel( const MyBlock &block );
+    string DoHTMLLabel( const MyBlock &block );
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 

@@ -95,7 +95,8 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
 	// filename wildcarding, which is semantically equiviant only when used in a Sequence.
     Block block;
 	block.bold = true;
-	block.title = string("*");
+	block.title = "Star";
+	block.symbol = "*";
 	block.shape = "circle";
     block.block_type = Graphable::NODE;
     if( *GetRestriction() )

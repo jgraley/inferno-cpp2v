@@ -114,7 +114,8 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 	// src/tree/operator_db.txt  
     Block block;
 	block.bold = true;
-	block.title = string("∨");
+    block.title = "Disjunction";
+	block.symbol = string("∨");
 	block.shape = "diamond";
     block.block_type = Graphable::NODE;
     block.sub_blocks = { { "patterns", 
