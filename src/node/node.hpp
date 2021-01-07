@@ -9,6 +9,7 @@
 #include "match.hpp"
 #include "renderable.hpp"
 #include "coloured.hpp"
+#include "common/serial.hpp"
 
 #include <memory>
 

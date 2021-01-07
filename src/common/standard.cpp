@@ -3,45 +3,7 @@
 #include <cxxabi.h>
 #include <stdio.h>
 
-string VSSPrintf(const char *fmt, va_list vl)
-{
-    char cs[1024];    
-    vsnprintf( cs, sizeof(cs), fmt, vl );  
-    //cs[sizeof(cs)-1] = '\0';
-    return string(cs);
-}
-
-
-string SSPrintf(const char *fmt, ...)
-{
-    va_list vl;
-    va_start( vl, fmt );
-    string s = VSSPrintf(fmt, vl);
-    va_end( vl );
-    
-    return s;
-}
-
-
-void CommonTest()
-{
-	// Test the FOREACH macro in case it's our dodgy home made one
-	deque<int> d;
-	deque<int> *pd = &d;
-	d.push_back(100);
-	d.push_back(101);
-	d.push_back(102);
-	d.push_back(103);
-	deque<int> r;
-	FOREACH( int i, *pd )
-	    r.push_back(i);
-	ASSERT( r.size() == 4 );
-    ASSERT( r[0] == 100 );
-    ASSERT( r[1] == 101 );
-    ASSERT( r[2] == 102 );
-    ASSERT( r[3] == 103 );
-}
-
+//////////////////////////// Traceable ///////////////////////////////
 
 string Traceable::CPPFilt( string s )
 {
@@ -104,83 +66,47 @@ string Traceable::GetTrace() const
     return GetName();
 }
 
-
-SerialNumber::SNType SerialNumber::master_location_serial;
-int SerialNumber::current_step;
-map<void *, SerialNumber::SNType> SerialNumber::location_serial;
-map<SerialNumber::SNType, void *> SerialNumber::location_readback;
-map<void *, SerialNumber::SNType> SerialNumber::master_serial;
-
-
-void SerialNumber::Construct()
-{
-    // Get the point in the code where we were constructed 
-    void *lp = __builtin_return_address(1); 
-    
-    // See if we know about this location
-    map<void *, SNType>::iterator it = location_serial.find(lp);
-    if( it == location_serial.end() )
-    {
-        // We don't know about this location, so produce a new location serial number and start the construction count 
-        location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
-        location_readback[master_location_serial] = lp;
-        master_serial.insert( pair<void *, SerialNumber::SNType>(lp, 0) );
-        master_location_serial++;
-    }
-        
-    // Remember values for this object
-    serial = master_serial[lp];
-    location = location_serial[lp];
-    step = current_step;
-    
-    // produce a new construction serial number
-    master_serial[lp]++;
-}    
-
-
-void SerialNumber::SetStep( int s )
-{
-    current_step = s;
-    // Just bin the structures we built up - this forces step to be primary ordering
-    location_serial = map<void *, SNType>();
-    master_serial = map<void *, SNType>();
-}
-
-
-void *SerialNumber::GetLocation( SNType location )
-{
-    return location_readback.at(location);
-}
-
-
-string SerialNumber::GetSerialString() const
-{
-    string ss;
-    switch( step )
-    {
-        case -3: // inputting
-            ss = SSPrintf("#I-%lu-%lu", location, serial);  
-            break;
-        case -2: // outputting
-            ss = SSPrintf("#O-%lu-%lu", location, serial);  
-            break;
-        case -1: // planning
-            ss = SSPrintf("#P-%lu-%lu", location, serial);  
-            break;
-        default: // during a step
-            ss = SSPrintf("#%d-%lu-%lu", step, location, serial);  
-            break;
-    }
-    return ss;
-}
-
-
-void *location(SerialNumber::SNType location) // for GCC
-{
-    return SerialNumber::GetLocation(location);
-}
-
 ////////////////////////// Misc free functions //////////////////////////
+
+string VSSPrintf(const char *fmt, va_list vl)
+{
+    char cs[1024];    
+    vsnprintf( cs, sizeof(cs), fmt, vl );  
+    //cs[sizeof(cs)-1] = '\0';
+    return string(cs);
+}
+
+
+string SSPrintf(const char *fmt, ...)
+{
+    va_list vl;
+    va_start( vl, fmt );
+    string s = VSSPrintf(fmt, vl);
+    va_end( vl );
+    
+    return s;
+}
+
+
+void CommonTest()
+{
+	// Test the FOREACH macro in case it's our dodgy home made one
+	deque<int> d;
+	deque<int> *pd = &d;
+	d.push_back(100);
+	d.push_back(101);
+	d.push_back(102);
+	d.push_back(103);
+	deque<int> r;
+	FOREACH( int i, *pd )
+	    r.push_back(i);
+	ASSERT( r.size() == 4 );
+    ASSERT( r[0] == 100 );
+    ASSERT( r[1] == 101 );
+    ASSERT( r[2] == 102 );
+    ASSERT( r[3] == 103 );
+}
+
 
 string Join( const list<string> &ls, string pre, string sep, string post )
 {

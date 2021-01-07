@@ -565,7 +565,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 
 string AgentCommon::GetTrace() const
 {
-    string s = Traceable::GetTrace();
+    string s = Traceable::GetName() + GetSerialString();
     switch( phase )
     {
     case IN_COMPARE_ONLY:

@@ -39,6 +39,7 @@ string Trace(bool b);
 string Trace(int i); 
 string Trace(size_t i); 
 string Trace(const exception &e); 
+string Trace(const void *p); 
 
 template<typename T>
 string Trace(const T *p) 

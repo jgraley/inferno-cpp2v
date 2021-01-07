@@ -43,6 +43,12 @@ string Trace(const exception &e)
     return string( e.what() ? e.what() : "exception:what()=NULL" );
 }
 
+
+string Trace(const void *p)
+{
+    return SSPrintf("(void *)%p", p);
+}
+
 ////////////////////////// Misc free functions //////////////////////////
 
 #ifdef __GLIBC__

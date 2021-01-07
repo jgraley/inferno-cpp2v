@@ -14,28 +14,8 @@ class Agent;
 class LocatedLink;
 class XLink;
 
-class LinkSerial
-{
-public:
-    typedef int LinkSNType;
-    
-    LinkSerial();
-    explicit LinkSerial( const TreePtrInterface *p );
-    string GetSerialString() const;
-    static void Dump();
-    
-private:
-    typedef map<const TreePtrInterface *, LinkSNType> SerialByLink;
-    // Index by location, then serial. Serial scales with inptu tree size so 
-    // use unordered_map for that.
-    typedef map< SerialNumber::SNType, unordered_map< SerialNumber::SNType, SerialByLink > > SerialByNodeSerial;
-    static SerialByNodeSerial serial_by_child_node;    
-    LinkSNType serial;
-};
-
-
 class PatternLink : public Traceable, 
-                    public LinkSerial
+                    public SatelliteSerial
 {
 public:
     PatternLink();
@@ -73,7 +53,7 @@ private: friend class LocatedLink;
 
 
 class XLink : public Traceable, 
-              public LinkSerial
+              public SatelliteSerial
 {
 public:
     XLink();
