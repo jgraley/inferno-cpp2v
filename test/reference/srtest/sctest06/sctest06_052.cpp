@@ -1,57 +1,57 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_7);
 }
-enum TStates
+enum id_1
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 1U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_THEN_ELSE1 = 4U,
-T_STATE_YIELD = 2U,
+id_2 = 0U,
+id_3 = 1U,
+id_4 = 3U,
+id_5 = 4U,
+id_6 = 2U,
 };
-void T();
+void id_7();
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
-int j;
+id_0 id_18("id_18");
+int id_15;
+int id_16;
+int id_17;
 
-void TopLevel::T()
+void id_0::id_7()
 {
-static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED_NEXT1, &&YIELD, &&PROCEED_THEN_ELSE, &&PROCEED_THEN_ELSE1 };
-auto unsigned int state;
- ::gvar=(1);
- ::i=(0);
+static const unsigned int (id_8[]) = { &&id_9, &&id_10, &&id_11, &&id_12, &&id_13 };
+auto unsigned int id_14;
+ ::id_15=(1);
+ ::id_16=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
-goto *(lmap[state]);
-PROCEED_NEXT:;
- ::gvar+= ::i;
- ::j=(0);
-state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
-goto *(lmap[state]);
-PROCEED_NEXT1:;
+id_14=((!( ::id_16<(4))) ?  ::id_0::id_5 :  ::id_0::id_2);
+goto *(id_8[id_14]);
+id_9:;
+ ::id_15+= ::id_16;
+ ::id_17=(0);
+id_14=((!( ::id_17<(3))) ?  ::id_0::id_4 :  ::id_0::id_3);
+goto *(id_8[id_14]);
+id_10:;
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
-goto *(lmap[state]);
-YIELD:;
- ::gvar++;
- ::j++;
-state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
-goto *(lmap[state]);
-PROCEED_THEN_ELSE:;
- ::gvar*=(2);
- ::i++;
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
-goto *(lmap[state]);
-PROCEED_THEN_ELSE1:;
-cease(  ::gvar );
+id_14= ::id_0::id_6;
+goto *(id_8[id_14]);
+id_11:;
+ ::id_15++;
+ ::id_17++;
+id_14=(( ::id_17<(3)) ?  ::id_0::id_3 :  ::id_0::id_4);
+goto *(id_8[id_14]);
+id_12:;
+ ::id_15*=(2);
+ ::id_16++;
+id_14=(( ::id_16<(4)) ?  ::id_0::id_2 :  ::id_0::id_5);
+goto *(id_8[id_14]);
+id_13:;
+cease(  ::id_15 );
 return ;
 }

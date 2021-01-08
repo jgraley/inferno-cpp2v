@@ -1,24 +1,24 @@
-int a = (44)+((99)*({ do
+int id_0 = (44)+((99)*({ do
 {
 }
 while( 0 ); 233; }));
-void (main)();
-int main_return;
-void *main_link;
-void *main_link1;
+void (id_1)();
+int id_5;
+void *id_4;
+void *id_6;
 
-void (main)()
+void (id_1)()
 {
-/*temp*/ void *temp_link;
-auto void *link;
-link= ::main_link;
+/*temp*/ void *id_2;
+auto void *id_3;
+id_3= ::id_4;
 {
- ::main_return=( ::a+((4)+((9)*({ do
+ ::id_5=( ::id_0+((4)+((9)*({ do
 {
 }
 while( 0 ); 23; }))));
 {
-temp_link=link;
+id_2=id_3;
 return ;
 }
 }

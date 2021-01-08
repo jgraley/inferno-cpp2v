@@ -1,42 +1,42 @@
 #include "isystemc.h"
 
-void *(link_stack[10U]);
-unsigned int main_stack_index = 0U;
-int a = (44)+((99)*({ {
-auto void *state;
+void *(id_0[10U]);
+unsigned int id_1 = 0U;
+int id_2 = (44)+((99)*({ {
+auto void *id_3;
 wait(SC_ZERO_TIME);
-state=(&&NEXT);
-goto *(state);
-NEXT:;
-state=(&&CONTINUE);
-goto *(state);
-CONTINUE:;
-state=((0) ? (&&NEXT) : (&&PROCEED));
-goto *(state);
-PROCEED:;
+id_3=(&&id_4);
+goto *(id_3);
+id_4:;
+id_3=(&&id_5);
+goto *(id_3);
+id_5:;
+id_3=((0) ? (&&id_4) : (&&id_6));
+goto *(id_3);
+id_6:;
 }
 233; }));
-void (main)();
-int main_return;
-void *main_link;
+void (id_7)();
+int id_14;
+void *id_11;
 
-void (main)()
+void (id_7)()
 {
-/*temp*/ void *temp_link;
-auto void *state1;
-/*temp*/ int result;
- ::main_stack_index++;
-( ::link_stack[ ::main_stack_index])= ::main_link;
+/*temp*/ void *id_8;
+auto void *id_9;
+/*temp*/ int id_10;
+ ::id_1++;
+( ::id_0[ ::id_1])= ::id_11;
 wait(SC_ZERO_TIME);
-state1=(&&NEXT1);
-goto *(state1);
-NEXT1:;
-state1=((0) ? (&&NEXT1) : (&&PROCEED1));
-goto *(state1);
-PROCEED1:;
-result=(23);
- ::main_return=( ::a+((4)+((9)*result)));
-temp_link=( ::link_stack[ ::main_stack_index]);
- ::main_stack_index--;
+id_9=(&&id_12);
+goto *(id_9);
+id_12:;
+id_9=((0) ? (&&id_12) : (&&id_13));
+goto *(id_9);
+id_13:;
+id_10=(23);
+ ::id_14=( ::id_2+((4)+((9)*id_10)));
+id_8=( ::id_0[ ::id_1]);
+ ::id_1--;
 return ;
 }

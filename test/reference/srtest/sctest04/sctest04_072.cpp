@@ -1,55 +1,55 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_5);
 }
-enum TStates
+enum id_1
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_THEN_ELSE = 2U,
-T_STATE_YIELD = 1U,
+id_2 = 0U,
+id_3 = 2U,
+id_4 = 1U,
 };
-void T();
+void id_5();
 private:
-unsigned int state;
+unsigned int id_8;
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
+id_0 id_9("id_9");
+int id_6;
+int id_7;
 
-void TopLevel::T()
+void id_0::id_5()
 {
 do
 {
 if( (sc_delta_count())==(0U) )
 {
- ::gvar=(1);
- ::i=(0);
+ ::id_6=(1);
+ ::id_7=(0);
 wait(SC_ZERO_TIME);
- ::TopLevel::state=((!( ::i<(5))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+ ::id_0::id_8=((!( ::id_7<(5))) ?  ::id_0::id_3 :  ::id_0::id_2);
 continue;
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
+if(  ::id_0::id_2== ::id_0::id_8 )
 {
- ::gvar+= ::i;
+ ::id_6+= ::id_7;
 wait(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+ ::id_0::id_8= ::id_0::id_4;
 continue;
 }
-if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
+if(  ::id_0::id_4== ::id_0::id_8 )
 {
- ::gvar*=(2);
- ::i++;
- ::TopLevel::state=(( ::i<(5)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::id_6*=(2);
+ ::id_7++;
+ ::id_0::id_8=(( ::id_7<(5)) ?  ::id_0::id_2 :  ::id_0::id_3);
 }
-if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
+if(  ::id_0::id_3== ::id_0::id_8 )
 {
-cease(  ::gvar );
+cease(  ::id_6 );
 return ;
 }
 wait(SC_ZERO_TIME);

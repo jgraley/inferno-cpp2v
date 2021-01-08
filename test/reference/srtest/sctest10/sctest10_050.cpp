@@ -1,133 +1,133 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_6);
 }
-enum TStates
+enum id_1
 {
-T_STATE_ENTER_f = 3U,
-T_STATE_LINK = 0U,
-T_STATE_LINK1 = 1U,
-T_STATE_LINK2 = 2U,
+id_2 = 3U,
+id_3 = 0U,
+id_4 = 1U,
+id_5 = 2U,
 };
-void T();
+void id_6();
 private:
-char k;
-short j;
-int i;
-int t;
+char id_42;
+short id_43;
 public:
-int x;
+int id_35;
 private:
-void *link;
+int id_44;
+int id_45;
+void *id_41;
 public:
-/*temp*/ char f_k;
-/*temp*/ short f_j;
-/*temp*/ int f_i;
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
-/*temp*/ void *f_link1;
+/*temp*/ char id_38;
+/*temp*/ short id_37;
+/*temp*/ int id_36;
+/*temp*/ int id_40;
+/*temp*/ void *id_39;
+/*temp*/ void *id_46;
 };
-TopLevel top_level("top_level");
+id_0 id_47("id_47");
 
-void TopLevel::T()
+void id_0::id_6()
 {
-/*temp*/ void *temp_link;
-static const void *(lmap[]) = { &&LINK, &&LINK1, &&LINK2, &&ENTER_f };
-auto void *state;
-/*temp*/ int result;
-/*temp*/ int result1;
-/*temp*/ int result10;
-/*temp*/ int result11;
-/*temp*/ int result2;
-/*temp*/ int result3;
-/*temp*/ int result4;
-/*temp*/ int result5;
-/*temp*/ int result6;
-/*temp*/ int result7;
-/*temp*/ int result8;
-/*temp*/ int result9;
-/*temp*/ int temp_i;
-/*temp*/ int temp_i1;
-/*temp*/ int temp_i2;
-/*temp*/ int temp_j;
-/*temp*/ int temp_j1;
-/*temp*/ int temp_j2;
-/*temp*/ int temp_k;
-/*temp*/ int temp_k1;
-/*temp*/ int temp_k2;
- ::TopLevel::x=(0);
-temp_i=(0);
-temp_j=(0);
-temp_k=(0);
- ::TopLevel::f_i=temp_i;
- ::TopLevel::f_j=temp_j;
- ::TopLevel::f_k=temp_k;
- ::TopLevel::f_link=(lmap[ ::TopLevel::T_STATE_LINK]);
+/*temp*/ void *id_7;
+static const void *(id_8[]) = { &&id_9, &&id_10, &&id_11, &&id_12 };
+auto void *id_13;
+/*temp*/ int id_14;
+/*temp*/ int id_15;
+/*temp*/ int id_16;
+/*temp*/ int id_17;
+/*temp*/ int id_18;
+/*temp*/ int id_19;
+/*temp*/ int id_20;
+/*temp*/ int id_21;
+/*temp*/ int id_22;
+/*temp*/ int id_23;
+/*temp*/ int id_24;
+/*temp*/ int id_25;
+/*temp*/ int id_26;
+/*temp*/ int id_27;
+/*temp*/ int id_28;
+/*temp*/ int id_29;
+/*temp*/ int id_30;
+/*temp*/ int id_31;
+/*temp*/ int id_32;
+/*temp*/ int id_33;
+/*temp*/ int id_34;
+ ::id_0::id_35=(0);
+id_26=(0);
+id_29=(0);
+id_32=(0);
+ ::id_0::id_36=id_26;
+ ::id_0::id_37=id_29;
+ ::id_0::id_38=id_32;
+ ::id_0::id_39=(id_8[ ::id_0::id_3]);
 wait(SC_ZERO_TIME);
 {
-state=(lmap[ ::TopLevel::T_STATE_ENTER_f]);
-goto *(state);
+id_13=(id_8[ ::id_0::id_2]);
+goto *(id_13);
 }
-LINK:;
-result= ::TopLevel::f_return;
-result1=result;
-result2=result1;
-result3=result2;
-temp_i1=result3;
-temp_j1=(6);
-temp_k1=(8);
- ::TopLevel::f_i=temp_i1;
- ::TopLevel::f_j=temp_j1;
- ::TopLevel::f_k=temp_k1;
- ::TopLevel::f_link=(lmap[ ::TopLevel::T_STATE_LINK1]);
+id_9:;
+id_14= ::id_0::id_40;
+id_15=id_14;
+id_16=id_15;
+id_17=id_16;
+id_27=id_17;
+id_30=(6);
+id_33=(8);
+ ::id_0::id_36=id_27;
+ ::id_0::id_37=id_30;
+ ::id_0::id_38=id_33;
+ ::id_0::id_39=(id_8[ ::id_0::id_4]);
 {
-state=(lmap[ ::TopLevel::T_STATE_ENTER_f]);
-goto *(state);
+id_13=(id_8[ ::id_0::id_2]);
+goto *(id_13);
 }
-LINK1:;
-result4= ::TopLevel::f_return;
-result5=result4;
-result6=result5;
-result7=result6;
- ::TopLevel::x=result7;
-temp_i2=(1);
-temp_j2=(2);
-temp_k2=(3);
- ::TopLevel::f_i=temp_i2;
- ::TopLevel::f_j=temp_j2;
- ::TopLevel::f_k=temp_k2;
- ::TopLevel::f_link=(lmap[ ::TopLevel::T_STATE_LINK2]);
+id_10:;
+id_18= ::id_0::id_40;
+id_19=id_18;
+id_20=id_19;
+id_21=id_20;
+ ::id_0::id_35=id_21;
+id_28=(1);
+id_31=(2);
+id_34=(3);
+ ::id_0::id_36=id_28;
+ ::id_0::id_37=id_31;
+ ::id_0::id_38=id_34;
+ ::id_0::id_39=(id_8[ ::id_0::id_5]);
 {
-state=(lmap[ ::TopLevel::T_STATE_ENTER_f]);
-goto *(state);
+id_13=(id_8[ ::id_0::id_2]);
+goto *(id_13);
 }
-LINK2:;
-result8= ::TopLevel::f_return;
-result9=result8;
-result10=result9;
-result11=result10;
-cease(  ::TopLevel::x+((2)*result11) );
+id_11:;
+id_22= ::id_0::id_40;
+id_23=id_22;
+id_24=id_23;
+id_25=id_24;
+cease(  ::id_0::id_35+((2)*id_25) );
 return ;
 {
-state=(lmap[ ::TopLevel::T_STATE_ENTER_f]);
-goto *(state);
+id_13=(id_8[ ::id_0::id_2]);
+goto *(id_13);
 }
-ENTER_f:;
- ::TopLevel::link= ::TopLevel::f_link;
- ::TopLevel::k= ::TopLevel::f_k;
- ::TopLevel::j= ::TopLevel::f_j;
- ::TopLevel::i= ::TopLevel::f_i;
- ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));
- ::TopLevel::f_return=( ::TopLevel::t+((5)* ::TopLevel::k));
-temp_link= ::TopLevel::link;
+id_12:;
+ ::id_0::id_41= ::id_0::id_39;
+ ::id_0::id_42= ::id_0::id_38;
+ ::id_0::id_43= ::id_0::id_37;
+ ::id_0::id_44= ::id_0::id_36;
+ ::id_0::id_45=( ::id_0::id_44+((3)* ::id_0::id_43));
+ ::id_0::id_40=( ::id_0::id_45+((5)* ::id_0::id_42));
+id_7= ::id_0::id_41;
 {
-state=temp_link;
-goto *(state);
+id_13=id_7;
+goto *(id_13);
 }
 }

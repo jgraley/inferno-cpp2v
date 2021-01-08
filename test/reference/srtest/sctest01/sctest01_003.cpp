@@ -1,69 +1,69 @@
 #include "isystemc.h"
 
-class Adder;
-class Multiplier;
-class TopLevel;
-class Adder : public sc_module
+class id_0;
+class id_7;
+class id_11;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( Adder )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_2);
 }
-sc_event proceed;
-void T();
+sc_event id_1;
+void id_2();
 };
-class Multiplier : public sc_module
+class id_7 : public sc_module
 {
 public:
-SC_CTOR( Multiplier )
+SC_CTOR( id_7 )
 {
-SC_THREAD(T1);
+SC_THREAD(id_9);
 }
-sc_event instigate;
-sc_event proceed1;
-void T1();
+sc_event id_6;
+sc_event id_8;
+void id_9();
 };
-class TopLevel : public sc_module
+class id_11 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+SC_CTOR( id_11 ) :
+id_10("id_10"),
+id_5("id_5")
 {
-SC_THREAD(T2);
+SC_THREAD(id_12);
 }
-void T2();
- ::Adder add_inst;
- ::Multiplier mul_inst;
+void id_12();
+ ::id_0 id_10;
+ ::id_7 id_5;
 };
-TopLevel top_level("top_level");
-int gvar;
+id_11 id_4("id_4");
+int id_3;
 
-void Adder::T()
+void id_0::id_2()
 {
-wait(  ::Adder::proceed );
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1).notify(SC_ZERO_TIME);
-wait(  ::Adder::proceed );
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1).notify(SC_ZERO_TIME);
+wait(  ::id_0::id_1 );
+ ::id_3+=(2);
+(( ::id_4. ::id_11::id_5). ::id_7::id_6).notify(SC_ZERO_TIME);
+wait(  ::id_0::id_1 );
+ ::id_3+=(3);
+(( ::id_4. ::id_11::id_5). ::id_7::id_6).notify(SC_ZERO_TIME);
 }
 
-void Multiplier::T1()
+void id_7::id_9()
 {
-wait(  ::Multiplier::instigate );
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed1 );
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed1 );
-cease(  ::gvar );
+wait(  ::id_7::id_8 );
+ ::id_3*=(5);
+(( ::id_4. ::id_11::id_10). ::id_0::id_1).notify(SC_ZERO_TIME);
+wait(  ::id_7::id_6 );
+ ::id_3*=(5);
+(( ::id_4. ::id_11::id_10). ::id_0::id_1).notify(SC_ZERO_TIME);
+wait(  ::id_7::id_6 );
+cease(  ::id_3 );
 }
 
-void TopLevel::T2()
+void id_11::id_12()
 {
- ::gvar=(1);
-( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);
+ ::id_3=(1);
+( ::id_11::id_5. ::id_7::id_8).notify(SC_ZERO_TIME);
 }

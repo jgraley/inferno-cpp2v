@@ -1,56 +1,56 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
-int y;
-void (f)(auto int i, auto void *link);
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
+void id_1();
+int id_2;
+int id_3;
+void (id_7)(auto int id_4, auto void *id_5);
+/*temp*/ int id_8;
+/*temp*/ void *id_13;
 };
-TopLevel top_level("top_level");
+id_0 id_14("id_14");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(4);
-(++ ::TopLevel::x)&&( ::TopLevel::y=({ {
- ::TopLevel::f( ::TopLevel::x, &&LINK);
-LINK:;
+ ::id_0::id_2=(4);
+(++ ::id_0::id_2)&&( ::id_0::id_3=({ {
+ ::id_0::id_7( ::id_0::id_2, &&id_6);
+id_6:;
 }
- ::TopLevel::f_return; }));
-(!(++ ::TopLevel::x))||( ::TopLevel::y+=({ {
- ::TopLevel::f( ::TopLevel::x, &&LINK1);
-LINK1:;
+ ::id_0::id_8; }));
+(!(++ ::id_0::id_2))||( ::id_0::id_3+=({ {
+ ::id_0::id_7( ::id_0::id_2, &&id_9);
+id_9:;
 }
- ::TopLevel::f_return; }));
-for(  ::TopLevel::x=(0);  ::TopLevel::x<(2);  )
-( ::TopLevel::x++) ? ( ::TopLevel::y+=({ {
- ::TopLevel::f( ::TopLevel::x, &&LINK2);
-LINK2:;
+ ::id_0::id_8; }));
+for(  ::id_0::id_2=(0);  ::id_0::id_2<(2);  )
+( ::id_0::id_2++) ? ( ::id_0::id_3+=({ {
+ ::id_0::id_7( ::id_0::id_2, &&id_10);
+id_10:;
 }
- ::TopLevel::f_return; })) : ( ::TopLevel::y-=({ {
- ::TopLevel::f( ::TopLevel::x, &&LINK3);
-LINK3:;
+ ::id_0::id_8; })) : ( ::id_0::id_3-=({ {
+ ::id_0::id_7( ::id_0::id_2, &&id_11);
+id_11:;
 }
- ::TopLevel::f_return; }));
-cease(  ::TopLevel::y );
+ ::id_0::id_8; }));
+cease(  ::id_0::id_3 );
 return ;
 }
 
-void (TopLevel::f)(int i, void *link)
+void (id_0::id_7)(int id_4, void *id_5)
 {
-/*temp*/ void *temp_link;
+/*temp*/ void *id_12;
 {
- ::TopLevel::f_return=((100)/i);
+ ::id_0::id_8=((100)/id_4);
 {
-temp_link=link;
+id_12=id_5;
 return ;
 }
 }

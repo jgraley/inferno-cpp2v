@@ -1,76 +1,76 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_8);
 }
-enum TStates
+enum id_1
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 1U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_THEN_ELSE1 = 5U,
-T_STATE_YIELD = 2U,
-T_STATE_YIELD1 = 4U,
+id_2 = 0U,
+id_3 = 1U,
+id_4 = 3U,
+id_5 = 5U,
+id_6 = 2U,
+id_7 = 4U,
 };
-void T();
+void id_8();
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
-int j;
+id_0 id_15("id_15");
+int id_12;
+int id_13;
+int id_14;
 
-void TopLevel::T()
+void id_0::id_8()
 {
-static const unsigned int (lmap[]) = { &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT, &&PROCEED_THEN_ELSE_YIELD_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_PROCEED_NEXT };
-auto unsigned int state;
+static const unsigned int (id_9[]) = { &&id_10, &&id_10, &&id_10, &&id_10, &&id_10, &&id_10 };
+auto unsigned int id_11;
 do
 {
 if( (sc_delta_count())==(0U) )
 {
- ::gvar=(1);
- ::i=(0);
+ ::id_12=(1);
+ ::id_13=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+id_11=((!( ::id_13<(4))) ?  ::id_0::id_5 :  ::id_0::id_2);
 continue;
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
+if(  ::id_0::id_2==id_11 )
 {
- ::gvar+= ::i;
- ::j=(0);
-state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+ ::id_12+= ::id_13;
+ ::id_14=(0);
+id_11=((!( ::id_14<(3))) ?  ::id_0::id_4 :  ::id_0::id_3);
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT1==state )
+if(  ::id_0::id_3==id_11 )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+id_11= ::id_0::id_6;
 continue;
 }
-if(  ::TopLevel::T_STATE_YIELD==state )
+if(  ::id_0::id_6==id_11 )
 {
- ::gvar++;
- ::j++;
-state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::id_12++;
+ ::id_14++;
+id_11=(( ::id_14<(3)) ?  ::id_0::id_3 :  ::id_0::id_4);
 }
-if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE==state )
+if(  ::id_0::id_4==id_11 )
 {
- ::gvar*=(2);
+ ::id_12*=(2);
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+id_11= ::id_0::id_7;
 continue;
 }
-if(  ::TopLevel::T_STATE_YIELD1==state )
+if(  ::id_0::id_7==id_11 )
 {
- ::i++;
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+ ::id_13++;
+id_11=(( ::id_13<(4)) ?  ::id_0::id_2 :  ::id_0::id_5);
 }
-if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1==state )
+if(  ::id_0::id_5==id_11 )
 {
-cease(  ::gvar );
+cease(  ::id_12 );
 return ;
 }
 }

@@ -1,161 +1,161 @@
 #include "isystemc.h"
 
-class Adder;
-class Multiplier;
-class TopLevel;
-class Adder : public sc_module
+class id_0;
+class id_13;
+class id_25;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( Adder )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_6);
 }
-enum TStates
+enum id_1
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 2U,
-T_STATE_PROCEED_THEN_ELSE = 1U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
+id_2 = 0U,
+id_3 = 2U,
+id_4 = 1U,
+id_5 = 3U,
 };
-void T();
-bool proceed;
+void id_6();
+bool id_8;
 };
-class Multiplier : public sc_module
+class id_13 : public sc_module
 {
 public:
-SC_CTOR( Multiplier )
+SC_CTOR( id_13 )
 {
-SC_THREAD(T1);
+SC_THREAD(id_21);
 }
-enum TStates1
+enum id_14
 {
-T_STATE_PROCEED_NEXT2 = 0U,
-T_STATE_PROCEED_NEXT3 = 2U,
-T_STATE_PROCEED_NEXT4 = 4U,
-T_STATE_PROCEED_THEN_ELSE2 = 1U,
-T_STATE_PROCEED_THEN_ELSE3 = 3U,
-T_STATE_PROCEED_THEN_ELSE4 = 5U,
+id_15 = 0U,
+id_16 = 2U,
+id_17 = 4U,
+id_18 = 1U,
+id_19 = 3U,
+id_20 = 5U,
 };
-void T1();
-bool instigate;
-bool proceed1;
+void id_21();
+bool id_12;
+bool id_23;
 };
-class TopLevel : public sc_module
+class id_25 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+SC_CTOR( id_25 ) :
+id_24("id_24"),
+id_11("id_11")
 {
-SC_THREAD(T2);
+SC_THREAD(id_27);
 }
-enum TStates2
+enum id_26
 {
 };
-void T2();
- ::Adder add_inst;
- ::Multiplier mul_inst;
+void id_27();
+ ::id_0 id_24;
+ ::id_13 id_11;
 };
-TopLevel top_level("top_level");
-int gvar;
+id_25 id_10("id_10");
+int id_9;
 
-void Adder::T()
+void id_0::id_6()
 {
-auto unsigned int state;
+auto unsigned int id_7;
 do
 {
 if( (sc_delta_count())==(0U) )
 {
 wait(SC_ZERO_TIME);
-state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE :  ::Adder::T_STATE_PROCEED_NEXT);
+id_7=((!(! ::id_0::id_8)) ?  ::id_0::id_4 :  ::id_0::id_2);
 continue;
 }
-if(  ::Adder::T_STATE_PROCEED_NEXT==state )
+if(  ::id_0::id_2==id_7 )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT :  ::Adder::T_STATE_PROCEED_THEN_ELSE);
+id_7=((! ::id_0::id_8) ?  ::id_0::id_2 :  ::id_0::id_4);
 continue;
 }
-if(  ::Adder::T_STATE_PROCEED_THEN_ELSE==state )
+if(  ::id_0::id_4==id_7 )
 {
- ::Adder::proceed=(false);
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
-state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE1 :  ::Adder::T_STATE_PROCEED_NEXT1);
+ ::id_0::id_8=(false);
+ ::id_9+=(2);
+(( ::id_10. ::id_25::id_11). ::id_13::id_12)=(true);
+id_7=((!(! ::id_0::id_8)) ?  ::id_0::id_5 :  ::id_0::id_3);
 }
-if(  ::Adder::T_STATE_PROCEED_NEXT1==state )
+if(  ::id_0::id_3==id_7 )
 {
 wait(SC_ZERO_TIME);
-state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT1 :  ::Adder::T_STATE_PROCEED_THEN_ELSE1);
+id_7=((! ::id_0::id_8) ?  ::id_0::id_3 :  ::id_0::id_5);
 continue;
 }
-if(  ::Adder::T_STATE_PROCEED_THEN_ELSE1==state )
+if(  ::id_0::id_5==id_7 )
 {
- ::Adder::proceed=(false);
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
+ ::id_0::id_8=(false);
+ ::id_9+=(3);
+(( ::id_10. ::id_25::id_11). ::id_13::id_12)=(true);
 return ;
 }
 }
 while( true );
 }
 
-void Multiplier::T1()
+void id_13::id_21()
 {
-auto unsigned int state1;
+auto unsigned int id_22;
 do
 {
 if( (sc_delta_count())==(0U) )
 {
 wait(SC_ZERO_TIME);
-state1=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2 :  ::Multiplier::T_STATE_PROCEED_NEXT2);
+id_22=((!(! ::id_13::id_23)) ?  ::id_13::id_18 :  ::id_13::id_15);
 continue;
 }
-if(  ::Multiplier::T_STATE_PROCEED_NEXT2==state1 )
+if(  ::id_13::id_15==id_22 )
 {
 wait(SC_ZERO_TIME);
-state1=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT2 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2);
+id_22=((! ::id_13::id_23) ?  ::id_13::id_15 :  ::id_13::id_18);
 continue;
 }
-if(  ::Multiplier::T_STATE_PROCEED_THEN_ELSE2==state1 )
+if(  ::id_13::id_18==id_22 )
 {
- ::Multiplier::instigate=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-state1=((!(! ::Multiplier::proceed1)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE3 :  ::Multiplier::T_STATE_PROCEED_NEXT3);
+ ::id_13::id_23=(false);
+ ::id_9*=(5);
+(( ::id_10. ::id_25::id_24). ::id_0::id_8)=(true);
+id_22=((!(! ::id_13::id_12)) ?  ::id_13::id_19 :  ::id_13::id_16);
 }
-if(  ::Multiplier::T_STATE_PROCEED_NEXT3==state1 )
+if(  ::id_13::id_16==id_22 )
 {
 wait(SC_ZERO_TIME);
-state1=((! ::Multiplier::proceed1) ?  ::Multiplier::T_STATE_PROCEED_NEXT3 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE3);
+id_22=((! ::id_13::id_12) ?  ::id_13::id_16 :  ::id_13::id_19);
 continue;
 }
-if(  ::Multiplier::T_STATE_PROCEED_THEN_ELSE3==state1 )
+if(  ::id_13::id_19==id_22 )
 {
- ::Multiplier::proceed1=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-state1=((!(! ::Multiplier::proceed1)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE4 :  ::Multiplier::T_STATE_PROCEED_NEXT4);
+ ::id_13::id_12=(false);
+ ::id_9*=(5);
+(( ::id_10. ::id_25::id_24). ::id_0::id_8)=(true);
+id_22=((!(! ::id_13::id_12)) ?  ::id_13::id_20 :  ::id_13::id_17);
 }
-if(  ::Multiplier::T_STATE_PROCEED_NEXT4==state1 )
+if(  ::id_13::id_17==id_22 )
 {
 wait(SC_ZERO_TIME);
-state1=((! ::Multiplier::proceed1) ?  ::Multiplier::T_STATE_PROCEED_NEXT4 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE4);
+id_22=((! ::id_13::id_12) ?  ::id_13::id_17 :  ::id_13::id_20);
 continue;
 }
-if(  ::Multiplier::T_STATE_PROCEED_THEN_ELSE4==state1 )
+if(  ::id_13::id_20==id_22 )
 {
- ::Multiplier::proceed1=(false);
-cease(  ::gvar );
+ ::id_13::id_12=(false);
+cease(  ::id_9 );
 return ;
 }
 }
 while( true );
 }
 
-void TopLevel::T2()
+void id_25::id_27()
 {
- ::gvar=(1);
-( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
+ ::id_9=(1);
+( ::id_25::id_11. ::id_13::id_23)=(true);
 return ;
 }

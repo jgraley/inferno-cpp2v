@@ -1,32 +1,32 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
-void (recurser)(auto int i);
+void id_1();
+int id_2;
+void (id_4)(auto int id_3);
 };
-TopLevel top_level("top_level");
+id_0 id_5("id_5");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(0);
- ::TopLevel::recurser(1);
-cease(  ::TopLevel::x );
+ ::id_0::id_2=(0);
+ ::id_0::id_4(1);
+cease(  ::id_0::id_2 );
 }
 
-void (TopLevel::recurser)(int i)
+void (id_0::id_4)(int id_3)
 {
- ::TopLevel::x++;
-if( i<(5) )
+ ::id_0::id_2++;
+if( id_3<(5) )
 {
- ::TopLevel::recurser((1)+i);
- ::TopLevel::recurser((1)+i);
+ ::id_0::id_4((1)+id_3);
+ ::id_0::id_4((1)+id_3);
 }
 }

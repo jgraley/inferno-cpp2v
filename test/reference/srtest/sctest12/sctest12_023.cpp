@@ -1,35 +1,35 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
+void id_1();
+int id_2;
 private:
-void *link;
+void *id_13;
 public:
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
-/*temp*/ void *f_link1;
+/*temp*/ int id_10;
+/*temp*/ void *id_14;
+/*temp*/ void *id_7;
 };
-TopLevel top_level("top_level");
+id_0 id_15("id_15");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(0);
+ ::id_0::id_2=(0);
 switch( 0 )
 {
 case 1:;
- ::TopLevel::x=(99);
+ ::id_0::id_2=(99);
 break;
 case 0:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
- ::TopLevel::x=((false) ? (88) : (2));
+if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
+ ::id_0::id_2=((false) ? (88) : (2));
 break;
 }
 {
@@ -37,57 +37,57 @@ break;
 switch( 0 )
 {
 case 1:;
- ::TopLevel::x=(99);
-goto BREAK;
+ ::id_0::id_2=(99);
+goto id_3;
 case 4:;
- ::TopLevel::x=(44);
+ ::id_0::id_2=(44);
 case 0:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
- ::TopLevel::x=((false) ? (88) : (2));
-goto BREAK1;
+if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
+ ::id_0::id_2=((false) ? (88) : (2));
+goto id_4;
 }
-BREAK1:;
+id_4:;
 }
-BREAK:;
+id_3:;
 }
 {
 {
 switch( 2 )
 {
 case 1:;
- ::TopLevel::x=(99);
-goto BREAK2;
+ ::id_0::id_2=(99);
+goto id_5;
 case 2:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
- ::TopLevel::x=({ /*temp*/ int muxtemp; if( false )
-muxtemp=(88);
+if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
+ ::id_0::id_2=({ /*temp*/ int id_6; if( false )
+id_6=(88);
 else
-muxtemp=({ {
+id_6=({ {
 {
- ::TopLevel::f_link=(&&LINK);
-goto ENTER_f;
+ ::id_0::id_7=(&&id_8);
+goto id_9;
 }
-LINK:;
+id_8:;
 }
- ::TopLevel::f_return; });
-muxtemp; });
-goto BREAK3;
+ ::id_0::id_10; });
+id_6; });
+goto id_11;
 }
-BREAK3:;
+id_11:;
 }
-BREAK2:;
+id_5:;
 }
-cease(  ::TopLevel::x );
+cease(  ::id_0::id_2 );
 return ;
-ENTER_f:;
+id_9:;
 {
-/*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link;
+/*temp*/ void *id_12;
+ ::id_0::id_13= ::id_0::id_7;
 {
- ::TopLevel::f_return=(3);
+ ::id_0::id_10=(3);
 {
-temp_link= ::TopLevel::link;
-goto *(temp_link);
+id_12= ::id_0::id_13;
+goto *(id_12);
 }
 }
 }

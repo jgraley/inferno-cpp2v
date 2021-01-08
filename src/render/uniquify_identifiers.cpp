@@ -5,33 +5,46 @@
 
 using namespace CPPTree;
 
-#define UID_FORMAT "%s%u"
+//#define UID_FORMAT_HINT "%s%u"
+#define UID_FORMAT_PURE "id_%u"
 
 //////////////////////////// VisibleIdentifiers ///////////////////////////////
 
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 {
+#ifdef UID_FORMAT_HINT 
 	if( n>0 )
-		return SSPrintf( UID_FORMAT, b.c_str(), n );
+		return SSPrintf( UID_FORMAT_HINT, b.c_str(), n );
 	else
 		return b; // n==0 means no change to identifier name; the "_0" is implied in this case
+#endif
+#ifdef UID_FORMAT_PURE 
+    (void)b;
+    return SSPrintf( UID_FORMAT_PURE, n );
+#endif    
 }
 
 
 void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, unsigned *n ) // note static
 {
-	char cb[1024]; // hope that's big enough!
 	string original_name = i->GetRender();
-	int c = sscanf( original_name.c_str(), UID_FORMAT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
+#ifdef UID_FORMAT_HINT 
+	char cb[1024]; // hope that's big enough!
+	int c = sscanf( original_name.c_str(), UID_FORMAT_HINT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
 	if( c == 2 && *n > 0 ) // note that x_0 is *not* in standard form, so it become eg x_0_1 etc
 	{
-		*b = string(cb);
-	}
-	else // no match to standard form
-	{
-		*n = 0;
-		*b = original_name;
-	}
+		*b = string(cb);        
+	}    
+    else
+    {
+        *n = 0;
+        *b = original_name;
+    }
+#endif
+#ifdef UID_FORMAT_PURE 
+    *n = 0;
+    *b = ""; // Have to prevent uniquifier from assuming different basenames are already unique
+#endif
 }
 
 

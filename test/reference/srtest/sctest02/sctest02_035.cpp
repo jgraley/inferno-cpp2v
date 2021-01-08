@@ -1,108 +1,108 @@
 #include "isystemc.h"
 
-class Adder;
-class Multiplier;
-class TopLevel;
-class Adder : public sc_module
+class id_0;
+class id_13;
+class id_26;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( Adder )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-bool proceed;
+void id_1();
+bool id_2;
 };
-class Multiplier : public sc_module
+class id_13 : public sc_module
 {
 public:
-SC_CTOR( Multiplier )
+SC_CTOR( id_13 )
 {
-SC_THREAD(T1);
+SC_THREAD(id_14);
 }
-void T1();
-bool instigate;
-bool proceed1;
+void id_14();
+bool id_15;
+bool id_9;
 };
-class TopLevel : public sc_module
+class id_26 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+SC_CTOR( id_26 ) :
+id_19("id_19"),
+id_8("id_8")
 {
-SC_THREAD(T2);
+SC_THREAD(id_27);
 }
-void T2();
- ::Adder add_inst;
- ::Multiplier mul_inst;
+void id_27();
+ ::id_0 id_19;
+ ::id_13 id_8;
 };
-TopLevel top_level("top_level");
-int gvar;
+id_26 id_7("id_7");
+int id_6;
 
-void Adder::T()
+void id_0::id_1()
 {
 wait(SC_ZERO_TIME);
-goto *((!(! ::Adder::proceed)) ? (&&THEN_ELSE) : (&&PROCEED_NEXT));
-PROCEED_NEXT:;
+goto *((!(! ::id_0::id_2)) ? (&&id_3) : (&&id_4));
+id_4:;
 wait(SC_ZERO_TIME);
-goto *((! ::Adder::proceed) ? (&&PROCEED_NEXT) : (&&PROCEED));
-PROCEED:;
-goto THEN_ELSE;
-THEN_ELSE:;
- ::Adder::proceed=(false);
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
-goto *((!(! ::Adder::proceed)) ? (&&THEN_ELSE1) : (&&PROCEED_NEXT1));
-PROCEED_NEXT1:;
+goto *((! ::id_0::id_2) ? (&&id_4) : (&&id_5));
+id_5:;
+goto id_3;
+id_3:;
+ ::id_0::id_2=(false);
+ ::id_6+=(2);
+(( ::id_7. ::id_26::id_8). ::id_13::id_9)=(true);
+goto *((!(! ::id_0::id_2)) ? (&&id_10) : (&&id_11));
+id_11:;
 wait(SC_ZERO_TIME);
-goto *((! ::Adder::proceed) ? (&&PROCEED_NEXT1) : (&&PROCEED1));
-PROCEED1:;
-goto THEN_ELSE1;
-THEN_ELSE1:;
- ::Adder::proceed=(false);
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
+goto *((! ::id_0::id_2) ? (&&id_11) : (&&id_12));
+id_12:;
+goto id_10;
+id_10:;
+ ::id_0::id_2=(false);
+ ::id_6+=(3);
+(( ::id_7. ::id_26::id_8). ::id_13::id_9)=(true);
 return ;
 }
 
-void Multiplier::T1()
+void id_13::id_14()
 {
-goto *((!(! ::Multiplier::instigate)) ? (&&THEN_ELSE2) : (&&PROCEED_NEXT2));
-PROCEED_NEXT2:;
+goto *((!(! ::id_13::id_15)) ? (&&id_16) : (&&id_17));
+id_17:;
 wait(SC_ZERO_TIME);
-goto *((! ::Multiplier::instigate) ? (&&PROCEED_NEXT2) : (&&PROCEED2));
-PROCEED2:;
-goto THEN_ELSE2;
-THEN_ELSE2:;
- ::Multiplier::instigate=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-goto *((!(! ::Multiplier::proceed1)) ? (&&THEN_ELSE3) : (&&PROCEED_NEXT3));
-PROCEED_NEXT3:;
+goto *((! ::id_13::id_15) ? (&&id_17) : (&&id_18));
+id_18:;
+goto id_16;
+id_16:;
+ ::id_13::id_15=(false);
+ ::id_6*=(5);
+(( ::id_7. ::id_26::id_19). ::id_0::id_2)=(true);
+goto *((!(! ::id_13::id_9)) ? (&&id_20) : (&&id_21));
+id_21:;
 wait(SC_ZERO_TIME);
-goto *((! ::Multiplier::proceed1) ? (&&PROCEED_NEXT3) : (&&PROCEED3));
-PROCEED3:;
-goto THEN_ELSE3;
-THEN_ELSE3:;
- ::Multiplier::proceed1=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-goto *((!(! ::Multiplier::proceed1)) ? (&&THEN_ELSE4) : (&&PROCEED_NEXT4));
-PROCEED_NEXT4:;
+goto *((! ::id_13::id_9) ? (&&id_21) : (&&id_22));
+id_22:;
+goto id_20;
+id_20:;
+ ::id_13::id_9=(false);
+ ::id_6*=(5);
+(( ::id_7. ::id_26::id_19). ::id_0::id_2)=(true);
+goto *((!(! ::id_13::id_9)) ? (&&id_23) : (&&id_24));
+id_24:;
 wait(SC_ZERO_TIME);
-goto *((! ::Multiplier::proceed1) ? (&&PROCEED_NEXT4) : (&&PROCEED4));
-PROCEED4:;
-goto THEN_ELSE4;
-THEN_ELSE4:;
- ::Multiplier::proceed1=(false);
-cease(  ::gvar );
+goto *((! ::id_13::id_9) ? (&&id_24) : (&&id_25));
+id_25:;
+goto id_23;
+id_23:;
+ ::id_13::id_9=(false);
+cease(  ::id_6 );
 return ;
 }
 
-void TopLevel::T2()
+void id_26::id_27()
 {
- ::gvar=(1);
-( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
+ ::id_6=(1);
+( ::id_26::id_8. ::id_13::id_15)=(true);
 return ;
 }

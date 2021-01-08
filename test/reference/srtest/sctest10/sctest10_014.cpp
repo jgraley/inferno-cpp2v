@@ -1,102 +1,102 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
+void id_1();
 private:
-char k;
-short j;
-int i;
-int t;
+char id_21;
+short id_22;
 public:
-int x;
+int id_2;
 private:
-void *link;
+int id_23;
+int id_24;
+void *id_25;
 public:
-void (f)();
-/*temp*/ char f_k;
-/*temp*/ short f_j;
-/*temp*/ int f_i;
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
-/*temp*/ void *f_link1;
+void (id_12)();
+/*temp*/ char id_9;
+/*temp*/ short id_8;
+/*temp*/ int id_13;
+/*temp*/ int id_7;
+/*temp*/ void *id_10;
+/*temp*/ void *id_27;
 };
-TopLevel top_level("top_level");
+id_0 id_28("id_28");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(0);
- ::TopLevel::x=({ /*temp*/ int temp_i; temp_i=({ /*temp*/ int temp_i1; temp_i1=(0); ({ /*temp*/ int temp_j; temp_j=(0); ({ /*temp*/ int temp_k; temp_k=(0); ({ {
+ ::id_0::id_2=(0);
+ ::id_0::id_2=({ /*temp*/ int id_3; id_3=({ /*temp*/ int id_4; id_4=(0); ({ /*temp*/ int id_5; id_5=(0); ({ /*temp*/ int id_6; id_6=(0); ({ {
 {
- ::TopLevel::f_i=temp_i1;
+ ::id_0::id_7=id_4;
 {
- ::TopLevel::f_j=temp_j;
+ ::id_0::id_8=id_5;
 {
- ::TopLevel::f_k=temp_k;
+ ::id_0::id_9=id_6;
 {
- ::TopLevel::f_link=(&&LINK);
- ::TopLevel::f();
+ ::id_0::id_10=(&&id_11);
+ ::id_0::id_12();
 }
 }
 }
 }
-LINK:;
+id_11:;
 }
- ::TopLevel::f_return; }); }); }); }); ({ /*temp*/ int temp_j1; temp_j1=(6); ({ /*temp*/ int temp_k1; temp_k1=(8); ({ {
+ ::id_0::id_13; }); }); }); }); ({ /*temp*/ int id_14; id_14=(6); ({ /*temp*/ int id_15; id_15=(8); ({ {
 {
- ::TopLevel::f_i=temp_i;
+ ::id_0::id_7=id_3;
 {
- ::TopLevel::f_j=temp_j1;
+ ::id_0::id_8=id_14;
 {
- ::TopLevel::f_k=temp_k1;
+ ::id_0::id_9=id_15;
 {
- ::TopLevel::f_link=(&&LINK1);
- ::TopLevel::f();
+ ::id_0::id_10=(&&id_16);
+ ::id_0::id_12();
 }
 }
 }
 }
-LINK1:;
+id_16:;
 }
- ::TopLevel::f_return; }); }); }); });
-cease(  ::TopLevel::x+((2)*({ /*temp*/ int temp_i2; temp_i2=(1); ({ /*temp*/ int temp_j2; temp_j2=(2); ({ /*temp*/ int temp_k2; temp_k2=(3); ({ {
+ ::id_0::id_13; }); }); }); });
+cease(  ::id_0::id_2+((2)*({ /*temp*/ int id_17; id_17=(1); ({ /*temp*/ int id_18; id_18=(2); ({ /*temp*/ int id_19; id_19=(3); ({ {
 {
- ::TopLevel::f_i=temp_i2;
+ ::id_0::id_7=id_17;
 {
- ::TopLevel::f_j=temp_j2;
+ ::id_0::id_8=id_18;
 {
- ::TopLevel::f_k=temp_k2;
+ ::id_0::id_9=id_19;
 {
- ::TopLevel::f_link=(&&LINK2);
- ::TopLevel::f();
+ ::id_0::id_10=(&&id_20);
+ ::id_0::id_12();
 }
 }
 }
 }
-LINK2:;
+id_20:;
 }
- ::TopLevel::f_return; }); }); }); })) );
+ ::id_0::id_13; }); }); }); })) );
 return ;
 }
 
-void (TopLevel::f)()
+void (id_0::id_12)()
 {
-/*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link;
- ::TopLevel::k= ::TopLevel::f_k;
- ::TopLevel::j= ::TopLevel::f_j;
- ::TopLevel::i= ::TopLevel::f_i;
- ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));
+/*temp*/ void *id_26;
+ ::id_0::id_25= ::id_0::id_10;
+ ::id_0::id_21= ::id_0::id_9;
+ ::id_0::id_22= ::id_0::id_8;
+ ::id_0::id_23= ::id_0::id_7;
+ ::id_0::id_24=( ::id_0::id_23+((3)* ::id_0::id_22));
 {
- ::TopLevel::f_return=( ::TopLevel::t+((5)* ::TopLevel::k));
+ ::id_0::id_13=( ::id_0::id_24+((5)* ::id_0::id_21));
 {
-temp_link= ::TopLevel::link;
+id_26= ::id_0::id_25;
 return ;
 }
 }

@@ -1,52 +1,52 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
+void id_1();
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
+id_0 id_11("id_11");
+int id_2;
+int id_3;
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::gvar=(1);
+ ::id_2=(1);
 {
- ::i=(0);
+ ::id_3=(0);
 {
-if( !( ::i<(5)) )
-goto THEN;
-goto PROCEED;
-PROCEED:;
+if( !( ::id_3<(5)) )
+goto id_4;
+goto id_5;
+id_5:;
 {
-NEXT:;
+id_6:;
 {
 {
- ::gvar+= ::i;
+ ::id_2+= ::id_3;
 wait(SC_ZERO_TIME);
- ::gvar*=(2);
+ ::id_2*=(2);
 }
-CONTINUE:;
- ::i++;
+id_7:;
+ ::id_3++;
 }
-CONTINUE1:;
-if(  ::i<(5) )
-goto NEXT;
-goto PROCEED1;
-PROCEED1:;
+id_8:;
+if(  ::id_3<(5) )
+goto id_6;
+goto id_9;
+id_9:;
 }
-goto ELSE;
-THEN:;
+goto id_10;
+id_4:;
 ;
-ELSE:;
+id_10:;
 }
 }
-cease(  ::gvar );
+cease(  ::id_2 );
 return ;
 }

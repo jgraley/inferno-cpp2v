@@ -1,31 +1,31 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
-int y;
-int (f)(auto int i);
+void id_1();
+int id_2;
+int id_3;
+int (id_5)(auto int id_4);
 };
-TopLevel top_level("top_level");
+id_0 id_6("id_6");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(4);
-(++ ::TopLevel::x)&&( ::TopLevel::y=( ::TopLevel::f( ::TopLevel::x)));
-(!(++ ::TopLevel::x))||( ::TopLevel::y+=( ::TopLevel::f( ::TopLevel::x)));
-for(  ::TopLevel::x=(0);  ::TopLevel::x<(2);  )
-( ::TopLevel::x++) ? ( ::TopLevel::y+=( ::TopLevel::f( ::TopLevel::x))) : ( ::TopLevel::y-=( ::TopLevel::f( ::TopLevel::x)));
-cease(  ::TopLevel::y );
+ ::id_0::id_2=(4);
+(++ ::id_0::id_2)&&( ::id_0::id_3=( ::id_0::id_5( ::id_0::id_2)));
+(!(++ ::id_0::id_2))||( ::id_0::id_3+=( ::id_0::id_5( ::id_0::id_2)));
+for(  ::id_0::id_2=(0);  ::id_0::id_2<(2);  )
+( ::id_0::id_2++) ? ( ::id_0::id_3+=( ::id_0::id_5( ::id_0::id_2))) : ( ::id_0::id_3-=( ::id_0::id_5( ::id_0::id_2)));
+cease(  ::id_0::id_3 );
 }
 
-int (TopLevel::f)(int i)
+int (id_0::id_5)(int id_4)
 {
-return (100)/i;
+return (100)/id_4;
 }

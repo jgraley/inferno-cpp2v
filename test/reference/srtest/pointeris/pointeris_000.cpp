@@ -1,12 +1,12 @@
-int a = (44)+((99)*({ do
+int id_0 = (44)+((99)*({ do
 {
 }
 while( 0 ); 233; }));
-int (main)();
+int (id_1)();
 
-int (main)()
+int (id_1)()
 {
-return  ::a+((4)+((9)*({ do
+return  ::id_0+((4)+((9)*({ do
 {
 }
 while( 0 ); 23; })));

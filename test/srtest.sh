@@ -81,6 +81,8 @@ fi
 
 exit $return_code
 
+# To run Beyond Compare on all the results
 # bcompare test/reference/srtest/ test/results/
 
+# To update the references
 # cp -r test/results/*/ test/reference/srtest/

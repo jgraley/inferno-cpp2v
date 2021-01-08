@@ -1,107 +1,107 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
+void id_1();
+int id_2;
 private:
-void *link;
+void *id_20;
 public:
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
-/*temp*/ void *f_link1;
+/*temp*/ int id_17;
+/*temp*/ void *id_14;
+/*temp*/ void *id_21;
 };
-TopLevel top_level("top_level");
+id_0 id_22("id_22");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(0);
+ ::id_0::id_2=(0);
 switch( 0 )
 {
 case 1:;
- ::TopLevel::x=(99);
+ ::id_0::id_2=(99);
 break;
 case 0:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
- ::TopLevel::x=((false) ? (88) : (2));
+if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
+ ::id_0::id_2=((false) ? (88) : (2));
 break;
 }
 {
 {
 {
-auto int switch_value = 0;
+auto int id_3 = 0;
 {
-if( (0)==switch_value )
-goto CASE;
-if( (4)==switch_value )
-goto CASE1;
-if( (1)==switch_value )
-goto CASE2;
-CASE2:;
- ::TopLevel::x=(99);
-goto BREAK;
-CASE1:;
- ::TopLevel::x=(44);
-CASE:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
- ::TopLevel::x=((false) ? (88) : (2));
-goto BREAK1;
+if( (0)==id_3 )
+goto id_4;
+if( (4)==id_3 )
+goto id_5;
+if( (1)==id_3 )
+goto id_6;
+id_6:;
+ ::id_0::id_2=(99);
+goto id_7;
+id_5:;
+ ::id_0::id_2=(44);
+id_4:;
+if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
+ ::id_0::id_2=((false) ? (88) : (2));
+goto id_8;
 }
 }
-BREAK1:;
+id_8:;
 }
-BREAK:;
+id_7:;
 }
 {
 {
 {
-auto int switch_value1 = 2;
+auto int id_9 = 2;
 {
-if( (2)==switch_value1 )
-goto CASE3;
-if( (1)==switch_value1 )
-goto CASE4;
-CASE4:;
- ::TopLevel::x=(99);
-goto BREAK2;
-CASE3:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
- ::TopLevel::x=({ /*temp*/ int muxtemp; if( false )
-muxtemp=(88);
+if( (2)==id_9 )
+goto id_10;
+if( (1)==id_9 )
+goto id_11;
+id_11:;
+ ::id_0::id_2=(99);
+goto id_12;
+id_10:;
+if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
+ ::id_0::id_2=({ /*temp*/ int id_13; if( false )
+id_13=(88);
 else
-muxtemp=({ {
+id_13=({ {
 {
- ::TopLevel::f_link=(&&LINK);
-goto ENTER_f;
+ ::id_0::id_14=(&&id_15);
+goto id_16;
 }
-LINK:;
+id_15:;
 }
- ::TopLevel::f_return; });
-muxtemp; });
-goto BREAK3;
+ ::id_0::id_17; });
+id_13; });
+goto id_18;
 }
 }
-BREAK3:;
+id_18:;
 }
-BREAK2:;
+id_12:;
 }
-cease(  ::TopLevel::x );
+cease(  ::id_0::id_2 );
 return ;
-ENTER_f:;
+id_16:;
 {
-/*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link;
+/*temp*/ void *id_19;
+ ::id_0::id_20= ::id_0::id_14;
 {
- ::TopLevel::f_return=(3);
+ ::id_0::id_17=(3);
 {
-temp_link= ::TopLevel::link;
-goto *(temp_link);
+id_19= ::id_0::id_20;
+goto *(id_19);
 }
 }
 }

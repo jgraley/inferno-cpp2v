@@ -1,123 +1,123 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-helper_stack_index(0U)
+SC_CTOR( id_0 ) :
+id_22(0U)
 {
-SC_METHOD(T);
+SC_METHOD(id_14);
 }
-/*temp*/ unsigned int temp_link;
-/*temp*/ unsigned int temp_link1;
-enum TStates
+/*temp*/ unsigned int id_1;
+/*temp*/ unsigned int id_2;
+enum id_3
 {
-T_STATE_ENTER_helper = 4U,
-T_STATE_ENTER_otherhelper = 9U,
-T_STATE_LINK = 1U,
-T_STATE_LINK1 = 8U,
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 5U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_THEN_ELSE1 = 7U,
-T_STATE_YIELD = 2U,
-T_STATE_YIELD1 = 6U,
+id_10 = 3U,
+id_11 = 7U,
+id_12 = 2U,
+id_13 = 6U,
+id_4 = 4U,
+id_5 = 9U,
+id_6 = 1U,
+id_7 = 8U,
+id_8 = 0U,
+id_9 = 5U,
 };
-void T();
+void id_14();
 private:
-int (n_stack[10U]);
-unsigned int (link_stack[10U]);
-unsigned int helper_stack_index;
-unsigned int link;
-unsigned int state;
+int (id_24[10U]);
+unsigned int (id_23[10U]);
+unsigned int id_18;
+unsigned int id_22;
+unsigned int id_27;
 public:
-/*temp*/ int helper_n;
-/*temp*/ int temp_n;
-/*temp*/ unsigned int helper_link;
-/*temp*/ unsigned int otherhelper_link;
+/*temp*/ int id_19;
+/*temp*/ int id_20;
+/*temp*/ unsigned int id_21;
+/*temp*/ unsigned int id_26;
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
-int j;
+id_0 id_28("id_28");
+int id_16;
+int id_17;
+int id_25;
 
-void TopLevel::T()
+void id_0::id_14()
 {
-/*temp*/ bool enabled = true;
+/*temp*/ bool id_15 = true;
 if( (sc_delta_count())==(0U) )
 {
- ::gvar=(1);
- ::i=(0);
+ ::id_16=(1);
+ ::id_17=(0);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
-enabled=(false);
+ ::id_0::id_18=((!( ::id_17<(4))) ?  ::id_0::id_10 :  ::id_0::id_8);
+id_15=(false);
 }
-if( enabled&&( ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_8== ::id_0::id_18) )
 {
- ::gvar=( ::gvar+ ::i);
- ::TopLevel::temp_n=(3);
- ::TopLevel::helper_n= ::TopLevel::temp_n;
- ::TopLevel::helper_link= ::TopLevel::T_STATE_LINK;
- ::TopLevel::state= ::TopLevel::T_STATE_ENTER_helper;
+ ::id_16=( ::id_16+ ::id_17);
+ ::id_0::id_19=(3);
+ ::id_0::id_20= ::id_0::id_19;
+ ::id_0::id_21= ::id_0::id_6;
+ ::id_0::id_18= ::id_0::id_4;
 }
-if( enabled&&( ::TopLevel::T_STATE_LINK== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_6== ::id_0::id_18) )
 {
- ::gvar=((2)* ::gvar);
+ ::id_16=((2)* ::id_16);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
-enabled=(false);
+ ::id_0::id_18= ::id_0::id_12;
+id_15=(false);
 }
-if( enabled&&( ::TopLevel::T_STATE_YIELD== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_12== ::id_0::id_18) )
 {
- ::i=((1)+ ::i);
- ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::id_17=((1)+ ::id_17);
+ ::id_0::id_18=(( ::id_17<(4)) ?  ::id_0::id_8 :  ::id_0::id_10);
 }
-if( enabled&&( ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_10== ::id_0::id_18) )
 {
-cease(  ::gvar );
-enabled=(false);
-if( enabled )
- ::TopLevel::state= ::TopLevel::T_STATE_ENTER_helper;
+cease(  ::id_16 );
+id_15=(false);
+if( id_15 )
+ ::id_0::id_18= ::id_0::id_4;
 }
-if( enabled&&( ::TopLevel::T_STATE_ENTER_helper== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_4== ::id_0::id_18) )
 {
- ::TopLevel::helper_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
-( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
- ::j=(0);
- ::TopLevel::state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+ ::id_0::id_22++;
+( ::id_0::id_23[ ::id_0::id_22])= ::id_0::id_21;
+( ::id_0::id_24[ ::id_0::id_22])= ::id_0::id_20;
+ ::id_25=(0);
+ ::id_0::id_18=((!( ::id_25<( ::id_0::id_24[ ::id_0::id_22]))) ?  ::id_0::id_11 :  ::id_0::id_9);
 }
-if( enabled&&( ::TopLevel::T_STATE_PROCEED_NEXT1== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_9== ::id_0::id_18) )
 {
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD1;
-enabled=(false);
+ ::id_0::id_18= ::id_0::id_13;
+id_15=(false);
 }
-if( enabled&&( ::TopLevel::T_STATE_YIELD1== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_13== ::id_0::id_18) )
 {
- ::gvar=((1)+ ::gvar);
- ::j=((1)+ ::j);
- ::TopLevel::state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+ ::id_16=((1)+ ::id_16);
+ ::id_25=((1)+ ::id_25);
+ ::id_0::id_18=(( ::id_25<( ::id_0::id_24[ ::id_0::id_22])) ?  ::id_0::id_9 :  ::id_0::id_11);
 }
-if( enabled&&( ::TopLevel::T_STATE_PROCEED_THEN_ELSE1== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_11== ::id_0::id_18) )
 {
- ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK1;
- ::TopLevel::state= ::TopLevel::T_STATE_ENTER_otherhelper;
+ ::id_0::id_26= ::id_0::id_7;
+ ::id_0::id_18= ::id_0::id_5;
 }
-if( enabled&&( ::TopLevel::T_STATE_LINK1== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_7== ::id_0::id_18) )
 {
- ::TopLevel::temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
- ::TopLevel::helper_stack_index--;
- ::TopLevel::state= ::TopLevel::temp_link;
+ ::id_0::id_1=( ::id_0::id_23[ ::id_0::id_22]);
+ ::id_0::id_22--;
+ ::id_0::id_18= ::id_0::id_1;
 }
-if( enabled&&( ::TopLevel::T_STATE_ENTER_otherhelper== ::TopLevel::state) )
+if( id_15&&( ::id_0::id_5== ::id_0::id_18) )
 {
- ::TopLevel::link= ::TopLevel::otherhelper_link;
- ::gvar=( ::gvar-(1));
- ::TopLevel::temp_link1= ::TopLevel::link;
- ::TopLevel::state= ::TopLevel::temp_link1;
+ ::id_0::id_27= ::id_0::id_26;
+ ::id_16=( ::id_16-(1));
+ ::id_0::id_2= ::id_0::id_27;
+ ::id_0::id_18= ::id_0::id_2;
 }
-if( enabled )
+if( id_15 )
 next_trigger(SC_ZERO_TIME);
 }

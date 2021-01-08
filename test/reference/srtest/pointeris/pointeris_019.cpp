@@ -1,29 +1,29 @@
-void *(link_stack[10U]);
-unsigned int main_stack_index = 0U;
-int a = (44)+((99)*({ do
+void *(id_0[10U]);
+unsigned int id_1 = 0U;
+int id_2 = (44)+((99)*({ do
 {
 }
 while( 0 ); 233; }));
-void (main)();
-int main_return;
-void *main_link;
-void *main_link1;
+void (id_3)();
+int id_6;
+void *id_5;
+void *id_7;
 
-void (main)()
+void (id_3)()
 {
 {
-/*temp*/ void *temp_link;
- ::main_stack_index++;
-( ::link_stack[ ::main_stack_index])= ::main_link;
+/*temp*/ void *id_4;
+ ::id_1++;
+( ::id_0[ ::id_1])= ::id_5;
 {
- ::main_return=( ::a+((4)+((9)*({ do
+ ::id_6=( ::id_2+((4)+((9)*({ do
 {
 }
 while( 0 ); 23; }))));
 {
-temp_link=( ::link_stack[ ::main_stack_index]);
+id_4=( ::id_0[ ::id_1]);
 {
- ::main_stack_index--;
+ ::id_1--;
 return ;
 }
 }

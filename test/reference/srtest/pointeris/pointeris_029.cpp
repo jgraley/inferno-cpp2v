@@ -1,39 +1,39 @@
-void *(link_stack[10U]);
-unsigned int main_stack_index = 0U;
-int a = (44)+((99)*({ {
-NEXT:;
+void *(id_0[10U]);
+unsigned int id_1 = 0U;
+int id_2 = (44)+((99)*({ {
+id_3:;
 {
 }
-CONTINUE:;
-goto *((0) ? (&&NEXT) : (&&PROCEED));
-PROCEED:;
+id_4:;
+goto *((0) ? (&&id_3) : (&&id_5));
+id_5:;
 }
 233; }));
-void (main)();
-int main_return;
-void *main_link;
-void *main_link1;
+void (id_6)();
+int id_9;
+void *id_13;
+void *id_8;
 
-void (main)()
+void (id_6)()
 {
 {
-/*temp*/ void *temp_link;
- ::main_stack_index++;
-( ::link_stack[ ::main_stack_index])= ::main_link;
+/*temp*/ void *id_7;
+ ::id_1++;
+( ::id_0[ ::id_1])= ::id_8;
 {
- ::main_return=( ::a+((4)+((9)*({ {
-NEXT1:;
+ ::id_9=( ::id_2+((4)+((9)*({ {
+id_10:;
 {
 }
-CONTINUE1:;
-goto *((0) ? (&&NEXT1) : (&&PROCEED1));
-PROCEED1:;
+id_11:;
+goto *((0) ? (&&id_10) : (&&id_12));
+id_12:;
 }
 23; }))));
 {
-temp_link=( ::link_stack[ ::main_stack_index]);
+id_7=( ::id_0[ ::id_1]);
 {
- ::main_stack_index--;
+ ::id_1--;
 return ;
 }
 }

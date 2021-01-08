@@ -1,34 +1,34 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
-void (recurser)(auto int i);
+void id_1();
+int id_2;
+void (id_5)(auto int id_4);
 };
-TopLevel top_level("top_level");
+id_0 id_8("id_8");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(0);
-({ /*temp*/ int temp_i; temp_i=(1);  ::TopLevel::recurser(temp_i); });
-cease(  ::TopLevel::x );
+ ::id_0::id_2=(0);
+({ /*temp*/ int id_3; id_3=(1);  ::id_0::id_5(id_3); });
+cease(  ::id_0::id_2 );
 return ;
 }
 
-void (TopLevel::recurser)(int i)
+void (id_0::id_5)(int id_4)
 {
- ::TopLevel::x++;
-if( i<(5) )
+ ::id_0::id_2++;
+if( id_4<(5) )
 {
-({ /*temp*/ int temp_i1; temp_i1=((1)+i);  ::TopLevel::recurser(temp_i1); });
-({ /*temp*/ int temp_i2; temp_i2=((1)+i);  ::TopLevel::recurser(temp_i2); });
+({ /*temp*/ int id_6; id_6=((1)+id_4);  ::id_0::id_5(id_6); });
+({ /*temp*/ int id_7; id_7=((1)+id_4);  ::id_0::id_5(id_7); });
 }
 return ;
 }

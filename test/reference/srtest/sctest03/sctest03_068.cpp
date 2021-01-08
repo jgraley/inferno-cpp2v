@@ -1,27 +1,27 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_METHOD(method);
+SC_METHOD(id_1);
 }
-void method();
-int gvar;
-int tot;
+void id_1();
+int id_2;
+int id_3;
 };
-TopLevel top_level("top_level");
-int gvar1 = 0;
-int tot1 = 0;
+id_0 id_4("id_4");
+int id_5 = 0;
+int id_6 = 0;
 
-void TopLevel::method()
+void id_0::id_1()
 {
- ::TopLevel::gvar++;
- ::TopLevel::tot+= ::TopLevel::gvar;
-if( (10)== ::TopLevel::gvar )
-cease(  ::TopLevel::tot );
+ ::id_0::id_2++;
+ ::id_0::id_3+= ::id_0::id_2;
+if( (10)== ::id_0::id_2 )
+cease(  ::id_0::id_3 );
 next_trigger(SC_ZERO_TIME);
 return ;
 }

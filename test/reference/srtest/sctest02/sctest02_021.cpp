@@ -1,113 +1,113 @@
 #include "isystemc.h"
 
-class Adder;
-class Multiplier;
-class TopLevel;
-class Adder : public sc_module
+class id_0;
+class id_11;
+class id_21;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( Adder )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-bool proceed;
+void id_1();
+bool id_2;
 };
-class Multiplier : public sc_module
+class id_11 : public sc_module
 {
 public:
-SC_CTOR( Multiplier )
+SC_CTOR( id_11 )
 {
-SC_THREAD(T1);
+SC_THREAD(id_12);
 }
-void T1();
-bool instigate;
-bool proceed1;
+void id_12();
+bool id_13;
+bool id_8;
 };
-class TopLevel : public sc_module
+class id_21 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+SC_CTOR( id_21 ) :
+id_16("id_16"),
+id_7("id_7")
 {
-SC_THREAD(T2);
+SC_THREAD(id_22);
 }
-void T2();
- ::Adder add_inst;
- ::Multiplier mul_inst;
+void id_22();
+ ::id_0 id_16;
+ ::id_11 id_7;
 };
-TopLevel top_level("top_level");
-int gvar;
+id_21 id_6("id_6");
+int id_5;
 
-void Adder::T()
+void id_0::id_1()
 {
 wait(SC_ZERO_TIME);
-if( ! ::Adder::proceed )
+if( ! ::id_0::id_2 )
 {
-NEXT:;
+id_3:;
 wait(SC_ZERO_TIME);
-CONTINUE:;
-if( ! ::Adder::proceed )
-goto NEXT;
+id_4:;
+if( ! ::id_0::id_2 )
+goto id_3;
 }
- ::Adder::proceed=(false);
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
-if( ! ::Adder::proceed )
+ ::id_0::id_2=(false);
+ ::id_5+=(2);
+(( ::id_6. ::id_21::id_7). ::id_11::id_8)=(true);
+if( ! ::id_0::id_2 )
 {
-NEXT1:;
+id_9:;
 wait(SC_ZERO_TIME);
-CONTINUE1:;
-if( ! ::Adder::proceed )
-goto NEXT1;
+id_10:;
+if( ! ::id_0::id_2 )
+goto id_9;
 }
- ::Adder::proceed=(false);
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
+ ::id_0::id_2=(false);
+ ::id_5+=(3);
+(( ::id_6. ::id_21::id_7). ::id_11::id_8)=(true);
 return ;
 }
 
-void Multiplier::T1()
+void id_11::id_12()
 {
-if( ! ::Multiplier::instigate )
+if( ! ::id_11::id_13 )
 {
-NEXT2:;
+id_14:;
 wait(SC_ZERO_TIME);
-CONTINUE2:;
-if( ! ::Multiplier::instigate )
-goto NEXT2;
+id_15:;
+if( ! ::id_11::id_13 )
+goto id_14;
 }
- ::Multiplier::instigate=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-if( ! ::Multiplier::proceed1 )
+ ::id_11::id_13=(false);
+ ::id_5*=(5);
+(( ::id_6. ::id_21::id_16). ::id_0::id_2)=(true);
+if( ! ::id_11::id_8 )
 {
-NEXT3:;
+id_17:;
 wait(SC_ZERO_TIME);
-CONTINUE3:;
-if( ! ::Multiplier::proceed1 )
-goto NEXT3;
+id_18:;
+if( ! ::id_11::id_8 )
+goto id_17;
 }
- ::Multiplier::proceed1=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-if( ! ::Multiplier::proceed1 )
+ ::id_11::id_8=(false);
+ ::id_5*=(5);
+(( ::id_6. ::id_21::id_16). ::id_0::id_2)=(true);
+if( ! ::id_11::id_8 )
 {
-NEXT4:;
+id_19:;
 wait(SC_ZERO_TIME);
-CONTINUE4:;
-if( ! ::Multiplier::proceed1 )
-goto NEXT4;
+id_20:;
+if( ! ::id_11::id_8 )
+goto id_19;
 }
- ::Multiplier::proceed1=(false);
-cease(  ::gvar );
+ ::id_11::id_8=(false);
+cease(  ::id_5 );
 return ;
 }
 
-void TopLevel::T2()
+void id_21::id_22()
 {
- ::gvar=(1);
-( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
+ ::id_5=(1);
+( ::id_21::id_7. ::id_11::id_13)=(true);
 return ;
 }

@@ -1,126 +1,126 @@
 #include "isystemc.h"
 
-class Adder;
-class Multiplier;
-class TopLevel;
-class Adder : public sc_module
+class id_0;
+class id_13;
+class id_24;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( Adder )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_5);
 }
-enum TStates
+enum id_1
 {
-T_STATE_YIELD = 0U,
-T_STATE_YIELD1 = 1U,
+id_2 = 0U,
+id_3 = 1U,
 };
-sc_event proceed;
-void T();
+sc_event id_4;
+void id_5();
 };
-class Multiplier : public sc_module
+class id_13 : public sc_module
 {
 public:
-SC_CTOR( Multiplier )
+SC_CTOR( id_13 )
 {
-SC_THREAD(T1);
+SC_THREAD(id_19);
 }
-enum TStates1
+enum id_14
 {
-T_STATE_YIELD2 = 0U,
-T_STATE_YIELD3 = 1U,
-T_STATE_YIELD4 = 2U,
+id_15 = 0U,
+id_16 = 1U,
+id_17 = 2U,
 };
-sc_event instigate;
-sc_event proceed1;
-void T1();
+sc_event id_12;
+sc_event id_18;
+void id_19();
 };
-class TopLevel : public sc_module
+class id_24 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+SC_CTOR( id_24 ) :
+id_23("id_23"),
+id_11("id_11")
 {
-SC_THREAD(T2);
+SC_THREAD(id_26);
 }
-enum TStates2
+enum id_25
 {
 };
-void T2();
- ::Adder add_inst;
- ::Multiplier mul_inst;
+void id_26();
+ ::id_0 id_23;
+ ::id_13 id_11;
 };
-TopLevel top_level("top_level");
-int gvar;
+id_24 id_10("id_10");
+int id_9;
 
-void Adder::T()
+void id_0::id_5()
 {
-static const unsigned int (lmap[]) = { &&YIELD, &&YIELD };
-auto unsigned int state;
-YIELD:;
+static const unsigned int (id_6[]) = { &&id_7, &&id_7 };
+auto unsigned int id_8;
+id_7:;
 if( (sc_delta_count())==(0U) )
 {
-wait(  ::Adder::proceed );
-state= ::Adder::T_STATE_YIELD;
-goto *(lmap[state]);
+wait(  ::id_0::id_4 );
+id_8= ::id_0::id_2;
+goto *(id_6[id_8]);
 }
-if(  ::Adder::T_STATE_YIELD==state )
+if(  ::id_0::id_2==id_8 )
 {
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1).notify(SC_ZERO_TIME);
-wait(  ::Adder::proceed );
-state= ::Adder::T_STATE_YIELD1;
-goto *(lmap[state]);
+ ::id_9+=(2);
+(( ::id_10. ::id_24::id_11). ::id_13::id_12).notify(SC_ZERO_TIME);
+wait(  ::id_0::id_4 );
+id_8= ::id_0::id_3;
+goto *(id_6[id_8]);
 }
-if(  ::Adder::T_STATE_YIELD1==state )
+if(  ::id_0::id_3==id_8 )
 {
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1).notify(SC_ZERO_TIME);
+ ::id_9+=(3);
+(( ::id_10. ::id_24::id_11). ::id_13::id_12).notify(SC_ZERO_TIME);
 return ;
 }
-goto *(lmap[state]);
+goto *(id_6[id_8]);
 }
 
-void Multiplier::T1()
+void id_13::id_19()
 {
-static const unsigned int (lmap1[]) = { &&YIELD1, &&YIELD1, &&YIELD1 };
-auto unsigned int state1;
-YIELD1:;
+static const unsigned int (id_20[]) = { &&id_21, &&id_21, &&id_21 };
+auto unsigned int id_22;
+id_21:;
 if( (sc_delta_count())==(0U) )
 {
-wait(  ::Multiplier::instigate );
-state1= ::Multiplier::T_STATE_YIELD2;
-goto *(lmap1[state1]);
+wait(  ::id_13::id_18 );
+id_22= ::id_13::id_15;
+goto *(id_20[id_22]);
 }
-if(  ::Multiplier::T_STATE_YIELD2==state1 )
+if(  ::id_13::id_15==id_22 )
 {
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed1 );
-state1= ::Multiplier::T_STATE_YIELD3;
-goto *(lmap1[state1]);
+ ::id_9*=(5);
+(( ::id_10. ::id_24::id_23). ::id_0::id_4).notify(SC_ZERO_TIME);
+wait(  ::id_13::id_12 );
+id_22= ::id_13::id_16;
+goto *(id_20[id_22]);
 }
-if(  ::Multiplier::T_STATE_YIELD3==state1 )
+if(  ::id_13::id_16==id_22 )
 {
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed1 );
-state1= ::Multiplier::T_STATE_YIELD4;
-goto *(lmap1[state1]);
+ ::id_9*=(5);
+(( ::id_10. ::id_24::id_23). ::id_0::id_4).notify(SC_ZERO_TIME);
+wait(  ::id_13::id_12 );
+id_22= ::id_13::id_17;
+goto *(id_20[id_22]);
 }
-if(  ::Multiplier::T_STATE_YIELD4==state1 )
+if(  ::id_13::id_17==id_22 )
 {
-cease(  ::gvar );
+cease(  ::id_9 );
 return ;
 }
-goto *(lmap1[state1]);
+goto *(id_20[id_22]);
 }
 
-void TopLevel::T2()
+void id_24::id_26()
 {
-static const unsigned int (lmap2[]) = {  };
- ::gvar=(1);
-( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);
+static const unsigned int (id_27[]) = {  };
+ ::id_9=(1);
+( ::id_24::id_11. ::id_13::id_18).notify(SC_ZERO_TIME);
 return ;
 }

@@ -1,67 +1,67 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_METHOD(T);
+SC_METHOD(id_7);
 }
-enum TStates
+enum id_1
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 1U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_THEN_ELSE1 = 4U,
-T_STATE_YIELD = 2U,
+id_2 = 0U,
+id_3 = 1U,
+id_4 = 3U,
+id_5 = 4U,
+id_6 = 2U,
 };
-void T();
+void id_7();
 private:
-unsigned int state;
+unsigned int id_10;
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
-int j;
+id_0 id_12("id_12");
+int id_11;
+int id_8;
+int id_9;
 
-void TopLevel::T()
+void id_0::id_7()
 {
 if( (sc_delta_count())==(0U) )
 {
- ::gvar=(1);
- ::i=(0);
+ ::id_8=(1);
+ ::id_9=(0);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+ ::id_0::id_10=((!( ::id_9<(4))) ?  ::id_0::id_5 :  ::id_0::id_2);
 return ;
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
+if(  ::id_0::id_2== ::id_0::id_10 )
 {
- ::gvar+= ::i;
- ::j=(0);
- ::TopLevel::state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+ ::id_8+= ::id_9;
+ ::id_11=(0);
+ ::id_0::id_10=((!( ::id_11<(3))) ?  ::id_0::id_4 :  ::id_0::id_3);
 }
-if(  ::TopLevel::T_STATE_PROCEED_NEXT1== ::TopLevel::state )
+if(  ::id_0::id_3== ::id_0::id_10 )
 {
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+ ::id_0::id_10= ::id_0::id_6;
 return ;
 }
-if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
+if(  ::id_0::id_6== ::id_0::id_10 )
 {
- ::gvar++;
- ::j++;
- ::TopLevel::state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::id_8++;
+ ::id_11++;
+ ::id_0::id_10=(( ::id_11<(3)) ?  ::id_0::id_3 :  ::id_0::id_4);
 }
-if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
+if(  ::id_0::id_4== ::id_0::id_10 )
 {
- ::gvar*=(2);
- ::i++;
- ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+ ::id_8*=(2);
+ ::id_9++;
+ ::id_0::id_10=(( ::id_9<(4)) ?  ::id_0::id_2 :  ::id_0::id_5);
 }
-if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1== ::TopLevel::state )
+if(  ::id_0::id_5== ::id_0::id_10 )
 {
-cease(  ::gvar );
+cease(  ::id_8 );
 return ;
 }
 next_trigger(SC_ZERO_TIME);

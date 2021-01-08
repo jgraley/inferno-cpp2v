@@ -1,82 +1,82 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-recurser_stack_index(0U)
+SC_CTOR( id_0 ) :
+id_12(0U)
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
+void id_1();
 private:
-int (i_stack[10U]);
-void *(link_stack[10U]);
+int (id_14[10U]);
+void *(id_13[10U]);
 public:
-int x;
+int id_7;
 private:
-unsigned int recurser_stack_index;
+unsigned int id_12;
 public:
-/*temp*/ int recurser_i;
-/*temp*/ void *recurser_link;
-/*temp*/ void *recurser_link1;
+/*temp*/ int id_8;
+/*temp*/ void *id_18;
+/*temp*/ void *id_9;
 };
-TopLevel top_level("top_level");
+id_0 id_19("id_19");
 
-void TopLevel::T()
+void id_0::id_1()
 {
-/*temp*/ void *temp_link;
-auto void *state;
-/*temp*/ int temp_i;
-/*temp*/ int temp_i1;
-/*temp*/ int temp_i2;
- ::TopLevel::x=(0);
-temp_i=(1);
- ::TopLevel::recurser_i=temp_i;
- ::TopLevel::recurser_link=(&&LINK);
+/*temp*/ void *id_2;
+auto void *id_3;
+/*temp*/ int id_4;
+/*temp*/ int id_5;
+/*temp*/ int id_6;
+ ::id_0::id_7=(0);
+id_4=(1);
+ ::id_0::id_8=id_4;
+ ::id_0::id_9=(&&id_10);
 wait(SC_ZERO_TIME);
 {
-state=(&&ENTER_recurser);
-goto *(state);
+id_3=(&&id_11);
+goto *(id_3);
 }
-LINK:;
-cease(  ::TopLevel::x );
+id_10:;
+cease(  ::id_0::id_7 );
 return ;
 {
-state=(&&ENTER_recurser);
-goto *(state);
+id_3=(&&id_11);
+goto *(id_3);
 }
-ENTER_recurser:;
- ::TopLevel::recurser_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
-( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
- ::TopLevel::x++;
+id_11:;
+ ::id_0::id_12++;
+( ::id_0::id_13[ ::id_0::id_12])= ::id_0::id_9;
+( ::id_0::id_14[ ::id_0::id_12])= ::id_0::id_8;
+ ::id_0::id_7++;
 {
-state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&LINK_THEN_ELSE) : (&&PROCEED));
-goto *(state);
+id_3=((!(( ::id_0::id_14[ ::id_0::id_12])<(5))) ? (&&id_15) : (&&id_16));
+goto *(id_3);
 }
-PROCEED:;
-temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
- ::TopLevel::recurser_i=temp_i1;
- ::TopLevel::recurser_link=(&&LINK1);
+id_16:;
+id_5=((1)+( ::id_0::id_14[ ::id_0::id_12]));
+ ::id_0::id_8=id_5;
+ ::id_0::id_9=(&&id_17);
 {
-state=(&&ENTER_recurser);
-goto *(state);
+id_3=(&&id_11);
+goto *(id_3);
 }
-LINK1:;
-temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
- ::TopLevel::recurser_i=temp_i2;
- ::TopLevel::recurser_link=(&&LINK_THEN_ELSE);
+id_17:;
+id_6=((1)+( ::id_0::id_14[ ::id_0::id_12]));
+ ::id_0::id_8=id_6;
+ ::id_0::id_9=(&&id_15);
 {
-state=(&&ENTER_recurser);
-goto *(state);
+id_3=(&&id_11);
+goto *(id_3);
 }
-LINK_THEN_ELSE:;
-temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
- ::TopLevel::recurser_stack_index--;
+id_15:;
+id_2=( ::id_0::id_13[ ::id_0::id_12]);
+ ::id_0::id_12--;
 {
-state=temp_link;
-goto *(state);
+id_3=id_2;
+goto *(id_3);
 }
 }

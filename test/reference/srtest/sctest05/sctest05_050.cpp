@@ -1,64 +1,64 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_7);
 }
-enum TStates
+enum id_1
 {
-T_STATE_PROCEED = 1U,
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_THEN_ELSE = 4U,
-T_STATE_THEN_ELSE = 3U,
-T_STATE_YIELD = 2U,
+id_2 = 1U,
+id_3 = 0U,
+id_4 = 4U,
+id_5 = 3U,
+id_6 = 2U,
 };
-void T();
+void id_7();
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
+id_0 id_17("id_17");
+int id_15;
+int id_16;
 
-void TopLevel::T()
+void id_0::id_7()
 {
-static const void *(lmap[]) = { &&PROCEED_NEXT, &&PROCEED, &&YIELD, &&THEN_ELSE, &&PROCEED_THEN_ELSE };
-auto void *state;
- ::gvar=(1);
- ::i=(0);
+static const void *(id_8[]) = { &&id_9, &&id_10, &&id_11, &&id_12, &&id_13 };
+auto void *id_14;
+ ::id_15=(1);
+ ::id_16=(0);
 wait(SC_ZERO_TIME);
 {
-state=((!( ::i<(5))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]));
-goto *(state);
+id_14=((!( ::id_16<(5))) ? (id_8[ ::id_0::id_4]) : (id_8[ ::id_0::id_3]));
+goto *(id_14);
 }
-PROCEED_NEXT:;
- ::gvar+= ::i;
+id_9:;
+ ::id_15+= ::id_16;
 {
-state=((!((0)==( ::i%(2)))) ? (lmap[ ::TopLevel::T_STATE_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED]));
-goto *(state);
+id_14=((!((0)==( ::id_16%(2)))) ? (id_8[ ::id_0::id_5]) : (id_8[ ::id_0::id_2]));
+goto *(id_14);
 }
-PROCEED:;
+id_10:;
 wait(SC_ZERO_TIME);
 {
-state=(lmap[ ::TopLevel::T_STATE_YIELD]);
-goto *(state);
+id_14=(id_8[ ::id_0::id_6]);
+goto *(id_14);
 }
-YIELD:;
- ::gvar^=(1);
+id_11:;
+ ::id_15^=(1);
 {
-state=(lmap[ ::TopLevel::T_STATE_THEN_ELSE]);
-goto *(state);
+id_14=(id_8[ ::id_0::id_5]);
+goto *(id_14);
 }
-THEN_ELSE:;
- ::gvar*=(2);
- ::i++;
+id_12:;
+ ::id_15*=(2);
+ ::id_16++;
 {
-state=(( ::i<(5)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]));
-goto *(state);
+id_14=(( ::id_16<(5)) ? (id_8[ ::id_0::id_3]) : (id_8[ ::id_0::id_4]));
+goto *(id_14);
 }
-PROCEED_THEN_ELSE:;
-cease(  ::gvar );
+id_13:;
+cease(  ::id_15 );
 return ;
 }

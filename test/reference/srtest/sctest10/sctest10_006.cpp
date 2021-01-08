@@ -1,28 +1,28 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-int x;
-int (f)(auto char k, auto short j, auto int i);
+void id_1();
+int id_2;
+int (id_6)(auto char id_5, auto short id_4, auto int id_3);
 };
-TopLevel top_level("top_level");
+id_0 id_8("id_8");
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::TopLevel::x=(0);
- ::TopLevel::x=( ::TopLevel::f(8, 6,  ::TopLevel::f(0, 0, 0)));
-cease(  ::TopLevel::x+((2)*( ::TopLevel::f(3, 2, 1))) );
+ ::id_0::id_2=(0);
+ ::id_0::id_2=( ::id_0::id_6(8, 6,  ::id_0::id_6(0, 0, 0)));
+cease(  ::id_0::id_2+((2)*( ::id_0::id_6(3, 2, 1))) );
 }
 
-int (TopLevel::f)(char k, short j, int i)
+int (id_0::id_6)(char id_5, short id_4, int id_3)
 {
-auto int t = i+((3)*j);
-return t+((5)*k);
+auto int id_7 = id_3+((3)*id_4);
+return id_7+((5)*id_5);
 }

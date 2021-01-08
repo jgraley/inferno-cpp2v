@@ -1,81 +1,81 @@
 #include "isystemc.h"
 
-class TopLevel;
-class TopLevel : public sc_module
+class id_0;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( TopLevel )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
+void id_1();
 };
-TopLevel top_level("top_level");
-int gvar;
-int i;
-int j;
+id_0 id_19("id_19");
+int id_2;
+int id_3;
+int id_7;
 
-void TopLevel::T()
+void id_0::id_1()
 {
- ::gvar=(1);
+ ::id_2=(1);
 {
- ::i=(0);
+ ::id_3=(0);
 {
-if( !( ::i<(4)) )
-goto THEN;
-goto PROCEED;
-PROCEED:;
+if( !( ::id_3<(4)) )
+goto id_4;
+goto id_5;
+id_5:;
 {
-NEXT:;
+id_6:;
 {
 {
- ::gvar+= ::i;
+ ::id_2+= ::id_3;
 {
- ::j=(0);
+ ::id_7=(0);
 {
-if( !( ::j<(3)) )
-goto THEN1;
-goto PROCEED1;
-PROCEED1:;
+if( !( ::id_7<(3)) )
+goto id_8;
+goto id_9;
+id_9:;
 {
-NEXT1:;
+id_10:;
 {
 {
 wait(SC_ZERO_TIME);
- ::gvar++;
+ ::id_2++;
 }
-CONTINUE:;
- ::j++;
+id_11:;
+ ::id_7++;
 }
-CONTINUE1:;
-if(  ::j<(3) )
-goto NEXT1;
-goto PROCEED2;
-PROCEED2:;
+id_12:;
+if(  ::id_7<(3) )
+goto id_10;
+goto id_13;
+id_13:;
 }
-goto ELSE;
-THEN1:;
+goto id_14;
+id_8:;
 ;
-ELSE:;
+id_14:;
 }
 }
- ::gvar*=(2);
+ ::id_2*=(2);
 }
-CONTINUE2:;
- ::i++;
+id_15:;
+ ::id_3++;
 }
-CONTINUE3:;
-if(  ::i<(4) )
-goto NEXT;
-goto PROCEED3;
-PROCEED3:;
+id_16:;
+if(  ::id_3<(4) )
+goto id_6;
+goto id_17;
+id_17:;
 }
-goto ELSE1;
-THEN:;
+goto id_18;
+id_4:;
 ;
-ELSE1:;
+id_18:;
 }
 }
-cease(  ::gvar );
+cease(  ::id_2 );
 return ;
 }

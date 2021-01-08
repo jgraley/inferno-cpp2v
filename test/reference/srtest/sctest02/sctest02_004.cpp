@@ -1,80 +1,80 @@
 #include "isystemc.h"
 
-class Adder;
-class Multiplier;
-class TopLevel;
-class Adder : public sc_module
+class id_0;
+class id_7;
+class id_11;
+class id_0 : public sc_module
 {
 public:
-SC_CTOR( Adder )
+SC_CTOR( id_0 )
 {
-SC_THREAD(T);
+SC_THREAD(id_1);
 }
-void T();
-bool proceed;
+void id_1();
+bool id_2;
 };
-class Multiplier : public sc_module
+class id_7 : public sc_module
 {
 public:
-SC_CTOR( Multiplier )
+SC_CTOR( id_7 )
 {
-SC_THREAD(T1);
+SC_THREAD(id_8);
 }
-void T1();
-bool instigate;
-bool proceed1;
+void id_8();
+bool id_6;
+bool id_9;
 };
-class TopLevel : public sc_module
+class id_11 : public sc_module
 {
 public:
-SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+SC_CTOR( id_11 ) :
+id_10("id_10"),
+id_5("id_5")
 {
-SC_THREAD(T2);
+SC_THREAD(id_12);
 }
-void T2();
- ::Adder add_inst;
- ::Multiplier mul_inst;
+void id_12();
+ ::id_0 id_10;
+ ::id_7 id_5;
 };
-TopLevel top_level("top_level");
-int gvar;
+id_11 id_4("id_4");
+int id_3;
 
-void Adder::T()
+void id_0::id_1()
 {
 wait(SC_ZERO_TIME);
-while( ! ::Adder::proceed )
+while( ! ::id_0::id_2 )
 wait(SC_ZERO_TIME);
- ::Adder::proceed=(false);
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
-while( ! ::Adder::proceed )
+ ::id_0::id_2=(false);
+ ::id_3+=(2);
+(( ::id_4. ::id_11::id_5). ::id_7::id_6)=(true);
+while( ! ::id_0::id_2 )
 wait(SC_ZERO_TIME);
- ::Adder::proceed=(false);
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed1)=(true);
+ ::id_0::id_2=(false);
+ ::id_3+=(3);
+(( ::id_4. ::id_11::id_5). ::id_7::id_6)=(true);
 }
 
-void Multiplier::T1()
+void id_7::id_8()
 {
-while( ! ::Multiplier::instigate )
+while( ! ::id_7::id_9 )
 wait(SC_ZERO_TIME);
- ::Multiplier::instigate=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-while( ! ::Multiplier::proceed1 )
+ ::id_7::id_9=(false);
+ ::id_3*=(5);
+(( ::id_4. ::id_11::id_10). ::id_0::id_2)=(true);
+while( ! ::id_7::id_6 )
 wait(SC_ZERO_TIME);
- ::Multiplier::proceed1=(false);
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-while( ! ::Multiplier::proceed1 )
+ ::id_7::id_6=(false);
+ ::id_3*=(5);
+(( ::id_4. ::id_11::id_10). ::id_0::id_2)=(true);
+while( ! ::id_7::id_6 )
 wait(SC_ZERO_TIME);
- ::Multiplier::proceed1=(false);
-cease(  ::gvar );
+ ::id_7::id_6=(false);
+cease(  ::id_3 );
 }
 
-void TopLevel::T2()
+void id_11::id_12()
 {
- ::gvar=(1);
-( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
+ ::id_3=(1);
+( ::id_11::id_5. ::id_7::id_9)=(true);
 }
