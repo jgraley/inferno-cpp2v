@@ -180,7 +180,7 @@ public:
     template<typename ... CP>
     static inline TreePtr<NODE_TYPE> Make(const CP& ... cp)
     {
-        return new StandardAgentWrapper<NODE_TYPE>(cp...);
+        return TreePtr<NODE_TYPE>(new StandardAgentWrapper<NODE_TYPE>(cp...));
     }    
 };
 
@@ -193,7 +193,7 @@ public:
     template<typename ... CP>
     static inline TreePtr<NODE_TYPE> Make(const CP&... cp)
     {
-        return new NODE_TYPE(cp...);
+        return TreePtr<NODE_TYPE>(new NODE_TYPE(cp...));
     }    
 };
 

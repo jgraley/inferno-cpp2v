@@ -67,7 +67,12 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
 {
     inline TreePtr() {}
 
-    inline TreePtr( VALUE_TYPE *o ) :
+    explicit inline TreePtr( VALUE_TYPE *o ) : // dangerous - make explicit
+        shared_ptr<VALUE_TYPE>( o )
+    {
+    }
+
+    inline TreePtr( nullptr_t o ) : // safe - leave implicit
         shared_ptr<VALUE_TYPE>( o )
     {
     }
@@ -173,7 +178,7 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
 	}
 	virtual TreePtr<Node> MakeValueArchitype() const
 	{
-        return new VALUE_TYPE; // means VALUE_TYPE must be constructable
+        return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }
 
     //inline bool operator<( const TreePtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
