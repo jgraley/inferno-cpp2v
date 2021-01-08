@@ -10,7 +10,7 @@
 
 #include "common/common.hpp"
 #include "itemise.hpp"
-#include "shared_ptr.hpp"
+#include "tree_ptr.hpp"
 
 #include <list>
 #include <set>

@@ -2,7 +2,7 @@
 #define SPECIALISE_OOSTD_HPP
 
 #include "common/common.hpp"
-#include "shared_ptr.hpp"
+#include "tree_ptr.hpp"
 #include "containers.hpp"
 #include <list>
 #include <set>

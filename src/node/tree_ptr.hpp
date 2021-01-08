@@ -1,12 +1,12 @@
 /*
- * shared_ptr.hpp
+ * tree_ptr.hpp
  *
  *  Created on: 9 Jun 2010
  *      Author: jgraley
  */
 
-#ifndef SHARED_PTR_HPP
-#define SHARED_PTR_HPP
+#ifndef TREE_PTR_HPP
+#define TREE_PTR_HPP
 
 #include "common/common.hpp"
 #include "common/magic.hpp"
