@@ -16,6 +16,8 @@
 #include <functional>
 #include "node/graphable.hpp"
 
+#define HINTS_IN_EXCEPTIONS
+
 namespace SR
 { 
 class SpecialBase;
@@ -49,12 +51,19 @@ public:
     };
     
     // Any mismatch this class throws
-    class Mismatch : public ::Mismatch {};
+    class Mismatch : public ::Mismatch 
+    {
+#ifdef HINTS_IN_EXCEPTIONS        
+    public:
+        LocatedLink hint;
+        virtual string What() const noexcept { return ::Mismatch::What() + (hint ? string(",hint:") + Trace(hint) : string(",no-hint")); }
+#endif        
+    };
     
     class NLQMismatch : public Mismatch {};
     class NLQConjOutAfterHitMismatch : public NLQMismatch {};
     class NLQConjOutAfterMissMismatch : public NLQMismatch {};
-    class SlowNLQLinksMismatch : public NLQMismatch {};
+    class NLQFromDQLinkMismatch : public NLQMismatch {};
     
     class CouplingMismatch : public Mismatch {};
     
@@ -123,7 +132,7 @@ public:
                                               const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const;
     virtual bool ImplHasDNLQ() const;                                              
-    void DNLQFromDQ( DecidedQuery &query,
+    void NLQFromDQ( DecidedQuery &query,
                      XLink base_xlink,
                      const SolutionMap *required_links,
                      const TheKnowledge *knowledge ) const;                                              

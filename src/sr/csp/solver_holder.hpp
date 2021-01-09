@@ -7,6 +7,12 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
+#define COROUTINE_HOLDER
+
+#ifdef COROUTINE_HOLDER
+#include <boost/coroutine2/coroutine.hpp>
+#endif
+
 namespace SR
 {
 class Agent;
@@ -29,6 +35,7 @@ public:
      * @param solver [inout] the solver to bind to
      */
     SolverHolder( shared_ptr<Solver> solver );
+    ~SolverHolder();
 
     /**
      * Start the process of solving a given example of a problem. The solver 
@@ -53,14 +60,22 @@ public:
      * @retval false No solutions are left, and the pointer arguments are unused
      */
     bool GetNextSolution( Solution *solution = nullptr );
-
  
 private:
     void ReportSolution( const Solution &solution );
-
+#ifdef COROUTINE_HOLDER
+    void ReapSource();
+#endif
     const shared_ptr<Solver> solver;
 
+    bool enable_coroutine;
+#ifdef COROUTINE_HOLDER
+    typedef boost::coroutines2::coroutine<Solution> Coroutine;
+    Coroutine::push_type *sink = nullptr;
+    Coroutine::pull_type *source = nullptr;
+#else
     list<Solution> solutions_queue;    
+#endif    
 };
 
 };

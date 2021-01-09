@@ -92,7 +92,8 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     TRACE("Simple solver begins\n");
     INDENT("S");
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
-    holder = holder_;
+    ScopedAssign<ReportageObserver *> sa(holder, holder_);
+    ASSERT( holder );
     initial_domain = initial_domain_;
 
     // Tell all the constraints about the forces
@@ -124,7 +125,6 @@ void SimpleSolver::Run( ReportageObserver *holder_,
         TryVariable( plan.variables.begin() );    
     }
 
-    holder = nullptr;
     TRACE("Simple solver ends\n");    
 }
 
@@ -137,22 +137,53 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     list<VariableId>::const_iterator next_it = current_it;
     ++next_it;
     bool complete = (next_it == plan.variables.end());
-    
+    bool hinted = false; 
     int i=0;
     for( Value v : initial_domain )
     {
         TRACE("Trying variable ")(*current_it)(" := ")(v)("\n");
         assignments[*current_it] = v;
         try_counts[*current_it] = i;
-     
+        bool ok = false;
+        
         try
         {
             Test( assignments );
+            ok = true;
         }
         catch( const ::Mismatch &e )
+        {            
+#ifdef HINTS_IN_EXCEPTIONS   
+            if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint
+            {
+                if( pae->hint && *current_it==(VariableId)(pae->hint) ) // does have a hint, and for the current variable
+                {
+                    TRACE("At ")(*current_it)(", got hint ")(e)(" - retesting\n"); 
+                    assignments[*current_it] = (Value)(pae->hint); // take the hint
+                    hinted = true;
+                    try 
+                    { 
+                        Test( assignments ); 
+                        ok = true;
+                        TRACEC("OK after hint\n"); 
+                    } 
+                    catch( const ::Mismatch &e2 ) 
+                    { 
+                        TRACEC("Mismatch after hint ")(e2)("\n"); 
+                    }
+                    
+                }
+            }
+#endif
+        }
+        
+        if( !ok )
         {
             assignments.erase(*current_it); // remove failed variable 
-            continue; // backtrack
+            if( hinted )
+                break;
+            else
+                continue; // try next value
         }   
             
 #ifdef TRACK_BEST_ASSIGNMENT    
@@ -170,7 +201,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         {
 #ifdef TRACK_BEST_ASSIGNMENT    
             TRACE("Reporting CSP solution\n");
-            ShowBestAssignment();
+//            ShowBestAssignment();
 #endif            
             holder->ReportSolution( assignments );
         }
@@ -178,6 +209,10 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         {
             TryVariable( next_it );
         }
+        
+        if( hinted )
+            break; // hint was the only valid value for this variable, given the other assignments
+        
         i++;
     }
     
@@ -192,7 +227,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 
 void SimpleSolver::Test( const Assignments &assigns )
 {
-    TimedOperations(); // overhead should be hidden by Constraint::Test()
+    //TimedOperations(); // overhead should be hidden by Constraint::Test()
 
     report = "";
     for( shared_ptr<Constraint> c : plan.constraints )

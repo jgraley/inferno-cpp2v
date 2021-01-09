@@ -23,6 +23,7 @@ void SerialNumber::Construct()
     {
         // We don't know about this location, so produce a new location serial number and start the construction count 
         location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
+        //FTRACE("%lu at %p\n", master_location_serial, lp);
         location_readback[master_location_serial] = lp;
         master_serial.insert( pair<void *, SerialNumber::SNType>(lp, 0) );
         master_location_serial++;

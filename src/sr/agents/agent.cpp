@@ -160,7 +160,7 @@ bool AgentCommon::ImplHasDNLQ() const
 }
 
     
-void AgentCommon::DNLQFromDQ( DecidedQuery &query,
+void AgentCommon::NLQFromDQ( DecidedQuery &query,
                               XLink base_xlink,
                               const SolutionMap *required_links,
                               const TheKnowledge *knowledge ) const
@@ -188,8 +188,14 @@ void AgentCommon::DNLQFromDQ( DecidedQuery &query,
             continue; // only happens when agent pushes out MMAX, as with DisjunctionAgent
             
         // Compare by location
-        if( (XLink)alink != (XLink)rlink )              
-            throw SlowNLQLinksMismatch(); // value of links mismatches                                
+        if( (XLink)alink != (XLink)rlink ) 
+        {
+            NLQFromDQLinkMismatch e; // value of links mismatches
+#ifdef HINTS_IN_EXCEPTIONS
+            e.hint = alink;
+#endif            
+            throw e;       
+        }                          
     }            
 }                           
                                 
@@ -227,7 +233,7 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 
                 if( use_DQ || !ImplHasDNLQ() )
                 {
-                    DNLQFromDQ( *query, base_xlink, required_links, knowledge );
+                    NLQFromDQ( *query, base_xlink, required_links, knowledge );
                 }
                 else
                 {

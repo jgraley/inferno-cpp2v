@@ -134,4 +134,26 @@ list<T> operator+( list<T> l, list<T> r ) // Just like in Python!
 typedef int CompareResult;
 static const CompareResult EQUAL = 0;
 
+template<typename T>
+class ScopedAssign
+{
+public:    
+    ScopedAssign( T &var_, const T &newval ) :
+        var(var_),
+        oldval(var)
+    {            
+        var = newval;
+    }
+    
+    ~ScopedAssign()
+    {
+        var = oldval;
+    }
+    
+private:
+    T &var;
+    const T oldval;
+};
+
+
 #endif

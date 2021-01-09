@@ -85,6 +85,14 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
     InfernoAbort();
 }
 
+
+void boost::assertion_failed_msg(char const * expr, char const * msg, char const * function, char const * file, long line)
+{
+    Tracer::MaybePrintEndl();
+    Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n%s\n", expr, msg );
+    InfernoAbort();
+}
+
 ////////////////////////// NewtonsCradle //////////////////////////
 
 NewtonsCradle &NewtonsCradle::operator()()

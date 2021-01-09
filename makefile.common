@@ -31,10 +31,6 @@ OPTIONS += -Wfatal-errors
 # Update: what decade are you living in?!! Oh, right.
 OPTIONS += -Og
 
-# JSG I need this to get the boost includes in a cygwin setup. This also
-# fixes the boost verison.
-OPTIONS += -I/usr/include/boost-1_33_1 
-
 # We supply an ASSERT handler in common/trace.cpp
 OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
 
@@ -51,6 +47,12 @@ OPTIONS += -fPIC
 
 # Generate include deps
 OPTIONS += -MMD
+
+# For boost
+OPTIONS += -DBOOST_CONTEXT_STATIC_LINK
+OPTIONS += -DBOOST_NO_CXX14_STD_EXCHANGE
+OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
+
 
 # For including llvm/clang header files
 BUILD = Debug
