@@ -50,7 +50,7 @@ private:
     } plan;
 
     bool TryVariable( list<VariableId>::const_iterator current_it );
-    bool Test( const Assignments &assigns );
+    void Test( const Assignments &assigns );
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();

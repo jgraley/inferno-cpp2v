@@ -73,15 +73,14 @@ public:
                         const SR::TheKnowledge *knowledge ) = 0;    
     
     /**
-     * Test a list of free variable values for inclusion in the constraint.
+     * Test a list of free variable values for inclusion in the constraint. A MisMatch
+     * exception is thrown if the assignment does not match.
      * 
-     * @param values [in] the values of the variables, size should be the degree.
-     * @param side_info [out] information relating to abnormal contexts etc, only defined if true is returned.
-     * 
-     * @retval true the values are in the constraint, same ordering as return of GetFreeVariables().
-     * @retval false the values are not in the constraint
+     * @param frees_map [in] a partial assignment of free varaibles for this constraint. 
+     * All required varaibles should be present. Variables not used by this constraint 
+     * are ignored.
      */
-    virtual bool Test( Assignments frees_map ) = 0;        
+    virtual void Test( Assignments frees_map ) = 0;        
 };
 
 };

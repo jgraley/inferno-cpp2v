@@ -78,7 +78,7 @@ private:
     void TraceProblem() const;
     virtual void Start( const Assignments &forces, 
                         const SR::TheKnowledge *knowledge );    
-    bool Test( Assignments frees_map );
+    void Test( Assignments frees_map );
         
     class ByLocationLinkMismatch : public ::Mismatch
     {

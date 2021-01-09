@@ -109,9 +109,14 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     if( plan.variables.empty() )
     {
         // TODO re-organise (and rename) TryVariable() so we don't need this bit
-        bool ok = Test( assignments );
-        if( ok )
+        try
+        {
+            Test( assignments );
             holder->ReportSolution( assignments );
+        }
+        catch( const ::Mismatch &e )
+        {
+        }        
     }
     else
     {
@@ -140,13 +145,15 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         assignments[*current_it] = v;
         try_counts[*current_it] = i;
      
-        bool ok = Test( assignments );
-        
-        if( !ok )
+        try
+        {
+            Test( assignments );
+        }
+        catch( const ::Mismatch &e )
         {
             assignments.erase(*current_it); // remove failed variable 
             continue; // backtrack
-        }
+        }   
             
 #ifdef TRACK_BEST_ASSIGNMENT    
         int num=0;
@@ -183,9 +190,10 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 }
 
 
-bool SimpleSolver::Test( const Assignments &assigns )
+void SimpleSolver::Test( const Assignments &assigns )
 {
-    bool ok = true; // AND-rule    
+    TimedOperations(); // overhead should be hidden by Constraint::Test()
+
     report = "";
     for( shared_ptr<Constraint> c : plan.constraints )
     {      
@@ -213,15 +221,7 @@ bool SimpleSolver::Test( const Assignments &assigns )
             TRACE_TO(report)(" fmet=%d", free_met);
         }
         
-        ok = c->Test(assignments); 
-        
-        TRACE_TO(report)(ok?" HIT\n":" MISS\n");
-
-        if( !ok )
-        {
-            TRACEC("Constraint says no: ")(*c)("\n")(assignments)("\n")(report)("\n");
-            break;
-        }
+        c->Test(assignments); 
                                     
         // Only expected to pass for base (which we only know about if 
         // it's FREE). We don't check whether the other 
@@ -231,9 +231,6 @@ bool SimpleSolver::Test( const Assignments &assigns )
         // for( VariableId var : c->GetFreeVariables() )
         //     CheckLocalMatch( assigns, var );   
     } 
-    TimedOperations(); // overhead should be hidden by Constraint::Test()
-
-    return ok;
 }
 
 
