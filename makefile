@@ -105,12 +105,12 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 # Run the main Inferno tests
 #
 test : test/results/execution.pass
+minitest : test/results/mini.pass
 
 #
 # Run the search and replace tests (requires reference outputs to be in in test/reference/srtest/)
 #
 srtest : test/results/sr.pass
-srminitest : test/results/srmini.pass
 	
 #
 # Run the repeatbility tests (requires reference trace logs to be in in test/reference/reptest/)

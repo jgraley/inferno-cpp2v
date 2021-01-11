@@ -503,7 +503,7 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         }
     }
     
-    // Require that every child x link is in the correct collection.
+    // Require that every child x link is in the correct container.
     // Note: checking x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
     for( PatternLink plink : plan_seq.non_stars )  // depends on x_seq
