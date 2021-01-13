@@ -161,7 +161,7 @@ public:
 			return make_shared<iterator>(*this);
 		}
 		
-		operator string()
+		explicit operator string()
 		{   
 		    if( pib )
 		        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
@@ -419,13 +419,13 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             Impl::push_back( (value_type)*i );
 		}
 	}
-	Sequential( const TreePtrInterface &nx )
+	explicit Sequential( const TreePtrInterface &nx )
 	{
 		value_type sx( value_type::InferredDynamicCast(nx) );
 		Impl::push_back( sx );
 	}
 	template<typename L, typename R>
-	inline Sequential( const pair<L, R> &p )
+	explicit inline Sequential( const pair<L, R> &p )
 	{
 		*this = Sequential<VALUE_TYPE>( p.first );
 		Sequential<VALUE_TYPE> t( p.second );
@@ -437,7 +437,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             Impl::push_back( *i );
 		}
 	}
-	inline Sequential( const value_type &v )
+	explicit inline Sequential( const value_type &v )
 	{
 		push_back( v );
 	}
@@ -523,13 +523,13 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
             Impl::insert( *i );
 		}
 	}
-    SimpleAssociativeContainer( const TreePtrInterface &nx )
+    explicit SimpleAssociativeContainer( const TreePtrInterface &nx )
 	{
 		value_type sx( value_type::InferredDynamicCast(nx) );
         Impl::insert( sx );
 	}
 	template<typename L, typename R>
-	inline SimpleAssociativeContainer( const pair<L, R> &p )
+	explicit inline SimpleAssociativeContainer( const pair<L, R> &p )
 	{
 		*this = SimpleAssociativeContainer<VALUE_TYPE>( p.first );
 		SimpleAssociativeContainer<VALUE_TYPE> t( p.second );
@@ -541,7 +541,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
             Impl::insert( *i );
 		}
 	}
-	inline SimpleAssociativeContainer( const value_type &v )
+	explicit inline SimpleAssociativeContainer( const value_type &v )
 	{
 		insert( v );
 	}
@@ -568,7 +568,7 @@ struct PointIterator : public ContainerInterface::iterator_interface
     {
     }
 
-    PointIterator( TreePtrInterface *i ) :
+    explicit PointIterator( TreePtrInterface *i ) :
         element(i)
     {      
         ASSERT(i); // We don't allow nullptr as input because it means end-of-range
@@ -626,7 +626,7 @@ struct CountingIterator : public ContainerInterface::iterator_interface
     {
     }
 
-    CountingIterator( int i ) :
+    explicit CountingIterator( int i ) :
         element(i)
     {
     }
@@ -705,10 +705,10 @@ struct Sequence : virtual Sequential< VALUE_TYPE >,
 {
 	inline Sequence() {}
 	template<typename L, typename R>
-	inline Sequence( const pair<L, R> &p ) :
+	inline Sequence( const pair<L, R> &p ) : // explicit missing due usage in steps
 		Sequential< VALUE_TYPE >( p ) {}
 	template< typename OTHER >
-	inline Sequence( const TreePtr<OTHER> &v ) :
+	inline Sequence( const TreePtr<OTHER> &v ) : // explicit missing due usage in steps
 		Sequential< VALUE_TYPE >( v ) {}
 };
 
@@ -718,10 +718,10 @@ struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
 {
  	inline Collection<VALUE_TYPE>() {}
 	template<typename L, typename R>
-	inline Collection( const pair<L, R> &p ) :
+	inline Collection( const pair<L, R> &p ) : // explicit missing due usage in steps
 		COLLECTION_BASE< VALUE_TYPE >( p ) {}
 	template< typename OTHER >
-	inline Collection( const TreePtr<OTHER> &v ) :
+	inline Collection( const TreePtr<OTHER> &v ) : // explicit missing due usage in steps
 		COLLECTION_BASE< VALUE_TYPE >( v ) {}
 };
 

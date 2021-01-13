@@ -19,7 +19,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
     MakePatternPtr< Star<Declaration> > decls;
-    sc->members = ( decls );
+    sc->members = { decls };
     MakePatternPtr< Star<Statement> > pre, post;
     sc->statements = ( pre, over, post );
 

@@ -19,9 +19,9 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     domain_extension_classes = make_shared<QuotientSet>();
     nuggets.clear();
     
-    AddSubtree( REQUIRE_SOLO, root_xlink );
+    AddAtRoot( REQUIRE_SOLO, root_xlink );
     
-    AddSubtree( REQUIRE_SOLO, XLink::MMAX_Link );
+    AddAtRoot( REQUIRE_SOLO, XLink::MMAX_Link );
     
     int is = domain.size();
     ExtendDomain( root_plink );
@@ -47,7 +47,7 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     for( pair<XLink, XLink> p : extra )
     {
         TRACEC(p)("\n");
-        AddSubtree( STOP_IF_ALREADY_IN, p.second ); // set to REQUIRE_SOLO to replicate #218
+        AddAtRoot( STOP_IF_ALREADY_IN, p.second ); // set to REQUIRE_SOLO to replicate #218
     }
     
     // Visit couplings repeatedly TODO union over couplings and
@@ -68,7 +68,7 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
 }
 
 
-void TheKnowledge::AddSubtree( SubtreeMode mode, XLink root_xlink )
+void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
 {
     // Bootstrap the recursive process with initial (root) values
     Nugget nugget;

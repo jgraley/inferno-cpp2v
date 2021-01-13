@@ -55,7 +55,7 @@ public:
 private:
     void DetermineDomain( PatternLink root_plink, XLink root_xlink );
     void ExtendDomain( PatternLink plink );
-    void AddSubtree( SubtreeMode mode, XLink root_xlink );
+    void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
                   Nugget nugget );
