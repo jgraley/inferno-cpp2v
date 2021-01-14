@@ -194,7 +194,7 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
 
 
 template<typename VALUE_TYPE>
-inline TreePtr<VALUE_TYPE> TreePtrCast( const TreePtrInterface &g )
+inline TreePtr<VALUE_TYPE> DynamicTreePtrCast( const TreePtrInterface &g )
 {
     return TreePtr<VALUE_TYPE>::DynamicCast(g);
 }

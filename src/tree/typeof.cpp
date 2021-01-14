@@ -14,14 +14,14 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
 {
     ASSERT(o);
     
-    if( TreePtr<SpecificInstanceIdentifier> ii = TreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
+    if( TreePtr<SpecificInstanceIdentifier> ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
         TreePtr<Node> n = GetDeclaration()(context, ii);
-        TreePtr<Instance> i = TreePtrCast<Instance>(n);
+        TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
         ASSERT(i);
         return i->type; 
     }
-    else if( TreePtr<NonCommutativeOperator> op = TreePtrCast<NonCommutativeOperator>(o) ) // operator
+    else if( TreePtr<NonCommutativeOperator> op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
@@ -29,7 +29,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
             optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
-    else if( TreePtr<CommutativeOperator> op = TreePtrCast<CommutativeOperator>(o) ) // operator
+    else if( TreePtr<CommutativeOperator> op = DynamicTreePtrCast<CommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
@@ -37,38 +37,38 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
                  optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
-    else if( TreePtr<Literal> l = TreePtrCast<Literal>(o) )
+    else if( TreePtr<Literal> l = DynamicTreePtrCast<Literal>(o) )
     {
         return GetLiteral( l );
     }
-    else if( TreePtr<Call> c = TreePtrCast<Call>(o) )
+    else if( TreePtr<Call> c = DynamicTreePtrCast<Call>(o) )
     {
         TreePtr<Type> t = Get(c->callee); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
-        if( TreePtr<Function> f = TreePtrCast<Function>(t) )
+        if( TreePtr<Function> f = DynamicTreePtrCast<Function>(t) )
         	return f->return_type;
         else
         	return MakeTreePtr<Void>();
     }
-    else if( TreePtr<Lookup> l = TreePtrCast<Lookup>(o) ) // a.b; just return type of b
+    else if( TreePtr<Lookup> l = DynamicTreePtrCast<Lookup>(o) ) // a.b; just return type of b
     {
         TreePtr<Type> t = Get( l->member );
         TRACE("TypeOf Lookup: ")(*(l->base))(" . ")(*(l->member))(" is ")(*t)("\n");
         return t;
     }
-    else if( TreePtr<Cast> c = TreePtrCast<Cast>(o) )
+    else if( TreePtr<Cast> c = DynamicTreePtrCast<Cast>(o) )
     {
         return c->type;
     }
-    else if( TreePtr<MakeRecord> rl = TreePtrCast<MakeRecord>(o) )
+    else if( TreePtr<MakeRecord> rl = DynamicTreePtrCast<MakeRecord>(o) )
     {
         return rl->type;
     }
-    else if( TreePtrCast<LabelIdentifier>(o) )
+    else if( DynamicTreePtrCast<LabelIdentifier>(o) )
     {
         return MakeTreePtr<Labeley>(); 
     }
-    else if( TreePtrCast<SizeOf>(o) || TreePtrCast<AlignOf>(o))
+    else if( DynamicTreePtrCast<SizeOf>(o) || DynamicTreePtrCast<AlignOf>(o))
     {
     	TreePtr<Integral> n;
     	if( TypeDb::int_default_signed )
@@ -79,22 +79,22 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     	n->width = sz;
         return n;
     }
-    else if( TreePtr<New> n = TreePtrCast<New>(o) )
+    else if( TreePtr<New> n = DynamicTreePtrCast<New>(o) )
     {
         TreePtr<Pointer> p( new Pointer );
         p->destination = n->type;
         return p;
     }
-    else if( TreePtrCast<Delete>(o) )
+    else if( DynamicTreePtrCast<Delete>(o) )
     {
         return MakeTreePtr<Void>(); 
     }
-    else if( TreePtr<StatementExpression> ce = TreePtrCast<StatementExpression>(o) )
+    else if( TreePtr<StatementExpression> ce = DynamicTreePtrCast<StatementExpression>(o) )
     {
         if( ce->statements.empty() )
             return MakeTreePtr<Void>(); 
         TreePtr<Statement> last = ce->statements.back();
-        if( TreePtr<Expression> e = TreePtrCast<Expression>(last) )
+        if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(last) )
             return Get(e);
         else
             return MakeTreePtr<Void>(); 
@@ -116,21 +116,21 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// - Arrays go to pointers
 	FOREACH( TreePtr<Type> &t, optypes )
 	{
-		while( TreePtr<Reference> r = TreePtrCast<Reference>(t) )
+		while( TreePtr<Reference> r = DynamicTreePtrCast<Reference>(t) )
 			t = r->destination;
-		if( TreePtr<Array> a = TreePtrCast<Array>(t) )
+		if( TreePtr<Array> a = DynamicTreePtrCast<Array>(t) )
 		{
 			TreePtr<Pointer> p( new Pointer );
 			p->destination = a->element;
 			t = p;
 		}
 		// Check we finished the job
-		ASSERT( !TreePtrCast<Reference>(t) );
-		ASSERT( !TreePtrCast<Array>(t) );
+		ASSERT( !DynamicTreePtrCast<Reference>(t) );
+		ASSERT( !DynamicTreePtrCast<Array>(t) );
 	}
 
 	// Turn an array literal into an array
-    if( TreePtr<MakeArray> al = TreePtrCast<MakeArray>(op) )
+    if( TreePtr<MakeArray> al = DynamicTreePtrCast<MakeArray>(op) )
     {
     	TreePtr<Array> a( new Array );
     	a->element = optypes.front();
@@ -140,7 +140,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
     }
 
 	// Assignment operators return their left-hand operand type in all cases
-	if( TreePtrCast<AssignmentOperator>(op) )
+	if( DynamicTreePtrCast<AssignmentOperator>(op) )
 	{
 		return optypes.front();
 	}
@@ -149,7 +149,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// we are not bothering to check that the pointer types are compatible.
 	if( dynamic_pointer_cast<Subtract>(op) )
 	{
-		if( TreePtrCast<Pointer>(optypes.front()) && TreePtrCast<Pointer>(optypes.back()) )
+		if( DynamicTreePtrCast<Pointer>(optypes.front()) && DynamicTreePtrCast<Pointer>(optypes.back()) )
 		{
 			TreePtr<Signed> i = TreePtr<Signed>( new Signed );
 			TreePtr<SpecificInteger> nc( new SpecificInteger(TypeDb::integral_bits[INT]) );
@@ -159,10 +159,10 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	}
 
 	// Pointer arithmetic: an add or subtract involving a pointer returns that pointer type
-	if( TreePtrCast<Add>(op) || TreePtrCast<Subtract>(op) )
+	if( DynamicTreePtrCast<Add>(op) || DynamicTreePtrCast<Subtract>(op) )
 	{
 		FOREACH( TreePtr<Type> t, optypes )
-			if( TreePtr<Pointer> p = TreePtrCast<Pointer>(t) )
+			if( TreePtr<Pointer> p = DynamicTreePtrCast<Pointer>(t) )
 		        return p;
 	}
 
@@ -175,16 +175,16 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 
     if(0) {}
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( TreePtrCast<NODE>(op) ) \
+	else if( DynamicTreePtrCast<NODE>(op) ) \
 		return CAT;
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( TreePtrCast<NODE>(op) ) \
+	else if( DynamicTreePtrCast<NODE>(op) ) \
 		return CAT;
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( TreePtrCast<NODE>(op) ) \
+	else if( DynamicTreePtrCast<NODE>(op) ) \
 		return CAT;
 #define OTHER(TOK, TEXT, NODE, BASE, CAT) \
-	else if( TreePtrCast<NODE>(op) ) \
+	else if( DynamicTreePtrCast<NODE>(op) ) \
 		return CAT;
 #include "tree/operator_db.inc"
     else
@@ -200,7 +200,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 {
 	Sequence<Numeric> nums;
 	for( TreePtr<Type> optype : optypes )
-		if( TreePtr<Numeric> n = TreePtrCast<Numeric>(optype) )
+		if( TreePtr<Numeric> n = DynamicTreePtrCast<Numeric>(optype) )
 			nums.push_back(n);
 	if( nums.size() == optypes.size() )
 		return GetStandard( nums );
@@ -226,9 +226,9 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 	for( TreePtr<Type> optype : optypes )
 	{
 		// Floats take priority
-		if( TreePtr<Floating> f = TreePtrCast<Floating>(optype) )
+		if( TreePtr<Floating> f = DynamicTreePtrCast<Floating>(optype) )
 		{
-			TreePtr<SpecificFloatSemantics> sfs = TreePtrCast<SpecificFloatSemantics>(f->semantics);
+			TreePtr<SpecificFloatSemantics> sfs = DynamicTreePtrCast<SpecificFloatSemantics>(f->semantics);
 			ASSERT(sfs)("Floating point type seen with semantics not specific");
 			unsigned int sl = llvm::APFloat::semanticsPrecision( *sfs );
 			unsigned int sr = llvm::APFloat::semanticsPrecision( *maxwidth_float );
@@ -237,23 +237,23 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 		}
 
 		// Should only have Integrals from here on
-		TreePtr<Integral> intop = TreePtrCast<Integral>(optype);
+		TreePtr<Integral> intop = DynamicTreePtrCast<Integral>(optype);
         if( !intop )
             throw NumericalOperatorUsageMismatch2();
         //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
 
         // Do a max algorithm on the width
-		TreePtr<SpecificInteger> width = TreePtrCast<SpecificInteger>(intop->width);
+		TreePtr<SpecificInteger> width = DynamicTreePtrCast<SpecificInteger>(intop->width);
         if( !width )
             throw NumericalOperatorUsageMismatch3();
 		//ASSERT( width )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
 
-		if( TreePtrCast<Signed>(optype) )
+		if( DynamicTreePtrCast<Signed>(optype) )
 		{
 			if( *width >= *maxwidth_signed )
 		    	maxwidth_signed = width;
 		}
-		else if( TreePtrCast<Unsigned>(optype) )
+		else if( DynamicTreePtrCast<Unsigned>(optype) )
 		{
 			if( !maxwidth_unsigned || *width >= *maxwidth_unsigned )
 				maxwidth_unsigned = width;
@@ -292,31 +292,31 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
 {
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
-        if( TreePtr<Pointer> o2 = TreePtrCast<Pointer>( optypes.front() ) )
+        if( TreePtr<Pointer> o2 = DynamicTreePtrCast<Pointer>( optypes.front() ) )
             return o2->destination;
-        else if( TreePtr<Array> o2 = TreePtrCast<Array>( optypes.front() ) )
+        else if( TreePtr<Array> o2 = DynamicTreePtrCast<Array>( optypes.front() ) )
             return o2->element;
         else
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );
     }
-    else if( TreePtrCast<AddressOf>(op) )
+    else if( DynamicTreePtrCast<AddressOf>(op) )
     {
         TreePtr<Pointer> p( new Pointer );
         p->destination = optypes.front();
         return p;
     }
-    else if( TreePtrCast<Comma>(op) )
+    else if( DynamicTreePtrCast<Comma>(op) )
     {
         return optypes.back();
     }
-    else if( TreePtrCast<ConditionalOperator>(op) )
+    else if( DynamicTreePtrCast<ConditionalOperator>(op) )
 	{
         Sequence<Type>::iterator optypes_it = optypes.begin();
         ++optypes_it;
 		return *optypes_it; // middle element TODO do this properly, consider cond ? nullptr : &x
 	}
-    else if( TreePtrCast<This>(op) )
+    else if( DynamicTreePtrCast<This>(op) )
     {
     	throw UnsupportedThisMismatch(); // TODO add support
         //ASSERTFAIL(""); 
@@ -331,7 +331,7 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
 
 TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
 {
-    if( TreePtr<SpecificInteger> si = TreePtrCast<SpecificInteger>(l) )
+    if( TreePtr<SpecificInteger> si = DynamicTreePtrCast<SpecificInteger>(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
     	TreePtr<Integral> it;
@@ -342,18 +342,18 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
         it->width = TreePtr<SpecificInteger>( new SpecificInteger( si->getBitWidth() ) );
         return it;
     }
-    else if( TreePtr<SpecificFloat> sf = TreePtrCast<SpecificFloat>(l) )
+    else if( TreePtr<SpecificFloat> sf = DynamicTreePtrCast<SpecificFloat>(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
     	MakeTreePtr<Floating> ft;
     	ft->semantics = TreePtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&sf->getSemantics()) );
         return ft;
     }
-    else if( TreePtrCast<Bool>(l) )
+    else if( DynamicTreePtrCast<Bool>(l) )
     {
         return MakeTreePtr<Boolean>();
     }
-    else if( TreePtrCast<String>(l) )
+    else if( DynamicTreePtrCast<String>(l) )
     {
     	TreePtr<Integral> n;
     	if( TypeDb::char_default_signed )
@@ -382,10 +382,10 @@ TreePtr<Expression> TypeOf::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> ca
 	context = c;
 	TreePtr<Expression> e;
 
-    if( TreePtr<Lookup> lf = TreePtrCast<Lookup>(call->callee) )
+    if( TreePtr<Lookup> lf = DynamicTreePtrCast<Lookup>(call->callee) )
     {
 		ASSERT(lf->member);
-		if( TreePtrCast<Constructor>( Get( lf->member ) ) )
+		if( DynamicTreePtrCast<Constructor>( Get( lf->member ) ) )
 			e = lf->base;
     }
 

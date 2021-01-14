@@ -66,11 +66,11 @@ void Validate::operator()( TreePtr<Node> context,
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(wit);
 
 			// Check that we can successfully call TypeOf on every Expression
-			if( TreePtr<Expression> e = TreePtrCast<Expression>(x) )
+			if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(x) )
 			    (void)TypeOf::instance(context, e);
 
 			// Check that every identifier has a declaration
-			if( TreePtr<InstanceIdentifier> ii = TreePtrCast<InstanceIdentifier>(x) )
+			if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast<InstanceIdentifier>(x) )
 			    (void)GetDeclaration()(context, ii);
 
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
@@ -102,17 +102,17 @@ void Validate::operator()( TreePtr<Node> context,
 
 void Validate::OnLink( TreePtr<Node> p, TreePtr<Node> c )
 {
-	if( TreePtr<Instance> pi = TreePtrCast<Instance>(p) )
+	if( TreePtr<Instance> pi = DynamicTreePtrCast<Instance>(p) )
 	{
 		if( c == pi->identifier )
 		    decl_refs[c]++;
 	}
-	else if( TreePtr<UserType> pu = TreePtrCast<UserType>(p) )
+	else if( TreePtr<UserType> pu = DynamicTreePtrCast<UserType>(p) )
 	{
 		if( c == pu->identifier )
 		    decl_refs[c]++;
 	}
-	else if( TreePtr<Label> pl = TreePtrCast<Label>(p) )
+	else if( TreePtr<Label> pl = DynamicTreePtrCast<Label>(p) )
 	{
 		if( c == pl->identifier )
 		    decl_refs[c]++;

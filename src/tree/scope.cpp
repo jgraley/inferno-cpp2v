@@ -18,7 +18,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
     Walk walkr(program);
 	FOREACH( const TreePtrInterface &n, walkr )
 	{
-    	if( TreePtr<Scope> s = TreePtrCast<Scope>((TreePtr<Node>)n) )
+    	if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
 	    FOREACH( TreePtr<Declaration> d, s->members )
 	    {            
 	        if( id == GetIdentifier( d ) ) 
@@ -30,16 +30,16 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	Walk walkc(program);
 	FOREACH( const TreePtrInterface &n, walkc )
 	{
-    	if( TreePtr<Compound> c = TreePtrCast<Compound>((TreePtr<Node>)n) )
+    	if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
 			FOREACH( TreePtr<Statement> s, c->statements )
 			{
-				if( TreePtr<Instance> d = TreePtrCast<Instance>(s) )
+				if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
 					if( id == GetIdentifier( d ) )
 						return c;
 			}
 	}
 	
-	if( TreePtr<SpecificIdentifier> sid = TreePtrCast<SpecificIdentifier>( id ) )
+	if( TreePtr<SpecificIdentifier> sid = DynamicTreePtrCast<SpecificIdentifier>( id ) )
 		ASSERT(0)("cannot get scope of ")( *sid );
 	else
 		ASSERT(0)("non-specific type ")(*id)(" - should not be doing GetScope() on these" );
