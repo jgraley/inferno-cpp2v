@@ -253,12 +253,12 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
     const TreePtrInterface *original_ptr = nullptr;
     if( plan.is_search )
     {
-        TreePtr< Stuff<Node> > stuff = dynamic_pointer_cast< Stuff<Node> >(original_pattern);
+        TreePtr< Stuff<Node> > stuff = TreePtrCast< Stuff<Node> >(original_pattern);
         ASSERT( stuff );
         original_pattern = *stuff->GetTerminus();
         original_ptr = stuff->GetTerminus();
     }
-    TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(original_pattern);
+    TreePtr< Overlay<Node> > overlay = TreePtrCast< Overlay<Node> >(original_pattern);
     if( overlay )
     {        
         sub_blocks.push_back( { plan.is_search?"search":"compare", 

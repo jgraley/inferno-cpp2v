@@ -25,6 +25,7 @@
 // So I've just hacked covariant returns to not be covariant whenever I get a problem (just returns same as
 // base class, is this "isovariant"? No, "invariant")
 //
+// See #268
 
 //    
 // This is the interface for TreePtr<>. It may be used like shared_ptr, with 
@@ -46,7 +47,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 	virtual explicit operator shared_ptr<Node>() const = 0; // TODO dangerous; see #201
 	virtual explicit operator TreePtr<Node>() const = 0; // TODO dangerous; see #201
 
-    virtual operator bool() const = 0; // for testing against nullptr
+    virtual explicit operator bool() const = 0; // for testing against nullptr
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual Node &operator *() const = 0; 
     virtual TreePtrInterface &operator=( const TreePtrInterface &o )
@@ -78,7 +79,7 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
     }
 
     template< typename OTHER >
-    inline TreePtr( const shared_ptr<OTHER> &o ) :
+    explicit inline TreePtr( const shared_ptr<OTHER> &o ) :
         shared_ptr<VALUE_TYPE>( o )
     {
     }
@@ -190,6 +191,14 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
     //    return SerialNumber::GetSerialString(); // avoiding the need for virtual inheritance
    // }
 };
+
+
+template<typename VALUE_TYPE>
+inline TreePtr<VALUE_TYPE> TreePtrCast( const TreePtrInterface &g )
+{
+    return TreePtr<VALUE_TYPE>::DynamicCast(g);
+}
+
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target

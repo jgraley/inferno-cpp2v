@@ -76,7 +76,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 	if( a == b )
 	    return false;
 	
-    const TreePtr<Record> recb = dynamic_pointer_cast<Record>(b); // 2 unrelated uses
+    const TreePtr<Record> recb = TreePtrCast<Record>(b); // 2 unrelated uses
 	
 	// Only ignore pointers and refs if we're checking dependency on a record; typedefs
 	// still apply (since you can't forward declare a typedef).

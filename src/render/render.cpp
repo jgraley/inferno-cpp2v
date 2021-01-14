@@ -120,7 +120,7 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	string ids;
 	if( id )
 	{
-		if( TreePtr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
+		if( TreePtr<SpecificIdentifier> ii = TreePtrCast<SpecificIdentifier>( id ) )
         {
             if( !unique.count(ii) > 0 )
                 return ERROR_UNKNOWN( SSPrintf("identifier %s undeclared", ii->GetRender().c_str() ) );
@@ -148,13 +148,13 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id )
 		return string(); // local scope
 	else if( scope == program )
 		return " ::";
-	else if( TreePtr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
+	else if( TreePtr<Enum> e = TreePtrCast<Enum>( scope ) ) // <- for enum
 		return RenderScopePrefix( e->identifier );    // omit scope for the enum itself
-	else if( TreePtr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
+	else if( TreePtr<Record> r = TreePtrCast<Record>( scope ) ) // <- for class, struct, union
 		return RenderScopedIdentifier( r->identifier ) + "::";
-	else if( dynamic_pointer_cast<CallableParams>( scope ) ||  // <- this is for params
-             dynamic_pointer_cast<Compound>( scope ) ||    // <- this is for locals in body
-             dynamic_pointer_cast<StatementExpression>( scope ) )    // <- this is for locals in body
+	else if( TreePtrCast<CallableParams>( scope ) ||  // <- this is for params
+             TreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
+             TreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
 		return string();
 	else
 		return ERROR_UNSUPPORTED( scope );
@@ -173,7 +173,7 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 {
 	bool ds;
 	unsigned width;
-	TreePtr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
+	TreePtr<SpecificInteger> ic = TreePtrCast<SpecificInteger>( type->width );
 	ASSERT(ic)("width must be integer");
 	width = ic->getLimitedValue();
 
@@ -187,9 +187,9 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 	// Produce signed or unsigned if required
 	// Note: literal strings can be converted to char * but not unsigned char * or signed char *
 	string s;
-	if( dynamic_pointer_cast< Signed >(type) && !ds )
+	if( TreePtrCast< Signed >(type) && !ds )
 		s = "signed ";
-	else if( dynamic_pointer_cast< Unsigned >(type) && ds )
+	else if( TreePtrCast< Unsigned >(type) && ds )
 		s = "unsigned ";
 
 	// Fix the width
@@ -226,7 +226,7 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 string Render::RenderFloatingType( TreePtr<Floating> type )
 {
 	string s;
-	TreePtr<SpecificFloatSemantics> sem = dynamic_pointer_cast<SpecificFloatSemantics>(type->semantics);
+	TreePtr<SpecificFloatSemantics> sem = TreePtrCast<SpecificFloatSemantics>(type->semantics);
 	ASSERT(sem);
 
 	if( &(const llvm::fltSemantics &)*sem == TypeDb::float_semantics )
@@ -251,31 +251,31 @@ string Render::RenderType( TreePtr<Type> type, string object, bool constant )
     string const_str = constant?"const ":"";
 
 	TRACE();
-	if( TreePtr<Integral> i = dynamic_pointer_cast< Integral >(type) )
+	if( TreePtr<Integral> i = TreePtrCast< Integral >(type) )
 		return const_str + RenderIntegralType( i, object );
-	if( TreePtr<Floating> f = dynamic_pointer_cast< Floating >(type) )
+	if( TreePtr<Floating> f = TreePtrCast< Floating >(type) )
 		return const_str + RenderFloatingType( f ) + sobject;
-	else if( dynamic_pointer_cast< Void >(type) )
+	else if( TreePtrCast< Void >(type) )
 		return const_str + "void" + sobject;
-	else if( dynamic_pointer_cast< Boolean >(type) )
+	else if( TreePtrCast< Boolean >(type) )
 		return const_str + "bool" + sobject;
-	else if( TreePtr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
+	else if( TreePtr<Constructor> c = TreePtrCast< Constructor >(type) )
 		return object + "(" + RenderDeclarationCollection(c, ", ", false) + ")" + const_str;
-	else if( TreePtr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
+	else if( TreePtr<Destructor> f = TreePtrCast< Destructor >(type) )
 		return object + "()" + const_str;
-	else if( TreePtr<Function> f = dynamic_pointer_cast< Function >(type) )
+	else if( TreePtr<Function> f = TreePtrCast< Function >(type) )
 		return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" + const_str );
-	else if( TreePtr<Process> f = dynamic_pointer_cast< Process >(type) )
+	else if( TreePtr<Process> f = TreePtrCast< Process >(type) )
 		return "void " + object + "()" + const_str;
-	else if( TreePtr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
+	else if( TreePtr<Pointer> p = TreePtrCast< Pointer >(type) )
 		return RenderType( p->destination, const_str + "(*" + object + ")", false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
-	else if( TreePtr<Reference> r = dynamic_pointer_cast< Reference >(type) )
+	else if( TreePtr<Reference> r = TreePtrCast< Reference >(type) )
 		return RenderType( r->destination, const_str + "(&" + object + ")" );
-	else if( TreePtr<Array> a = dynamic_pointer_cast< Array >(type) )
+	else if( TreePtr<Array> a = TreePtrCast< Array >(type) )
 		return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])", constant );
-	else if( TreePtr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
+	else if( TreePtr<Typedef> t = TreePtrCast< Typedef >(type) )
 		return const_str + RenderIdentifier(t->identifier) + sobject;
-	else if( TreePtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
+	else if( TreePtr<SpecificTypeIdentifier> ti = TreePtrCast< SpecificTypeIdentifier >(type) )
 		return const_str + RenderScopedIdentifier(ti) + sobject;
 	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
 		return const_str + sct->GetToken() + sobject;
@@ -308,11 +308,11 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
 	ASSERT(op);
     string s;
     Sequence<Expression>::iterator operands_it = operands.begin();
-	if( dynamic_pointer_cast< MakeArray >(op) )
+	if( TreePtrCast< MakeArray >(op) )
     {
 		s = "{ " + RenderOperandSequence( operands, ", ", false ) + " }";
     }
-	else if( dynamic_pointer_cast< ConditionalOperator >(op) )
+	else if( TreePtrCast< ConditionalOperator >(op) )
     {
 		s = RenderExpression( *operands_it, true ) + " ? ";
         ++operands_it;
@@ -320,14 +320,14 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
         ++operands_it;
         s += RenderExpression( *operands_it, true );           
     }
-	else if( dynamic_pointer_cast< Subscript >(op) )
+	else if( TreePtrCast< Subscript >(op) )
 	{
         s = RenderExpression( *operands_it, true ) + "[";
         ++operands_it;
 		s += RenderExpression( *operands_it, false ) + "]";
     }
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
-    else if( dynamic_pointer_cast<NODE>(op) ) \
+    else if( TreePtrCast<NODE>(op) ) \
 	{ \
 		s = RenderExpression( *operands_it, true ); \
 		s += TEXT; \
@@ -335,13 +335,13 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
 		s += RenderExpression( *operands_it, true ); \
     }
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( dynamic_pointer_cast<NODE>(op) ) \
+	else if( TreePtrCast<NODE>(op) ) \
     { \
 		s = TEXT; \
 		s += RenderExpression( *operands_it, true ); \
     }
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( dynamic_pointer_cast<NODE>(op) ) \
+	else if( TreePtrCast<NODE>(op) ) \
     { \
 		s = RenderExpression( *operands_it, true ); \
 		s += TEXT; \
@@ -371,7 +371,7 @@ string Render::RenderCall( TreePtr<Call> call )
 	// If CallableParams, generate some arguments, resolving the order using the original function type
 	TreePtr<Node> ctype = TypeOf::instance( program, call->callee );
 	ASSERT( ctype );
-	if( TreePtr<CallableParams> cp = dynamic_pointer_cast<CallableParams>(ctype) )
+	if( TreePtr<CallableParams> cp = TreePtrCast<CallableParams>(ctype) )
 		s += RenderMapInOrder( call, cp, ", ", false );
 
 	s += ")";
@@ -386,9 +386,9 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 	string before = bracketize_operator ? "(" : "";
 	string after = bracketize_operator ? ")" : "";
 
-	if( dynamic_pointer_cast< Uninitialised >(expression) )
+	if( TreePtrCast< Uninitialised >(expression) )
 		return string();
-    else if( TreePtr<StatementExpression> ce = dynamic_pointer_cast< StatementExpression >(expression) )
+    else if( TreePtr<StatementExpression> ce = TreePtrCast< StatementExpression >(expression) )
     {
         AutoPush< TreePtr<Scope> > cs( scope_stack, ce );
         string s = "({ ";
@@ -396,25 +396,25 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
         s += RenderSequence( ce->statements, "; ", true );
         return s + "})";
     }
-	else if( TreePtr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(expression) )
+	else if( TreePtr<SpecificLabelIdentifier> li = TreePtrCast< SpecificLabelIdentifier >(expression) )
 		return before +
 			   "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
 			   after;
-	else if( TreePtr<InstanceIdentifier> ii = dynamic_pointer_cast< InstanceIdentifier >(expression) )
+	else if( TreePtr<InstanceIdentifier> ii = TreePtrCast< InstanceIdentifier >(expression) )
 		return RenderScopedIdentifier( ii );
-	else if( TreePtr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
+	else if( TreePtr<SizeOf> pot = TreePtrCast< SizeOf >(expression) )
 		return before +
 			   "sizeof(" + RenderType( pot->operand, "" ) + ")" +
 			   after;
-	else if( TreePtr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
+	else if( TreePtr<AlignOf> pot = TreePtrCast< AlignOf >(expression) )
 		return before +
 			   "alignof(" + RenderType( pot->operand, "" ) + ")" +
 			   after;
-	else if( TreePtr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(expression) )
+	else if( TreePtr<NonCommutativeOperator> nco = TreePtrCast< NonCommutativeOperator >(expression) )
 		return before +
 			   RenderOperator( nco, nco->operands ) +
 			   after;
-	else if( TreePtr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(expression) )
+	else if( TreePtr<CommutativeOperator> co = TreePtrCast< CommutativeOperator >(expression) )
 	{
 		Sequence<Expression> seq_operands;
 		// Operands are in collection, so sort them and put them in a sequence
@@ -424,47 +424,47 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 			   RenderOperator( co, seq_operands ) +
 			   after;
 	}
-	else if( TreePtr<Call> c = dynamic_pointer_cast< Call >(expression) )
+	else if( TreePtr<Call> c = TreePtrCast< Call >(expression) )
 		return before +
 			   RenderCall( c ) +
 			   after;
-	else if( TreePtr<New> n = dynamic_pointer_cast< New >(expression) )
+	else if( TreePtr<New> n = TreePtrCast< New >(expression) )
 		return before +
-			   (dynamic_pointer_cast<Global>(n->global) ? "::" : "") +
+			   (TreePtrCast<Global>(n->global) ? "::" : "") +
 			   "new(" + RenderOperandSequence( n->placement_arguments, ", ", false ) + ") " +
 			   RenderType( n->type, "" ) +
 			   (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments, ", ", false ) + ")" ) +
 			   after;
-	else if( TreePtr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
+	else if( TreePtr<Delete> d = TreePtrCast< Delete >(expression) )
 		return before +
-			   (dynamic_pointer_cast<Global>(d->global) ? "::" : "") +
+			   (TreePtrCast<Global>(d->global) ? "::" : "") +
 			   "delete" +
-			   (dynamic_pointer_cast<DeleteArray>(d->array) ? "[]" : "") +
+			   (TreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
 			   " " + RenderExpression( d->pointer, true ) +
 			   after;
-	else if( TreePtr<Lookup> a = dynamic_pointer_cast< Lookup >(expression) )
+	else if( TreePtr<Lookup> a = TreePtrCast< Lookup >(expression) )
 		return before +
 			   RenderExpression( a->base, true ) + "." +
 			   RenderScopedIdentifier( a->member ) +
 			   after;
-	else if( TreePtr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
+	else if( TreePtr<Cast> c = TreePtrCast< Cast >(expression) )
 		return before +
 			   "(" + RenderType( c->type, "" ) + ")" +
 			   RenderExpression( c->operand, false ) +
 			   after;
-	else if( TreePtr<MakeRecord> ro = dynamic_pointer_cast< MakeRecord >(expression) )
+	else if( TreePtr<MakeRecord> ro = TreePtrCast< MakeRecord >(expression) )
 		return before +
 			   RenderMakeRecord( ro ) +
 			   after;
-	else if( TreePtr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
+	else if( TreePtr<Literal> l = TreePtrCast< Literal >(expression) )
 		return before +
 			   RenderLiteral( l ) +
 			   after;
-	else if( dynamic_pointer_cast< This >(expression) )
+	else if( TreePtrCast< This >(expression) )
 		return before +
 			   "this" +
 			   after;
-	else if( TreePtr<DeltaCount> dc = dynamic_pointer_cast<DeltaCount>(expression) ) 
+	else if( TreePtr<DeltaCount> dc = TreePtrCast<DeltaCount>(expression) ) 
 	    return before +
 	           dc->GetToken() + "()" +
 	           after;
@@ -478,7 +478,7 @@ string Render::RenderMakeRecord( TreePtr<MakeRecord> ro )
 	string s;
 
 	// Get the record
-	TreePtr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
+	TreePtr<TypeIdentifier> id = TreePtrCast<TypeIdentifier>(ro->type);
 	ASSERT(id);
 	TreePtr<Record> r = GetRecordDeclaration(program, id);
 
@@ -511,10 +511,10 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 	FOREACH( TreePtr<Declaration> d, sd )
 	{
 		// We only care about instances...
-		if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+		if( TreePtr<Instance> i = TreePtrCast<Instance>( d ) )
 		{
 			// ...and not function instances
-			if( !dynamic_pointer_cast<Callable>( i->type ) )
+			if( !TreePtrCast<Callable>( i->type ) )
 			{
 				// search init for matching member (TODO could avoid O(n^2) by exploiting the map)
 				FOREACH( TreePtr<MapOperand> mi, ro->operands )
@@ -538,11 +538,11 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 
 string Render::RenderAccess( TreePtr<AccessSpec> current_access )
 {
-	if( dynamic_pointer_cast<Public>( current_access ) )
+	if( TreePtrCast<Public>( current_access ) )
 		return "public";
-	else if( dynamic_pointer_cast<Private>( current_access ) )
+	else if( TreePtrCast<Private>( current_access ) )
 		return "private";
-	else if( dynamic_pointer_cast<Protected>( current_access ) )
+	else if( TreePtrCast<Protected>( current_access ) )
 		return "protected";
 	else
 		return ERROR_UNKNOWN("current_access spec");
@@ -551,20 +551,20 @@ string Render::RenderAccess( TreePtr<AccessSpec> current_access )
 
 string Render::RenderStorage( TreePtr<Instance> st )
 {
-	if( dynamic_pointer_cast<Program>( scope_stack.top() ) )
+	if( TreePtrCast<Program>( scope_stack.top() ) )
 		return ""; // at top-level scope, everything is set to static, but don't actually output the word
-	else if( dynamic_pointer_cast<Static>( st ) )
+	else if( TreePtrCast<Static>( st ) )
 		return "static ";
-	else if( dynamic_pointer_cast<Automatic>( st ) )
+	else if( TreePtrCast<Automatic>( st ) )
 		return "auto ";
-	else if( dynamic_pointer_cast<Temporary>( st ) )
+	else if( TreePtrCast<Temporary>( st ) )
 		return "/*temp*/ ";
-	else if( TreePtr<Field> no = dynamic_pointer_cast<Field>( st ) )
+	else if( TreePtr<Field> no = TreePtrCast<Field>( st ) )
 	{
 		TreePtr<Virtuality> v = no->virt;
-		if( dynamic_pointer_cast<Virtual>( v ) )
+		if( TreePtrCast<Virtual>( v ) )
 			return "virtual ";
-		else if( dynamic_pointer_cast<NonVirtual>( v ) )
+		else if( TreePtrCast<NonVirtual>( v ) )
 			return "";
 		else
 			return ERROR_UNKNOWN("virtualness");
@@ -578,7 +578,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 {
 	FOREACH( TreePtr<Statement> s, body )
 	{
-		if( TreePtr<Call> o = dynamic_pointer_cast< Call >(s) )
+		if( TreePtr<Call> o = TreePtrCast< Call >(s) )
 		{
 			if( TypeOf::instance.IsConstructorCall( program, o ) )
 			{
@@ -600,11 +600,11 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
 	ASSERT(o->type);
 
-	if( TreePtr<Static> st = dynamic_pointer_cast<Static>(o) )
-		if( dynamic_pointer_cast<Const>(st->constancy) )
+	if( TreePtr<Static> st = TreePtrCast<Static>(o) )
+		if( TreePtrCast<Const>(st->constancy) )
 			constant = true;
-	if( TreePtr<Field> f = dynamic_pointer_cast<Field>(o) )
-		if( dynamic_pointer_cast<Const>(f->constancy) )
+	if( TreePtr<Field> f = TreePtrCast<Field>(o) )
+		if( TreePtrCast<Const>(f->constancy) )
             constant = true;
 
 	if( showstorage )
@@ -615,11 +615,11 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 	if( showscope )
 		name += RenderScopePrefix(o->identifier);
 
-	TreePtr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
-	TreePtr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
+	TreePtr<Constructor> con = TreePtrCast<Constructor>(o->type);
+	TreePtr<Destructor> de = TreePtrCast<Destructor>(o->type);
 	if( con || de )
 	{
-		TreePtr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o->identifier ) );
+		TreePtr<Record> rec = TreePtrCast<Record>( GetScope( program, o->identifier ) );
 		ASSERT( rec );        
 		name += (de ? "~" : "");
 		name += RenderIdentifier(rec->identifier);
@@ -634,20 +634,20 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 	else
 		s = name;
 
-	bool callable = (bool)dynamic_pointer_cast<Callable>(o->type);
+	bool callable = (bool)TreePtrCast<Callable>(o->type);
 
     // If object is really a module, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderDeclarationCollection()
-	if( !dynamic_pointer_cast<Field>(o) )
-	    if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+	if( !TreePtrCast<Field>(o) )
+	    if( TreePtr<TypeIdentifier> tid = TreePtrCast<TypeIdentifier>(o->type) )
 	        if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
-	            if( dynamic_pointer_cast<Module>(r) )
+	            if( TreePtrCast<Module>(r) )
 	            {
 	                s += "(\"" + RenderIdentifier(o->identifier) + "\")" + sep;
 	                return s;
 	            }
 	
-	if( !showinit || dynamic_pointer_cast<Uninitialised>(o->initialiser) )
+	if( !showinit || TreePtrCast<Uninitialised>(o->initialiser) )
 	{
 		// Don't render any initialiser
 		s += sep;
@@ -661,12 +661,12 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		// Statement there - this is because we will wrangle with them later
 		Sequence<Statement> code;
 		Collection<Declaration> members;
-		if( TreePtr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
+		if( TreePtr<Compound> comp = TreePtrCast<Compound>(o->initialiser) )
 		{
 			members = comp->members;
 			code = comp->statements;
 		}
-		else if( TreePtr<Statement> st = dynamic_pointer_cast<Statement>(o->initialiser) )
+		else if( TreePtr<Statement> st = TreePtrCast<Statement>(o->initialiser) )
 			code.push_back( st );
 		else
 			s += ERROR_UNSUPPORTED(o->initialiser);
@@ -691,7 +691,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
     }
 	else
 	{
-		if( TreePtr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
+		if( TreePtr<Expression> ei = TreePtrCast<Expression>( o->initialiser ) )
 		{
 			// Render expression with an assignment
 			AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
@@ -713,16 +713,16 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
 bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 {
-	bool isfunc = !!dynamic_pointer_cast<Callable>( o->type );
-	bool isnumber = !!dynamic_pointer_cast<Numeric>( o->type );
-    if( TreePtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
-        if( dynamic_pointer_cast<Enum>( GetRecordDeclaration(program, ti) ) )
+	bool isfunc = !!TreePtrCast<Callable>( o->type );
+	bool isnumber = !!TreePtrCast<Numeric>( o->type );
+    if( TreePtr<TypeIdentifier> ti = TreePtrCast<TypeIdentifier>(o->type) )
+        if( TreePtrCast<Enum>( GetRecordDeclaration(program, ti) ) )
             isnumber = 1; // enum is like a number        
 	bool split_var = false;
-	if( TreePtr<Static> s = dynamic_pointer_cast<Static>(o) )
-		if( dynamic_pointer_cast<NonConst>(s->constancy) || !isnumber )
+	if( TreePtr<Static> s = TreePtrCast<Static>(o) )
+		if( TreePtrCast<NonConst>(s->constancy) || !isnumber )
 			split_var = true;
-	return ( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
+	return ( TreePtrCast<Record>( scope_stack.top() ) &&
 			   split_var ) || 
 			   isfunc;
 }
@@ -738,7 +738,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 	TreePtr<AccessSpec> this_access;
 
 	// Decide access spec for this declaration (explicit if instance, otherwise force to Public)
-	if( TreePtr<Field> f = dynamic_pointer_cast<Field>(declaration) )
+	if( TreePtr<Field> f = TreePtrCast<Field>(declaration) )
 		this_access = f->access;
 	else
 		this_access = MakeTreePtr<Public>();
@@ -751,7 +751,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		*current_access = this_access;
 	}
 
-	if( TreePtr<Instance> o = dynamic_pointer_cast<Instance>(declaration) )
+	if( TreePtr<Instance> o = TreePtrCast<Instance>(declaration) )
 	{
 		if( ShouldSplitInstance(o) )
 		{
@@ -767,32 +767,32 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 			s += RenderInstance( o, sep, showtype, showtype, shownonfuncinit, false );
 		}
 	}
-	else if( TreePtr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
+	else if( TreePtr<Typedef> t = TreePtrCast< Typedef >(declaration) )
 	{
 		s += "typedef " + RenderType( t->type, RenderIdentifier(t->identifier) ) + sep;
 	}
-	else if( TreePtr<Record> r = dynamic_pointer_cast< Record >(declaration) )
+	else if( TreePtr<Record> r = TreePtrCast< Record >(declaration) )
 	{
 		TreePtr<AccessSpec> a;
 		bool showtype=true;
 		string sep2=";\n";
 		shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(r);
-		if( dynamic_pointer_cast< Class >(r) || scr )
+		if( TreePtrCast< Class >(r) || scr )
 		{
 			s += "class";
 			a = TreePtr<Private>(new Private);
 		}
-		else if( dynamic_pointer_cast< Struct >(r) )
+		else if( TreePtrCast< Struct >(r) )
 		{
 			s += "struct";
 			a = TreePtr<Public>(new Public);
 		}
-		else if( dynamic_pointer_cast< Union >(r) )
+		else if( TreePtrCast< Union >(r) )
 		{
 			s += "union";
 			a = TreePtr<Public>(new Public);
 		}
-		else if( dynamic_pointer_cast< Enum >(r) )
+		else if( TreePtrCast< Enum >(r) )
 		{
 			s += "enum";
 			a = TreePtr<Public>(new Public);
@@ -808,7 +808,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		if( !force_incomplete )
 		{
 			// Base classes
-			if( TreePtr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
+			if( TreePtr<InheritanceRecord> ir = TreePtrCast< InheritanceRecord >(declaration) )
 			{
 				if( !ir->bases.empty() || scr )
 				{
@@ -840,7 +840,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 
 		s += ";\n";
 	}
-	else if( TreePtr<Label> l = dynamic_pointer_cast<Label>(declaration) )
+	else if( TreePtr<Label> l = TreePtrCast<Label>(declaration) )
 		return RenderIdentifier(l->identifier) + ":;\n"; // need ; after a label in case last in compound block
 	else
 		s += ERROR_UNSUPPORTED(declaration);
@@ -856,9 +856,9 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 	if( !statement )
 		return sep;
 	//printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
-	if( TreePtr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
+	if( TreePtr<Declaration> d = TreePtrCast< Declaration >(statement) )
 		return RenderDeclaration( d, sep );
-	else if( TreePtr<Compound> c = dynamic_pointer_cast< Compound >(statement) )
+	else if( TreePtr<Compound> c = TreePtrCast< Compound >(statement) )
 	{
 		AutoPush< TreePtr<Scope> > cs( scope_stack, c );
 		string s = "{\n";
@@ -866,74 +866,74 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		s += RenderSequence( c->statements, ";\n", true );
 		return s + "}\n";
 	}
-	else if( TreePtr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
+	else if( TreePtr<Expression> e = TreePtrCast< Expression >(statement) )
 		return RenderExpression(e) + sep;
-	else if( TreePtr<Return> es = dynamic_pointer_cast<Return>(statement) )
+	else if( TreePtr<Return> es = TreePtrCast<Return>(statement) )
 		return "return " + RenderExpression(es->return_value) + sep;
-	else if( TreePtr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
+	else if( TreePtr<Goto> g = TreePtrCast<Goto>(statement) )
 	{
-		if( TreePtr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(g->destination) )
+		if( TreePtr<SpecificLabelIdentifier> li = TreePtrCast< SpecificLabelIdentifier >(g->destination) )
 			return "goto " + RenderIdentifier(li) + sep;  // regular goto
 		else
 			return "goto *(" + RenderExpression(g->destination) + ")" + sep; // goto-a-variable (GCC extension)
 	}
-	else if( TreePtr<If> i = dynamic_pointer_cast<If>(statement) )
+	else if( TreePtr<If> i = TreePtrCast<If>(statement) )
 	{
 		string s;
 		s += "if( " + RenderExpression(i->condition) + " )\n";
-		bool sub_if = !!dynamic_pointer_cast<If>(i->body);
+		bool sub_if = !!TreePtrCast<If>(i->body);
 		if( sub_if )
 			 s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
 	    s += RenderStatement(i->body, ";\n");
 		if( sub_if )
 			 s += "}\n";
-		if( !dynamic_pointer_cast<Nop>(i->else_body) )  // Nop means no else clause
+		if( !TreePtrCast<Nop>(i->else_body) )  // Nop means no else clause
 			s += "else\n" +
 				 RenderStatement(i->else_body, ";\n");
 		return s;
 	}
-	else if( TreePtr<While> w = dynamic_pointer_cast<While>(statement) )
+	else if( TreePtr<While> w = TreePtrCast<While>(statement) )
 		return "while( " + RenderExpression(w->condition) + " )\n" +
 			   RenderStatement(w->body, ";\n");
-	else if( TreePtr<Do> d = dynamic_pointer_cast<Do>(statement) )
+	else if( TreePtr<Do> d = TreePtrCast<Do>(statement) )
 		return "do\n" +
 			   RenderStatement(d->body, ";\n") +
 			   "while( " + RenderExpression(d->condition) + " )" + sep;
-	else if( TreePtr<For> f = dynamic_pointer_cast<For>(statement) )
+	else if( TreePtr<For> f = TreePtrCast<For>(statement) )
 		return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderExpression(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
 			   RenderStatement(f->body, ";\n");
-	else if( TreePtr<Switch> s = dynamic_pointer_cast<Switch>(statement) )
+	else if( TreePtr<Switch> s = TreePtrCast<Switch>(statement) )
 		return "switch( " + RenderExpression(s->condition) + " )\n" +
 			   RenderStatement(s->body, ";\n");
-	else if( TreePtr<Case> c = dynamic_pointer_cast<Case>(statement) )
+	else if( TreePtr<Case> c = TreePtrCast<Case>(statement) )
 		return "case " + RenderExpression(c->value) + ":;\n";
-	else if( TreePtr<RangeCase> rc = dynamic_pointer_cast<RangeCase>(statement) )
+	else if( TreePtr<RangeCase> rc = TreePtrCast<RangeCase>(statement) )
 		return "case " + RenderExpression(rc->value_lo) + " ... " + RenderExpression(rc->value_hi) + ":\n";
-	else if( dynamic_pointer_cast<Default>(statement) )
+	else if( TreePtrCast<Default>(statement) )
 		return "default:;\n";
-	else if( dynamic_pointer_cast<Continue>(statement) )
+	else if( TreePtrCast<Continue>(statement) )
 		return "continue" + sep;
-	else if( dynamic_pointer_cast<Break>(statement) )
+	else if( TreePtrCast<Break>(statement) )
 		return "break" + sep;
-	else if( dynamic_pointer_cast<Nop>(statement) )
+	else if( TreePtrCast<Nop>(statement) )
 		return sep;
-	else if( TreePtr<WaitDynamic> c = dynamic_pointer_cast<WaitDynamic>(statement) ) 
+	else if( TreePtr<WaitDynamic> c = TreePtrCast<WaitDynamic>(statement) ) 
 	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
-	else if( TreePtr<WaitStatic> c = dynamic_pointer_cast<WaitStatic>(statement) ) 
+	else if( TreePtr<WaitStatic> c = TreePtrCast<WaitStatic>(statement) ) 
 	    return c->GetToken() + "();\n";
-	else if( TreePtr<WaitDelta> c = dynamic_pointer_cast<WaitDelta>(statement) )
+	else if( TreePtr<WaitDelta> c = TreePtrCast<WaitDelta>(statement) )
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
-	else if( TreePtr<NextTriggerDynamic> c = dynamic_pointer_cast<NextTriggerDynamic>(statement) ) 
+	else if( TreePtr<NextTriggerDynamic> c = TreePtrCast<NextTriggerDynamic>(statement) ) 
 	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
-	else if( TreePtr<NextTriggerStatic> c = dynamic_pointer_cast<NextTriggerStatic>(statement) ) 
+	else if( TreePtr<NextTriggerStatic> c = TreePtrCast<NextTriggerStatic>(statement) ) 
 	    return c->GetToken() + "();\n";
-	else if( TreePtr<NextTriggerDelta> c = dynamic_pointer_cast<NextTriggerDelta>(statement) ) 
+	else if( TreePtr<NextTriggerDelta> c = TreePtrCast<NextTriggerDelta>(statement) ) 
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
-	else if( TreePtr<TerminationFunction> tf = dynamic_pointer_cast<TerminationFunction>(statement) )
+	else if( TreePtr<TerminationFunction> tf = TreePtrCast<TerminationFunction>(statement) )
 		return tf->GetToken() + "( " + RenderExpression(tf->code) + " );\n";
-	else if( TreePtr<NotifyImmediate> n = dynamic_pointer_cast<NotifyImmediate>(statement) )
+	else if( TreePtr<NotifyImmediate> n = TreePtrCast<NotifyImmediate>(statement) )
 		return RenderExpression( n->event, true ) + "." + n->GetToken() + "();\n";
-	else if( TreePtr<NotifyDelta> n = dynamic_pointer_cast<NotifyDelta>(statement) )
+	else if( TreePtr<NotifyDelta> n = TreePtrCast<NotifyDelta>(statement) )
 		return RenderExpression( n->event, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
     else
 		return ERROR_UNSUPPORTED(statement);
@@ -957,9 +957,9 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 		//TRACE("%d %p\n", i, &i);
 		string sep = (separate_last || it!=last_it) ? separator : "";
 		TreePtr<ELEMENT> pe = *it;
-		if( TreePtr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
+		if( TreePtr<Declaration> d = TreePtrCast< Declaration >(pe) )
 			s += RenderDeclaration( d, sep, init_access ? &init_access : nullptr, showtype, false, shownonfuncinit );
-		else if( TreePtr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
+		else if( TreePtr<Statement> st = TreePtrCast< Statement >(pe) )
 			s += RenderStatement( st, sep );
 		else
 			s += ERROR_UNSUPPORTED(pe);
@@ -993,7 +993,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     string s;
     
     // SystemC module, we must produce a constructor in SC style, do this as inline
-    if( !dynamic_pointer_cast<Public>(*access) )
+    if( !TreePtrCast<Public>(*access) )
     {
         s += "public:\n";
         *access = MakeTreePtr<Public>();// note that we left the access as public
@@ -1005,10 +1005,10 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     {
         // Bodge an init list that names any fields we have that are modules
         // and initialises any fields with initialisers
-        if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
-            if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(f->type) )
+        if( TreePtr<Field> f = TreePtrCast<Field>(pd) )
+            if( TreePtr<TypeIdentifier> tid = TreePtrCast<TypeIdentifier>(f->type) )
                 if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
-                    if( dynamic_pointer_cast<Module>(r) )
+                    if( TreePtrCast<Module>(r) )
                     {
                         if( first )
                             s += " :";
@@ -1022,13 +1022,13 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
         // Where data members are initialised, generate the init into the init list. We will 
         // inhibit rendering of these inits in the module decls. TODO inconsistent 
         // with normal C++ constructors where the inits should already be in the correct place.
-        if( TreePtr<Field> i = dynamic_pointer_cast<Field>(pd) )
+        if( TreePtr<Field> i = TreePtrCast<Field>(pd) )
         {
             TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
-                    (int)(bool)dynamic_pointer_cast<Callable>(i->type),
-                    (int)(bool)dynamic_pointer_cast<Uninitialised>(i->initialiser) );                   
+                    (int)(bool)TreePtrCast<Callable>(i->type),
+                    (int)(bool)TreePtrCast<Uninitialised>(i->initialiser) );                   
         
-            if( !dynamic_pointer_cast<Callable>(i->type) && !dynamic_pointer_cast<Uninitialised>(i->initialiser) )
+            if( !TreePtrCast<Callable>(i->type) && !TreePtrCast<Uninitialised>(i->initialiser) )
             {                   
                 if( first )
                     s += " :";
@@ -1043,8 +1043,8 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     }    
     s += "\n{\n";
     FOREACH( TreePtr<Node> pd, sorted_members )
-        if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
-            if( TreePtr<Process> r = dynamic_pointer_cast<Process>(f->type) )
+        if( TreePtr<Field> f = TreePtrCast<Field>(pd) )
+            if( TreePtr<Process> r = TreePtrCast<Process>(f->type) )
                 s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";
     s += "}\n";
     
@@ -1066,14 +1066,14 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	// Emit an incomplete for each record
     string s;
 	FOREACH( TreePtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
-		if( TreePtr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record
-			if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum
+		if( TreePtr<Record> r = TreePtrCast<Record>(pd) ) // is a record
+			if( !TreePtrCast<Enum>(r) ) // but not an enum
 				s += RenderDeclaration( r, separator, init_access ? &init_access : nullptr, showtype, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
     // it is an elaboration mechanism, not funcitonal.
-    TreePtr<Module> sc_module = dynamic_pointer_cast<Module>(sd);
+    TreePtr<Module> sc_module = TreePtrCast<Module>(sd);
     if( sc_module )
         s += RenderModuleCtor( sc_module, &init_access );
 

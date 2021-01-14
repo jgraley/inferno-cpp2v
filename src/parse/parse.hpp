@@ -60,7 +60,7 @@ public:
 		}
 		if (!context)
 			context = *proot;
-		TreePtr<Scope> root_scope = dynamic_pointer_cast<Scope> (*proot);
+		TreePtr<Scope> root_scope = TreePtrCast<Scope> (*proot);
 		ASSERT(root_scope)("Can only parse into a scope");
 
 		clang::FileManager fm;
@@ -222,10 +222,10 @@ private:
 		clang::Action::TypeTy *isTypeName(clang::IdentifierInfo &II,
 				clang::Scope *S, const clang::CXXScopeSpec *SS)
 		{
-			TreePtr<Node> n = ident_track.TryGet(&II, FromCXXScope(SS));
+			TreePtr<Node> n( ident_track.TryGet(&II, FromCXXScope(SS)) );
 			if (n)
 			{
-				TreePtr<UserType> t = dynamic_pointer_cast<UserType> (n);
+				TreePtr<UserType> t = TreePtrCast<UserType> (n);
 				if (t)
 					return hold_type.ToRaw(t->identifier);
 			}
@@ -245,12 +245,12 @@ private:
 		    TRACE();
 			ident_track.SeenScope(S);
 
-			TreePtr<Node> cur = ident_track.GetCurrent();
-			if (!dynamic_pointer_cast<Record> (cur))
+			TreePtr<Node> cur( ident_track.GetCurrent() );
+			if (!TreePtrCast<Record> (cur))
 				return false; // not even in a record
 
 			TreePtr<Node> cxxs = FromCXXScope(SS);
-			TreePtr<Node> n = ident_track.TryGet(&II, cxxs);
+			TreePtr<Node> n( ident_track.TryGet(&II, cxxs) );
 			return n == cur;
 		}
 
@@ -306,7 +306,7 @@ private:
 			{
 				TreePtr<Declaration> d = hold_decl.FromRaw(
 						fchunk.ArgInfo[i].Param);
-				TreePtr<Instance> inst = dynamic_pointer_cast<Instance> (d);
+				TreePtr<Instance> inst = TreePtrCast<Instance> (d);
 				ASSERT( inst );
 				backing_ordering[p].push_back(inst);
 				p->members.insert(inst);
@@ -373,7 +373,7 @@ private:
 					TRACE("struct/union/class/enum\n");
 					// Disgustingly, clang casts the DeclTy returned from ActOnTag() to
 					// a TypeTy.
-					return dynamic_pointer_cast<Record> (hold_decl.FromRaw(
+					return TreePtrCast<Record> (hold_decl.FromRaw(
 							DS.getTypeRep()))->identifier;
 					break;
 				default:
@@ -643,7 +643,7 @@ private:
 			TreePtr<Node> cxxs = FromCXXScope(&SS);
 
 			// Use C++ scope if non-nullptr; do not recurse (=precise match only)
-			TreePtr<Node> found_n = ident_track.TryGet(ID, cxxs, recurse);
+			TreePtr<Node> found_n( ident_track.TryGet(ID, cxxs, recurse) );
 			//TRACE("Looked for %s, result %p (%p)\n", ID->getName(),
 			//		found_n.get(), cxxs.get());
 			if (!found_n)
@@ -654,7 +654,7 @@ private:
 			}
 
 			TreePtr<Declaration> found_d =
-					dynamic_pointer_cast<Declaration> (found_n);
+					TreePtrCast<Declaration> (found_n);
 			// If the found match is not a declaration, cast will fail and we'll return nullptr for "not found"
 			return found_d;
 		}
@@ -766,7 +766,7 @@ private:
 		    TRACE();
 			TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
 
-			TreePtr<Instance> o = dynamic_pointer_cast<Instance> (d);
+			TreePtr<Instance> o = TreePtrCast<Instance> (d);
 			ASSERT( o ); // Only objects can be initialised
 
 			o->initialiser = FromClang(Init);
@@ -774,8 +774,8 @@ private:
 			// At this point, when we have the instance (and hence the type) and the initialiser
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
-			if ( TreePtr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(o->initialiser) )
-				if ( TreePtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+			if ( TreePtr<MakeArray> ai = TreePtrCast<MakeArray>(o->initialiser) )
+				if ( TreePtr<TypeIdentifier> ti = TreePtrCast<TypeIdentifier>(o->type) )
 					if ( TreePtr<Record> r = GetRecordDeclaration(all_decls, ti) )
 						o->initialiser = CreateRecordLiteralFromArrayLiteral(
 								ai, r);
@@ -792,7 +792,7 @@ private:
         {
 		    TRACE();
 			TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
-			TreePtr<Instance> o = dynamic_pointer_cast<Instance> (d);
+			TreePtr<Instance> o = TreePtrCast<Instance> (d);
             TRACE("Ignoring C++ direct initialiser for SC Modules, not supported in general\n"); // TODO try the code below...
 		   // TreePtr<Instance> cm = GetConstructor( d->type );
 		   // ASSERT( cm );
@@ -840,7 +840,7 @@ private:
 	virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D)
 	{
 		//TRACE("FnBodyScope S%p\n", FnBodyScope);
-		TreePtr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
+		TreePtr<Instance> o = TreePtrCast<Instance>(hold_decl.FromRaw(D));
 		ASSERT(o);		
 		
 		// Note: this line was commented out as of mid August, but I'm sure I put it 
@@ -848,7 +848,7 @@ private:
 		// to fix scopes being popped without being pushed.
 		ident_track.SeenScope( FnBodyScope );
 
-		if( TreePtr<CallableParams> pp = dynamic_pointer_cast<CallableParams>( o->type ) )
+		if( TreePtr<CallableParams> pp = TreePtrCast<CallableParams>( o->type ) )
 		AddParamsToScope( pp, FnBodyScope );
 
 		// This is just a junk scope because we will not use scopes collected
@@ -865,19 +865,19 @@ private:
 	virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body)
 	{
 		TRACE();
-		TreePtr<Instance> o( dynamic_pointer_cast<Instance>( hold_decl.FromRaw(Decl) ) );
+		TreePtr<Instance> o( TreePtrCast<Instance>( hold_decl.FromRaw(Decl) ) );
 		ASSERT(o);
-		TreePtr<Compound> cb( dynamic_pointer_cast<Compound>( FromClang( Body ) ) );
+		TreePtr<Compound> cb( TreePtrCast<Compound>( FromClang( Body ) ) );
 		ASSERT(cb); // function body must be a scope or 0
 
-		if( dynamic_pointer_cast<Uninitialised>( o->initialiser ) )
+		if( TreePtrCast<Uninitialised>( o->initialiser ) )
 		o->initialiser = cb;
-		else if( TreePtr<Compound> c = dynamic_pointer_cast<Compound>( o->initialiser ) )
+		else if( TreePtr<Compound> c = TreePtrCast<Compound>( o->initialiser ) )
 		c->statements = c->statements + cb->statements;
 		else
 		ASSERTFAIL("wrong thing in function instance");
 
-		TRACE("finish fn %d statements %d total\n", cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
+		TRACE("finish fn %d statements %d total\n", cb->statements.size(), (TreePtrCast<Compound>(o->initialiser))->statements.size() );
 
 		inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
         ident_track.PopScope(nullptr);
@@ -887,7 +887,7 @@ private:
 	virtual OwningStmtResult ActOnExprStmt(ExprArg Expr)
 	{
 		// TODO most of this is now unnecessary
-		if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>( FromClang(Expr) ) )
+		if( TreePtr<Expression> e = TreePtrCast<Expression>( FromClang(Expr) ) )
 		{
 			return ToStmt( e );
 		}
@@ -919,9 +919,9 @@ private:
 			const clang::CXXScopeSpec *SS = 0 )
 	{
 	    //TRACE("S%p\n", S);
-		TreePtr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
+		TreePtr<Node> n( ident_track.Get( &II, FromCXXScope( SS ) ) );
 		TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
-		TreePtr<Instance> o = dynamic_pointer_cast<Instance>( n );
+		TreePtr<Instance> o = TreePtrCast<Instance>( n );
 		ASSERT( o );
 		return hold_expr.ToRaw( o->identifier );
 	}
@@ -1003,12 +1003,12 @@ private:
 #include "tree/operator_db.inc"
 		}
 		ASSERT( o );
-		if( TreePtr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(o) )
+		if( TreePtr<NonCommutativeOperator> nco = TreePtrCast< NonCommutativeOperator >(o) )
 		{
 			nco->operands.push_back( hold_expr.FromRaw(LHS) );
 			nco->operands.push_back( hold_expr.FromRaw(RHS) );
 		}
-		else if( TreePtr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(o) )
+		else if( TreePtr<CommutativeOperator> co = TreePtrCast< CommutativeOperator >(o) )
 		{
 			co->operands.insert( hold_expr.FromRaw(LHS) );
 			co->operands.insert( hold_expr.FromRaw(RHS) );
@@ -1075,7 +1075,7 @@ private:
 
 		// If CallableParams, fill in the args map based on the supplied args and original function type
 		TreePtr<Node> t = TypeOf::instance(all_decls, callee);
-		if( TreePtr<CallableParams> p = dynamic_pointer_cast<CallableParams>(t) )
+		if( TreePtr<CallableParams> p = TreePtrCast<CallableParams>(t) )
 		    PopulateMapOperator( c, args, p );
 
 		return c;
@@ -1102,7 +1102,7 @@ private:
 
 	void AddDeclarationToCompound( TreePtr<Compound> s, TreePtr<Declaration> d )
 	{
-		if( TreePtr<DeclarationChain> dc = dynamic_pointer_cast<DeclarationChain>( d ) )
+		if( TreePtr<DeclarationChain> dc = TreePtrCast<DeclarationChain>( d ) )
 		{
 		    TRACE("Walking declaration chain\n");
 		    AddDeclarationToCompound( s, dc->first );
@@ -1110,7 +1110,7 @@ private:
 		    return;
 		}
  		 
-		if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+		if( TreePtr<Instance> i = TreePtrCast<Instance>(d) )
 		    AddStatementToCompound( s, i ); // Instances can have inits that require being in order, so append as a statement
 		else
 		    s->members.insert( d );
@@ -1118,14 +1118,14 @@ private:
 	
 	void AddStatementToCompound( TreePtr<Compound> s, TreePtr<Statement> st )
 	{
-		/* if( TreePtr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>( st ) )
+		/* if( TreePtr<ParseTwin> pt = TreePtrCast<ParseTwin>( st ) )
 		 {
 		 AddStatementToCompound( s, pt->d1 );
 		 AddStatementToCompound( s, pt->d2 );
 		 return;
 		 }
 		 */
-		if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>( st ) )
+		if( TreePtr<Declaration> d = TreePtrCast<Declaration>( st ) )
 		{
 			if( backing_paired_decl.count(d) > 0 )
 			{
@@ -1136,19 +1136,19 @@ private:
 			}
 		}
 
-		if( TreePtr<DeclarationAsStatement> das = dynamic_pointer_cast<DeclarationAsStatement>(st) )
+		if( TreePtr<DeclarationAsStatement> das = TreePtrCast<DeclarationAsStatement>(st) )
 		    AddDeclarationToCompound( s, das->d );
 		else
 		    s->statements.push_back( st );
 
 		// Flatten the "sub" statements of labels etc
-		if( TreePtr<Label> l = dynamic_pointer_cast<Label>( st ) )
+		if( TreePtr<Label> l = TreePtrCast<Label>( st ) )
 		{
 			ASSERT( backing_labels[l] );
 			AddStatementToCompound( s, backing_labels[l] );
 			backing_labels.erase(l);
 		}
-		else if( TreePtr<SwitchTarget> t = dynamic_pointer_cast<SwitchTarget>( st ) )
+		else if( TreePtr<SwitchTarget> t = TreePtrCast<SwitchTarget>( st ) )
 		{
 			ASSERT( backing_targets[t] );
 			AddStatementToCompound( s, backing_targets[t] );
@@ -1177,7 +1177,7 @@ private:
 		// into a Statement. Instances are already both Declarations and Statements, so that's
 		// OK. In other cases, we have to package up the Declaration in a special kind of
 		// Statement node and pass it through that way. We will unpack later.
-		if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+		if( TreePtr<Instance> i = TreePtrCast<Instance>(d) )
 		{
 			return ToStmt( i );
 		}
@@ -1302,7 +1302,7 @@ private:
 			StmtTy *rsw, ExprTy *Body)
 	{
 		TreePtr<Statement> s( hold_stmt.FromRaw( rsw ) );
-		TreePtr<Switch> sw( dynamic_pointer_cast<Switch>(s) );
+		TreePtr<Switch> sw( TreePtrCast<Switch>(s) );
 		ASSERT(sw)("expecting a switch statement");
 
 		StmtTy *body = (StmtTy *)Body; // Third is really a statement, the Actions API is wrong
@@ -1372,7 +1372,7 @@ private:
 			case clang::AS_none:
 			ASSERT( rec )( "no access specifier and record not supplied so cannot deduce");
 			// members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
-			if( dynamic_pointer_cast<Class>(rec) )
+			if( TreePtrCast<Class>(rec) )
 			return TreePtr<Private>(new Private);
 			else
 			return TreePtr<Public>(new Public);
@@ -1391,17 +1391,17 @@ private:
 		const clang::DeclSpec &DS = D.getDeclSpec();
 		//TRACE("Element %p\n", Init);
 		TreePtr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
-		TreePtr<Instance> o = dynamic_pointer_cast<Instance>(d);
+		TreePtr<Instance> o = TreePtrCast<Instance>(d);
 
 		if( BitfieldWidth )
 		{
 			ASSERT( o )( "only Instances may be bitfields" );
-			TreePtr<Integral> n( dynamic_pointer_cast<Integral>( o->type ) );
+			TreePtr<Integral> n( TreePtrCast<Integral>( o->type ) );
 			ASSERT( n )( "cannot specify width of non-numeric type" );
 			TreePtr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
-			TreePtr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
+			TreePtr<Literal> ll = TreePtrCast<Literal>(ee);
 			ASSERT(ll )( "bitfield width must be literal, not expression"); // TODO evaluate
-			TreePtr<SpecificInteger> ii = dynamic_pointer_cast<SpecificInteger>(ll);
+			TreePtr<SpecificInteger> ii = TreePtrCast<SpecificInteger>(ll);
 			ASSERT(ll )( "bitfield width must be integer");
 			n->width = ii;
 		}
@@ -1510,7 +1510,7 @@ private:
 		// Just populate the members container for the Record node
 		// we already created. No need to return anything.
 		TreePtr<Declaration> d = hold_decl.FromRaw( TagDecl );
-		TreePtr<Record> h = dynamic_pointer_cast<Record>(d);
+		TreePtr<Record> h = TreePtrCast<Record>(d);
 
 		// We're about to populate the Record; if it has been populated already
 		// then something's wrong
@@ -1533,7 +1533,7 @@ private:
 
 		// TODO are structs etc definable in functions? If so, this will put the decl outside the function
 		TreePtr<Declaration> d = hold_decl.FromRaw( TagDecl );
-		TreePtr<Record> h = dynamic_pointer_cast<Record>(d);
+		TreePtr<Record> h = TreePtrCast<Record>(d);
 		decl_to_insert = h;
 	}
 
@@ -1566,7 +1566,7 @@ private:
 
 		// Find the specified member in the record implied by the expression on the left of .
 		TreePtr<Node> tbase = TypeOf::instance( all_decls, a->base );
-		TreePtr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
+		TreePtr<TypeIdentifier> tibase = TreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
 		TreePtr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
@@ -1696,10 +1696,10 @@ private:
 			    break;
 			}
 			// We only care about instances...
-			if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+			if( TreePtr<Instance> i = TreePtrCast<Instance>( d ) )
 			{
 				// ...and not function instances
-				if( !dynamic_pointer_cast<Callable>( i->type ) )
+				if( !TreePtrCast<Callable>( i->type ) )
 				{
 					// Get value out of array init and put it in record init together with member instance id
 					TreePtr<Expression> v = *seq_it;
@@ -1751,7 +1751,7 @@ private:
 			clang::SourceLocation EqualLoc, ExprTy *Val)
 	{
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
-        TreePtr<Enum> e( dynamic_pointer_cast<Enum>(d) );
+        TreePtr<Enum> e( TreePtrCast<Enum>(d) );
 		TreePtr<Static> o(new Static());
 		all_decls->members.insert(o);
 		o->identifier = CreateInstanceIdentifier(Id);
@@ -1764,7 +1764,7 @@ private:
 		else if( LastEnumConstant )
 		{
 			TreePtr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
-			TreePtr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
+			TreePtr<Instance> lasto( TreePtrCast<Instance>(lastd) );
 			ASSERT(lasto)( "unexpected kind of declaration inside an enum");
 			TreePtr<Add> inf( new Add );
 			TreePtr<Expression> ei = lasto->identifier;
@@ -1784,7 +1784,7 @@ private:
 			DeclTy **Elements, unsigned NumElements)
 	{
 		TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
-		TreePtr<Enum> e( dynamic_pointer_cast<Enum>(d) );
+		TreePtr<Enum> e( TreePtrCast<Enum>(d) );
 		ASSERT( e )( "expected the declaration to be an enum");
 		for( int i=0; i<NumElements; i++ )
 		    e->members.insert( hold_decl.FromRaw( Elements[i] ) );
@@ -1796,7 +1796,7 @@ private:
 	{
 		TRACE();
 		TreePtr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
-		TreePtr<Record> h( dynamic_pointer_cast<Record>( d ) );
+		TreePtr<Record> h( TreePtrCast<Record>( d ) );
 		ASSERT( h );
 		if( decl_to_insert )
 		{
@@ -1845,10 +1845,10 @@ private:
 			clang::SourceLocation BaseLoc)
 	{
 		TreePtr<Type> t( hold_type.FromRaw( basetype ) );
-		TreePtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(t);
+		TreePtr<SpecificTypeIdentifier> ti = TreePtrCast<SpecificTypeIdentifier>(t);
 		ASSERT( ti );
 		TreePtr<Declaration> d = hold_decl.FromRaw( classdecl );
-		TreePtr<Record> r = dynamic_pointer_cast<Record>( d );
+		TreePtr<Record> r = TreePtrCast<Record>( d );
 		ASSERT( r );
 
 		TreePtr<Base> base( new Base );
@@ -1866,7 +1866,7 @@ private:
 			unsigned NumBases)
 	{
 		TreePtr<Declaration> cd( hold_decl.FromRaw( ClassDecl ) );
-		TreePtr<InheritanceRecord> ih( dynamic_pointer_cast<InheritanceRecord>(cd) );
+		TreePtr<InheritanceRecord> ih( TreePtrCast<InheritanceRecord>(cd) );
 		ASSERT( ih );
 
 		for( int i=0; i<NumBases; i++ )
@@ -1927,16 +1927,16 @@ private:
 
 	TreePtr<Instance> GetConstructor( TreePtr<Type> t )
 	{
-		TreePtr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(t);
+		TreePtr<TypeIdentifier> id = TreePtrCast<TypeIdentifier>(t);
 		ASSERT(id);
 		TreePtr<Record> r = GetRecordDeclaration( all_decls, id );
 
 		FOREACH( TreePtr<Declaration> d, r->members )
 		{
-			TreePtr<Instance> o( dynamic_pointer_cast<Instance>(d) );
+			TreePtr<Instance> o( TreePtrCast<Instance>(d) );
 			if( !o )
 			continue;
-			if( dynamic_pointer_cast<Constructor>(o->type) )
+			if( TreePtrCast<Constructor>(o->type) )
 			return o;
 		}
 		ASSERTFAIL("missing constructor");
@@ -1952,8 +1952,8 @@ private:
 			clang::SourceLocation RParenLoc )
 	{
 		// Get (or make) the constructor we're invoking
-		TreePtr<Node> n = ident_track.Get( MemberOrBase );
-		TreePtr<Instance> om( dynamic_pointer_cast<Instance>(n) );
+		TreePtr<Node> n( ident_track.Get( MemberOrBase ) );
+		TreePtr<Instance> om( TreePtrCast<Instance>(n) );
 		ASSERT( om );
 		TreePtr<Instance> cm = GetConstructor( om->type );
 		ASSERT( cm );
@@ -1972,9 +1972,9 @@ private:
 		// Get the constructor whose init list we're adding to (may need to start a
 		// new compound statement)
 		TreePtr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
-		TreePtr<Instance> o( dynamic_pointer_cast<Instance>(d) );
+		TreePtr<Instance> o( TreePtrCast<Instance>(d) );
 		ASSERT(o);
-		TreePtr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);
+		TreePtr<Compound> comp = TreePtrCast<Compound>(o->initialiser);
 		if( !comp )
 		{
 			comp = TreePtr<Compound>( new Compound );
@@ -2055,8 +2055,8 @@ private:
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
-		if( TreePtr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(e) )
-		if( TreePtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
+		if( TreePtr<MakeArray> ai = TreePtrCast<MakeArray>(e) )
+		if( TreePtr<TypeIdentifier> ti = TreePtrCast<TypeIdentifier>(t) )
 		if( TreePtr<Record> r = GetRecordDeclaration(all_decls, ti) )
 		e = CreateRecordLiteralFromArrayLiteral( ai, r );
 
@@ -2066,7 +2066,7 @@ private:
     virtual ExprResult ActOnStmtExpr(clang::SourceLocation LPLoc, StmtTy *SubStmt,
                                      clang::SourceLocation RPLoc) // "({..})"
     {
-		TreePtr<Compound> cb( dynamic_pointer_cast<Compound>( hold_stmt.FromRaw( SubStmt ) ) );
+		TreePtr<Compound> cb( TreePtrCast<Compound>( hold_stmt.FromRaw( SubStmt ) ) );
         ASSERT(cb); // Let's hope the only statement Clang gives us is a compound
 
 		TreePtr<StatementExpression> ce( new StatementExpression );

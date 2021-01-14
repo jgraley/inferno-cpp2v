@@ -7,7 +7,7 @@ TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source )
 {
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
-    TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
+    auto dest = TreePtr<Node>( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERT(dest);
     
     return dest;    

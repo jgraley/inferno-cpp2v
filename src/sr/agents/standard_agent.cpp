@@ -947,7 +947,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
     // Identifiers that have multiple references in the pattern will be coupled, and  
     // after the first hit, BuildReplaceOverlay() will handle the rest and it uses Duplicate()
     shared_ptr<Cloner> dup_dest = Clone();
-    TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
+    TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     master_scr_engine->GetOverallMaster()->dirty_grass.insert( dest );
 
     ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 

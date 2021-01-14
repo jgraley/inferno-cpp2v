@@ -53,7 +53,7 @@ string BuildIdentifierAgent::GetNewName()
         TreePtr<Node> n = AsAgent(source)->BuildReplace();
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( n );
-        TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
+        TreePtr<SpecificIdentifier> si = TreePtrCast<SpecificIdentifier>( n );
         ASSERT( si )("BuildIdentifier: ")(*n)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
         string s = si->GetRender();
         if( !vs.empty() )
@@ -162,7 +162,7 @@ void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &que
     query.Reset();
     string newname = name; 
     TreePtr<Node> nx = x.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
-    if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(nx) )
+    if( TreePtr<CPPTree::SpecificIdentifier> si = TreePtrCast<CPPTree::SpecificIdentifier>(nx) )
     {
         TRACE("Comparing ")(si->GetRender())(" with ")(newname);
         if( si->GetRender() == newname )
@@ -253,7 +253,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo() const
 XLink NestedArrayAgent::Advance( XLink x, 
                                  string *depth ) const
 {
-    if( auto a = dynamic_pointer_cast<Array>(x.GetChildX()) )         
+    if( auto a = TreePtrCast<Array>(x.GetChildX()) )         
         return XLink(a, &(a->element)); // TODO support depth string (or integer)
     else
         return XLink();
@@ -263,12 +263,12 @@ XLink NestedArrayAgent::Advance( XLink x,
 XLink NestedSubscriptLookupAgent::Advance( XLink x, 
                                            string *depth ) const
 {
-    if( auto s = dynamic_pointer_cast<Subscript>(x.GetChildX()) )            
+    if( auto s = TreePtrCast<Subscript>(x.GetChildX()) )            
     {
         *depth += "S";
         return XLink(s, &(s->operands.front())); // the base, not the index
     }
-    else if( auto l = dynamic_pointer_cast<Lookup>(x.GetChildX()) )            
+    else if( auto l = TreePtrCast<Lookup>(x.GetChildX()) )            
     {
         *depth += "L";
         return XLink(l, &(l->member)); 
@@ -365,11 +365,11 @@ void IsLabelReachedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query
 	TreePtr<Node> n = AsAgent(pattern)->GetKey().GetChildX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
 	if( !n )
 		n = pattern;
-	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
+	TreePtr<Expression> y = TreePtrCast<Expression>( n );
 	ASSERT( y )("IsLabelReachedAgent saw pattern coupled to ")(n)(" but an Expression is needed\n"); 
 	ASSERT( xx );
 	TreePtr<Node> nxx = xx.GetChildX();
-	TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( nxx );
+	TreePtr<LabelIdentifier> x = TreePtrCast<LabelIdentifier>( nxx );
 	ASSERT( x )("IsLabelReachedAgent at ")(xx)(" but is of type LabelIdentifier\n"); 
 	TRACE("Can label id ")(x)(" reach expression ")(y)("?\n");
 
@@ -386,15 +386,15 @@ bool IsLabelReachedAgent::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
 {
 	INDENT("X");
 	bool r = false;
-	if( TreePtr<LabelIdentifier> liy = dynamic_pointer_cast<LabelIdentifier>(y) )
+	if( TreePtr<LabelIdentifier> liy = TreePtrCast<LabelIdentifier>(y) )
     {
 		r = liy->IsLocalMatch( x.get() ); // y is x, so yes
     }
-	else if( TreePtr<InstanceIdentifier> iiy = dynamic_pointer_cast<InstanceIdentifier>( y ) )
+	else if( TreePtr<InstanceIdentifier> iiy = TreePtrCast<InstanceIdentifier>( y ) )
     {
 		r = CanReachVar(f, x, iiy );
     }
-	else if( TreePtr<Ternop> ty = dynamic_pointer_cast<Ternop>( y ) )
+	else if( TreePtr<Ternop> ty = TreePtrCast<Ternop>( y ) )
     {
         Sequence<Expression>::iterator ops_it = ty->operands.begin();
         ++ops_it; // only the choices, not the condition
@@ -402,15 +402,15 @@ bool IsLabelReachedAgent::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
         ++ops_it;
 		r = r || CanReachExpr(f, x, *ops_it); 
     }
-	else if( TreePtr<Comma> cy = dynamic_pointer_cast<Comma>( y ) )
+	else if( TreePtr<Comma> cy = TreePtrCast<Comma>( y ) )
     {
 		r = CanReachExpr(f, x, cy->operands.back()); // second operand
     }
-	else if( TreePtr<Subscript> sy = dynamic_pointer_cast<Subscript>( y ) ) // subscript as r-value
+	else if( TreePtr<Subscript> sy = TreePtrCast<Subscript>( y ) ) // subscript as r-value
 	{
         r = CanReachExpr(f, x, sy->operands.front()); // first operand
     }
-	else if( dynamic_pointer_cast<Dereference>( y ) )
+	else if( TreePtrCast<Dereference>( y ) )
     {
         ASSERTFAIL("IsLabelReachedAgent used on expression that is read from memory, cannot figure out the answer\n");
     }
@@ -444,10 +444,10 @@ bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 
 	FOREACH( const TreePtrInterface &n, e )
 	{
-		if( TreePtr<Assign> a = dynamic_pointer_cast<Assign>((TreePtr<Node>)n) )
+		if( TreePtr<Assign> a = TreePtrCast<Assign>((TreePtr<Node>)n) )
 		{
 			TreePtr<Expression> lhs = a->operands.front();
-			if( TreePtr<Subscript> slhs = dynamic_pointer_cast<Subscript>( lhs ) ) // subscript as l-value 
+			if( TreePtr<Subscript> slhs = TreePtrCast<Subscript>( lhs ) ) // subscript as l-value 
 				lhs = slhs->operands.front();
 			TRACE("Examining assignment: ")(*lhs)(" = ")(*a->operands.back())("\n"); 
 			if( lhs == y )

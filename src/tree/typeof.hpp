@@ -25,7 +25,7 @@ public:
     virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )
     {
     	context = c;
-    	TreePtr<CPPTree::Expression> e = dynamic_pointer_cast<CPPTree::Expression>(root);
+    	auto e = TreePtr<CPPTree::Expression>::DynamicCast(root);
     	TreePtr<Node> n;
     	if( e ) // if the tree at root is not an expression, return nullptr
     		n = Get( e );

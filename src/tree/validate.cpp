@@ -66,16 +66,16 @@ void Validate::operator()( TreePtr<Node> context,
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(wit);
 
 			// Check that we can successfully call TypeOf on every Expression
-			if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(x) )
+			if( TreePtr<Expression> e = TreePtrCast<Expression>(x) )
 			    (void)TypeOf::instance(context, e);
 
 			// Check that every identifier has a declaration
-			if( TreePtr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
+			if( TreePtr<InstanceIdentifier> ii = TreePtrCast<InstanceIdentifier>(x) )
 			    (void)GetDeclaration()(context, ii);
 
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.
-			TreePtr<Node> y = dynamic_pointer_cast<Node>((*x).Clone());
+			TreePtr<Node> y( dynamic_pointer_cast<Node>((*x).Clone()) );
 			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(wit);
         }
 
@@ -102,17 +102,17 @@ void Validate::operator()( TreePtr<Node> context,
 
 void Validate::OnLink( TreePtr<Node> p, TreePtr<Node> c )
 {
-	if( TreePtr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
+	if( TreePtr<Instance> pi = TreePtrCast<Instance>(p) )
 	{
 		if( c == pi->identifier )
 		    decl_refs[c]++;
 	}
-	else if( TreePtr<UserType> pu = dynamic_pointer_cast<UserType>(p) )
+	else if( TreePtr<UserType> pu = TreePtrCast<UserType>(p) )
 	{
 		if( c == pu->identifier )
 		    decl_refs[c]++;
 	}
-	else if( TreePtr<Label> pl = dynamic_pointer_cast<Label>(p) )
+	else if( TreePtr<Label> pl = TreePtrCast<Label>(p) )
 	{
 		if( c == pl->identifier )
 		    decl_refs[c]++;
