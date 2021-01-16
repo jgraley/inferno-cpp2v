@@ -23,11 +23,7 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
-    virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink base_xlink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+                                      XLink x ) const;                                                             
     virtual bool ImplHasDNLQ() const;
     virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink base_xlink,

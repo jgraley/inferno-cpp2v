@@ -115,15 +115,6 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
     return XLink(base_xlink.GetChildX(), &*it);
 }
 
-
-void AnyNodeAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                             XLink base_xlink,
-                                             const SolutionMap *required_links,
-                                             const TheKnowledge *knowledge ) const
-{
-    (void)RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
-}
-
     
 Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                                    XLink base_xlink,
@@ -221,7 +212,33 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const
 {
-    (void)RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+    INDENT("#");
+    ASSERT( this );
+    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+    query.Reset();
+
+    if( !recurse_restriction )
+        return;
+
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    
+    PatternLink terminus_plink(this, &terminus);
+    XLink req_terminus_xlink = required_links->at(terminus_plink); 
+    
+    XLink x = req_terminus_xlink;
+    TreePtr<SubSequence> xpr_ss( new SubSequence() );
+    while(x != base_xlink)
+    {       
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(x) );       
+        x = nugget.parent_xlink;
+        
+        // Putting this here excludes the terminus, as required
+        TRACEC("Move to parent ")(x)("\n");
+        xpr_ss->elts.push_front( x );      
+    }
+    
+    XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
+    query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
 }
     
     
@@ -248,7 +265,6 @@ Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAge
     
     XLink x = req_terminus_xlink;
     bool found = false;
-    TreePtr<SubSequence> xpr_ss( new SubSequence() );
     TRACE("Seeking ")(base_xlink)(" in ancestors of ")(req_terminus_xlink)("\n");
     while(true)
     {
@@ -265,20 +281,14 @@ Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAge
         x = nugget.parent_xlink;
         
         // Putting this here excludes the terminus, as required
-        TRACEC("Move to parent ")(x)("\n");
-        xpr_ss->elts.push_front( x );      
+        TRACEC("Move to parent ")(x)("\n"); 
     }
     if( !found )
     {
         TRACEC("Not found\n");        
         throw TerminusMismatch();
     }
-    
-    if( recurse_restriction )
-    {
-        XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
-        query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
-    }      
+
     return COMPLETE;
 }                                                                                        
 

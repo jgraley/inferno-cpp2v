@@ -51,11 +51,7 @@ class AnyNodeAgent : public SearchContainerAgent
 {
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
-    virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
-    virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink x,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+    virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;                                             
     virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink x,
                                                           const SolutionMap *required_links,

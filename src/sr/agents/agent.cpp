@@ -136,23 +136,8 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    if( base_xlink == XLink::MMAX_Link )
-    {
-        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
-        {
-            if( required_links->count(plink) > 0 )
-            {
-                XLink req_xlink = required_links->at(plink);
-                if( req_xlink != XLink::MMAX_Link )
-                    throw MMAXPropagationMismatch();
-            }
-        }   
-    }   
-    else
-    {
-        TRACE("Attempting to vcall on ")(*this)("\n");
+    if( base_xlink != XLink::MMAX_Link )
         this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
-    }
 }                             
 
 

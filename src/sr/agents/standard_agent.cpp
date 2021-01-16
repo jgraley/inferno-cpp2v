@@ -396,10 +396,6 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("Q");
     query.Reset();
 
-    // Check pre-restriction
-    TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
-    CheckLocalMatch(base_xlink.GetChildX().get());
-
     // Recurse through the children. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
     // be dynamic_castable to pattern's type.
@@ -425,54 +421,7 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
             RegenerationQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge );
         }
-        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
-        {
-            if( TreePtr<Node>(*pattern_sing) ) // TreePtrs are allowed to be nullptr meaning no restriction
-            {
-                TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-                ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-                auto sing_plink = PatternLink(this, pattern_sing);
-                auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
-                
-                TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
-                SolutionMap::const_iterator req_sing_it = required_links->find(sing_plink);
-                if( req_sing_it != required_links->end() ) 
-                {
-                    XLink req_sing_xlink = req_sing_it->second;                 
-                    if( sing_xlink != req_sing_xlink )
-                        throw SingularMismatch();
-                }
-            }
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
-        }
     }
-}
-
-
-void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query,
-                                               XLink base_xlink,
-                                               SequenceInterface *x_seq,
-                                               SequenceInterface *pattern_seq,
-                                               const SolutionMap *required_links,
-                                               const TheKnowledge *knowledge ) const
-{
-    Completeness completeness;
-    DecidedNormalLinkedQuerySequence(query, base_xlink, x_seq, pattern_seq, required_links, knowledge, completeness);
-}
-
-
-void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &query,
-                                                 XLink base_xlink,
-                                                 CollectionInterface *x_col,
-                                                 CollectionInterface *pattern_col,
-                                                 const SolutionMap *required_links,
-                                                 const TheKnowledge *knowledge ) const
-{
-    Completeness completeness;
-    DecidedNormalLinkedQueryCollection(query, base_xlink, x_col, pattern_col, required_links, knowledge, completeness);
 }
 
 
@@ -552,6 +501,89 @@ Agent::Completeness StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
 }
 
 
+void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query,
+                                               XLink base_xlink,
+                                               SequenceInterface *x_seq,
+                                               SequenceInterface *pattern_seq,
+                                               const SolutionMap *required_links,
+                                               const TheKnowledge *knowledge ) const
+{
+    INDENT("S");
+    ASSERT( planned );
+
+    const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
+
+    TRACEC("RQ sequence: %d plinks\n", pattern_seq->size());
+
+    // If we got this far with an undersized x_seq, something has gone wrong 
+    // in the logic, and the following code will crash into x_seq->end(). 
+    // And I mean "crash" literally.
+    ASSERT(x_seq->size() >= plan_seq.num_non_star); 
+
+    // We now look at the runs of star patterns. Each is bounded by some combination
+    // of the bounds of the x sequence and the surrounding non-star child x values. 
+    for( shared_ptr<Plan::Sequence::Run> run : plan_seq.star_runs )
+    {
+      	ContainerInterface::iterator xit, xit_star_limit;
+
+        if( run->predecessor )
+        {
+            SolutionMap::const_iterator pred_it = required_links->find(run->predecessor);
+            if( pred_it == required_links->end() )         
+                break; // can't do any more in the current run
+            XLink pred_xlink = pred_it->second; 
+            const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
+            xit = pred_nugget.iterator;
+            ++xit; // get past the non-star
+        }
+        else
+        {
+            xit = x_seq->begin();
+        }
+        
+        if( run->successor )
+        {
+            SolutionMap::const_iterator succ_it = required_links->find(run->successor);
+            if( succ_it == required_links->end() )         
+                break; // can't do any more in the current run
+            XLink succ_xlink = succ_it->second; 
+            const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
+            xit_star_limit = succ_nugget.iterator;
+        }
+        else
+        {
+            xit_star_limit = x_seq->end();
+        }
+        
+        // Within a run of star patterns, register decisions for all but the last
+        // and for all of them register a subsequence range as an abnormal link.
+        for( PatternLink plink : run->elts )
+        {
+            // We have a Star type wildcard that can match multiple elements.
+            ContainerInterface::iterator xit_star_end;               
+            ContainerInterface::iterator xit_star_begin = xit;            
+                        
+            if( plink != run->elts.back() ) // Another star follows this one, forcing a decision
+            {
+                xit_star_end = query.RegisterDecision( xit_star_begin, xit_star_limit, true );
+                xit = xit_star_end;
+            }
+            else // No decision needed, we go all the way up to the limit
+            {
+                xit_star_end = xit_star_limit;
+            }
+            
+            // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
+
+            // Apply couplings to this Star and matched range
+            // Restrict to pre-restriction or pattern_seq restriction
+            query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass AND REPLACE!!
+        }
+    } 
+}
+
+
 void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
                                                       XLink base_xlink,
                                                       SequenceInterface *x_seq,
@@ -566,16 +598,10 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
     const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
 
     TRACEC("DNLQ sequence: %d plinks\n", pattern_seq->size());
-    bool incomplete = false;
 
     for( PatternLink plink : plan_seq.non_stars )  // independent of x_seq
-    {
         if( required_links->find(plink) == required_links->end() ) 
-        {
             completeness = INCOMPLETE;
-            incomplete = true;
-        }
-    }
     
     // The only true unary constraint is that every child x link
     // is in some sequence (because that can be read directly off the
@@ -663,76 +689,31 @@ void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface
         if( !(a_nugget.container == b_nugget.container && a_nugget.index < b_nugget.index) )
              throw NotAfterSequenceMismatch();
     }
+}
 
-    if( incomplete )
-        return; // Can now assume all x are in the right container, satisfying #228
 
-    // If we got this far with an undersized x_seq, something has gone wrong 
-    // in the logic, and the following code will crash into x_seq->end(). 
-    // And I mean "crash" literally.
-    ASSERT(x_seq->size() >= plan_seq.num_non_star); 
+void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &query,
+                                                 XLink base_xlink,
+                                                 CollectionInterface *x_col,
+                                                 CollectionInterface *pattern_col,
+                                                 const SolutionMap *required_links,
+                                                 const TheKnowledge *knowledge ) const
+{
+    INDENT("C");
+    const Plan::Collection &plan_col = plan.collections.at(pattern_col);
 
-    // We now look at the runs of star patterns. Each is bounded by some combination
-    // of the bounds of the x sequence and the surrounding non-star child x values. 
-    for( shared_ptr<Plan::Sequence::Run> run : plan_seq.star_runs )
+    if( plan_col.star_plink )
     {
-      	ContainerInterface::iterator xit, xit_star_limit;
+        // Determine the set of non-star tree pointers 
+        SubCollectionRange::ExclusionSet excluded_x;
+        for( PatternLink plink : plan_col.non_stars ) // independent of x_col
+            excluded_x.insert( required_links->find(plink)->second.GetXPtr() );
 
-        if( run->predecessor )
-        {
-            SolutionMap::const_iterator pred_it = required_links->find(run->predecessor);
-            if( pred_it == required_links->end() )         
-                break; // can't do any more in the current run
-            XLink pred_xlink = pred_it->second; 
-            const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
-            xit = pred_nugget.iterator;
-            ++xit; // get past the non-star
-        }
-        else
-        {
-            xit = x_seq->begin();
-        }
-        
-        if( run->successor )
-        {
-            SolutionMap::const_iterator succ_it = required_links->find(run->successor);
-            if( succ_it == required_links->end() )         
-                break; // can't do any more in the current run
-            XLink succ_xlink = succ_it->second; 
-            const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
-            xit_star_limit = succ_nugget.iterator;
-        }
-        else
-        {
-            xit_star_limit = x_seq->end();
-        }
-        
-        // Within a run of star patterns, register decisions for all but the last
-        // and for all of them register a subsequence range as an abnormal link.
-        for( PatternLink plink : run->elts )
-        {
-            // We have a Star type wildcard that can match multiple elements.
-            ContainerInterface::iterator xit_star_end;               
-            ContainerInterface::iterator xit_star_begin = xit;            
-                        
-            if( plink != run->elts.back() ) // Another star follows this one, forcing a decision
-            {
-                xit_star_end = query.RegisterDecision( xit_star_begin, xit_star_limit, true );
-                xit = xit_star_end;
-            }
-            else // No decision needed, we go all the way up to the limit
-            {
-                xit_star_end = xit_star_limit;
-            }
-            
-            // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
-            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
-
-            // Apply couplings to this Star and matched range
-            // Restrict to pre-restriction or pattern_seq restriction
-            query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass AND REPLACE!!
-        }
-    } 
+        // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), x_col->begin(), x_col->end() ) );
+        x_subcollection->SetExclusions( excluded_x );                                                             
+        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
+    }    
 }
 
 
@@ -805,19 +786,6 @@ void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterfa
             completeness = INCOMPLETE;
             return;
         }
-    }
-    
-    if( plan_col.star_plink )
-    {
-        // Determine the set of non-star tree pointers 
-        SubCollectionRange::ExclusionSet excluded_x;
-        for( PatternLink plink : plan_col.non_stars ) // independent of x_col
-            excluded_x.insert( required_links->find(plink)->second.GetXPtr() );
-
-        // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
-        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), x_col->begin(), x_col->end() ) );
-        x_subcollection->SetExclusions( excluded_x );                                                             
-        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    
 }
 
