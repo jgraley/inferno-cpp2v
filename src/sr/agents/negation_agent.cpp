@@ -14,20 +14,37 @@ shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 
 
 void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                         XLink x ) const
+                                         XLink base_xlink ) const
 {
     INDENT("¬");
     ASSERT( *GetPattern() );
     query.Reset();
     
     // Check pre-restriction
-    TRACE("Negation: local match check: ")(*this)(" vs ")(x)("\n");
-    CheckLocalMatch(x.GetChildX().get());
+    TRACE("Negation: local match check: ")(*this)(" vs ")(base_xlink)("\n");
+    CheckLocalMatch(base_xlink.GetChildX().get());
     TRACE("Negation: local match check OK\n");
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), x ); // Link into X, abnormal
+    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), base_xlink ); // Link into X, abnormal
     query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+}
+
+
+bool NegationAgent::ImplHasDNLQ() const
+{
+    return true;
+}
+
+
+Agent::Completeness NegationAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                    XLink base_xlink,
+                                                                    const SolutionMap *required_links,
+                                                                    const TheKnowledge *knowledge ) const
+{ 
+    // This agent has no normal links, so just do this to populate query
+    RunDecidedQueryImpl( query, base_xlink ); 
+    return COMPLETE;
 }
 
 

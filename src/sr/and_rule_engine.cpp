@@ -23,7 +23,7 @@
 //#define TEST_PATTERN_QUERY
 
 // This now works!
-//#define USE_SOLVER
+#define USE_SOLVER
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
@@ -582,9 +582,9 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 #endif
     
 #ifdef NLQ_TEST
-    auto nlq_lambda = agent->TestStartNormalLinkedQuery( base_xlink, &basic_solution, knowledge );
+    auto nlq_lambda = agent->TestStartRegenerationQuery( base_xlink, &basic_solution, knowledge );
 #else    
-    auto nlq_lambda = agent->StartNormalLinkedQuery( base_xlink, &basic_solution, knowledge );
+    auto nlq_lambda = agent->StartRegenerationQuery( base_xlink, &basic_solution, knowledge );
 #endif
     
     int i=0;
@@ -828,7 +828,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_link.GetChildX() ) ); 
 
     multiset<XLink> candidate_links { keyer_link, residual_link };
-    agent->CouplingQuery( candidate_links );
+    agent->RunCouplingQuery( candidate_links );
 }                                     
 
 

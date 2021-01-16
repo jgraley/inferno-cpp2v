@@ -192,7 +192,7 @@ void SystemicConstraint::Test( Assignments frees_map )
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {
             // First check any coupling at this pattern node
-            plan.agent->CouplingQuery( coupling_links );
+            plan.agent->RunCouplingQuery( coupling_links );
         }
               
         if( plan.action==Action::FULL )
@@ -201,7 +201,7 @@ void SystemicConstraint::Test( Assignments frees_map )
             // We only need one match to know that required_links_list are good, 
             // i.e. to run once without throuwing a mismatch. Don't need
             // the returned query.
-            (void)plan.agent->StartNormalLinkedQuery( x, &required_links, knowledge )();      
+            plan.agent->RunNormalLinkedQuery( x, &required_links, knowledge );    
         }
     }            
 }

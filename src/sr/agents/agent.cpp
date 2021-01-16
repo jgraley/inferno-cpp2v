@@ -116,7 +116,7 @@ Agent::Completeness AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAg
                                                                   const SolutionMap *required_links,
                                                                   const TheKnowledge *knowledge ) const
 {
-    ASSERTFAIL();
+    return COMPLETE;
 }
     
     
@@ -200,7 +200,7 @@ void AgentCommon::NLQFromDQ( DecidedQuery &query,
 }                           
                                 
     
-AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
+AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                                                               const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
                                                               bool use_DQ ) const
@@ -230,15 +230,7 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 query = nlq_conjecture->GetQuery(this);
-                
-                if( use_DQ || !ImplHasDNLQ() )
-                {
-                    NLQFromDQ( *query, base_xlink, required_links, knowledge );
-                }
-                else
-                {
-                    Completeness completeness = RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
-                }                    
+                Completeness completeness = RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );                                   
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
@@ -262,7 +254,7 @@ AgentCommon::QueryLambda AgentCommon::StartNormalLinkedQuery( XLink base_xlink,
 }   
                                               
                                               
-AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xlink,
+AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xlink,
                                                                   const SolutionMap *required_links,
                                                                   const TheKnowledge *knowledge ) const
 {
@@ -272,14 +264,14 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartNormalLinkedQuery( base_xlink, required_links, knowledge, false );
+        mut_lambda = StartRegenerationQuery( base_xlink, required_links, knowledge, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIEnable silencer( false ); // make ref algo be quiet            
-            (void)StartNormalLinkedQuery( base_xlink, required_links, knowledge, true );
+            (void)StartRegenerationQuery( base_xlink, required_links, knowledge, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)(" at ")(base_xlink)("\n")
                          ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
@@ -296,7 +288,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
     try
     {
         Tracer::RAIIEnable silencer( false ); // make ref algo be quiet             
-        ref_lambda = StartNormalLinkedQuery( base_xlink, required_links, knowledge, true );        
+        ref_lambda = StartRegenerationQuery( base_xlink, required_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
     {
@@ -378,7 +370,24 @@ AgentCommon::QueryLambda AgentCommon::TestStartNormalLinkedQuery( XLink base_xli
 }
 
 
-void AgentCommon::CouplingQuery( multiset<XLink> candidate_links )
+void AgentCommon::RunNormalLinkedQuery( XLink base_xlink,
+                                        const SolutionMap *required_links,
+                                        const TheKnowledge *knowledge,
+                                        bool use_DQ ) const
+{
+    auto query = CreateDecidedQuery();
+    if( use_DQ || !ImplHasDNLQ() )
+    {
+        NLQFromDQ( *query, base_xlink, required_links, knowledge );
+    }
+    else
+    {
+        Completeness completeness = RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
+    }                    
+}                                            
+
+
+void AgentCommon::RunCouplingQuery( multiset<XLink> candidate_links )
 {    
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 

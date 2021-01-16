@@ -56,6 +56,23 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }                       
 
 
+bool StarAgent::ImplHasDNLQ() const
+{
+    return true;
+}
+
+
+Agent::Completeness StarAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
+                                                                XLink base_xlink,
+                                                                const SolutionMap *required_links,
+                                                                const TheKnowledge *knowledge ) const
+{ 
+    // This agent has no normal links, so just do this to populate query
+    RunDecidedQueryImpl( query, base_xlink ); 
+    return COMPLETE;
+}
+
+
 TreePtr<Node> StarAgent::BuildReplaceImpl() 
 {
     INDENT("*");
