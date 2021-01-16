@@ -394,6 +394,15 @@ bool StandardAgent::ImplHasDNLQ() const
 }
 
 
+Agent::Completeness StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                                             XLink base_xlink,
+                                                             const SolutionMap *required_links,
+                                                             const TheKnowledge *knowledge ) const
+{ 
+    return RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+}
+
+
 Agent::Completeness StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                                     XLink base_xlink,
                                                                     const SolutionMap *required_links,

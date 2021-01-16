@@ -116,6 +116,15 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
 
+Agent::Completeness AnyNodeAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                                            XLink base_xlink,
+                                                            const SolutionMap *required_links,
+                                                            const TheKnowledge *knowledge ) const
+{
+    return RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+}
+
+    
 Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                                    XLink base_xlink,
                                                                    const SolutionMap *required_links,
@@ -207,6 +216,15 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
+Agent::Completeness StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink base_xlink,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const
+{
+    return RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+}
+    
+    
 Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                                  XLink base_xlink,
                                                                  const SolutionMap *required_links,

@@ -92,6 +92,10 @@ private:
                                  CollectionInterface *px,
     		                     CollectionInterface *pattern ) const;
     virtual bool ImplHasDNLQ() const;
+    virtual Completeness RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                                          XLink base_xlink,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const;                                              
     virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
