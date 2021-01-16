@@ -119,10 +119,9 @@ void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
-Agent::Completeness AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                                  XLink base_xlink,
-                                                                  const SolutionMap *required_links,
-                                                                  const TheKnowledge *knowledge ) const
+Agent::Completeness AgentCommon::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                           const SolutionMap *required_links,
+                                                           const TheKnowledge *knowledge ) const
 {
     ASSERTFAIL();
 }
@@ -139,41 +138,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     if( base_xlink != XLink::MMAX_Link )
         this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
 }                             
-
-
-Agent::Completeness AgentCommon::RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
-                                                              XLink base_xlink,
-                                                              const SolutionMap *required_links,
-                                                              const TheKnowledge *knowledge ) const
-{
-    query.last_activity = DecidedQueryCommon::QUERY;
-   
-    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    Completeness completeness = COMPLETE;
-    if( base_xlink == XLink::MMAX_Link )
-    {
-        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
-        {
-            if( required_links->count(plink) == 0 )
-            {
-                completeness = INCOMPLETE;
-            }
-            else
-            {
-                XLink req_xlink = required_links->at(plink);
-                if( req_xlink != XLink::MMAX_Link )
-                    throw MMAXPropagationMismatch();
-            }
-        }   
-    }   
-    else
-    {
-        TRACE("Attempting to vcall on ")(*this)("\n");
-        completeness = this->RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
-    }
-    return completeness;
-}                             
-
+                      
 
 bool AgentCommon::ImplHasDNLQ() const
 {    
@@ -181,19 +146,19 @@ bool AgentCommon::ImplHasDNLQ() const
 }
 
     
-void AgentCommon::NLQFromDQ( DecidedQuery &query,
-                              XLink base_xlink,
-                              const SolutionMap *required_links,
-                              const TheKnowledge *knowledge ) const
+void AgentCommon::NLQFromDQ( XLink base_xlink,
+                             const SolutionMap *required_links,
+                             const TheKnowledge *knowledge ) const
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(base_xlink)("\n");
-    RunDecidedQuery( query, base_xlink );
+    auto query = CreateDecidedQuery();
+    RunDecidedQuery( *query, base_xlink );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
     // over both and check that they refer to the same x nodes
     // we were passed. Mismatch will throw, same as in DQ.
-    auto actual_links = query.GetNormalLinks();
+    auto actual_links = query->GetNormalLinks();
     TRACE("Actual   ")(actual_links)("\n");
     ASSERT( actual_links.size() == pattern_query->GetNormalLinks().size() );
     
@@ -396,14 +361,29 @@ void AgentCommon::RunNormalLinkedQuery( XLink base_xlink,
                                         const TheKnowledge *knowledge,
                                         bool use_DQ ) const
 {
-    auto query = CreateDecidedQuery();
     if( use_DQ || !ImplHasDNLQ() )
     {
-        NLQFromDQ( *query, base_xlink, required_links, knowledge );
+        NLQFromDQ( base_xlink, required_links, knowledge );
     }
     else
     {
-        Completeness completeness = RunDecidedNormalLinkedQuery( *query, base_xlink, required_links, knowledge );   
+        if( base_xlink == XLink::MMAX_Link )
+        {
+            for( PatternLink plink : pattern_query->GetNormalLinks() ) 
+            {
+                if( required_links->count(plink) > 0 )
+                {
+                    XLink req_xlink = required_links->at(plink);
+                    if( req_xlink != XLink::MMAX_Link )
+                        throw MMAXPropagationMismatch();
+                }
+            }   
+        }   
+        else
+        {
+            TRACE("Attempting to vcall on ")(*this)("\n");
+            (void)this->RunNormalLinkedQueryImpl( base_xlink, required_links, knowledge );
+        }
     }                    
 }                                            
 

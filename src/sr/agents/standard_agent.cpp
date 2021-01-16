@@ -431,13 +431,11 @@ bool StandardAgent::ImplHasDNLQ() const
 }
 
 
-Agent::Completeness StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                                    XLink base_xlink,
-                                                                    const SolutionMap *required_links,
-                                                                    const TheKnowledge *knowledge ) const
+Agent::Completeness StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                             const SolutionMap *required_links,
+                                                             const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
-    query.Reset();
     Completeness completeness = COMPLETE;
 
     // Check pre-restriction
@@ -460,14 +458,14 @@ Agent::Completeness StandardAgent::RunDecidedNormalLinkedQueryImpl( DecidedQuery
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedNormalLinkedQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge, completeness );
+            NormalLinkedQuerySequence( base_xlink, p_x_seq, pattern_seq, required_links, knowledge, completeness );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedNormalLinkedQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge, completeness );
+            NormalLinkedQueryCollection( base_xlink, p_x_col, pattern_col, required_links, knowledge, completeness );
         }
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -584,13 +582,12 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 }
 
 
-void StandardAgent::DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
-                                                      XLink base_xlink,
-                                                      SequenceInterface *x_seq,
-                                                      SequenceInterface *pattern_seq,
-                                                      const SolutionMap *required_links,
-                                                      const TheKnowledge *knowledge,
-                                                      Completeness &completeness ) const
+void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
+                                               SequenceInterface *x_seq,
+                                               SequenceInterface *pattern_seq,
+                                               const SolutionMap *required_links,
+                                               const TheKnowledge *knowledge,
+                                               Completeness &completeness ) const
 {
     INDENT("S");
     ASSERT( planned );
@@ -717,13 +714,12 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterface &query,
-                                                        XLink base_xlink,
-                                                        CollectionInterface *x_col,
-                                                        CollectionInterface *pattern_col,
-                                                        const SolutionMap *required_links,
-                                                        const TheKnowledge *knowledge,
-                                                        Completeness &completeness ) const
+void StandardAgent::NormalLinkedQueryCollection( XLink base_xlink,
+                                                 CollectionInterface *x_col,
+                                                 CollectionInterface *pattern_col,
+                                                 const SolutionMap *required_links,
+                                                 const TheKnowledge *knowledge,
+                                                 Completeness &completeness ) const
 {
     INDENT("C");
     bool incomplete = false;

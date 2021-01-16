@@ -66,13 +66,11 @@ bool DisjunctionAgent::ImplHasDNLQ() const
 }
 
 
-Agent::Completeness DisjunctionAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                                    XLink base_xlink,
-                                                                    const SolutionMap *required_links,
-                                                                    const TheKnowledge *knowledge ) const
+Agent::Completeness DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                                const SolutionMap *required_links,
+                                                                const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
-    query.Reset();
     bool found = false;
     Completeness completeness = COMPLETE;
     

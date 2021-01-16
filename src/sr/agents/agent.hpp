@@ -132,22 +132,16 @@ public:
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
     virtual bool ImplHasDNLQ() const;                                              
-    virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                          XLink base_xlink,
-                                                          const SolutionMap *required_links,
-                                                          const TheKnowledge *knowledge ) const;
+    virtual Completeness RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                   const SolutionMap *required_links,
+                                                   const TheKnowledge *knowledge ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
                                const SolutionMap *required_links,
                                const TheKnowledge *knowledge ) const;
-    Completeness RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
-                                              XLink base_xlink,
-                                              const SolutionMap *required_links,
-                                              const TheKnowledge *knowledge ) const;
-    void NLQFromDQ( DecidedQuery &query,
-                     XLink base_xlink,
-                     const SolutionMap *required_links,
-                     const TheKnowledge *knowledge ) const;                                              
+    void NLQFromDQ( XLink base_xlink,
+                    const SolutionMap *required_links,
+                    const TheKnowledge *knowledge ) const;                                              
     virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,

@@ -116,15 +116,13 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
     
-Agent::Completeness AnyNodeAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                                   XLink base_xlink,
-                                                                   const SolutionMap *required_links,
-                                                                   const TheKnowledge *knowledge ) const
+Agent::Completeness AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                            const SolutionMap *required_links,
+                                                            const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    query.Reset();
 
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
@@ -242,15 +240,13 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
-Agent::Completeness StuffAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                                 XLink base_xlink,
-                                                                 const SolutionMap *required_links,
-                                                                 const TheKnowledge *knowledge ) const
+Agent::Completeness StuffAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                          const SolutionMap *required_links,
+                                                          const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    query.Reset();
 
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
