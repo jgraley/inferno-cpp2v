@@ -111,36 +111,15 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                            XLink base_xlink,
+void AgentCommon::RunNormalLinkedQueryImpl( XLink base_xlink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
-{
-}
-    
-    
-Agent::Completeness AgentCommon::RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                           const SolutionMap *required_links,
-                                                           const TheKnowledge *knowledge ) const
 {
     ASSERTFAIL();
 }
     
     
-void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                                        XLink base_xlink,
-                                        const SolutionMap *required_links,
-                                        const TheKnowledge *knowledge ) const
-{
-    query.last_activity = DecidedQueryCommon::QUERY;
-   
-    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    if( base_xlink != XLink::MMAX_Link )
-        this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
-}                             
-                      
-
-bool AgentCommon::ImplHasDNLQ() const
+bool AgentCommon::ImplHasNLQ() const
 {    
     return false;
 }
@@ -186,6 +165,86 @@ void AgentCommon::NLQFromDQ( XLink base_xlink,
 }                           
                                 
     
+void AgentCommon::RunNormalLinkedQuery( XLink base_xlink,
+                                        const SolutionMap *required_links,
+                                        const TheKnowledge *knowledge,
+                                        bool use_DQ ) const
+{
+    if( use_DQ || !ImplHasNLQ() )
+    {
+        NLQFromDQ( base_xlink, required_links, knowledge );
+    }
+    else
+    {
+        if( base_xlink == XLink::MMAX_Link )
+        {
+            for( PatternLink plink : pattern_query->GetNormalLinks() ) 
+            {
+                if( required_links->count(plink) > 0 )
+                {
+                    XLink req_xlink = required_links->at(plink);
+                    if( req_xlink != XLink::MMAX_Link )
+                        throw MMAXPropagationMismatch();
+                }
+            }   
+        }   
+        else
+        {
+            TRACE("Attempting to vcall on ")(*this)("\n");
+            (void)this->RunNormalLinkedQueryImpl( base_xlink, required_links, knowledge );
+        }
+    }                    
+}                                            
+
+
+void AgentCommon::RunCouplingQuery( multiset<XLink> candidate_links )
+{    
+    // This function establishes the policy for couplings in one place.
+    // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
+    // And it always will be: see #121; para starting at "No!!"
+    // HOWEVER: it is now possible for agents to override this policy.
+
+    // We will always accept MMAX links, so ignore them
+    candidate_links.erase(XLink::MMAX_Link);
+
+    // Check remaining links against each other. EquivalenceRelation is
+    // transitive, so it's enough just to daisy-chain the checks.
+    XLink previous_link;
+    for( XLink current_link : candidate_links )
+    {
+        if( previous_link )
+        {
+            CompareResult cr = equivalence_relation.Compare( previous_link, 
+                                                             current_link );
+            if( cr != EQUAL )
+                throw CouplingMismatch();               
+        }
+        previous_link = current_link;
+    }     
+}
+
+
+void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                            XLink base_xlink,
+                                            const SolutionMap *required_links,
+                                            const TheKnowledge *knowledge ) const
+{
+}
+    
+    
+void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
+                                        XLink base_xlink,
+                                        const SolutionMap *required_links,
+                                        const TheKnowledge *knowledge ) const
+{
+    query.last_activity = DecidedQueryCommon::QUERY;
+   
+    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
+    if( base_xlink != XLink::MMAX_Link )
+        this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
+}                             
+                      
+
 AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                                                               const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
@@ -353,65 +412,6 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xli
     };
     
     return test_lambda;
-}
-
-
-void AgentCommon::RunNormalLinkedQuery( XLink base_xlink,
-                                        const SolutionMap *required_links,
-                                        const TheKnowledge *knowledge,
-                                        bool use_DQ ) const
-{
-    if( use_DQ || !ImplHasDNLQ() )
-    {
-        NLQFromDQ( base_xlink, required_links, knowledge );
-    }
-    else
-    {
-        if( base_xlink == XLink::MMAX_Link )
-        {
-            for( PatternLink plink : pattern_query->GetNormalLinks() ) 
-            {
-                if( required_links->count(plink) > 0 )
-                {
-                    XLink req_xlink = required_links->at(plink);
-                    if( req_xlink != XLink::MMAX_Link )
-                        throw MMAXPropagationMismatch();
-                }
-            }   
-        }   
-        else
-        {
-            TRACE("Attempting to vcall on ")(*this)("\n");
-            (void)this->RunNormalLinkedQueryImpl( base_xlink, required_links, knowledge );
-        }
-    }                    
-}                                            
-
-
-void AgentCommon::RunCouplingQuery( multiset<XLink> candidate_links )
-{    
-    // This function establishes the policy for couplings in one place.
-    // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
-    // And it always will be: see #121; para starting at "No!!"
-    // HOWEVER: it is now possible for agents to override this policy.
-
-    // We will always accept MMAX links, so ignore them
-    candidate_links.erase(XLink::MMAX_Link);
-
-    // Check remaining links against each other. EquivalenceRelation is
-    // transitive, so it's enough just to daisy-chain the checks.
-    XLink previous_link;
-    for( XLink current_link : candidate_links )
-    {
-        if( previous_link )
-        {
-            CompareResult cr = equivalence_relation.Compare( previous_link, 
-                                                             current_link );
-            if( cr != EQUAL )
-                throw CouplingMismatch();               
-        }
-        previous_link = current_link;
-    }     
 }
 
 

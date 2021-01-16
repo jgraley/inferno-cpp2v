@@ -56,7 +56,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }
 
 
-bool SearchContainerAgent::ImplHasDNLQ() const
+bool SearchContainerAgent::ImplHasNLQ() const
 {
     return true;
 }
@@ -116,9 +116,9 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
     
-Agent::Completeness AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                            const SolutionMap *required_links,
-                                                            const TheKnowledge *knowledge ) const
+void AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                             const SolutionMap *required_links,
+                                             const TheKnowledge *knowledge ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -132,7 +132,7 @@ Agent::Completeness AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
     PatternLink terminus_plink(this, &terminus);
     SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
     if( req_terminus_it==required_links->end() ) 
-        return INCOMPLETE;
+        return;
     XLink req_terminus_xlink = req_terminus_it->second; 
 
     const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
@@ -140,8 +140,6 @@ Agent::Completeness AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
         throw NoParentMismatch();                    
     if( nugget.parent_xlink != base_xlink )      
         throw TerminusMismatch();     
-        
-    return COMPLETE;
 }                                                                                        
 
 
@@ -205,6 +203,53 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
+void StuffAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const
+{
+    INDENT("#");
+    ASSERT( this );
+    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+
+    // Check pre-restriction
+    CheckLocalMatch(base_xlink.GetChildX().get());
+    
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    
+    PatternLink terminus_plink(this, &terminus);
+    SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
+    if( req_terminus_it==required_links->end() ) 
+        return;
+    XLink req_terminus_xlink = req_terminus_it->second; 
+    
+    XLink x = req_terminus_xlink;
+    bool found = false;
+    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(req_terminus_xlink)("\n");
+    while(true)
+    {
+        if( x == base_xlink )
+        {
+            found = true;
+            TRACEC("Found ")(x)("\n");
+            break;            
+        }        
+        
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(x) );
+        if( !nugget.parent_xlink )
+            break;            
+        x = nugget.parent_xlink;
+        
+        // Putting this here excludes the terminus, as required
+        TRACEC("Move to parent ")(x)("\n"); 
+    }
+    if( !found )
+    {
+        TRACEC("Not found\n");        
+        throw TerminusMismatch();
+    }
+}                                                                                        
+
+
 void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
@@ -240,55 +285,6 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
-Agent::Completeness StuffAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                          const SolutionMap *required_links,
-                                                          const TheKnowledge *knowledge ) const
-{
-    INDENT("#");
-    ASSERT( this );
-    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-
-    // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
-    
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
-    
-    PatternLink terminus_plink(this, &terminus);
-    SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
-    if( req_terminus_it==required_links->end() ) 
-        return INCOMPLETE;
-    XLink req_terminus_xlink = req_terminus_it->second; 
-    
-    XLink x = req_terminus_xlink;
-    bool found = false;
-    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(req_terminus_xlink)("\n");
-    while(true)
-    {
-        if( x == base_xlink )
-        {
-            found = true;
-            TRACEC("Found ")(x)("\n");
-            break;            
-        }        
-        
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(x) );
-        if( !nugget.parent_xlink )
-            break;            
-        x = nugget.parent_xlink;
-        
-        // Putting this here excludes the terminus, as required
-        TRACEC("Move to parent ")(x)("\n"); 
-    }
-    if( !found )
-    {
-        TRACEC("Not found\n");        
-        throw TerminusMismatch();
-    }
-
-    return COMPLETE;
-}                                                                                        
-
-
 Graphable::Block StuffAgent::GetGraphBlockInfo() const
 {
 	// The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the

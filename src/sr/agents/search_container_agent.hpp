@@ -25,7 +25,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
-    virtual bool ImplHasDNLQ() const;
+    virtual bool ImplHasNLQ() const;
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const = 0;
@@ -52,9 +52,9 @@ class AnyNodeAgent : public SearchContainerAgent
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;                                             
-    virtual Completeness RunNormalLinkedQueryImpl( XLink x,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const;                                              
+    virtual void RunNormalLinkedQueryImpl( XLink x,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
 };
 
@@ -92,13 +92,13 @@ public:
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
+    virtual void RunNormalLinkedQueryImpl( XLink x,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                              
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink x,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    virtual Completeness RunNormalLinkedQueryImpl( XLink x,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree

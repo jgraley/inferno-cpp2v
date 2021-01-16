@@ -29,13 +29,7 @@ class TheKnowledge;
 class Agent : public virtual Graphable,
               public virtual Node
 {
-public:
-    enum Completeness
-    {
-        COMPLETE,
-        INCOMPLETE
-    };
-    
+public:  
     enum Phase
     {
         // Really a bitfield
@@ -78,8 +72,15 @@ public:
     
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink base_xlink ) const = 0;                                                
+                                  XLink base_xlink ) const = 0;     
+    
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
+    virtual void RunNormalLinkedQuery( XLink base_xlink,
+                                       const SolutionMap *required_links,
+                                       const TheKnowledge *knowledge,
+                                       bool use_DQ = false ) const = 0;
+    virtual bool ImplHasNLQ() const = 0;                                              
+    virtual void RunCouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
     virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
@@ -87,12 +88,6 @@ public:
     virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
-    virtual void RunNormalLinkedQuery( XLink base_xlink,
-                                       const SolutionMap *required_links,
-                                       const TheKnowledge *knowledge,
-                                       bool use_DQ = false ) const = 0;
-    virtual bool ImplHasDNLQ() const = 0;                                              
-    virtual void RunCouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
     // function<XLink(XLink)> deduplicator
 
@@ -127,21 +122,26 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
+    virtual bool ImplHasNLQ() const;                                              
+    virtual void RunNormalLinkedQueryImpl( XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
+    void NLQFromDQ( XLink base_xlink,
+                    const SolutionMap *required_links,
+                    const TheKnowledge *knowledge ) const;                                              
+    virtual void RunNormalLinkedQuery( XLink base_xlink,
+                                       const SolutionMap *required_links,
+                                       const TheKnowledge *knowledge,
+                                       bool use_DQ = false ) const;
+    virtual void RunCouplingQuery( multiset<XLink> candidate_links );                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
-    virtual bool ImplHasDNLQ() const;                                              
-    virtual Completeness RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
                                const SolutionMap *required_links,
                                const TheKnowledge *knowledge ) const;
-    void NLQFromDQ( XLink base_xlink,
-                    const SolutionMap *required_links,
-                    const TheKnowledge *knowledge ) const;                                              
     virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
@@ -149,11 +149,6 @@ public:
     virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQuery( XLink base_xlink,
-                                       const SolutionMap *required_links,
-                                       const TheKnowledge *knowledge,
-                                       bool use_DQ = false ) const;
-    virtual void RunCouplingQuery( multiset<XLink> candidate_links );                                       
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return map<XLink, XLink>(); /* implement in agents that can expand the domain */ }
 
 protected:

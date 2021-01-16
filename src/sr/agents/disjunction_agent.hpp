@@ -24,10 +24,10 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                                             
-    virtual bool ImplHasDNLQ() const;
-    virtual Completeness RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const;                                              
+    virtual bool ImplHasNLQ() const;
+    virtual void RunNormalLinkedQueryImpl( XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
     
 private:

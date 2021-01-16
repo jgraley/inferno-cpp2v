@@ -91,39 +91,37 @@ private:
                                  XLink base_xlink,
                                  CollectionInterface *x_col,
     		                     CollectionInterface *pattern_col ) const;
+                                           
+    virtual bool ImplHasNLQ() const;
+    virtual void RunNormalLinkedQueryImpl( XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                              
+    void NormalLinkedQuerySequence( XLink base_xlink,
+                                    SequenceInterface *x_seq,
+                                    SequenceInterface *pattern_seq,
+                                    const SolutionMap *required_links,
+                                    const TheKnowledge *knowledge ) const;
+    void NormalLinkedQueryCollection( XLink base_xlink,
+                                      CollectionInterface *x_col,
+                                      CollectionInterface *pattern_col,
+                                      const SolutionMap *required_links,
+                                      const TheKnowledge *knowledge ) const;
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-                                           
-    virtual bool ImplHasDNLQ() const;
-    virtual Completeness RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const;                                              
     void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                     XLink base_xlink,
                                     SequenceInterface *x_seq,
                                     SequenceInterface *pattern_seq,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;
-    void NormalLinkedQuerySequence( XLink base_xlink,
-                                    SequenceInterface *x_seq,
-                                    SequenceInterface *pattern_seq,
-                                    const SolutionMap *required_links,
-                                    const TheKnowledge *knowledge,
-                                    Completeness &completeness ) const;
     void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                       XLink base_xlink,
                                       CollectionInterface *x_col,
                                       CollectionInterface *pattern_col,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
-    void NormalLinkedQueryCollection( XLink base_xlink,
-                                      CollectionInterface *x_col,
-                                      CollectionInterface *pattern_col,
-                                      const SolutionMap *required_links,
-                                      const TheKnowledge *knowledge,
-                                      Completeness &completeness ) const;
                                            
 public:
     virtual void KeyForOverlay( Agent *from );

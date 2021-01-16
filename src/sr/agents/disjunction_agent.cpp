@@ -29,7 +29,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 
 
 void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                         XLink x ) const
+                                            XLink x ) const
 {
     INDENT("∨");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
@@ -60,19 +60,19 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-bool DisjunctionAgent::ImplHasDNLQ() const
+bool DisjunctionAgent::ImplHasNLQ() const
 {
     return true;
 }
 
 
-Agent::Completeness DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
-                                                                const SolutionMap *required_links,
-                                                                const TheKnowledge *knowledge ) const
+void DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+                                                 const SolutionMap *required_links,
+                                                 const TheKnowledge *knowledge ) const
 { 
-    INDENT("Q");
+    INDENT("∨");
     bool found = false;
-    Completeness completeness = COMPLETE;
+    bool complete = true;
     
     // Loop over the options for this disjunction
     FOREACH( const TreePtrInterface &p, GetPatterns() )           
@@ -82,7 +82,7 @@ Agent::Completeness DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink
         
         if( req_it == required_links->end() ) 
         {
-            completeness = INCOMPLETE; // Partial query: skip this one
+            complete = false;
         }
         else
         {
@@ -95,10 +95,8 @@ Agent::Completeness DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink
     }
     
     // We only really have a mismatch if query was full i.e. we tried all the options
-    if( !found && completeness==COMPLETE )
+    if( complete && !found )
         throw NoOptionsMatchedMismatch();
-
-    return completeness;
 }
 
 
