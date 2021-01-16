@@ -111,12 +111,11 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-Agent::Completeness AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                                           XLink base_xlink,
-                                                           const SolutionMap *required_links,
-                                                           const TheKnowledge *knowledge ) const
+void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                            XLink base_xlink,
+                                            const SolutionMap *required_links,
+                                            const TheKnowledge *knowledge ) const
 {
-    return COMPLETE;
 }
     
     
@@ -129,24 +128,19 @@ Agent::Completeness AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAg
 }
     
     
-Agent::Completeness AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                                                       XLink base_xlink,
-                                                       const SolutionMap *required_links,
-                                                       const TheKnowledge *knowledge ) const
+void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
+                                        XLink base_xlink,
+                                        const SolutionMap *required_links,
+                                        const TheKnowledge *knowledge ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    Completeness completeness = COMPLETE;
     if( base_xlink == XLink::MMAX_Link )
     {
         for( PatternLink plink : pattern_query->GetNormalLinks() ) 
         {
-            if( required_links->count(plink) == 0 )
-            {
-                completeness = INCOMPLETE;
-            }
-            else
+            if( required_links->count(plink) > 0 )
             {
                 XLink req_xlink = required_links->at(plink);
                 if( req_xlink != XLink::MMAX_Link )
@@ -157,9 +151,8 @@ Agent::Completeness AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterfac
     else
     {
         TRACE("Attempting to vcall on ")(*this)("\n");
-        completeness = this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
+        this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
     }
-    return completeness;
 }                             
 
 
@@ -273,7 +266,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 query = nlq_conjecture->GetQuery(this);
-                Completeness completeness = RunRegenerationQuery( *query, base_xlink, required_links, knowledge );                                   
+                RunRegenerationQuery( *query, base_xlink, required_links, knowledge );                                   
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     

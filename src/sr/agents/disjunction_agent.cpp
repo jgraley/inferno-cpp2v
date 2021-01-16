@@ -60,12 +60,12 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::Completeness DisjunctionAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                                                XLink base_xlink,
-                                                                const SolutionMap *required_links,
-                                                                const TheKnowledge *knowledge ) const
+void DisjunctionAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                                 XLink base_xlink,
+                                                 const SolutionMap *required_links,
+                                                 const TheKnowledge *knowledge ) const
 { 
-    return RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+    RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
 }
 
 

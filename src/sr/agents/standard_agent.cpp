@@ -388,14 +388,13 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::Completeness StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                                             XLink base_xlink,
-                                                             const SolutionMap *required_links,
-                                                             const TheKnowledge *knowledge ) const
+void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                              XLink base_xlink,
+                                              const SolutionMap *required_links,
+                                              const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
     query.Reset();
-    Completeness completeness = COMPLETE;
 
     // Check pre-restriction
     TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
@@ -417,14 +416,14 @@ Agent::Completeness StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentIn
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            RegenerationQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge, completeness );
+            RegenerationQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            RegenerationQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge, completeness );
+            RegenerationQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge );
         }
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -437,11 +436,7 @@ Agent::Completeness StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentIn
                 
                 TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
                 SolutionMap::const_iterator req_sing_it = required_links->find(sing_plink);
-                if( req_sing_it == required_links->end() ) 
-                {
-                    completeness = INCOMPLETE;
-                }
-                else
+                if( req_sing_it != required_links->end() ) 
                 {
                     XLink req_sing_xlink = req_sing_it->second;                 
                     if( sing_xlink != req_sing_xlink )
@@ -454,7 +449,6 @@ Agent::Completeness StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentIn
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
     }
-    return completeness;
 }
 
 
@@ -463,9 +457,9 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                                                SequenceInterface *x_seq,
                                                SequenceInterface *pattern_seq,
                                                const SolutionMap *required_links,
-                                               const TheKnowledge *knowledge,
-                                               Completeness &completeness ) const
+                                               const TheKnowledge *knowledge ) const
 {
+    Completeness completeness;
     DecidedNormalLinkedQuerySequence(query, base_xlink, x_seq, pattern_seq, required_links, knowledge, completeness);
 }
 
@@ -475,9 +469,9 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
                                                  CollectionInterface *x_col,
                                                  CollectionInterface *pattern_col,
                                                  const SolutionMap *required_links,
-                                                 const TheKnowledge *knowledge,
-                                                 Completeness &completeness ) const
+                                                 const TheKnowledge *knowledge ) const
 {
+    Completeness completeness;
     DecidedNormalLinkedQueryCollection(query, base_xlink, x_col, pattern_col, required_links, knowledge, completeness);
 }
 

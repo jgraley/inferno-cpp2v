@@ -127,19 +127,19 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
-    virtual Completeness RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                                          XLink base_xlink,
-                                                          const SolutionMap *required_links,
-                                                          const TheKnowledge *knowledge ) const;
+    virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                           XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
     virtual bool ImplHasDNLQ() const;                                              
     virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;
-    Completeness RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                                       XLink base_xlink,
-                                       const SolutionMap *required_links,
-                                       const TheKnowledge *knowledge ) const;
+    void RunRegenerationQuery( DecidedQueryAgentInterface &query,
+                               XLink base_xlink,
+                               const SolutionMap *required_links,
+                               const TheKnowledge *knowledge ) const;
     Completeness RunDecidedNormalLinkedQuery( DecidedQueryAgentInterface &query,
                                               XLink base_xlink,
                                               const SolutionMap *required_links,

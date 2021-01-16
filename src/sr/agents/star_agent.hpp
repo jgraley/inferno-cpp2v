@@ -28,10 +28,10 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
-    virtual Completeness RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                                   XLink base_xlink,
-                                                   const SolutionMap *required_links,
-                                                   const TheKnowledge *knowledge ) const;                                                                                          
+    virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                           XLink base_xlink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                                                                          
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual Block GetGraphBlockInfo() const;
 private:
