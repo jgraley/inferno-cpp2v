@@ -125,7 +125,7 @@ Agent::Completeness AgentCommon::RunDecidedNormalLinkedQueryImpl( DecidedQueryAg
                                                                   const SolutionMap *required_links,
                                                                   const TheKnowledge *knowledge ) const
 {
-    return COMPLETE;
+    ASSERTFAIL();
 }
     
     

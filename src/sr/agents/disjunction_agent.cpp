@@ -60,18 +60,18 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-bool DisjunctionAgent::ImplHasDNLQ() const
-{
-    return true;
-}
-
-
 Agent::Completeness DisjunctionAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                                                 XLink base_xlink,
                                                                 const SolutionMap *required_links,
                                                                 const TheKnowledge *knowledge ) const
 { 
     return RunDecidedNormalLinkedQueryImpl( query, base_xlink, required_links, knowledge );
+}
+
+
+bool DisjunctionAgent::ImplHasDNLQ() const
+{
+    return true;
 }
 
 

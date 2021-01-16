@@ -31,27 +31,10 @@ void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-bool NegationAgent::ImplHasDNLQ() const
-{
-    return true;
-}
-
-
 Agent::Completeness NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                                              XLink base_xlink,
                                                              const SolutionMap *required_links,
                                                              const TheKnowledge *knowledge ) const
-{ 
-    // This agent has no normal links, so just do this to populate query
-    RunDecidedQueryImpl( query, base_xlink ); 
-    return COMPLETE;
-}
-
-
-Agent::Completeness NegationAgent::RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
-                                                                    XLink base_xlink,
-                                                                    const SolutionMap *required_links,
-                                                                    const TheKnowledge *knowledge ) const
 { 
     // This agent has no normal links, so just do this to populate query
     RunDecidedQueryImpl( query, base_xlink ); 

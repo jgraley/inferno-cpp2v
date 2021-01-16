@@ -131,6 +131,7 @@ public:
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;
+    virtual bool ImplHasDNLQ() const;                                              
     virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
@@ -143,7 +144,6 @@ public:
                                               XLink base_xlink,
                                               const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const;
-    virtual bool ImplHasDNLQ() const;                                              
     void NLQFromDQ( DecidedQuery &query,
                      XLink base_xlink,
                      const SolutionMap *required_links,

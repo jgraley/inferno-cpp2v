@@ -85,32 +85,47 @@ public:
 private:
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
-                               SequenceInterface *px,
-    	                       SequenceInterface *pattern ) const;
+                               SequenceInterface *x_seq,
+    	                       SequenceInterface *pattern_seq ) const;
     void DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                  XLink base_xlink,
-                                 CollectionInterface *px,
-    		                     CollectionInterface *pattern ) const;
-    virtual bool ImplHasDNLQ() const;
+                                 CollectionInterface *x_col,
+    		                     CollectionInterface *pattern_col ) const;
     virtual Completeness RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
+    void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
+                                    XLink base_xlink,
+                                    SequenceInterface *x_seq,
+                                    SequenceInterface *pattern_seq,
+                                    const SolutionMap *required_links,
+                                    const TheKnowledge *knowledge,
+                                    Completeness &completeness ) const;
+    void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink,
+                                      CollectionInterface *x_col,
+                                      CollectionInterface *pattern_col,
+                                      const SolutionMap *required_links,
+                                      const TheKnowledge *knowledge,
+                                      Completeness &completeness ) const;
+                                           
+    virtual bool ImplHasDNLQ() const;
     virtual Completeness RunDecidedNormalLinkedQueryImpl( DecidedQueryAgentInterface &query,
                                                           XLink base_xlink,
                                                           const SolutionMap *required_links,
                                                           const TheKnowledge *knowledge ) const;                                              
     void DecidedNormalLinkedQuerySequence( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
-                                           SequenceInterface *px,
-                                           SequenceInterface *pattern,
+                                           SequenceInterface *x_seq,
+                                           SequenceInterface *pattern_seq,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge,
                                            Completeness &completeness ) const;
     void DecidedNormalLinkedQueryCollection( DecidedQueryAgentInterface &query,
                                              XLink base_xlink,
-                                             CollectionInterface *px,
-                                             CollectionInterface *pattern,
+                                             CollectionInterface *x_col,
+                                             CollectionInterface *pattern_col,
                                              const SolutionMap *required_links,
                                              const TheKnowledge *knowledge,
                                              Completeness &completeness ) const;
