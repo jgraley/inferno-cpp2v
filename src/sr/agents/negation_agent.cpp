@@ -27,7 +27,6 @@ void NegationAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     
     // Context is abnormal because patterns must not match
     query.RegisterAbnormalLink( PatternLink(this, GetPattern()), base_xlink ); // Link into X, abnormal
-    query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 
 

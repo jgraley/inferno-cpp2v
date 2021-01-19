@@ -130,8 +130,6 @@ public:
     virtual void RegisterAbnormalLink( PatternLink plink, XLink xlink ) = 0; 
     virtual void RegisterMultiplicityLink( PatternLink plink, XLink xlink ) = 0; 
     
-    virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
-
     class RAIIDecisionsCleanup
     {
     public:
@@ -155,8 +153,6 @@ public:
     virtual const Links &GetAbnormalLinks() const = 0; 
     virtual const Links &GetMultiplicityLinks() const = 0; 
     virtual Links GetAllLinks() const = 0; 
-
-    virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
     virtual void Invalidate( int bc ) = 0;
     virtual void SetChoice( int bc, Choice newc ) = 0;
@@ -187,16 +183,12 @@ public:
     void RegisterNormalLink( PatternLink plink, XLink xlink ); 
     void RegisterAbnormalLink( PatternLink plink, XLink xlink ); 
     void RegisterMultiplicityLink( PatternLink plink, XLink xlink ); 
-
-    void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
     const Links &GetNormalLinks() const { return normal_links; } 
     const Links &GetAbnormalLinks() const { return abnormal_links; }
     const Links &GetMultiplicityLinks() const { return multiplicity_links; }
     Links GetAllLinks() const; 
-
-    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
-      
+     
     const Choices &GetChoices() const { return choices; }
     const Ranges &GetDecisions() const { return decisions; }
     void Invalidate( int bc );
@@ -208,7 +200,6 @@ public:
     
 private: friend class Conjecture;
     const Agent *base_agent;
-    shared_ptr<BooleanEvaluator> evaluator;
     Links normal_links; 
     Links abnormal_links; 
     Links multiplicity_links; 

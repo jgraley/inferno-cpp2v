@@ -179,13 +179,6 @@ void PatternQuery::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
 }	
 
 
-void DecidedQuery::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
-{
-	ASSERT( !evaluator ); // should not register more than one
-	evaluator = e;
-}	
-        
-        
 void DecidedQuery::Invalidate( int bc )
 {
     // TODO may not need all thes preconditions
@@ -313,7 +306,6 @@ void DecidedQuery::Reset()
     normal_links.clear();
 	abnormal_links.clear();
     multiplicity_links.clear();
-    evaluator = shared_ptr<BooleanEvaluator>();    
     next_decision = decisions.begin();  
     next_choice = choices.begin();  
 }
