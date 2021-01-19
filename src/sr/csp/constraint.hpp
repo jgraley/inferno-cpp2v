@@ -15,7 +15,6 @@
 namespace SR
 {
 class Agent;
-class BooleanEvaluator;
 class TheKnowledge;
 };
 

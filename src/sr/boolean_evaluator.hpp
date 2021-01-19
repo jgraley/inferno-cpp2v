@@ -2,18 +2,13 @@
 #define BOOLEAN_EVALUATOR_HPP
 
 #include <list>
+#include <functional>
 
 namespace SR
 {
-
-// Interface class for a functor object that can produce the result of 
-// some N to 1 operator on bools.
-class BooleanEvaluator
-{
-public:
-	virtual bool operator()( list<bool> &inputs ) const = 0;
-	virtual ~BooleanEvaluator() {}
-};
+    
+// Now just a functor that evaluates down the list
+typedef function<bool(list<bool>)> BooleanEvaluator;
  
 };
 

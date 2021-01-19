@@ -29,11 +29,6 @@ public:
     
 private:
     virtual const TreePtrInterface *GetPattern() const = 0;
-    class BooleanEvaluatorNot : public BooleanEvaluator
-    {
-	public:
-   	    virtual bool operator()( list<bool> &inputs ) const;
-	};
 };
 
 

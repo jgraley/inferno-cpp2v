@@ -8,7 +8,14 @@ shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterAbnormalLink( PatternLink(this, GetPattern()) );
-	pq->RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    
+    auto evaluator = make_shared<BooleanEvaluator>( [](list<bool> inputs) -> bool
+    {
+        ASSERT( inputs.size() == 1 ); // we should remember one block
+        return !inputs.front();        
+    });
+    
+	pq->RegisterEvaluator( evaluator );
     return pq;
 }
 
@@ -63,11 +70,4 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()} } } } };
     return block;
-}
-
-
-bool NegationAgent::BooleanEvaluatorNot::operator()( list<bool> &inputs ) const
-{
-	ASSERT( inputs.size() == 1 ); // we should remember one block
-	return !inputs.front();
 }
