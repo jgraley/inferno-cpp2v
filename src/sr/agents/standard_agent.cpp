@@ -26,6 +26,10 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
             sequences.emplace( make_pair(pattern_seq, Sequence(this, phase, pattern_seq)) );
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
             collections.emplace( make_pair(pattern_col, Collection(this, phase, pattern_col)) );
+        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(ie) )        
+            singulars.emplace( make_pair(pattern_sing, Singular(this, phase, pattern_sing)) );
+        else
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
     }
     algo->planned = true;
 }
@@ -121,6 +125,14 @@ StandardAgent::Plan::Collection::Collection( Plan *plan, Phase phase, Collection
             non_stars.insert( plink );
         }
     }
+}
+
+
+StandardAgent::Plan::Singular::Singular( Plan *plan, Phase phase, TreePtrInterface *pattern )
+{
+    ASSERT( pattern );
+    if( *pattern )
+        plink = PatternLink(plan->algo, pattern);
 }
 
 
@@ -411,14 +423,14 @@ void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            NormalLinkedQuerySequence( base_xlink, p_x_seq, pattern_seq, required_links, knowledge );
+            NormalLinkedQuerySequence( base_xlink, p_x_seq, plan.sequences.at(pattern_seq), required_links, knowledge );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            NormalLinkedQueryCollection( base_xlink, p_x_col, pattern_col, required_links, knowledge );
+            NormalLinkedQueryCollection( base_xlink, p_x_col, plan.collections.at(pattern_col), required_links, knowledge );
         }
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -426,13 +438,13 @@ void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
             {
                 TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-                auto sing_plink = PatternLink(this, pattern_sing);
+                auto sing_plink = plan.singulars.at(pattern_sing).plink;
                 auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
                 
-                TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
                 if( required_links->count(sing_plink) > 0 ) 
                 {
                     XLink req_sing_xlink = required_links->at(sing_plink);                
+                    TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(req_sing_xlink)("\n");
                     if( sing_xlink != req_sing_xlink )
                         throw SingularMismatch();
                 }
@@ -448,17 +460,13 @@ void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
 
 void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
                                                SequenceInterface *x_seq,
-                                               SequenceInterface *pattern_seq,
+                                               const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
     INDENT("S");
     ASSERT( planned );
-
-    const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
-
-    TRACEC("DNLQ sequence: %d plinks\n", pattern_seq->size());
-
+    
     // The only true unary constraint is that every child x link
     // is in some sequence (because that can be read directly off the
     // nugget).
@@ -487,7 +495,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
         }
     }
     
-    // If the pattern_seq begins with a non-star, constrain the child x to be the 
+    // If the pattern begins with a non-star, constrain the child x to be the 
     // front node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_front ) // depends on x_seq
     {
@@ -500,7 +508,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
         }
     }
 
-    // If the pattern_seq ends with a non-star, constrain the child x to be the 
+    // If the pattern ends with a non-star, constrain the child x to be the 
     // back node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_back ) // depends on x_seq
     {
@@ -513,7 +521,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
         }
     }
 
-    // Adjacent pairs of non-stars in the pattern_seq should correspond to adjacent
+    // Adjacent pairs of non-stars in the pattern should correspond to adjacent
     // pairs of child x nodes. Only needs the two child x nodes, so binary constraint.
     for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of x_seq
     {
@@ -530,7 +538,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
         }
     }
     
-    // Gapped pairs of non-stars in the pattern_seq (i.e. stars in between) should 
+    // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
     // correspond to pairs of child x nodes that are ordered correctly. Only needs 
     // the two child x nodes, so binary constraint.    
     for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of x_seq
@@ -550,13 +558,12 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
 
 void StandardAgent::NormalLinkedQueryCollection( XLink base_xlink,
                                                  CollectionInterface *x_col,
-                                                 CollectionInterface *pattern_col,
+                                                 const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 {
     INDENT("C");
     bool incomplete = false;
-    const Plan::Collection &plan_col = plan.collections.at(pattern_col);
 
     // The only true unary constraint is that every child x link
     // is in some collection (because that can be read directly off the
@@ -633,14 +640,14 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            RegenerationQuerySequence( query, base_xlink, p_x_seq, pattern_seq, required_links, knowledge );
+            RegenerationQuerySequence( query, base_xlink, p_x_seq, plan.sequences.at(pattern_seq), required_links, knowledge );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            RegenerationQueryCollection( query, base_xlink, p_x_col, pattern_col, required_links, knowledge );
+            RegenerationQueryCollection( query, base_xlink, p_x_col, plan.collections.at(pattern_col), required_links, knowledge );
         }
     }
 }
@@ -649,16 +656,12 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                                XLink base_xlink,
                                                SequenceInterface *x_seq,
-                                               SequenceInterface *pattern_seq,
+                                               const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
     INDENT("S");
     ASSERT( planned );
-
-    const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
-
-    TRACEC("RQ sequence: %d plinks\n", pattern_seq->size());
 
     // If we got this far with an undersized x_seq, something has gone wrong 
     // in the logic, and the following code will crash into x_seq->end(). 
@@ -732,12 +735,11 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                                  XLink base_xlink,
                                                  CollectionInterface *x_col,
-                                                 CollectionInterface *pattern_col,
+                                                 const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 {
     INDENT("C");
-    const Plan::Collection &plan_col = plan.collections.at(pattern_col);
 
     if( plan_col.star_plink )
     {

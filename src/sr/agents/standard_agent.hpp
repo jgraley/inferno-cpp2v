@@ -73,9 +73,17 @@ public:
             set<PatternLink> non_stars;
         };
         
+        struct Singular
+        {
+            Singular( Plan *plan, Phase phase, TreePtrInterface *sing );
+            
+            PatternLink plink;
+        };
+        
         StandardAgent *algo;
         map<SequenceInterface *, Sequence> sequences;
         map<CollectionInterface *, Collection> collections;
+        map<TreePtrInterface *, Singular> singulars;
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
@@ -98,12 +106,12 @@ private:
                                            const TheKnowledge *knowledge ) const;                                              
     void NormalLinkedQuerySequence( XLink base_xlink,
                                     SequenceInterface *x_seq,
-                                    SequenceInterface *pattern_seq,
+                                    const Plan::Sequence &plan_seq,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;
     void NormalLinkedQueryCollection( XLink base_xlink,
                                       CollectionInterface *x_col,
-                                      CollectionInterface *pattern_col,
+                                      const Plan::Collection &plan_col,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
@@ -113,13 +121,13 @@ private:
     void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                     XLink base_xlink,
                                     SequenceInterface *x_seq,
-                                    SequenceInterface *pattern_seq,
+                                    const Plan::Sequence &plan_seq,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;
     void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                       XLink base_xlink,
                                       CollectionInterface *x_col,
-                                      CollectionInterface *pattern_col,
+                                      const Plan::Collection &plan_col,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
                                            
