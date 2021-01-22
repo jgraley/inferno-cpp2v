@@ -226,6 +226,7 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     ContainerCommon& operator=(const ContainerCommon& other)
     {
         (void)Impl::operator=(other);
+        (void)ContainerInterface::operator=(other); // For Itemise
         return *this;
     }
     
