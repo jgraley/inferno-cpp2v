@@ -156,8 +156,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
     const vector< Itemiser::Element * > pattern_memb = Itemise();
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        SequenceInterface *pattern_seq = plan_seq.pattern;        
-        for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
+        for( SequenceInterface::iterator pit = plan_seq.pattern->begin(); pit != plan_seq.pattern->end(); ++pit )                 
         {
             const TreePtrInterface *pe = &*pit; 
             ASSERT( pe );
@@ -176,8 +175,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
         
     for( const Plan::Collection &plan_col : plan.collections )
     {
-        CollectionInterface *pattern_col = plan_col.pattern;
-        for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
+        for( CollectionInterface::iterator pit = plan_col.pattern->begin(); pit != plan_col.pattern->end(); ++pit )                 
         {
             const TreePtrInterface *pe = &*pit; 
             if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
@@ -194,8 +192,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
     
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
-        TreePtrInterface *pattern_ptr = plan_sing.pattern;
-        pattern_query->RegisterNormalLink(PatternLink(this, pattern_ptr));
+        pattern_query->RegisterNormalLink(PatternLink(this, plan_sing.pattern));
     }
 
     return pattern_query;
@@ -215,28 +212,24 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_seq.itemise_index];
-        SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(p_x_item);
+        auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
         ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
         DecidedQuerySequence( query, base_xlink, p_x_seq, plan_seq );
     }
 
     for( const Plan::Collection &plan_col : plan.collections )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_col.itemise_index];
-        CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(p_x_item);
+        auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
         DecidedQueryCollection( query, base_xlink, p_x_col, plan_col );
     }
 
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
-        TreePtrInterface *pattern_sing = plan_sing.pattern;
-        Itemiser::Element *p_x_item = x_memb[plan_sing.itemise_index];
-        TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(p_x_item);
-        auto sing_plink = PatternLink(this, pattern_sing);
-        auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
+        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
         ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+        auto sing_plink = PatternLink(this, plan_sing.pattern);
+        auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
         query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
     }
 }
@@ -401,20 +394,17 @@ void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_seq.itemise_index];
-        SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(p_x_item);
+        auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
         NormalLinkedQuerySequence( base_xlink, p_x_seq, plan_seq, required_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_col.itemise_index];
-        CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(p_x_item);
+        auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
         NormalLinkedQueryCollection( base_xlink, p_x_col, plan_col, required_links, knowledge );
     }
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_sing.itemise_index];
-        TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(p_x_item);
+        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
         
         auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);        
         if( required_links->count(plan_sing.plink) > 0 ) 
@@ -598,14 +588,12 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_seq.itemise_index];
-        SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(p_x_item);
+        auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
         RegenerationQuerySequence( query, base_xlink, p_x_seq, plan_seq, required_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
-        Itemiser::Element *p_x_item = x_memb[plan_col.itemise_index];
-        CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(p_x_item);
+        auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
         RegenerationQueryCollection( query, base_xlink, p_x_col, plan_col, required_links, knowledge );
     }
 }
