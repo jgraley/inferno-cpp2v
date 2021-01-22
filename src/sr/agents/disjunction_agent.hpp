@@ -23,7 +23,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                                             
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( XLink base_xlink,
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;

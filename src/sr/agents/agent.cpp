@@ -111,7 +111,7 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::RunNormalLinkedQueryImpl( XLink base_xlink,
+void AgentCommon::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
 {
@@ -125,13 +125,13 @@ bool AgentCommon::ImplHasNLQ() const
 }
 
     
-void AgentCommon::NLQFromDQ( XLink base_xlink,
+void AgentCommon::NLQFromDQ( PatternLink base_plink,
                              const SolutionMap *required_links,
                              const TheKnowledge *knowledge ) const
 {    
-    TRACE("common DNLQ: ")(*this)(" at ")(base_xlink)("\n");
+    TRACE("common DNLQ: ")(*this)(" at ")(base_plink)("\n");
     auto query = CreateDecidedQuery();
-    RunDecidedQuery( *query, base_xlink );
+    RunDecidedQuery( *query, required_links->at(base_plink) );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
@@ -165,18 +165,18 @@ void AgentCommon::NLQFromDQ( XLink base_xlink,
 }                           
                                 
     
-void AgentCommon::RunNormalLinkedQuery( XLink base_xlink,
+void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
                                         const SolutionMap *required_links,
                                         const TheKnowledge *knowledge,
                                         bool use_DQ ) const
 {
     if( use_DQ || !ImplHasNLQ() )
     {
-        NLQFromDQ( base_xlink, required_links, knowledge );
+        NLQFromDQ( base_plink, required_links, knowledge );
     }
     else
     {
-        if( base_xlink == XLink::MMAX_Link )
+        if( required_links->at(base_plink) == XLink::MMAX_Link )
         {
             for( PatternLink plink : pattern_query->GetNormalLinks() ) 
             {
@@ -191,7 +191,7 @@ void AgentCommon::RunNormalLinkedQuery( XLink base_xlink,
         else
         {
             TRACE("Attempting to vcall on ")(*this)("\n");
-            (void)this->RunNormalLinkedQueryImpl( base_xlink, required_links, knowledge );
+            (void)this->RunNormalLinkedQueryImpl( base_plink, required_links, knowledge );
         }
     }                    
 }                                            

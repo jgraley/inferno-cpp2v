@@ -116,7 +116,7 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
     
-void AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+void AnyNodeAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                              const SolutionMap *required_links,
                                              const TheKnowledge *knowledge ) const
 {
@@ -125,9 +125,9 @@ void AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
     // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
+    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
     
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
     SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
@@ -138,7 +138,7 @@ void AnyNodeAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
     const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
     if( !nugget.parent_xlink )
         throw NoParentMismatch();                    
-    if( nugget.parent_xlink != base_xlink )      
+    if( nugget.parent_xlink != required_links->at(base_plink) )      
         throw TerminusMismatch();     
 }                                                                                        
 
@@ -203,7 +203,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-void StuffAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+void StuffAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const
 {
@@ -212,9 +212,9 @@ void StuffAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
     // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
+    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
     
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
     SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
@@ -224,10 +224,10 @@ void StuffAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
     
     XLink x = req_terminus_xlink;
     bool found = false;
-    TRACE("Seeking ")(base_xlink)(" in ancestors of ")(req_terminus_xlink)("\n");
+    TRACE("Seeking ")(base_plink)(" in ancestors of ")(req_terminus_xlink)("\n");
     while(true)
     {
-        if( x == base_xlink )
+        if( x == required_links->at(base_plink) )
         {
             found = true;
             TRACEC("Found ")(x)("\n");

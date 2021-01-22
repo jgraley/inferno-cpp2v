@@ -100,10 +100,10 @@ public:
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
 
 private:
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                  
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
                                SequenceInterface *x_seq,
@@ -112,21 +112,31 @@ private:
                                  XLink base_xlink,
                                  CollectionInterface *x_col,
     		                     const Plan::Collection &plan_col ) const;
+    void DecidedQuerySingular( DecidedQueryAgentInterface &query,
+                               XLink base_xlink,
+                               TreePtrInterface *x_sing,
+	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( XLink base_xlink,
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    void NormalLinkedQuerySequence( XLink base_xlink,
+    void NormalLinkedQuerySequence( PatternLink base_plink,
                                     SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;
-    void NormalLinkedQueryCollection( XLink base_xlink,
+    void NormalLinkedQueryCollection( PatternLink base_plink,
                                       CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
+    void NormalLinkedQuerySingular( PatternLink base_plink,
+                                    TreePtrInterface *x_sing,
+                                    const Plan::Singular &plan_sing,
+                                    const SolutionMap *required_links,
+                                    const TheKnowledge *knowledge ) const;
+                                    
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,

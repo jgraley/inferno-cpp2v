@@ -122,7 +122,7 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
          ++pit )                 
     {
         const TreePtrInterface *pe = &*pit; 
-        auto plink = PatternLink(plan->algo, &*pit);
+        PatternLink plink(plan->algo, &*pit);
 		ASSERT( pe );
         if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
@@ -228,9 +228,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     {
         auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
         ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-        auto sing_plink = PatternLink(this, plan_sing.pattern);
-        auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
-        query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
+        DecidedQuerySingular( query, base_xlink, p_x_sing, plan_sing );
     }
 }
 
@@ -374,50 +372,58 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 }
 
 
+void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
+                                          XLink base_xlink,
+                                          TreePtrInterface *x_sing,
+		                                  const Plan::Singular &plan_sing ) const
+{
+    PatternLink sing_plink(this, plan_sing.pattern);
+    XLink sing_xlink(base_xlink.GetChildX(), x_sing);
+    query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
+}
+
+
 bool StandardAgent::ImplHasNLQ() const
 {
     return true;
 }
 
 
-void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+void StandardAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                               const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
 
     // Check pre-restriction
-    TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
-    CheckLocalMatch(base_xlink.GetChildX().get());
-
-    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   // Get the members of x corresponding to pattern's class
+    TRACE(*this)("::CheckLocalMatch(")(base_plink)(")\n");
+    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
+    
+    // Get the members of x corresponding to pattern's class
+    vector< Itemiser::Element * > x_memb = Itemise( required_links->at(base_plink).GetChildX().get() );   
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
-        NormalLinkedQuerySequence( base_xlink, p_x_seq, plan_seq, required_links, knowledge );
+        ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
+        NormalLinkedQuerySequence( base_plink, p_x_seq, plan_seq, required_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
-        NormalLinkedQueryCollection( base_xlink, p_x_col, plan_col, required_links, knowledge );
+        ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
+        NormalLinkedQueryCollection( base_plink, p_x_col, plan_col, required_links, knowledge );
     }
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
         auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
-        
-        auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);        
-        if( required_links->count(plan_sing.plink) > 0 ) 
-        {
-            XLink req_sing_xlink = required_links->at(plan_sing.plink);                
-            if( sing_xlink != req_sing_xlink )
-                throw SingularMismatch();
-        }
+        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+        NormalLinkedQuerySingular( base_plink, p_x_sing, plan_sing, required_links, knowledge );
     }
 }
 
 
-void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
+void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
                                                SequenceInterface *x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
@@ -458,7 +464,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // front node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_front ) // depends on x_seq
     {
-        XLink front_xlink(base_xlink.GetChildX(), &x_seq->front());
+        XLink front_xlink(required_links->at(base_plink).GetChildX(), &x_seq->front());
         if( required_links->count(plan_seq.non_star_at_front) > 0 ) 
         {        
             XLink req_xlink = required_links->at(plan_seq.non_star_at_front);
@@ -471,7 +477,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // back node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_back ) // depends on x_seq
     {
-        XLink back_xlink(base_xlink.GetChildX(), &x_seq->back());
+        XLink back_xlink(required_links->at(base_plink).GetChildX(), &x_seq->back());
         if( required_links->count(plan_seq.non_star_at_back) > 0 ) 
         {        
             XLink req_xlink = required_links->at(plan_seq.non_star_at_back);
@@ -515,7 +521,7 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
 }
 
 
-void StandardAgent::NormalLinkedQueryCollection( XLink base_xlink,
+void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
                                                  CollectionInterface *x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
@@ -575,6 +581,22 @@ void StandardAgent::NormalLinkedQueryCollection( XLink base_xlink,
 }
 
 
+void StandardAgent::NormalLinkedQuerySingular( PatternLink base_plink,
+                                               TreePtrInterface *x_sing,
+                                               const Plan::Singular &plan_sing,
+                                               const SolutionMap *required_links,
+                                               const TheKnowledge *knowledge ) const
+{
+    XLink sing_xlink(required_links->at(base_plink).GetChildX(), x_sing);        
+    if( required_links->count(plan_sing.plink) > 0 ) 
+    {
+        XLink req_sing_xlink = required_links->at(plan_sing.plink);                
+        if( sing_xlink != req_sing_xlink )
+            throw SingularMismatch();
+    }
+}
+
+                                               
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               XLink base_xlink,
                                               const SolutionMap *required_links,

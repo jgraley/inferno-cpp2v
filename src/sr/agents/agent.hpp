@@ -75,7 +75,7 @@ public:
                                   XLink base_xlink ) const = 0;     
     
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
-    virtual void RunNormalLinkedQuery( XLink base_xlink,
+    virtual void RunNormalLinkedQuery( PatternLink base_plink,
                                        const SolutionMap *required_links,
                                        const TheKnowledge *knowledge,
                                        bool use_DQ = false ) const = 0;
@@ -123,13 +123,13 @@ public:
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
     virtual bool ImplHasNLQ() const;                                              
-    virtual void RunNormalLinkedQueryImpl( XLink base_xlink,
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
-    void NLQFromDQ( XLink base_xlink,
+    void NLQFromDQ( PatternLink base_plink,
                     const SolutionMap *required_links,
                     const TheKnowledge *knowledge ) const;                                              
-    virtual void RunNormalLinkedQuery( XLink base_xlink,
+    virtual void RunNormalLinkedQuery( PatternLink base_plink,
                                        const SolutionMap *required_links,
                                        const TheKnowledge *knowledge,
                                        bool use_DQ = false ) const;

@@ -66,7 +66,7 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
 
-void DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
+void DisjunctionAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 { 
@@ -87,7 +87,7 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
         else
         {
             XLink req_xlink = req_it->second; 
-            if( req_xlink == base_xlink )
+            if( req_xlink == required_links->at(base_plink) )
                 found = true; // This is the taken option
             else if( req_xlink != XLink::MMAX_Link )
                 throw MMAXRequiredOnUntakenOptionMismatch();
