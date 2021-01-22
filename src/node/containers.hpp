@@ -186,6 +186,18 @@ public:
     virtual void insert( const TreePtrInterface &gx ) = 0;
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
+    virtual const TreePtrInterface &front()
+    {
+        ASSERT( !empty() );
+        return *begin();
+    }
+    virtual const TreePtrInterface &back()
+    {
+        ASSERT( !empty() );
+        iterator t = end();
+        --t;
+        return *t;
+    }
     virtual void erase( const iterator_interface &it ) = 0;
     virtual bool empty() { return begin()==end(); }
     virtual int size() const
@@ -408,7 +420,18 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     {
     	my_end.Impl::iterator::operator=( Impl::end() );
     	return my_end;
+    }  
+    virtual const TreePtr<VALUE_TYPE> &front()
+    {
+        ASSERT( !ContainerCommon<Impl>::empty() );
+        return Impl::front();
     }
+    virtual const TreePtr<VALUE_TYPE> &back()
+    {
+        ASSERT( !ContainerCommon<Impl>::empty() );
+        return Impl::back();
+    }
+
 	Sequential( const ContainerInterface &cns )
 	{
 		// TODO support const_interator properly and get rid of this const_cast

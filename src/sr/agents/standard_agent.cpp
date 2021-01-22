@@ -38,7 +38,6 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, Phase phase, SequenceInterf
     
     num_non_star = 0;
     SequenceInterface::iterator pit_prev;
-    TreePtr<Node> pe_prev;
     PatternLink plink_prev;
     PatternLink non_star_queue;
     list<PatternLink> stars_queue;
@@ -57,11 +56,8 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, Phase phase, SequenceInterf
          pit != pattern->end(); 
          ++pit ) 
     {
-		TreePtr<Node> pe( *pit );
-		ASSERT( pe );
         PatternLink plink(plan->algo, &*pit);
-        ASSERT( plink );
-        if( dynamic_pointer_cast<StarAgent>(pe) )
+        if( dynamic_cast<StarAgent *>(plink.GetChildAgent()) )
         {               
             pit_last_star = pit;
             stars_queue.push_back( plink );
@@ -83,23 +79,18 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, Phase phase, SequenceInterf
             non_star_queue = plink;
         }     
         pit_prev = pit;      
-        pe_prev = pe;
         plink_prev = plink; 
     }
     run_lambda( PatternLink() );
     
-    if( (SequenceInterface::iterator)(pattern->begin()) != pattern->end() )
+    if( !pattern->empty() )
     {        
-        plink_front = PatternLink(plan->algo, &*(pattern->begin()));
-        TreePtr<Node> pfront( *(pattern->begin()) );
-        if( !dynamic_pointer_cast<StarAgent>(pfront) )
+        plink_front = PatternLink(plan->algo, &pattern->front());
+        if( !dynamic_cast<StarAgent *>(plink_front.GetChildAgent()) )
             non_star_at_front = plink_front;
             
-        SequenceInterface::iterator pit_back = pattern->end();
-        --pit_back;
-        TreePtr<Node> pback( *pit_back );
-        plink_back = PatternLink(plan->algo, &*pit_back);
-        if( !dynamic_pointer_cast<StarAgent>(pback) )
+        plink_back = PatternLink(plan->algo, &pattern->back());
+        if( !dynamic_cast<StarAgent *>(plink_back.GetChildAgent()) )
             non_star_at_back = plink_back;        
     }
 }
