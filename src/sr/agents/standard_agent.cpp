@@ -430,10 +430,9 @@ void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
                 auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
                 
                 TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(required_links->at( sing_plink ))("\n");
-                SolutionMap::const_iterator req_sing_it = required_links->find(sing_plink);
-                if( req_sing_it != required_links->end() ) 
+                if( required_links->count(sing_plink) > 0 ) 
                 {
-                    XLink req_sing_xlink = req_sing_it->second;                 
+                    XLink req_sing_xlink = required_links->at(sing_plink);                
                     if( sing_xlink != req_sing_xlink )
                         throw SingularMismatch();
                 }
@@ -465,10 +464,10 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // nugget).
     for( PatternLink plink : plan_seq.non_stars )  // independent of x_seq
     {
-        SolutionMap::const_iterator it = required_links->find(plink);
-        if( it != required_links->end() ) 
+        if( required_links->count(plink) > 0 ) 
         {
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            XLink req_xlink = required_links->at(plink);
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE) )
                 throw WrongContainerSequenceMismatch(); // Be in the right sequence        
         }
@@ -478,11 +477,11 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // Note: checking x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
     for( PatternLink plink : plan_seq.non_stars )  // depends on x_seq
-    {
-        SolutionMap::const_iterator it = required_links->find(plink);
-        if( it != required_links->end() ) 
+    {        
+        if( required_links->count(plink) > 0 ) 
         {
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            XLink req_xlink = required_links->at(plink);
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.container == x_seq) )
                 throw WrongContainerSequenceMismatch(); // Be in the right sequence        
         }
@@ -492,11 +491,11 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // front node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_front ) // depends on x_seq
     {
-        SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_front);
-        if( it != required_links->end() ) 
+        XLink front_xlink(base_xlink.GetChildX(), &x_seq->front());
+        if( required_links->count(plan_seq.non_star_at_front) > 0 ) 
         {        
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
-            if( !(nugget.container == x_seq && nugget.iterator == x_seq->begin()) )
+            XLink req_xlink = required_links->at(plan_seq.non_star_at_front);
+            if( req_xlink != front_xlink )
                 throw NotAtFrontMismatch();
         }
     }
@@ -505,13 +504,11 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // back node in the collection at our base x. Uses base so a binary constraint.
     if( plan_seq.non_star_at_back ) // depends on x_seq
     {
-        SolutionMap::const_iterator it = required_links->find(plan_seq.non_star_at_back);
-        if( it != required_links->end() ) 
-        {
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
-            ContainerInterface::iterator it_incremented = nugget.iterator;
-            ++it_incremented;        
-            if( !(nugget.container == x_seq && it_incremented == x_seq->end()) )
+        XLink back_xlink(base_xlink.GetChildX(), &x_seq->back());
+        if( required_links->count(plan_seq.non_star_at_back) > 0 ) 
+        {        
+            XLink req_xlink = required_links->at(plan_seq.non_star_at_back);
+            if( req_xlink != back_xlink )
                 throw NotAtBackMismatch();
         }
     }
@@ -520,16 +517,17 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // pairs of child x nodes. Only needs the two child x nodes, so binary constraint.
     for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of x_seq
     {
-        SolutionMap::const_iterator a_it = required_links->find(p.first);
-        SolutionMap::const_iterator b_it = required_links->find(p.second);
-        if( a_it == required_links->end() || b_it == required_links->end() ) 
-            continue;
-        const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_it->second) );        
-        const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_it->second) );       
-        ContainerInterface::iterator a_it_incremented = a_nugget.iterator;
-        ++a_it_incremented;
-        if( !(a_nugget.container == b_nugget.container && a_it_incremented == b_nugget.iterator) )
-             throw NotSuccessorSequenceMismatch();
+        if( required_links->count(p.first) > 0 && required_links->count(p.second) > 0 )
+        {
+            XLink a_req_xlink = required_links->at(p.first);
+            XLink b_req_xlink = required_links->at(p.second);
+            const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
+            const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );       
+            ContainerInterface::iterator a_it_incremented = a_nugget.iterator;
+            ++a_it_incremented;
+            if( !(a_nugget.container == b_nugget.container && a_it_incremented == b_nugget.iterator) )
+                 throw NotSuccessorSequenceMismatch();
+        }
     }
     
     // Gapped pairs of non-stars in the pattern_seq (i.e. stars in between) should 
@@ -537,14 +535,15 @@ void StandardAgent::NormalLinkedQuerySequence( XLink base_xlink,
     // the two child x nodes, so binary constraint.    
     for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of x_seq
     {
-        SolutionMap::const_iterator a_it = required_links->find(p.first);
-        SolutionMap::const_iterator b_it = required_links->find(p.second);
-        if( a_it == required_links->end() || b_it == required_links->end() ) 
-            continue;
-        const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_it->second) );        
-        const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_it->second) );        
-        if( !(a_nugget.container == b_nugget.container && a_nugget.index < b_nugget.index) )
-             throw NotAfterSequenceMismatch();
+        if( required_links->count(p.first) > 0 && required_links->count(p.second) > 0 )
+        {
+            XLink a_req_xlink = required_links->at(p.first);
+            XLink b_req_xlink = required_links->at(p.second);
+            const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
+            const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );        
+            if( !(a_nugget.container == b_nugget.container && a_nugget.index < b_nugget.index) )
+                throw NotAfterSequenceMismatch();
+        }
     }
 }
 
@@ -564,10 +563,10 @@ void StandardAgent::NormalLinkedQueryCollection( XLink base_xlink,
     // nugget).
     for( PatternLink plink : plan_col.non_stars )  // independent of x_col
     {
-        SolutionMap::const_iterator it = required_links->find(plink);
-        if( it != required_links->end() ) 
+        if( required_links->count(plink) > 0 )
         {
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            XLink req_xlink = required_links->at(plink);
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION) )
                 throw WrongContainerCollectionMismatch(); // Be in a sequence
         }
@@ -576,26 +575,25 @@ void StandardAgent::NormalLinkedQueryCollection( XLink base_xlink,
     // Require that every child x link is in the correct collection.
     for( PatternLink plink : plan_col.non_stars )  // depends on x_col
     {
-        SolutionMap::const_iterator it = required_links->find(plink);
-        if( it != required_links->end() ) 
+        if( required_links->count(plink) > 0 )
         {
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(it->second) );        
+            XLink req_xlink = required_links->at(plink);
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
             if( nugget.container != x_col )
                 throw WrongContainerCollectionMismatch(); // Be in the right sequence
         }
     }
 
     // Require that every child x link is different (alldiff).
-    SubCollectionRange::ExclusionSet x_so_far;
+    set<XLink> x_so_far;
     for( PatternLink plink : plan_col.non_stars ) // independent of x_col
     {
-        SolutionMap::const_iterator req_it = required_links->find(plink);
-        if( req_it != required_links->end() ) 
+        if( required_links->count(plink) > 0 )
         {
-            XLink req_xlink = req_it->second; 
-            if( x_so_far.count( req_xlink.GetXPtr() ) > 0 )
+            XLink req_xlink = required_links->at(plink);
+            if( x_so_far.count( req_xlink ) > 0 )
                 throw CollisionCollectionMismatch(); // Already removed this one: collision
-            x_so_far.insert( req_xlink.GetXPtr() );
+            x_so_far.insert( req_xlink );
         }
     }
 
@@ -675,10 +673,10 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 
         if( run->predecessor )
         {
-            SolutionMap::const_iterator pred_it = required_links->find(run->predecessor);
-            if( pred_it == required_links->end() )         
+            if( required_links->count(run->predecessor) == 0 )         
                 break; // can't do any more in the current run
-            XLink pred_xlink = pred_it->second; 
+            
+            XLink pred_xlink = required_links->at(run->predecessor);
             const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
             xit = pred_nugget.iterator;
             ++xit; // get past the non-star
@@ -690,10 +688,10 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
         
         if( run->successor )
         {
-            SolutionMap::const_iterator succ_it = required_links->find(run->successor);
-            if( succ_it == required_links->end() )         
+            if( required_links->count(run->successor) == 0 )         
                 break; // can't do any more in the current run
-            XLink succ_xlink = succ_it->second; 
+            
+            XLink succ_xlink = required_links->at(run->successor);
             const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
             xit_star_limit = succ_nugget.iterator;
         }
@@ -746,7 +744,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
         // Determine the set of non-star tree pointers 
         SubCollectionRange::ExclusionSet excluded_x;
         for( PatternLink plink : plan_col.non_stars ) // independent of x_col
-            excluded_x.insert( required_links->find(plink)->second.GetXPtr() );
+            excluded_x.insert( required_links->at(plink).GetXPtr() );
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
         TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), x_col->begin(), x_col->end() ) );
