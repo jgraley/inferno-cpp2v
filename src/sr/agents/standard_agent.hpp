@@ -42,9 +42,19 @@ public:
     {
         void ConstructPlan( StandardAgent *algo, Phase phase );
         
-        struct Sequence
+        struct Item
         {
-            Sequence( Plan *plan, Phase phase, SequenceInterface *pattern );
+            Item( int ii ) : 
+                itemise_index(ii)
+            {
+            }
+            int itemise_index;
+        };
+        
+        struct Sequence : Item
+        {
+            Sequence( int ii, Plan *plan, Phase phase, SequenceInterface *pattern_ );
+            
             struct Run
             {
                 PatternLink predecessor; // nonstar before run or NULL of at start
@@ -52,6 +62,7 @@ public:
                 PatternLink successor;   // nonstar after run or NULL of at end
             };
             
+            SequenceInterface *pattern;
             int num_non_star;
             ContainerInterface::iterator pit_last_star;
             PatternLink plink_front; // ?...
@@ -64,26 +75,28 @@ public:
             set< shared_ptr<Run> > star_runs; // ...?***?...
         };
         
-        struct Collection
+        struct Collection : Item
         {
-            Collection( Plan *plan, Phase phase, CollectionInterface *pattern );
+            Collection( int ii, Plan *plan, Phase phase, CollectionInterface *pattern_ );
             
+            CollectionInterface *pattern;
             const TreePtrInterface *p_star;
             PatternLink star_plink;
             set<PatternLink> non_stars;
         };
         
-        struct Singular
+        struct Singular : Item
         {
-            Singular( Plan *plan, Phase phase, TreePtrInterface *sing );
+            Singular( int ii, Plan *plan, Phase phase, TreePtrInterface *pattern_ );
             
+            TreePtrInterface *pattern;
             PatternLink plink;
         };
         
         StandardAgent *algo;
-        map<SequenceInterface *, Sequence> sequences;
-        map<CollectionInterface *, Collection> collections;
-        map<TreePtrInterface *, Singular> singulars;
+        list<Sequence> sequences;
+        list<Collection> collections;
+        list<Singular> singulars;
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
@@ -94,11 +107,11 @@ private:
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
                                SequenceInterface *x_seq,
-    	                       SequenceInterface *pattern_seq ) const;
+    	                       const Plan::Sequence &plan_seq ) const;
     void DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                  XLink base_xlink,
                                  CollectionInterface *x_col,
-    		                     CollectionInterface *pattern_col ) const;
+    		                     const Plan::Collection &plan_col ) const;
                                            
     virtual bool ImplHasNLQ() const;
     virtual void RunNormalLinkedQueryImpl( XLink base_xlink,

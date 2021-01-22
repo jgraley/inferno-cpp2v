@@ -7,6 +7,8 @@
 #include "scr_engine.hpp"
 #include "link.hpp"
 
+#define ITEMS_BY_PLAN
+
 using namespace SR;
 
 void StandardAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine )
@@ -20,22 +22,29 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 {
     algo = algo_;
     const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
+    int ii=0;
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
-            sequences.emplace( make_pair(pattern_seq, Sequence(this, phase, pattern_seq)) );
+            sequences.emplace_back( Sequence(ii, this, phase, pattern_seq) );
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
-            collections.emplace( make_pair(pattern_col, Collection(this, phase, pattern_col)) );
+            collections.emplace_back( Collection(ii, this, phase, pattern_col) );
         else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(ie) )        
-            singulars.emplace( make_pair(pattern_sing, Singular(this, phase, pattern_sing)) );
+        {
+            if( *pattern_sing ) // only make plans for non-null singular pointers
+                singulars.emplace_back( Singular(ii, this, phase, pattern_sing) );
+        }
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+        ii++;
     }
     algo->planned = true;
 }
 
 
-StandardAgent::Plan::Sequence::Sequence( Plan *plan, Phase phase, SequenceInterface *pattern )
+StandardAgent::Plan::Sequence::Sequence( int ii, Plan *plan, Phase phase, SequenceInterface *pattern_ ) :
+    Item(ii),
+    pattern(pattern_)
 {
     if( phase == IN_REPLACE_ONLY )
         return;
@@ -100,7 +109,9 @@ StandardAgent::Plan::Sequence::Sequence( Plan *plan, Phase phase, SequenceInterf
 }
 
 
-StandardAgent::Plan::Collection::Collection( Plan *plan, Phase phase, CollectionInterface *pattern )
+StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, CollectionInterface *pattern_ ) :
+    Item(ii),
+    pattern(pattern_)
 {
     if( phase == IN_REPLACE_ONLY )
         return;
@@ -128,11 +139,12 @@ StandardAgent::Plan::Collection::Collection( Plan *plan, Phase phase, Collection
 }
 
 
-StandardAgent::Plan::Singular::Singular( Plan *plan, Phase phase, TreePtrInterface *pattern )
+StandardAgent::Plan::Singular::Singular( int ii, Plan *plan, Phase phase, TreePtrInterface *pattern_ ) :
+    Item(ii),
+    pattern(pattern_)
 {
     ASSERT( pattern );
-    if( *pattern )
-        plink = PatternLink(plan->algo, pattern);
+    plink = PatternLink(plan->algo, pattern);
 }
 
 
@@ -142,57 +154,50 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
     auto pattern_query = make_shared<PatternQuery>(this);
 
     const vector< Itemiser::Element * > pattern_memb = Itemise();
-    FOREACH( Itemiser::Element *ie, pattern_memb )
+    for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
+        SequenceInterface *pattern_seq = plan_seq.pattern;        
+        for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
         {
-            const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
-
-   			for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
-   			{
-                const TreePtrInterface *pe = &*pit; 
-                ASSERT( pe );
-                if( dynamic_cast<StarAgent *>(pe->get()) )
-                {
-                    if( pit != plan_seq.pit_last_star )
-                        pattern_query->RegisterDecision( true ); // Inclusive, please.
-                    pattern_query->RegisterAbnormalLink(PatternLink(this, pe));    
-                }
-                else
-                {
-                    pattern_query->RegisterNormalLink(PatternLink(this, pe));    
-                }
-            }
-        }
-        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
-        {
-            const Plan::Collection &plan_col = plan.collections.at(pattern_col);
-
-   			for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
-   			{
-                const TreePtrInterface *pe = &*pit; 
-				if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
-                {
-                    pattern_query->RegisterDecision( false ); // Exclusive, please
-				    pattern_query->RegisterNormalLink(PatternLink(this, pe));    	     
-                }
-		    }
-            if( plan_col.star_plink )
+            const TreePtrInterface *pe = &*pit; 
+            ASSERT( pe );
+            if( dynamic_cast<StarAgent *>(pe->get()) )
             {
-                pattern_query->RegisterAbnormalLink( plan_col.star_plink );   		                    
+                if( pit != plan_seq.pit_last_star )
+                    pattern_query->RegisterDecision( true ); // Inclusive, please.
+                pattern_query->RegisterAbnormalLink(PatternLink(this, pe));    
+            }
+            else
+            {
+                pattern_query->RegisterNormalLink(PatternLink(this, pe));    
             }
         }
-        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
+    }
+        
+    for( const Plan::Collection &plan_col : plan.collections )
+    {
+        CollectionInterface *pattern_col = plan_col.pattern;
+        for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
         {
-            if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be nullptr meaning no restriction            
-                pattern_query->RegisterNormalLink(PatternLink(this, pattern_ptr));
+            const TreePtrInterface *pe = &*pit; 
+            if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
+            {
+                pattern_query->RegisterDecision( false ); // Exclusive, please
+                pattern_query->RegisterNormalLink(PatternLink(this, pe));    	     
+            }
         }
-        else
+        if( plan_col.star_plink )
         {
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+            pattern_query->RegisterAbnormalLink( plan_col.star_plink );   		                    
         }
     }
     
+    for( const Plan::Singular &plan_sing : plan.singulars )
+    {
+        TreePtrInterface *pattern_ptr = plan_sing.pattern;
+        pattern_query->RegisterNormalLink(PatternLink(this, pattern_ptr));
+    }
+
     return pattern_query;
 }
 
@@ -206,47 +211,33 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
 
-    // Recurse through the children. Note that the itemiser internally does a
-    // dynamic_cast onto the type of pattern, and itemises over that type. x must
-    // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   // Get the members of x corresponding to pattern's class
-    ASSERT( pattern_memb.size() == x_memb.size() );
-    for( int i=0; i<pattern_memb.size(); i++ )
-    {
-        ASSERT( pattern_memb[i] )( "itemise returned null element");
-        ASSERT( x_memb[i] )( "itemise returned null element");
 
-        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
-        {
-            SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
-            ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedQuerySequence( query, base_xlink, p_x_seq, pattern_seq );
-        }
-        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
-        {
-            CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
-            ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( query, base_xlink, p_x_col, pattern_col );
-        }
-        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
-        {
-            if( TreePtr<Node>(*pattern_sing) ) // TreePtrs are allowed to be nullptr meaning no restriction
-            {
-                TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-                auto sing_plink = PatternLink(this, pattern_sing);
-                auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
-                ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_sing)("\n");
-                query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
-            }
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
-        }
+    for( const Plan::Sequence &plan_seq : plan.sequences )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_seq.itemise_index];
+        SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(p_x_item);
+        ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
+        DecidedQuerySequence( query, base_xlink, p_x_seq, plan_seq );
+    }
+
+    for( const Plan::Collection &plan_col : plan.collections )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_col.itemise_index];
+        CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(p_x_item);
+        ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
+        DecidedQueryCollection( query, base_xlink, p_x_col, plan_col );
+    }
+
+    for( const Plan::Singular &plan_sing : plan.singulars )
+    {
+        TreePtrInterface *pattern_sing = plan_sing.pattern;
+        Itemiser::Element *p_x_item = x_memb[plan_sing.itemise_index];
+        TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(p_x_item);
+        auto sing_plink = PatternLink(this, pattern_sing);
+        auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
+        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+        query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
     }
 }
 
@@ -254,11 +245,11 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                           XLink base_xlink,
                                           SequenceInterface *x_seq,
-		                                  SequenceInterface *pattern_seq ) const
+		                                  const Plan::Sequence &plan_seq ) const
 {
     INDENT("S");
     ASSERT( planned );
-    const Plan::Sequence &plan_seq = plan.sequences.at(pattern_seq);
+    SequenceInterface *pattern_seq = plan_seq.pattern;
     int num_non_star = plan_seq.num_non_star;
     ContainerInterface::iterator pit_last_star = plan_seq.pit_last_star;
 
@@ -337,12 +328,11 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             XLink base_xlink,
                                             CollectionInterface *x_col,
-		 					                CollectionInterface *pattern_col ) const
+		 					                const Plan::Collection &plan_col ) const
 {
     INDENT("C");
 
-    const Plan::Collection &plan_col = plan.collections.at(pattern_col);
-
+    CollectionInterface *pattern_col = plan_col.pattern;
     SubCollectionRange::ExclusionSet excluded_x;
     
     for( PatternLink plink : plan_col.non_stars )
@@ -407,52 +397,31 @@ void StandardAgent::RunNormalLinkedQueryImpl( XLink base_xlink,
     TRACE(*this)("::CheckLocalMatch(")(base_xlink)(")\n");
     CheckLocalMatch(base_xlink.GetChildX().get());
 
-    // Recurse through the children. Note that the itemiser internally does a
-    // dynamic_cast onto the type of pattern, and itemises over that type. x must
-    // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   // Get the members of x corresponding to pattern's class
-    ASSERT( pattern_memb.size() == x_memb.size() );
-    for( int i=0; i<pattern_memb.size(); i++ )
-    {
-        ASSERT( pattern_memb[i] )( "itemise returned null element");
-        ASSERT( x_memb[i] )( "itemise returned null element");
 
-        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
+    for( const Plan::Sequence &plan_seq : plan.sequences )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_seq.itemise_index];
+        SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(p_x_item);
+        NormalLinkedQuerySequence( base_xlink, p_x_seq, plan_seq, required_links, knowledge );
+    }
+    for( const Plan::Collection &plan_col : plan.collections )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_col.itemise_index];
+        CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(p_x_item);
+        NormalLinkedQueryCollection( base_xlink, p_x_col, plan_col, required_links, knowledge );
+    }
+    for( const Plan::Singular &plan_sing : plan.singulars )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_sing.itemise_index];
+        TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(p_x_item);
+        
+        auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);        
+        if( required_links->count(plan_sing.plink) > 0 ) 
         {
-            SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
-            ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            NormalLinkedQuerySequence( base_xlink, p_x_seq, plan.sequences.at(pattern_seq), required_links, knowledge );
-        }
-        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
-        {
-            CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
-            ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            NormalLinkedQueryCollection( base_xlink, p_x_col, plan.collections.at(pattern_col), required_links, knowledge );
-        }
-        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
-        {
-            if( TreePtr<Node>(*pattern_sing) ) // TreePtrs are allowed to be nullptr meaning no restriction
-            {
-                TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-                ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-                auto sing_plink = plan.singulars.at(pattern_sing).plink;
-                auto sing_xlink = XLink(base_xlink.GetChildX(), p_x_sing);
-                
-                if( required_links->count(sing_plink) > 0 ) 
-                {
-                    XLink req_sing_xlink = required_links->at(sing_plink);                
-                    TRACE("Member %d is singlular, pattern=", i)(sing_plink)(" x=")(sing_xlink)(" required x=")(req_sing_xlink)("\n");
-                    if( sing_xlink != req_sing_xlink )
-                        throw SingularMismatch();
-                }
-            }
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+            XLink req_sing_xlink = required_links->at(plan_sing.plink);                
+            if( sing_xlink != req_sing_xlink )
+                throw SingularMismatch();
         }
     }
 }
@@ -624,31 +593,20 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("Q");
     query.Reset();
 
-    // Recurse through the children. Note that the itemiser internally does a
-    // dynamic_cast onto the type of pattern, and itemises over that type. x must
-    // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > pattern_memb = Itemise();
-    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   // Get the members of x corresponding to pattern's class
-    ASSERT( pattern_memb.size() == x_memb.size() );
-    for( int i=0; i<pattern_memb.size(); i++ )
-    {
-        ASSERT( pattern_memb[i] )( "itemise returned null element");
-        ASSERT( x_memb[i] )( "itemise returned null element");
+    // Get the members of x corresponding to pattern's class
+    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
 
-        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
-        {
-            SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
-            ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            RegenerationQuerySequence( query, base_xlink, p_x_seq, plan.sequences.at(pattern_seq), required_links, knowledge );
-        }
-        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
-        {
-            CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
-            ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            RegenerationQueryCollection( query, base_xlink, p_x_col, plan.collections.at(pattern_col), required_links, knowledge );
-        }
+    for( const Plan::Sequence &plan_seq : plan.sequences )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_seq.itemise_index];
+        SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(p_x_item);
+        RegenerationQuerySequence( query, base_xlink, p_x_seq, plan_seq, required_links, knowledge );
+    }
+    for( const Plan::Collection &plan_col : plan.collections )
+    {
+        Itemiser::Element *p_x_item = x_memb[plan_col.itemise_index];
+        CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(p_x_item);
+        RegenerationQueryCollection( query, base_xlink, p_x_col, plan_col, required_links, knowledge );
     }
 }
 
