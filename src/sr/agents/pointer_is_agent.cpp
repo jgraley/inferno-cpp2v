@@ -91,3 +91,9 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
     return block;
 }
 
+
+void PointerIsAgent::Reset()
+{
+    AgentCommon::Reset();
+    cache.Reset();
+}

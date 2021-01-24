@@ -23,6 +23,9 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
     algo = algo_;
     const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
     int ii=0;
+    ASSERT( sequences.empty() );
+    ASSERT( collections.empty() );
+    ASSERT( singulars.empty() );
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
@@ -208,7 +211,15 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     // Check pre-restriction
     CheckLocalMatch(base_xlink.GetChildX().get());
 
-    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   // Get the members of x corresponding to pattern's class
+    // Get the members of x corresponding to pattern's class
+    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
+    
+    for( const Plan::Singular &plan_sing : plan.singulars )
+    {
+        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
+        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+        DecidedQuerySingular( query, base_xlink, p_x_sing, plan_sing );
+    }
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
@@ -222,13 +233,6 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
         DecidedQueryCollection( query, base_xlink, p_x_col, plan_col );
-    }
-
-    for( const Plan::Singular &plan_sing : plan.singulars )
-    {
-        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
-        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-        DecidedQuerySingular( query, base_xlink, p_x_sing, plan_sing );
     }
 }
 
@@ -346,7 +350,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                    
         // No need to provide the container x_decision; iterators will keep it alive and are
         // not invalidated by re-construction of the container (they're proxies for iterators on x_col).
-        xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false );    
+        xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false, x_decision );    
         
         // We have our x element
         query.RegisterNormalLink( plink, XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
@@ -402,6 +406,12 @@ void StandardAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
     // Get the members of x corresponding to pattern's class
     vector< Itemiser::Element * > x_memb = Itemise( required_links->at(base_plink).GetChildX().get() );   
 
+    for( const Plan::Singular &plan_sing : plan.singulars )
+    {
+        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
+        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
+        NormalLinkedQuerySingular( base_plink, p_x_sing, plan_sing, required_links, knowledge );
+    }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
@@ -413,12 +423,6 @@ void StandardAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
         NormalLinkedQueryCollection( base_plink, p_x_col, plan_col, required_links, knowledge );
-    }
-    for( const Plan::Singular &plan_sing : plan.singulars )
-    {
-        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
-        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySingular( base_plink, p_x_sing, plan_sing, required_links, knowledge );
     }
 }
 

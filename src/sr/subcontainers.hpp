@@ -73,7 +73,7 @@ struct SubContainerRangeExclusions : SubContainerRange
 		exclusion_iterator();
 		exclusion_iterator( const exclusion_iterator &i );
 		exclusion_iterator( const iterator_interface &ib,
-                            shared_ptr<const SubContainerRangeExclusions> container_ );
+                            weak_ptr<const SubContainerRangeExclusions> container_ );
 		exclusion_iterator &operator=( const iterator_interface &ib );
 		exclusion_iterator &operator++();
 		exclusion_iterator &operator--();
@@ -94,7 +94,7 @@ struct SubContainerRangeExclusions : SubContainerRange
         void NormaliseForward();
         void NormaliseReverse();
 		shared_ptr<iterator_interface> pib;
-        shared_ptr<const SubContainerRangeExclusions> container;
+        weak_ptr<const SubContainerRangeExclusions> container;
 	};        
     
     SubContainerRangeExclusions() {}

@@ -35,6 +35,8 @@ public:
      */
     Value operator()( Key key, CannonicalOperation op );
         
+    void Reset();    
+    
 public:
     map< Key, Value > cache;
 };

@@ -16,6 +16,7 @@ class TheKnowledge : public Traceable
 {
 public:
     void Build( PatternLink root_plink, XLink root_xlink );
+    void Clear();
     enum SubtreeMode
     {
         // Behaviour for main domain population: we will check uniqueness

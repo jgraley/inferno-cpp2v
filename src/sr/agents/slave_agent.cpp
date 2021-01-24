@@ -88,8 +88,10 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl()
     
     // Run the slave engine
     (void)my_scr_engine->RepeatingCompareReplace( &dest, &master_keys );   
-    
     ASSERT( dest );
+    
+    master_keys.clear(); // save memory
+    
     return dest;
 }
 

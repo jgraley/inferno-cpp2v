@@ -250,6 +250,13 @@ Graphable::Block NestedAgent::GetGraphBlockInfo() const
 }
 
 
+void NestedAgent::Reset()
+{
+    AgentCommon::Reset();
+    cache.Reset();
+}
+
+
 XLink NestedArrayAgent::Advance( XLink x, 
                                  string *depth ) const
 {

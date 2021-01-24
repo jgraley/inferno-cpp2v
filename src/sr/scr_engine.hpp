@@ -80,7 +80,8 @@ public:
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                const CouplingKeysMap *master_keys );
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
-                                 const CouplingKeysMap *master_keys );                              
+                                 const CouplingKeysMap *master_keys );                   
+                                            
 private:
     void KeyReplaceNodes( const CouplingKeysMap *coupling_keys) const;
     TreePtr<Node> Replace() const;

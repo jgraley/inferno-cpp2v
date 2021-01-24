@@ -112,6 +112,7 @@ string Join( const list<string> &ls, string pre, string sep, string post )
 {
     bool first = true;
     string s;
+    s += pre;
     for( string si : ls )
     {
         if( !first )
@@ -119,6 +120,7 @@ string Join( const list<string> &ls, string pre, string sep, string post )
         first = false;
         s += si;
     }
+    s += post;
     return s;
 } 
 

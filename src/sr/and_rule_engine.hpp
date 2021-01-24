@@ -128,6 +128,7 @@ public:
     void EnsureChoicesHaveIterators();
 
     const CouplingKeysMap &GetCouplingKeys();
+    const void ClearCouplingKeys();
 
 private:    
     void RecordLink( LocatedLink link );

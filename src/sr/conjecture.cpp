@@ -230,6 +230,17 @@ bool Conjecture::Increment()
 }
 
 
+void Conjecture::Reset()
+{
+    for( AgentRecords::const_iterator rit=plan.agent_records.begin(); 
+         rit != plan.agent_records.end();
+         ++rit )
+    {
+        rit->second.query->Reset();
+    }
+}
+
+
 shared_ptr<DecidedQuery> Conjecture::GetQuery(const Agent *agent)
 {
     return plan.agent_records.at(agent).query;

@@ -31,6 +31,7 @@ public:
     	pattern(p)
     {
     }
+    virtual void Reset();    
 
 protected: 
     TransformOfAgent() {}    

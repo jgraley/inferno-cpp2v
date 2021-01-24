@@ -66,3 +66,10 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
                                {PatternLink(this, &pattern).GetShortName()} } } } };
     return block;
 }
+
+
+void TransformOfAgent::Reset()
+{
+    AgentCommon::Reset();
+    cache.Reset();
+}

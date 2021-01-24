@@ -271,8 +271,6 @@ void SimpleSolver::Test( const Assignments &assigns )
 
 void SimpleSolver::TraceProblem() const
 {
-    INDENT("T");
-
     TRACE("SimpleSolver; %d constraints:", plan.constraints.size());
     for( shared_ptr<Constraint> c : plan.constraints )    
         c->TraceProblem();   

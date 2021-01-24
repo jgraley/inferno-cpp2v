@@ -78,7 +78,7 @@ SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator( const exclu
 
 
 SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator( const iterator_interface &ib,
-                                                                     shared_ptr<const SubContainerRangeExclusions> container_ ) :
+                                                                     weak_ptr<const SubContainerRangeExclusions> container_ ) :
     container(container_)
 {            
     pib = ib.Clone(); // Note we are not clone-on-write, so clone here for in case we write later
@@ -199,14 +199,18 @@ SubContainerRangeExclusions::exclusion_iterator::operator string()
 
 void SubContainerRangeExclusions::exclusion_iterator::NormaliseForward()
 {
-    while( container->IsExcluded(*pib) )
+    shared_ptr<const SubContainerRangeExclusions> lc = container.lock();
+    ASSERT( lc )("Container went away\n");
+    while( lc->IsExcluded(*pib) )
         pib->operator++();
 }
 
 
 void SubContainerRangeExclusions::exclusion_iterator::NormaliseReverse()
 {
-    while( container->IsExcluded(*pib) )
+    shared_ptr<const SubContainerRangeExclusions> lc = container.lock();
+    ASSERT( lc )("Container went away\n");
+    while( lc->IsExcluded(*pib) )
         pib->operator--();
 }
 
@@ -223,8 +227,8 @@ void SubContainerRangeExclusions::SetExclusions( const ExclusionSet &exclusions_
 {    
     exclusions = make_shared<const ExclusionSet>( exclusions_ );
     
-    auto sp_this = dynamic_pointer_cast<SubContainerRangeExclusions>(shared_from_this());
-    ASSERT( sp_this );
+    weak_ptr<const SubContainerRangeExclusions> sp_this = 
+        dynamic_pointer_cast<SubContainerRangeExclusions>(shared_from_this());
     my_exclusive_begin = make_shared<exclusion_iterator>( *my_begin, sp_this );
     my_exclusive_end = make_shared<exclusion_iterator>( *my_end, sp_this );
 }

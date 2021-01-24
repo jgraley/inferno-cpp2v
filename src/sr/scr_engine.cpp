@@ -382,6 +382,10 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // replace does so it can change the root node.
     plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );
            
+#ifdef BUILD_THE_KNOWLEDGE
+    knowledge.Clear();
+#endif
+
     TRACE("Search successful, now keying replace nodes\n");
     plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
     KeyReplaceNodes( &plan.and_rule_engine->GetCouplingKeys() );
@@ -400,7 +404,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, *plan.my_agents )
-        a->ResetKey();
+        a->Reset();
+    plan.and_rule_engine->ClearCouplingKeys(); // save memory
 }
 
 

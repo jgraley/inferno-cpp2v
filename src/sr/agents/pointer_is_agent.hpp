@@ -20,6 +20,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual Block GetGraphBlockInfo() const;
+    virtual void Reset();    
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
     

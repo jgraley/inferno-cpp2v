@@ -112,6 +112,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty );   
 
     pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
+    dirty_grass.clear(); // save memory
 }
 
 

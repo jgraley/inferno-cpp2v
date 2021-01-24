@@ -3,6 +3,57 @@
 #include <cxxabi.h>
 #include <stdio.h>
 
+//////////////////////////// LeakCheck ///////////////////////////////
+
+LeakCheck::~LeakCheck()
+{
+    instance_counts.at(origin).count--;
+    instance_counts.at(origin).destructs.insert( GetOrigin() );
+}
+
+
+void LeakCheck::Construct()
+{
+    if( instance_counts.count(origin)==0 )
+        instance_counts[origin] = {0};
+    instance_counts.at(origin).count++;
+}
+
+
+void LeakCheck::DumpCounts( int min )
+{
+    FTRACEC("LeakCheck:\n");
+    for( auto p : instance_counts )  
+        if( p.second.count >= min )
+            FTRACEC(p.first)
+                   (" %llu instances\n", p.second.count)
+                   ("destructs: ")(p.second.destructs)("\n");
+}
+
+#define TRY(SEQ, LEVEL) \
+    if( !ON_STACK( __builtin_frame_address(LEVEL) ) ) \
+        break; \
+    SEQ.push_back( __builtin_extract_return_addr(__builtin_return_address(LEVEL)) ); 
+ 
+
+LeakCheck::Origin LeakCheck::GetOrigin()
+{
+    Origin o;
+    do 
+    {
+        TRY(o, 1)
+        TRY(o, 2)
+        TRY(o, 3)
+        TRY(o, 4)
+        TRY(o, 5)
+    } while(0);
+    return o;
+}
+
+#undef TRY
+
+map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
+
 //////////////////////////// SerialNumber ///////////////////////////////
 
 SerialNumber::SNType SerialNumber::master_location_serial;
@@ -75,12 +126,6 @@ string SerialNumber::GetSerialString() const
     return ss;
 }
 
-
-void *location(SerialNumber::SNType location) // for GCC
-{
-    return SerialNumber::GetLocation(location);
-}
-
 //////////////////////////// SatelliteSerial ///////////////////////////////
 
 SatelliteSerial::SatelliteSerial()
@@ -119,5 +164,17 @@ string SatelliteSerial::GetSerialString() const
 }
 
 
-
 SatelliteSerial::SerialByMotherSerial SatelliteSerial::serial_by_child_node;    
+
+//////////////////////////// free functions ///////////////////////////////
+
+void *GetLocation(SerialNumber::SNType location) // for GCC
+{
+    return SerialNumber::GetLocation(location);
+}
+
+void DumpCounts( int min = 0 ) // for GCC
+{
+    FTRACEC("Dumping counts...\n");
+    LeakCheck::DumpCounts(min);
+}

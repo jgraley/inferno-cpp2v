@@ -275,7 +275,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 query = nlq_conjecture->GetQuery(this);
-                RunRegenerationQuery( *query, base_xlink, required_links, knowledge );                                   
+                RunRegenerationQuery( *query, base_xlink, required_links, knowledge );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
@@ -287,7 +287,10 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                 // own comparison of the normal links. Permit the conjecture
                 // to move to a new set of choices.
                 if( !nlq_conjecture->Increment() )
+                {
+                    nlq_conjecture->Reset();
                     throw; // Conjecture has run out of choices to try.
+                }
                 // Conjecture would like us to try again with new choices
             }
         }     
@@ -415,6 +418,13 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xli
 }
 
 
+void AgentCommon::ResetNLQConjecture()
+{
+    // Theoretically this should be done inside the lambda's destructor, but can't put code there
+    nlq_conjecture->Reset();
+}
+
+
 void AgentCommon::SetKey( CouplingKey keylink )
 {
     ASSERT(keylink);
@@ -434,7 +444,7 @@ CouplingKey AgentCommon::GetKey()
 }
 
 
-void AgentCommon::ResetKey()
+void AgentCommon::Reset()
 {
     coupling_key = LocatedLink();
 }

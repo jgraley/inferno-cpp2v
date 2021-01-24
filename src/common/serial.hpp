@@ -4,8 +4,46 @@
 #include <map>
 #include <bits/stdint-uintn.h>
 #include <unordered_map>
+#include <vector>
+#include <map>
+#include <set>
 
 using namespace std;
+
+class LeakCheck
+{
+public:
+    inline LeakCheck() :
+        origin( GetOrigin() )
+    { 
+        Construct();       
+    }
+    inline LeakCheck( const LeakCheck &other ) :
+        origin( GetOrigin() )
+    {
+        // Identity semantics: ignore "other"
+        Construct();        
+    }
+    ~LeakCheck();
+    inline LeakCheck &operator=( const LeakCheck &other )
+    {
+        // Identity semantics: ignore "other"
+        return *this;
+    }
+    void Construct();
+    static void DumpCounts( int min );
+    
+private:    
+    typedef vector<void *> Origin;
+    struct Block
+    {
+        int count;
+        set<Origin> destructs;
+    };
+    static Origin GetOrigin();
+    const Origin origin;
+    static map<Origin, Block> instance_counts;
+};
 
 //
 // The idea is to provide an alternative to raw pointers for ordering our sets, miltsets etc.
@@ -64,6 +102,7 @@ protected:
 public:
     static void SetStep( int s );
     static void *GetLocation( SNType location );
+
     inline pair<SNType, SNType> GetSerialNumber() const 
     {
         return make_pair(location, serial); // This is enough for uniqueness
@@ -79,14 +118,16 @@ public:
     
     SatelliteSerial();
     explicit SatelliteSerial( const SerialNumber *mother, const void *satellite );
+
     string GetSerialString() const;
     
 private:
     typedef map<const void *, SatelliteSNType> SerialBySatelliteInstance;
-    // Index by location, then serial. Serial scales with inptu tree size so 
+    // Index by location, then serial. Serial scales with input tree size so
     // use unordered_map for that.
     typedef map< SerialNumber::SNType, unordered_map< SerialNumber::SNType, SerialBySatelliteInstance > > SerialByMotherSerial;
     static SerialByMotherSerial serial_by_child_node;    
+
     SatelliteSNType serial;
 };
 

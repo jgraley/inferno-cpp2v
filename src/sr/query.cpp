@@ -337,8 +337,10 @@ bool DecidedQueryCommon::Range::operator==(const Range &o) const // Only require
         return false;
     if( inclusive != o.inclusive )
         return false;
-    if( container != o.container )
-        return false;
+    // Inconvenient: it suffices that we supply a new container 
+    // with the same begin, end, inclusive and iteration behaviour
+    //if( container != o.container )
+    //    return false; 
     return true;
 }
 

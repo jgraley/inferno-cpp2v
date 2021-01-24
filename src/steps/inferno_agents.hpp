@@ -176,6 +176,7 @@ struct NestedAgent : public virtual AgentCommonDomainExtender
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
+    virtual void Reset();    
     
 private:
     mutable CacheByLocation cache;    

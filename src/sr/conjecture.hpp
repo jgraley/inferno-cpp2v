@@ -52,7 +52,8 @@ public:
     void EnsureChoicesHaveIterators();
     
 	bool IncrementAgent( AgentRecords::const_iterator rit, int bc );			                                     
-    bool Increment(); // returns true for try again, false for give up				 
+    bool Increment(); // returns true for try again, false for give up		
+    void Reset();		 
     bool IncrementConjecture( AgentRecords::const_iterator rit );     
         				       
     // Standard interface for decided compare functions

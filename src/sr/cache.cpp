@@ -15,3 +15,8 @@ CacheByLocation::Value CacheByLocation::operator()( Key key, CannonicalOperation
     return x;
 }
 
+
+void CacheByLocation::Reset()
+{
+    cache.clear();
+}

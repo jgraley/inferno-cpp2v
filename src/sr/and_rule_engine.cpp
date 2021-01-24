@@ -23,7 +23,7 @@
 //#define TEST_PATTERN_QUERY
 
 // This now works!
-#define USE_SOLVER
+//#define USE_SOLVER
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
@@ -646,6 +646,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             TRACE("Caught Mismatch exception, retrying the lambda\n", i);    
         }                             
     } 
+    agent->ResetNLQConjecture(); // save memory
 }      
 
 
@@ -739,7 +740,8 @@ void AndRuleEngine::Compare( XLink root_xlink,
             // RegisterDecision() will return the current choice for that decision, if absent it will
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.    
-            DecidedCompare( root_link );            
+            DecidedCompare( root_link );       
+            my_coupling_keys.clear(); // save memory     
 #endif
             basic_solution[plan.root_plink] = root_xlink;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
@@ -751,8 +753,8 @@ void AndRuleEngine::Compare( XLink root_xlink,
             {            
                 ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
             }
-
             RegenerationPass();
+            basic_solution.clear(); // save memory
         }
         catch( const ::Mismatch& e )
         {                
@@ -764,6 +766,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
             if( plan.conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
+            plan.conj->Reset();
             // We didn't match and we've run out of choices, so we're done.              
             throw NoSolution();
 #endif            
@@ -772,6 +775,9 @@ void AndRuleEngine::Compare( XLink root_xlink,
         TRACE("AndRuleEngine hit\n");
         break; // Success
     }
+#ifndef USE_SOLVER
+    plan.conj->Reset();
+#endif
     
     // By now, we succeeded and slave_keys is the right set of keys
 }
@@ -799,6 +805,12 @@ void AndRuleEngine::EnsureChoicesHaveIterators()
 const CouplingKeysMap &AndRuleEngine::GetCouplingKeys()
 {
     return external_keys;
+}
+
+
+const void AndRuleEngine::ClearCouplingKeys()
+{
+    external_keys.clear();
 }
 
 

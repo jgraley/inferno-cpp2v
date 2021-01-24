@@ -11,6 +11,15 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
     DetermineDomain( root_plink, root_xlink );
 }
 
+
+void TheKnowledge::Clear()
+{
+    domain.clear();
+    nuggets.clear();
+    if( domain_extension_classes )
+        domain_extension_classes->Clear();
+}
+
     
 void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 {   

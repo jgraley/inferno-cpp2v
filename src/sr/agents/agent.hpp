@@ -89,10 +89,10 @@ public:
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
-    // function<XLink(XLink)> deduplicator
+    virtual void ResetNLQConjecture() = 0;    
 
     virtual CouplingKey GetKey() = 0;                                  
-    virtual void ResetKey() = 0;     
+    virtual void Reset() = 0;     
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
     virtual void KeyForOverlay( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
@@ -150,13 +150,14 @@ public:
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return map<XLink, XLink>(); /* implement in agents that can expand the domain */ }
-
+    virtual void ResetNLQConjecture();
+     
 protected:
     void SetKey( CouplingKey x );
 
 public:
     CouplingKey GetKey();                                  
-    void ResetKey();    
+    virtual void Reset();    
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys );
     virtual void KeyForOverlay( Agent *from );
     virtual TreePtr<Node> BuildReplace();
