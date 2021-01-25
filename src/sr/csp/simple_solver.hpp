@@ -55,6 +55,7 @@ private:
     } plan;
 
     bool TryVariable( list<VariableId>::const_iterator current_it );
+    pair<bool, Assignment> TestNoThrow( const Assignments &assigns, const ConstraintSet &to_test );
     void Test( const Assignments &assigns, const ConstraintSet &to_test );
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );

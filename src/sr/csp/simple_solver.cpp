@@ -121,49 +121,37 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     list<VariableId>::const_iterator next_it = current_it;
     ++next_it;
     bool complete = (next_it == plan.variables.end());
-    bool hinted = false; 
+    bool took_hint = false; 
     int i=0;
+    Assignment hint;
+    list<Value> value_queue;
     for( Value v : initial_domain )
+        value_queue.push_back(v);
+    while( !value_queue.empty() )
     {
+        Value v = value_queue.front();
+        value_queue.pop_front();
+        
         TRACE("Trying variable ")(*current_it)(" := ")(v)("\n");
         assignments[*current_it] = v;
         try_counts[*current_it] = i;
         bool ok = false;
         
-        try
-        {
-            Test( assignments, plan.affected_constraints.at(*current_it) );
-            ok = true;
-        }
-        catch( const ::Mismatch &e )
-        {            
+        tie(ok, hint) = TestNoThrow( assignments, plan.affected_constraints.at(*current_it) );        
+        
 #ifdef HINTS_IN_EXCEPTIONS   
-            if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint
-            {
-                if( pae->hint && *current_it==(VariableId)(pae->hint) ) // does have a hint, and for the current variable
-                {
-                    TRACE("At ")(*current_it)(", got hint ")(e)(" - retesting\n"); 
-                    assignments[*current_it] = (Value)(pae->hint); // take the hint
-                    hinted = true;
-                    try 
-                    { 
-                        Test( assignments, plan.affected_constraints.at(*current_it) ); 
-                        ok = true;
-                        TRACEC("OK after hint\n"); 
-                    } 
-                    catch( const ::Mismatch &e2 ) 
-                    { 
-                        TRACEC("Mismatch after hint ")(e2)("\n"); 
-                    }
-                    
-                }
-            }
-#endif
+        if( hint && *current_it==(VariableId)(hint) ) // does have a hint, and for the current variable
+        {
+            TRACE("At ")(*current_it)(", got hint ")(hint)(" - retesting\n"); 
+            assignments[*current_it] = (Value)(hint); // take the hint
+            tie(ok, ignore) = TestNoThrow( assignments, plan.affected_constraints.at(*current_it) );      
+            took_hint = true;
         }
+#endif
         
         if( !ok )
         {
-            if( hinted )
+            if( took_hint )
                 break;
             else
                 continue; // try next value
@@ -193,7 +181,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
             TryVariable( next_it );
         }
         
-        if( hinted )
+        if( took_hint )
             break; // hint was the only valid value for this variable, given the other assignments
         
         i++;
@@ -205,6 +193,24 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     assignments.erase(*current_it);
 
     return false;
+}
+
+
+pair<bool, Assignment> SimpleSolver::TestNoThrow( const Assignments &assigns, const ConstraintSet &to_test )
+{
+    try
+    {
+        Test( assignments, to_test );
+        return make_pair(true, Assignment());
+    }
+    catch( const ::Mismatch &e )
+    {            
+#ifdef HINTS_IN_EXCEPTIONS   
+        if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
+            return make_pair(false, pae->hint);
+#endif
+        return make_pair(false, Assignment());
+    }
 }
 
 

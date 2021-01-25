@@ -22,6 +22,7 @@ namespace CSP
 { 
 typedef SR::XLink Value;
 typedef SR::PatternLink VariableId;
+typedef SR::LocatedLink Assignment;
 typedef unordered_map<VariableId, Value> Assignments;
 typedef Assignments Solution;
 
