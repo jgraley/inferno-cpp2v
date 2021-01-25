@@ -163,7 +163,6 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         
         if( !ok )
         {
-            assignments.erase(*current_it); // remove failed variable 
             if( hinted )
                 break;
             else
