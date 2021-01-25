@@ -25,6 +25,7 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
 
     for( shared_ptr<Constraint> c : constraints )
     {
+        constraint_set.insert(c);
         list<VariableId> vars = c->GetFreeVariables();
         
         for( VariableId v : vars )
@@ -35,6 +36,7 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
                 if( variables_ == nullptr )
                     my_variables.push_back( v ); 
             }
+            affected_constraints[v].insert(c);
         }
     }
     
@@ -61,26 +63,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
     holder(nullptr)
 {
     TraceProblem();
-
-    set<VariableId> variables_used;
-    for( shared_ptr<Constraint> c : plan.constraints )
-    {
-        list<VariableId> cfv = c->GetFreeVariables();
-        for( VariableId v : cfv )
-        {
-            ASSERT( find( plan.variables.begin(), plan.variables.end(), v ) != plan.variables.end() )
-                  ("Planning error: ")(c)(" is missing variables\n")
-                  ("expecting ")(cfv)("\n")
-                  ("provided ")(plan.variables)("\n");
-            variables_used.insert( v );
-        }
-    }
-    for( VariableId v : plan.variables )
-    {
-        ASSERT( variables_used.count(v) > 0 )
-              ("Planning error: variable ")(v)(" is not used by any constraints\n")
-              ("Variables used: ")(variables_used)("\n");
-    }
+    CheckPlanVariablesUsed();
 }
                         
 
@@ -106,22 +89,23 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     best_assignments.clear();
     best_num_assignments = 0;
 #endif    
+    try_counts.clear();
+    
+    try
+    {
+        Test( assignments, plan.constraint_set );
+    }
+    catch( const ::Mismatch &e )
+    {
+        return; // We failed with no assignments, so we cannot match
+    }        
 
     if( plan.variables.empty() )
     {
-        // TODO re-organise (and rename) TryVariable() so we don't need this bit
-        try
-        {
-            Test( assignments );
-            holder->ReportSolution( assignments );
-        }
-        catch( const ::Mismatch &e )
-        {
-        }        
+        holder->ReportSolution( assignments );
     }
     else
-    {
-        try_counts.clear();
+    {        
         TryVariable( plan.variables.begin() );    
     }
 
@@ -148,7 +132,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         
         try
         {
-            Test( assignments );
+            Test( assignments, plan.affected_constraints.at(*current_it) );
             ok = true;
         }
         catch( const ::Mismatch &e )
@@ -163,7 +147,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
                     hinted = true;
                     try 
                     { 
-                        Test( assignments ); 
+                        Test( assignments, plan.affected_constraints.at(*current_it) ); 
                         ok = true;
                         TRACEC("OK after hint\n"); 
                     } 
@@ -225,12 +209,12 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 }
 
 
-void SimpleSolver::Test( const Assignments &assigns )
+void SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test )
 {
     //TimedOperations(); // overhead should be hidden by Constraint::Test()
 
     report = "";
-    for( shared_ptr<Constraint> c : plan.constraints )
+    for( shared_ptr<Constraint> c : to_test )
     {      
         TRACE_TO(report)(*c);
             
@@ -341,3 +325,26 @@ void SimpleSolver::TimedOperations()
     }
 }
 
+
+void SimpleSolver::CheckPlanVariablesUsed()
+{
+    set<VariableId> variables_used;
+    for( shared_ptr<Constraint> c : plan.constraints )
+    {
+        list<VariableId> cfv = c->GetFreeVariables();
+        for( VariableId v : cfv )
+        {
+            ASSERT( find( plan.variables.begin(), plan.variables.end(), v ) != plan.variables.end() )
+                  ("Planning error: ")(c)(" is missing variables\n")
+                  ("expecting ")(cfv)("\n")
+                  ("provided ")(plan.variables)("\n");
+            variables_used.insert( v );
+        }
+    }
+    for( VariableId v : plan.variables )
+    {
+        ASSERT( variables_used.count(v) > 0 )
+              ("Planning error: variable ")(v)(" is not used by any constraints\n")
+              ("Variables used: ")(variables_used)("\n");
+    }
+}

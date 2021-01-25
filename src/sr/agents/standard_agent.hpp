@@ -27,6 +27,7 @@ public:
     class WrongContainerSequenceMismatch : public SequenceMismatch {}; 
     class NotAtFrontMismatch : public SequenceMismatch {};
     class NotAtBackMismatch : public SequenceMismatch {};
+    class SequenceIsEmpty : public SequenceMismatch {};
     class NotAfterSequenceMismatch : public SequenceMismatch {};
     class NotSuccessorSequenceMismatch : public SequenceMismatch {};
     
@@ -114,7 +115,7 @@ private:
     		                     const Plan::Collection &plan_col ) const;
     void DecidedQuerySingular( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
-                               TreePtrInterface *x_sing,
+                               TreePtrInterface *p_x_sing,
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
@@ -132,7 +133,7 @@ private:
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
     void NormalLinkedQuerySingular( PatternLink base_plink,
-                                    TreePtrInterface *x_sing,
+                                    TreePtrInterface *p_x_sing,
                                     const Plan::Singular &plan_sing,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;

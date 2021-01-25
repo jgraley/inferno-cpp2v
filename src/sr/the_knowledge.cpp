@@ -119,24 +119,24 @@ void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
             AddSequence( mode, x_seq, xlink );
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
             AddCollection( mode, x_col, xlink );
-        else if( TreePtrInterface *x_sing = dynamic_cast<TreePtrInterface *>(xe) )
-            AddSingularNode( mode, x_sing, xlink );
+        else if( TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(xe) )
+            AddSingularNode( mode, p_x_sing, xlink );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }
 }
 
 
-void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *x_sing, XLink xlink )
+void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_sing, XLink xlink )
 {
-    ASSERT( x_sing );
+    ASSERT( p_x_sing );
     // MakeValueArchitype() can generate nodes with NULL pointers (eg in PointerIs)
     // and these get into the domain even though they are not allowed in input trees.
     // In this case, stop recursing since there's no child to build knowledge for.    
-    if( !*x_sing )
+    if( !*p_x_sing )
         return;
         
-    XLink child_xlink( xlink.GetChildX(), x_sing );        
+    XLink child_xlink( xlink.GetChildX(), p_x_sing );        
     Nugget nugget;
     nugget.cadence = Nugget::SINGULAR;
     nugget.parent_xlink = xlink;

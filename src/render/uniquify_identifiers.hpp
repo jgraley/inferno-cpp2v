@@ -65,7 +65,7 @@ public:
     
     void ProcessNode( TreePtr<Node> x, int &index );
     void ProcessChildren( TreePtr<Node> x, int &index );
-    void ProcessSingularNode( const TreePtrInterface *x_sing, int &index );
+    void ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index );
     void ProcessSequence( SequenceInterface *x_seq, int &index );
     void ProcessCollection( CollectionInterface *x_col, int &index );    
     map< TreePtr<CPPTree::SpecificIdentifier>, Fingerprint > GetFingerprints();

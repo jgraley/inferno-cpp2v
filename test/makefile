@@ -10,7 +10,7 @@ CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 # Use pointeris (very quick to test) as "canary"
 SRCASES = pointeris $(CASES) 
 
-MINICASES = sctest01 sctest07 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15 sctest03
+MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15 sctest03
 
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd

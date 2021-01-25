@@ -158,17 +158,17 @@ void IdentifierFingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
             ProcessSequence( x_seq, index );
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
             ProcessCollection( x_col, index );
-        else if( TreePtrInterface *x_sing = dynamic_cast<TreePtrInterface *>(xe) )
-            ProcessSingularNode( x_sing, index );
+        else if( TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(xe) )
+            ProcessSingularNode( p_x_sing, index );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }
 }
 
 
-void IdentifierFingerprinter::ProcessSingularNode( const TreePtrInterface *x_sing, int &index )
+void IdentifierFingerprinter::ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index )
 {
-    ProcessNode( (TreePtr<Node>)(*x_sing), index );
+    ProcessNode( (TreePtr<Node>)(*p_x_sing), index );
 }
 
 

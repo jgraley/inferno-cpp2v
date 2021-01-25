@@ -39,22 +39,28 @@ public:
               const SR::TheKnowledge *knowledge );
 
 private:
+    typedef set<shared_ptr<Constraint>> ConstraintSet;
+
     const struct Plan
     {
         Plan( const list< shared_ptr<Constraint> > &constraints, 
               const list<VariableId> *variables = nullptr );
         void DeduceVariables( const list<VariableId> *variables );
-
-        list< shared_ptr<Constraint> > constraints;
+    
         list<VariableId> variables;
+        list< shared_ptr<Constraint> > constraints;
+
+        ConstraintSet constraint_set;
+        map<VariableId, ConstraintSet> affected_constraints;
     } plan;
 
     bool TryVariable( list<VariableId>::const_iterator current_it );
-    void Test( const Assignments &assigns );
+    void Test( const Assignments &assigns, const ConstraintSet &to_test );
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();
     void TimedOperations();
+    void CheckPlanVariablesUsed();
 
     ReportageObserver *holder;
         

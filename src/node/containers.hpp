@@ -188,12 +188,12 @@ public:
     virtual const iterator_interface &end() = 0;
     virtual const TreePtrInterface &front()
     {
-        ASSERT( !empty() );
+        ASSERT( !empty() )("Attempting to obtain front() of an empty container");
         return *begin();
     }
     virtual const TreePtrInterface &back()
     {
-        ASSERT( !empty() );
+        ASSERT( !empty() )("Attempting to obtain back() of an empty container");
         iterator t = end();
         --t;
         return *t;
@@ -423,12 +423,12 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     }  
     virtual const TreePtr<VALUE_TYPE> &front()
     {
-        ASSERT( !ContainerCommon<Impl>::empty() );
+        ASSERT( !ContainerCommon<Impl>::empty() )("Attempting to obtain front() of an empty sequence");
         return Impl::front();
     }
     virtual const TreePtr<VALUE_TYPE> &back()
     {
-        ASSERT( !ContainerCommon<Impl>::empty() );
+        ASSERT( !ContainerCommon<Impl>::empty() )("Attempting to obtain back() of an empty sequence");
         return Impl::back();
     }
 

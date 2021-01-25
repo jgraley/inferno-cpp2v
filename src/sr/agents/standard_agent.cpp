@@ -242,29 +242,29 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
 void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                           XLink base_xlink,
-                                          SequenceInterface *x_seq,
+                                          SequenceInterface *p_x_seq,
 		                                  const Plan::Sequence &plan_seq ) const
 {
     INDENT("S");
     ASSERT( planned );
 
-    if( x_seq->size() < plan_seq.num_non_star )
+    if( p_x_seq->size() < plan_seq.num_non_star )
     {
         throw Mismatch();     
     }
 
     // Determine last star limit by working back from end of x
-    ContainerInterface::iterator xit_star_limit = x_seq->end();            
+    ContainerInterface::iterator xit_star_limit = p_x_seq->end();            
     for( int i=0; i<plan_seq.num_non_star; i++ )
         --xit_star_limit;                
         
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or x runs out.
-	ContainerInterface::iterator xit = x_seq->begin();
+	ContainerInterface::iterator xit = p_x_seq->begin();
     ContainerInterface::iterator pit = plan_seq.pattern->begin();
 	for( ; pit != plan_seq.pattern->end(); ++pit )
 	{
- 		ASSERT( xit == x_seq->end() || *xit );
+ 		ASSERT( xit == p_x_seq->end() || *xit );
 
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
@@ -299,7 +299,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
         }
  	    else // not a Star so match singly...
 	    {
-            if( xit == x_seq->end() )
+            if( xit == p_x_seq->end() )
                 break;
        
             query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
@@ -307,14 +307,14 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
-            ASSERT(xit_star_limit != x_seq->end());
+            ASSERT(xit_star_limit != p_x_seq->end());
             ++xit_star_limit;
 	    }
 	}
 
     // If we finished the job and pattern and x are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==x_seq->end(), pit==plan_seq.pattern->end() );
-    if( xit != x_seq->end() )
+	TRACE("Finishing compare sequence %d %d\n", xit==p_x_seq->end(), pit==plan_seq.pattern->end() );
+    if( xit != p_x_seq->end() )
         throw Mismatch();  
     else if( pit != plan_seq.pattern->end() )
         throw Mismatch();  
@@ -323,7 +323,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             XLink base_xlink,
-                                            CollectionInterface *x_col,
+                                            CollectionInterface *p_x_col,
 		 					                const Plan::Collection &plan_col ) const
 {
     INDENT("C");
@@ -341,15 +341,15 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // We have to decide which node in the tree to match, so use the present conjecture
         // Make a SubCollectionRange excluding x elements we already matched
         ContainerInterface::iterator xit;
-        auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), x_col->begin(), x_col->end() );
+        auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() );
         x_decision->SetExclusions( excluded_x );                       
                    
-        // An empty decision would imply we ran out of elements in x_col
+        // An empty decision would imply we ran out of elements in p_x_col
         if( x_decision->empty() )
             throw InsufficientXCollectionMismatch();                 
                    
         // No need to provide the container x_decision; iterators will keep it alive and are
-        // not invalidated by re-construction of the container (they're proxies for iterators on x_col).
+        // not invalidated by re-construction of the container (they're proxies for iterators on p_x_col).
         xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false, x_decision );    
         
         // We have our x element
@@ -363,11 +363,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     
     if( plan_col.star_plink )
     {
-        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), x_col->begin(), x_col->end() ) );
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!
     }
-    else if( excluded_x.size() != x_col->size() )
+    else if( excluded_x.size() != p_x_col->size() )
     {
         throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
     }
@@ -378,11 +378,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 
 void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
                                           XLink base_xlink,
-                                          TreePtrInterface *x_sing,
+                                          TreePtrInterface *p_x_sing,
 		                                  const Plan::Singular &plan_sing ) const
 {
     PatternLink sing_plink(this, plan_sing.pattern);
-    XLink sing_xlink(base_xlink.GetChildX(), x_sing);
+    XLink sing_xlink(base_xlink.GetChildX(), p_x_sing);
     query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
 }
 
@@ -428,7 +428,7 @@ void StandardAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
 
 
 void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
-                                               SequenceInterface *x_seq,
+                                               SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
@@ -439,7 +439,7 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
     // The only true unary constraint is that every child x link
     // is in some sequence (because that can be read directly off the
     // nugget).
-    for( PatternLink plink : plan_seq.non_stars )  // independent of x_seq
+    for( PatternLink plink : plan_seq.non_stars )  // independent of p_x_seq
     {
         if( required_links->count(plink) > 0 ) 
         {
@@ -451,24 +451,26 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
     }
     
     // Require that every child x link is in the correct container.
-    // Note: checking x_seq only on non_star_at_front and non_star_at_back
+    // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
-    for( PatternLink plink : plan_seq.non_stars )  // depends on x_seq
+    for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
     {        
         if( required_links->count(plink) > 0 ) 
         {
             XLink req_xlink = required_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.container == x_seq) )
+            if( !(nugget.container == p_x_seq) )
                 throw WrongContainerSequenceMismatch(); // Be in the right sequence        
         }
     }
     
     // If the pattern begins with a non-star, constrain the child x to be the 
     // front node in the collection at our base x. Uses base so a binary constraint.
-    if( plan_seq.non_star_at_front ) // depends on x_seq
+    if( plan_seq.non_star_at_front ) // depends on p_x_seq
     {
-        XLink front_xlink(required_links->at(base_plink).GetChildX(), &x_seq->front());
+        if( p_x_seq->empty() )
+            throw SequenceIsEmpty();
+        XLink front_xlink(required_links->at(base_plink).GetChildX(), &p_x_seq->front());
         if( required_links->count(plan_seq.non_star_at_front) > 0 ) 
         {        
             XLink req_xlink = required_links->at(plan_seq.non_star_at_front);
@@ -479,9 +481,11 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
 
     // If the pattern ends with a non-star, constrain the child x to be the 
     // back node in the collection at our base x. Uses base so a binary constraint.
-    if( plan_seq.non_star_at_back ) // depends on x_seq
+    if( plan_seq.non_star_at_back ) // depends on p_x_seq
     {
-        XLink back_xlink(required_links->at(base_plink).GetChildX(), &x_seq->back());
+        if( p_x_seq->empty() )
+            throw SequenceIsEmpty();
+        XLink back_xlink(required_links->at(base_plink).GetChildX(), &p_x_seq->back());
         if( required_links->count(plan_seq.non_star_at_back) > 0 ) 
         {        
             XLink req_xlink = required_links->at(plan_seq.non_star_at_back);
@@ -492,7 +496,7 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
 
     // Adjacent pairs of non-stars in the pattern should correspond to adjacent
     // pairs of child x nodes. Only needs the two child x nodes, so binary constraint.
-    for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of x_seq
+    for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of p_x_seq
     {
         if( required_links->count(p.first) > 0 && required_links->count(p.second) > 0 )
         {
@@ -510,7 +514,7 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
     // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
     // correspond to pairs of child x nodes that are ordered correctly. Only needs 
     // the two child x nodes, so binary constraint.    
-    for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of x_seq
+    for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of p_x_seq
     {
         if( required_links->count(p.first) > 0 && required_links->count(p.second) > 0 )
         {
@@ -526,7 +530,7 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
 
 
 void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
-                                                 CollectionInterface *x_col,
+                                                 CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
@@ -537,7 +541,7 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
     // The only true unary constraint is that every child x link
     // is in some collection (because that can be read directly off the
     // nugget).
-    for( PatternLink plink : plan_col.non_stars )  // independent of x_col
+    for( PatternLink plink : plan_col.non_stars )  // independent of p_x_col
     {
         if( required_links->count(plink) > 0 )
         {
@@ -549,20 +553,20 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
     }
 
     // Require that every child x link is in the correct collection.
-    for( PatternLink plink : plan_col.non_stars )  // depends on x_col
+    for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
     {
         if( required_links->count(plink) > 0 )
         {
             XLink req_xlink = required_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
-            if( nugget.container != x_col )
+            if( nugget.container != p_x_col )
                 throw WrongContainerCollectionMismatch(); // Be in the right sequence
         }
     }
 
     // Require that every child x link is different (alldiff).
     set<XLink> x_so_far;
-    for( PatternLink plink : plan_col.non_stars ) // independent of x_col
+    for( PatternLink plink : plan_col.non_stars ) // independent of p_x_col
     {
         if( required_links->count(plink) > 0 )
         {
@@ -573,10 +577,10 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
         }
     }
 
-    // Require that there are no leftover x, if no stars in pattern. Depends on x_col.
+    // Require that there are no leftover x, if no stars in pattern. Depends on p_x_col.
     if( !plan_col.star_plink )
     {
-        if( x_col->size() > plan_col.non_stars.size() )
+        if( p_x_col->size() > plan_col.non_stars.size() )
         {
             TRACE("mismatch - x left over\n");
             throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
@@ -586,12 +590,12 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
 
 
 void StandardAgent::NormalLinkedQuerySingular( PatternLink base_plink,
-                                               TreePtrInterface *x_sing,
+                                               TreePtrInterface *p_x_sing,
                                                const Plan::Singular &plan_sing,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
-    XLink sing_xlink(required_links->at(base_plink).GetChildX(), x_sing);        
+    XLink sing_xlink(required_links->at(base_plink).GetChildX(), p_x_sing);        
     if( required_links->count(plan_sing.plink) > 0 ) 
     {
         XLink req_sing_xlink = required_links->at(plan_sing.plink);                
@@ -627,7 +631,7 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
 void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                                XLink base_xlink,
-                                               SequenceInterface *x_seq,
+                                               SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
@@ -635,10 +639,10 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
     INDENT("S");
     ASSERT( planned );
 
-    // If we got this far with an undersized x_seq, something has gone wrong 
-    // in the logic, and the following code will crash into x_seq->end(). 
+    // If we got this far with an undersized p_x_seq, something has gone wrong 
+    // in the logic, and the following code will crash into p_x_seq->end(). 
     // And I mean "crash" literally.
-    ASSERT(x_seq->size() >= plan_seq.num_non_star); 
+    ASSERT(p_x_seq->size() >= plan_seq.num_non_star); 
 
     // We now look at the runs of star patterns. Each is bounded by some combination
     // of the bounds of the x sequence and the surrounding non-star child x values. 
@@ -658,7 +662,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
         }
         else
         {
-            xit = x_seq->begin();
+            xit = p_x_seq->begin();
         }
         
         if( run->successor )
@@ -672,7 +676,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
         }
         else
         {
-            xit_star_limit = x_seq->end();
+            xit_star_limit = p_x_seq->end();
         }
         
         // Within a run of star patterns, register decisions for all but the last
@@ -706,7 +710,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 
 void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                                  XLink base_xlink,
-                                                 CollectionInterface *x_col,
+                                                 CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
@@ -717,11 +721,11 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
     {
         // Determine the set of non-star tree pointers 
         SubCollectionRange::ExclusionSet excluded_x;
-        for( PatternLink plink : plan_col.non_stars ) // independent of x_col
+        for( PatternLink plink : plan_col.non_stars ) // independent of p_x_col
             excluded_x.insert( required_links->at(plink).GetXPtr() );
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
-        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), x_col->begin(), x_col->end() ) );
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    
