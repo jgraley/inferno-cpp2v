@@ -30,7 +30,13 @@ public:
         // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
         STOP_IF_ALREADY_IN
     };
-        
+    
+    // Don't use a vector for this:
+    // (a) you'd need the size in advance otherwise the iterators in
+    // the nuggets will go bad while populating and
+    // (b) incremental domain update will be hard
+    typedef list<XLink> OrderedDomain;    
+    
     class Nugget : public Traceable
     {
     public:
@@ -42,13 +48,13 @@ public:
             IN_COLLECTION
         };
         typedef int IndexType;
+        typedef OrderedDomain::const_iterator OrderedIt;
         Cadence cadence;
         XLink parent_xlink = XLink();
         ContainerInterface *container = nullptr;
         ContainerInterface::iterator iterator;
         IndexType index = -1;
-        list<XLink>::const_iterator ordered_it;
-        list<XLink>::const_iterator eod_it; // End Of Descendants
+        OrderedIt ordered_it;
         
         string GetTrace() const;
     };
@@ -66,15 +72,13 @@ private:
     void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_sing, XLink xlink );
     void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
     void AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink );
-
-    set<Nugget *> pending_need_eods;
     
 public:
     // Global domain of possible xlink values
     unordered_set<XLink> domain;            
     
     // Global domain of possible xlink values - ordered
-    list<XLink> ordered_domain;            
+    OrderedDomain ordered_domain;            
     
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;

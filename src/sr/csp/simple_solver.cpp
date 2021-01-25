@@ -137,8 +137,8 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     }
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
-    auto fwd_it = nugget.ordered_it;
-    auto rev_it = nugget.ordered_it;
+    SR::TheKnowledge::Nugget::OrderedIt fwd_it = nugget.ordered_it;
+    SR::TheKnowledge::Nugget::OrderedIt rev_it = nugget.ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
     list<Value> value_queue;
