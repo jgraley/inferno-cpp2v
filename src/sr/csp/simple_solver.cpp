@@ -124,7 +124,12 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     int i=0;
     list<Value> value_queue;
     for( Value v : initial_domain )
-        value_queue.push_back(v);
+    {
+        if( v == SR::XLink::MMAX_Link )
+            value_queue.push_front(v);
+        else
+            value_queue.push_back(v);
+    }
         
     while( !value_queue.empty() )
     {
