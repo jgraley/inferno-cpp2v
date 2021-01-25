@@ -22,7 +22,7 @@ SolverHolder::~SolverHolder()
 }
 
 
-void SolverHolder::Start( const unordered_set<Value> &initial_domain, 
+void SolverHolder::Start( const list<Value> &initial_domain, 
                           const Assignments &forces,
                           const SR::TheKnowledge *knowledge )
 {

@@ -20,7 +20,7 @@ public:
     enum SubtreeMode
     {
         // Behaviour for main domain population: we will check uniqueness
-        // of the XLinks we meed during our recursive walk.
+        // of the XLinks we meet during our recursive walk.
         REQUIRE_SOLO,
         
         // Behaviour for domain extensions. We will continue as long as 
@@ -47,6 +47,7 @@ public:
         ContainerInterface *container = nullptr;
         ContainerInterface::iterator iterator;
         IndexType index = -1;
+        list<XLink>::const_iterator ordered_it;
         
         string GetTrace() const;
     };
@@ -68,6 +69,9 @@ private:
 public:
     // Global domain of possible xlink values
     unordered_set<XLink> domain;            
+    
+    // Global domain of possible xlink values - ordered
+    list<XLink> ordered_domain;            
     
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;

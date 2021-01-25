@@ -68,7 +68,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
                         
 
 void SimpleSolver::Run( ReportageObserver *holder_, 
-                        const unordered_set< Value > &initial_domain_,
+                        const list< Value > &initial_domain_,
                         const Assignments &forces,
                         const SR::TheKnowledge *knowledge )
 {
@@ -117,10 +117,25 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 {
     INDENT("T");
     ASSERT( current_it != plan.variables.end() );
+    VariableId current_var = *current_it;
    
     list<VariableId>::const_iterator next_it = current_it;
     ++next_it;
     bool complete = (next_it == plan.variables.end());
+
+    
+    Value start_val;
+    if( current_it==plan.variables.begin() )
+    {
+        start_val = initial_domain.front();
+    }
+    else
+    {
+        list<VariableId>::const_iterator prev_it = current_it;
+        --prev_it; 
+        start_val = assignments[*prev_it];   
+    }
+    
     int i=0;
     list<Value> value_queue;
     for( Value v : initial_domain )
@@ -132,26 +147,23 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     }
         
     while( !value_queue.empty() )
-    {
-        Value v = value_queue.front();
+    {       
+        TRACE("Trying variable ")(current_var)(" := ")(value_queue.front())("\n");
+        assignments[current_var] = value_queue.front();
         value_queue.pop_front();
+        try_counts[current_var] = i++;
         
-        TRACE("Trying variable ")(*current_it)(" := ")(v)("\n");
-        assignments[*current_it] = v;
-        try_counts[*current_it] = i;
         bool ok;
         Assignment hint;        
-        tie(ok, hint) = TestNoThrow( assignments, plan.affected_constraints.at(*current_it) );        
+        tie(ok, hint) = TestNoThrow( assignments, plan.affected_constraints.at(current_var) );        
         
-#ifdef HINTS_IN_EXCEPTIONS   
-        if( hint && *current_it==(VariableId)(hint) ) // does have a hint, and for the current variable
+        if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
-            TRACE("At ")(*current_it)(", got hint ")(hint)(" - rewriting queue\n"); 
+            TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             value_queue.clear();
             value_queue.push_back( (Value)(hint) ); 
         }
-#endif
-        
+       
         if( !ok )
            continue; // try next value
             
@@ -185,7 +197,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     // Need to do this to avoid old assignments hanging around, being 
     // picked up by partial NLQs and causing mismatches that don't get
     // resolved beacuse this assignment won't be getting incremented.
-    assignments.erase(*current_it);
+    assignments.erase(current_var);
 
     return false;
 }

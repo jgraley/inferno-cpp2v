@@ -15,6 +15,7 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 void TheKnowledge::Clear()
 {
     domain.clear();
+    ordered_domain.clear();
     nuggets.clear();
     if( domain_extension_classes )
         domain_extension_classes->Clear();
@@ -25,6 +26,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 {   
     // Both should be cleared together
     domain.clear();
+    ordered_domain.clear();
     domain_extension_classes = make_shared<QuotientSet>();
     nuggets.clear();
     
@@ -32,13 +34,12 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     
     AddAtRoot( REQUIRE_SOLO, XLink::MMAX_Link );
     
-    int is = domain.size();
+    int is = nuggets.size();
     ExtendDomain( root_plink );
-    int es = domain.size();
+    int es = nuggets.size();
     
     if( es > is )
-        TRACE("Domain size %d -> %d\n", is, es);
-
+        TRACE("Knowledge size %d -> %d\n", is, es);
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
@@ -91,11 +92,16 @@ void TheKnowledge::AddLink( SubtreeMode mode,
                             Nugget nugget )
 {
     // This will also prevent recursion into xlink
-    if( mode==STOP_IF_ALREADY_IN && domain.count(xlink) > 0 )
+    if( mode==STOP_IF_ALREADY_IN && nuggets.count(xlink) > 0 )
         return; // Terminate into the existing domain
     
-    // Update domain
+    // Update domain 
     InsertSolo( domain, xlink );
+    ordered_domain.push_back(xlink);
+    
+    list<XLink>::const_iterator it = ordered_domain.end();
+    --it; // I know this is OK because we just pushed to ordered_domain
+    nugget.ordered_it = it;
     
     // Add a nugget of knowledge
     InsertSolo( nuggets, make_pair(xlink, nugget) );

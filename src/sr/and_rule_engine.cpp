@@ -386,7 +386,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
-    plan.solver->Start( knowledge->domain, master_and_root_links, knowledge );
+    plan.solver->Start( knowledge->ordered_domain, master_and_root_links, knowledge );
 }
 
 
