@@ -121,12 +121,11 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     list<VariableId>::const_iterator next_it = current_it;
     ++next_it;
     bool complete = (next_it == plan.variables.end());
-    bool took_hint = false; 
     int i=0;
-    Assignment hint;
     list<Value> value_queue;
     for( Value v : initial_domain )
         value_queue.push_back(v);
+        
     while( !value_queue.empty() )
     {
         Value v = value_queue.front();
@@ -135,27 +134,21 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         TRACE("Trying variable ")(*current_it)(" := ")(v)("\n");
         assignments[*current_it] = v;
         try_counts[*current_it] = i;
-        bool ok = false;
-        
+        bool ok;
+        Assignment hint;        
         tie(ok, hint) = TestNoThrow( assignments, plan.affected_constraints.at(*current_it) );        
         
 #ifdef HINTS_IN_EXCEPTIONS   
         if( hint && *current_it==(VariableId)(hint) ) // does have a hint, and for the current variable
         {
-            TRACE("At ")(*current_it)(", got hint ")(hint)(" - retesting\n"); 
-            assignments[*current_it] = (Value)(hint); // take the hint
-            tie(ok, ignore) = TestNoThrow( assignments, plan.affected_constraints.at(*current_it) );      
-            took_hint = true;
+            TRACE("At ")(*current_it)(", got hint ")(hint)(" - rewriting queue\n"); 
+            value_queue.clear();
+            value_queue.push_back( (Value)(hint) ); 
         }
 #endif
         
         if( !ok )
-        {
-            if( took_hint )
-                break;
-            else
-                continue; // try next value
-        }   
+           continue; // try next value
             
 #ifdef TRACK_BEST_ASSIGNMENT    
         int num=0;
@@ -180,10 +173,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         {
             TryVariable( next_it );
         }
-        
-        if( took_hint )
-            break; // hint was the only valid value for this variable, given the other assignments
-        
+
         i++;
     }
     
