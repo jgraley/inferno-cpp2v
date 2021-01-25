@@ -247,28 +247,26 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 {
     INDENT("S");
     ASSERT( planned );
-    SequenceInterface *pattern_seq = plan_seq.pattern;
-    int num_non_star = plan_seq.num_non_star;
-    ContainerInterface::iterator pit_last_star = plan_seq.pit_last_star;
 
-    if( x_seq->size() < num_non_star )
+    if( x_seq->size() < plan_seq.num_non_star )
     {
-        throw Mismatch();     // TODO break to get the final trace?
+        throw Mismatch();     
     }
 
-	ContainerInterface::iterator pit, npit, nnpit, nxit;            
+    // Determine last star limit by working back from end of x
     ContainerInterface::iterator xit_star_limit = x_seq->end();            
-    for( int i=0; i<num_non_star; i++ )
+    for( int i=0; i<plan_seq.num_non_star; i++ )
         --xit_star_limit;                
         
 	// Attempt to match all the elements between start and the end of the sequence; stop
-	// if either pattern_seq or subject runs out.
+	// if either pattern or x runs out.
 	ContainerInterface::iterator xit = x_seq->begin();
-	for( pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )
+    ContainerInterface::iterator pit = plan_seq.pattern->begin();
+	for( ; pit != plan_seq.pattern->end(); ++pit )
 	{
  		ASSERT( xit == x_seq->end() || *xit );
 
-		// Get the next element of the pattern_seq
+		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
         if( dynamic_pointer_cast<StarAgent>(pe) )
@@ -277,7 +275,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             ContainerInterface::iterator xit_star_end;
                 
             // The last Star does not need a decision            
-            if( pit == pit_last_star )
+            if( pit == plan_seq.pit_last_star )
             {
                 // No more stars, so skip ahead to the end of the possible star range. 
                 xit_star_end = xit_star_limit;
@@ -307,18 +305,18 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
             ++xit;
             
-            // Every non-star pattern_seq node we pass means there's one fewer remaining
+            // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
             ASSERT(xit_star_limit != x_seq->end());
             ++xit_star_limit;
 	    }
 	}
 
-    // If we finished the job and pattern_seq and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==x_seq->end(), pit==pattern_seq->end() );
+    // If we finished the job and pattern and x are still aligned, then it was a match
+	TRACE("Finishing compare sequence %d %d\n", xit==x_seq->end(), pit==plan_seq.pattern->end() );
     if( xit != x_seq->end() )
         throw Mismatch();  
-    else if( pit != pattern_seq->end() )
+    else if( pit != plan_seq.pattern->end() )
         throw Mismatch();  
 }
 
@@ -330,16 +328,15 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 {
     INDENT("C");
 
-    CollectionInterface *pattern_col = plan_col.pattern;
     SubCollectionRange::ExclusionSet excluded_x;
     
     for( PatternLink plink : plan_col.non_stars )
     {
     	TRACE( "Collection compare %d excluded out of %d; looking at ",
                excluded_x.size(),
-               pattern_col->size() )
+               plan_col.pattern->size() )
              (plink)
-             (" in pattern_col\n" );        
+             (" in plan_col.pattern\n" );        
 
         // We have to decide which node in the tree to match, so use the present conjecture
         // Make a SubCollectionRange excluding x elements we already matched
