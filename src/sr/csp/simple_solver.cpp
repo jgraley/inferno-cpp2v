@@ -140,7 +140,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     list<Value>::const_iterator fwd_it = nugget.ordered_it;
     list<Value>::const_iterator rev_it = nugget.ordered_it;
     
-    int i=0;
+    // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
     list<Value> value_queue;
     bool tick = false;
     for( Value v_unused : knowledge->ordered_domain ) // just to get the right number of iterations
@@ -149,15 +149,17 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         if( tick )
         {
             v = *fwd_it;
-            ++fwd_it;
-            if( fwd_it==knowledge->ordered_domain.end() )
-                fwd_it=knowledge->ordered_domain.begin(); // wrap
+            //++fwd_it;
+            //if( fwd_it==knowledge->ordered_domain.end() )
+            //    fwd_it=knowledge->ordered_domain.begin(); // wrap
+            AdvanceWithWrap( knowledge->ordered_domain, fwd_it, 1 );
         }
         else
         {
-            if( rev_it==knowledge->ordered_domain.begin() )
-                rev_it=knowledge->ordered_domain.end(); // wrap            
-            --rev_it;
+            //if( rev_it==knowledge->ordered_domain.begin() )
+            //    rev_it=knowledge->ordered_domain.end(); // wrap            
+            //--rev_it;
+            AdvanceWithWrap( knowledge->ordered_domain, rev_it, -1 );
             v = *rev_it;
         }
         if( v == SR::XLink::MMAX_Link )
@@ -167,6 +169,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         tick = !tick;
     }
         
+    int i=0;
     while( !value_queue.empty() )
     {       
         TRACE("Trying variable ")(current_var)(" := ")(value_queue.front())("\n");

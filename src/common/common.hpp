@@ -123,6 +123,24 @@ inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
 }
 
 
+template<class C, class IT>
+void AdvanceWithWrap(const C &c, IT& it, int n)
+{
+    while (n > 0) {
+        --n;
+        ++it;
+        if( it == c.end() )
+            it = c.begin();            
+    }
+    while (n < 0) {
+        ++n;
+        if( it == c.begin() )
+            it = c.end();            
+        --it;
+    }
+}
+
+
 template< typename T >
 list<T> operator+( list<T> l, list<T> r ) // Just like in Python!
 {
