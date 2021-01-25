@@ -48,6 +48,7 @@ public:
         ContainerInterface::iterator iterator;
         IndexType index = -1;
         list<XLink>::const_iterator ordered_it;
+        list<XLink>::const_iterator eod_it; // End Of Descendants
         
         string GetTrace() const;
     };
@@ -66,6 +67,8 @@ private:
     void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
     void AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink );
 
+    set<Nugget *> pending_need_eods;
+    
 public:
     // Global domain of possible xlink values
     unordered_set<XLink> domain;            

@@ -41,6 +41,12 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     if( es > is )
         TRACE("Knowledge size %d -> %d\n", is, es);
     
+    // All the adding is done and we can tie of pending EODs using real end() iterators
+    for( Nugget *need_eod : pending_need_eods )    
+        need_eod->eod_it = ordered_domain.end();    
+    pending_need_eods.clear();
+
+    
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
     e.TestProperties( domain );
@@ -99,9 +105,14 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     InsertSolo( domain, xlink );
     ordered_domain.push_back(xlink);
     
-    list<XLink>::const_iterator it = ordered_domain.end();
+    auto it = ordered_domain.end();
     --it; // I know this is OK because we just pushed to ordered_domain
     nugget.ordered_it = it;
+    
+    // Is this iterator EOD for anything?
+    for( Nugget *need_eod : pending_need_eods )    
+        need_eod->eod_it = it;    
+    pending_need_eods.clear();
     
     // Add a nugget of knowledge
     InsertSolo( nuggets, make_pair(xlink, nugget) );
@@ -113,6 +124,9 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     
     // Recurse into our child nodes
     AddChildren( mode, xlink );
+    
+    // We wish to put an EOD iterator into this xlink, when we have one
+    pending_need_eods.insert( &(nuggets[xlink]) );
 }
 
 

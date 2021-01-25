@@ -137,28 +137,22 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     }
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
-    list<Value>::const_iterator fwd_it = nugget.ordered_it;
-    list<Value>::const_iterator rev_it = nugget.ordered_it;
+    auto fwd_it = nugget.ordered_it;
+    auto rev_it = nugget.ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
     list<Value> value_queue;
-    bool tick = false;
+    bool go_forward = true;
     for( Value v_unused : knowledge->ordered_domain ) // just to get the right number of iterations
     {
         Value v;
-        if( tick )
+        if( go_forward )
         {
             v = *fwd_it;
-            //++fwd_it;
-            //if( fwd_it==knowledge->ordered_domain.end() )
-            //    fwd_it=knowledge->ordered_domain.begin(); // wrap
             AdvanceWithWrap( knowledge->ordered_domain, fwd_it, 1 );
         }
         else
         {
-            //if( rev_it==knowledge->ordered_domain.begin() )
-            //    rev_it=knowledge->ordered_domain.end(); // wrap            
-            //--rev_it;
             AdvanceWithWrap( knowledge->ordered_domain, rev_it, -1 );
             v = *rev_it;
         }
@@ -166,7 +160,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
             value_queue.push_front(v);
         else
             value_queue.push_back(v);
-        tick = !tick;
+        go_forward = !go_forward;
     }
         
     int i=0;
