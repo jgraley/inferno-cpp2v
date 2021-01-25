@@ -2,6 +2,7 @@
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"
+#include "the_knowledge.hpp"
 
 #include <algorithm>
 
@@ -68,16 +69,15 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
                         
 
 void SimpleSolver::Run( ReportageObserver *holder_, 
-                        const list< Value > &initial_domain_,
                         const Assignments &forces,
-                        const SR::TheKnowledge *knowledge )
+                        const SR::TheKnowledge *knowledge_ )
 {
     TRACE("Simple solver begins\n");
     INDENT("S");
+    knowledge = knowledge_;
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     ScopedAssign<ReportageObserver *> sa(holder, holder_);
     ASSERT( holder );
-    initial_domain = initial_domain_;
 
     // Tell all the constraints about the forces
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
@@ -127,7 +127,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     Value start_val;
     if( current_it==plan.variables.begin() )
     {
-        start_val = initial_domain.front();
+        start_val = knowledge->ordered_domain.front();
     }
     else
     {
@@ -136,14 +136,35 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         start_val = assignments[*prev_it];   
     }
     
+    const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
+    list<Value>::const_iterator fwd_it = nugget.ordered_it;
+    list<Value>::const_iterator rev_it = nugget.ordered_it;
+    
     int i=0;
     list<Value> value_queue;
-    for( Value v : initial_domain )
+    bool tick = false;
+    for( Value v_unused : knowledge->ordered_domain ) // just to get the right number of iterations
     {
+        Value v;
+        if( tick )
+        {
+            v = *fwd_it;
+            ++fwd_it;
+            if( fwd_it==knowledge->ordered_domain.end() )
+                fwd_it=knowledge->ordered_domain.begin(); // wrap
+        }
+        else
+        {
+            if( rev_it==knowledge->ordered_domain.begin() )
+                rev_it=knowledge->ordered_domain.end(); // wrap            
+            --rev_it;
+            v = *rev_it;
+        }
         if( v == SR::XLink::MMAX_Link )
             value_queue.push_front(v);
         else
             value_queue.push_back(v);
+        tick = !tick;
     }
         
     while( !value_queue.empty() )

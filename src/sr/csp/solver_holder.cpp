@@ -22,8 +22,7 @@ SolverHolder::~SolverHolder()
 }
 
 
-void SolverHolder::Start( const list<Value> &initial_domain, 
-                          const Assignments &forces,
+void SolverHolder::Start( const Assignments &forces,
                           const SR::TheKnowledge *knowledge )
 {
 #ifdef COROUTINE_HOLDER
@@ -33,13 +32,13 @@ void SolverHolder::Start( const list<Value> &initial_domain,
     auto lambda = [&](Coroutine::push_type& sink_)
     {
         sink = &sink_;
-        solver->Run( this, initial_domain, forces, knowledge);
+        solver->Run( this, forces, knowledge);
         sink = nullptr;
     };
     source = new Coroutine::pull_type(lambda);        
 #else
     solutions_queue.clear();
-    solver->Run( this, initial_domain, forces, knowledge);
+    solver->Run( this, forces, knowledge);
 #endif
 }
 

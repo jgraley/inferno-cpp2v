@@ -76,7 +76,6 @@ public:
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
     virtual void Run( ReportageObserver *holder, 
-                      const list<Value> &initial_domain,
                       const Assignments &forces,
                       const SR::TheKnowledge *knowledge ) = 0;
 };

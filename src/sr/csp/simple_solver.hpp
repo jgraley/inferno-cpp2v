@@ -34,7 +34,6 @@ public:
                   const list<VariableId> *variables = nullptr );
 
     void Run( ReportageObserver *holder, 
-              const list<Value> &initial_domain,
               const Assignments &forces,
               const SR::TheKnowledge *knowledge );
 
@@ -66,7 +65,7 @@ private:
     ReportageObserver *holder;
         
     // Used during solve - depends on pattern and x
-    list<Value> initial_domain;    
+    const SR::TheKnowledge *knowledge;
     Assignments assignments;
     map<VariableId, int> try_counts; // just for tracing
     

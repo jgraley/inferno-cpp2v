@@ -45,8 +45,7 @@ public:
      * 
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
-    void Start( const list<Value> &initial_domain, 
-                const Assignments &forces,
+    void Start( const Assignments &forces,
                 const SR::TheKnowledge *knowledge );
 
     /**
