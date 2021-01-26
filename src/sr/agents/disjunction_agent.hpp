@@ -1,5 +1,5 @@
-#ifndef MATCH_ANY_AGENT_HPP
-#define MATCH_ANY_AGENT_HPP
+#ifndef DISJUNCTION_AGENT_HPP
+#define DISJUNCTION_AGENT_HPP
 
 #include "../search_replace.hpp"
 #include "helpers/transformation.hpp"

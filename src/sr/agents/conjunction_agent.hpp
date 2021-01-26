@@ -1,5 +1,5 @@
-#ifndef MATCH_ALL_AGENT_HPP
-#define MATCH_ALL_AGENT_HPP
+#ifndef CONJUNCTION_AGENT_HPP
+#define CONJUNCTION_AGENT_HPP
 
 #include "../search_replace.hpp"
 #include "helpers/transformation.hpp"

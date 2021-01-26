@@ -1,5 +1,5 @@
-#ifndef NOT_MATCH_AGENT_HPP
-#define NOT_MATCH_AGENT_HPP
+#ifndef NEGATION_AGENT_HPP
+#define NEGATION_AGENT_HPP
 
 #include "../search_replace.hpp"
 #include "helpers/transformation.hpp"
