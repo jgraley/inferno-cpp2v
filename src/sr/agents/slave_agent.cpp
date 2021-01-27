@@ -22,20 +22,6 @@ shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
 }
 
 
-void SlaveAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const
-{
-    INDENT("l");
-    query.Reset();
-
-    // Check pre-restriction
-    CheckLocalMatch(x.GetChildX().get());
-    
-    // When a slave node seen duriung search, just forward through the "through" path
-    query.RegisterNormalLink( PatternLink(this, GetThrough()), x ); // Link into X
-}
-
-
 void SlaveAgent::KeyForOverlay( Agent *from )
 {
     INDENT("l");
@@ -61,9 +47,8 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
 }
 
 
-void SlaveAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine, SCREngine *my_scr_engine_ )
+void SlaveAgent::SetMyEngine( SCREngine *my_scr_engine_ )
 {
-    AgentCommon::AgentConfigure( phase, master_scr_engine );
     my_scr_engine = my_scr_engine_;
 }
 

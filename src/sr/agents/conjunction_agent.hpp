@@ -14,6 +14,7 @@ namespace SR
 class ConjunctionAgent : public virtual ColocatedAgent 
 {
 public:               
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual Block GetGraphBlockInfo() const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;

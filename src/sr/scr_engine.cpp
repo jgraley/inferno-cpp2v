@@ -68,7 +68,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     // For closure under full arrowhead model, we need a link to root
     root_plink = PatternLink::CreateDistinct( root_pattern );
     
-    set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
+    set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines, agent_phases );    
 
     // This recurses SCR engine planning
@@ -79,7 +79,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 void SCREngine::Plan::InitPartTwo(const CompareReplace::AgentPhases &agent_phases)
 {
     // Recurse into subordinate SCREngines
-    for( pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
         p.second->InitPartTwo(agent_phases);                                      
 
     // Configure agents on the way out
@@ -130,7 +130,7 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     
 
 void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agents, 
-                                      set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                                      set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                                       CompareReplace::AgentPhases &agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
@@ -170,20 +170,20 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     // Determine who our slaves are
     FOREACH( Agent *a, *my_agents )
     {
-        if( auto ae = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
+        if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
             my_agents_needing_engines.insert( ae );
     }
 }
 
 
 void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agents, 
-                                       const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                                       const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                                        CompareReplace::AgentPhases &agent_phases )
 {
     // Determine which agents our slaves should not configure
     unordered_set<Agent *> surrounding_agents = UnionOf( master_agents, *my_agents ); 
             
-    FOREACH( AgentCommonNeedSCREngine *ae, my_agents_needing_engines )
+    FOREACH( RequiresSubordinateSCREngine *ae, my_agents_needing_engines )
     {
         my_engines[ae] = make_shared<SCREngine>( ae->IsSearch(),
                                                  overall_master_ptr, 
@@ -201,17 +201,11 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
     // Give agents pointers to here and our coupling keys
     FOREACH( Agent *a, *my_agents )
     {        
-        if( auto ae = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
-        {
-            ae->AgentConfigure( agent_phases.at(a),
-                                algo, 
-                                &*my_engines.at(ae) );
-        }
-        else
-        {
-            a->AgentConfigure( agent_phases.at(a),
-                               algo );             
-        }
+        a->AgentConfigure( agent_phases.at(a),
+                           algo );             
+                           
+        if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )        
+            ae->SetMyEngine( &*my_engines.at(ae) );
     }    
 }
 
@@ -395,7 +389,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 		CouplingKeysMap coupling_keys = UnionOfSolo( *master_keys, 
                                                      plan.and_rule_engine->GetCouplingKeys() );    
 		
-        for( const pair< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
+        for( const pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );
 	}
 
@@ -427,7 +421,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
     {
         bool stop = depth < stop_after.size() && stop_after[depth]==i;
         if( stop )
-            for( const pair< AgentCommonNeedSCREngine * const, shared_ptr<SCREngine> > &p : plan.my_engines )
+            for( const pair< RequiresSubordinateSCREngine * const, shared_ptr<SCREngine> > &p : plan.my_engines )
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {

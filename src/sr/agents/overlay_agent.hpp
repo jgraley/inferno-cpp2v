@@ -3,9 +3,7 @@
 
 #include "agent.hpp"
 #include "common/common.hpp"
-#include "common/read_args.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/transformation.hpp"
+#include "colocated_agent.hpp"
 
 namespace SR
 { 
@@ -17,12 +15,10 @@ namespace SR
 /// If the replace pattern under `overlay` contains wildcards, these will 
 /// be overlayed over the pattern under `through`, to the extent that this
 /// is unambiguous and the structures of the two subtrees match.
-class OverlayAgent : public virtual AgentCommon
+class OverlayAgent : public virtual ColocatedAgent
 {  
 public:
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
     virtual TreePtr<Node> BuildReplaceImpl();
 private:

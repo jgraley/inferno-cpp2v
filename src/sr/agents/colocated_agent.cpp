@@ -4,37 +4,36 @@
 
 using namespace SR;
 
-shared_ptr<PatternQuery> ColocatedAgent::GetPatternQuery() const
+void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                          XLink base_xlink ) const
+{ 
+    INDENT("∧");
+    query.Reset();
+    auto plinks = pattern_query->GetNormalLinks();
+    ASSERT( !plinks.empty() ); // must be at least one thing!
+    
+    // Check pre-restriction
+    CheckLocalMatch(base_xlink.GetChildX().get());
+    
+    RunColocatedQuery(base_xlink);
+
+    for( PatternLink plink : plinks )                 
+        query.RegisterNormalLink( plink, base_xlink ); // Link into X
+}    
+
+
+void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 {
-    auto pq = make_shared<PatternQuery>(this);
-    // TODO don't really need iterator, so could use FOREACH
-    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
-    {
-        const TreePtrInterface *p = &*pit; 
-	    pq->RegisterNormalLink( PatternLink(this, p) );
-    }
-        
-    return pq;
+    // No restriction by default
 }
 
 
-void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                          XLink x ) const
-{ 
-    INDENT("∧");
-    ASSERT( !GetPatterns().empty() ); // must be at least one thing!
-    query.Reset();
-    
-    // Check pre-restriction
-    CheckLocalMatch(x.GetChildX().get());
-    
-    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
-    {
-        const TreePtrInterface *p = &*pit; 
-        ASSERT( *p );
-        // Context is normal because all patterns must match (but none should contain
-        // nodes with reploace functionlity because they will not be invoked during replace) 
-        query.RegisterNormalLink( PatternLink(this, p), x ); // Link into X
-    }
-}    
+TreePtr<Node> ColocatedAgent::BuildReplaceImpl() 
+{
+    auto plinks = pattern_query->GetNormalLinks();
+    PatternLink replace_plink = plinks.front();
+    ASSERT( replace_plink );          
+    return replace_plink.GetChildAgent()->BuildReplace();
+}
+
 

@@ -3,9 +3,9 @@
 
 #include "agent.hpp"
 #include "common/common.hpp"
-#include "common/read_args.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/transformation.hpp"
+#include "colocated_agent.hpp"
+
+#define COLO_GG
 
 namespace SR
 { 
@@ -14,13 +14,11 @@ namespace SR
 /// input tree, i.e. durng the second and later hits of the master or any slave,
 /// it does not match any part of the working graph that was created by an earlier
 /// pass. This departs from the reductive style, so should be used with care.
-class GreenGrassAgent : public virtual AgentCommon 
-{
+class GreenGrassAgent : public virtual ColocatedAgent 
+{               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+    virtual void RunColocatedQuery(XLink common_xlink) const;
     virtual Block GetGraphBlockInfo() const;
-    virtual TreePtr<Node> BuildReplaceImpl();
     virtual const TreePtrInterface *GetThrough() const = 0;
 };
 

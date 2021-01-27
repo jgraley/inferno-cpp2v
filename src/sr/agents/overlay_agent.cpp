@@ -12,19 +12,6 @@ shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
     return pq;
 }
 
-
-void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                        XLink x ) const
-{
-    query.Reset();
-    
-    // Check pre-restriction
-    CheckLocalMatch(x.GetChildX().get());
-
-    query.RegisterNormalLink( PatternLink(this, GetThrough()), x ); // Link into X
-}
-
-
 Graphable::Block OverlayAgent::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;

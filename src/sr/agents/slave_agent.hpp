@@ -4,9 +4,8 @@
 #include "agent.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/transformation.hpp"
-#include "../search_replace.hpp" 
+#include "../scr_engine.hpp" 
+#include "colocated_agent.hpp"
 
 namespace SR
 { 
@@ -20,17 +19,15 @@ class SearchReplace;
 /// operates on the resulting subtree, performing search and replace operations
 /// via the `search_pattern` and `replace_pattern` pointers until no more 
 /// matches are found (the usual reductive style).  
-class SlaveAgent : public virtual AgentCommonNeedSCREngine
+class SlaveAgent : public virtual ColocatedAgent, public RequiresSubordinateSCREngine 
 {
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual void KeyForOverlay( Agent *from );
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual Block GetGraphBlockInfo() const;
-    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine, SCREngine *my_scr_engine );
+    virtual void SetMyEngine( SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;

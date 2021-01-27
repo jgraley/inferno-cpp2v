@@ -184,17 +184,6 @@ private:
 };
 
 
-class AgentCommonNeedSCREngine : public AgentCommon
-{
-public:
-	virtual bool IsSearch() const = 0;
-	virtual TreePtr<Node> GetSearchPattern() const = 0;
-	virtual TreePtr<Node> GetReplacePattern() const = 0;
-    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine, SCREngine *my_engine ) = 0;
-    virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
-};
-
-
 class AgentCommonDomainExtender : public AgentCommon
 {
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );

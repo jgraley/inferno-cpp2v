@@ -1,26 +1,25 @@
 #ifndef COLOCATED_AGENT_HPP
 #define COLOCATED_AGENT_HPP
 
-#include "../search_replace.hpp"
-#include "helpers/transformation.hpp"
-#include "overlay_agent.hpp"
-#include "slave_agent.hpp"
+#include "agent.hpp"
 
 namespace SR
 {
 
 /**
  * Intermediate class for agents that are colocated under the
- * arrow-head with MMAX model. Subclasses must implement GetPatterns().
+ * "arrow-head with MMAX" model. Only applies to normal links.
+ * Links are extracted from pattern query and front() link is used
+ * to build replace pattern. Subclasses may override 
+ * RunColocatedQuery() to add additional restrictions. #271
  */
 class ColocatedAgent : public virtual AgentCommon 
 {
 public:
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
-private:
-    virtual CollectionInterface &GetPatterns() const = 0;
+                                      XLink base_xlink ) const;                                                        
+    virtual TreePtr<Node> BuildReplaceImpl();
+    virtual void RunColocatedQuery(XLink common_xlink) const;
 };
 
 };

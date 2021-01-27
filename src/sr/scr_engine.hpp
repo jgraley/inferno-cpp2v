@@ -19,10 +19,19 @@
 namespace SR 
 {
 class Agent;
-class AgentCommonNeedSCREngine;
 class Conjecture;
 class SpecialBase;
 class AndRuleEngine;
+
+class RequiresSubordinateSCREngine
+{
+public:
+	virtual bool IsSearch() const = 0;
+	virtual TreePtr<Node> GetSearchPattern() const = 0;
+	virtual TreePtr<Node> GetReplacePattern() const = 0;
+    virtual void SetMyEngine( SCREngine *my_engine ) = 0;
+    virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
+};
 
 /// Common implementation for search+replace, compare+replace and slaves
 class SCREngine : public virtual Graphable
@@ -55,10 +64,10 @@ private:
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<Agent *> &master_agents, 
-                             set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                             set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                              CompareReplace::AgentPhases &agent_phases );
         void CreateMyEngines( const unordered_set<Agent *> &master_agents,                       
-                              const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines,
+                              const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                               CompareReplace::AgentPhases &agent_phases );
         void ConfigureAgents(const CompareReplace::AgentPhases &agent_phases);
 
@@ -72,7 +81,7 @@ private:
         const unordered_set<Agent *> master_agents;
         shared_ptr< unordered_set<Agent *> > my_agents;   
         shared_ptr< unordered_set<PatternLink> > my_agent_links;   
-        map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
+        map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
 public:
