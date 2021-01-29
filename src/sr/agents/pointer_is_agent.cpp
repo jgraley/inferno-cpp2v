@@ -15,7 +15,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void PointerIsAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                           XLink x ) const
 {
 	INDENT("@");

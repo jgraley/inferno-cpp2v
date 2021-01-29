@@ -12,7 +12,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void TransformOfAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                             XLink xlink ) const
 {
     INDENT("T");

@@ -187,7 +187,7 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 }
 
 
-void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                        XLink x ) const                          
 {
     INDENT("N");

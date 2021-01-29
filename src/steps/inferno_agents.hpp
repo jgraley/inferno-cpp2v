@@ -165,10 +165,10 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 /// when accessing arrays. The `terminus` is the node to be found at the end of
 /// the recursion and `depth` is a string matching the steps taken to 
 /// reach the terminus.
-struct NestedAgent : public virtual AgentCommonDomainExtender
+struct NestedAgent : public virtual ExtendingAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual XLink Advance( XLink x, 
                            string *depth ) const = 0;

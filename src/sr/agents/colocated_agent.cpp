@@ -4,17 +4,14 @@
 
 using namespace SR;
 
-void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void ColocatedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                           XLink base_xlink ) const
 { 
     INDENT("∧");
     query.Reset();
     auto plinks = pattern_query->GetNormalLinks();
     ASSERT( !plinks.empty() ); // must be at least one thing!
-    
-    // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
-    
+
     RunColocatedQuery(base_xlink);
 
     for( PatternLink plink : plinks )                 

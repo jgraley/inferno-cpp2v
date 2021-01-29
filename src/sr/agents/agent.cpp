@@ -244,7 +244,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
         this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
 }                             
                       
-
+                      
 AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                                                               const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
@@ -608,7 +608,34 @@ string AgentCommon::GetTrace() const
 }
 
 
-map<XLink, XLink> AgentCommonDomainExtender::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
+void PreRestrictedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                              XLink base_xlink ) const
+{
+    // Check pre-restriction
+    CheckLocalMatch(base_xlink.GetChildX().get());
+ 
+    RunDecidedQueryPRed( query, base_xlink );
+}
+
+
+void PreRestrictedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                                   const SolutionMap *required_links,
+                                                   const TheKnowledge *knowledge ) const
+{
+    // Check pre-restriction
+    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
+}
+
+                               
+void PreRestrictedAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
+                                                   const SolutionMap *required_links,
+                                                   const TheKnowledge *knowledge ) const                                      
+{                      
+    ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");
+}                     
+
+
+map<XLink, XLink> ExtendingAgent::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
 {
     Conjecture conj(this);            
 

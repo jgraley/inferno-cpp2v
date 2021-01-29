@@ -184,7 +184,24 @@ private:
 };
 
 
-class AgentCommonDomainExtender : public AgentCommon
+class PreRestrictedAgent : public AgentCommon
+{
+public:    
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                                      
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const = 0;                                          
+                                      
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
+    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                      
+};
+
+
+class ExtendingAgent : public PreRestrictedAgent
 {
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
 };
