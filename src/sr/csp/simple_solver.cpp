@@ -122,7 +122,6 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     list<VariableId>::const_iterator next_it = current_it;
     ++next_it;
     bool complete = (next_it == plan.variables.end());
-
     
     Value start_val;
     if( current_it==plan.variables.begin() )
@@ -225,7 +224,7 @@ pair<bool, Assignment> SimpleSolver::TestNoThrow( const Assignments &assigns, co
 {
     try
     {
-        Test( assignments, to_test );
+        Test( assigns, to_test );
         return make_pair(true, Assignment());
     }
     catch( const ::Mismatch &e )
@@ -251,7 +250,7 @@ void SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_tes
         int requirements_met = 0;
         list<VariableId> required_vars = c->GetRequiredVariables();
         for( VariableId rv : required_vars )
-            if( assignments.count(rv) > 0 )
+            if( assigns.count(rv) > 0 )
                 requirements_met++;
            
         if( requirements_met < required_vars.size())
@@ -265,12 +264,12 @@ void SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_tes
             int free_met = 0;
             list<VariableId> free_vars = c->GetFreeVariables();
             for( VariableId rv : free_vars )
-                if( assignments.count(rv) > 0 )
+                if( assigns.count(rv) > 0 )
                     free_met++;
             TRACE_TO(report)(" fmet=%d", free_met);
         }
         
-        c->Test(assignments); 
+        c->Test(assigns); 
                                     
         // Only expected to pass for base (which we only know about if 
         // it's FREE). We don't check whether the other 
@@ -294,10 +293,10 @@ void SimpleSolver::TraceProblem() const
 }
 
 
-void SimpleSolver::CheckLocalMatch( const Assignments &assignments, VariableId variable )
+void SimpleSolver::CheckLocalMatch( const Assignments &assigns, VariableId variable )
 {
-    ASSERT( assignments.count(variable) > 0 );   // in the assignment
-    ::CheckLocalMatch( variable, assignments.at(variable) );
+    ASSERT( assigns.count(variable) > 0 );   // in the assignment
+    ::CheckLocalMatch( variable, assigns.at(variable) );
 }
 
 
