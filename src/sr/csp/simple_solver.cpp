@@ -91,21 +91,23 @@ void SimpleSolver::Run( ReportageObserver *holder_,
 #endif    
     try_counts.clear();
     
-    try
-    {
-        Test( assignments, plan.constraint_set );
-    }
-    catch( const ::Mismatch &e )
-    {
-        return; // We failed with no assignments, so we cannot match
-    }        
-
+    bool ok;
+    Assignment hint;  
+    // Do a test with all constraints but no assignments (=free variables), so forced variables 
+    // will be tested. From here on we can test only constraints affected by changed assignments.
+    tie(ok, hint) = Test( assignments, plan.constraint_set );
+    
+    if( !ok )
+        return; // We failed with no assignments, so we cannot match - no solutions will be reported
+    
     if( plan.variables.empty() )
     {
+        // No free vars, so we've got a solution
         holder->ReportSolution( assignments );
     }
     else
     {        
+        // Work through the free vars
         TryVariable( plan.variables.begin() );    
     }
 
@@ -172,7 +174,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
         
         bool ok;
         Assignment hint;        
-        tie(ok, hint) = TestNoThrow( assignments, plan.affected_constraints.at(current_var) );        
+        tie(ok, hint) = Test( assignments, plan.affected_constraints.at(current_var) );        
         
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
@@ -220,29 +222,11 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 }
 
 
-pair<bool, Assignment> SimpleSolver::TestNoThrow( const Assignments &assigns, const ConstraintSet &to_test )
+pair<bool, Assignment> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test )
 {
-    try
-    {
-        Test( assigns, to_test );
-        return make_pair(true, Assignment());
-    }
-    catch( const ::Mismatch &e )
-    {            
-#ifdef HINTS_IN_EXCEPTIONS   
-        if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
-            return make_pair(false, pae->hint);
-#endif
-        return make_pair(false, Assignment());
-    }
-}
-
-
-void SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test )
-{
-    //TimedOperations(); // overhead should be hidden by Constraint::Test()
-
     report = "";
+    ConstraintSet unsatisfied;
+    list<Assignment> hints;
     for( shared_ptr<Constraint> c : to_test )
     {      
         TRACE_TO(report)(*c);
@@ -269,8 +253,19 @@ void SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_tes
             TRACE_TO(report)(" fmet=%d", free_met);
         }
         
-        c->Test(assigns); 
-                                    
+        try
+        {
+            c->Test(assigns); 
+        }
+        catch( const ::Mismatch &e )
+        {            
+#ifdef HINTS_IN_EXCEPTIONS   
+            if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
+                hints.push_back( pae->hint );
+#endif
+            unsatisfied.insert( c );
+        }
+       
         // Only expected to pass for base (which we only know about if 
         // it's FREE). We don't check whether the other 
         // values accepted by the constraint are compatible with the 
@@ -279,6 +274,8 @@ void SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_tes
         // for( VariableId var : c->GetFreeVariables() )
         //     CheckLocalMatch( assigns, var );   
     } 
+    return make_pair( unsatisfied.empty(), 
+                      hints.empty() ? Assignment() : hints.front() );
 }
 
 
