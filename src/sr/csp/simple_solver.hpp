@@ -8,6 +8,7 @@
 #include "common/common.hpp"
 
 #include <chrono>
+#include <functional>
 
 namespace CSP
 { 
@@ -53,21 +54,23 @@ private:
         map<VariableId, ConstraintSet> affected_constraints;
     } plan;
 
-    class VariableTrier : public Traceable
+    void TryVariable( list<VariableId>::const_iterator current_it );
+
+    class ValueSelector : public Traceable
     {
     public:
-        VariableTrier( const Plan &solver_plan,
-                       SimpleSolver &solver,
+        typedef function< pair<bool, Assignment>( const Assignments &assigns, const ConstraintSet &to_test ) > AssignmentTester;
+        ValueSelector( const Plan &solver_plan,
+                       const AssignmentTester &assignment_tester,
                        const SR::TheKnowledge *knowledge,
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
-        ~VariableTrier();
-        Value SelectValue();
-        void TryVariable();
+        ~ValueSelector();
+        Value SelectNextValue();
         
     private:
         const Plan &solver_plan;
-        SimpleSolver &solver;
+        const AssignmentTester &assignment_tester;
         const SR::TheKnowledge * const knowledge;
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
@@ -75,18 +78,21 @@ private:
         list<Value> value_queue;    
     };
 
-    pair<bool, Assignment> Test( const Assignments &assigns, const ConstraintSet &to_test );
+    pair<bool, Assignment> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlanVariablesUsed();
 
-    ReportageObserver *holder;
+    // Structural
+    ReportageObserver *holder;    
+    ValueSelector::AssignmentTester assignment_tester;    
         
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
     Assignments assignments;
+    map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;

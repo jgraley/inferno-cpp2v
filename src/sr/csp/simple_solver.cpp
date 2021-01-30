@@ -65,6 +65,12 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
 {
     TraceProblem();
     CheckPlanVariablesUsed();
+
+    assignment_tester = 
+        [=]( const Assignments &assigns, const ConstraintSet &to_test ) -> pair<bool, Assignment>
+    {
+        return Test( assigns, to_test );
+    };    
 }
                         
 
@@ -102,20 +108,49 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     else
     {        
         // Work through the free vars
-        VariableTrier( plan, *this, knowledge, assignments, plan.variables.begin() ).TryVariable();    
+        TryVariable( plan.variables.begin() );    
     }
 
     TRACE("Simple solver ends\n");    
 }
 
 
-SimpleSolver::VariableTrier::VariableTrier( const Plan &solver_plan_,
-                                            SimpleSolver &solver_,
+void SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
+{ 
+    const VariableId current_var = *current_it;
+    value_selectors[current_var] = make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, current_it );
+    list<VariableId>::const_iterator next_it = current_it;
+    
+    while(true)
+    {
+        if( !value_selectors.at(current_var)->SelectNextValue() )
+            break; // backtrack
+            
+        
+        ++next_it;
+        if( next_it == plan.variables.end() ) // complete
+        {
+            holder->ReportSolution( assignments );
+            --next_it;
+            continue;
+        }
+        
+        TryVariable( next_it ); // advance
+        --next_it;
+    }
+    
+    ASSERT( next_it == current_it );
+    value_selectors[current_var] = nullptr;
+}
+
+
+SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
+                                            const AssignmentTester &assignment_tester_,
                                             const SR::TheKnowledge *knowledge_,
                                             Assignments &assignments_,
                                             list<VariableId>::const_iterator current_it_ ) :
     solver_plan( solver_plan_ ),
-    solver( solver_ ),
+    assignment_tester( assignment_tester_ ),
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     current_it( current_it_ ),
@@ -164,7 +199,7 @@ SimpleSolver::VariableTrier::VariableTrier( const Plan &solver_plan_,
 }
 
 
-SimpleSolver::VariableTrier::~VariableTrier()
+SimpleSolver::ValueSelector::~ValueSelector()
 {
     // Need to do this to avoid old assignments hanging around, being 
     // picked up by partial NLQs and causing mismatches that don't get
@@ -173,7 +208,7 @@ SimpleSolver::VariableTrier::~VariableTrier()
 }
 
 
-Value SimpleSolver::VariableTrier::SelectValue()
+Value SimpleSolver::ValueSelector::SelectNextValue()
 {
     while( !value_queue.empty() )
     {       
@@ -184,7 +219,7 @@ Value SimpleSolver::VariableTrier::SelectValue()
         
         bool ok;
         Assignment hint;        
-        tie(ok, hint) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
+        tie(ok, hint) = assignment_tester( assignments, solver_plan.affected_constraints.at(current_var) );        
         
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
@@ -202,24 +237,7 @@ Value SimpleSolver::VariableTrier::SelectValue()
 }
 
 
-void SimpleSolver::VariableTrier::TryVariable()
-{
-    list<VariableId>::const_iterator next_it = current_it;
-    ++next_it;
-    bool complete = (next_it == solver_plan.variables.end());
-    
-    Value value;
-    while( value = SelectValue() )
-    {
-        if( complete )
-            solver.holder->ReportSolution( assignments );
-        else
-            VariableTrier( solver_plan, solver, knowledge, assignments, next_it ).TryVariable();
-    }
-}
-
-
-pair<bool, Assignment> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test )
+pair<bool, Assignment> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test ) const 
 {
     ConstraintSet unsatisfied;
     list<Assignment> hints;
