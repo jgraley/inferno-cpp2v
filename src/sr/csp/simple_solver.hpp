@@ -62,6 +62,7 @@ private:
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
         ~VariableTrier();
+        Value SelectValue();
         void TryVariable();
         
     private:
@@ -71,9 +72,7 @@ private:
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
-        list<VariableId>::const_iterator next_it;
         list<Value> value_queue;    
-        bool complete;    
     };
 
     pair<bool, Assignment> Test( const Assignments &assigns, const ConstraintSet &to_test );

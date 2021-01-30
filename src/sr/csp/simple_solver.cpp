@@ -124,10 +124,6 @@ SimpleSolver::VariableTrier::VariableTrier( const Plan &solver_plan_,
     ASSERT( current_it != solver_plan.variables.end() );
     INDENT("T");
        
-    next_it = current_it;
-    ++next_it;
-    complete = (next_it == solver_plan.variables.end());
-    
     Value start_val;
     if( current_it==solver_plan.variables.begin() )
     {
@@ -177,13 +173,13 @@ SimpleSolver::VariableTrier::~VariableTrier()
 }
 
 
-void SimpleSolver::VariableTrier::TryVariable()
+Value SimpleSolver::VariableTrier::SelectValue()
 {
-
     while( !value_queue.empty() )
     {       
         TRACE("Trying variable ")(current_var)(" := ")(value_queue.front())("\n");
-        assignments[current_var] = value_queue.front();
+        Value value = value_queue.front();
+        assignments[current_var] = value;
         value_queue.pop_front();
         
         bool ok;
@@ -199,15 +195,26 @@ void SimpleSolver::VariableTrier::TryVariable()
        
         if( !ok )
            continue; // try next value
-                   
+           
+        return value;
+    }
+    return Value();
+}
+
+
+void SimpleSolver::VariableTrier::TryVariable()
+{
+    list<VariableId>::const_iterator next_it = current_it;
+    ++next_it;
+    bool complete = (next_it == solver_plan.variables.end());
+    
+    Value value;
+    while( value = SelectValue() )
+    {
         if( complete )
-        {
             solver.holder->ReportSolution( assignments );
-        }
         else
-        {
             VariableTrier( solver_plan, solver, knowledge, assignments, next_it ).TryVariable();
-        }
     }
 }
 
