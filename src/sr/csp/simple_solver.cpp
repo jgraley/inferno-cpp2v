@@ -108,6 +108,9 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     else
     {        
         // Work through the free vars
+        value_selectors[plan.variables.front()] = 
+            make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, plan.variables.begin() );
+        
         TryVariable( plan.variables.begin() );    
     }
 
@@ -115,18 +118,26 @@ void SimpleSolver::Run( ReportageObserver *holder_,
 }
 
 
+#define DERECURSE
+
 void SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
-{ 
-    value_selectors[*current_it] = 
-        make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, current_it );
-    list<VariableId>::const_iterator next_it = current_it;
-    
+{     
     while(true)
     {
         if( !value_selectors.at(*current_it)->SelectNextValue() )
+        {
+            value_selectors[*current_it] = nullptr;
+            if( current_it == plan.variables.begin() )
+                return;
+#ifdef DERECURSE
+            --current_it; // backtrack
+            continue;
+#else            
             break; // backtrack
+#endif            
+        }
                     
-        ++current_it;
+        ++current_it; // try advance
         if( current_it == plan.variables.end() ) // complete
         {
             holder->ReportSolution( assignments );
@@ -134,11 +145,13 @@ void SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
             continue;
         }
         
-        TryVariable( current_it ); // advance
+        value_selectors[*current_it] = 
+            make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, current_it );
+#ifndef DERECURSE
+        TryVariable( current_it ); 
         --current_it;
-    }
-    
-    value_selectors[*current_it] = nullptr;
+#endif        
+    }        
 }
 
 
