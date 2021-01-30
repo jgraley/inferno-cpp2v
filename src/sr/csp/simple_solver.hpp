@@ -53,7 +53,29 @@ private:
         map<VariableId, ConstraintSet> affected_constraints;
     } plan;
 
-    bool TryVariable( list<VariableId>::const_iterator current_it );
+    class VariableTrier : public Traceable
+    {
+    public:
+        VariableTrier( const Plan &solver_plan,
+                       SimpleSolver &solver,
+                       const SR::TheKnowledge *knowledge,
+                       Assignments &assignments,
+                       list<VariableId>::const_iterator current_it );
+        ~VariableTrier();
+        void TryVariable();
+        
+    private:
+        const Plan &solver_plan;
+        SimpleSolver &solver;
+        const SR::TheKnowledge * const knowledge;
+        Assignments &assignments;
+        const list<VariableId>::const_iterator current_it;
+        const VariableId current_var;
+        list<VariableId>::const_iterator next_it;
+        list<Value> value_queue;    
+        bool complete;    
+    };
+
     pair<bool, Assignment> Test( const Assignments &assigns, const ConstraintSet &to_test );
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
@@ -66,12 +88,6 @@ private:
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
     Assignments assignments;
-    map<VariableId, int> try_counts; // just for tracing
-    
-    // Only needed for debug output
-    Assignments best_assignments;
-    int best_num_assignments;
-    string report;
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;

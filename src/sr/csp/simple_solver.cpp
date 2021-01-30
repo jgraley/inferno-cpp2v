@@ -83,13 +83,7 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
         c->Start( forces, knowledge );
         
-    assignments.clear();
-    
-#ifdef TRACK_BEST_ASSIGNMENT    
-    best_assignments.clear();
-    best_num_assignments = 0;
-#endif    
-    try_counts.clear();
+    assignments.clear();    
     
     bool ok;
     Assignment hint;  
@@ -108,25 +102,34 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     else
     {        
         // Work through the free vars
-        TryVariable( plan.variables.begin() );    
+        VariableTrier( plan, *this, knowledge, assignments, plan.variables.begin() ).TryVariable();    
     }
 
     TRACE("Simple solver ends\n");    
 }
 
 
-bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
+SimpleSolver::VariableTrier::VariableTrier( const Plan &solver_plan_,
+                                            SimpleSolver &solver_,
+                                            const SR::TheKnowledge *knowledge_,
+                                            Assignments &assignments_,
+                                            list<VariableId>::const_iterator current_it_ ) :
+    solver_plan( solver_plan_ ),
+    solver( solver_ ),
+    knowledge( knowledge_ ),
+    assignments( assignments_ ),
+    current_it( current_it_ ),
+    current_var( *current_it )
 {
+    ASSERT( current_it != solver_plan.variables.end() );
     INDENT("T");
-    ASSERT( current_it != plan.variables.end() );
-    VariableId current_var = *current_it;
-   
-    list<VariableId>::const_iterator next_it = current_it;
+       
+    next_it = current_it;
     ++next_it;
-    bool complete = (next_it == plan.variables.end());
+    complete = (next_it == solver_plan.variables.end());
     
     Value start_val;
-    if( current_it==plan.variables.begin() )
+    if( current_it==solver_plan.variables.begin() )
     {
         start_val = knowledge->ordered_domain.front();
     }
@@ -142,7 +145,6 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
     SR::TheKnowledge::Nugget::OrderedIt rev_it = nugget.ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
-    list<Value> value_queue;
     bool go_forward = true;
     for( Value v_unused : knowledge->ordered_domain ) // just to get the right number of iterations
     {
@@ -163,18 +165,30 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
             value_queue.push_back(v);
         go_forward = !go_forward;
     }
-        
-    int i=0;
+}
+
+
+SimpleSolver::VariableTrier::~VariableTrier()
+{
+    // Need to do this to avoid old assignments hanging around, being 
+    // picked up by partial NLQs and causing mismatches that don't get
+    // resolved beacuse this assignment won't be getting incremented.
+    assignments.erase(current_var);
+}
+
+
+void SimpleSolver::VariableTrier::TryVariable()
+{
+
     while( !value_queue.empty() )
     {       
         TRACE("Trying variable ")(current_var)(" := ")(value_queue.front())("\n");
         assignments[current_var] = value_queue.front();
         value_queue.pop_front();
-        try_counts[current_var] = i++;
         
         bool ok;
         Assignment hint;        
-        tie(ok, hint) = Test( assignments, plan.affected_constraints.at(current_var) );        
+        tie(ok, hint) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
         
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
@@ -185,73 +199,33 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
        
         if( !ok )
            continue; // try next value
-            
-#ifdef TRACK_BEST_ASSIGNMENT    
-        int num=0;
-        for( auto p : assignments )
-            num++;
-        if( num > best_num_assignments )
-        {
-             best_assignments = assignments;
-             best_num_assignments = num;
-        }
-#endif
-        
+                   
         if( complete )
         {
-#ifdef TRACK_BEST_ASSIGNMENT    
-            TRACE("Reporting CSP solution\n");
-//            ShowBestAssignment();
-#endif            
-            holder->ReportSolution( assignments );
+            solver.holder->ReportSolution( assignments );
         }
         else
         {
-            TryVariable( next_it );
+            VariableTrier( solver_plan, solver, knowledge, assignments, next_it ).TryVariable();
         }
-
-        i++;
     }
-    
-    // Need to do this to avoid old assignments hanging around, being 
-    // picked up by partial NLQs and causing mismatches that don't get
-    // resolved beacuse this assignment won't be getting incremented.
-    assignments.erase(current_var);
-
-    return false;
 }
 
 
 pair<bool, Assignment> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test )
 {
-    report = "";
     ConstraintSet unsatisfied;
     list<Assignment> hints;
     for( shared_ptr<Constraint> c : to_test )
-    {      
-        TRACE_TO(report)(*c);
-            
+    {                  
         int requirements_met = 0;
         list<VariableId> required_vars = c->GetRequiredVariables();
         for( VariableId rv : required_vars )
             if( assigns.count(rv) > 0 )
                 requirements_met++;
            
-        if( requirements_met < required_vars.size())
-            TRACE_TO(report)(" rmet=%d SKIP\n", requirements_met);        
-           
         if( requirements_met < required_vars.size() )
             continue;        
-        
-        if( Tracer::IsEnabled() )
-        {
-            int free_met = 0;
-            list<VariableId> free_vars = c->GetFreeVariables();
-            for( VariableId rv : free_vars )
-                if( assigns.count(rv) > 0 )
-                    free_met++;
-            TRACE_TO(report)(" fmet=%d", free_met);
-        }
         
         try
         {
@@ -306,8 +280,6 @@ void SimpleSolver::ShowBestAssignment()
     TRACE("VARIABLES: assigned %d of %d:\n", assignments_to_show.size(), plan.variables.size());
     for( VariableId var : plan.variables )
     {
-        if( try_counts.count(var) > 0 )
-            TRACEC("[%03d] ", try_counts.at(var));
         TRACEC(var);
         if( assignments_to_show.count(var) > 0 )
         {
@@ -334,8 +306,6 @@ void SimpleSolver::ShowBestAssignment()
             break; // solver gives up
         }
     }
-    TRACEC("CONSTRAINTS:\n");
-    TRACEC(report);
 }
 
 
