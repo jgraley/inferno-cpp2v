@@ -117,30 +117,28 @@ void SimpleSolver::Run( ReportageObserver *holder_,
 
 void SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
 { 
-    const VariableId current_var = *current_it;
-    value_selectors[current_var] = make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, current_it );
+    value_selectors[*current_it] = 
+        make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, current_it );
     list<VariableId>::const_iterator next_it = current_it;
     
     while(true)
     {
-        if( !value_selectors.at(current_var)->SelectNextValue() )
+        if( !value_selectors.at(*current_it)->SelectNextValue() )
             break; // backtrack
-            
-        
-        ++next_it;
-        if( next_it == plan.variables.end() ) // complete
+                    
+        ++current_it;
+        if( current_it == plan.variables.end() ) // complete
         {
             holder->ReportSolution( assignments );
-            --next_it;
+            --current_it;
             continue;
         }
         
-        TryVariable( next_it ); // advance
-        --next_it;
+        TryVariable( current_it ); // advance
+        --current_it;
     }
     
-    ASSERT( next_it == current_it );
-    value_selectors[current_var] = nullptr;
+    value_selectors[*current_it] = nullptr;
 }
 
 
