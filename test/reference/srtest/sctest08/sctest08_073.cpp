@@ -14,27 +14,27 @@ SC_THREAD(id_14);
 enum id_3
 {
 id_10 = 3U,
-id_11 = 7U,
+id_11 = 9U,
 id_12 = 2U,
-id_13 = 6U,
+id_13 = 7U,
 id_4 = 4U,
-id_5 = 9U,
+id_5 = 5U,
 id_6 = 1U,
 id_7 = 8U,
 id_8 = 0U,
-id_9 = 5U,
+id_9 = 6U,
 };
 void id_14();
 private:
-int (id_23[10U]);
-unsigned int (id_22[10U]);
+int (id_22[10U]);
+unsigned int (id_23[10U]);
 unsigned int id_17;
 unsigned int id_21;
 unsigned int id_26;
 public:
 /*temp*/ int id_18;
-/*temp*/ int id_19;
-/*temp*/ unsigned int id_20;
+/*temp*/ int id_20;
+/*temp*/ unsigned int id_19;
 /*temp*/ unsigned int id_25;
 };
 id_0 id_27("id_27");
@@ -58,8 +58,8 @@ if(  ::id_0::id_8== ::id_0::id_17 )
 {
  ::id_15=( ::id_15+ ::id_16);
  ::id_0::id_18=(3);
- ::id_0::id_19= ::id_0::id_18;
- ::id_0::id_20= ::id_0::id_6;
+ ::id_0::id_19= ::id_0::id_6;
+ ::id_0::id_20= ::id_0::id_18;
  ::id_0::id_17= ::id_0::id_4;
 }
 if(  ::id_0::id_6== ::id_0::id_17 )
@@ -86,7 +86,7 @@ if(  ::id_0::id_4== ::id_0::id_17 )
 ( ::id_0::id_22[ ::id_0::id_21])= ::id_0::id_20;
 ( ::id_0::id_23[ ::id_0::id_21])= ::id_0::id_19;
  ::id_24=(0);
- ::id_0::id_17=((!( ::id_24<( ::id_0::id_23[ ::id_0::id_21]))) ?  ::id_0::id_11 :  ::id_0::id_9);
+ ::id_0::id_17=((!( ::id_24<( ::id_0::id_22[ ::id_0::id_21]))) ?  ::id_0::id_11 :  ::id_0::id_9);
 }
 if(  ::id_0::id_9== ::id_0::id_17 )
 {
@@ -98,7 +98,7 @@ if(  ::id_0::id_13== ::id_0::id_17 )
 {
  ::id_15=((1)+ ::id_15);
  ::id_24=((1)+ ::id_24);
- ::id_0::id_17=(( ::id_24<( ::id_0::id_23[ ::id_0::id_21])) ?  ::id_0::id_9 :  ::id_0::id_11);
+ ::id_0::id_17=(( ::id_24<( ::id_0::id_22[ ::id_0::id_21])) ?  ::id_0::id_9 :  ::id_0::id_11);
 }
 if(  ::id_0::id_11== ::id_0::id_17 )
 {
@@ -107,7 +107,7 @@ if(  ::id_0::id_11== ::id_0::id_17 )
 }
 if(  ::id_0::id_7== ::id_0::id_17 )
 {
- ::id_0::id_1=( ::id_0::id_22[ ::id_0::id_21]);
+ ::id_0::id_1=( ::id_0::id_23[ ::id_0::id_21]);
  ::id_0::id_21--;
  ::id_0::id_17= ::id_0::id_1;
 }

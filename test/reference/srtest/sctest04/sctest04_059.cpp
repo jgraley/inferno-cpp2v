@@ -11,8 +11,8 @@ SC_THREAD(id_5);
 enum id_1
 {
 id_2 = 0U,
-id_3 = 2U,
-id_4 = 1U,
+id_3 = 1U,
+id_4 = 2U,
 };
 void id_5();
 };
@@ -36,7 +36,7 @@ wait(SC_ZERO_TIME);
 id_10= ::id_0::id_4;
 goto *(id_6[id_10]);
 }
-id_8:;
+id_9:;
 if(  ::id_0::id_4==id_10 )
 {
  ::id_11*=(2);
@@ -44,7 +44,7 @@ if(  ::id_0::id_4==id_10 )
 id_10=(( ::id_12<(5)) ?  ::id_0::id_2 :  ::id_0::id_3);
 }
 goto *(id_6[id_10]);
-id_9:;
+id_8:;
 cease(  ::id_11 );
 return ;
 }

@@ -237,10 +237,10 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
     list< TreePtr<SpecificIdentifier> > ids;
     for( auto p : idfp.GetReverseFingerprints() )
     {
-        ASSERT(p.second.size() == 1)
+        /*ASSERT(p.second.size() == 1)
           ("Could not differentiate between these identifiers: ")(p.second)
           (" fingerprint ")(p.first)
-          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");
+          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");*/
         // If assert is removed, this loop could iterate more than once; the order
         // of the iterations will not be repeatable, and so id uniquification won't be.
         for( TreePtr<SpecificIdentifier> si : p.second ) // TODO change me!

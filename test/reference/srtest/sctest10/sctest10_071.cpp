@@ -17,20 +17,20 @@ id_5 = 2U,
 };
 void id_6();
 private:
-char id_37;
-short id_38;
+char id_38;
+short id_37;
 public:
 int id_30;
 private:
-int id_39;
+int id_36;
 int id_40;
-unsigned int id_36;
+unsigned int id_39;
 public:
-/*temp*/ char id_33;
-/*temp*/ short id_32;
-/*temp*/ int id_31;
+/*temp*/ char id_32;
+/*temp*/ short id_33;
+/*temp*/ int id_34;
 /*temp*/ int id_35;
-/*temp*/ unsigned int id_34;
+/*temp*/ unsigned int id_31;
 };
 id_0 id_41("id_41");
 
@@ -64,13 +64,15 @@ do
 if( (sc_delta_count())==(0U) )
 {
  ::id_0::id_30=(0);
+id_27=(8);
+id_24=(6);
+id_28=(0);
+id_25=(0);
 id_21=(0);
-id_24=(0);
-id_27=(0);
- ::id_0::id_31=id_21;
- ::id_0::id_32=id_24;
- ::id_0::id_33=id_27;
- ::id_0::id_34= ::id_0::id_3;
+ ::id_0::id_31= ::id_0::id_3;
+ ::id_0::id_32=id_28;
+ ::id_0::id_33=id_25;
+ ::id_0::id_34=id_21;
 wait(SC_ZERO_TIME);
 id_8= ::id_0::id_2;
 continue;
@@ -82,12 +84,10 @@ id_10=id_9;
 id_11=id_10;
 id_12=id_11;
 id_22=id_12;
-id_25=(6);
-id_28=(8);
- ::id_0::id_31=id_22;
- ::id_0::id_32=id_25;
- ::id_0::id_33=id_28;
- ::id_0::id_34= ::id_0::id_4;
+ ::id_0::id_31= ::id_0::id_4;
+ ::id_0::id_32=id_27;
+ ::id_0::id_33=id_24;
+ ::id_0::id_34=id_22;
 id_8= ::id_0::id_2;
 }
 if(  ::id_0::id_4==id_8 )
@@ -97,13 +97,13 @@ id_14=id_13;
 id_15=id_14;
 id_16=id_15;
  ::id_0::id_30=id_16;
-id_23=(1);
-id_26=(2);
 id_29=(3);
- ::id_0::id_31=id_23;
- ::id_0::id_32=id_26;
- ::id_0::id_33=id_29;
- ::id_0::id_34= ::id_0::id_5;
+id_26=(2);
+id_23=(1);
+ ::id_0::id_31= ::id_0::id_5;
+ ::id_0::id_32=id_29;
+ ::id_0::id_33=id_26;
+ ::id_0::id_34=id_23;
 id_8= ::id_0::id_2;
 }
 if(  ::id_0::id_5==id_8 )
@@ -122,9 +122,9 @@ if(  ::id_0::id_2==id_8 )
  ::id_0::id_37= ::id_0::id_33;
  ::id_0::id_38= ::id_0::id_32;
  ::id_0::id_39= ::id_0::id_31;
- ::id_0::id_40=( ::id_0::id_39+((3)* ::id_0::id_38));
- ::id_0::id_35=( ::id_0::id_40+((5)* ::id_0::id_37));
-id_7= ::id_0::id_36;
+ ::id_0::id_40=( ::id_0::id_36+((3)* ::id_0::id_37));
+ ::id_0::id_35=( ::id_0::id_40+((5)* ::id_0::id_38));
+id_7= ::id_0::id_39;
 id_8=id_7;
 }
 wait(SC_ZERO_TIME);

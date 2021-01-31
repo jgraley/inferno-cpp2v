@@ -11,8 +11,8 @@ SC_THREAD(id_5);
 enum id_1
 {
 id_2 = 0U,
-id_3 = 2U,
-id_4 = 1U,
+id_3 = 1U,
+id_4 = 2U,
 };
 void id_5();
 private:

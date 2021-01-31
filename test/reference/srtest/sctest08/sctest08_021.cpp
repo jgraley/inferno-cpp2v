@@ -11,16 +11,16 @@ SC_THREAD(id_1);
 }
 void id_1();
 private:
-int (id_15[10U]);
-void *(id_14[10U]);
+int (id_14[10U]);
+void *(id_15[10U]);
 void *id_24;
 unsigned int id_13;
 public:
-/*temp*/ int id_6;
+/*temp*/ int id_8;
 /*temp*/ void *id_20;
 /*temp*/ void *id_25;
 /*temp*/ void *id_26;
-/*temp*/ void *id_7;
+/*temp*/ void *id_6;
 };
 id_0 id_27("id_27");
 int id_16;
@@ -40,13 +40,13 @@ id_4:;
  ::id_2=( ::id_2+ ::id_3);
 ({ /*temp*/ int id_5; id_5=(3); {
 {
- ::id_0::id_6=id_5;
+ ::id_0::id_6=(&&id_7);
 {
- ::id_0::id_7=(&&id_8);
+ ::id_0::id_8=id_5;
 goto id_9;
 }
 }
-id_8:;
+id_7:;
 }
 });
  ::id_2=((2)* ::id_2);
@@ -67,11 +67,11 @@ id_9:;
 {
 /*temp*/ void *id_12;
  ::id_0::id_13++;
-( ::id_0::id_14[ ::id_0::id_13])= ::id_0::id_7;
+( ::id_0::id_14[ ::id_0::id_13])= ::id_0::id_8;
 ( ::id_0::id_15[ ::id_0::id_13])= ::id_0::id_6;
 {
  ::id_16=(0);
-if(  ::id_16<( ::id_0::id_15[ ::id_0::id_13]) )
+if(  ::id_16<( ::id_0::id_14[ ::id_0::id_13]) )
 {
 id_17:;
 {
@@ -83,7 +83,7 @@ id_18:;
  ::id_16=((1)+ ::id_16);
 }
 id_19:;
-if(  ::id_16<( ::id_0::id_15[ ::id_0::id_13]) )
+if(  ::id_16<( ::id_0::id_14[ ::id_0::id_13]) )
 goto id_17;
 }
 }
@@ -95,7 +95,7 @@ goto id_22;
 id_21:;
 }
 {
-id_12=( ::id_0::id_14[ ::id_0::id_13]);
+id_12=( ::id_0::id_15[ ::id_0::id_13]);
 {
  ::id_0::id_13--;
 goto *(id_12);

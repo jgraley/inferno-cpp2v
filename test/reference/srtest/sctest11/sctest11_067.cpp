@@ -12,16 +12,16 @@ enum id_1
 {
 id_10 = 5U,
 id_11 = 6U,
-id_12 = 12U,
+id_12 = 10U,
 id_13 = 3U,
-id_14 = 9U,
+id_14 = 11U,
 id_15 = 2U,
-id_2 = 11U,
-id_3 = 13U,
+id_2 = 13U,
+id_3 = 8U,
 id_4 = 1U,
 id_5 = 4U,
-id_6 = 8U,
-id_7 = 10U,
+id_6 = 9U,
+id_7 = 12U,
 id_8 = 0U,
 id_9 = 7U,
 };
@@ -29,12 +29,12 @@ void id_16();
 int id_31;
 int id_35;
 private:
-int id_37;
-unsigned int id_36;
+int id_36;
+unsigned int id_37;
 public:
-/*temp*/ int id_32;
+/*temp*/ int id_33;
 /*temp*/ int id_34;
-/*temp*/ unsigned int id_33;
+/*temp*/ unsigned int id_32;
 /*temp*/ unsigned int id_38;
 };
 id_0 id_39("id_39");
@@ -66,8 +66,8 @@ continue;
 }
 if(  ::id_0::id_8==id_20 )
 {
- ::id_0::id_32= ::id_0::id_31;
- ::id_0::id_33= ::id_0::id_4;
+ ::id_0::id_32= ::id_0::id_4;
+ ::id_0::id_33= ::id_0::id_31;
 id_20= ::id_0::id_3;
 }
 if(  ::id_0::id_4==id_20 )
@@ -85,8 +85,8 @@ id_20=((!id_28) ?  ::id_0::id_13 :  ::id_0::id_10);
 }
 if(  ::id_0::id_13==id_20 )
 {
- ::id_0::id_32= ::id_0::id_31;
- ::id_0::id_33= ::id_0::id_5;
+ ::id_0::id_32= ::id_0::id_5;
+ ::id_0::id_33= ::id_0::id_31;
 id_20= ::id_0::id_3;
 }
 if(  ::id_0::id_5==id_20 )
@@ -108,8 +108,8 @@ id_20=((!( ::id_0::id_31++)) ?  ::id_0::id_14 :  ::id_0::id_9);
 }
 if(  ::id_0::id_9==id_20 )
 {
- ::id_0::id_32= ::id_0::id_31;
- ::id_0::id_33= ::id_0::id_6;
+ ::id_0::id_32= ::id_0::id_6;
+ ::id_0::id_33= ::id_0::id_31;
 id_20= ::id_0::id_3;
 }
 if(  ::id_0::id_6==id_20 )
@@ -120,8 +120,8 @@ id_20= ::id_0::id_2;
 }
 if(  ::id_0::id_14==id_20 )
 {
- ::id_0::id_32= ::id_0::id_31;
- ::id_0::id_33= ::id_0::id_7;
+ ::id_0::id_32= ::id_0::id_7;
+ ::id_0::id_33= ::id_0::id_31;
 id_20= ::id_0::id_3;
 }
 if(  ::id_0::id_7==id_20 )
@@ -146,8 +146,8 @@ if(  ::id_0::id_3==id_20 )
 {
  ::id_0::id_36= ::id_0::id_33;
  ::id_0::id_37= ::id_0::id_32;
- ::id_0::id_34=((100)/ ::id_0::id_37);
-id_17= ::id_0::id_36;
+ ::id_0::id_34=((100)/ ::id_0::id_36);
+id_17= ::id_0::id_37;
 id_20=id_17;
 }
 }

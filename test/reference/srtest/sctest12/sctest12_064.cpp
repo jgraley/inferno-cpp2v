@@ -11,20 +11,20 @@ SC_THREAD(id_18);
 enum id_1
 {
 id_10 = 1U,
-id_11 = 6U,
-id_12 = 9U,
-id_13 = 10U,
+id_11 = 8U,
+id_12 = 14U,
+id_13 = 15U,
 id_14 = 2U,
-id_15 = 7U,
-id_16 = 11U,
-id_17 = 14U,
-id_2 = 5U,
+id_15 = 10U,
+id_16 = 13U,
+id_17 = 6U,
+id_2 = 7U,
 id_3 = 3U,
 id_4 = 4U,
-id_5 = 8U,
-id_6 = 13U,
-id_7 = 15U,
-id_8 = 12U,
+id_5 = 12U,
+id_6 = 9U,
+id_7 = 5U,
+id_8 = 11U,
 id_9 = 0U,
 };
 void id_18();
@@ -62,17 +62,17 @@ break;
 id_37=(0);
 wait(SC_ZERO_TIME);
 id_39=(((0)==id_37) ?  ::id_0::id_4 :  ::id_0::id_9);
+id_26:;
+id_27:;
+id_30:;
+id_32:;
+id_34:;
 id_36:;
 id_35:;
-id_34:;
 id_33:;
-id_32:;
 id_31:;
-id_30:;
 id_29:;
 id_28:;
-id_27:;
-id_26:;
 id_25:;
 id_24:;
 id_23:;

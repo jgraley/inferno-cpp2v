@@ -13,9 +13,9 @@ SC_METHOD(id_6);
 enum id_1
 {
 id_2 = 0U,
-id_3 = 2U,
+id_3 = 3U,
 id_4 = 1U,
-id_5 = 3U,
+id_5 = 2U,
 };
 void id_6();
 bool id_8;
@@ -32,10 +32,10 @@ SC_METHOD(id_21);
 enum id_14
 {
 id_15 = 0U,
-id_16 = 2U,
+id_16 = 3U,
 id_17 = 4U,
 id_18 = 1U,
-id_19 = 3U,
+id_19 = 2U,
 id_20 = 5U,
 };
 void id_21();
@@ -119,28 +119,28 @@ if(  ::id_13::id_18== ::id_13::id_22 )
  ::id_13::id_23=(false);
  ::id_9*=(5);
 (( ::id_10. ::id_25::id_24). ::id_0::id_8)=(true);
- ::id_13::id_22=((!(! ::id_13::id_12)) ?  ::id_13::id_19 :  ::id_13::id_16);
+ ::id_13::id_22=((!(! ::id_13::id_12)) ?  ::id_13::id_20 :  ::id_13::id_16);
 }
 if(  ::id_13::id_16== ::id_13::id_22 )
 {
 next_trigger(SC_ZERO_TIME);
- ::id_13::id_22=((! ::id_13::id_12) ?  ::id_13::id_16 :  ::id_13::id_19);
+ ::id_13::id_22=((! ::id_13::id_12) ?  ::id_13::id_16 :  ::id_13::id_20);
 return ;
 }
-if(  ::id_13::id_19== ::id_13::id_22 )
+if(  ::id_13::id_20== ::id_13::id_22 )
 {
  ::id_13::id_12=(false);
  ::id_9*=(5);
 (( ::id_10. ::id_25::id_24). ::id_0::id_8)=(true);
- ::id_13::id_22=((!(! ::id_13::id_12)) ?  ::id_13::id_20 :  ::id_13::id_17);
+ ::id_13::id_22=((!(! ::id_13::id_12)) ?  ::id_13::id_19 :  ::id_13::id_17);
 }
 if(  ::id_13::id_17== ::id_13::id_22 )
 {
 next_trigger(SC_ZERO_TIME);
- ::id_13::id_22=((! ::id_13::id_12) ?  ::id_13::id_17 :  ::id_13::id_20);
+ ::id_13::id_22=((! ::id_13::id_12) ?  ::id_13::id_17 :  ::id_13::id_19);
 return ;
 }
-if(  ::id_13::id_20== ::id_13::id_22 )
+if(  ::id_13::id_19== ::id_13::id_22 )
 {
  ::id_13::id_12=(false);
 cease(  ::id_9 );

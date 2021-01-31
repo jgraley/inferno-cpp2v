@@ -65,7 +65,7 @@ private:
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
         ~ValueSelector();
-        Value SelectNextValue();
+        pair<Value, ConstraintSet> SelectNextValue();
         
     private:
         const Plan &solver_plan;
@@ -75,14 +75,16 @@ private:
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
         list<Value> value_queue;    
+        ConstraintSet all_unsatisfied;     
     };
 
-    pair<bool, Assignment> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
+    tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
     void TraceProblem() const;
     static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlanVariablesUsed();
+    set<VariableId> GetAllAffected( ConstraintSet constraints );
 
     // Structural
     ReportageObserver *holder;    
@@ -90,10 +92,12 @@ private:
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
     Assignments assignments;
-    map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;
+    
+    const int my_index;
+    static int next_index;
 };
 
 };

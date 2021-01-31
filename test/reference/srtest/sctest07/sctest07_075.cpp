@@ -11,10 +11,10 @@ SC_METHOD(id_8);
 enum id_1
 {
 id_2 = 0U,
-id_3 = 1U,
-id_4 = 3U,
+id_3 = 2U,
+id_4 = 1U,
 id_5 = 5U,
-id_6 = 2U,
+id_6 = 3U,
 id_7 = 4U,
 };
 void id_8();
@@ -33,14 +33,14 @@ if( (sc_delta_count())==(0U) )
  ::id_9=(1);
  ::id_10=(0);
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_11=((!( ::id_10<(4))) ?  ::id_0::id_5 :  ::id_0::id_2);
+ ::id_0::id_11=((!( ::id_10<(4))) ?  ::id_0::id_4 :  ::id_0::id_2);
 return ;
 }
 if(  ::id_0::id_2== ::id_0::id_11 )
 {
  ::id_9+= ::id_10;
  ::id_12=(0);
- ::id_0::id_11=((!( ::id_12<(3))) ?  ::id_0::id_4 :  ::id_0::id_3);
+ ::id_0::id_11=((!( ::id_12<(3))) ?  ::id_0::id_5 :  ::id_0::id_3);
 }
 if(  ::id_0::id_3== ::id_0::id_11 )
 {
@@ -52,9 +52,9 @@ if(  ::id_0::id_6== ::id_0::id_11 )
 {
  ::id_9++;
  ::id_12++;
- ::id_0::id_11=(( ::id_12<(3)) ?  ::id_0::id_3 :  ::id_0::id_4);
+ ::id_0::id_11=(( ::id_12<(3)) ?  ::id_0::id_3 :  ::id_0::id_5);
 }
-if(  ::id_0::id_4== ::id_0::id_11 )
+if(  ::id_0::id_5== ::id_0::id_11 )
 {
  ::id_9*=(2);
 next_trigger(SC_ZERO_TIME);
@@ -64,9 +64,9 @@ return ;
 if(  ::id_0::id_7== ::id_0::id_11 )
 {
  ::id_10++;
- ::id_0::id_11=(( ::id_10<(4)) ?  ::id_0::id_2 :  ::id_0::id_5);
+ ::id_0::id_11=(( ::id_10<(4)) ?  ::id_0::id_2 :  ::id_0::id_4);
 }
-if(  ::id_0::id_5== ::id_0::id_11 )
+if(  ::id_0::id_4== ::id_0::id_11 )
 {
 cease(  ::id_9 );
 return ;

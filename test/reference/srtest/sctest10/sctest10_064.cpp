@@ -17,20 +17,20 @@ id_5 = 2U,
 };
 void id_6();
 private:
-char id_42;
-short id_43;
+char id_43;
+short id_42;
 public:
 int id_35;
 private:
-int id_44;
+int id_41;
 int id_45;
-unsigned int id_41;
+unsigned int id_44;
 public:
-/*temp*/ char id_38;
-/*temp*/ short id_37;
-/*temp*/ int id_36;
+/*temp*/ char id_37;
+/*temp*/ short id_38;
+/*temp*/ int id_39;
 /*temp*/ int id_40;
-/*temp*/ unsigned int id_39;
+/*temp*/ unsigned int id_36;
 /*temp*/ unsigned int id_46;
 };
 id_0 id_47("id_47");
@@ -62,13 +62,15 @@ auto unsigned int id_13;
 /*temp*/ int id_33;
 /*temp*/ int id_34;
  ::id_0::id_35=(0);
+id_32=(8);
+id_29=(6);
+id_33=(0);
+id_30=(0);
 id_26=(0);
-id_29=(0);
-id_32=(0);
- ::id_0::id_36=id_26;
- ::id_0::id_37=id_29;
- ::id_0::id_38=id_32;
- ::id_0::id_39= ::id_0::id_3;
+ ::id_0::id_36= ::id_0::id_3;
+ ::id_0::id_37=id_33;
+ ::id_0::id_38=id_30;
+ ::id_0::id_39=id_26;
 wait(SC_ZERO_TIME);
 id_13= ::id_0::id_2;
 id_12:;
@@ -82,12 +84,10 @@ id_15=id_14;
 id_16=id_15;
 id_17=id_16;
 id_27=id_17;
-id_30=(6);
-id_33=(8);
- ::id_0::id_36=id_27;
- ::id_0::id_37=id_30;
- ::id_0::id_38=id_33;
- ::id_0::id_39= ::id_0::id_4;
+ ::id_0::id_36= ::id_0::id_4;
+ ::id_0::id_37=id_32;
+ ::id_0::id_38=id_29;
+ ::id_0::id_39=id_27;
 id_13= ::id_0::id_2;
 }
 if(  ::id_0::id_4==id_13 )
@@ -97,13 +97,13 @@ id_19=id_18;
 id_20=id_19;
 id_21=id_20;
  ::id_0::id_35=id_21;
-id_28=(1);
-id_31=(2);
 id_34=(3);
- ::id_0::id_36=id_28;
- ::id_0::id_37=id_31;
- ::id_0::id_38=id_34;
- ::id_0::id_39= ::id_0::id_5;
+id_31=(2);
+id_28=(1);
+ ::id_0::id_36= ::id_0::id_5;
+ ::id_0::id_37=id_34;
+ ::id_0::id_38=id_31;
+ ::id_0::id_39=id_28;
 id_13= ::id_0::id_2;
 }
 if(  ::id_0::id_5==id_13 )
@@ -122,9 +122,9 @@ if(  ::id_0::id_2==id_13 )
  ::id_0::id_42= ::id_0::id_38;
  ::id_0::id_43= ::id_0::id_37;
  ::id_0::id_44= ::id_0::id_36;
- ::id_0::id_45=( ::id_0::id_44+((3)* ::id_0::id_43));
- ::id_0::id_40=( ::id_0::id_45+((5)* ::id_0::id_42));
-id_7= ::id_0::id_41;
+ ::id_0::id_45=( ::id_0::id_41+((3)* ::id_0::id_42));
+ ::id_0::id_40=( ::id_0::id_45+((5)* ::id_0::id_43));
+id_7= ::id_0::id_44;
 id_13=id_7;
 }
 goto *(id_8[id_13]);

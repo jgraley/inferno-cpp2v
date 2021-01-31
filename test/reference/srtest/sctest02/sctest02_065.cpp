@@ -13,9 +13,9 @@ SC_THREAD(id_6);
 enum id_1
 {
 id_2 = 0U,
-id_3 = 2U,
+id_3 = 3U,
 id_4 = 1U,
-id_5 = 3U,
+id_5 = 2U,
 };
 void id_6();
 bool id_10;
@@ -30,10 +30,10 @@ SC_THREAD(id_23);
 enum id_16
 {
 id_17 = 0U,
-id_18 = 2U,
+id_18 = 3U,
 id_19 = 4U,
 id_20 = 1U,
-id_21 = 3U,
+id_21 = 2U,
 id_22 = 5U,
 };
 void id_23();
@@ -113,28 +113,28 @@ if(  ::id_15::id_20==id_26 )
  ::id_15::id_27=(false);
  ::id_11*=(5);
 (( ::id_12. ::id_29::id_28). ::id_0::id_10)=(true);
-id_26=((!(! ::id_15::id_14)) ?  ::id_15::id_21 :  ::id_15::id_18);
+id_26=((!(! ::id_15::id_14)) ?  ::id_15::id_22 :  ::id_15::id_18);
 }
 if(  ::id_15::id_18==id_26 )
 {
 wait(SC_ZERO_TIME);
-id_26=((! ::id_15::id_14) ?  ::id_15::id_18 :  ::id_15::id_21);
+id_26=((! ::id_15::id_14) ?  ::id_15::id_18 :  ::id_15::id_22);
 goto *(id_24[id_26]);
 }
-if(  ::id_15::id_21==id_26 )
+if(  ::id_15::id_22==id_26 )
 {
  ::id_15::id_14=(false);
  ::id_11*=(5);
 (( ::id_12. ::id_29::id_28). ::id_0::id_10)=(true);
-id_26=((!(! ::id_15::id_14)) ?  ::id_15::id_22 :  ::id_15::id_19);
+id_26=((!(! ::id_15::id_14)) ?  ::id_15::id_21 :  ::id_15::id_19);
 }
 if(  ::id_15::id_19==id_26 )
 {
 wait(SC_ZERO_TIME);
-id_26=((! ::id_15::id_14) ?  ::id_15::id_19 :  ::id_15::id_22);
+id_26=((! ::id_15::id_14) ?  ::id_15::id_19 :  ::id_15::id_21);
 goto *(id_24[id_26]);
 }
-if(  ::id_15::id_22==id_26 )
+if(  ::id_15::id_21==id_26 )
 {
  ::id_15::id_14=(false);
 cease(  ::id_11 );

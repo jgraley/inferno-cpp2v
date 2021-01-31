@@ -12,25 +12,25 @@ SC_THREAD(id_12);
 enum id_1
 {
 id_10 = 2U,
-id_11 = 6U,
+id_11 = 7U,
 id_2 = 4U,
-id_3 = 9U,
+id_3 = 5U,
 id_4 = 1U,
 id_5 = 8U,
 id_6 = 0U,
-id_7 = 5U,
+id_7 = 6U,
 id_8 = 3U,
-id_9 = 7U,
+id_9 = 9U,
 };
 void id_12();
 private:
-int (id_34[10U]);
-void *(id_33[10U]);
+int (id_33[10U]);
+void *(id_34[10U]);
 void *id_37;
 unsigned int id_32;
 public:
-/*temp*/ int id_30;
-/*temp*/ void *id_31;
+/*temp*/ int id_31;
+/*temp*/ void *id_30;
 /*temp*/ void *id_36;
 /*temp*/ void *id_38;
 /*temp*/ void *id_39;
@@ -57,8 +57,8 @@ goto *(id_26);
 id_16:;
  ::id_28=( ::id_28+ ::id_29);
 id_27=(3);
- ::id_0::id_30=id_27;
- ::id_0::id_31=(id_15[ ::id_0::id_4]);
+ ::id_0::id_30=(id_15[ ::id_0::id_4]);
+ ::id_0::id_31=id_27;
 {
 id_26=(id_15[ ::id_0::id_2]);
 goto *(id_26);
@@ -89,36 +89,36 @@ id_20:;
 ( ::id_0::id_34[ ::id_0::id_32])= ::id_0::id_30;
  ::id_35=(0);
 {
-id_26=((!( ::id_35<( ::id_0::id_34[ ::id_0::id_32]))) ? (id_15[ ::id_0::id_9]) : (id_15[ ::id_0::id_7]));
+id_26=((!( ::id_35<( ::id_0::id_33[ ::id_0::id_32]))) ? (id_15[ ::id_0::id_9]) : (id_15[ ::id_0::id_7]));
 goto *(id_26);
 }
-id_21:;
+id_22:;
 wait(SC_ZERO_TIME);
 {
 id_26=(id_15[ ::id_0::id_11]);
 goto *(id_26);
 }
-id_22:;
+id_23:;
  ::id_28=((1)+ ::id_28);
  ::id_35=((1)+ ::id_35);
 {
-id_26=(( ::id_35<( ::id_0::id_34[ ::id_0::id_32])) ? (id_15[ ::id_0::id_7]) : (id_15[ ::id_0::id_9]));
+id_26=(( ::id_35<( ::id_0::id_33[ ::id_0::id_32])) ? (id_15[ ::id_0::id_7]) : (id_15[ ::id_0::id_9]));
 goto *(id_26);
 }
-id_23:;
+id_25:;
  ::id_0::id_36=(id_15[ ::id_0::id_5]);
 {
 id_26=(id_15[ ::id_0::id_3]);
 goto *(id_26);
 }
 id_24:;
-id_13=( ::id_0::id_33[ ::id_0::id_32]);
+id_13=( ::id_0::id_34[ ::id_0::id_32]);
  ::id_0::id_32--;
 {
 id_26=id_13;
 goto *(id_26);
 }
-id_25:;
+id_21:;
  ::id_0::id_37= ::id_0::id_36;
  ::id_28=( ::id_28-(1));
 id_14= ::id_0::id_37;

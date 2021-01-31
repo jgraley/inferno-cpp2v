@@ -11,16 +11,16 @@ SC_THREAD(id_1);
 void id_1();
 int id_2;
 private:
-int id_28;
+int id_27;
 public:
 int id_5;
 private:
-void *id_27;
+void *id_28;
 public:
 /*temp*/ int id_10;
-/*temp*/ int id_6;
+/*temp*/ int id_8;
 /*temp*/ void *id_29;
-/*temp*/ void *id_7;
+/*temp*/ void *id_6;
 };
 id_0 id_30("id_30");
 
@@ -32,13 +32,13 @@ if( !id_3 )
 goto id_4;
 id_3=( ::id_0::id_5=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::id_0::id_6=(&&id_7);
 {
- ::id_0::id_7=(&&id_8);
+ ::id_0::id_8= ::id_0::id_2;
 goto id_9;
 }
 }
-id_8:;
+id_7:;
 }
  ::id_0::id_10; }));
 goto id_11;
@@ -55,9 +55,9 @@ goto id_14;
 id_13:;
 id_12=( ::id_0::id_5+=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::id_0::id_6=(&&id_15);
 {
- ::id_0::id_7=(&&id_15);
+ ::id_0::id_8= ::id_0::id_2;
 goto id_9;
 }
 }
@@ -80,9 +80,9 @@ if( !( ::id_0::id_2++) )
 goto id_19;
 id_18=( ::id_0::id_5+=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::id_0::id_6=(&&id_20);
 {
- ::id_0::id_7=(&&id_20);
+ ::id_0::id_8= ::id_0::id_2;
 goto id_9;
 }
 }
@@ -93,9 +93,9 @@ goto id_21;
 id_19:;
 id_18=( ::id_0::id_5-=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::id_0::id_6=(&&id_22);
 {
- ::id_0::id_7=(&&id_22);
+ ::id_0::id_8= ::id_0::id_2;
 goto id_9;
 }
 }
@@ -123,12 +123,12 @@ return ;
 id_9:;
 {
 /*temp*/ void *id_26;
- ::id_0::id_27= ::id_0::id_7;
+ ::id_0::id_27= ::id_0::id_8;
  ::id_0::id_28= ::id_0::id_6;
 {
- ::id_0::id_10=((100)/ ::id_0::id_28);
+ ::id_0::id_10=((100)/ ::id_0::id_27);
 {
-id_26= ::id_0::id_27;
+id_26= ::id_0::id_28;
 goto *(id_26);
 }
 }

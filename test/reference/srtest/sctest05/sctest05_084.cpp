@@ -10,11 +10,11 @@ SC_METHOD(id_7);
 }
 enum id_1
 {
-id_2 = 1U,
+id_2 = 2U,
 id_3 = 0U,
-id_4 = 4U,
-id_5 = 3U,
-id_6 = 2U,
+id_4 = 1U,
+id_5 = 4U,
+id_6 = 3U,
 };
 void id_7();
 private:

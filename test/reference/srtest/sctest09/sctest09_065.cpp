@@ -19,15 +19,15 @@ id_6 = 2U,
 };
 void id_7();
 private:
-int (id_20[10U]);
-unsigned int (id_19[10U]);
+int (id_19[10U]);
+unsigned int (id_20[10U]);
 public:
 int id_15;
 private:
 unsigned int id_18;
 public:
-/*temp*/ int id_16;
-/*temp*/ unsigned int id_17;
+/*temp*/ int id_17;
+/*temp*/ unsigned int id_16;
 /*temp*/ unsigned int id_21;
 };
 id_0 id_22("id_22");
@@ -42,8 +42,8 @@ auto unsigned int id_11;
 /*temp*/ int id_14;
  ::id_0::id_15=(0);
 id_12=(1);
- ::id_0::id_16=id_12;
- ::id_0::id_17= ::id_0::id_3;
+ ::id_0::id_16= ::id_0::id_3;
+ ::id_0::id_17=id_12;
 wait(SC_ZERO_TIME);
 id_11= ::id_0::id_2;
 id_10:;
@@ -59,25 +59,25 @@ if(  ::id_0::id_2==id_11 )
 ( ::id_0::id_19[ ::id_0::id_18])= ::id_0::id_17;
 ( ::id_0::id_20[ ::id_0::id_18])= ::id_0::id_16;
  ::id_0::id_15++;
-id_11=((!(( ::id_0::id_20[ ::id_0::id_18])<(5))) ?  ::id_0::id_5 :  ::id_0::id_6);
+id_11=((!(( ::id_0::id_19[ ::id_0::id_18])<(5))) ?  ::id_0::id_5 :  ::id_0::id_6);
 }
 if(  ::id_0::id_6==id_11 )
 {
-id_13=((1)+( ::id_0::id_20[ ::id_0::id_18]));
- ::id_0::id_16=id_13;
- ::id_0::id_17= ::id_0::id_4;
+id_13=((1)+( ::id_0::id_19[ ::id_0::id_18]));
+ ::id_0::id_16= ::id_0::id_4;
+ ::id_0::id_17=id_13;
 id_11= ::id_0::id_2;
 }
 if(  ::id_0::id_4==id_11 )
 {
-id_14=((1)+( ::id_0::id_20[ ::id_0::id_18]));
- ::id_0::id_16=id_14;
- ::id_0::id_17= ::id_0::id_5;
+id_14=((1)+( ::id_0::id_19[ ::id_0::id_18]));
+ ::id_0::id_16= ::id_0::id_5;
+ ::id_0::id_17=id_14;
 id_11= ::id_0::id_2;
 }
 if(  ::id_0::id_5==id_11 )
 {
-id_8=( ::id_0::id_19[ ::id_0::id_18]);
+id_8=( ::id_0::id_20[ ::id_0::id_18]);
  ::id_0::id_18--;
 id_11=id_8;
 }

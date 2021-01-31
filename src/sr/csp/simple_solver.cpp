@@ -43,13 +43,13 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
     
     if( variables_ == nullptr )
     {
-        TRACE("Variables not supplied by engine: using own");
+        TRACE("Variables not supplied by engine: using own\n");
         // No variables list was supplied, so return the one we generated
         variables = my_variables;
     }
     else
     {
-        TRACE("Variables supplied by engine: cross-checking");
+        TRACE("Variables supplied by engine: cross-checking\n");
         // A variables list was supplied and it must have the same set of variables
         for( VariableId v : *variables_ )
             ASSERT( variables_check_set.count(v) == 1 );
@@ -61,7 +61,8 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
 SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
                             const list<VariableId> *variables_ ) :
     plan( constraints_, variables_ ),
-    holder(nullptr)
+    holder(nullptr),
+    my_index( next_index++ )
 {
     TraceProblem();
     CheckPlanVariablesUsed();    
@@ -85,13 +86,11 @@ void SimpleSolver::Run( ReportageObserver *holder_,
         
     assignments.clear();    
     
-    bool ok;
-    Assignment hint;  
     // Do a test with all constraints but no assignments (=free variables), so forced variables 
     // will be tested. From here on we can test only constraints affected by changed assignments.
-    tie(ok, hint) = Test( assignments, plan.constraint_set );
+    auto t = Test( assignments, plan.constraint_set );
     
-    if( !ok )
+    if( !get<0>(t) )
         return; // We failed with no assignments, so we cannot match - no solutions will be reported
     
     if( plan.variables.empty() )
@@ -110,34 +109,62 @@ void SimpleSolver::Run( ReportageObserver *holder_,
 
 void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
 {     
+    TRACE("SS%d solving...\n");
+    TRACEC("Vars ")(plan.variables)("\n");
+    TRACEC("Starting at ")(*current_it)("\n");
+    
     // Selector for first variable
+    map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     value_selectors[plan.variables.front()] = 
         make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );
-        
+    TRACEC("Made selector for ")(*current_it)("\n");
+
     while(true)
     {
-        if( value_selectors.at(*current_it)->SelectNextValue() ) // consistent value?
+        auto p = value_selectors.at(*current_it)->SelectNextValue();        
+        if( !p.first ) // no consistent value
+        {
+            ConstraintSet unsatisfied = p.second;
+            TRACEC("Inconsistent. Unsatisfied constraints: ")(unsatisfied)("\n");
+            set<VariableId> possibly_conflicted_vars = GetAllAffected(unsatisfied);
+            TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
+            bool backjump = false;
+            do
+            {
+                value_selectors.erase(*current_it);            
+                TRACEC("Killed selector for ")(*current_it)("\n");
+                
+                if( current_it == plan.variables.begin() )
+                    goto CEASE; // no more solutions
+                --current_it; 
+                TRACEC("Back to ")(*current_it)("\n");
+                
+                backjump = false;//(possibly_conflicted_vars.count(*current_it) == 0);
+                if( backjump )
+                    TRACEC("Backjump over ")(*current_it)("\n");
+            } while( backjump ); // backjump into possibly_conflicted_vars
+        }        
+        else
         {
             ++current_it; // try advance
             if( current_it != plan.variables.end() ) // new variable
             {
                 value_selectors[*current_it] = 
                     make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
+                TRACEC("Advanced to and made selector for ")(*current_it)("\n");
             }
             else // complete
             {
+                TRACEC("Reporting solution\n");
                 holder->ReportSolution( assignments );
+                TRACE("SS%d finished reporting solution\n");
                 --current_it;
+                TRACEC("Back to ")(*current_it)("\n");                
             }                    
         }
-        else // no consistent value
-        {
-            value_selectors[*current_it] = nullptr;
-            if( current_it == plan.variables.begin() )
-                return; // no more solutions
-            --current_it; // backtrack            
-        }        
     }        
+    CEASE:
+    TRACEC("Finished solving\n");
 }
 
 
@@ -155,7 +182,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
 {
     ASSERT( current_it != solver_plan.variables.end() );
     ASSERT( assignments.count(current_var) == 0 );
-    INDENT("T");
+    INDENT("V");
        
     Value start_val;
     if( current_it==solver_plan.variables.begin() )
@@ -203,19 +230,22 @@ SimpleSolver::ValueSelector::~ValueSelector()
 }
 
 
-Value SimpleSolver::ValueSelector::SelectNextValue()
+pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNextValue()
 {
+    INDENT("N");    
+    TRACE("Finding value for variable ")(current_var)("\n");
     while( !value_queue.empty() )
     {       
-        TRACE("Trying variable ")(current_var)(" := ")(value_queue.front())("\n");
         Value value = value_queue.front();
         assignments[current_var] = value;
         value_queue.pop_front();
         
         bool ok;
-        Assignment hint;        
-        tie(ok, hint) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
-        
+        Assignment hint;  
+        ConstraintSet unsatisfied;     
+        tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
+        ASSERT( ok || !unsatisfied.empty() );
+
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
@@ -223,16 +253,21 @@ Value SimpleSolver::ValueSelector::SelectNextValue()
             value_queue.push_back( (Value)(hint) ); 
         }
        
-        if( !ok )
-           continue; // try next value
-           
-        return value;
+        all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
+       
+        if( ok )
+        {
+            TRACEC("Value is ")(value)("\n");
+            return make_pair(value, all_unsatisfied);
+        }
     }
-    return Value();
+    TRACEC("No (more) values found\n");
+    ASSERT( !all_unsatisfied.empty() ); // Note: could fire if domain is empty
+    return make_pair(Value(), all_unsatisfied);
 }
 
 
-pair<bool, Assignment> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test ) const 
+tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test ) const 
 {
     ConstraintSet unsatisfied;
     list<Assignment> hints;
@@ -268,14 +303,15 @@ pair<bool, Assignment> SimpleSolver::Test( const Assignments &assigns, const Con
         // for( VariableId var : c->GetFreeVariables() )
         //     CheckLocalMatch( assigns, var );   
     } 
-    return make_pair( unsatisfied.empty(), 
-                      hints.empty() ? Assignment() : hints.front() );
+    return make_tuple( unsatisfied.empty(), 
+                       hints.empty() ? Assignment() : hints.front(),
+                       unsatisfied );
 }
 
 
 void SimpleSolver::TraceProblem() const
 {
-    TRACE("SimpleSolver; %d constraints:", plan.constraints.size());
+    TRACE("SimpleSolver SS%d; %d constraints:", my_index, plan.constraints.size());
     for( shared_ptr<Constraint> c : plan.constraints )    
         c->TraceProblem();   
     TRACEC("%d variables:", plan.variables.size());        
@@ -364,3 +400,15 @@ void SimpleSolver::CheckPlanVariablesUsed()
               ("Variables used: ")(variables_used)("\n");
     }
 }
+
+
+set<VariableId> SimpleSolver::GetAllAffected( ConstraintSet constraints )
+{
+    set<VariableId> all_vars;
+    for( shared_ptr<Constraint> c : constraints )
+        all_vars = UnionOf(all_vars, c->GetFreeVariables());
+    return all_vars;            
+}
+
+
+int SimpleSolver::next_index = 0;

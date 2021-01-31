@@ -11,8 +11,8 @@ SC_THREAD(id_5);
 enum id_1
 {
 id_2 = 0U,
-id_3 = 2U,
-id_4 = 1U,
+id_3 = 1U,
+id_4 = 2U,
 };
 void id_5();
 };
@@ -28,8 +28,8 @@ auto unsigned int id_10;
  ::id_12=(0);
 wait(SC_ZERO_TIME);
 id_10=((!( ::id_12<(5))) ?  ::id_0::id_3 :  ::id_0::id_2);
-id_9:;
 id_8:;
+id_9:;
 id_7:;
 if(  ::id_0::id_2==id_10 )
 {

@@ -11,13 +11,13 @@ SC_THREAD(id_1);
 }
 void id_1();
 private:
-int (id_17[10U]);
-void *(id_16[10U]);
+int (id_16[10U]);
+void *(id_17[10U]);
 void *id_25;
 unsigned int id_15;
 public:
-/*temp*/ int id_10;
-/*temp*/ void *id_11;
+/*temp*/ int id_12;
+/*temp*/ void *id_10;
 /*temp*/ void *id_22;
 /*temp*/ void *id_26;
 /*temp*/ void *id_27;
@@ -43,13 +43,13 @@ goto *(id_4);
 id_9:;
  ::id_6=( ::id_6+ ::id_7);
 id_5=(3);
- ::id_0::id_10=id_5;
- ::id_0::id_11=(&&id_12);
+ ::id_0::id_10=(&&id_11);
+ ::id_0::id_12=id_5;
 {
 id_4=(&&id_13);
 goto *(id_4);
 }
-id_12:;
+id_11:;
  ::id_6=((2)* ::id_6);
 wait(SC_ZERO_TIME);
 {
@@ -71,11 +71,11 @@ goto *(id_4);
 }
 id_13:;
  ::id_0::id_15++;
-( ::id_0::id_16[ ::id_0::id_15])= ::id_0::id_11;
+( ::id_0::id_16[ ::id_0::id_15])= ::id_0::id_12;
 ( ::id_0::id_17[ ::id_0::id_15])= ::id_0::id_10;
  ::id_18=(0);
 {
-id_4=((!( ::id_18<( ::id_0::id_17[ ::id_0::id_15]))) ? (&&id_19) : (&&id_20));
+id_4=((!( ::id_18<( ::id_0::id_16[ ::id_0::id_15]))) ? (&&id_19) : (&&id_20));
 goto *(id_4);
 }
 id_20:;
@@ -88,7 +88,7 @@ id_21:;
  ::id_6=((1)+ ::id_6);
  ::id_18=((1)+ ::id_18);
 {
-id_4=(( ::id_18<( ::id_0::id_17[ ::id_0::id_15])) ? (&&id_20) : (&&id_19));
+id_4=(( ::id_18<( ::id_0::id_16[ ::id_0::id_15])) ? (&&id_20) : (&&id_19));
 goto *(id_4);
 }
 id_19:;
@@ -98,7 +98,7 @@ id_4=(&&id_24);
 goto *(id_4);
 }
 id_23:;
-id_2=( ::id_0::id_16[ ::id_0::id_15]);
+id_2=( ::id_0::id_17[ ::id_0::id_15]);
  ::id_0::id_15--;
 {
 id_4=id_2;

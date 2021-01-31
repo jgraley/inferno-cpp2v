@@ -12,13 +12,13 @@ void id_1();
 int id_13;
 int id_2;
 private:
-int id_40;
-void *id_39;
+int id_39;
+void *id_40;
 public:
+/*temp*/ int id_10;
 /*temp*/ int id_12;
-/*temp*/ int id_8;
 /*temp*/ void *id_41;
-/*temp*/ void *id_9;
+/*temp*/ void *id_8;
 };
 id_0 id_42("id_42");
 
@@ -36,13 +36,13 @@ id_6:;
 /*temp*/ int id_7;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::id_0::id_8=(&&id_9);
 {
- ::id_0::id_9=(&&id_10);
+ ::id_0::id_10= ::id_0::id_2;
 goto id_11;
 }
 }
-id_10:;
+id_9:;
 }
 id_7= ::id_0::id_12;
 id_3=( ::id_0::id_13=id_7);
@@ -69,9 +69,9 @@ id_17:;
 /*temp*/ int id_20;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::id_0::id_8=(&&id_21);
 {
- ::id_0::id_9=(&&id_21);
+ ::id_0::id_10= ::id_0::id_2;
 goto id_11;
 }
 }
@@ -103,9 +103,9 @@ id_28:;
 /*temp*/ int id_29;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::id_0::id_8=(&&id_30);
 {
- ::id_0::id_9=(&&id_30);
+ ::id_0::id_10= ::id_0::id_2;
 goto id_11;
 }
 }
@@ -120,9 +120,9 @@ id_27:;
 /*temp*/ int id_32;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::id_0::id_8=(&&id_33);
 {
- ::id_0::id_9=(&&id_33);
+ ::id_0::id_10= ::id_0::id_2;
 goto id_11;
 }
 }
@@ -154,12 +154,12 @@ return ;
 id_11:;
 {
 /*temp*/ void *id_38;
- ::id_0::id_39= ::id_0::id_9;
+ ::id_0::id_39= ::id_0::id_10;
  ::id_0::id_40= ::id_0::id_8;
 {
- ::id_0::id_12=((100)/ ::id_0::id_40);
+ ::id_0::id_12=((100)/ ::id_0::id_39);
 {
-id_38= ::id_0::id_39;
+id_38= ::id_0::id_40;
 goto *(id_38);
 }
 }

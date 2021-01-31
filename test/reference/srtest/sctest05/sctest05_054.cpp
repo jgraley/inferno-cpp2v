@@ -10,11 +10,11 @@ SC_THREAD(id_7);
 }
 enum id_1
 {
-id_2 = 1U,
+id_2 = 2U,
 id_3 = 0U,
-id_4 = 4U,
-id_5 = 3U,
-id_6 = 2U,
+id_4 = 1U,
+id_5 = 4U,
+id_6 = 3U,
 };
 void id_7();
 };
@@ -36,7 +36,7 @@ if(  ::id_0::id_3==id_14 )
  ::id_15+= ::id_16;
 id_14=((!((0)==( ::id_16%(2)))) ?  ::id_0::id_5 :  ::id_0::id_2);
 }
-id_10:;
+id_11:;
 if(  ::id_0::id_2==id_14 )
 {
 wait(SC_ZERO_TIME);
@@ -44,16 +44,16 @@ id_14= ::id_0::id_6;
 goto *(id_8[id_14]);
 }
 goto *(id_8[id_14]);
-id_11:;
+id_12:;
  ::id_15^=(1);
 id_14= ::id_0::id_5;
 goto *(id_8[id_14]);
-id_12:;
+id_13:;
  ::id_15*=(2);
  ::id_16++;
 id_14=(( ::id_16<(5)) ?  ::id_0::id_3 :  ::id_0::id_4);
 goto *(id_8[id_14]);
-id_13:;
+id_10:;
 cease(  ::id_15 );
 return ;
 }
