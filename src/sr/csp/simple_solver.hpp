@@ -54,14 +54,13 @@ private:
         map<VariableId, ConstraintSet> affected_constraints;
     } plan;
 
-    void TryVariable( list<VariableId>::const_iterator current_it );
+    void Solve( list<VariableId>::const_iterator current_it );
 
     class ValueSelector : public Traceable
     {
     public:
-        typedef function< pair<bool, Assignment>( const Assignments &assigns, const ConstraintSet &to_test ) > AssignmentTester;
         ValueSelector( const Plan &solver_plan,
-                       const AssignmentTester &assignment_tester,
+                       const SimpleSolver &solver,
                        const SR::TheKnowledge *knowledge,
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
@@ -70,7 +69,7 @@ private:
         
     private:
         const Plan &solver_plan;
-        const AssignmentTester &assignment_tester;
+        const SimpleSolver &solver;
         const SR::TheKnowledge * const knowledge;
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
@@ -87,7 +86,6 @@ private:
 
     // Structural
     ReportageObserver *holder;    
-    ValueSelector::AssignmentTester assignment_tester;    
         
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;

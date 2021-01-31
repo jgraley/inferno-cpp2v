@@ -64,13 +64,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
     holder(nullptr)
 {
     TraceProblem();
-    CheckPlanVariablesUsed();
-
-    assignment_tester = 
-        [=]( const Assignments &assigns, const ConstraintSet &to_test ) -> pair<bool, Assignment>
-    {
-        return Test( assigns, to_test );
-    };    
+    CheckPlanVariablesUsed();    
 }
                         
 
@@ -106,68 +100,61 @@ void SimpleSolver::Run( ReportageObserver *holder_,
         holder->ReportSolution( assignments );
     }
     else
-    {        
-        // Work through the free vars
-        value_selectors[plan.variables.front()] = 
-            make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, plan.variables.begin() );
-        
-        TryVariable( plan.variables.begin() );    
+    {                
+        Solve( plan.variables.begin() );    
     }
 
     TRACE("Simple solver ends\n");    
 }
 
 
-#define DERECURSE
-
-void SimpleSolver::TryVariable( list<VariableId>::const_iterator current_it )
+void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
 {     
+    // Selector for first variable
+    value_selectors[plan.variables.front()] = 
+        make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );
+        
     while(true)
     {
-        if( !value_selectors.at(*current_it)->SelectNextValue() )
+        if( value_selectors.at(*current_it)->SelectNextValue() ) // consistent value?
+        {
+            ++current_it; // try advance
+            if( current_it != plan.variables.end() ) // new variable
+            {
+                value_selectors[*current_it] = 
+                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
+            }
+            else // complete
+            {
+                holder->ReportSolution( assignments );
+                --current_it;
+            }                    
+        }
+        else // no consistent value
         {
             value_selectors[*current_it] = nullptr;
             if( current_it == plan.variables.begin() )
-                return;
-#ifdef DERECURSE
-            --current_it; // backtrack
-            continue;
-#else            
-            break; // backtrack
-#endif            
-        }
-                    
-        ++current_it; // try advance
-        if( current_it == plan.variables.end() ) // complete
-        {
-            holder->ReportSolution( assignments );
-            --current_it;
-            continue;
-        }
-        
-        value_selectors[*current_it] = 
-            make_shared<ValueSelector>( plan, assignment_tester, knowledge, assignments, current_it );
-#ifndef DERECURSE
-        TryVariable( current_it ); 
-        --current_it;
-#endif        
+                return; // no more solutions
+            --current_it; // backtrack            
+        }        
     }        
 }
 
 
 SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
-                                            const AssignmentTester &assignment_tester_,
+                                            const SimpleSolver &solver_,
                                             const SR::TheKnowledge *knowledge_,
                                             Assignments &assignments_,
                                             list<VariableId>::const_iterator current_it_ ) :
     solver_plan( solver_plan_ ),
-    assignment_tester( assignment_tester_ ),
+    solver( solver_ ),
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     current_it( current_it_ ),
     current_var( *current_it )
 {
     ASSERT( current_it != solver_plan.variables.end() );
+    ASSERT( assignments.count(current_var) == 0 );
     INDENT("T");
        
     Value start_val;
@@ -179,7 +166,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     {
         list<VariableId>::const_iterator prev_it = current_it;
         --prev_it; 
-        start_val = assignments[*prev_it];   
+        start_val = assignments.at(*prev_it);   
     }
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
@@ -212,9 +199,6 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
 
 SimpleSolver::ValueSelector::~ValueSelector()
 {
-    // Need to do this to avoid old assignments hanging around, being 
-    // picked up by partial NLQs and causing mismatches that don't get
-    // resolved beacuse this assignment won't be getting incremented.
     assignments.erase(current_var);
 }
 
@@ -230,7 +214,7 @@ Value SimpleSolver::ValueSelector::SelectNextValue()
         
         bool ok;
         Assignment hint;        
-        tie(ok, hint) = assignment_tester( assignments, solver_plan.affected_constraints.at(current_var) );        
+        tie(ok, hint) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
         
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
