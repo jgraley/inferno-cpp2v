@@ -61,7 +61,7 @@ for file in $(find $outdir -type f | sort); do
         diff --color ${file/#$outdir/$refdir} $file
         set +x
         printf "\n" 
-        dres=0
+        dres=1
         break
     fi
 done
