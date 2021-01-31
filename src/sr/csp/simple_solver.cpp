@@ -11,6 +11,10 @@
 using namespace CSP;
 
 
+#define BACKJUMPING
+#define TAKE_HINTS
+//#define DYNAMIC_START_VALUE
+
 SimpleSolver::Plan::Plan( const list< shared_ptr<Constraint> > &constraints_, 
                           const list<VariableId> *variables_ ) :
     constraints(constraints_)
@@ -126,8 +130,10 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
         {
             ConstraintSet unsatisfied = p.second;
             TRACEC("Inconsistent. Unsatisfied constraints: ")(unsatisfied)("\n");
+#ifdef BACKJUMPING
             set<VariableId> possibly_conflicted_vars = GetAllAffected(unsatisfied);
             TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
+#endif
             bool backjump = false;
             do
             {
@@ -139,7 +145,9 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 --current_it; 
                 TRACEC("Back to ")(*current_it)("\n");
                 
-                backjump = false;//(possibly_conflicted_vars.count(*current_it) == 0);
+#ifdef BACKJUMPING
+                backjump = (possibly_conflicted_vars.count(*current_it) == 0);
+#endif                
                 if( backjump )
                     TRACEC("Backjump over ")(*current_it)("\n");
             } while( backjump ); // backjump into possibly_conflicted_vars
@@ -184,17 +192,16 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
-    Value start_val;
-    if( current_it==solver_plan.variables.begin() )
-    {
-        start_val = knowledge->ordered_domain.front();
-    }
-    else
+    Value start_val = knowledge->ordered_domain.front();
+    
+#ifdef DYNAMIC_START_VALUE    
+    if( current_it!=solver_plan.variables.begin() )
     {
         list<VariableId>::const_iterator prev_it = current_it;
         --prev_it; 
         start_val = assignments.at(*prev_it);   
     }
+#endif
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
     SR::TheKnowledge::Nugget::OrderedIt fwd_it = nugget.ordered_it;
@@ -246,12 +253,14 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
         tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
         ASSERT( ok || !unsatisfied.empty() );
 
+#ifdef TAKE_HINTS
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             value_queue.clear();
             value_queue.push_back( (Value)(hint) ); 
         }
+#endif
        
         all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
        

@@ -84,5 +84,8 @@ exit $return_code
 # To run Beyond Compare on all the results
 # bcompare test/reference/srtest/ test/results/
 
+# For 3-way use eg
+# bcompare test/reference/srtest/pointeris/pointeris_034.cpp test/results/pointeris/pointeris_034.cpp test/reference/srtest/pointeris/pointeris_033.cpp
+
 # To update the references
 # cp -r test/results/*/ test/reference/srtest/
