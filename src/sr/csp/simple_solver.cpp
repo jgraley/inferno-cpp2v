@@ -11,9 +11,9 @@
 using namespace CSP;
 
 
-#define BACKJUMPING
+//#define BACKJUMPING
 #define TAKE_HINTS
-//#define DYNAMIC_START_VALUE
+#define DYNAMIC_START_VALUE
 
 SimpleSolver::Plan::Plan( const list< shared_ptr<Constraint> > &constraints_, 
                           const list<VariableId> *variables_ ) :
