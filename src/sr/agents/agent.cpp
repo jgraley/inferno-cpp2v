@@ -624,6 +624,8 @@ void PreRestrictedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
 {
     // Check pre-restriction
     CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
+    
+    RunNormalLinkedQueryPRed( base_plink, required_links, knowledge );
 }
 
                                

@@ -16,7 +16,7 @@ MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctes
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe resource test/test.sh
+$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh
 	@mkdir -p test/results/execution
 	@rm -f test/results/execution/$*.
 	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log 

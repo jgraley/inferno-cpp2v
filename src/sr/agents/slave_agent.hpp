@@ -19,7 +19,8 @@ class SearchReplace;
 /// operates on the resulting subtree, performing search and replace operations
 /// via the `search_pattern` and `replace_pattern` pointers until no more 
 /// matches are found (the usual reductive style).  
-class SlaveAgent : public virtual ColocatedAgent, public RequiresSubordinateSCREngine 
+class SlaveAgent : public virtual ColocatedAgent, 
+                   public RequiresSubordinateSCREngine 
 {
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );

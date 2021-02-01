@@ -22,16 +22,13 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 }
 
 
-void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                                 XLink base_xlink ) const
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
     query.Reset();
-    
-    // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
     
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
@@ -116,7 +113,7 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
     
-void AnyNodeAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+void AnyNodeAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                              const SolutionMap *required_links,
                                              const TheKnowledge *knowledge ) const
 {
@@ -124,9 +121,6 @@ void AnyNodeAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-    // Check pre-restriction
-    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
-    
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
@@ -203,7 +197,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-void StuffAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+void StuffAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const
 {
@@ -211,9 +205,6 @@ void StuffAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-    // Check pre-restriction
-    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
-    
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);

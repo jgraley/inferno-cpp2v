@@ -14,7 +14,7 @@ namespace SR
 
 /// Agent that tries to match the sub-pattern under `terminus` to any element
 /// within some container of nodes. 
-class SearchContainerAgent : public virtual AgentCommon
+class SearchContainerAgent : public virtual PreRestrictedAgent
 {
 private:
     TreePtr<Node> terminus_key;
@@ -23,7 +23,7 @@ public:
     class TerminusMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
     virtual bool ImplHasNLQ() const;
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ); 
@@ -52,7 +52,7 @@ class AnyNodeAgent : public SearchContainerAgent
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;                                             
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
@@ -92,7 +92,7 @@ public:
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

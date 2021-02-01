@@ -10,13 +10,13 @@ namespace SR
 /// Boolean node that matches if the sub-pattern at `pattern` does 
 /// not match i.e. a "not" operation. `pattern` points to an abnormal 
 /// context since in an overall match, the sub-pattern does not match.
-class NegationAgent : public virtual AgentCommon 
+class NegationAgent : public virtual PreRestrictedAgent 
 {
 public:
     class LocationMismatch : public Agent::Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,

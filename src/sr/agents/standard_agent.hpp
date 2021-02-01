@@ -16,7 +16,7 @@ namespace SR
 /// constructed using `MakePatternPtr`. All the `TreePtr` members are treated
 /// as pointers to sub-patterns and must match. Direct members (i.e. not in a 
 /// `Collection`) may be nullptr to indicate a full wildcard (matches anything). 
-class StandardAgent : public virtual AgentCommon
+class StandardAgent : public virtual PreRestrictedAgent
 {
 public:
     class Mismatch : public ::Mismatch {};
@@ -103,7 +103,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
 
 private:
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
@@ -119,7 +119,7 @@ private:
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     void NormalLinkedQuerySequence( PatternLink base_plink,

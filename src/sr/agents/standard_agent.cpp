@@ -205,14 +205,11 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 }
 
 
-void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void StandardAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink base_xlink ) const
 {
     INDENT("Q");
     query.Reset();
-
-    // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
 
     // Get the members of x corresponding to pattern's class
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
@@ -393,16 +390,12 @@ bool StandardAgent::ImplHasNLQ() const
 }
 
 
-void StandardAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                               const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
 
-    // Check pre-restriction
-    TRACE(*this)("::CheckLocalMatch(")(base_plink)(")\n");
-    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
-    
     // Get the members of x corresponding to pattern's class
     vector< Itemiser::Element * > x_memb = Itemise( required_links->at(base_plink).GetChildX().get() );   
 
