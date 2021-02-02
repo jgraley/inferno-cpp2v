@@ -96,7 +96,7 @@ public:
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink x,
+                                           XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;

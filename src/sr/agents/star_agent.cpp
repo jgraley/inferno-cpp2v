@@ -21,14 +21,14 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
 void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                     XLink x ) const
+                                     XLink base_xlink ) const
 {
     INDENT("*");
-    ASSERT(x);
+    ASSERT(base_xlink);
     query.Reset();
                 
-    ContainerInterface *x_ci = dynamic_cast<ContainerInterface *>(x.GetChildX().get());
-    auto x_sc = TreePtr<SubContainer>::DynamicCast(x.GetChildX());
+    auto x_ci = dynamic_cast<ContainerInterface *>(base_xlink.GetChildX().get());
+    auto x_sc = TreePtr<SubContainer>::DynamicCast(base_xlink.GetChildX());
 
     // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
@@ -51,7 +51,7 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     {
         TRACE("StarAgent pattern, size is %d\n", x_ci->size());
         // Apply pattern restriction - will be at least as strict as pre-restriction
-        query.RegisterMultiplicityLink( PatternLink(this, GetRestriction()), x ); // Links into X
+        query.RegisterMultiplicityLink( PatternLink(this, GetRestriction()), base_xlink ); // Links into X
     }
 }                       
 

@@ -362,15 +362,15 @@ TreePtr<Node> LocatedLink::GetChildX() const
 }
 
 
-void LocatedLink::SetX( const XLink &x )
+void LocatedLink::SetX( const XLink &xlink_ )
 {
-    xlink = x;
+    xlink = xlink_;
 }
 
 
-void LocatedLink::SetPattern( const PatternLink &pattern )
+void LocatedLink::SetPattern( const PatternLink &plink_ )
 {
-    plink = pattern;
+    plink = plink_;
 }
 
 

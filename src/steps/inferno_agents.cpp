@@ -18,7 +18,7 @@ shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
 
 
 void BuildIdentifierAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                XLink x ) const             
+                                                XLink base_xlink ) const             
 { 
     query.Reset();
 }   
@@ -157,15 +157,15 @@ shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 
 
 void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                 XLink x ) const                
+                                                 XLink base_xlink ) const                
 {
     query.Reset();
     string newname = name; 
-    TreePtr<Node> nx = x.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
-    if( TreePtr<CPPTree::SpecificIdentifier> si = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(nx) )
+    TreePtr<Node> base_x = base_xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
+    if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
-        TRACE("Comparing ")(si->GetRender())(" with ")(newname);
-        if( si->GetRender() == newname )
+        TRACE("Comparing ")(si_x->GetRender())(" with ")(newname);
+        if( si_x->GetRender() == newname )
         {
             TRACE(" : same\n");
             return;
@@ -188,7 +188,7 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 
 
 void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                       XLink x ) const                          
+                                       XLink base_xlink ) const                          
 {
     INDENT("N");
     query.Reset();
@@ -196,19 +196,17 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
     string s;
     // Keep advancing until we get nullptr, and remember the last non-null position
     int i = 0;
-    XLink xt = x;
-    while( XLink tt = Advance(xt, &s) )
-    {
-        xt = tt;
-    } 
+    XLink xlink = base_xlink;
+    while( XLink next_xlink = Advance(xlink, &s) )
+        xlink = next_xlink;
             
     // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( PatternLink(this, &terminus), xt ); // Link into X
+    query.RegisterNormalLink( PatternLink(this, &terminus), xlink ); // Link into X
     
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
-        auto op = [&](XLink x) -> XLink
+        auto op = [&](XLink base_xlink) -> XLink
         {
             TreePtr<Node> cur_depth( new SpecificString(s) );
             XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
@@ -216,7 +214,7 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
         };
         // note: not caching the recursive algorithm because we
         // need terminus from it. See #153 for discussion
-        query.RegisterNormalLink( PatternLink(this, &depth), cache( x, op ) );  // Generated Link (string)
+        query.RegisterNormalLink( PatternLink(this, &depth), cache( base_xlink, op ) );  // Generated Link (string)
     }
 }    
 
@@ -257,25 +255,25 @@ void NestedAgent::Reset()
 }
 
 
-XLink NestedArrayAgent::Advance( XLink x, 
+XLink NestedArrayAgent::Advance( XLink xlink, 
                                  string *depth ) const
 {
-    if( auto a = DynamicTreePtrCast<Array>(x.GetChildX()) )         
+    if( auto a = TreePtr<Array>::DynamicCast(xlink.GetChildX()) )         
         return XLink(a, &(a->element)); // TODO support depth string (or integer)
     else
         return XLink();
 }
 
 
-XLink NestedSubscriptLookupAgent::Advance( XLink x, 
+XLink NestedSubscriptLookupAgent::Advance( XLink xlink, 
                                            string *depth ) const
 {
-    if( auto s = DynamicTreePtrCast<Subscript>(x.GetChildX()) )            
+    if( auto s = DynamicTreePtrCast<Subscript>(xlink.GetChildX()) )            
     {
         *depth += "S";
         return XLink(s, &(s->operands.front())); // the base, not the index
     }
-    else if( auto l = DynamicTreePtrCast<Lookup>(x.GetChildX()) )            
+    else if( auto l = DynamicTreePtrCast<Lookup>(xlink.GetChildX()) )            
     {
         *depth += "L";
         return XLink(l, &(l->member)); 
@@ -295,7 +293,7 @@ shared_ptr<PatternQuery> BuildContainerSizeAgent::GetPatternQuery() const
 
 
 void BuildContainerSizeAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                   XLink x ) const
+                                                   XLink base_xlink ) const
 { 
     query.Reset(); 
 }   
@@ -357,7 +355,7 @@ shared_ptr<PatternQuery> IsLabelReachedAgent::GetPatternQuery() const
     
     
 void IsLabelReachedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                               XLink xx ) const
+                                               XLink base_xlink ) const
 {
 	INDENT("L");
 	ASSERT( pattern );
@@ -369,21 +367,21 @@ void IsLabelReachedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query
 	// y is nominally the goto expression, coupled in
 	FlushCache();
 	
-	TreePtr<Node> n = AsAgent(pattern)->GetKey().GetChildX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
-	if( !n )
-		n = pattern;
-	TreePtr<Expression> y = DynamicTreePtrCast<Expression>( n );
-	ASSERT( y )("IsLabelReachedAgent saw pattern coupled to ")(n)(" but an Expression is needed\n"); 
-	ASSERT( xx );
-	TreePtr<Node> nxx = xx.GetChildX();
-	TreePtr<LabelIdentifier> x = DynamicTreePtrCast<LabelIdentifier>( nxx );
-	ASSERT( x )("IsLabelReachedAgent at ")(xx)(" but is of type LabelIdentifier\n"); 
-	TRACE("Can label id ")(x)(" reach expression ")(y)("?\n");
+	TreePtr<Node> child_x = AsAgent(pattern)->GetKey().GetChildX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+	if( !child_x )
+		child_x = pattern;
+	TreePtr<Expression> e_child_x = DynamicTreePtrCast<Expression>( child_x );
+	ASSERT( e_child_x )("IsLabelReachedAgent saw pattern coupled to ")(child_x)(" but an Expression is needed\n"); 
+	ASSERT( base_xlink );
+	TreePtr<Node> base_x = base_xlink.GetChildX();
+	TreePtr<LabelIdentifier> lid_x = DynamicTreePtrCast<LabelIdentifier>( base_x );
+	ASSERT( lid_x )("IsLabelReachedAgent at ")(base_xlink)(" but is of type LabelIdentifier\n"); 
+	TRACE("Can label id ")(lid_x)(" reach expression ")(e_child_x)("?\n");
 
 	set< TreePtr<InstanceIdentifier> > uf;        
-    if( !CanReachExpr(&uf, x, y) )
+    if( !CanReachExpr(&uf, lid_x, e_child_x) )
         throw Mismatch();  
-	TRACE("I reakon ")(x)(" reaches ")(y)("\n"); 
+	TRACE("I reakon ")(lid_x)(" reaches ")(e_child_x)("\n"); 
 }                 
 
 

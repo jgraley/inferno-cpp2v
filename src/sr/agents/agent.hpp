@@ -153,7 +153,7 @@ public:
     virtual void ResetNLQConjecture();
      
 protected:
-    void SetKey( CouplingKey x );
+    void SetKey( CouplingKey keylink );
 
 public:
     CouplingKey GetKey();                                  

@@ -109,8 +109,8 @@ public:
     Agent *GetChildAgent() const;
     const TreePtrInterface *GetPatternPtr() const;
     TreePtr<Node> GetChildX() const;
-    void SetX( const XLink &x );
-    void SetPattern( const PatternLink &pattern );
+    void SetX( const XLink &xlink );
+    void SetPattern( const PatternLink &plink );
     explicit operator PatternLink() const;
     string GetTrace() const; // used for debug
 

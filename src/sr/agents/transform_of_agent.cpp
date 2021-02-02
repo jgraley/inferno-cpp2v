@@ -13,26 +13,26 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 
 
 void TransformOfAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                            XLink xlink ) const
+                                            XLink base_xlink ) const
 {
     INDENT("T");
     query.Reset();
     
-    auto op = [&](XLink xlink) -> XLink
+    auto op = [&](XLink base_xlink) -> XLink
     {
         // Transform the candidate expression, sharing the overall S&R context so that
         // things like GetDeclaration can work (they search the whole program tree).
-        TreePtr<Node> x = xlink.GetChildX();
-        TreePtr<Node> child_xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x );
-        if( child_xt )
+        TreePtr<Node> base_x = base_xlink.GetChildX();
+        TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
+        if( trans_x )
         {
-            ASSERT( child_xt->IsFinal() )(*this)(" computed non-final ")(*child_xt)(" from ")(xlink)("\n"); 
+            ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n"); 
             
             // Punt it back into the search/replace engine
-            XLink child_xlink = XLink::CreateDistinct(child_xt);  // Cache will un-distinct
-            ASSERT( child_xlink.GetChildX()->IsFinal() )(*this)(" computed non-final ")(child_xlink)("\n"); 
+            XLink trans_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
+            ASSERT( trans_xlink.GetChildX()->IsFinal() )(*this)(" computed non-final ")(trans_xlink)("\n"); 
             
-            XLink unique_child_xlink = master_scr_engine->UniquifyDomainExtension(child_xlink);
+            XLink unique_child_xlink = master_scr_engine->UniquifyDomainExtension(trans_xlink);
             return unique_child_xlink;
         }
         else
@@ -42,8 +42,8 @@ void TransformOfAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
             throw Mismatch();  
         }
     };
-    XLink cached_child_xlink = cache( xlink, op );
-    query.RegisterNormalLink( PatternLink(this, &pattern), cached_child_xlink );    
+    XLink cached_xlink = cache( base_xlink, op );
+    query.RegisterNormalLink( PatternLink(this, &pattern), cached_xlink );    
 }
 
 

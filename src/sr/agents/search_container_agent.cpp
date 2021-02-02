@@ -213,25 +213,25 @@ void StuffAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
         return;
     XLink req_terminus_xlink = req_terminus_it->second; 
     
-    XLink x = req_terminus_xlink;
+    XLink xlink = req_terminus_xlink;
     bool found = false;
     TRACE("Seeking ")(base_plink)(" in ancestors of ")(req_terminus_xlink)("\n");
     while(true)
     {
-        if( x == required_links->at(base_plink) )
+        if( xlink == required_links->at(base_plink) )
         {
             found = true;
-            TRACEC("Found ")(x)("\n");
+            TRACEC("Found ")(xlink)("\n");
             break;            
         }        
         
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(x) );
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );
         if( !nugget.parent_xlink )
             break;            
-        x = nugget.parent_xlink;
+        xlink = nugget.parent_xlink;
         
         // Putting this here excludes the terminus, as required
-        TRACEC("Move to parent ")(x)("\n"); 
+        TRACEC("Move to parent ")(xlink)("\n"); 
     }
     if( !found )
     {
@@ -259,16 +259,16 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     PatternLink terminus_plink(this, &terminus);
     XLink req_terminus_xlink = required_links->at(terminus_plink); 
     
-    XLink x = req_terminus_xlink;
+    XLink xlink = req_terminus_xlink;
     TreePtr<SubSequence> xpr_ss( new SubSequence() );
-    while(x != base_xlink)
+    while(xlink != base_xlink)
     {       
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(x) );       
-        x = nugget.parent_xlink;
+        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );       
+        xlink = nugget.parent_xlink;
         
         // Putting this here excludes the terminus, as required
-        TRACEC("Move to parent ")(x)("\n");
-        xpr_ss->elts.push_front( x );      
+        TRACEC("Move to parent ")(xlink)("\n");
+        xpr_ss->elts.push_front( xlink );      
     }
     
     XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass

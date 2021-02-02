@@ -34,7 +34,7 @@ struct BuildIdentifierAgent : public virtual AgentCommon
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;
+                                      XLink base_xlink ) const;
     virtual Block GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
@@ -109,7 +109,7 @@ struct IdentifierByNameAgent : public virtual AgentCommon
     virtual Block GetGraphBlockInfo() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;
+                                      XLink base_xlink ) const;
 
     string name;
 };
@@ -169,8 +169,8 @@ struct NestedAgent : public virtual ExtendingAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
-    virtual XLink Advance( XLink x, 
+                                      XLink base_xlink ) const;                  
+    virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
     virtual Block GetGraphBlockInfo() const;
     
@@ -196,7 +196,7 @@ struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
         return shared_from_this();
     }
     
-    virtual XLink Advance( XLink x, 
+    virtual XLink Advance( XLink xlink, 
                            string *depth ) const;
 };
 
@@ -216,7 +216,7 @@ struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
         return shared_from_this();
     }
     
-    virtual XLink Advance( XLink x, 
+    virtual XLink Advance( XLink xlink, 
                            string *depth ) const;
 };
 
@@ -239,7 +239,7 @@ struct BuildContainerSizeAgent : public virtual AgentCommon,
 private:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;
+                                      XLink base_xlink ) const;
 	TreePtr<Node> BuildReplaceImpl();
     virtual Block GetGraphBlockInfo() const;
 }; 
@@ -262,7 +262,7 @@ struct IsLabelReachedAgent : public virtual AgentCommon,
 	virtual void FlushCache() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;
+                                      XLink base_xlink ) const;
     virtual Block GetGraphBlockInfo() const;
     TreePtr<CPPTree::Expression> pattern;           
            
