@@ -303,14 +303,6 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 #endif
             unsatisfied.insert( c );
         }
-       
-        // Only expected to pass for base (which we only know about if 
-        // it's FREE). We don't check whether the other 
-        // values accepted by the constraint are compatible with the 
-        // variable's deduced type, because that is the job of the 
-        // constraint that is based upon it.
-        // for( VariableId var : c->GetFreeVariables() )
-        //     CheckLocalMatch( assigns, var );   
     } 
     return make_tuple( unsatisfied.empty(), 
                        hints.empty() ? Assignment() : hints.front(),
@@ -326,13 +318,6 @@ void SimpleSolver::TraceProblem() const
     TRACEC("%d variables:", plan.variables.size());        
     for( VariableId var : plan.variables )
         TRACEC(var)("\n");
-}
-
-
-void SimpleSolver::CheckLocalMatch( const Assignments &assigns, VariableId variable )
-{
-    ASSERT( assigns.count(variable) > 0 );   // in the assignment
-    ::CheckLocalMatch( variable, assigns.at(variable) );
 }
 
 

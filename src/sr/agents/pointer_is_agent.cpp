@@ -16,13 +16,13 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 
 
 void PointerIsAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                          XLink x ) const
+                                          XLink base_xlink ) const
 {
 	INDENT("@");
-    auto op = [&](XLink xlink) -> XLink
+    auto op = [&](XLink base_xlink) -> XLink
     {
         TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
-        if( xlink.GetChildX() == context )
+        if( base_xlink.GetChildX() == context )
         {
             // Imagine that the root is pointed to by a TreePtr<Node>
             // (in this case wit.GetNodePointerInParent() would return NULL)
@@ -35,7 +35,7 @@ void PointerIsAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
         Walk e( context ); 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
-            if( *wit == xlink.GetChildX() ) // found ourself TODO use find()
+            if( *wit == base_xlink.GetChildX() ) // found ourself TODO use find()
             {            
                 if(found_one_already)
                     throw Mismatch(); // X has multiple parents - ambiguous, so don't match
@@ -63,12 +63,13 @@ void PointerIsAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
         }
         ASSERTFAIL("Failed to generate a link\n");
     };
+        
+    auto cached_xlink = cache( base_xlink, op );
+    // Canary for cache malfunctions
+    ASSERT( cached_xlink.GetChildX()->IsLocalMatch(base_xlink.GetChildX().get()) );
     
     query.Reset();
-    auto cx = cache( x, op );
-    // Canary for cache malfunctions
-    ASSERT( cx.GetChildX()->IsLocalMatch(x.GetChildX().get()) );
-    query.RegisterNormalLink( PatternLink(this, GetPointer()), cx );
+    query.RegisterNormalLink( PatternLink(this, GetPointer()), cached_xlink );
 }
 
 

@@ -27,9 +27,6 @@ typedef unordered_map<VariableId, Value> Assignments;
 typedef Assignments Solution;
 
 
-void CheckLocalMatch( VariableId variable, Value value );
-
-
 /** Implements a systemic constraint as discussed in #107
  */
 class Constraint : public Traceable

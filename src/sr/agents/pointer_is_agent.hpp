@@ -18,7 +18,7 @@ class PointerIsAgent : public virtual ExtendingAgent
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+                                      XLink base_xlink ) const;                  
     virtual Block GetGraphBlockInfo() const;
     virtual void Reset();    
 private:

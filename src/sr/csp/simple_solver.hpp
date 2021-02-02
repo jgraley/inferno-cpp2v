@@ -80,7 +80,6 @@ private:
 
     tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
     void TraceProblem() const;
-    static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlanVariablesUsed();
