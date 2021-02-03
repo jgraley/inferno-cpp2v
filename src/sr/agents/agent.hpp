@@ -119,6 +119,8 @@ public:
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                                      
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
     virtual bool ImplHasNLQ() const;                                              
@@ -168,8 +170,6 @@ public:
     virtual string GetTrace() const;
 
 protected:                                  
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const = 0;                                      
     const SCREngine *master_scr_engine;    
     shared_ptr<PatternQuery> pattern_query;
 			

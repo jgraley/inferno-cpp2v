@@ -88,11 +88,18 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 }
     
     
+void AgentCommon::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+                                       XLink base_xlink ) const
+{
+    ASSERTFAIL();
+}                                       
+
+
 void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                    XLink base_xlink ) const
 {
-    query.last_activity = DecidedQueryCommon::QUERY;
-   
+    // Admin stuff every DQ has to do
+    query.last_activity = DecidedQueryCommon::QUERY;   
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     
     if( base_xlink == XLink::MMAX_Link )
@@ -101,8 +108,8 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
-        for( PatternLink l : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( PatternLink(this, l.GetPatternPtr()), base_xlink );
+        for( PatternLink plink : pattern_query->GetNormalLinks() )       
+            query.RegisterNormalLink( plink, base_xlink );
     }   
     else
     {

@@ -4,19 +4,22 @@
 
 using namespace SR;
 
-void ColocatedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                          XLink base_xlink ) const
+void ColocatedAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const
 { 
     INDENT("∧");
+    // Admin stuff every DQ has to do
+    query.last_activity = DecidedQueryCommon::QUERY;   
+    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset();
-    auto plinks = pattern_query->GetNormalLinks();
-    ASSERT( !plinks.empty() ); // must be at least one thing!
-
-    CheckLocalMatch( base_xlink.GetChildX().get() );
     
-    RunColocatedQuery(base_xlink);
-
-    for( PatternLink plink : plinks )                 
+    if( base_xlink != XLink::MMAX_Link )
+    {
+        CheckLocalMatch( base_xlink.GetChildX().get() );
+        RunColocatedQuery(base_xlink);
+    }
+    
+    for( PatternLink plink : pattern_query->GetNormalLinks() )                 
         query.RegisterNormalLink( plink, base_xlink ); // Link into X
 }    
 
