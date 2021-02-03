@@ -28,7 +28,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void DisjunctionAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                             XLink x ) const
 {
     INDENT("∨");
@@ -66,7 +66,7 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
 
-void DisjunctionAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+void DisjunctionAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 { 

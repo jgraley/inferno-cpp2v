@@ -123,7 +123,7 @@ public:
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
     virtual bool ImplHasNLQ() const;                                              
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
     void NLQFromDQ( PatternLink base_plink,
@@ -170,7 +170,7 @@ public:
     virtual string GetTrace() const;
 
 protected:                                  
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;                                      
     const SCREngine *master_scr_engine;    
     shared_ptr<PatternQuery> pattern_query;
@@ -187,12 +187,12 @@ private:
 class PreRestrictedAgent : public AgentCommon
 {
 public:    
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                      
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;                                          
                                       
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
     virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,

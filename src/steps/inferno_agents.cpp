@@ -17,7 +17,7 @@ shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
 }
 
 
-void BuildIdentifierAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void BuildIdentifierAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                 XLink base_xlink ) const             
 { 
     query.Reset();
@@ -156,7 +156,7 @@ shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 }
 
 
-void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void IdentifierByNameAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                  XLink base_xlink ) const                
 {
     query.Reset();
@@ -292,7 +292,7 @@ shared_ptr<PatternQuery> BuildContainerSizeAgent::GetPatternQuery() const
 }
 
 
-void BuildContainerSizeAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void BuildContainerSizeAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                    XLink base_xlink ) const
 { 
     query.Reset(); 
@@ -354,7 +354,7 @@ shared_ptr<PatternQuery> IsLabelReachedAgent::GetPatternQuery() const
 }
     
     
-void IsLabelReachedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void IsLabelReachedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                XLink base_xlink ) const
 {
 	INDENT("L");

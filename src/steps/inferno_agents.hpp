@@ -33,7 +33,7 @@ struct BuildIdentifierAgent : public virtual AgentCommon
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
     virtual Block GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
@@ -108,7 +108,7 @@ struct IdentifierByNameAgent : public virtual AgentCommon
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
 
     string name;
@@ -238,7 +238,7 @@ struct BuildContainerSizeAgent : public virtual AgentCommon,
     shared_ptr< StarAgent > container;
 private:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
 	TreePtr<Node> BuildReplaceImpl();
     virtual Block GetGraphBlockInfo() const;
@@ -261,7 +261,7 @@ struct IsLabelReachedAgent : public virtual AgentCommon,
     
 	virtual void FlushCache() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
     virtual Block GetGraphBlockInfo() const;
     TreePtr<CPPTree::Expression> pattern;           

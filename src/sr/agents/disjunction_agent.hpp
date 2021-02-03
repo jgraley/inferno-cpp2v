@@ -17,10 +17,10 @@ public:
     class MMAXRequiredOnUntakenOptionMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                                             
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;

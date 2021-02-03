@@ -106,12 +106,12 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
     }   
     else
     {
-        RunDecidedQueryImpl( query, base_xlink );
+        RunDecidedQueryMMed( query, base_xlink );
     }
 }                             
 
 
-void AgentCommon::RunNormalLinkedQueryImpl( PatternLink base_plink,
+void AgentCommon::RunNormalLinkedQueryMMed( PatternLink base_plink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
 {
@@ -191,7 +191,7 @@ void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
         else
         {
             TRACE("Attempting to vcall on ")(*this)("\n");
-            (void)this->RunNormalLinkedQueryImpl( base_plink, required_links, knowledge );
+            (void)this->RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
         }
     }                    
 }                                            
@@ -608,7 +608,7 @@ string AgentCommon::GetTrace() const
 }
 
 
-void PreRestrictedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                               XLink base_xlink ) const
 {
     // Check pre-restriction
@@ -618,7 +618,7 @@ void PreRestrictedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void PreRestrictedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+void PreRestrictedAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
                                                    const SolutionMap *required_links,
                                                    const TheKnowledge *knowledge ) const
 {
