@@ -13,10 +13,10 @@ namespace SR
  * to build replace pattern. Subclasses may override 
  * RunColocatedQuery() to add additional restrictions. #271
  */
-class ColocatedAgent : public virtual PreRestrictedAgent 
+class ColocatedAgent : public virtual AgentCommon 
 {
 public:
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                        
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual void RunColocatedQuery(XLink common_xlink) const;
