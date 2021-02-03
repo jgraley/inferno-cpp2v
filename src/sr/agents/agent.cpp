@@ -612,7 +612,7 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                               XLink base_xlink ) const
 {
     // Check pre-restriction
-    CheckLocalMatch(base_xlink.GetChildX().get());
+    CheckLocalMatch( base_xlink.GetChildX().get() );
  
     RunDecidedQueryPRed( query, base_xlink );
 }
@@ -622,8 +622,9 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
                                                    const SolutionMap *required_links,
                                                    const TheKnowledge *knowledge ) const
 {
-    // Check pre-restriction
-    CheckLocalMatch(required_links->at(base_plink).GetChildX().get());
+    // Check pre-restriction if based
+    if( required_links->count(base_plink) == 1 )
+        CheckLocalMatch( required_links->at(base_plink).GetChildX().get() );
     
     RunNormalLinkedQueryPRed( base_plink, required_links, knowledge );
 }
