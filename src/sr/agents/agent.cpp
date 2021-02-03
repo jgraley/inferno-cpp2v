@@ -167,10 +167,9 @@ void AgentCommon::NLQFromDQ( PatternLink base_plink,
     
 void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
                                         const SolutionMap *required_links,
-                                        const TheKnowledge *knowledge,
-                                        bool use_DQ ) const
+                                        const TheKnowledge *knowledge ) const
 {
-    if( use_DQ || !ImplHasNLQ() )
+    if( !ImplHasNLQ() )
     {
         NLQFromDQ( base_plink, required_links, knowledge );
     }
