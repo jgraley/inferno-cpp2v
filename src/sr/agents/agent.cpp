@@ -131,7 +131,7 @@ void AgentCommon::NLQFromDQ( PatternLink base_plink,
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(base_plink)("\n");
     auto query = CreateDecidedQuery();
-    RunDecidedQuery( *query, required_links->at(base_plink) );
+    RunDecidedQueryMMed( *query, required_links->at(base_plink) );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
@@ -169,30 +169,24 @@ void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
                                         const SolutionMap *required_links,
                                         const TheKnowledge *knowledge ) const
 {
-    if( !ImplHasNLQ() )
+    if( required_links->at(base_plink) == XLink::MMAX_Link )
     {
-        NLQFromDQ( base_plink, required_links, knowledge );
-    }
-    else
-    {
-        if( required_links->at(base_plink) == XLink::MMAX_Link )
+        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
         {
-            for( PatternLink plink : pattern_query->GetNormalLinks() ) 
+            if( required_links->count(plink) > 0 )
             {
-                if( required_links->count(plink) > 0 )
-                {
-                    XLink req_xlink = required_links->at(plink);
-                    if( req_xlink != XLink::MMAX_Link )
-                        throw MMAXPropagationMismatch();
-                }
-            }   
+                XLink req_xlink = required_links->at(plink);
+                if( req_xlink != XLink::MMAX_Link )
+                    throw MMAXPropagationMismatch();
+            }
         }   
-        else
-        {
-            TRACE("Attempting to vcall on ")(*this)("\n");
-            (void)this->RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
-        }
-    }                    
+        return; // Done: all are MMAX
+    }   
+    
+    if( ImplHasNLQ() )    
+        RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
+    else
+        NLQFromDQ( base_plink, required_links, knowledge );               
 }                                            
 
 
