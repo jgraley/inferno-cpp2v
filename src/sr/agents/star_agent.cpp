@@ -20,7 +20,7 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-void StarAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                      XLink base_xlink ) const
 {
     INDENT("*");
@@ -62,7 +62,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                           const TheKnowledge *knowledge ) const
 { 
     // This agent has no normal links, so just do this to populate query
-    RunDecidedQueryMMed( query, base_xlink ); 
+    RunDecidedQueryImpl( query, base_xlink ); 
 }
 
 

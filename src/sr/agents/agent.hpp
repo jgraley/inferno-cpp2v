@@ -118,18 +118,18 @@ public:
     AgentCommon();
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
-    virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                                      
+    virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                                                
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
     virtual bool ImplHasNLQ() const;                                              
-    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;
     void NLQFromDQ( PatternLink base_plink,
                     const SolutionMap *required_links,
                     const TheKnowledge *knowledge ) const;                                              
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
     virtual void RunNormalLinkedQuery( PatternLink base_plink,
                                        const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const;
@@ -182,7 +182,24 @@ private:
 };
 
 
-class PreRestrictedAgent : public AgentCommon
+class DefaultMMAXAgent : public AgentCommon
+{
+public:    
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                                      
+    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const = 0;
+                                                                                      
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;                                             
+    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
+};
+
+
+class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,

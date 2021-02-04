@@ -88,7 +88,7 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 }
     
     
-void AgentCommon::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+void AgentCommon::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                        XLink base_xlink ) const
 {
     ASSERTFAIL();
@@ -102,23 +102,11 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
     query.last_activity = DecidedQueryCommon::QUERY;   
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     
-    if( base_xlink == XLink::MMAX_Link )
-    {
-        query.Reset();
-        // Magic Match Anything node: all normal children also match anything
-        // This is just to keep normal-domain solver happy, so we 
-        // only need normals. 
-        for( PatternLink plink : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( plink, base_xlink );
-    }   
-    else
-    {
-        RunDecidedQueryMMed( query, base_xlink );
-    }
+    RunDecidedQueryImpl( query, base_xlink );
 }                             
 
 
-void AgentCommon::RunNormalLinkedQueryMMed( PatternLink base_plink,
+void AgentCommon::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
 {
@@ -182,21 +170,7 @@ void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
         return;
     }
 
-    if( required_links->at(base_plink) == XLink::MMAX_Link )
-    {
-        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
-        {
-            if( required_links->count(plink) > 0 )
-            {
-                XLink req_xlink = required_links->at(plink);
-                if( req_xlink != XLink::MMAX_Link )
-                    throw MMAXPropagationMismatch();
-            }
-        }   
-        return; // Done: all are MMAX
-    }   
-    
-    RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
+    RunNormalLinkedQueryImpl( base_plink, required_links, knowledge );
 }                                            
 
 
@@ -609,6 +583,55 @@ string AgentCommon::GetTrace() const
     }
     return s;
 }
+
+
+void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                            XLink base_xlink ) const
+{
+    if( base_xlink == XLink::MMAX_Link )
+    {
+        query.Reset();
+        // Magic Match Anything node: all normal children also match anything
+        // This is just to keep normal-domain solver happy, so we 
+        // only need normals. 
+        for( PatternLink plink : pattern_query->GetNormalLinks() )       
+            query.RegisterNormalLink( plink, base_xlink );
+    }   
+    else
+    {
+        RunDecidedQueryMMed( query, base_xlink );
+    }
+}
+
+
+void DefaultMMAXAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                                 const SolutionMap *required_links,
+                                                 const TheKnowledge *knowledge ) const
+{
+    if( required_links->at(base_plink) == XLink::MMAX_Link )
+    {
+        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
+        {
+            if( required_links->count(plink) > 0 )
+            {
+                XLink req_xlink = required_links->at(plink);
+                if( req_xlink != XLink::MMAX_Link )
+                    throw MMAXPropagationMismatch();
+            }
+        }   
+        return; // Done: all are MMAX
+    }   
+    
+    RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
+}
+
+                               
+void DefaultMMAXAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
+                                                 const SolutionMap *required_links,
+                                                 const TheKnowledge *knowledge ) const                                      
+{                      
+    ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
+}                     
 
 
 void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,

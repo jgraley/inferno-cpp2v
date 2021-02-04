@@ -26,7 +26,7 @@ class StarAgent : public virtual AgentCommon
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,

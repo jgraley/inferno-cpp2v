@@ -10,7 +10,7 @@ namespace SR
 /// Boolean node that matches if any of the sub-patterns at the pointers in
 /// `patterns` do match i.e. an "or" operation. `patterns` point to abnormal 
 /// contexts since in an overall match, some sub-patterns may not match.
-class DisjunctionAgent : public virtual AgentCommon 
+class DisjunctionAgent : public virtual DefaultMMAXAgent 
 {
 public:
     class NoOptionsMatchedMismatch : public Mismatch {};
