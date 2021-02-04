@@ -126,7 +126,7 @@ void AgentCommon::NLQFromDQ( PatternLink base_plink,
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(base_plink)("\n");
     auto query = CreateDecidedQuery();
-    RunDecidedQuery( *query, required_links->at(base_plink) );
+    RunDecidedQueryImpl( *query, required_links->at(base_plink) );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
@@ -164,13 +164,10 @@ void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
                                         const SolutionMap *required_links,
                                         const TheKnowledge *knowledge ) const
 {
-    if( !ImplHasNLQ() )    
-    {
+    if( ImplHasNLQ() )    
+        RunNormalLinkedQueryImpl( base_plink, required_links, knowledge );
+    else
         NLQFromDQ( base_plink, required_links, knowledge );               
-        return;
-    }
-
-    RunNormalLinkedQueryImpl( base_plink, required_links, knowledge );
 }                                            
 
 

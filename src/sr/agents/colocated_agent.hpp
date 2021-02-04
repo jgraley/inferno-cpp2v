@@ -16,8 +16,8 @@ namespace SR
 class ColocatedAgent : public virtual AgentCommon 
 {
 public:
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink base_xlink ) const;                                                        
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                                                        
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual void RunColocatedQuery(XLink common_xlink) const;
 };

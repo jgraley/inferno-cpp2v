@@ -4,13 +4,10 @@
 
 using namespace SR;
 
-void ColocatedAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const
+void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                          XLink base_xlink ) const
 { 
     INDENT("∧");
-    // Admin stuff every DQ has to do
-    query.last_activity = DecidedQueryCommon::QUERY;   
-    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset();
     
     if( base_xlink != XLink::MMAX_Link )
