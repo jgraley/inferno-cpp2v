@@ -12,38 +12,24 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-void TransformOfAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                            XLink base_xlink ) const
+LocatedLink TransformOfAgent::RunTeleportQuery( XLink base_xlink ) const
 {
-    INDENT("T");
-    query.Reset();
-    
-    auto op = [&](XLink base_xlink) -> XLink
+    // Transform the candidate expression, sharing the overall S&R context so that
+    // things like GetDeclaration can work (they search the whole program tree).
+    TreePtr<Node> base_x = base_xlink.GetChildX();
+    TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
+    if( trans_x )
     {
-        // Transform the candidate expression, sharing the overall S&R context so that
-        // things like GetDeclaration can work (they search the whole program tree).
-        TreePtr<Node> base_x = base_xlink.GetChildX();
-        TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
-        if( trans_x )
-        {
-            ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n"); 
-            
-            // Punt it back into the search/replace engine
-            XLink trans_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
-            ASSERT( trans_xlink.GetChildX()->IsFinal() )(*this)(" computed non-final ")(trans_xlink)("\n"); 
-            
-            XLink unique_child_xlink = master_scr_engine->UniquifyDomainExtension(trans_xlink);
-            return unique_child_xlink;
-        }
-        else
-        {
-            // Transformation returned nullptr, probably because the candidate was incompatible
-            // with the transofrmation - a search MISS.
-            throw Mismatch();  
-        }
-    };
-    XLink cached_xlink = cache( base_xlink, op );
-    query.RegisterNormalLink( PatternLink(this, &pattern), cached_xlink );    
+        ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
+        XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
+        return LocatedLink( PatternLink(this, &pattern), tp_xlink );
+    }
+    else
+    {
+        // Transformation returned nullptr, probably because the candidate was incompatible
+        // with the transformation - a search MISS.
+        throw TransformationFailedMismatch();  
+    }
 }
 
 

@@ -661,7 +661,31 @@ void PreRestrictedAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
 }                     
 
 
-map<XLink, XLink> ExtendingAgent::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
+void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+                                         XLink base_xlink ) const
+{
+    INDENT("T");
+    query.Reset();
+    LocatedLink tp_link;
+    
+    auto op = [&](XLink base_xlink) -> XLink
+    {
+        tp_link = RunTeleportQuery( base_xlink );
+        
+        // We will uniquify the link against the domain and then cache it against base_xlink
+        
+        XLink unique_tp_xlink = master_scr_engine->UniquifyDomainExtension((XLink)tp_link);       
+        return unique_tp_xlink;
+    };
+    XLink cached_xlink = cache( base_xlink, op );
+    
+    // ASSERT( (PatternLink)tp_link ); TODO not filled in when cache hits => got to cache these. Indeed, why not cache a SolutionMap while at it.
+    ASSERT( cached_xlink );
+    query.RegisterNormalLink( pattern_query->GetNormalLinks().front(), cached_xlink );    
+}                                    
+
+
+map<XLink, XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
 {
     Conjecture conj(this);            
 

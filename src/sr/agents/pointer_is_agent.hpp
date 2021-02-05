@@ -13,12 +13,12 @@ namespace SR
 /// original pointer object for the purposes of comparison, so if the
 /// original pointer is unavailable, as may be the case if it was 
 /// created locally, this agent will not work correctly.
-class PointerIsAgent : public virtual ExtendingAgent
+class PointerIsAgent : public virtual TeleportAgent
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
+    virtual LocatedLink RunTeleportQuery( XLink base_xlink ) const;
+                 
     virtual Block GetGraphBlockInfo() const;
     virtual void Reset();    
 private:

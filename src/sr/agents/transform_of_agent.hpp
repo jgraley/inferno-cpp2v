@@ -17,12 +17,13 @@ namespace SR
 /// but can change when replace acts to change the tree. Thus it can depend on
 /// the tree. The overall root of the tree is supplied as context to the 
 /// transformation, even when processing slaves.
-class TransformOfAgent : public virtual ExtendingAgent
+class TransformOfAgent : public virtual TeleportAgent
 {
 public:
+    class TransformationFailedMismatch : public Mismatch {};
+
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+    virtual LocatedLink RunTeleportQuery( XLink base_xlink ) const;                
     virtual Block GetGraphBlockInfo() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;

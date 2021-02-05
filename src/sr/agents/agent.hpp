@@ -10,6 +10,7 @@
 #include "../query.hpp"
 #include "common/mismatch.hpp"
 #include "../equivalence.hpp"
+#include "../cache.hpp"
 
 #include <vector>
 #include <boost/type_traits.hpp>
@@ -216,9 +217,17 @@ public:
 };
 
 
-class ExtendingAgent : public PreRestrictedAgent
+class TeleportAgent : public PreRestrictedAgent
 {
+public:    
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                  
+    virtual LocatedLink RunTeleportQuery( XLink base_xlink ) const { ASSERTFAIL(); }
+    
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
+
+private:
+    mutable CacheByLocation cache;    
 };
 
 
