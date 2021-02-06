@@ -720,30 +720,7 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &base_x
     }
     return extra_xlinks;
 }
-/*
-    map<XLink, XLink> extra;
-    for( XLink base_xlink : xlinks )
-    {
-        if( base_xlink == XLink::MMAX_Link )
-            continue; // MMAX at base never expands domain because all child patterns are also MMAX
-        if( !IsLocalMatch( base_xlink.GetChildX().get() ) )
-            continue; // Failed pre-restriction so can't expand domain
-            
-        try
-        {
-            map<PatternLink, XLink> tp_links = RunTeleportQuery( base_xlink );
-                    
-            for( pair<PatternLink, XLink> p : tp_links )
-                p.second = master_scr_engine->UniquifyDomainExtension(p.second); // in-place
-            
-            ASSERT( tp_links.size() <= 1 ); // TODO this method should return a set<XLink> - caller doesn't need the plinks
-            for( LocatedLink new_link : tp_links )
-                extra[base_xlink] = (XLink)new_link;
-        }
-        catch( ::Mismatch & ) {}
-    }
-    return extra;
-*/
+
 
 void TeleportAgent::Reset()
 {

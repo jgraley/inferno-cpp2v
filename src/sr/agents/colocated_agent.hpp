@@ -17,8 +17,13 @@ class ColocatedAgent : public virtual AgentCommon
 {
 public:
     class PreRestrictionMismatch : public Mismatch {};
+    class ColocationMismatch : public Mismatch {};
+
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                        
+    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                           const SolutionMap *required_links,
+                                           const TheKnowledge *knowledge ) const;
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual void RunColocatedQuery(XLink common_xlink) const;
 };
