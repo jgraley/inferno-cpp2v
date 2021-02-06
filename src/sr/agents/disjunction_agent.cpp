@@ -28,7 +28,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-void DisjunctionAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+void DisjunctionAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                             XLink x ) const
 {
     INDENT("∨");

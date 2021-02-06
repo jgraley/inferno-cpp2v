@@ -143,7 +143,7 @@ shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 }
 
 
-void IdentifierByNameAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                                  XLink base_xlink ) const                
 {
     string newname = name; 
@@ -333,7 +333,7 @@ shared_ptr<PatternQuery> IsLabelReachedAgent::GetPatternQuery() const
 }
     
     
-void IsLabelReachedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+void IsLabelReachedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                                XLink base_xlink ) const
 {
 	INDENT("L");

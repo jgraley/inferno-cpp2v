@@ -100,12 +100,12 @@ private:
 /// a minimum due to the risk of co-incidentla unwanted matches and the 
 /// general principle that identifier names should not be important (it is
 /// the identiy proprty itself that matters with identifiers). 
-struct IdentifierByNameAgent : public virtual DefaultMMAXAgent
+struct IdentifierByNameAgent : public virtual PreRestrictedAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
 
     string name;
@@ -240,7 +240,7 @@ private:
 /// `IsLabelReachedAgent` matches a `LabelIdentifier` if that label is used
 /// anywhere in the expression pointed to by `pattern`.
 /// TODO generalise to more than just labels.
-struct IsLabelReachedAgent : public virtual DefaultMMAXAgent, 
+struct IsLabelReachedAgent : public virtual PreRestrictedAgent, 
                              Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
@@ -252,7 +252,7 @@ struct IsLabelReachedAgent : public virtual DefaultMMAXAgent,
     
 	virtual void FlushCache() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
     virtual Block GetGraphBlockInfo() const;
     TreePtr<CPPTree::Expression> pattern;           
