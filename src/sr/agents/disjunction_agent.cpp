@@ -65,7 +65,7 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
 
-void DisjunctionAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
+void DisjunctionAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 { 
