@@ -137,12 +137,6 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 }
 
 
-shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
-{ 
-    return make_shared<PatternQuery>(this);
-}
-
-
 void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                                  XLink base_xlink ) const                
 {
@@ -327,12 +321,6 @@ void IsLabelReachedAgent::FlushCache() const
 }
 
 
-shared_ptr<PatternQuery> IsLabelReachedAgent::GetPatternQuery() const
-{ 
-    return make_shared<PatternQuery>(this);
-}
-    
-    
 void IsLabelReachedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                                XLink base_xlink ) const
 {

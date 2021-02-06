@@ -235,7 +235,7 @@ private:
 };
 
 
-class BuilderAgent : public PreRestrictedAgent
+class SearchLeafAgent : public PreRestrictedAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,

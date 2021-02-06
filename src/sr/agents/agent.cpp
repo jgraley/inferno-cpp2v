@@ -751,15 +751,15 @@ void TeleportAgent::Reset()
     cache.Reset();
 }
 
-//---------------------------------- BuilderAgent ------------------------------------    
+//---------------------------------- SearchLeafAgent ------------------------------------    
 
-shared_ptr<PatternQuery> BuilderAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
 { 
     return make_shared<PatternQuery>(this);
 }
 
 
-void BuilderAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+void SearchLeafAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                         XLink base_xlink ) const
 {
 }
