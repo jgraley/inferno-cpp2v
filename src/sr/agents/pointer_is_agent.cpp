@@ -15,7 +15,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-LocatedLink PointerIsAgent::RunTeleportQuery( XLink base_xlink ) const
+map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink base_xlink ) const
 {
     TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
     if( base_xlink.GetChildX() == context )
@@ -24,7 +24,7 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink base_xlink ) const
         // (in this case wit.GetNodePointerInParent() would return NULL)
         TreePtr<Node> node( new Node );
         XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct        
-        return LocatedLink( PatternLink(this, GetPointer()), tp_xlink );
+        return { { PatternLink(this, GetPointer()), tp_xlink } };
     }
     
     // Do a walk over context (the whole x tree)
@@ -46,7 +46,7 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink base_xlink ) const
 
             // Stick that in your pipe + smoke it
             XLink tp_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
-            return LocatedLink( PatternLink(this, GetPointer()), tp_xlink );
+            return { { PatternLink(this, GetPointer()), tp_xlink } };
         }
     }
     
@@ -57,7 +57,7 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink base_xlink ) const
         // you can replace the root node with anything).
         TreePtr<Node> node( new Node );
         XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct
-        return LocatedLink( PatternLink(this, GetPointer()), tp_xlink );
+        return { { PatternLink(this, GetPointer()), tp_xlink } };
     }
     ASSERTFAIL("Failed to generate a link\n");
 }
@@ -80,11 +80,4 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
                                {},
                                {PatternLink(this, GetPointer()).GetShortName()} } } } };
     return block;
-}
-
-
-void PointerIsAgent::Reset()
-{
-    AgentCommon::Reset();
-    cache.Reset();
 }

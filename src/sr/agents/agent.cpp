@@ -12,6 +12,8 @@
 
 using namespace SR;
 
+//---------------------------------- Agent ------------------------------------    
+
 // C++11 fix
 Agent& Agent::operator=(Agent& other)
 {
@@ -37,6 +39,8 @@ const Agent *Agent::AsAgentConst( shared_ptr<const Node> node )
     return agent;
 }
 
+
+//---------------------------------- AgentCommon ------------------------------------    
 
 AgentCommon::AgentCommon() :
     master_scr_engine(nullptr)
@@ -581,6 +585,7 @@ string AgentCommon::GetTrace() const
     return s;
 }
 
+//---------------------------------- DefaultMMAXAgent ------------------------------------    
 
 void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                             XLink base_xlink ) const
@@ -630,6 +635,7 @@ void DefaultMMAXAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
     ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
 }                     
 
+//---------------------------------- PreRestrictedAgent ------------------------------------    
 
 void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                               XLink base_xlink ) const
@@ -660,28 +666,33 @@ void PreRestrictedAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
     ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");
 }                     
 
+//---------------------------------- TeleportAgent ------------------------------------    
 
 void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink base_xlink ) const
 {
     INDENT("T");
     query.Reset();
-    LocatedLink tp_link;
     
-    auto op = [&](XLink base_xlink) -> XLink
+    auto op = [&](XLink base_xlink) -> map<PatternLink, XLink>
     {
-        tp_link = RunTeleportQuery( base_xlink );
+        map<PatternLink, XLink> tp_links = RunTeleportQuery( base_xlink );
         
         // We will uniquify the link against the domain and then cache it against base_xlink
         
-        XLink unique_tp_xlink = master_scr_engine->UniquifyDomainExtension((XLink)tp_link);       
-        return unique_tp_xlink;
+        for( pair<PatternLink, XLink> p : tp_links )
+            p.second = master_scr_engine->UniquifyDomainExtension(p.second); // in-place
+                   
+        return tp_links;
     };
-    XLink cached_xlink = cache( base_xlink, op );
+    map<PatternLink, XLink> cached_links = cache( base_xlink, op );
     
     // ASSERT( (PatternLink)tp_link ); TODO not filled in when cache hits => got to cache these. Indeed, why not cache a SolutionMap while at it.
-    ASSERT( cached_xlink );
-    query.RegisterNormalLink( pattern_query->GetNormalLinks().front(), cached_xlink );    
+    for( LocatedLink cached_link : cached_links )
+    {   
+        ASSERT( cached_link );
+        query.RegisterNormalLink( (PatternLink)cached_link, (XLink)cached_link );
+    }    
 }                                    
 
 
@@ -711,4 +722,11 @@ map<XLink, XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> 
         while( conj.Increment() );
     }
     return extra;
+}
+
+
+void TeleportAgent::Reset()
+{
+    AgentCommon::Reset();
+    cache.Reset();
 }

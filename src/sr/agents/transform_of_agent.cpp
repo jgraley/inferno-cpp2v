@@ -12,7 +12,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-LocatedLink TransformOfAgent::RunTeleportQuery( XLink base_xlink ) const
+map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink base_xlink ) const
 {
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
@@ -22,7 +22,7 @@ LocatedLink TransformOfAgent::RunTeleportQuery( XLink base_xlink ) const
     {
         ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
         XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
-        return LocatedLink( PatternLink(this, &pattern), tp_xlink );
+        return { { PatternLink(this, &pattern), tp_xlink } };
     }
     else
     {
@@ -51,11 +51,4 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
                                {},
                                {PatternLink(this, &pattern).GetShortName()} } } } };
     return block;
-}
-
-
-void TransformOfAgent::Reset()
-{
-    AgentCommon::Reset();
-    cache.Reset();
 }

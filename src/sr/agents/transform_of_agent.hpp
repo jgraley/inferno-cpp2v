@@ -23,7 +23,7 @@ public:
     class TransformationFailedMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual LocatedLink RunTeleportQuery( XLink base_xlink ) const;                
+    virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;                
     virtual Block GetGraphBlockInfo() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;
@@ -32,13 +32,9 @@ public:
     	pattern(p)
     {
     }
-    virtual void Reset();    
 
 protected: 
     TransformOfAgent() {}    
-    
-public:
-    mutable CacheByLocation cache;    
 };
 
 

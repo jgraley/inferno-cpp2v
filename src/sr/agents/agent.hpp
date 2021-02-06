@@ -222,9 +222,11 @@ class TeleportAgent : public PreRestrictedAgent
 public:    
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
-    virtual LocatedLink RunTeleportQuery( XLink base_xlink ) const { ASSERTFAIL(); }
+    virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const { ASSERTFAIL(); }
     
     virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
+
+    virtual void Reset();    
 
 private:
     mutable CacheByLocation cache;    

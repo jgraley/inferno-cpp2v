@@ -191,7 +191,9 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                        XLink base_xlink ) const                          
 {
     INDENT("N");
-    query.Reset();
+    
+    // Do the teleporty bit
+    TeleportAgent::RunDecidedQueryPRed(query, base_xlink);    
     
     string s;
     // Keep advancing until we get nullptr, and remember the last non-null position
@@ -202,20 +204,30 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
             
     // Compare the last position with the terminus pattern
     query.RegisterNormalLink( PatternLink(this, &terminus), xlink ); // Link into X
+
+}
+
+    
+map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink base_xlink ) const
+{
+    map<PatternLink, XLink> tp_links;
     
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
-        auto op = [&](XLink base_xlink) -> XLink
-        {
-            TreePtr<Node> cur_depth( new SpecificString(s) );
-            XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
-            return master_scr_engine->UniquifyDomainExtension(new_xlink);
-        };
-        // note: not caching the recursive algorithm because we
-        // need terminus from it. See #153 for discussion
-        query.RegisterNormalLink( PatternLink(this, &depth), cache( base_xlink, op ) );  // Generated Link (string)
+        string s;
+        // Keep advancing until we get nullptr, and remember the last non-null position
+        int i = 0;
+        XLink xlink = base_xlink;
+        while( XLink next_xlink = Advance(xlink, &s) )
+            xlink = next_xlink;
+
+        TreePtr<Node> cur_depth( new SpecificString(s) );
+        XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
+        tp_links[PatternLink(this, &depth)] = new_xlink;
     }
+    
+    return tp_links;
 }    
 
 
@@ -247,13 +259,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo() const
     return block;
 }
 
-
-void NestedAgent::Reset()
-{
-    AgentCommon::Reset();
-    cache.Reset();
-}
-
+//---------------------------------- NestedArrayAgent ------------------------------------    
 
 XLink NestedArrayAgent::Advance( XLink xlink, 
                                  string *depth ) const
@@ -264,6 +270,7 @@ XLink NestedArrayAgent::Advance( XLink xlink,
         return XLink();
 }
 
+//---------------------------------- NestedSubscriptLookupAgent ------------------------------------    
 
 XLink NestedSubscriptLookupAgent::Advance( XLink xlink, 
                                            string *depth ) const

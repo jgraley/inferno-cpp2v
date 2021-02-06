@@ -17,14 +17,11 @@ class PointerIsAgent : public virtual TeleportAgent
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual LocatedLink RunTeleportQuery( XLink base_xlink ) const;
+    virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;
                  
     virtual Block GetGraphBlockInfo() const;
-    virtual void Reset();    
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
-    
-    mutable CacheByLocation cache;
 };
 	
 template<class PRE_RESTRICTION>
