@@ -235,6 +235,13 @@ private:
 };
 
 
+class BuilderAgent : public PreRestrictedAgent
+{
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
+    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+                                      XLink base_xlink ) const;                  
+};
+
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
 // Special nodes (that is nodes defined here with special S&R behaviour)
 // derive from a standard tree node via templating. This base class is

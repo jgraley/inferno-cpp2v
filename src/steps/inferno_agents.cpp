@@ -11,18 +11,6 @@ using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
-shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
-{ 
-    return make_shared<PatternQuery>(this);
-}
-
-
-void BuildIdentifierAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                                XLink base_xlink ) const             
-{ 
-}   
-
-
 Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
@@ -289,18 +277,6 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 }
 
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    
-
-shared_ptr<PatternQuery> BuildContainerSizeAgent::GetPatternQuery() const
-{ 
-    return make_shared<PatternQuery>(this);
-}
-
-
-void BuildContainerSizeAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                                   XLink base_xlink ) const
-{ 
-}   
-
 
 TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl() 
 {

@@ -28,13 +28,10 @@ using namespace SR;
 /// `BYPASS_WHEN_IDENTICAL` means if all the names of the source nodes are the
 /// same, that name is used. This reduces verbosity and is a good fit when
 /// in some sense you are "merging" objects with identifiers.
-struct BuildIdentifierAgent : public virtual DefaultMMAXAgent
+struct BuildIdentifierAgent : public virtual BuilderAgent
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;
     virtual Block GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
@@ -222,7 +219,7 @@ struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
 /// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
-struct BuildContainerSizeAgent : public virtual DefaultMMAXAgent,
+struct BuildContainerSizeAgent : public virtual BuilderAgent,
                                  Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
@@ -234,9 +231,6 @@ struct BuildContainerSizeAgent : public virtual DefaultMMAXAgent,
     
     shared_ptr< StarAgent > container;
 private:
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;
 	TreePtr<Node> BuildReplaceImpl();
     virtual Block GetGraphBlockInfo() const;
 }; 

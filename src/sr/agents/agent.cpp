@@ -750,3 +750,16 @@ void TeleportAgent::Reset()
     AgentCommon::Reset();
     cache.Reset();
 }
+
+//---------------------------------- BuilderAgent ------------------------------------    
+
+shared_ptr<PatternQuery> BuilderAgent::GetPatternQuery() const
+{ 
+    return make_shared<PatternQuery>(this);
+}
+
+
+void BuilderAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+                                        XLink base_xlink ) const
+{
+}
