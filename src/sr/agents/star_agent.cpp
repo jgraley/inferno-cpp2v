@@ -25,7 +25,6 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 {
     INDENT("*");
     ASSERT(base_xlink);
-    query.Reset();
                 
     auto x_ci = dynamic_cast<ContainerInterface *>(base_xlink.GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(base_xlink.GetChildX());

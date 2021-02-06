@@ -8,7 +8,6 @@ void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                           XLink base_xlink ) const
 { 
     INDENT("∧");
-    query.Reset();
     
     if( base_xlink != XLink::MMAX_Link )
     {

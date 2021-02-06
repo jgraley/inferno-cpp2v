@@ -105,7 +105,8 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
     // Admin stuff every DQ has to do
     query.last_activity = DecidedQueryCommon::QUERY;   
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    
+    query.Reset(); 
+
     RunDecidedQueryImpl( query, base_xlink );
 }                             
 
@@ -215,9 +216,11 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                         const SolutionMap *required_links,
                                         const TheKnowledge *knowledge ) const
 {
+    // Admin stuff every RQ has to do
     query.last_activity = DecidedQueryCommon::QUERY;
-   
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
+    query.Reset(); 
+
     if( base_xlink != XLink::MMAX_Link )
         this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
 }                             
@@ -592,7 +595,6 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 {
     if( base_xlink == XLink::MMAX_Link )
     {
-        query.Reset();
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
@@ -672,7 +674,6 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink base_xlink ) const
 {
     INDENT("T");
-    query.Reset();
     
     auto op = [&](XLink base_xlink) -> map<PatternLink, XLink>
     {

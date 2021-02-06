@@ -28,7 +28,6 @@ void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &quer
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    query.Reset();
     
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
@@ -249,7 +248,6 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    query.Reset();
 
     if( !recurse_restriction )
         return;

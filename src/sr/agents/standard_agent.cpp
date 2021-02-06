@@ -209,7 +209,6 @@ void StandardAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink base_xlink ) const
 {
     INDENT("Q");
-    query.Reset();
 
     // Get the members of x corresponding to pattern's class
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
@@ -604,7 +603,6 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
-    query.Reset();
 
     // Get the members of x corresponding to pattern's class
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   

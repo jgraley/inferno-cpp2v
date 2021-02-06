@@ -33,7 +33,6 @@ void DisjunctionAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 {
     INDENT("∨");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
-    query.Reset(); 
     
     // We register a decision that actually chooses between our agents - that
     // is, the options for the OR operation.

@@ -20,7 +20,6 @@ shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
 void BuildIdentifierAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                 XLink base_xlink ) const             
 { 
-    query.Reset();
 }   
 
 
@@ -159,7 +158,6 @@ shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 void IdentifierByNameAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                  XLink base_xlink ) const                
 {
-    query.Reset();
     string newname = name; 
     TreePtr<Node> base_x = base_xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
@@ -204,7 +202,6 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
             
     // Compare the last position with the terminus pattern
     query.RegisterNormalLink( PatternLink(this, &terminus), xlink ); // Link into X
-
 }
 
     
@@ -302,7 +299,6 @@ shared_ptr<PatternQuery> BuildContainerSizeAgent::GetPatternQuery() const
 void BuildContainerSizeAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                                    XLink base_xlink ) const
 { 
-    query.Reset(); 
 }   
 
 
@@ -366,7 +362,6 @@ void IsLabelReachedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query
 {
 	INDENT("L");
 	ASSERT( pattern );
-    query.Reset();
 	
 	// TODO Flushable mechanism removed - flush every time for safety (if
 	// this code ever gets used again). This may be slow!
