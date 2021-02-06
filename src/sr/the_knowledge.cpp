@@ -51,13 +51,13 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 void TheKnowledge::ExtendDomain( PatternLink plink )
 {
     // Extend locally first and then pass that into children.
-    map<XLink, XLink> extra = plink.GetChildAgent()->ExpandNormalDomain( domain );    
-    if( !extra.empty() )
+    set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( domain );    
+    if( !extra_xlinks.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
-    for( pair<XLink, XLink> p : extra )
+    for( XLink extra_xlink : extra_xlinks )
     {
-        TRACEC(p)("\n");
-        AddAtRoot( STOP_IF_ALREADY_IN, p.second ); // set to REQUIRE_SOLO to replicate #218
+        TRACEC(extra_xlink)("\n");
+        AddAtRoot( STOP_IF_ALREADY_IN, extra_xlink ); // set to REQUIRE_SOLO to replicate #218
     }
     
     // Visit couplings repeatedly TODO union over couplings and

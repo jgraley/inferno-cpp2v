@@ -698,8 +698,29 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }                                    
 
 
-map<XLink, XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
+set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &base_xlinks )
 {
+    set<XLink> extra_xlinks;
+    for( XLink base_xlink : base_xlinks )
+    {
+        if( base_xlink == XLink::MMAX_Link )
+            continue; // MMAX at base never expands domain because all child patterns are also MMAX
+        if( !IsLocalMatch( base_xlink.GetChildX().get() ) )
+            continue; // Failed pre-restriction so can't expand domain
+
+        try
+        {
+            shared_ptr<DecidedQuery> query = CreateDecidedQuery();
+            RunDecidedQueryPRed( *query, base_xlink );
+           
+            for( LocatedLink extra_link : query->GetNormalLinks() )
+                extra_xlinks.insert( (XLink)extra_link );
+        }
+        catch( ::Mismatch & ) {}
+    }
+    return extra_xlinks;
+}
+/*
     map<XLink, XLink> extra;
     for( XLink base_xlink : xlinks )
     {
@@ -722,8 +743,7 @@ map<XLink, XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> 
         catch( ::Mismatch & ) {}
     }
     return extra;
-}
-
+*/
 
 void TeleportAgent::Reset()
 {

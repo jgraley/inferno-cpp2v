@@ -88,7 +88,7 @@ public:
     virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
-    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) = 0;
+    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
     virtual CouplingKey GetKey() = 0;                                  
@@ -150,7 +150,7 @@ public:
     virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
-    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return map<XLink, XLink>(); }
+    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
      
 protected:
@@ -226,7 +226,7 @@ public:
                                       XLink base_xlink ) const;                  
     virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const { ASSERTFAIL(); }
     
-    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks );
+    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks );
 
     virtual void Reset();    
 
