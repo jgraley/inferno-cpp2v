@@ -150,7 +150,7 @@ public:
     virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
                                                     const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
-    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return map<XLink, XLink>(); /* implement in agents that can expand the domain */ }
+    virtual map<XLink, XLink> ExpandNormalDomain( const unordered_set<XLink> &xlinks ) { return map<XLink, XLink>(); }
     virtual void ResetNLQConjecture();
      
 protected:

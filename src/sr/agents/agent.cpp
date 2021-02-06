@@ -700,28 +700,26 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 
 map<XLink, XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &xlinks )
 {
-    Conjecture conj(this);            
-
     map<XLink, XLink> extra;
-    for( XLink xlink : xlinks )
+    for( XLink base_xlink : xlinks )
     {
-        conj.Start();
-        do
+        if( base_xlink == XLink::MMAX_Link )
+            continue; // MMAX at base never expands domain because all child patterns are also MMAX
+        if( !IsLocalMatch( base_xlink.GetChildX().get() ) )
+            continue; // Failed pre-restriction so can't expand domain
+            
+        try
         {
-            try
-            {
-                shared_ptr<DecidedQuery> query = conj.GetQuery(this);
-                {
-                    Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-                    RunDecidedQuery( *query, xlink );
-                }
-                
-                for( LocatedLink new_link : query->GetNormalLinks() )
-                    extra[xlink] = (XLink)new_link;
-            }
-            catch( ::Mismatch & ) {}
+            map<PatternLink, XLink> tp_links = RunTeleportQuery( base_xlink );
+                    
+            for( pair<PatternLink, XLink> p : tp_links )
+                p.second = master_scr_engine->UniquifyDomainExtension(p.second); // in-place
+            
+            ASSERT( tp_links.size() <= 1 ); // TODO this method should return a set<XLink> - caller doesn't need the plinks
+            for( LocatedLink new_link : tp_links )
+                extra[base_xlink] = (XLink)new_link;
         }
-        while( conj.Increment() );
+        catch( ::Mismatch & ) {}
     }
     return extra;
 }
