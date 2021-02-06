@@ -203,6 +203,8 @@ public:
 class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
+    class PreRestrictionMismatch : public Mismatch {};
+
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                      
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,

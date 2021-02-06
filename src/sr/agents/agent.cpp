@@ -643,8 +643,9 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                               XLink base_xlink ) const
 {
     // Check pre-restriction
-    CheckLocalMatch( base_xlink.GetChildX().get() );
- 
+    if( !IsLocalMatch( base_xlink.GetChildX().get() ) )
+        throw PreRestrictionMismatch();
+            
     RunDecidedQueryPRed( query, base_xlink );
 }
 
@@ -655,7 +656,8 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
 {
     // Check pre-restriction if based
     if( required_links->count(base_plink) == 1 )
-        CheckLocalMatch( required_links->at(base_plink).GetChildX().get() );
+        if( !IsLocalMatch( required_links->at(base_plink).GetChildX().get() ) )
+            throw PreRestrictionMismatch();
     
     RunNormalLinkedQueryPRed( base_plink, required_links, knowledge );
 }
@@ -686,9 +688,8 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                    
         return tp_links;
     };
-    map<PatternLink, XLink> cached_links = cache( base_xlink, op );
     
-    // ASSERT( (PatternLink)tp_link ); TODO not filled in when cache hits => got to cache these. Indeed, why not cache a SolutionMap while at it.
+    map<PatternLink, XLink> cached_links = cache( base_xlink, op );
     for( LocatedLink cached_link : cached_links )
     {   
         ASSERT( cached_link );

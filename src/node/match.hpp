@@ -33,11 +33,6 @@ struct Matcher
 		// candidate's class is a (non-strict) subclass of this class, we have a match.
 		return IsSubclass( candidate );
 	}
-	virtual void CheckLocalMatch( const Matcher *candidate ) const
-	{
-        if( !IsLocalMatch( candidate ) )
-            throw LocalMismatch();
-	}
     virtual ~Matcher() {}
     template< class TARGET_TYPE >
     static inline bool IsSubclassStatic( const TARGET_TYPE *target_architype, const Matcher *source_architype )

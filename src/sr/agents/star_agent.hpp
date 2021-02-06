@@ -25,6 +25,9 @@ namespace SR
 class StarAgent : public virtual AgentCommon 
 {
 public:
+    class PreRestrictionMismatch : public Mismatch {};
+    class NotASubcontainerMismatch : public Mismatch {};
+
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  

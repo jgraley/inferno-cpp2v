@@ -11,7 +11,9 @@ void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     
     if( base_xlink != XLink::MMAX_Link )
     {
-        CheckLocalMatch( base_xlink.GetChildX().get() );
+        if( !IsLocalMatch( base_xlink.GetChildX().get() ) ) 
+            throw PreRestrictionMismatch();
+
         RunColocatedQuery(base_xlink);
     }
     

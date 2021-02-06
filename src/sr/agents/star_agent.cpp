@@ -31,18 +31,20 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
     // Nodes passed to StarAgent::RunDecidedQueryMMed() must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
-        throw Mismatch();
+        throw NotASubcontainerMismatch();
     
     // Check pre-restriction
     TRACE("StarAgent pre-res\n");
     FOREACH( const TreePtrInterface &xe, *x_ci )
     {
-        CheckLocalMatch( ((TreePtr<Node>)xe).get() );
+        if( !IsLocalMatch( ((TreePtr<Node>)xe).get() ) )
+            throw PreRestrictionMismatch();
     }
      /* For #207
     for( XLink elt_xlink : x_ci->elts )
     {
-        CheckLocalMatch( elt_xlink.GetChildX().get() );
+        if( !IsLocalMatch( elt_xlink.GetChildX().get() ) )
+            throw PreRestrictionMismatch();
     }
     */
      

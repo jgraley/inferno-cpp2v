@@ -16,6 +16,7 @@ namespace SR
 class ColocatedAgent : public virtual AgentCommon 
 {
 public:
+    class PreRestrictionMismatch : public Mismatch {};
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                        
     virtual TreePtr<Node> BuildReplaceImpl();
