@@ -612,20 +612,32 @@ void DefaultMMAXAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 {
-    if( required_links->at(base_plink) == XLink::MMAX_Link )
+    // Baseless query strategy: hand-rolled
+    XLink base_xlink;
+    if( required_links->count(base_plink) > 0 )
+        base_xlink = required_links->at(base_plink);
+
+    if( !base_xlink || base_xlink == XLink::MMAX_Link )
     {
+        bool saw_non_mmax = false;
         for( PatternLink plink : pattern_query->GetNormalLinks() ) 
         {
             if( required_links->count(plink) > 0 )
             {
                 XLink req_xlink = required_links->at(plink);
                 if( req_xlink != XLink::MMAX_Link )
-                    throw MMAXPropagationMismatch();
+                    saw_non_mmax = true;                    
             }
         }   
-        return; // Done: all are MMAX
+        
+        if( !saw_non_mmax )
+            return; // Done: all are MMAX
+        
+        if( base_xlink == XLink::MMAX_Link )
+            throw MMAXPropagationMismatch(); // Mismatch: there are non-MMAX but base is MMAX
     }   
     
+    ASSERT( base_xlink != XLink::MMAX_Link );
     RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
 }
 
@@ -654,7 +666,7 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
                                                    const SolutionMap *required_links,
                                                    const TheKnowledge *knowledge ) const
 {
-    // Check pre-restriction if based
+    // Baseless query strategy: don't check PR
     if( required_links->count(base_plink) == 1 )
         if( !IsLocalMatch( required_links->at(base_plink).GetChildX().get() ) )
             throw PreRestrictionMismatch();

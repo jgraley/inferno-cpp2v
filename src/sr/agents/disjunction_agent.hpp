@@ -14,6 +14,7 @@ class DisjunctionAgent : public virtual PreRestrictedAgent
 {
 public:
     class NoOptionsMatchedMismatch : public Mismatch {};
+    class TakenOptionMismatch : public Mismatch {};
     class MMAXRequiredOnUntakenOptionMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;

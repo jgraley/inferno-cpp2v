@@ -69,33 +69,56 @@ void DisjunctionAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 { 
+    // Baseless query strategy: hand-rolled
     INDENT("∨");
-    bool found = false;
-    bool complete = true;
+    XLink base_xlink;
+    if( required_links->count(base_plink) > 0 )
+        base_xlink = required_links->at(base_plink);
     
-    // Loop over the options for this disjunction
+    ASSERT( base_xlink != XLink::MMAX_Link ); // DefaultMMAXAgent should have taken care of this case
+       
+    // Loop over the options for this disjunction and collect the links 
+    // that are not MMAX. Also take note of missing children.
+    bool children_complete = true;
+    list<XLink> non_mmax_links;
     FOREACH( const TreePtrInterface &p, GetPatterns() )           
     {
         PatternLink plink(this, &p);
-        SolutionMap::const_iterator req_it = required_links->find(plink); // TODO hangover from when it was a list
         
-        if( req_it == required_links->end() ) 
+        if( required_links->count(plink) > 0 ) 
         {
-            complete = false;
-        }
+            XLink xlink = required_links->at(plink); 
+            ASSERT( xlink );
+            if( xlink != XLink::MMAX_Link )
+                non_mmax_links.push_back( xlink );
+        }        
         else
         {
-            XLink req_xlink = req_it->second; 
-            if( req_xlink == required_links->at(base_plink) )
-                found = true; // This is the taken option
-            else if( req_xlink != XLink::MMAX_Link )
-                throw MMAXRequiredOnUntakenOptionMismatch();
+            children_complete = false;
         }        
     }
     
-    // We only really have a mismatch if query was full i.e. we tried all the options
-    if( complete && !found )
-        throw NoOptionsMatchedMismatch();
+    // Choose a checking strategy based on the number of non-MMAX we saw. 
+    // Roughly speaking, it should be 1, but see the code for details.
+    switch( non_mmax_links.size() )
+    {
+    case 0:
+        // All were MMAX: we only have a mismatch if query was full i.e. we tried all the options
+        if( children_complete )
+            throw NoOptionsMatchedMismatch();    
+        break;        
+        
+    case 1:
+        // This is the correct number of non-MMAX. If we have a base, check against it.
+        if( base_xlink && non_mmax_links.front() != base_xlink )
+            throw TakenOptionMismatch();  
+        break;        
+        
+    default: // 2 or more
+        // It's never OK to have more than one non-MMAX.
+        throw MMAXRequiredOnUntakenOptionMismatch();        
+        break;
+    }    
 }
 
 

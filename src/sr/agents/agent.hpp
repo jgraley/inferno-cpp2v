@@ -61,9 +61,7 @@ public:
     class NLQFromDQLinkMismatch : public NLQMismatch {};
     
     class CouplingMismatch : public Mismatch {};
-    
-    class MMAXPropagationMismatch : public Mismatch {};
-    
+        
     Agent& operator=(Agent& other);
 	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
 
@@ -186,6 +184,8 @@ private:
 class DefaultMMAXAgent : public AgentCommon
 {
 public:    
+    class MMAXPropagationMismatch : public Mismatch {};
+
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                      
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,

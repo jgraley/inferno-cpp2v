@@ -26,7 +26,7 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
-    // Should work with baseless queries
+    // Baseless query strategy: symmetrical
     PatternQuery::Links base_and_normal_plinks = pattern_query->GetNormalLinks();
     base_and_normal_plinks.push_front(base_plink);
     
