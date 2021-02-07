@@ -74,10 +74,11 @@ public:
                                   XLink base_xlink ) const = 0;     
     
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
+    virtual bool ImplHasNLQ() const = 0;                                              
+    virtual bool NLQRequiresBase() const = 0;                                              
     virtual void RunNormalLinkedQuery( PatternLink base_plink,
                                        const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const = 0;
-    virtual bool ImplHasNLQ() const = 0;                                              
     virtual void RunCouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
     virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
@@ -122,7 +123,8 @@ public:
                                       XLink base_xlink ) const;                                                
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink base_xlink ) const;                                                
-    virtual bool ImplHasNLQ() const;                                              
+    virtual bool ImplHasNLQ() const;
+    virtual bool NLQRequiresBase() const;
     void NLQFromDQ( PatternLink base_plink,
                     const SolutionMap *required_links,
                     const TheKnowledge *knowledge ) const;                                              

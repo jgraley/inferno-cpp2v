@@ -43,6 +43,8 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
         }
     }            
 
+    ASSERT( common_xlink ); // empty query
+
     if( common_xlink != XLink::MMAX_Link )
     {
         if( !IsLocalMatch( common_xlink.GetChildX().get() ) ) 
@@ -51,6 +53,18 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
         RunColocatedQuery(common_xlink);
     }    
 }                            
+
+
+bool ColocatedAgent::ImplHasNLQ() const
+{    
+    return true;
+}
+
+    
+bool ColocatedAgent::NLQRequiresBase() const
+{
+    return true;
+}                                         
 
 
 void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const

@@ -111,6 +111,18 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
+bool AgentCommon::ImplHasNLQ() const
+{    
+    return false;
+}
+
+    
+bool AgentCommon::NLQRequiresBase() const
+{
+    return true;
+}                                         
+
+
 void AgentCommon::RunNormalLinkedQueryImpl( PatternLink base_plink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
@@ -119,17 +131,16 @@ void AgentCommon::RunNormalLinkedQueryImpl( PatternLink base_plink,
 }
     
     
-bool AgentCommon::ImplHasNLQ() const
-{    
-    return false;
-}
-
-    
 void AgentCommon::NLQFromDQ( PatternLink base_plink,
                              const SolutionMap *required_links,
                              const TheKnowledge *knowledge ) const
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(base_plink)("\n");
+    
+    // Can't do baseless query using DQ
+    ASSERT( NLQRequiresBase() ); // Agent shouldn't advertise
+    ASSERT( required_links->count(base_plink) ); // Solver shouldn't try
+    
     auto query = CreateDecidedQuery();
     RunDecidedQueryImpl( *query, required_links->at(base_plink) );
     

@@ -24,6 +24,8 @@ public:
     virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
+    virtual bool ImplHasNLQ() const;
+    virtual bool NLQRequiresBase() const;                                           
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual void RunColocatedQuery(XLink common_xlink) const;
 };

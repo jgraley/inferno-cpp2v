@@ -82,17 +82,18 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 
 list<VariableId> SystemicConstraint::GetRequiredVariables() const
 { 
-    list<VariableId> free_vars;
+    list<VariableId> required_free_vars;
     for( auto var : plan.all_variables )
     {
-        // We require the free keyer if there is one (otherwise it will be a force)
+        // Only need to report FREE variables as being required
         if( var.flags.freedom != Freedom::FREE )
             continue;
              
         switch( var.kind )
         {
-        case Kind::KEYER:
-            free_vars.push_back( var.id );
+        case Kind::KEYER: // KEYER is used as base
+            if( plan.agent->NLQRequiresBase() )
+                required_free_vars.push_back( var.id );
             break;
         case Kind::RESIDUAL:
             break;
@@ -100,7 +101,7 @@ list<VariableId> SystemicConstraint::GetRequiredVariables() const
             break;
         }        
     }
-    return free_vars;
+    return required_free_vars;
 }
 
 
@@ -153,6 +154,9 @@ void SystemicConstraint::Test( Assignments frees_map )
     list<Value>::const_iterator forceit = forces.begin();
     for( const VariableRecord &var : plan.all_variables )
     {
+        if( var.kind==Kind::KEYER )
+            base_var = var.id;        
+        
         Value v;
         switch( var.flags.freedom )
         {
@@ -170,7 +174,6 @@ void SystemicConstraint::Test( Assignments frees_map )
         switch( var.kind )
         {
         case Kind::KEYER:
-            base_var = var.id;
             coupling_links.insert(v);
             required_links[var.id] = v;     
             break;
