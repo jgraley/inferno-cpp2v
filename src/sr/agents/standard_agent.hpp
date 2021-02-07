@@ -24,6 +24,7 @@ public:
     class SingularMismatch : public Mismatch {};
     
     class SequenceMismatch : public Mismatch {};
+    class WrongCadenceSequenceMismatch : public SequenceMismatch {}; 
     class WrongContainerSequenceMismatch : public SequenceMismatch {}; 
     class NotAtFrontMismatch : public SequenceMismatch {};
     class NotAtBackMismatch : public SequenceMismatch {};
@@ -32,6 +33,7 @@ public:
     class NotSuccessorSequenceMismatch : public SequenceMismatch {};
     
     class CollectionMismatch : public Mismatch {};
+    class WrongCadenceCollectionMismatch : public CollectionMismatch {};
     class WrongContainerCollectionMismatch : public CollectionMismatch {};
     class CollisionCollectionMismatch : public CollectionMismatch {};
     class SurplusXCollectionMismatch : public CollectionMismatch {};
@@ -119,6 +121,7 @@ private:
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
+    virtual bool NLQRequiresBase() const;
     virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              

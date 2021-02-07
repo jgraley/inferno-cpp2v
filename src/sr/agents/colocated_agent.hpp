@@ -20,7 +20,8 @@ public:
     class ColocationMismatch : public Mismatch {};
 
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                                                        
+                                      XLink base_xlink ) const;         
+                                                                                     
     virtual bool ImplHasNLQ() const;
     virtual bool NLQRequiresBase() const; 
     virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,

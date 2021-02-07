@@ -122,7 +122,8 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink base_xlink ) const;                                                
+                                  XLink base_xlink ) const;       
+                                                                           
     virtual bool ImplHasNLQ() const;
     virtual bool NLQRequiresBase() const;
     void NLQFromDQ( PatternLink base_plink,
@@ -134,7 +135,9 @@ public:
     virtual void RunNormalLinkedQuery( PatternLink base_plink,
                                        const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const;
+                                       
     virtual void RunCouplingQuery( multiset<XLink> candidate_links );                                       
+    
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            XLink base_xlink,
                                            const SolutionMap *required_links,

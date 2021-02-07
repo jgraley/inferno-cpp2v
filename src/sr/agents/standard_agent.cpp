@@ -384,9 +384,15 @@ void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
 
 
 bool StandardAgent::ImplHasNLQ() const
-{
+{    
     return true;
 }
+
+    
+bool StandardAgent::NLQRequiresBase() const
+{
+    return false;
+}                                         
 
 
 void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
@@ -396,23 +402,32 @@ void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
     INDENT("Q");
 
     // Get the members of x corresponding to pattern's class
-    vector< Itemiser::Element * > x_memb = Itemise( required_links->at(base_plink).GetChildX().get() );   
+    bool based = required_links->count(base_plink);
+    vector< Itemiser::Element * > x_memb;
+    if( based )
+        x_memb = Itemise( required_links->at(base_plink).GetChildX().get() );   
 
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
-        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
+        TreePtrInterface *p_x_sing = based ? 
+                                     dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]) :
+                                     nullptr;
         ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
         NormalLinkedQuerySingular( base_plink, p_x_sing, plan_sing, required_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
-        auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
+        CollectionInterface *p_x_col = based ?
+                                       dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]) :
+                                       nullptr;
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
         NormalLinkedQueryCollection( base_plink, p_x_col, plan_col, required_links, knowledge );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
+        SequenceInterface *p_x_seq = based ? 
+                                     dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]) :
+                                     nullptr;
         ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
         NormalLinkedQuerySequence( base_plink, p_x_seq, plan_seq, required_links, knowledge );
     }
@@ -438,27 +453,30 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
             XLink req_xlink = required_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE) )
-                throw WrongContainerSequenceMismatch(); // Be in the right sequence        
+                throw WrongCadenceSequenceMismatch(); // Be in the right sequence        
         }
     }
     
     // Require that every child x link is in the correct container.
     // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
-    for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
-    {        
-        if( required_links->count(plink) > 0 ) 
-        {
-            XLink req_xlink = required_links->at(plink);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.container == p_x_seq) )
-                throw WrongContainerSequenceMismatch(); // Be in the right sequence        
+    if( p_x_seq )
+    {
+        for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
+        {        
+            if( required_links->count(plink) > 0 ) 
+            {
+                XLink req_xlink = required_links->at(plink);
+                const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
+                if( !(nugget.container == p_x_seq) )
+                    throw WrongContainerSequenceMismatch(); // Be in the right sequence        
+            }
         }
     }
     
     // If the pattern begins with a non-star, constrain the child x to be the 
     // front node in the collection at our base x. Uses base so a binary constraint.
-    if( plan_seq.non_star_at_front ) // depends on p_x_seq
+    if( plan_seq.non_star_at_front && p_x_seq ) // depends on p_x_seq
     {
         if( p_x_seq->empty() )
             throw SequenceIsEmpty();
@@ -473,7 +491,7 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
 
     // If the pattern ends with a non-star, constrain the child x to be the 
     // back node in the collection at our base x. Uses base so a binary constraint.
-    if( plan_seq.non_star_at_back ) // depends on p_x_seq
+    if( plan_seq.non_star_at_back && p_x_seq ) // depends on p_x_seq
     {
         if( p_x_seq->empty() )
             throw SequenceIsEmpty();
@@ -540,19 +558,22 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
             XLink req_xlink = required_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION) )
-                throw WrongContainerCollectionMismatch(); // Be in a sequence
+                throw WrongCadenceCollectionMismatch(); // Be in a collection
         }
     }
 
     // Require that every child x link is in the correct collection.
-    for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
+    if( p_x_col )
     {
-        if( required_links->count(plink) > 0 )
+        for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
         {
-            XLink req_xlink = required_links->at(plink);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
-            if( nugget.container != p_x_col )
-                throw WrongContainerCollectionMismatch(); // Be in the right sequence
+            if( required_links->count(plink) > 0 )
+            {
+                XLink req_xlink = required_links->at(plink);
+                const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
+                if( nugget.container != p_x_col )
+                    throw WrongContainerCollectionMismatch(); // Be in the right collection
+            }
         }
     }
 
@@ -570,7 +591,7 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
     }
 
     // Require that there are no leftover x, if no stars in pattern. Depends on p_x_col.
-    if( !plan_col.star_plink )
+    if( !plan_col.star_plink && p_x_col )
     {
         if( p_x_col->size() > plan_col.non_stars.size() )
         {
@@ -587,12 +608,15 @@ void StandardAgent::NormalLinkedQuerySingular( PatternLink base_plink,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
-    XLink sing_xlink(required_links->at(base_plink).GetChildX(), p_x_sing);        
-    if( required_links->count(plan_sing.plink) > 0 ) 
+    if( p_x_sing )
     {
-        XLink req_sing_xlink = required_links->at(plan_sing.plink);                
-        if( sing_xlink != req_sing_xlink )
-            throw SingularMismatch();
+        XLink sing_xlink(required_links->at(base_plink).GetChildX(), p_x_sing);        
+        if( required_links->count(plan_sing.plink) > 0 ) 
+        {
+            XLink req_sing_xlink = required_links->at(plan_sing.plink);                
+            if( sing_xlink != req_sing_xlink )
+                throw SingularMismatch();
+        }
     }
 }
 
