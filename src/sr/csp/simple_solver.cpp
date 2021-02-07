@@ -128,9 +128,9 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
         auto p = value_selectors.at(*current_it)->SelectNextValue();        
         if( !p.first ) // no consistent value
         {
+#ifdef BACKJUMPING
             ConstraintSet unsatisfied = p.second;
             TRACEC("Inconsistent. Unsatisfied constraints: ")(unsatisfied)("\n");
-#ifdef BACKJUMPING
             set<VariableId> possibly_conflicted_vars = GetAllAffected(unsatisfied);
             TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
 #endif
@@ -251,7 +251,9 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
         Assignment hint;  
         ConstraintSet unsatisfied;     
         tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
+#ifdef BACKJUMPING
         ASSERT( ok || !unsatisfied.empty() );
+#endif
 
 #ifdef TAKE_HINTS
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
@@ -271,7 +273,9 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
         }
     }
     TRACEC("No (more) values found\n");
+#ifdef BACKJUMPING
     ASSERT( !all_unsatisfied.empty() ); // Note: could fire if domain is empty
+#endif
     return make_pair(Value(), all_unsatisfied);
 }
 
@@ -280,6 +284,7 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 {
     ConstraintSet unsatisfied;
     list<Assignment> hints;
+    bool ok = true;
     for( shared_ptr<Constraint> c : to_test )
     {                  
         int required_frees_assigned = 0;
@@ -301,10 +306,13 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
             if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
                 hints.push_back( pae->hint );
 #endif
+#ifdef BACKJUMPING
             unsatisfied.insert( c );
+#endif
+            ok = false;
         }
     } 
-    return make_tuple( unsatisfied.empty(), 
+    return make_tuple( ok, 
                        hints.empty() ? Assignment() : hints.front(),
                        unsatisfied );
 }
