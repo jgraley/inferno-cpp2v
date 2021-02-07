@@ -60,9 +60,15 @@ void DisjunctionAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 
 
 bool DisjunctionAgent::ImplHasNLQ() const
-{
+{    
     return true;
 }
+
+    
+bool DisjunctionAgent::NLQRequiresBase() const
+{
+    return false;
+}                                         
 
 
 void DisjunctionAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,

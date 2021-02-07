@@ -282,13 +282,13 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
     list<Assignment> hints;
     for( shared_ptr<Constraint> c : to_test )
     {                  
-        int requirements_met = 0;
+        int required_frees_assigned = 0;
         list<VariableId> required_vars = c->GetRequiredVariables();
         for( VariableId rv : required_vars )
             if( assigns.count(rv) > 0 )
-                requirements_met++;
-           
-        if( requirements_met < required_vars.size() )
+                required_frees_assigned++;
+
+        if( required_frees_assigned < required_vars.size() )
             continue;        
         
         try

@@ -22,39 +22,6 @@ void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-void ColocatedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
-                                               const SolutionMap *required_links,
-                                               const TheKnowledge *knowledge ) const
-{
-    // Baseless query strategy: symmetrical
-    PatternQuery::Links base_and_normal_plinks = pattern_query->GetNormalLinks();
-    base_and_normal_plinks.push_front(base_plink);
-    
-    XLink common_xlink;
-    for( PatternLink plink : base_and_normal_plinks )                 
-    {
-        if( required_links->count(plink) > 0 )
-        {
-            XLink xlink = required_links->at(plink);
-            if( !common_xlink )
-                common_xlink = xlink;
-            else if( xlink != common_xlink )
-                throw ColocationMismatch();
-        }
-    }            
-
-    ASSERT( common_xlink ); // empty query
-
-    if( common_xlink != XLink::MMAX_Link )
-    {
-        if( !IsLocalMatch( common_xlink.GetChildX().get() ) ) 
-            throw PreRestrictionMismatch();
-
-        RunColocatedQuery(common_xlink);
-    }    
-}                            
-
-
 bool ColocatedAgent::ImplHasNLQ() const
 {    
     return true;
@@ -63,8 +30,64 @@ bool ColocatedAgent::ImplHasNLQ() const
     
 bool ColocatedAgent::NLQRequiresBase() const
 {
-    return true;
+    return false;
 }                                         
+
+
+void ColocatedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
+                                               const SolutionMap *required_links,
+                                               const TheKnowledge *knowledge ) const
+{
+    // Baseless query strategy: symmetrical
+
+    XLink common_xlink;
+    auto lambda_find_common = [&](PatternLink plink)
+    {
+        if( required_links->count(plink) == 0 )
+            return; // Partial query: XLink not supplied
+        
+        XLink xlink = required_links->at(plink);
+        if( !common_xlink )
+            common_xlink = xlink;
+    };
+    
+    auto lambda_enforce_colocation = [&](PatternLink plink)
+    {
+        if( required_links->count(plink) == 0 )
+            return; // Partial query: XLink not supplied
+        
+        XLink xlink = required_links->at(plink);
+        if( xlink != common_xlink )
+        {
+            ColocationMismatch e; // value of links mismatches
+#ifdef HINTS_IN_EXCEPTIONS
+            e.hint = LocatedLink( plink, common_xlink );
+#endif           
+            throw e;                    
+        }
+    };
+    
+    // Determine common xlink (giving priority to base)
+    lambda_find_common( base_plink );
+    for( PatternLink plink : pattern_query->GetNormalLinks() )                 
+        lambda_find_common( plink );         
+    ASSERT( common_xlink ); // empty query
+    
+    // Enforce colocation. Not need to check base since it
+    // got priority for _being_ the common xlink.
+    for( PatternLink plink : pattern_query->GetNormalLinks() )                 
+        lambda_enforce_colocation( plink );         
+
+    // Now that the common xlink is known to be really common,
+    // we can apply the usual checks including PR check and allowing for MMAX
+    if( common_xlink != XLink::MMAX_Link )
+    {
+        if( !IsLocalMatch( common_xlink.GetChildX().get() ) ) 
+            throw PreRestrictionMismatch();
+
+        RunColocatedQuery(common_xlink);
+    }    
+}                            
 
 
 void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const

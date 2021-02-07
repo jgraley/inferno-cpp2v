@@ -21,6 +21,7 @@ public:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                                             
     virtual bool ImplHasNLQ() const;
+    virtual bool NLQRequiresBase() const; 
     virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              

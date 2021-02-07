@@ -198,8 +198,8 @@ void SystemicConstraint::Test( Assignments frees_map )
             // First check any coupling at this pattern node
             plan.agent->RunCouplingQuery( coupling_links );
         }
-              
-        if( plan.action==Action::FULL )
+                      
+        if( plan.action==Action::FULL && required_links.size() > 0 )
         {
             // Use a normal-linked query on our underlying agent.
             // We only need one match to know that required_links_list are good, 
