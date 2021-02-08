@@ -28,7 +28,6 @@ public:
     class WrongContainerSequenceMismatch : public SequenceMismatch {}; 
     class NotAtFrontMismatch : public SequenceMismatch {};
     class NotAtBackMismatch : public SequenceMismatch {};
-    class SequenceIsEmpty : public SequenceMismatch {};
     class NotAfterSequenceMismatch : public SequenceMismatch {};
     class NotSuccessorSequenceMismatch : public SequenceMismatch {};
     

@@ -443,9 +443,8 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
     INDENT("S");
     ASSERT( planned );
     
-    // The only true unary constraint is that every child x link
-    // is in some sequence (because that can be read directly off the
-    // nugget).
+    // Every child x link is in some sequence (because that can be read 
+    // directly off the nugget).
     for( PatternLink plink : plan_seq.non_stars )  // independent of p_x_seq
     {
         if( required_links->count(plink) > 0 ) 
@@ -475,31 +474,33 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
     }
     
     // If the pattern begins with a non-star, constrain the child x to be the 
-    // front node in the collection at our base x. Uses base so a binary constraint.
-    if( plan_seq.non_star_at_front && p_x_seq ) // depends on p_x_seq
+    // front node in its own sequence. A unary constraint.
+    if( plan_seq.non_star_at_front ) // independent of p_x_seq
     {
-        if( p_x_seq->empty() )
-            throw SequenceIsEmpty();
-        XLink front_xlink(required_links->at(base_plink).GetChildX(), &p_x_seq->front());
         if( required_links->count(plan_seq.non_star_at_front) > 0 ) 
         {        
             XLink req_xlink = required_links->at(plan_seq.non_star_at_front);
-            if( req_xlink != front_xlink )
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
+            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.container);
+            ASSERT( req_seq )("Front element not in a sequence, cadence check should have ensured this");            
+            XLink req_front_xlink(required_links->at(base_plink).GetChildX(), &req_seq->front());            
+            if( req_xlink != req_front_xlink )
                 throw NotAtFrontMismatch();
         }
     }
 
-    // If the pattern ends with a non-star, constrain the child x to be the 
-    // back node in the collection at our base x. Uses base so a binary constraint.
-    if( plan_seq.non_star_at_back && p_x_seq ) // depends on p_x_seq
+    // If the pattern finishes with a non-star, constrain the child x to be the 
+    // back node in its own sequence. A unary constraint.
+    if( plan_seq.non_star_at_back ) // independent of p_x_seq
     {
-        if( p_x_seq->empty() )
-            throw SequenceIsEmpty();
-        XLink back_xlink(required_links->at(base_plink).GetChildX(), &p_x_seq->back());
         if( required_links->count(plan_seq.non_star_at_back) > 0 ) 
         {        
             XLink req_xlink = required_links->at(plan_seq.non_star_at_back);
-            if( req_xlink != back_xlink )
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
+            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.container);
+            ASSERT( req_seq )("Back element not in a sequence, cadence check should have ensured this");            
+            XLink req_back_xlink(required_links->at(base_plink).GetChildX(), &req_seq->back());            
+            if( req_xlink != req_back_xlink )
                 throw NotAtBackMismatch();
         }
     }
@@ -590,7 +591,7 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
         }
     }
 
-    // Require that there are no leftover x, if no stars in pattern. Depends on p_x_col.
+    // Require that there are no leftover x, if no stars in pattern. Depends on p_x_col ONLY.
     if( !plan_col.star_plink && p_x_col )
     {
         if( p_x_col->size() > plan_col.non_stars.size() )
