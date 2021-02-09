@@ -29,6 +29,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     ordered_domain.clear();
     domain_extension_classes = make_shared<QuotientSet>();
     nuggets.clear();
+    current_index = 0;
     
     AddAtRoot( REQUIRE_SOLO, root_xlink );
     
@@ -102,6 +103,7 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     Nugget::OrderedIt it = ordered_domain.end();
     --it; // I know this is OK because we just pushed to ordered_domain
     nugget.ordered_it = it;
+    nugget.index = current_index++;  
     
     // Add a nugget of knowledge
     InsertSolo( nuggets, make_pair(xlink, nugget) );
@@ -152,7 +154,6 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
 
 void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink )
 {
-    Nugget::IndexType index = 0;
     for( SequenceInterface::iterator xit = x_seq->begin();
          xit != x_seq->end();
          ++xit )
@@ -163,9 +164,7 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
         nugget.parent_xlink = xlink;
         nugget.container = x_seq;
         nugget.iterator = xit;
-        nugget.index = index;  
         AddLink( mode, child_xlink, nugget );
-        index++;
     }
 }
 

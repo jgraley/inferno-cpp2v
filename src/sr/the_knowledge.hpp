@@ -85,6 +85,8 @@ public:
     
     // Child-to-parent map
     unordered_map<XLink, Nugget> nuggets;
+    
+    int current_index;
 };    
     
 };
