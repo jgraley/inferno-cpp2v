@@ -207,35 +207,26 @@ void StuffAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
-    SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
-    if( req_terminus_it==required_links->end() ) 
-        return;
-    XLink req_terminus_xlink = req_terminus_it->second; 
-    
-    XLink xlink = req_terminus_xlink;
-    bool found = false;
-    TRACE("Seeking ")(base_plink)(" in ancestors of ")(req_terminus_xlink)("\n");
-    while(true)
-    {
-        if( xlink == required_links->at(base_plink) )
-        {
-            found = true;
-            TRACEC("Found ")(xlink)("\n");
-            break;            
-        }        
+    if( required_links->count(terminus_plink) > 0 )
+    {        
+        // Get nugget for base - base is first descendant in depth-first ordering
+        XLink base_xlink = required_links->at(base_plink);
+        ASSERT( base_xlink );        
+        const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(base_xlink) );
         
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );
-        if( !nugget.parent_xlink )
-            break;            
-        xlink = nugget.parent_xlink;
+        // Get nugget for last descendant of base
+        ASSERT( base_nugget.last_descendant_xlink );
+        const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(base_nugget.last_descendant_xlink) );
         
-        // Putting this here excludes the terminus, as required
-        TRACEC("Move to parent ")(xlink)("\n"); 
-    }
-    if( !found )
-    {
-        TRACEC("Not found\n");        
-        throw TerminusMismatch();
+        // Get nugget for terminus
+        XLink req_terminus_xlink = required_links->at(terminus_plink);
+        ASSERT( req_terminus_xlink );
+        const TheKnowledge::Nugget &req_terminus_nugget( knowledge->GetNugget(req_terminus_xlink) );
+
+        // Terminus must be a descendant
+        if( !(req_terminus_nugget.index >= base_nugget.index &&
+              req_terminus_nugget.index <= last_descendant_nugget.index) )
+            throw TerminusMismatch();
     }
 }                                                                                        
 

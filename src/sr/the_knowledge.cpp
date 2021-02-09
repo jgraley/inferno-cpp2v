@@ -104,6 +104,15 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     --it; // I know this is OK because we just pushed to ordered_domain
     nugget.ordered_it = it;
     nugget.index = current_index++;  
+        
+    // Keep track of the lask added on the way in
+    last_xlink = xlink;
+        
+    // Recurse into our child nodes
+    AddChildren( mode, xlink );
+
+    // Grab last link that was added during unwind    
+    nugget.last_descendant_xlink = last_xlink;
     
     // Add a nugget of knowledge
     InsertSolo( nuggets, make_pair(xlink, nugget) );
@@ -111,10 +120,7 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     // Here, elements go into quotient set, but it does not 
     // uniquify: every link in the input X tree must appear 
     // separately in domain.
-    (void)domain_extension_classes->Uniquify( xlink );
-    
-    // Recurse into our child nodes
-    AddChildren( mode, xlink );
+    (void)domain_extension_classes->Uniquify( xlink );    
 }
 
 

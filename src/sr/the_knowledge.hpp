@@ -51,6 +51,7 @@ public:
         typedef OrderedDomain::const_iterator OrderedIt;
         Cadence cadence;
         XLink parent_xlink = XLink();
+        XLink last_descendant_xlink = XLink();
         ContainerInterface *container = nullptr;
         ContainerInterface::iterator iterator;
         IndexType index = -1;
@@ -86,7 +87,11 @@ public:
     // Child-to-parent map
     unordered_map<XLink, Nugget> nuggets;
     
+    // Depth-first ordering
     int current_index;
+    
+    // Last node to be reached and given a nugget
+    XLink last_xlink;
 };    
     
 };
