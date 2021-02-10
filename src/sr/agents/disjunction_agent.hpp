@@ -23,8 +23,7 @@ public:
                                                                
     virtual bool ImplHasNLQ() const;
     virtual bool NLQRequiresBase() const; 
-    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                
                                                                          
     virtual Block GetGraphBlockInfo() const;

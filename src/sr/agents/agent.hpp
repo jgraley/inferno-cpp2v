@@ -64,6 +64,8 @@ public:
         
     Agent& operator=(Agent& other);
 	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
+    virtual void ConfigureParents( PatternLink base_plink, 
+                                   set<PatternLink> coupled_plinks ) = 0;
 
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -74,12 +76,17 @@ public:
                                   XLink base_xlink ) const = 0;     
     
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
+
+    /// Test an Agent given partial map of locations of base and normal links. 
     virtual bool ImplHasNLQ() const = 0;                                              
     virtual bool NLQRequiresBase() const = 0;                                              
-    virtual void RunNormalLinkedQuery( PatternLink base_plink,
-                                       const SolutionMap *required_links,
+    virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const = 0;
+
+    /// Test an agent given given partial map of locations of keyer and residuals.  
     virtual void RunCouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
+
+    /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
                                                 const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
@@ -117,6 +124,8 @@ class AgentCommon : public Agent
 public:
     AgentCommon();
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
+    virtual void ConfigureParents( PatternLink base_plink, 
+                                   set<PatternLink> coupled_plinks );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
@@ -126,14 +135,11 @@ public:
                                                                            
     virtual bool ImplHasNLQ() const;
     virtual bool NLQRequiresBase() const;
-    void NLQFromDQ( PatternLink base_plink,
-                    const SolutionMap *required_links,
+    void NLQFromDQ( const SolutionMap *required_links,
                     const TheKnowledge *knowledge ) const;                                              
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQuery( PatternLink base_plink,
-                                       const SolutionMap *required_links,
+    virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const;
                                        
     virtual void RunCouplingQuery( multiset<XLink> candidate_links );                                       
@@ -176,7 +182,9 @@ public:
 protected:                                  
     const SCREngine *master_scr_engine;    
     shared_ptr<PatternQuery> pattern_query;
-			
+    PatternLink base_plink;
+    set<PatternLink> coupled_plinks;
+    
 private:    
     CouplingKey coupling_key;    
     int num_decisions;
@@ -196,11 +204,9 @@ public:
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;
                                                                                       
-    virtual void RunNormalLinkedQueryImpl( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                             
-    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryMMed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
 };
 
@@ -215,11 +221,9 @@ public:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;                                          
                                       
-    virtual void RunNormalLinkedQueryMMed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryMMed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                      
 };
 

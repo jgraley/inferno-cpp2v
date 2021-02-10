@@ -71,8 +71,7 @@ bool DisjunctionAgent::NLQRequiresBase() const
 }                                         
 
 
-void DisjunctionAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                                 const SolutionMap *required_links,
+void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 { 
     // Baseless query strategy: hand-rolled

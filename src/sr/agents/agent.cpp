@@ -73,6 +73,18 @@ void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
 }
 
 
+void AgentCommon::ConfigureParents( PatternLink base_plink_, 
+                                    set<PatternLink> coupled_plinks_ )
+{
+    base_plink = base_plink_;
+    ASSERT( base_plink );
+    
+    coupled_plinks = coupled_plinks_;
+    for( PatternLink plink : coupled_plinks )
+        ASSERT( plink );
+}
+                                
+
 shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren( Path v ) const
 {
 	// Normally all children should be visible 
@@ -123,16 +135,14 @@ bool AgentCommon::NLQRequiresBase() const
 }                                         
 
 
-void AgentCommon::RunNormalLinkedQueryImpl( PatternLink base_plink,
-                                            const SolutionMap *required_links,
+void AgentCommon::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
 {
     ASSERTFAIL();
 }
     
     
-void AgentCommon::NLQFromDQ( PatternLink base_plink,
-                             const SolutionMap *required_links,
+void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
                              const TheKnowledge *knowledge ) const
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(base_plink)("\n");
@@ -176,14 +186,13 @@ void AgentCommon::NLQFromDQ( PatternLink base_plink,
 }                           
                                 
     
-void AgentCommon::RunNormalLinkedQuery( PatternLink base_plink,
-                                        const SolutionMap *required_links,
+void AgentCommon::RunNormalLinkedQuery( const SolutionMap *required_links,
                                         const TheKnowledge *knowledge ) const
 {
     if( ImplHasNLQ() )    
-        RunNormalLinkedQueryImpl( base_plink, required_links, knowledge );
+        RunNormalLinkedQueryImpl( required_links, knowledge );
     else
-        NLQFromDQ( base_plink, required_links, knowledge );               
+        NLQFromDQ( required_links, knowledge );               
 }                                            
 
 
@@ -619,8 +628,7 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void DefaultMMAXAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
-                                                 const SolutionMap *required_links,
+void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 {
     // Baseless query strategy: hand-rolled
@@ -649,12 +657,11 @@ void DefaultMMAXAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
     }   
     
     ASSERT( base_xlink != XLink::MMAX_Link );
-    RunNormalLinkedQueryMMed( base_plink, required_links, knowledge );
+    RunNormalLinkedQueryMMed( required_links, knowledge );
 }
 
                                
-void DefaultMMAXAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
-                                                 const SolutionMap *required_links,
+void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const                                      
 {                      
     ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
@@ -673,8 +680,7 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 }
 
 
-void PreRestrictedAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
-                                                   const SolutionMap *required_links,
+void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *required_links,
                                                    const TheKnowledge *knowledge ) const
 {
     // Baseless query strategy: don't check PR
@@ -682,12 +688,11 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( PatternLink base_plink,
         if( !IsLocalMatch( required_links->at(base_plink).GetChildX().get() ) )
             throw PreRestrictionMismatch();
     
-    RunNormalLinkedQueryPRed( base_plink, required_links, knowledge );
+    RunNormalLinkedQueryPRed( required_links, knowledge );
 }
 
                                
-void PreRestrictedAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                                   const SolutionMap *required_links,
+void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                                    const TheKnowledge *knowledge ) const                                      
 {                      
     ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");

@@ -60,14 +60,15 @@ public:
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
         void PopulateSomeThings( PatternLink link,
                                  const unordered_set<Agent *> &master_agents );
-        void DetermineKeyersModuloMatchAny( PatternLink plink,
-                                            unordered_set<Agent *> *master_agents,
-                                            unordered_set<Agent *> *match_any_agents );
+        void DetermineKeyersModuloDisjucntion( PatternLink plink,
+                                               unordered_set<Agent *> *master_agents,
+                                               unordered_set<Agent *> *match_any_agents );
         void DetermineKeyers( PatternLink plink,
                               unordered_set<Agent *> master_agents );
         void DetermineResiduals( Agent *agent,
                                  unordered_set<Agent *> master_agents );
         void DetermineNontrivialKeyers();
+        void ConfigureAgents();
         void PopulateNormalAgents( unordered_set<Agent *> *normal_agents, 
                                    unordered_set<PatternLink> *my_normal_links,
                                    PatternLink link );
@@ -95,7 +96,6 @@ public:
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
         list<PatternLink> normal_links_ordered;
-        unordered_map<Agent *, PatternLink> agent_to_keyer;
         
     private: // working variables in plan construction
         unordered_set<Agent *> reached_agents;

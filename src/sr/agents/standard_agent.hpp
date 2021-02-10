@@ -121,21 +121,17 @@ private:
                                            
     virtual bool ImplHasNLQ() const;
     virtual bool NLQRequiresBase() const;
-    virtual void RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    void NormalLinkedQuerySequence( PatternLink base_plink,
-                                    SequenceInterface *x_seq,
+    void NormalLinkedQuerySequence( SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;
-    void NormalLinkedQueryCollection( PatternLink base_plink,
-                                      CollectionInterface *x_col,
+    void NormalLinkedQueryCollection( CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
-    void NormalLinkedQuerySingular( PatternLink base_plink,
-                                    TreePtrInterface *p_x_sing,
+    void NormalLinkedQuerySingular( TreePtrInterface *p_x_sing,
                                     const Plan::Singular &plan_sing,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;

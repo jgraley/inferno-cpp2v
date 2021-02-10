@@ -148,15 +148,11 @@ void SystemicConstraint::Test( Assignments frees_map )
 {   
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
-    VariableId base_var;
     SR::SolutionMap required_links;
     multiset<SR::XLink> coupling_links;
     list<Value>::const_iterator forceit = forces.begin();
     for( const VariableRecord &var : plan.all_variables )
     {
-        if( var.kind==Kind::KEYER )
-            base_var = var.id;        
-        
         Value v;
         switch( var.flags.freedom )
         {
@@ -187,7 +183,6 @@ void SystemicConstraint::Test( Assignments frees_map )
             break;
         }
     }    
-    ASSERT( base_var ); // The keyer is required
     //required_links = UnionOfSolo(forces_map, frees_map);
     
     {
@@ -205,7 +200,7 @@ void SystemicConstraint::Test( Assignments frees_map )
             // We only need one match to know that required_links_list are good, 
             // i.e. to run once without throuwing a mismatch. Don't need
             // the returned query.
-            plan.agent->RunNormalLinkedQuery( base_var, &required_links, knowledge );    
+            plan.agent->RunNormalLinkedQuery( &required_links, knowledge );    
         }
     }            
 }

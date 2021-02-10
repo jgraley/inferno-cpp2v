@@ -112,8 +112,7 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
     
-void AnyNodeAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                             const SolutionMap *required_links,
+void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                              const TheKnowledge *knowledge ) const
 {
     INDENT("#");
@@ -196,8 +195,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-void StuffAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                           const SolutionMap *required_links,
+void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const
 {
     INDENT("#");
@@ -209,21 +207,18 @@ void StuffAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
     PatternLink terminus_plink(this, &terminus);
     if( required_links->count(terminus_plink) > 0 )
     {        
-        // Get nugget for base - base is first descendant in depth-first ordering
+        // Get nugget for base - base is first descendant (inclusive) in depth-first ordering
         XLink base_xlink = required_links->at(base_plink);
-        ASSERT( base_xlink );        
         const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(base_xlink) );
         
         // Get nugget for last descendant of base
-        ASSERT( base_nugget.last_descendant_xlink );
         const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(base_nugget.last_descendant_xlink) );
         
         // Get nugget for terminus
         XLink req_terminus_xlink = required_links->at(terminus_plink);
-        ASSERT( req_terminus_xlink );
         const TheKnowledge::Nugget &req_terminus_nugget( knowledge->GetNugget(req_terminus_xlink) );
 
-        // Terminus must be a descendant
+        // Terminus must be base or a descendant of base 
         if( !(req_terminus_nugget.index >= base_nugget.index &&
               req_terminus_nugget.index <= last_descendant_nugget.index) )
             throw TerminusMismatch();

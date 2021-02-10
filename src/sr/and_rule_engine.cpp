@@ -72,6 +72,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
+    
+    ConfigureAgents();
         
 #ifdef USE_SOLVER   
     {
@@ -215,9 +217,9 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
 }
 
         
-void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
-                                                         unordered_set<Agent *> *senior_agents,
-                                                         unordered_set<Agent *> *matchany_agents )
+void AndRuleEngine::Plan::DetermineKeyersModuloDisjucntion( PatternLink plink,
+                                                            unordered_set<Agent *> *senior_agents,
+                                                            unordered_set<Agent *> *disjunction_agents )
 {
     if( senior_agents->count( plink.GetChildAgent() ) > 0 )
         return; // will be fixed values for our solver
@@ -229,18 +231,17 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( PatternLink plink,
               ("Conflicting coupling in and-rule pattern: check Disjunction nodes\n");
 
     coupling_keyer_links.insert(plink);
-    agent_to_keyer[plink.GetChildAgent()] = plink;
 
     if( dynamic_cast<DisjunctionAgent *>(plink.GetChildAgent()) )
     {
-        matchany_agents->insert( plink.GetChildAgent() );
+        disjunction_agents->insert( plink.GetChildAgent() );
         return;
     }
 
     shared_ptr<PatternQuery> pq = plink.GetChildAgent()->GetPatternQuery();
     FOREACH( PatternLink plink, pq->GetNormalLinks() )
     {
-        DetermineKeyersModuloMatchAny( plink, senior_agents, matchany_agents );        
+        DetermineKeyersModuloDisjucntion( plink, senior_agents, disjunction_agents );        
     }
 }
         
@@ -252,7 +253,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
     // region up to and including a Disjunction; junior is the region under each of its
     // links.
     unordered_set<Agent *> my_matchany_agents;
-    DetermineKeyersModuloMatchAny( plink, &senior_agents, &my_matchany_agents );
+    DetermineKeyersModuloDisjucntion( plink, &senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the Disjunction agents that we saw, BUT SKIPPED
@@ -315,6 +316,21 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
         {
             coupling_nontrivial_keyer_links.insert( keyer_plink );
         }
+    }
+}
+
+
+void AndRuleEngine::Plan::ConfigureAgents()
+{
+    for( PatternLink keyer_plink : coupling_keyer_links )
+    {
+        Agent *agent = keyer_plink.GetChildAgent();
+                
+        set< PatternLink > residual_plinks;
+        for( PatternLink residual_plink : coupling_residual_links )
+            residual_plinks.insert( residual_plink );
+            
+        agent->ConfigureParents( keyer_plink, residual_plinks );
     }
 }
 

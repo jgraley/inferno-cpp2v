@@ -395,8 +395,7 @@ bool StandardAgent::NLQRequiresBase() const
 }                                         
 
 
-void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
-                                              const SolutionMap *required_links,
+void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
@@ -413,7 +412,7 @@ void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                      dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]) :
                                      nullptr;
         ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySingular( base_plink, p_x_sing, plan_sing, required_links, knowledge );
+        NormalLinkedQuerySingular( p_x_sing, plan_sing, required_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
@@ -421,7 +420,7 @@ void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                        dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]) :
                                        nullptr;
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQueryCollection( base_plink, p_x_col, plan_col, required_links, knowledge );
+        NormalLinkedQueryCollection( p_x_col, plan_col, required_links, knowledge );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
@@ -429,13 +428,12 @@ void StandardAgent::RunNormalLinkedQueryPRed( PatternLink base_plink,
                                      dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]) :
                                      nullptr;
         ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySequence( base_plink, p_x_seq, plan_seq, required_links, knowledge );
+        NormalLinkedQuerySequence( p_x_seq, plan_seq, required_links, knowledge );
     }
 }
 
 
-void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
-                                               SequenceInterface *p_x_seq,
+void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
@@ -540,8 +538,7 @@ void StandardAgent::NormalLinkedQuerySequence( PatternLink base_plink,
 }
 
 
-void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
-                                                 CollectionInterface *p_x_col,
+void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
@@ -603,8 +600,7 @@ void StandardAgent::NormalLinkedQueryCollection( PatternLink base_plink,
 }
 
 
-void StandardAgent::NormalLinkedQuerySingular( PatternLink base_plink,
-                                               TreePtrInterface *p_x_sing,
+void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_sing,
                                                const Plan::Singular &plan_sing,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const

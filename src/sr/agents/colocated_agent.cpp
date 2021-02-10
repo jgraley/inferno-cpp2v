@@ -34,8 +34,7 @@ bool ColocatedAgent::NLQRequiresBase() const
 }                                         
 
 
-void ColocatedAgent::RunNormalLinkedQueryImpl( PatternLink base_plink,
-                                               const SolutionMap *required_links,
+void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
     // Baseless query strategy: symmetrical

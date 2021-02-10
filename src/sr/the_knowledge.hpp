@@ -85,7 +85,7 @@ public:
     shared_ptr<QuotientSet> domain_extension_classes;
     
     // Child-to-parent map
-    unordered_map<XLink, Nugget> nuggets;
+    map<XLink, Nugget> nuggets;
     
     // Depth-first ordering
     int current_index;
