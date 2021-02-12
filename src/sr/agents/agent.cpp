@@ -76,12 +76,22 @@ void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
 void AgentCommon::ConfigureParents( PatternLink base_plink_, 
                                     set<PatternLink> coupled_plinks_ )
 {
+    ASSERT(master_scr_engine)("Must call AgentConfigure() before ConfigureParents()");
+    
     base_plink = base_plink_;
     ASSERT( base_plink );
     
     coupled_plinks = coupled_plinks_;
     for( PatternLink plink : coupled_plinks )
         ASSERT( plink );
+
+    // It works with a set, but if we lose this ordering hints from 
+    // Colocated agent NLQs become less useful and CSP solver slows right
+    // down.
+    base_and_normal_plinks.clear();
+    base_and_normal_plinks.push_back( base_plink );
+    for( PatternLink plink : pattern_query->GetNormalLinks() )
+        base_and_normal_plinks.push_back( plink );
 }
                                 
 

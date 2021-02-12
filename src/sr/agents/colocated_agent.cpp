@@ -40,43 +40,26 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
     // Baseless query strategy: symmetrical
 
     XLink common_xlink;
-    auto lambda_find_common = [&](PatternLink plink)
+    for( PatternLink plink : base_and_normal_plinks )                 
     {
-        if( required_links->count(plink) == 0 )
-            return; // Partial query: XLink not supplied
-        
-        XLink xlink = required_links->at(plink);
-        if( !common_xlink )
-            common_xlink = xlink;
-    };
-    
-    auto lambda_enforce_colocation = [&](PatternLink plink)
-    {
-        if( required_links->count(plink) == 0 )
-            return; // Partial query: XLink not supplied
-        
-        XLink xlink = required_links->at(plink);
-        if( xlink != common_xlink )
+        if( required_links->count(plink) == 1 )
         {
-            ColocationMismatch e; // value of links mismatches
+            XLink xlink = required_links->at(plink);
+            if( !common_xlink )   
+            {         
+                common_xlink = xlink;
+            }
+            else if( xlink != common_xlink )
+            {
+                ColocationMismatch e; // value of links mismatches
 #ifdef HINTS_IN_EXCEPTIONS
-            e.hint = LocatedLink( plink, common_xlink );
+                e.hint = LocatedLink( plink, common_xlink );
 #endif           
-            throw e;                    
+                throw e;                    
+            }
         }
     };
     
-    // Determine common xlink (giving priority to base)
-    lambda_find_common( base_plink );
-    for( PatternLink plink : pattern_query->GetNormalLinks() )                 
-        lambda_find_common( plink );         
-    ASSERT( common_xlink ); // empty query
-    
-    // Enforce colocation. Not need to check base since it
-    // got priority for _being_ the common xlink.
-    for( PatternLink plink : pattern_query->GetNormalLinks() )                 
-        lambda_enforce_colocation( plink );         
-
     // Now that the common xlink is known to be really common,
     // we can apply the usual checks including PR check and allowing for MMAX
     if( common_xlink != XLink::MMAX_Link )

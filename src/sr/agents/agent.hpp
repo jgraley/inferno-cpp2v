@@ -184,6 +184,7 @@ protected:
     shared_ptr<PatternQuery> pattern_query;
     PatternLink base_plink;
     set<PatternLink> coupled_plinks;
+    list<PatternLink> base_and_normal_plinks;
     
 private:    
     CouplingKey coupling_key;    
