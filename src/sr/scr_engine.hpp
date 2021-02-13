@@ -42,7 +42,7 @@ public:
                CompareReplace::AgentPhases &agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
-               const unordered_set<Agent *> &master_agents = unordered_set<Agent *>(),                            
+               const unordered_set<PatternLink> &master_plinks = unordered_set<PatternLink>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
     void InitPartTwo( const CompareReplace::AgentPhases &agent_phases )
     {
@@ -58,12 +58,12 @@ private:
               CompareReplace::AgentPhases &agent_phases,
               TreePtr<Node> cp,
               TreePtr<Node> rp,
-              const unordered_set<Agent *> &master_agents,                            
+              const unordered_set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
         void InitPartTwo(const CompareReplace::AgentPhases &agent_phases); // Part one is the constructor
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
-        void CategoriseSubs( const unordered_set<Agent *> &master_agents, 
+        void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
                              set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                              CompareReplace::AgentPhases &agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
@@ -81,9 +81,10 @@ private:
         PatternLink root_plink;
         Agent *root_agent;
         const SCREngine *master_ptr;
-        const unordered_set<Agent *> master_agents;
+        const unordered_set<PatternLink> master_plinks;
+        unordered_set<Agent *> master_agents;
+        shared_ptr< unordered_set<PatternLink> > my_plinks;   
         shared_ptr< unordered_set<Agent *> > my_agents;   
-        shared_ptr< unordered_set<PatternLink> > my_agent_links;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;

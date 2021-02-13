@@ -32,12 +32,12 @@ bool SCREngine::rep_error;
 // engines, it's the most masterish one that "owns" it).
 SCREngine::SCREngine( bool is_search_,
                       const CompareReplace *overall_master,
-                       CompareReplace::AgentPhases &agent_phases,
+                      CompareReplace::AgentPhases &agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
-                      const unordered_set<Agent *> &master_agents,
+                      const unordered_set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
-    plan(this, is_search_, overall_master, agent_phases, cp, rp, master_agents, master),
+    plan(this, is_search_, overall_master, agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {
 }
@@ -49,12 +49,12 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        CompareReplace::AgentPhases &agent_phases,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
-                       const unordered_set<Agent *> &master_agents_,
+                       const unordered_set<PatternLink> &master_plinks_,
                        const SCREngine *master ) :
     algo( algo_ ),
     is_search( is_search_ ),
     master_ptr( nullptr ),
-    master_agents( master_agents_ )
+    master_plinks( master_plinks_ )
 {
     TRACE(GetName());
     INDENT("P");
@@ -66,7 +66,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     InstallRootAgents(cp, rp);
             
     set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
-    CategoriseSubs( master_agents, my_agents_needing_engines, agent_phases );    
+    CategoriseSubs( master_plinks, my_agents_needing_engines, agent_phases );    
 
     // This recurses SCR engine planning
     CreateMyEngines( master_agents, my_agents_needing_engines, agent_phases );    
@@ -128,7 +128,7 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
 }
     
 
-void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agents, 
+void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
                                       set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                                       CompareReplace::AgentPhases &agent_phases )
 {
@@ -142,7 +142,6 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     // Determine all the agents we can see (can only see though slave "through", 
     // not into the slave's pattern)
     unordered_set<PatternLink> visible_plinks = UnionOf( visible_plinks_compare, visible_plinks_replace );
-    unordered_set<Agent *> visible_agents;
     
     for( PatternLink plink : visible_plinks )
     {
@@ -154,17 +153,30 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
         else
             phase |= Agent::IN_COMPARE_AND_REPLACE;
         agent_phases[plink.GetChildAgent()] = (Agent::Phase)phase;
-        visible_agents.insert( plink.GetChildAgent() );
     }
         
+    // Temporary: make my_agents and master_agents
+    master_agents.clear();
+    for( PatternLink plink : master_plinks )
+        master_agents.insert( plink.GetChildAgent() );
+
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.      
+    my_plinks = make_shared< unordered_set<PatternLink> >();
+    //*my_plinks = DifferenceOf( visible_plinks, master_plinks );
+    for( PatternLink plink : visible_plinks )
+        if( master_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
+            my_plinks->insert( plink );
+
+    // Temporary: make my_agents and master_agents
     my_agents = make_shared< unordered_set<Agent *> >();
-    *my_agents = DifferenceOf( visible_agents, master_agents );
+    for( PatternLink plink : *my_plinks )
+        my_agents->insert( plink.GetChildAgent() );
 
     // Determine who our slaves are
-    FOREACH( Agent *a, *my_agents )
+    FOREACH( PatternLink plink, *my_plinks )
     {
+        Agent *a = plink.GetChildAgent();
         if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
             my_agents_needing_engines.insert( ae );
     }
@@ -187,7 +199,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
                                        CompareReplace::AgentPhases &agent_phases )
 {
     // Determine which agents our slaves should not configure
-    unordered_set<Agent *> surrounding_agents = UnionOf( master_agents, *my_agents ); 
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, *my_plinks ); 
             
     FOREACH( RequiresSubordinateSCREngine *ae, my_agents_needing_engines )
     {
@@ -196,7 +208,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
                                                  agent_phases,
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
-                                                 surrounding_agents, 
+                                                 surrounding_plinks, 
                                                  algo );                                
     }        
 }
