@@ -69,8 +69,7 @@ private:
         void WalkVisible( unordered_set<PatternLink> &visible, 
                           PatternLink base_plink, 
                           Agent::Path path ) const;
-        void CreateMyEngines( const unordered_set<Agent *> &master_agents,                       
-                              const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
+        void CreateMyEngines( const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                               CompareReplace::AgentPhases &agent_phases );
         void ConfigureAgents(const CompareReplace::AgentPhases &agent_phases);
 
@@ -83,8 +82,8 @@ private:
         const SCREngine *master_ptr;
         const unordered_set<PatternLink> master_plinks;
         unordered_set<Agent *> master_agents;
-        shared_ptr< unordered_set<PatternLink> > my_plinks;   
-        shared_ptr< unordered_set<Agent *> > my_agents;   
+        unordered_set<PatternLink> my_plinks;   
+        unordered_set<Agent *> my_agents;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;

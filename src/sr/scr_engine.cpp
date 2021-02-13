@@ -26,7 +26,7 @@ int SCREngine::repetitions;
 bool SCREngine::rep_error;
 
 
-// The master_agents argument is a set of agents that we should not
+// The master_plinks argument is a set of plinks to agents that we should not
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
@@ -69,7 +69,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     CategoriseSubs( master_plinks, my_agents_needing_engines, agent_phases );    
 
     // This recurses SCR engine planning
-    CreateMyEngines( master_agents, my_agents_needing_engines, agent_phases );    
+    CreateMyEngines( my_agents_needing_engines, agent_phases );    
 }
 
     
@@ -161,18 +161,18 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
 
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.      
-    my_plinks = make_shared< unordered_set<PatternLink> >();
-    //*my_plinks = DifferenceOf( visible_plinks, master_plinks );
+    my_plinks.clear();
+    //my_plinks = DifferenceOf( visible_plinks, master_plinks );
     for( PatternLink plink : visible_plinks )
         if( master_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
-            my_plinks->insert( plink );
+            my_plinks.insert( plink );
 
-    my_agents = make_shared< unordered_set<Agent *> >();
-    for( PatternLink plink : *my_plinks )
-        my_agents->insert( plink.GetChildAgent() );
+    my_agents.clear();
+    for( PatternLink plink : my_plinks )
+        my_agents.insert( plink.GetChildAgent() );
 
     // Determine who our slaves are
-    for( PatternLink plink : *my_plinks )
+    for( PatternLink plink : my_plinks )
     {
         Agent *a = plink.GetChildAgent();
         if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
@@ -192,12 +192,11 @@ void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
 }
 
 
-void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agents, 
-                                       const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
+void SCREngine::Plan::CreateMyEngines( const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                                        CompareReplace::AgentPhases &agent_phases )
 {
     // Determine which agents our slaves should not configure
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, *my_plinks ); 
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
             
     for( RequiresSubordinateSCREngine *ae : my_agents_needing_engines )
     {
@@ -215,7 +214,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
 void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_phases)
 {
     // Give agents pointers to here and our coupling keys
-    for( Agent *a : *my_agents )
+    for( Agent *a : my_agents )
     {        
         a->AgentConfigure( agent_phases.at(a),
                            algo );             
@@ -308,7 +307,7 @@ void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
     INDENT("K");   
         
     TRACE("My agents coupling status:\n");
-    FOREACH( Agent *a, *plan.my_agents )
+    FOREACH( Agent *a, plan.my_agents )
     {
         TRACEC(*a);
         bool keyed = ( coupling_keys->count( a ) > 0 );
@@ -346,7 +345,7 @@ TreePtr<Node> SCREngine::Replace() const
 void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 {
 	// Get couplings from agents into the supplied map if not there already
-    FOREACH( Agent *a, *plan.my_agents )
+    FOREACH( Agent *a, plan.my_agents )
         if( a->GetKey() && !coupling_keys->count( a ) > 0 )
             (*coupling_keys)[a] = a->GetKey();	
 }
@@ -413,7 +412,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     *p_root_xnode = Replace();
     
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
-    FOREACH( Agent *a, *plan.my_agents )
+    FOREACH( Agent *a, plan.my_agents )
         a->Reset();
     plan.and_rule_engine->ClearCouplingKeys(); // save memory
 }
