@@ -84,7 +84,7 @@ void SCREngine::Plan::InitPartTwo(const CompareReplace::AgentPhases &agent_phase
 
     // Make and-rule engines on the way out - by now, hopefully all
     // the agents this and-rule engine sees have been configured.
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_agents);
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks);
 } 
 
 
@@ -155,7 +155,6 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
         agent_phases[plink.GetChildAgent()] = (Agent::Phase)phase;
     }
         
-    // Temporary: make my_agents and master_agents
     master_agents.clear();
     for( PatternLink plink : master_plinks )
         master_agents.insert( plink.GetChildAgent() );
@@ -168,13 +167,12 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
         if( master_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks->insert( plink );
 
-    // Temporary: make my_agents and master_agents
     my_agents = make_shared< unordered_set<Agent *> >();
     for( PatternLink plink : *my_plinks )
         my_agents->insert( plink.GetChildAgent() );
 
     // Determine who our slaves are
-    FOREACH( PatternLink plink, *my_plinks )
+    for( PatternLink plink : *my_plinks )
     {
         Agent *a = plink.GetChildAgent();
         if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
@@ -201,7 +199,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
     // Determine which agents our slaves should not configure
     unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, *my_plinks ); 
             
-    FOREACH( RequiresSubordinateSCREngine *ae, my_agents_needing_engines )
+    for( RequiresSubordinateSCREngine *ae : my_agents_needing_engines )
     {
         my_engines[ae] = make_shared<SCREngine>( ae->IsSearch(),
                                                  overall_master_ptr, 
@@ -217,7 +215,7 @@ void SCREngine::Plan::CreateMyEngines( const unordered_set<Agent *> &master_agen
 void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_phases)
 {
     // Give agents pointers to here and our coupling keys
-    FOREACH( Agent *a, *my_agents )
+    for( Agent *a : *my_agents )
     {        
         a->AgentConfigure( agent_phases.at(a),
                            algo );             

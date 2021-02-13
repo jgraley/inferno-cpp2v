@@ -33,23 +33,27 @@
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
-                              const unordered_set<Agent *> &master_agents_ ) :
-    plan( this, root_plink, master_agents_ )
+                              const unordered_set<PatternLink> &master_plinks ) :
+    plan( this, root_plink, master_plinks )
 {
 }    
  
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
                            PatternLink root_plink_, 
-                           const unordered_set<Agent *> &master_agents_) :
+                           const unordered_set<PatternLink> &master_plinks_ ) :
     algo( algo_ ),
     root_plink( root_plink_ ),
     root_pattern( root_plink.GetPattern() ),
     root_agent( root_plink.GetChildAgent() ),
-    master_agents( master_agents_ )
+    master_plinks( master_plinks_ )
 {
     TRACE(GetName());
     INDENT("P");
     
+    master_agents.clear();
+    for( PatternLink plink : master_plinks )
+        master_agents.insert( plink.GetChildAgent() );
+
     unordered_set<Agent *> normal_agents;
     unordered_set<PatternLink> normal_links;
     PopulateNormalAgents( &normal_agents, &normal_links, root_plink );    
@@ -61,8 +65,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     if( my_normal_agents.empty() ) 
         return;  // Early-out on trivial problems
 
-    unordered_set<Agent *> surrounding_agents = UnionOf( my_normal_agents, master_agents );         
-    CreateSubordniateEngines( normal_agents, surrounding_agents );    
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    CreateSubordniateEngines( normal_agents, surrounding_plinks );    
         
     reached_agents.clear();
     reached_links.clear();
@@ -360,7 +364,7 @@ void AndRuleEngine::Plan::PopulateNormalAgents( unordered_set<Agent *> *normal_a
 
 
 void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
-                                                    const unordered_set<Agent *> &surrounding_agents )
+                                                    const unordered_set<PatternLink> &surrounding_plinks )
 {
     for( auto agent : normal_agents )
     {
@@ -373,17 +377,17 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *>
         {        
             if( pq->GetEvaluator() )
             {
-                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_agents );  
+                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks );  
             }
             else
             {
-                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_agents );  
+                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks );  
             }
         }
         
         FOREACH( PatternLink link, pq->GetMultiplicityLinks() )
         {
-            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, surrounding_agents );  
+            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks );  
         }
     }
 }

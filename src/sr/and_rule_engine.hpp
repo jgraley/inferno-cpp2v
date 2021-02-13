@@ -48,13 +48,13 @@ public:
     };
     
     AndRuleEngine( PatternLink root_plink, 
-                   const unordered_set<Agent *> &master_agents);
+                   const unordered_set<PatternLink> &master_plinks);
     
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo,  
               PatternLink root_plink, 
-              const unordered_set<Agent *> &master_agents);
+              const unordered_set<PatternLink> &master_plinks);
         void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
@@ -73,13 +73,14 @@ public:
                                    unordered_set<PatternLink> *my_normal_links,
                                    PatternLink link );
         void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
-                                       const unordered_set<Agent *> &surrounding_agents );
+                                       const unordered_set<PatternLink> &surrounding_plinks );
  
         AndRuleEngine * const algo;
         const PatternLink root_plink;
         const TreePtr<Node> root_pattern;
         Agent * const root_agent;
-        const unordered_set<Agent *> master_agents;
+        const unordered_set<PatternLink> master_plinks;
+        unordered_set<Agent *> master_agents;
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
         unordered_set< Agent *> my_evaluators;   
