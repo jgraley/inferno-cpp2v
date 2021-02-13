@@ -95,14 +95,23 @@ void AgentCommon::ConfigureParents( PatternLink base_plink_,
 }
                                 
 
-shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren( Path v ) const
+list<Agent *> AgentCommon::GetVisibleChildren( Path v ) const
 {
 	// Normally all children should be visible 
-   typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
-   return shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
+    typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
+    auto c = shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
     // Note: a pattern query should be just as good...
     // Incorrect! This gets the replace-side stuff as well; GetPatternQuery()
     // is only for search.
+    
+    list<Agent *> la;
+    FOREACH( const TreePtrInterface &tpi, *c )
+    {
+        auto n = (TreePtr<Node>)tpi;
+        if( n )
+            la.push_back( Agent::AsAgent(n) );
+    }
+    return la;
 }
 
     
@@ -452,6 +461,14 @@ void AgentCommon::SetKey( CouplingKey keylink )
 CouplingKey AgentCommon::GetKey()
 {
     return coupling_key; 
+}
+
+
+PatternLink AgentCommon::GetKeyerPatternLink()
+{
+    ASSERT( base_plink )(*this)(" has not been ConfigureParents()ed");
+    
+    return base_plink;
 }
 
 

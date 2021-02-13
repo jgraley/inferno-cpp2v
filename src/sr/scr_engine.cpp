@@ -137,15 +137,9 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
     // compare and replace sets separately.
     unordered_set<Agent *> visible_agents_compare, visible_agents_replace;
+    WalkVisible( visible_agents_compare, root_agent, Agent::COMPARE_PATH );
+    WalkVisible( visible_agents_replace, root_agent, Agent::REPLACE_PATH );
     
-    VisibleWalk tp_compare(root_pattern, Agent::COMPARE_PATH); 
-    for( const TreePtrInterface &n : tp_compare )
-        visible_agents_compare.insert( Agent::AsAgent((TreePtr<Node>)n) );    
-    
-    VisibleWalk tp_replace(root_pattern, Agent::REPLACE_PATH); 
-    for( const TreePtrInterface &n : tp_replace )
-        visible_agents_replace.insert( Agent::AsAgent((TreePtr<Node>)n) );
-
     // Determine all the agents we can see (can only see though slave "through", 
     // not into the slave's pattern)
     unordered_set<Agent *>  visible_agents = UnionOf( visible_agents_compare, visible_agents_replace );
@@ -173,6 +167,17 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
         if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
             my_agents_needing_engines.insert( ae );
     }
+}
+
+
+void SCREngine::Plan::WalkVisible( unordered_set<Agent *> &visible, 
+                                   Agent *agent, 
+                                   Agent::Path path ) const
+{
+    visible.insert( agent );    
+    list<Agent *> agents = agent->GetVisibleChildren(path); 
+    for( Agent *a : agents )
+        WalkVisible( visible, a, path );    
 }
 
 
@@ -449,16 +454,3 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
        
     return repetitions;
 }
-
-
-shared_ptr<ContainerInterface::iterator_interface> SCREngine::VisibleWalk_iterator::Clone() const
-{
-	return shared_ptr<VisibleWalk_iterator>( new VisibleWalk_iterator(*this) );
-}      
-
-
-shared_ptr<ContainerInterface> SCREngine::VisibleWalk_iterator::GetChildContainer( TreePtr<Node> n ) const
-{
-	return Agent::AsAgent(n)->GetVisibleChildren(v); 
-}
-

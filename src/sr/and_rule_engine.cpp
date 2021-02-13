@@ -23,7 +23,7 @@
 //#define TEST_PATTERN_QUERY
 
 // This now works!
-#define USE_SOLVER
+//#define USE_SOLVER
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
@@ -715,7 +715,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
     master_keys = master_keys_;    
     knowledge = knowledge_;
     
-    // distinct OK because this only runs once per solve
     LocatedLink root_link( plan.root_plink, root_xlink );
 
     TRACE("Compare root ")(root_link)("\n");
@@ -850,12 +849,14 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 {
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
-    XLink keyer_link = keys.at(agent);
+    XLink keyer_xlink = keys.at(agent);
 
     // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_link.GetChildX() ) ); 
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 
+    //FTRACE("Keyer ")(keyer_xlink)(" Residual ")(residual_link)("\n");
+    //PatternLink keyer_plink = agent->GetKeyerPatternLink();
 
-    multiset<XLink> candidate_links { keyer_link, residual_link };
+    multiset<XLink> candidate_links { keyer_xlink, residual_link };
     agent->RunCouplingQuery( candidate_links );
 }                                     
 

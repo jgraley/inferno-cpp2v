@@ -19,7 +19,7 @@ class OverlayAgent : public virtual ColocatedAgent
 {  
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
+    virtual list<Agent *> GetVisibleChildren( Path v ) const;
     virtual TreePtr<Node> BuildReplaceImpl();
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;

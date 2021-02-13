@@ -81,10 +81,10 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl()
 }
 
 
-shared_ptr<ContainerInterface> SlaveAgent::GetVisibleChildren( Path v ) const
+list<Agent *> SlaveAgent::GetVisibleChildren( Path v ) const
 {
 	// it's a slave, so set up a container containing only "through", not "compare" or "replace"
-	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
-	seq->push_back( *GetThrough() );
-	return seq;
+	list<Agent *> la;
+	la.push_back( Agent::AsAgent((TreePtr<Node>)*GetThrough()) );
+	return la;
 }

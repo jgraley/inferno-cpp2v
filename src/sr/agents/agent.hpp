@@ -97,7 +97,9 @@ public:
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
-    virtual CouplingKey GetKey() = 0;                                  
+    virtual CouplingKey GetKey() = 0;      
+    virtual PatternLink GetKeyerPatternLink() = 0;
+                            
     virtual void Reset() = 0;     
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys ) = 0;
     virtual void KeyForOverlay( Agent *from ) = 0;
@@ -105,7 +107,7 @@ public:
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
                                             TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
-    virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const = 0;
+    virtual list<Agent *> GetVisibleChildren( Path v ) const = 0;
 		
 	static Agent *AsAgent( shared_ptr<Node> node );
 	static const Agent *AsAgentConst( shared_ptr<const Node> node );
@@ -126,7 +128,7 @@ public:
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
     virtual void ConfigureParents( PatternLink base_plink, 
                                    set<PatternLink> coupled_plinks );
-    virtual shared_ptr<ContainerInterface> GetVisibleChildren( Path v ) const;
+    virtual list<Agent *> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                
@@ -167,6 +169,7 @@ protected:
 
 public:
     CouplingKey GetKey();                                  
+    PatternLink GetKeyerPatternLink();                                  
     virtual void Reset();    
     virtual void KeyReplace( const CouplingKeysMap *coupling_keys );
     virtual void KeyForOverlay( Agent *from );

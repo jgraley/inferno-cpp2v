@@ -66,6 +66,9 @@ private:
         void CategoriseSubs( const unordered_set<Agent *> &master_agents, 
                              set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                              CompareReplace::AgentPhases &agent_phases );
+        void WalkVisible( unordered_set<Agent *> &visible, 
+                          Agent *agent, 
+                          Agent::Path path ) const;
         void CreateMyEngines( const unordered_set<Agent *> &master_agents,                       
                               const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                               CompareReplace::AgentPhases &agent_phases );
@@ -113,25 +116,7 @@ private:
     
     vector<int> stop_after;
     int depth;    
-    TheKnowledge knowledge;
-    
-	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
-		but still recurses through the "through" member. Therefore, it visits all the
-		nodes under the same engine as the root. Based on UniqueWalk, so each node only
-		visited once. Restrict according to visibility category v. Note: setting v to
-        IN_COMPARE_AND_REPLACE may not work as expected because couplings will be missed. */
-	class VisibleWalk_iterator : public UniqueWalk::iterator
-	{
-	public:
-		VisibleWalk_iterator( TreePtr<Node> &root, Agent::Path v_ ) : UniqueWalk::iterator(root), v(v_) {}        
-		VisibleWalk_iterator() : UniqueWalk::iterator() {}
-		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
-	private:
-		virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const;
-        Agent::Path v;
-	};
-
-	typedef ContainerFromIterator< VisibleWalk_iterator, TreePtr<Node>, Agent::Path > VisibleWalk;       
+    TheKnowledge knowledge;    
 };
 
 };
