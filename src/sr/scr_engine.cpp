@@ -65,9 +65,6 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     InstallRootAgents(cp, rp);
             
-    // For closure under full arrowhead model, we need a link to root
-    root_plink = PatternLink::CreateDistinct( root_pattern );
-    
     set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
     CategoriseSubs( master_agents, my_agents_needing_engines, agent_phases );    
 
@@ -126,6 +123,8 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
     root_pattern = cp; 
     root_agent = Agent::AsAgent(root_pattern);
+    // For closure under full arrowhead model, we need a link to root
+    root_plink = PatternLink::CreateDistinct( root_pattern );   
 }
     
 
@@ -136,26 +135,28 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
     // compare and replace sets separately.
-    unordered_set<Agent *> visible_agents_compare, visible_agents_replace;
-    WalkVisible( visible_agents_compare, root_agent, Agent::COMPARE_PATH );
-    WalkVisible( visible_agents_replace, root_agent, Agent::REPLACE_PATH );
+    unordered_set<PatternLink> visible_plinks_compare, visible_plinks_replace;
+    WalkVisible( visible_plinks_compare, root_plink, Agent::COMPARE_PATH );
+    WalkVisible( visible_plinks_replace, root_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though slave "through", 
     // not into the slave's pattern)
-    unordered_set<Agent *>  visible_agents = UnionOf( visible_agents_compare, visible_agents_replace );
+    unordered_set<PatternLink> visible_plinks = UnionOf( visible_plinks_compare, visible_plinks_replace );
+    unordered_set<Agent *> visible_agents;
     
-    FOREACH( Agent *a, visible_agents )
+    for( PatternLink plink : visible_plinks )
     {
-        unsigned int phase = (unsigned int)agent_phases[a];
-        if( visible_agents_compare.count(a) == 0 )
+        unsigned int phase = (unsigned int)agent_phases[plink.GetChildAgent()];
+        if( visible_plinks_compare.count(plink) == 0 )
             phase |= Agent::IN_REPLACE_ONLY;
-        else if( visible_agents_replace.count(a) == 0 )
+        else if( visible_plinks_replace.count(plink) == 0 )
             phase |= Agent::IN_COMPARE_ONLY;
         else
             phase |= Agent::IN_COMPARE_AND_REPLACE;
-        agent_phases[a] = (Agent::Phase)phase;
+        agent_phases[plink.GetChildAgent()] = (Agent::Phase)phase;
+        visible_agents.insert( plink.GetChildAgent() );
     }
-    
+        
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.      
     my_agents = make_shared< unordered_set<Agent *> >();
@@ -170,14 +171,14 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<Agent *> &master_agent
 }
 
 
-void SCREngine::Plan::WalkVisible( unordered_set<Agent *> &visible, 
-                                   Agent *agent, 
+void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible, 
+                                   PatternLink base_plink, 
                                    Agent::Path path ) const
 {
-    visible.insert( agent );    
-    list<Agent *> agents = agent->GetVisibleChildren(path); 
-    for( Agent *a : agents )
-        WalkVisible( visible, a, path );    
+    visible.insert( base_plink );    
+    list<PatternLink> plinks = base_plink.GetChildAgent()->GetVisibleChildren(path); 
+    for( PatternLink plink : plinks )
+        WalkVisible( visible, plink, path );    
 }
 
 

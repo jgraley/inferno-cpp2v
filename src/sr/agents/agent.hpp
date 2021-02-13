@@ -107,7 +107,7 @@ public:
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
                                             TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
-    virtual list<Agent *> GetVisibleChildren( Path v ) const = 0;
+    virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;
 		
 	static Agent *AsAgent( shared_ptr<Node> node );
 	static const Agent *AsAgentConst( shared_ptr<const Node> node );
@@ -128,7 +128,7 @@ public:
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
     virtual void ConfigureParents( PatternLink base_plink, 
                                    set<PatternLink> coupled_plinks );
-    virtual list<Agent *> GetVisibleChildren( Path v ) const;
+    virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                

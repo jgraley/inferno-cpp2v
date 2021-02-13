@@ -95,7 +95,7 @@ void AgentCommon::ConfigureParents( PatternLink base_plink_,
 }
                                 
 
-list<Agent *> AgentCommon::GetVisibleChildren( Path v ) const
+list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 {
 	// Normally all children should be visible 
     typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
@@ -104,14 +104,13 @@ list<Agent *> AgentCommon::GetVisibleChildren( Path v ) const
     // Incorrect! This gets the replace-side stuff as well; GetPatternQuery()
     // is only for search.
     
-    list<Agent *> la;
+    list<PatternLink> plinks;
     FOREACH( const TreePtrInterface &tpi, *c )
-    {
-        auto n = (TreePtr<Node>)tpi;
-        if( n )
-            la.push_back( Agent::AsAgent(n) );
+    {        
+        if( tpi )
+            plinks.push_back( PatternLink(this, &tpi) );
     }
-    return la;
+    return plinks;
 }
 
     

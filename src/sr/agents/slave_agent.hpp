@@ -31,7 +31,7 @@ public:
     virtual void SetMyEngine( SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl();
-    virtual list<Agent *> GetVisibleChildren( Path v ) const;
+    virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }

@@ -66,8 +66,8 @@ private:
         void CategoriseSubs( const unordered_set<Agent *> &master_agents, 
                              set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                              CompareReplace::AgentPhases &agent_phases );
-        void WalkVisible( unordered_set<Agent *> &visible, 
-                          Agent *agent, 
+        void WalkVisible( unordered_set<PatternLink> &visible, 
+                          PatternLink base_plink, 
                           Agent::Path path ) const;
         void CreateMyEngines( const unordered_set<Agent *> &master_agents,                       
                               const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,

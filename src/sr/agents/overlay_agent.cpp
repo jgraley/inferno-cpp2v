@@ -35,19 +35,19 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
 }
 
 
-list<Agent *> OverlayAgent::GetVisibleChildren( Path v ) const
+list<PatternLink> OverlayAgent::GetVisibleChildren( Path v ) const
 {	
-	list<Agent *> la;
+	list<PatternLink> plinks;
     switch(v)
     {
     case COMPARE_PATH:
-        la.push_back( Agent::AsAgent((TreePtr<Node>)*GetThrough()) );
+        plinks.push_back( PatternLink(this, GetThrough()) );
         break;
     case REPLACE_PATH:
-        la.push_back( Agent::AsAgent((TreePtr<Node>)*GetOverlay()) );
+        plinks.push_back( PatternLink(this, GetOverlay()) );
         break;
     }
-	return la;
+	return plinks;
 }
 
 

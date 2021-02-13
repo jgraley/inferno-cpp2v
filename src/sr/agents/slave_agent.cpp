@@ -81,10 +81,10 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl()
 }
 
 
-list<Agent *> SlaveAgent::GetVisibleChildren( Path v ) const
+list<PatternLink> SlaveAgent::GetVisibleChildren( Path v ) const
 {
 	// it's a slave, so set up a container containing only "through", not "compare" or "replace"
-	list<Agent *> la;
-	la.push_back( Agent::AsAgent((TreePtr<Node>)*GetThrough()) );
-	return la;
+	list<PatternLink> plinks;
+	plinks.push_back( PatternLink(this, GetThrough()) );
+	return plinks;
 }
