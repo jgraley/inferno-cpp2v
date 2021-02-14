@@ -74,24 +74,41 @@ void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
 
 
 void AgentCommon::ConfigureParents( PatternLink base_plink_, 
-                                    set<PatternLink> coupled_plinks_ )
-{
+                                    set<PatternLink> coupled_plinks_,
+                                    void *are )
+{  
     ASSERT(master_scr_engine)("Must call AgentConfigure() before ConfigureParents()");
+    if( ReadArgs::new_feature )
+        FTRACE(*this)(" ConfigureParents ")(base_plink_)("\n");
     
-    base_plink = base_plink_;
-    ASSERT( base_plink );
+    if( base_plink_ )
+    {
+        if( ReadArgs::new_feature )
+            ASSERT( !base_plink )("Base plink should only be configured once ")
+                                 (configuring_engine)(" vs ")(are)("\n")
+                                 (base_plink)(" vs ")(base_plink_);
+        ASSERT( base_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
+        base_plink = base_plink_;
+        configuring_engine = are;
+    }
     
-    coupled_plinks = coupled_plinks_;
-    for( PatternLink plink : coupled_plinks )
+    for( PatternLink plink : coupled_plinks_ )
+    {
         ASSERT( plink );
+        ASSERT( plink.GetChildAgent() == this )("Parent link supplied for different agent");
+        InsertSolo( coupled_plinks, plink );
+    }
 
     // It works with a set, but if we lose this ordering hints from 
     // Colocated agent NLQs become less useful and CSP solver slows right
     // down.
-    base_and_normal_plinks.clear();
-    base_and_normal_plinks.push_back( base_plink );
-    for( PatternLink plink : pattern_query->GetNormalLinks() )
-        base_and_normal_plinks.push_back( plink );
+    if( phase != IN_REPLACE_ONLY && base_plink )
+    {
+        base_and_normal_plinks.clear();
+        base_and_normal_plinks.push_back( base_plink );
+        for( PatternLink plink : pattern_query->GetNormalLinks() )
+            base_and_normal_plinks.push_back( plink );
+    }
 }
                                 
 
@@ -465,7 +482,7 @@ CouplingKey AgentCommon::GetKey()
 
 PatternLink AgentCommon::GetKeyerPatternLink()
 {
-    ASSERT( base_plink )(*this)(" has not been ConfigureParents()ed");
+    ASSERT( base_plink )(*this)(" has no base_plink");
     
     return base_plink;
 }

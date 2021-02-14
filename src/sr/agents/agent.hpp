@@ -65,7 +65,8 @@ public:
     Agent& operator=(Agent& other);
 	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
     virtual void ConfigureParents( PatternLink base_plink, 
-                                   set<PatternLink> coupled_plinks ) = 0;
+                                   set<PatternLink> coupled_plinks,
+                                   void *are ) = 0;
 
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -127,7 +128,8 @@ public:
     AgentCommon();
     virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
     virtual void ConfigureParents( PatternLink base_plink, 
-                                   set<PatternLink> coupled_plinks );
+                                   set<PatternLink> coupled_plinks,
+                                   void *are );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
@@ -183,9 +185,10 @@ public:
     virtual string GetTrace() const;
 
 protected:                                  
-    const SCREngine *master_scr_engine;    
+    const SCREngine *master_scr_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink base_plink;
+    void *configuring_engine;
     set<PatternLink> coupled_plinks;
     list<PatternLink> base_and_normal_plinks;
     

@@ -29,7 +29,7 @@ public:
 	virtual bool IsSearch() const = 0;
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
-    virtual void SetMyEngine( SCREngine *my_engine ) = 0;
+    virtual void ConfigureMyEngine( SCREngine *my_engine ) = 0;
     virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
 };
 

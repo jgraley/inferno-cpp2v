@@ -28,7 +28,7 @@ public:
     virtual void KeyForOverlay( Agent *from );
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual Block GetGraphBlockInfo() const;
-    virtual void SetMyEngine( SCREngine *my_scr_engine );
+    virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl();
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;

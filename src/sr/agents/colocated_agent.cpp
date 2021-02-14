@@ -60,6 +60,8 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
         }
     };
     
+    ASSERT( common_xlink )("Empty query!");
+    
     // Now that the common xlink is known to be really common,
     // we can apply the usual checks including PR check and allowing for MMAX
     if( common_xlink != XLink::MMAX_Link )

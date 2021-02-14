@@ -214,13 +214,21 @@ void SCREngine::Plan::CreateMyEngines( const set<RequiresSubordinateSCREngine *>
 void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_phases)
 {
     // Give agents pointers to here and our coupling keys
-    for( Agent *a : my_agents )
+    for( Agent *agent : my_agents )
     {        
-        a->AgentConfigure( agent_phases.at(a),
-                           algo );             
+        agent->AgentConfigure( agent_phases.at(agent),
+                               algo );             
                            
-        if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )        
-            ae->SetMyEngine( &*my_engines.at(ae) );
+        if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(agent) )        
+            ae->ConfigureMyEngine( &*my_engines.at(ae) );
+    }
+    
+    for( PatternLink plink : my_plinks )
+    {
+        Agent *agent = plink.GetChildAgent();
+        // Replace-only nodes are self-keying
+        if( agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
+            agent->ConfigureParents( PatternLink(), {plink}, this );
     }    
 }
 

@@ -50,6 +50,8 @@ public:
     AndRuleEngine( PatternLink root_plink, 
                    const unordered_set<PatternLink> &master_plinks);
     
+    ~AndRuleEngine();
+    
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo,  
@@ -151,6 +153,7 @@ private:
     // into the agents (half-link model). Note: solutions can specify
     // the MMAX node.
     SolutionMap basic_solution; 
+    bool used = false;
 };
 
 #endif

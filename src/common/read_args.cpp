@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 using namespace std;
 
 string ReadArgs::exename;
@@ -30,6 +29,7 @@ bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
+bool ReadArgs::new_feature = false;
 
 void ReadArgs::Usage()
 {
@@ -48,12 +48,14 @@ void ReadArgs::Usage()
                     "            Note: -q<n> makes -t and -r operate only on step n.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
 	                "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
-	                "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name.\n"
+	                "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name,\n"
+                    "               or generate all into a directory if name ends in /\n"
 	                "-g[t][k]d      Generate dot files for documentation; -o specifies directory.\n"
 	                "            Note: t enables trace details in graph; k enables dark colour-scheme.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates. <outfile> is path/basename.\n"
+                    "-x          Enable new feature. Meaning varies.\n"
                     "\n"
     		        "One of -i, -s, -th, -gp, -gd required; all others are optional.\n",
     		        exename.c_str() );
@@ -184,6 +186,10 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         else if( option=='f' )
         {
             output_all = true;
+        }
+        else if( option=='x' )
+        {
+            new_feature = true;
         }
         else 
         {

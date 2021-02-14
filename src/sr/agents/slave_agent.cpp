@@ -47,7 +47,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo() const
 }
 
 
-void SlaveAgent::SetMyEngine( SCREngine *my_scr_engine_ )
+void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 {
     my_scr_engine = my_scr_engine_;
 }

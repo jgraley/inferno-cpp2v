@@ -37,6 +37,13 @@ AndRuleEngine::AndRuleEngine( PatternLink root_plink,
     plan( this, root_plink, master_plinks )
 {
 }    
+
+
+AndRuleEngine::~AndRuleEngine() 
+{ 
+    //ASSERT( used )( plan.root_plink );
+}
+
  
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
                            PatternLink root_plink_, 
@@ -62,11 +69,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
             my_normal_links.insert( plink );
             
     my_normal_agents = DifferenceOf( normal_agents, master_agents );       
+    if( ReadArgs::new_feature )
+        FTRACE("Normal agents ")(normal_agents)("\nMaster agents ")(master_agents)("\n");
     if( my_normal_agents.empty() ) 
         return;  // Early-out on trivial problems
-
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    CreateSubordniateEngines( normal_agents, surrounding_plinks );    
         
     reached_agents.clear();
     reached_links.clear();
@@ -91,6 +97,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
 #endif                      
+
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    CreateSubordniateEngines( my_normal_agents, surrounding_plinks );    
 }
 
 
@@ -210,7 +219,7 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
     } 
          
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternLink link, pq->GetNormalLinks() )
+    for( PatternLink link : pq->GetNormalLinks() )
     {
         PopulateSomeThings( link, master_agents );        
         
@@ -326,15 +335,22 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 
 void AndRuleEngine::Plan::ConfigureAgents()
 {
+    if( ReadArgs::new_feature )
+        FTRACE((void *)algo)(" ConfigureAgents keyers:\n")(coupling_keyer_links)("\n");
     for( PatternLink keyer_plink : coupling_keyer_links )
     {
+        ASSERT( keyer_plink );
         Agent *agent = keyer_plink.GetChildAgent();
                 
         set< PatternLink > residual_plinks;
         for( PatternLink residual_plink : coupling_residual_links )
-            residual_plinks.insert( residual_plink );
+            if( residual_plink.GetChildAgent() == agent )
+                residual_plinks.insert( residual_plink );
+        for( PatternLink residual_plink : master_boundary_residual_links )
+            if( residual_plink.GetChildAgent() == agent )
+                residual_plinks.insert( residual_plink );
             
-        agent->ConfigureParents( keyer_plink, residual_plinks );
+        agent->ConfigureParents( keyer_plink, residual_plinks, this );
     }
 }
 
@@ -366,8 +382,10 @@ void AndRuleEngine::Plan::PopulateNormalAgents( unordered_set<Agent *> *normal_a
 void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
                                                     const unordered_set<PatternLink> &surrounding_plinks )
 {
-    for( auto agent : normal_agents )
+    for( PatternLink plink : coupling_keyer_links )
     {
+        Agent *agent = plink.GetChildAgent();
+        
         shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
             
         if( pq->GetEvaluator() )
@@ -715,6 +733,13 @@ void AndRuleEngine::Compare( XLink root_xlink,
 {
     INDENT("C");
     ASSERT( root_xlink );
+    used = true;
+
+    if( ReadArgs::new_feature )
+    {
+        FTRACE((void *)this)(" Coupling keyers ")(plan.coupling_keyer_links)("\n");
+        FTRACE((void *)this)(" Master boundary keyers ")(plan.master_boundary_keyer_links)("\n");
+    }
            
     master_keys = master_keys_;    
     knowledge = knowledge_;
@@ -857,8 +882,12 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 
-    //FTRACE("Keyer ")(keyer_xlink)(" Residual ")(residual_link)("\n");
-    //PatternLink keyer_plink = agent->GetKeyerPatternLink();
+    
+    if( ReadArgs::new_feature )
+    {
+        FTRACE((void *)this)(" Keyer ")(keyer_xlink)("\nResidual ")(residual_link)("\n");
+        PatternLink keyer_plink = agent->GetKeyerPatternLink();
+    }
 
     multiset<XLink> candidate_links { keyer_xlink, residual_link };
     agent->RunCouplingQuery( candidate_links );
