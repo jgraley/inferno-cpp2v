@@ -15,24 +15,29 @@
 namespace SCTree {
 
 /** Base for all SystemC nodes, permitting detection of SystemC dialect eg for rendering */
-struct SCConstruct {}; 
+struct SCConstruct : virtual Node {}; 
 
 /** Base for SystemC nodes that helps with detection and rendering by allowing constructs
     that differ only in source-code-name to be treated as a group. The actual source-code-name
     is available via a virtual accessor. */
 struct SCNamedConstruct : public SCConstruct
 {
+    NODE_FUNCTIONS
     virtual string GetToken() {ASSERTFAIL("GetToken() called on intermediate node\n")} ///< Produce the source-code-name of the corresponding SystemC construct
 };
 
 /// Anything derived from this renders like an identifier
-struct SCNamedIdentifier : SCNamedConstruct {};
+struct SCNamedIdentifier : virtual SCNamedConstruct {};
 
 /// Anything derived from this renders like a record
-struct SCNamedRecord : SCNamedConstruct {};
+struct SCNamedRecord : virtual SCNamedConstruct,
+                       CPPTree::InheritanceRecord 
+{
+    NODE_FUNCTIONS
+};
 
 /// Anything derived from this renders like a function
-struct SCNamedFunction : SCNamedConstruct {};
+struct SCNamedFunction : virtual SCNamedConstruct {};
 
 /** SystemC event type, no members need to be set up. Event instances
     are declared to be of this type. They can then be signalled, waited etc. */
@@ -49,8 +54,7 @@ struct Event : CPPTree::Type,
     based on the module's members. Thus elaboration is structural in the tree
     (as with Verilog) and the renderer generates the run-time elaboration
     fu to satisfy SystemC. */
-struct Module : CPPTree::InheritanceRecord,
-                SCNamedRecord
+struct Module : SCNamedRecord
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "sc_module"; }
@@ -58,12 +62,20 @@ struct Module : CPPTree::InheritanceRecord,
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
     this. Presumably this is why Module comes from InheritanceRecord not Record. */                                                                      
-struct Interface : CPPTree::InheritanceRecord,
-                   SCNamedRecord
+struct Interface : SCNamedRecord
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "sc_interface"; }
 };
+
+/** SystemC interface construct. Not exactly sure whether/how I will use 
+    this. Presumably this is why Module comes from InheritanceRecord not Record. */   
+struct SCDynamicNamedFunction : virtual SCNamedFunction
+{
+    NODE_FUNCTIONS
+    TreePtr<CPPTree::Expression> event; 
+};
+
 
 /** Intermediate node for SystemC wait() primitive. wait() can be used
     in a few fundamentally different ways and to be explicit we use specialised
@@ -80,10 +92,10 @@ struct Wait : CPPTree::Statement,
 /** Waiting for a SystemC event - blocks until the event indicated by the expression is 
     triggered, regardless of clocks, deltas etc. Ands and ors etc are probably OK as 
     the correpsonding boolean expressions on the events. */
-struct WaitDynamic : Wait
+struct WaitDynamic : Wait,
+                     SCDynamicNamedFunction
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<CPPTree::Expression> event; ///< event to wait for 
 };
 
 /** Waiting for a SystemC event - blocks until an event is triggered. I think the event
@@ -115,10 +127,10 @@ struct NextTrigger : CPPTree::Statement,
 /** Causes the method to be triggered again when the event indicated by the expression is 
     triggered, regardless of clocks, deltas etc. Ands and ors etc are probably OK as 
     the correpsonding boolean expressions on the events. */
-struct NextTriggerDynamic : NextTrigger
+struct NextTriggerDynamic : NextTrigger,
+                            SCDynamicNamedFunction
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<CPPTree::Expression> event; ///< event to wait for 
 };
 
 /** Causes the method to be triggered again when an event is triggered. I think the event

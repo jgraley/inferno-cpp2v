@@ -13,6 +13,110 @@ namespace Steps {
 
 using namespace SR;
 
+/// spot SystemC type by its name and replace with inferno node 
+/** We look for the decl and remeove it since the inferno
+ Node does not require declaration. Then just switch each appearance
+ over to the new node, using a slave */
+class DetectSCType : public CompareReplace  // Note not SearchReplace
+{
+public:
+    DetectSCType( TreePtr< SCTree::SCNamedConstruct > lr_scnode );
+};
+
+
+/// spot SystemC base class by its name and replace with inferno node 
+/** We look for the decl and remove it since the inferno
+ Node does not require declaration. Then replace all class nodes
+ that inherit from the suppleid base with the new inferno node and 
+ remove the base */
+class DetectSCBase : public CompareReplace  // Note not SearchReplace
+{
+public:
+    DetectSCBase( TreePtr< SCTree::SCNamedRecord > lr_scclass );
+};
+
+
+class DetectSCDynamic : public SearchReplace
+{
+public:
+    DetectSCDynamic( TreePtr<SCTree::SCDynamicNamedFunction> r_dynamic );
+};
+
+
+class DetectSCStatic : public SearchReplace
+{
+public:
+    DetectSCStatic( TreePtr<SCTree::SCNamedFunction> r_static );
+};
+
+
+class DetectSCDelta : public SearchReplace
+{
+public:
+    DetectSCDelta( TreePtr<SCTree::SCNamedFunction> r_delta );
+};
+
+
+/// spot syscall exit() or equivalent function by its name and replace with inferno node 
+/** We look for the decl and remove it since the inferno
+ Node does not require declaration. Then replace all calls to 
+ the function with the explicit statement node. Bring arguments
+ across by name match as per Inferno's MapOperator style. */
+class DetectTerminationFunction : public SearchReplace
+{
+public:
+    DetectTerminationFunction( TreePtr<SCTree::TerminationFunction> r_tf );    
+};
+
+
+class DetectSCProcess : public CompareReplace // Note not SearchReplace
+{
+public:
+    DetectSCProcess( TreePtr< SCTree::Process > lr_scprocess );
+};
+
+
+
+/// spot SystemC notify() method by its name and replace with inferno node 
+/** Look for myevent.notify() and replace with Notify->myevent. No need to 
+    eliminate the notify decl - that disappeared with the sc_event class */
+class DetectSCNotifyImmediate : public SearchReplace  
+{
+public:
+    DetectSCNotifyImmediate();
+};
+
+
+/// spot SystemC notify(SC_ZERO_TIME) method by its name and replace with inferno node 
+/** Look for myevent.notify(SC_ZERO_TIME) and replace with Notify->myevent. No need to 
+    eliminate the notify decl - that disappeared with the sc_event class */
+class DetectSCNotifyDelta : public SearchReplace  
+{
+public:
+    DetectSCNotifyDelta();
+};
+
+
+/// Remove constructors in SC modules that are now empty thanks to earlier steps
+/// Must also remove explicit calls to constructor (which would not do anything)
+class RemoveEmptyModuleConstructors : public CompareReplace
+{
+public:
+    RemoveEmptyModuleConstructors();
+};
+
+
+/// Remove top-level instances that are of type void
+/** isystemc.h declares void variables to satisfy parser. Hoover them all up
+    efficiently here. */
+class RemoveVoidInstances : public CompareReplace  // Note not SearchReplace
+{
+public:
+    RemoveVoidInstances();
+};
+
+
+
 /** Holder for the steps that detect implicit SysetemC constructs in C++ code
     and replace them with Inferno's Explicit nodes for SystemC which are much
     more succinct in tree form */
