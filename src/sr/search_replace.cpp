@@ -10,16 +10,9 @@
 using namespace SR;
 
 
-CompareReplace::CompareReplace( TreePtr<Node> cp,
-                                TreePtr<Node> rp,
-                                bool is_search ) :
+CompareReplace::CompareReplace( bool is_search ) :
     plan( this, is_search )
 {
-    // If cp and rp are provided, do an instant configuration
-    if( cp )
-    {
-        plan.Configure( cp, rp );
-    }
 }    
 
 
@@ -34,14 +27,26 @@ void CompareReplace::Plan::Configure( TreePtr<Node> cp,
                                       TreePtr<Node> rp )
 {
     TRACE(algo->GetName());
+    compare_pattern = cp;
+    replace_pattern = rp;
+}
+
+
+void CompareReplace::Plan::PlanningPartOne()
+{
     // Two-part init for SCREngine: 
     // First, add extra root nodes, categorise, create subordinate 
     // SCREngines and recurse into them
     // This allows the phases of the agents to be determined correctly
-    scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, cp, rp);
+    scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, compare_pattern, replace_pattern);
+}
+
+    
+void CompareReplace::Plan::PlanningPartTwo()
+{
     //FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
     // Second, configure the agents and create subordinate AndRuleEngines
-    scr_engine->InitPartTwo(agent_phases);
+    scr_engine->PlanningPartTwo(agent_phases);
 }                                      
 
 
@@ -50,6 +55,18 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 {
     INDENT("P");
     plan.Configure( cp, rp );
+}
+
+
+void CompareReplace::PlanningPartOne()
+{
+    plan.PlanningPartOne();
+}
+
+
+void CompareReplace::PlanningPartTwo()
+{
+    plan.PlanningPartTwo();
 }
 
 
@@ -116,9 +133,8 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 }
 
 
-SearchReplace::SearchReplace( TreePtr<Node> sp,
-                              TreePtr<Node> rp ) :
-    CompareReplace( sp, rp, true )                              
+SearchReplace::SearchReplace() :
+    CompareReplace( true )                              
 {
 }
 

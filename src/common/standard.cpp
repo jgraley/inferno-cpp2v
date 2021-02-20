@@ -68,20 +68,20 @@ string Traceable::GetTrace() const
 
 ////////////////////////// Misc free functions //////////////////////////
 
-string VSSPrintf(const char *fmt, va_list vl)
+string VSSPrintf(string fmt, va_list vl)
 {
     char cs[1024];    
-    vsnprintf( cs, sizeof(cs), fmt, vl );  
+    vsnprintf( cs, sizeof(cs), fmt.c_str(), vl );  
     //cs[sizeof(cs)-1] = '\0';
     return string(cs);
 }
 
 
-string SSPrintf(const char *fmt, ...)
+string SSPrintf(string fmt, ...)
 {
     va_list vl;
     va_start( vl, fmt );
-    string s = VSSPrintf(fmt, vl);
+    string s = VSSPrintf( fmt.c_str(), vl );
     va_end( vl );
     
     return s;

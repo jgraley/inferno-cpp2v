@@ -44,9 +44,9 @@ public:
                TreePtr<Node> rp = TreePtr<Node>(),
                const unordered_set<PatternLink> &master_plinks = unordered_set<PatternLink>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
-    void InitPartTwo( const CompareReplace::AgentPhases &agent_phases )
+    void PlanningPartTwo( const CompareReplace::AgentPhases &agent_phases )
     {
-        plan.InitPartTwo(agent_phases); 
+        plan.PlanningPartTwo(agent_phases); 
     }
                     
 private:
@@ -60,7 +60,7 @@ private:
               TreePtr<Node> rp,
               const unordered_set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
-        void InitPartTwo(const CompareReplace::AgentPhases &agent_phases); // Part one is the constructor
+        void PlanningPartTwo(const CompareReplace::AgentPhases &agent_phases); // Part one is the constructor
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 

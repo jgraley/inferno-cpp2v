@@ -25,5 +25,8 @@ SlaveTest::SlaveTest()
     MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_slave );
 
-   	SearchReplace( s_for, r_comp );
+   	SearchReplace sr;
+    sr.Configure( s_for, r_comp );
+    sr.PlanningPartOne();
+    sr.PlanningPartTwo();
 }

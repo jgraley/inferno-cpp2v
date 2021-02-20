@@ -25,9 +25,7 @@ public:
     
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
-    CompareReplace( TreePtr<Node> cp = TreePtr<Node>(),
-                    TreePtr<Node> rp = TreePtr<Node>(),
-                    bool is_search=false );
+    CompareReplace( bool is_search=false );
                     
 private:
     struct Plan 
@@ -36,7 +34,12 @@ private:
               bool is_search );
         void Configure( TreePtr<Node> cp,
                         TreePtr<Node> rp );
-                        
+        void PlanningPartOne();
+        void PlanningPartTwo();
+
+        TreePtr<Node> compare_pattern;
+        TreePtr<Node> replace_pattern;
+        
         CompareReplace * const algo;
         const bool is_search;   
         shared_ptr<SCREngine> scr_engine;
@@ -46,6 +49,9 @@ private:
 public:
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
+    void PlanningPartOne();
+    void PlanningPartTwo();
+    
     static void SetMaxReps( int n, bool e );
                             
     using Transformation::operator();
@@ -71,8 +77,7 @@ private:
 class SearchReplace : public CompareReplace
 {
 public:
-    SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
-                   TreePtr<Node> rp = TreePtr<Node>() );
+    SearchReplace();
 };
 
 };

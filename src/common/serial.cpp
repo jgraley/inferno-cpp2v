@@ -1,5 +1,8 @@
 #include "serial.hpp"
+
 #include "trace.hpp"
+#include "progress.hpp"
+
 #include <cxxabi.h>
 #include <stdio.h>
 
@@ -57,7 +60,6 @@ map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
 //////////////////////////// SerialNumber ///////////////////////////////
 
 SerialNumber::SNType SerialNumber::master_location_serial;
-int SerialNumber::current_step;
 map<void *, SerialNumber::SNType> SerialNumber::location_serial;
 map<SerialNumber::SNType, void *> SerialNumber::location_readback;
 map<void *, SerialNumber::SNType> SerialNumber::master_serial;
@@ -83,20 +85,11 @@ void SerialNumber::Construct()
     // Remember values for this object
     serial = master_serial[lp];
     location = location_serial[lp];
-    step = current_step;
+    progress = Progress::GetCurrent();
     
     // produce a new construction serial number
     master_serial[lp]++;
 }    
-
-
-void SerialNumber::SetStep( int s )
-{
-    current_step = s;
-    // Just bin the structures we built up - this forces step to be primary ordering
-    location_serial = map<void *, SNType>();
-    master_serial = map<void *, SNType>();
-}
 
 
 void *SerialNumber::GetLocation( SNType location )
@@ -107,22 +100,8 @@ void *SerialNumber::GetLocation( SNType location )
 
 string SerialNumber::GetSerialString() const
 {
-    string ss;
-    switch( step )
-    {
-        case -3: // inputting
-            ss = SSPrintf("#I-%lu-%lu", location, serial);  
-            break;
-        case -2: // outputting
-            ss = SSPrintf("#O-%lu-%lu", location, serial);  
-            break;
-        case -1: // planning
-            ss = SSPrintf("#P-%lu-%lu", location, serial);  
-            break;
-        default: // during a step
-            ss = SSPrintf("#%d-%lu-%lu", step, location, serial);  
-            break;
-    }
+    string pp = progress.GetPrefix();
+    string ss = SSPrintf("#%s-%lu-%lu", pp.c_str(), location, serial);
     return ss;
 }
 

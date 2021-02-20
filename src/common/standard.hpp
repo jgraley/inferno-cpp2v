@@ -33,8 +33,8 @@ public:
 };
 
 // sprintf into a std::string
-string VSSPrintf(const char *fmt, va_list vl);
-string SSPrintf(const char *fmt, ...);
+string VSSPrintf(string fmt, va_list vl);
+string SSPrintf(string fmt, ...);
 
 void CommonTest();
 

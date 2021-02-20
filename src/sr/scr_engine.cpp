@@ -73,11 +73,11 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 }
 
     
-void SCREngine::Plan::InitPartTwo(const CompareReplace::AgentPhases &agent_phases)
+void SCREngine::Plan::PlanningPartTwo(const CompareReplace::AgentPhases &agent_phases)
 {
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->InitPartTwo(agent_phases);                                      
+        p.second->PlanningPartTwo(agent_phases);                                      
 
     // Configure agents on the way out
     ConfigureAgents(agent_phases);
@@ -206,7 +206,8 @@ void SCREngine::Plan::CreateMyEngines( const set<RequiresSubordinateSCREngine *>
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
                                                  surrounding_plinks, 
-                                                 algo );                                
+                                                 algo );       
+        ae->ConfigureMyEngine( &*my_engines.at(ae) );
     }        
 }
 
@@ -217,10 +218,7 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
     for( Agent *agent : my_agents )
     {        
         agent->AgentConfigure( agent_phases.at(agent),
-                               algo );             
-                           
-        if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(agent) )        
-            ae->ConfigureMyEngine( &*my_engines.at(ae) );
+                               algo );                                                 
     }
     
     for( PatternLink plink : my_plinks )

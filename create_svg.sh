@@ -1,5 +1,7 @@
 #! /bin/bash -ex
 
+make -j 3
+
 rm pattern-graphs*/*
 
 ./inferno.exe -gp pattern-graphs/

@@ -1,6 +1,8 @@
 #ifndef SERIAL_HPP
 #define SERIAL_HPP
 
+#include "progress.hpp"
+
 #include <map>
 #include <bits/stdint-uintn.h>
 #include <unordered_map>
@@ -66,13 +68,12 @@ public:
     
 private:    
     static SNType master_location_serial;
-    static int current_step;
     static map<void *, SNType> location_serial;
     static map<SNType, void *> location_readback;
     static map<void *, SNType> master_serial;
     SNType serial;
     SNType location;
-    SNType step;
+    Progress progress;
 
 protected:
     void Construct();
@@ -92,15 +93,14 @@ protected:
     }
     inline bool operator<( const SerialNumber &o )
     {
-        if( step != o.step )
-            return step < o.step;
+        if( progress != o.progress )
+            return progress < o.progress;
         else if( location < o.location )
             return location < o.location;
         else
             return serial < o.serial;
     }
 public:
-    static void SetStep( int s );
     static void *GetLocation( SNType location );
 
     inline pair<SNType, SNType> GetSerialNumber() const 

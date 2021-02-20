@@ -146,36 +146,23 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 }
 
 
-int main( int argc, char *argv[] )
+void SetStep( Progress::Stage stage, int step=-1 )
 {
-    // Check the command line arguments 
-    ReadArgs( argc, argv );
-    HitCount::instance.Check();
-    Tracer::Enable( ReadArgs::trace );
-    HitCount::instance.SetStep(-1);
-    SerialNumber::SetStep(-1);
-    Tracer::SetStep(-1);
-    HitCount::Enable( ReadArgs::trace_hits );
+    HitCount::instance.SetStep(step);
+    Tracer::SetStep(step);
+    Progress( stage, step ).SetAsCurrent();
+}
 
-    // Do self-tests (unit tests) if requested
-    if( ReadArgs::selftest )
-        SelfTest();
-    
-    // Build documentation graphs if requested
-    if( ReadArgs::documentation_graphs )
-        GenerateDocumentationGraphs();
-    
-    // If a pattern graph was requested, generate it now
-    vector< shared_ptr<Transformation> > sequence;
-    BuildSequence( &sequence );
-    
+
+void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence )
+{
     if( !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1 )
     {
         if( ReadArgs::pattern_graph_name.back()=='/' )
         {
             string dir = ReadArgs::pattern_graph_name;
             int index = 0;
-            for( shared_ptr<Transformation> t : sequence )
+            for( shared_ptr<Transformation> t : *sequence )
             {
                 string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
                 Graph g( filepath );
@@ -188,35 +175,76 @@ int main( int argc, char *argv[] )
             if( !ReadArgs::pattern_graph_name.empty() )
             {
                 ReadArgs::pattern_graph_index = 0;
-                for( shared_ptr<Transformation> t : sequence )
+                for( shared_ptr<Transformation> t : *sequence )
                 {
                     if( t->GetName() == ReadArgs::pattern_graph_name )
                         break;
                     ReadArgs::pattern_graph_index++;
                 }
-                if( ReadArgs::pattern_graph_index == sequence.size() )
+                if( ReadArgs::pattern_graph_index == sequence->size() )
                 {
                     fprintf(stderr, "Cannot find step named %s. Known step names:\n", ReadArgs::pattern_graph_name.c_str() );  
-                    for( shared_ptr<Transformation> t : sequence )
+                    for( shared_ptr<Transformation> t : *sequence )
                         fprintf(stderr, "%s\n", t->GetName().c_str() );
                     ASSERT(false);
                 }
             }
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-            ASSERT( ReadArgs::pattern_graph_index < sequence.size() )("There are only %d steps at present\n", sequence.size() );
+            ASSERT( ReadArgs::pattern_graph_index < sequence->size() )("There are only %d steps at present\n", sequence->size() );
             Graph g( ReadArgs::outfile );
-            g( sequence[ReadArgs::pattern_graph_index].get() );
+            g( sequence->at(ReadArgs::pattern_graph_index).get() );
         }
     }        
+}
+
+
+int main( int argc, char *argv[] )
+{
+    // Check the command line arguments 
+    ReadArgs( argc, argv );
+    HitCount::instance.Check();
+    Tracer::Enable( ReadArgs::trace );
+    SetStep(Progress::BUILDING_STEPS);    
+    HitCount::Enable( ReadArgs::trace_hits );
+    int i;
+
+    // Do self-tests (unit tests) if requested
+    if( ReadArgs::selftest )
+        SelfTest();
     
+    // Build documentation graphs if requested
+    if( ReadArgs::documentation_graphs )
+        GenerateDocumentationGraphs();
+    
+    // Build the sequence of steps
+    vector< shared_ptr<Transformation> > sequence;
+    BuildSequence( &sequence );
+    
+    // Planning part one
+    i=0;
+    FOREACH( shared_ptr<Transformation> t, sequence )
+    {
+        SetStep(Progress::PLANNING_ONE, i++);
+        dynamic_pointer_cast<CompareReplace>(t)->PlanningPartOne();
+    }
+
+    // If a pattern graph was requested, generate it now
+    MaybeGeneratePatternGraphs( &sequence );
+        
+    // Planning part two
+    i=0;
+    FOREACH( shared_ptr<Transformation> t, sequence )
+    {
+        SetStep(Progress::PLANNING_TWO, i++);
+        dynamic_pointer_cast<CompareReplace>(t)->PlanningPartTwo();
+    }
+       
     // If there was no input program then there's nothing more to do
     if( ReadArgs::infile.empty() )
         return 0;
 
-    HitCount::instance.SetStep(-3);
-    SerialNumber::SetStep(-3);
-    Tracer::SetStep(-3);
-
+    SetStep(Progress::PARSING);
+    
     // Parse the input program
     TreePtr<Node> program = TreePtr<Node>();
     {
@@ -228,8 +256,7 @@ int main( int argc, char *argv[] )
     if( ReadArgs::runonlyenable )
     {
         // Apply only the transformation requested
-        SerialNumber::SetStep(ReadArgs::runonlystep);
-        HitCount::instance.SetStep(ReadArgs::runonlystep);
+        SetStep(Progress::TRANSFORMING, ReadArgs::runonlystep);
         
         shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
         if( !ReadArgs::trace_quiet )
@@ -240,13 +267,11 @@ int main( int argc, char *argv[] )
     else if( !(!ReadArgs::quitafter.empty() && ReadArgs::quitafter[0]==-1 ) )
     {
         // Apply the transformation steps in order, but quit early if requested to
-        int i=0;
+        i=0;
         FOREACH( shared_ptr<Transformation> t, sequence )
         {
-            SerialNumber::SetStep(i);
-            HitCount::instance.SetStep(i);
-            Tracer::SetStep(i);
-            
+            SetStep(Progress::TRANSFORMING, i);
+                       
             bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
             if( !ReadArgs::trace_quiet )
                 fprintf(stderr, "%s step %03d-%s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
@@ -280,9 +305,7 @@ int main( int argc, char *argv[] )
     // Output either C source code or a graph, as requested
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
-    HitCount::instance.SetStep(-2);
-    SerialNumber::SetStep(-2);
-    Tracer::SetStep(-2);
+    SetStep(Progress::RENDERING);
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
