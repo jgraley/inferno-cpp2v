@@ -309,25 +309,25 @@ RemoveVoidInstances::RemoveVoidInstances()
 }
 
 
-DetectAllSCTypes::DetectAllSCTypes()
+void DetectAllSCTypes::Build( vector< shared_ptr<Transformation> > *sequence )
 {
-    push_back( shared_ptr<Transformation>( new DetectSCType( MakePatternPtr<Event>() ) ) );
-    push_back( shared_ptr<Transformation>( new DetectSCBase( MakePatternPtr<Module>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCBase( MakePatternPtr<Interface>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCDynamic( MakePatternPtr<WaitDynamic>() ) ) );        
-    push_back( shared_ptr<Transformation>( new DetectSCStatic( MakePatternPtr<WaitStatic>() ) ) );        
-    push_back( shared_ptr<Transformation>( new DetectSCDelta( MakePatternPtr<WaitDelta>() ) ) );        
-    push_back( shared_ptr<Transformation>( new DetectSCDynamic( MakePatternPtr<NextTriggerDynamic>() ) ) );        
-    push_back( shared_ptr<Transformation>( new DetectSCStatic( MakePatternPtr<NextTriggerStatic>() ) ) );        
-    push_back( shared_ptr<Transformation>( new DetectSCDelta( MakePatternPtr<NextTriggerDelta>() ) ) );        
-    push_back( shared_ptr<Transformation>( new DetectTerminationFunction( MakePatternPtr<Exit>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectTerminationFunction( MakePatternPtr<Cease>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Thread>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<ClockedThread>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Method>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCNotifyImmediate ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCNotifyDelta ) );    
-    push_back( shared_ptr<Transformation>( new RemoveEmptyModuleConstructors ) );    
-    push_back( shared_ptr<Transformation>( new RemoveVoidInstances ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCType( MakePatternPtr<Event>() ) ) );
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCBase( MakePatternPtr<Module>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCBase( MakePatternPtr<Interface>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCDynamic( MakePatternPtr<WaitDynamic>() ) ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCStatic( MakePatternPtr<WaitStatic>() ) ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCDelta( MakePatternPtr<WaitDelta>() ) ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCDynamic( MakePatternPtr<NextTriggerDynamic>() ) ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCStatic( MakePatternPtr<NextTriggerStatic>() ) ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCDelta( MakePatternPtr<NextTriggerDelta>() ) ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectTerminationFunction( MakePatternPtr<Exit>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectTerminationFunction( MakePatternPtr<Cease>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Thread>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<ClockedThread>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Method>() ) ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCNotifyImmediate ) );    
+    sequence->push_back( shared_ptr<Transformation>( new DetectSCNotifyDelta ) );    
+    sequence->push_back( shared_ptr<Transformation>( new RemoveEmptyModuleConstructors ) );    
+    sequence->push_back( shared_ptr<Transformation>( new RemoveVoidInstances ) );    
 }
 

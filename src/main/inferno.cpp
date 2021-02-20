@@ -30,7 +30,7 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
     ASSERT( sequence );
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we never want to process implicit SystemC.
-    sequence->push_back( shared_ptr<Transformation>( new DetectAllSCTypes ) );
+    DetectAllSCTypes::Build(sequence);
 
     { // establish what is locally uncombable
         sequence->push_back( shared_ptr<Transformation>( new DetectUncombableSwitch ) );

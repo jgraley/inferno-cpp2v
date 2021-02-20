@@ -117,13 +117,13 @@ public:
 
 
 
-/** Holder for the steps that detect implicit SysetemC constructs in C++ code
+/** Builder for the steps that detect implicit SysetemC constructs in C++ code
     and replace them with Inferno's Explicit nodes for SystemC which are much
     more succinct in tree form */
-class DetectAllSCTypes : public TransformationVector // TODO make generic version
+class DetectAllSCTypes
 {
 public:
-    DetectAllSCTypes();
+    static void Build( vector< shared_ptr<Transformation> > *sequence );
 };
 
 };
