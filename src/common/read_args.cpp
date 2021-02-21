@@ -44,7 +44,7 @@ void ReadArgs::Usage()
                     "-tq         No output to console.\n"
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
-                    "-q<n>       Stop after step <n>.\n"    
+                    "-q<n>       Stop after step <n> or use -qp to stop after parse stage.\n"    
                     "            Note: -q<n> makes -t and -r operate only on step n.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
 	                "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
