@@ -4,6 +4,7 @@
 #include "query.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
+#include "common/serial.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
@@ -34,7 +35,8 @@ public:
 };
 
 /// Common implementation for search+replace, compare+replace and slaves
-class SCREngine : public virtual Graphable
+class SCREngine : public virtual Graphable,
+                  public SerialNumber
 {      
 public:
     SCREngine( bool is_search,
@@ -72,7 +74,8 @@ private:
         void CreateMyEngines( const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                               CompareReplace::AgentPhases &agent_phases );
         void ConfigureAgents(const CompareReplace::AgentPhases &agent_phases);
-
+        string GetTrace() const; // used for debug
+        
         SCREngine * const algo;
         const bool is_search;    
         const CompareReplace *overall_master_ptr;
@@ -109,6 +112,7 @@ public:
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     XLink UniquifyDomainExtension( XLink xlink ) const;
+    string GetTrace() const; // used for debug
         
 private:    
     static int repetitions;

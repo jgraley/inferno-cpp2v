@@ -66,25 +66,12 @@ class SerialNumber
 public:
     typedef uint64_t SNType;
     
-private:    
-    static SNType master_location_serial;
-    static map<void *, SNType> location_serial;
-    static map<SNType, void *> location_readback;
-    static map<void *, SNType> master_serial;
-    SNType serial;
-    SNType location;
-    Progress progress;
-
 protected:
-    void Construct();
-    inline SerialNumber() 
-    { 
-        Construct();       
-    }
-    inline SerialNumber( const SerialNumber &other ) 
-    {
-        // Identity semantics: ignore "other"
-        Construct();        
+    SerialNumber( bool use_location = true,
+                  const SerialNumber *serial_to_use = nullptr );
+    inline SerialNumber( const SerialNumber &other ) :
+        SerialNumber() // Identity semantics: ignore "other"
+    {      
     }
     inline SerialNumber &operator=( const SerialNumber &other )
     {
@@ -108,6 +95,16 @@ public:
         return make_pair(location, serial); // This is enough for uniqueness
     }
     string GetSerialString() const; 
+private:    
+    const bool use_location;
+    SNType serial;
+    SNType location;
+    Progress progress;
+
+    static SNType master_location_serial;
+    static map<void *, SNType> location_serial;
+    static map<SNType, void *> location_readback;
+    static map<void *, SNType> master_serial;
 };
 
 

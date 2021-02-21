@@ -75,7 +75,7 @@ void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
 
 void AgentCommon::ConfigureParents( PatternLink base_plink_, 
                                     set<PatternLink> coupled_plinks_,
-                                    void *are )
+                                    string are )
 {  
     ASSERT(master_scr_engine)("Must call AgentConfigure() before ConfigureParents()");
     if( ReadArgs::new_feature )

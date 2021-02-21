@@ -59,21 +59,16 @@ map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
 
 //////////////////////////// SerialNumber ///////////////////////////////
 
-SerialNumber::SNType SerialNumber::master_location_serial;
-map<void *, SerialNumber::SNType> SerialNumber::location_serial;
-map<SerialNumber::SNType, void *> SerialNumber::location_readback;
-map<void *, SerialNumber::SNType> SerialNumber::master_serial;
-
-
-void SerialNumber::Construct()
-{
+SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_use ) :
+    use_location( use_location_ )
+{    
     // Get the point in the code where we were constructed 
-    void *lp = __builtin_return_address(1); 
+    void *lp = use_location ? __builtin_return_address(1) : nullptr; 
     
     // See if we know about this location
     map<void *, SNType>::iterator it = location_serial.find(lp);
     if( it == location_serial.end() )
-    {
+    {        
         // We don't know about this location, so produce a new location serial number and start the construction count 
         location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
         TRACE("%p assigned serial -%lu-\n", lp, master_location_serial);
@@ -83,12 +78,13 @@ void SerialNumber::Construct()
     }
         
     // Remember values for this object
-    serial = master_serial[lp];
+    serial = serial_to_use ? serial_to_use->serial : master_serial[lp];
     location = location_serial[lp];
     progress = Progress::GetCurrent();
     
     // produce a new construction serial number
-    master_serial[lp]++;
+    if( !serial_to_use )
+        master_serial[lp]++;
 }    
 
 
@@ -101,9 +97,17 @@ void *SerialNumber::GetLocation( SNType location )
 string SerialNumber::GetSerialString() const
 {
     string pp = progress.GetPrefix();
-    string ss = SSPrintf("#%s-%lu-%lu", pp.c_str(), location, serial);
-    return ss;
+    if( use_location )
+        return SSPrintf("#%s-%lu-%lu", pp.c_str(), location, serial);
+    else
+        return SSPrintf("#%s-%lu", pp.c_str(), serial);    
 }
+
+
+SerialNumber::SNType SerialNumber::master_location_serial = 1;
+map<void *, SerialNumber::SNType> SerialNumber::location_serial = {{nullptr, 0}};
+map<SerialNumber::SNType, void *> SerialNumber::location_readback = {{0, nullptr}};
+map<void *, SerialNumber::SNType> SerialNumber::master_serial = {{nullptr, 0}};
 
 //////////////////////////// SatelliteSerial ///////////////////////////////
 

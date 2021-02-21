@@ -5,6 +5,7 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "common/mismatch.hpp"
+#include "common/serial.hpp"
 #include "agents/agent.hpp"
 #include "agents/conjunction_agent.hpp"
 #include "link.hpp"
@@ -29,7 +30,8 @@ class SpecialBase;
 class CompareReplace;
 
 /// Solve an and-rule matching problem
-class AndRuleEngine : public virtual Traceable
+class AndRuleEngine : public virtual Traceable,
+                      public SerialNumber
 {
 public:
     // Any mismatch this class throws
@@ -48,7 +50,8 @@ public:
     };
     
     AndRuleEngine( PatternLink root_plink, 
-                   const unordered_set<PatternLink> &master_plinks);
+                   const unordered_set<PatternLink> &master_plinks,
+                   const SerialNumber *serial_to_use = nullptr );
     
     ~AndRuleEngine();
     
@@ -76,7 +79,8 @@ public:
                                    PatternLink link );
         void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
                                        const unordered_set<PatternLink> &surrounding_plinks );
- 
+        string GetTrace() const; // used for debug
+        
         AndRuleEngine * const algo;
         const PatternLink root_plink;
         const TreePtr<Node> root_pattern;
@@ -137,6 +141,7 @@ private:
     void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
     void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, XLink new_xlink, Agent *parent_agent );
+    string GetTrace() const; // used for debug
 
     // Information about the X tree
     const TheKnowledge *knowledge;

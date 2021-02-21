@@ -37,6 +37,7 @@ SCREngine::SCREngine( bool is_search_,
                       TreePtr<Node> rp,
                       const unordered_set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
+    SerialNumber( false ),
     plan(this, is_search_, overall_master, agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {
@@ -56,8 +57,8 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     master_ptr( nullptr ),
     master_plinks( master_plinks_ )
 {
-    TRACE(GetName());
     INDENT("}");
+    TRACE(*this)(" planning part one\n");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
     //TRACE("Entering SCREngine::Configure on ")(*this)("\n");
     overall_master_ptr = overall_master;
@@ -76,6 +77,8 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 void SCREngine::Plan::PlanningPartTwo(const CompareReplace::AgentPhases &agent_phases)
 {
     INDENT("}");
+    TRACE(*this)(" planning part two\n");
+    
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningPartTwo(agent_phases);                                      
@@ -85,7 +88,7 @@ void SCREngine::Plan::PlanningPartTwo(const CompareReplace::AgentPhases &agent_p
 
     // Make and-rule engines on the way out - by now, hopefully all
     // the agents this and-rule engine sees have been configured.
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks);
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
 } 
 
 
@@ -227,8 +230,14 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
         Agent *agent = plink.GetChildAgent();
         // Replace-only nodes are self-keying
         if( agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
-            agent->ConfigureParents( PatternLink(), {plink}, this );
+            agent->ConfigureParents( PatternLink(), {plink}, GetTrace() );
     }    
+}
+
+
+string SCREngine::Plan::GetTrace() const 
+{
+    return algo->GetName() + "::Plan" + algo->GetSerialString();
 }
 
 
@@ -470,4 +479,11 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
        
     return repetitions;
+}
+
+
+string SCREngine::GetTrace() const
+{
+    string s = Traceable::GetName() + GetSerialString();
+    return s;
 }

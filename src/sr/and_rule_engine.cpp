@@ -33,7 +33,9 @@
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
-                              const unordered_set<PatternLink> &master_plinks ) :
+                              const unordered_set<PatternLink> &master_plinks,
+                              const SerialNumber *serial_to_use ) :
+    SerialNumber( false, serial_to_use ),
     plan( this, root_plink, master_plinks )
 {
 }    
@@ -336,7 +338,7 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 void AndRuleEngine::Plan::ConfigureAgents()
 {
     if( ReadArgs::new_feature )
-        FTRACE((void *)algo)(" ConfigureAgents keyers:\n")(coupling_keyer_links)("\n");
+        FTRACE(*algo)(" ConfigureAgents keyers:\n")(coupling_keyer_links)("\n");
     for( PatternLink keyer_plink : coupling_keyer_links )
     {
         ASSERT( keyer_plink );
@@ -350,7 +352,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
             
-        agent->ConfigureParents( keyer_plink, residual_plinks, this );
+        agent->ConfigureParents( keyer_plink, residual_plinks, GetTrace() );
     }
 }
 
@@ -408,6 +410,12 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *>
             my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks );  
         }
     }
+}
+
+
+string AndRuleEngine::Plan::GetTrace() const
+{
+    return algo->GetName() + "::Plan" + algo->GetSerialString();
 }
 
 
@@ -737,8 +745,8 @@ void AndRuleEngine::Compare( XLink root_xlink,
 
     if( ReadArgs::new_feature )
     {
-        FTRACE((void *)this)(" Coupling keyers ")(plan.coupling_keyer_links)("\n");
-        FTRACE((void *)this)(" Master boundary keyers ")(plan.master_boundary_keyer_links)("\n");
+        FTRACE(*this)(" Coupling keyers ")(plan.coupling_keyer_links)("\n");
+        FTRACE(*this)(" Master boundary keyers ")(plan.master_boundary_keyer_links)("\n");
     }
            
     master_keys = master_keys_;    
@@ -885,7 +893,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     
     if( ReadArgs::new_feature )
     {
-        FTRACE((void *)this)(" Keyer ")(keyer_xlink)("\nResidual ")(residual_link)("\n");
+        FTRACE(*this)(" Keyer ")(keyer_xlink)("\nResidual ")(residual_link)("\n");
         PatternLink keyer_plink = agent->GetKeyerPatternLink();
     }
 
@@ -939,4 +947,11 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     {
         ASSERT( extracted.at(new_agent).GetChildX() == new_xnode );
     }
+}
+
+
+string AndRuleEngine::GetTrace() const
+{
+    string s = Traceable::GetName() + GetSerialString();
+    return s;
 }
