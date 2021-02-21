@@ -27,6 +27,18 @@ string Progress::GetPrefix(int width) const
 }
 
 
+int Progress::GetStep() const
+{
+    return step;
+}
+
+
+Progress::Stage Progress::GetStage() const
+{
+    return stage;
+}
+
+
 void Progress::SetAsCurrent() const
 {
     current = *this;

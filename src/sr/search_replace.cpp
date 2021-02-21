@@ -26,7 +26,7 @@ CompareReplace::Plan::Plan( CompareReplace *algo_, bool is_search_ ) :
 void CompareReplace::Plan::Configure( TreePtr<Node> cp,
                                       TreePtr<Node> rp )
 {
-    TRACE(algo->GetName());
+    TRACE(algo->GetName())("\n");
     compare_pattern = cp;
     replace_pattern = rp;
 }
@@ -53,7 +53,7 @@ void CompareReplace::Plan::PlanningPartTwo()
 void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
-    INDENT("P");
+    INDENT(")");
     plan.Configure( cp, rp );
 }
 

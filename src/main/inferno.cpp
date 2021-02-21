@@ -4,7 +4,6 @@
 #include "render/render.hpp"
 #include "render/graph.hpp"
 #include "common/read_args.hpp"
-#include "common/hit_count.hpp"
 #include "helpers/walk.hpp"
 #include "sr/search_replace.hpp"
 #include "tree/validate.hpp"
@@ -146,14 +145,6 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 }
 
 
-void SetStep( Progress::Stage stage, int step=-1 )
-{
-    HitCount::instance.SetStep(step);
-    Tracer::SetStep(step);
-    Progress( stage, step ).SetAsCurrent();
-}
-
-
 void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence )
 {
     if( !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1 )
@@ -204,7 +195,7 @@ int main( int argc, char *argv[] )
     ReadArgs( argc, argv );
     HitCount::instance.Check();
     Tracer::Enable( ReadArgs::trace );
-    SetStep(Progress::BUILDING_STEPS);    
+    Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
     HitCount::Enable( ReadArgs::trace_hits );
     int i;
 
@@ -224,7 +215,7 @@ int main( int argc, char *argv[] )
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
-        SetStep(Progress::PLANNING_ONE, i++);
+        Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningPartOne();
     }
 
@@ -235,7 +226,7 @@ int main( int argc, char *argv[] )
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
-        SetStep(Progress::PLANNING_TWO, i++);
+        Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningPartTwo();
     }
        
@@ -243,7 +234,7 @@ int main( int argc, char *argv[] )
     if( ReadArgs::infile.empty() )
         return 0;
 
-    SetStep(Progress::PARSING);
+    Progress(Progress::PARSING).SetAsCurrent();
     
     // Parse the input program
     TreePtr<Node> program = TreePtr<Node>();
@@ -256,7 +247,7 @@ int main( int argc, char *argv[] )
     if( ReadArgs::runonlyenable )
     {
         // Apply only the transformation requested
-        SetStep(Progress::TRANSFORMING, ReadArgs::runonlystep);
+        Progress(Progress::TRANSFORMING, ReadArgs::runonlystep).SetAsCurrent();
         
         shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
         if( !ReadArgs::trace_quiet )
@@ -270,7 +261,7 @@ int main( int argc, char *argv[] )
         i=0;
         FOREACH( shared_ptr<Transformation> t, sequence )
         {
-            SetStep(Progress::TRANSFORMING, i);
+            Progress(Progress::TRANSFORMING, i).SetAsCurrent();
                        
             bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
             if( !ReadArgs::trace_quiet )
@@ -305,7 +296,7 @@ int main( int argc, char *argv[] )
     // Output either C source code or a graph, as requested
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
-    SetStep(Progress::RENDERING);
+    Progress(Progress::RENDERING).SetAsCurrent();
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )

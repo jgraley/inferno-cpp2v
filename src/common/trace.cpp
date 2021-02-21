@@ -1,4 +1,7 @@
 #include "trace.hpp"
+
+#include "progress.hpp"
+
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include <string.h>
@@ -230,31 +233,9 @@ void Tracer::Descend::Indent()
 }
 
 
-void Tracer::SetStep( int s )
-{
-    current_step = s;
-}
-
-
 void Tracer::PrintPrefix()
 {
-    switch( current_step )
-    {
-        case -4: // inputting
-            break;
-        case -3: // inputting
-            clog << "I  ";
-            break;
-        case -2: // outputting
-            clog << "O  ";
-            break;
-        case -1: // planning
-            clog << "P  ";
-            break;
-        default: // during a step
-            clog << SSPrintf( "%03d", current_step );  
-            break;
-    }
+    clog << Progress::GetCurrent().GetPrefix(4) << " ";
     Descend::Indent();
 }
 
@@ -269,7 +250,6 @@ void Tracer::MaybePrintBanner()
     }    
 }
 
-int Tracer::current_step = -4; // -4 is disable
 bool Tracer::require_endl = false;
 bool Tracer::require_banner = true;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing

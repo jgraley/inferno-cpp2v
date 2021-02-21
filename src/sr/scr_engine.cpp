@@ -57,7 +57,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     master_plinks( master_plinks_ )
 {
     TRACE(GetName());
-    INDENT("P");
+    INDENT("}");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
     //TRACE("Entering SCREngine::Configure on ")(*this)("\n");
     overall_master_ptr = overall_master;
@@ -75,6 +75,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
 void SCREngine::Plan::PlanningPartTwo(const CompareReplace::AgentPhases &agent_phases)
 {
+    INDENT("}");
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningPartTwo(agent_phases);                                      

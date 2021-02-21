@@ -22,13 +22,15 @@ public:
     
     Progress( Stage stage=INVALID, int step=-1 );
     string GetPrefix( int width=0 ) const;
+    int GetStep() const;
+    Stage GetStage() const;
     void SetAsCurrent() const;
     static const Progress &GetCurrent();
-    inline bool operator!=( const Progress &o )
+    inline bool operator!=( const Progress &o ) const 
     {
         return stage != o.stage || step != o.step;
     }
-    inline bool operator<( const Progress &o )
+    inline bool operator<( const Progress &o ) const
     {
         if( stage != o.stage )
             return (int)stage < (int)o.stage;

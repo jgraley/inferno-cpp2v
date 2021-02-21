@@ -1,10 +1,6 @@
 #include "hit_count.hpp"
 #include "read_args.hpp"
 
-HitCount HitCount::instance; 
-
-bool HitCount::enable = false; ///< call HitCount::Enable(true) to begin counting hits
-
 bool operator<( const HitCount::Category &l, const HitCount::Category &r )
 {
     // prioritise the comparisons in a way that makes for a nice dump when dumped in order
@@ -13,8 +9,8 @@ bool operator<( const HitCount::Category &l, const HitCount::Category &r )
         switch( ReadArgs::hits_format[i] )
         {
             case 'S':
-            if( l.step != r.step )
-                return l.step < r.step;
+            if( l.progress != r.progress )
+                return l.progress < r.progress;
             break;
             
             case 'I':
@@ -83,8 +79,8 @@ void HitCount::Dump()
             switch( ReadArgs::hits_format[i] )
             {
                 case 'S':
-                if( p.first.step>=0 )
-                    printf("step %d", p.first.step );                   
+                if( p.first.progress.GetStage() == Progress::TRANSFORMING )
+                    printf("step %d", p.first.progress.GetStep() );                   
                 else
                     printf("pre/post");
                 break;
@@ -129,4 +125,8 @@ void HitCount::Enable( bool e )
     enable = e;
 }
 
+
+HitCount HitCount::instance; 
+
+bool HitCount::enable = false; ///< call HitCount::Enable(true) to begin counting hits
 

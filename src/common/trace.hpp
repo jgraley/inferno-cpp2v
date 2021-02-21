@@ -244,8 +244,6 @@ public:
 
     static void MaybePrintEndl();
 
-    static void SetStep( int s );
-
 private:    
     void PrintPrefix();
     void MaybePrintBanner();
@@ -257,7 +255,6 @@ private:
     static bool require_endl;
     static bool require_banner;
     static bool enable;
-    static int current_step;
 };
 
 ////////////////////////// TraceTo //////////////////////////
