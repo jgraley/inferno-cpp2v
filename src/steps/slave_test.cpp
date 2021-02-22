@@ -27,6 +27,6 @@ SlaveTest::SlaveTest()
 
    	SearchReplace sr;
     sr.Configure( s_for, r_comp );
-    sr.PlanningPartOne();
-    sr.PlanningPartTwo();
+    sr.PlanningStageOne();
+    sr.PlanningStageTwo();
 }

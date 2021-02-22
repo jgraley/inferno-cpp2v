@@ -104,7 +104,8 @@ private:
     static SNType master_location_serial;
     static map<void *, SNType> location_serial;
     static map<SNType, void *> location_readback;
-    static map<void *, SNType> master_serial;
+    static map<SNType, SNType> master_serial_by_location;
+    static map<Progress, SNType> master_serial_by_progress;
 };
 
 

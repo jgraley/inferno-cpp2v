@@ -32,7 +32,7 @@ void CompareReplace::Plan::Configure( TreePtr<Node> cp,
 }
 
 
-void CompareReplace::Plan::PlanningPartOne()
+void CompareReplace::Plan::PlanningStageOne()
 {
     // Two-part init for SCREngine: 
     // First, add extra root nodes, categorise, create subordinate 
@@ -42,11 +42,11 @@ void CompareReplace::Plan::PlanningPartOne()
 }
 
     
-void CompareReplace::Plan::PlanningPartTwo()
+void CompareReplace::Plan::PlanningStageTwo()
 {
     //FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
     // Second, configure the agents and create subordinate AndRuleEngines
-    scr_engine->PlanningPartTwo(agent_phases);
+    scr_engine->PlanningStageTwo(agent_phases);
 }                                      
 
 
@@ -58,15 +58,15 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 }
 
 
-void CompareReplace::PlanningPartOne()
+void CompareReplace::PlanningStageOne()
 {
-    plan.PlanningPartOne();
+    plan.PlanningStageOne();
 }
 
 
-void CompareReplace::PlanningPartTwo()
+void CompareReplace::PlanningStageTwo()
 {
-    plan.PlanningPartTwo();
+    plan.PlanningStageTwo();
 }
 
 

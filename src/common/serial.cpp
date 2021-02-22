@@ -62,29 +62,55 @@ map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
 SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_use ) :
     use_location( use_location_ )
 {    
-    // Get the point in the code where we were constructed 
-    void *lp = use_location ? __builtin_return_address(1) : nullptr; 
-    
-    // See if we know about this location
-    map<void *, SNType>::iterator it = location_serial.find(lp);
-    if( it == location_serial.end() )
-    {        
-        // We don't know about this location, so produce a new location serial number and start the construction count 
-        location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
-        TRACE("%p assigned serial -%lu-\n", lp, master_location_serial);
-        location_readback[master_location_serial] = lp;
-        master_serial.insert( pair<void *, SerialNumber::SNType>(lp, 0) );
-        master_location_serial++;
-    }
-        
-    // Remember values for this object
-    serial = serial_to_use ? serial_to_use->serial : master_serial[lp];
-    location = location_serial[lp];
     progress = Progress::GetCurrent();
     
-    // produce a new construction serial number
-    if( !serial_to_use )
-        master_serial[lp]++;
+    if( serial_to_use )
+    {
+        // Serial number supplied to constructor (explicitly), take
+        // location and serial but not progress.
+        serial = serial_to_use->serial;
+        location = serial_to_use->location;
+        return;
+    }
+    
+    if( use_location )
+    {
+        // Get the point in the code where we were constructed 
+        void *lp = __builtin_return_address(1); 
+        
+        // See if we know about this location
+        if( location_serial.count(lp) == 0 )
+        {        
+            // We don't know about this location, so produce a new location 
+            // serial number and start the construction count 
+            location = master_location_serial;
+            master_location_serial++;
+            
+            location_serial[lp] = location;
+            location_readback[location] = lp;
+            TRACE("%p assigned serial -%lu-\n", lp, location);
+
+            master_serial_by_location[location] = 0;
+        }
+        else
+        {
+            location = location_serial.at(lp);
+        }
+        
+        serial = master_serial_by_location.at(location);
+        
+        // produce a new construction serial number
+        master_serial_by_location[location]++;
+    }
+    else
+    {
+        location = 0;
+        serial = master_serial_by_progress[progress];
+        
+        // produce a new construction serial number
+        master_serial_by_progress[progress]++;
+    }
+        
 }    
 
 
@@ -105,9 +131,10 @@ string SerialNumber::GetSerialString() const
 
 
 SerialNumber::SNType SerialNumber::master_location_serial = 1;
-map<void *, SerialNumber::SNType> SerialNumber::location_serial = {{nullptr, 0}};
-map<SerialNumber::SNType, void *> SerialNumber::location_readback = {{0, nullptr}};
-map<void *, SerialNumber::SNType> SerialNumber::master_serial = {{nullptr, 0}};
+map<void *, SerialNumber::SNType> SerialNumber::location_serial;
+map<SerialNumber::SNType, void *> SerialNumber::location_readback;
+map<SerialNumber::SNType, SerialNumber::SNType> SerialNumber::master_serial_by_location;
+map<Progress, SerialNumber::SNType> SerialNumber::master_serial_by_progress;
 
 //////////////////////////// SatelliteSerial ///////////////////////////////
 

@@ -34,8 +34,8 @@ private:
               bool is_search );
         void Configure( TreePtr<Node> cp,
                         TreePtr<Node> rp );
-        void PlanningPartOne();
-        void PlanningPartTwo();
+        void PlanningStageOne();
+        void PlanningStageTwo();
 
         TreePtr<Node> compare_pattern;
         TreePtr<Node> replace_pattern;
@@ -49,8 +49,8 @@ private:
 public:
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
-    void PlanningPartOne();
-    void PlanningPartTwo();
+    void PlanningStageOne();
+    void PlanningStageTwo();
     
     static void SetMaxReps( int n, bool e );
                             

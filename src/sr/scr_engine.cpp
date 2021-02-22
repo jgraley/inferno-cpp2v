@@ -74,14 +74,14 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 }
 
     
-void SCREngine::Plan::PlanningPartTwo(const CompareReplace::AgentPhases &agent_phases)
+void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &agent_phases)
 {
     INDENT("}");
     TRACE(*this)(" planning part two\n");
     
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningPartTwo(agent_phases);                                      
+        p.second->PlanningStageTwo(agent_phases);                                      
 
     // Configure agents on the way out
     ConfigureAgents(agent_phases);

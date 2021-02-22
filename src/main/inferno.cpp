@@ -216,7 +216,7 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
-        dynamic_pointer_cast<CompareReplace>(t)->PlanningPartOne();
+        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageOne();
     }
 
     // If a pattern graph was requested, generate it now
@@ -227,7 +227,7 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
-        dynamic_pointer_cast<CompareReplace>(t)->PlanningPartTwo();
+        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageTwo();
     }
        
     // If there was no input program then there's nothing more to do
