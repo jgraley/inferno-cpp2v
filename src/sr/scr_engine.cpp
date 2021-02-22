@@ -268,6 +268,10 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
                                     SOLID, 
                                     {},
                                     {plan.root_plink.GetShortName()} } } } );
+        sub_blocks.push_back( { GetSerialString(), 
+                                "", 
+                                false, 
+                                {} }  );
         return { false, GetName(), "", "", CONTROL, sub_blocks };
     }
     
