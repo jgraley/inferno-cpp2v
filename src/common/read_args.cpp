@@ -5,6 +5,7 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 
 using namespace std;
 
@@ -23,7 +24,9 @@ string ReadArgs::hits_format;
 bool ReadArgs::selftest = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
-vector<int> ReadArgs::quitafter;
+bool ReadArgs::quitafter = false;
+Progress ReadArgs::quitafter_progress;
+vector<int> ReadArgs::quitafter_counts;
 int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
@@ -44,8 +47,10 @@ void ReadArgs::Usage()
                     "-tq         No output to console.\n"
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
-                    "-q<n>       Stop after step <n> or use -qp to stop after parse stage.\n"    
-                    "            Note: -q<n> makes -t and -r operate only on step n.\n"                
+                    "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
+                    "               for transformation 12, master match 2, first slave match 3\n"    
+                    "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
+                    "               Note: if quitting after parse or later, output is attempted.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
 	                "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
 	                "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name,\n"
@@ -208,19 +213,16 @@ ReadArgs::ReadArgs( int ac, char *av[] )
 }
 
 // quitafter syntax
-// "step.sub0.sub1.sub2.master.slave1.slave2.slave3"
+// "<stage><step>.<sub0>.<sub1>.<sub2>.<master>.<slave1>.<slave2>.<slave3>"
 // or "p" for parse
 void ReadArgs::ParseQuitAfter(string arg)
 {
-    if( arg[0]=='p' ) // Quit after parse - nothing more to know
-    {
-        quitafter.push_back(-1);
-        return;
-    }
-    
+    quitafter = true;
+
     int p = 0;
     int i = 0;
     int dot = 0;
+    bool first = true;
     do
     {
         dot = arg.find('.', p);
@@ -229,8 +231,21 @@ void ReadArgs::ParseQuitAfter(string arg)
             s = arg.substr(p, dot-p);
         else 
             s = arg.substr(p);
-        int v = atoi(s.c_str());
-        quitafter.push_back(v);
+        if( first )
+        {
+            quitafter_progress = Progress( s );
+            if( !quitafter_progress.IsValid() )
+            {
+                cerr << "Invalid stage/step string used with -q: " << s << endl;
+                exit(1);
+            }            
+        }
+        else
+        {
+            int v = atoi(s.c_str());
+            quitafter_counts.push_back(v);            
+        }
         p = dot+1;
+        first = false;
     } while( dot != string::npos );
 }

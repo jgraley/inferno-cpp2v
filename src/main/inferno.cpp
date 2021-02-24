@@ -189,6 +189,17 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
 }
 
 
+bool ShouldIQuit()
+{
+    if( ReadArgs::quitafter && ReadArgs::quitafter_progress==Progress::GetCurrent() )
+    {
+        TRACE("Stopping after ")(ReadArgs::quitafter_progress.GetPrefix());
+        return true;
+    }
+    return false;
+}
+    
+
 int main( int argc, char *argv[] )
 {
     // Check the command line arguments 
@@ -210,13 +221,17 @@ int main( int argc, char *argv[] )
     // Build the sequence of steps
     vector< shared_ptr<Transformation> > sequence;
     BuildSequence( &sequence );
-    
+    if( ShouldIQuit() )
+        exit(0);    
+        
     // Planning part one
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageOne();
+        if( ShouldIQuit() )
+            exit(0);
     }
 
     // If a pattern graph was requested, generate it now
@@ -228,6 +243,8 @@ int main( int argc, char *argv[] )
     {
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageTwo();
+        if( ShouldIQuit() )
+            exit(0);
     }
        
     // If there was no input program then there's nothing more to do
@@ -255,7 +272,7 @@ int main( int argc, char *argv[] )
         CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
         (*t)( &program );
     }
-    else if( !(!ReadArgs::quitafter.empty() && ReadArgs::quitafter[0]==-1 ) )
+    else if( !ShouldIQuit() )
     {
         // Apply the transformation steps in order, but quit early if requested to
         i=0;
@@ -263,7 +280,7 @@ int main( int argc, char *argv[] )
         {
             Progress(Progress::TRANSFORMING, i).SetAsCurrent();
                        
-            bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
+            bool allow = !ReadArgs::quitafter || ReadArgs::quitafter_progress==Progress::GetCurrent();
             if( !ReadArgs::trace_quiet )
                 fprintf(stderr, "%s step %03d-%s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
             Tracer::Enable( ReadArgs::trace && allow ); 
@@ -273,7 +290,7 @@ int main( int argc, char *argv[] )
             else
                 CompareReplace::SetMaxReps( 100, true );
             if( allow )
-                t->SetStopAfter(ReadArgs::quitafter, 1);
+                t->SetStopAfter(ReadArgs::quitafter_counts, 0);
             (*t)( &program );
             if( ReadArgs::output_all )
             {
@@ -284,11 +301,8 @@ int main( int argc, char *argv[] )
                 //g( &program );    
             }
                 
-            if( !ReadArgs::quitafter.empty() && ReadArgs::quitafter[0]==i )
-            {
-                TRACE("Stopping after step %d", ReadArgs::quitafter[0]);
-                break;
-            }
+            if( ShouldIQuit() )
+                break;            
             i++;
         }
     }

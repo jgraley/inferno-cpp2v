@@ -11,6 +11,39 @@ Progress::Progress( Stage stage_, int step_ ) :
 }
 
 
+Progress::Progress( string s )
+{    
+    for( auto p : Progress::stage_formats )
+    {
+        stage = p.first;
+        auto fmt = p.second;
+        if( fmt.second )
+        {
+            if( fmt.first == s.substr(0, fmt.first.size()) )
+            {
+                string ss = s.substr(fmt.first.size());                
+                step = atoi(ss.c_str());
+                if( step==0 && ss != "0" )
+                    break; // error - invalid
+                return;
+            }
+        }
+        else
+        {
+            if( fmt.first == s )
+            {
+                step = -1;
+                return;                
+            }
+        }
+    }
+    
+    // Didn't find stage
+    stage = INVALID;
+    step = -1;
+}
+
+
 string Progress::GetPrefix(int width) const
 {
     string stage_code;
@@ -36,6 +69,12 @@ int Progress::GetStep() const
 Progress::Stage Progress::GetStage() const
 {
     return stage;
+}
+
+
+bool Progress::IsValid() const
+{
+    return stage != INVALID;
 }
 
 

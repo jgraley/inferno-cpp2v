@@ -21,11 +21,17 @@ public:
     };
     
     Progress( Stage stage=INVALID, int step=-1 );
+    Progress( string s );
     string GetPrefix( int width=0 ) const;
     int GetStep() const;
     Stage GetStage() const;
+    bool IsValid() const;
     void SetAsCurrent() const;
     static const Progress &GetCurrent();
+    inline bool operator==( const Progress &o ) const 
+    {
+        return stage == o.stage && step == o.step;
+    }
     inline bool operator!=( const Progress &o ) const 
     {
         return stage != o.stage || step != o.step;

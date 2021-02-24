@@ -1,6 +1,8 @@
 #ifndef READ_ARGS_HPP
 #define READ_ARGS_HPP
 
+#include "progress.hpp"
+
 #include <string>
 #include <vector>
 
@@ -27,7 +29,9 @@ public:
     static bool trace_hits;    
     static bool trace_quiet;    
     static std::string hits_format;
-    static std::vector<int> quitafter;
+    static bool quitafter;
+    static Progress quitafter_progress;
+    static vector<int> quitafter_counts;
     static int runonlystep;
     static bool runonlyenable;
     static int repetitions;
