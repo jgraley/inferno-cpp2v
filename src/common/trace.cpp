@@ -52,6 +52,12 @@ string Trace(const void *p)
     return SSPrintf("(void *)%p", p);
 }
 
+
+string Trace(const Progress &progress)
+{
+    return progress.GetPrefix();
+}
+
 ////////////////////////// Misc free functions //////////////////////////
 
 #ifdef __GLIBC__

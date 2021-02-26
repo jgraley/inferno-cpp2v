@@ -189,12 +189,15 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
 }
 
 
-bool ShouldIQuit()
+bool ShouldIQuit( bool on_step = false )
 {
-    if( ReadArgs::quitafter && ReadArgs::quitafter_progress==Progress::GetCurrent() )
+    if( ReadArgs::quitafter )
     {
-        TRACE("Stopping after ")(ReadArgs::quitafter_progress.GetPrefix());
-        return true;
+        if( ReadArgs::quitafter_progress==(on_step ? Progress::GetCurrent() : Progress::GetCurrentStage()) )
+        {
+            FTRACE("Stopping after ")(ReadArgs::quitafter_progress)("\n");
+            return true;
+        }
     }
     return false;
 }
@@ -230,9 +233,12 @@ int main( int argc, char *argv[] )
     {
         Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageOne();
-        if( ShouldIQuit() )
+        if( ShouldIQuit(true) )
             exit(0);
     }
+
+    if( ShouldIQuit() )
+        exit(0);
 
     // If a pattern graph was requested, generate it now
     MaybeGeneratePatternGraphs( &sequence );
@@ -243,10 +249,13 @@ int main( int argc, char *argv[] )
     {
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageTwo();
-        if( ShouldIQuit() )
+        if( ShouldIQuit(true) )
             exit(0);
     }
        
+    if( ShouldIQuit() )
+        exit(0);
+
     // If there was no input program then there's nothing more to do
     if( ReadArgs::infile.empty() )
         return 0;
@@ -301,7 +310,7 @@ int main( int argc, char *argv[] )
                 //g( &program );    
             }
                 
-            if( ShouldIQuit() )
+            if( ShouldIQuit(true) )
                 break;            
             i++;
         }
