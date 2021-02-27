@@ -955,3 +955,6 @@ string AndRuleEngine::GetTrace() const
     string s = Traceable::GetName() + GetSerialString();
     return s;
 }
+
+
+Graph

@@ -159,6 +159,11 @@ private:
     // the MMAX node.
     SolutionMap basic_solution; 
     bool used = false;
+    
+    class Graph
+    {
+        void operator()( AndRuleEngine *engine );
+    };    
 };
 
 #endif
