@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 destdir=html
 idxname=step_index.html
@@ -6,37 +6,40 @@ imgtype=svg
 testcase=test/examples/sctest13.cpp
 extraiopt=
 
+mkdir -p $destdir
+
 echo \<!DOCTYPE html\> > $destdir/$idxname
 echo \<html\>\<head\>\</head\> >> $destdir/$idxname
 echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$idxname
 echo \<h1\>Inferno search and replace patterns\</h1\> >> $destdir/$idxname
 
-#TODO one of these got broken and seems to spin forever!
-#cd ../..
-#./inferno.exe $extraiopt -i$testcase -thSNnMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
-#./inferno.exe $extraiopt -i$testcase -t 2>&1 | grep "Conjecture dump" > docs/generated/conj_counts.txt
-#cd docs/generated
+cd ../..
+./inferno.exe $extraiopt -i$testcase -thSNMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
+cd docs/generated
 
 i=0
 while :
 do
-  imgname=pattern_graph_$i.$imgtype
-  stepname=step_$i.html
+  progress=T$i
+  imgname=pattern_graph_$progress.$imgtype
+  stepname=$progress.html
   
   # Generate graph of the pattern of the step
-  ../../inferno.exe -gp$i -otemp.dot
+  set +e
+  ../../inferno.exe -gtp$i -otemp.dot
   if [ $? -ne 0 ];
   then
     break
   fi
+  set -e
+  
   dot -T$imgtype -o$destdir/$imgname temp.dot 
   # transform image size - not needed if vector eg svg
   # mogrify -antialias -resize 40% $destdir/$imgname
 
   # Generate step-specific page
-  grep "step $i " hits.txt > cur_hits.txt
-  grep "step $i;" conj_counts.txt > cur_conj_counts.txt
-  grep "Step $i:" steps.txt | sed 's/Step [0-9]*: Steps::\([a-zA-Z]*\)@0x[0-9a-f]*/\1/' > name.txt
+  grep "At $progress " hits.txt > cur_hits.txt
+  grep "at $progress:" steps.txt | sed 's/Step [0-9]*: Steps::\([a-zA-Z]*\)@0x[0-9a-f]*/\1/' > name.txt
   name=`cat name.txt`
   echo \<!DOCTYPE html\> > $destdir/$stepname
   echo \<html\>\<head\>\</head\> >> $destdir/$stepname
@@ -53,15 +56,12 @@ do
     echo $p\<br\> >> $destdir/$stepname
   done < cur_hits.txt
   echo \</p\> >> $destdir/$stepname  
-  echo Decision activity summaries based on $testcase\<br\> >> $destdir/$stepname   
-  while read p; do
-    echo $p\<br\> >> $destdir/$stepname
-  done < cur_conj_counts.txt
+
   echo \</body\>\</html\> >> $destdir/$stepname
 
   # Add link to link farm page
   echo \<p\>\<a href=\"$stepname\"\> >> $destdir/$idxname 
-  echo "Step $i: $name" >> $destdir/$idxname
+  echo "At $i: $name" >> $destdir/$idxname
   echo \</a\>\</p\> >> $destdir/$idxname
 
   i=$(( $i+1 ))

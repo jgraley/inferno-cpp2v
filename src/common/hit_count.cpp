@@ -79,10 +79,7 @@ void HitCount::Dump()
             switch( ReadArgs::hits_format[i] )
             {
                 case 'S':
-                if( p.first.progress.GetStage() == Progress::TRANSFORMING )
-                    printf("step %d", p.first.progress.GetStep() );                   
-                else
-                    printf("pre/post");
+                printf("At %s", p.first.progress.GetPrefix().c_str() );                   
                 break;
                 
                 case 'I':

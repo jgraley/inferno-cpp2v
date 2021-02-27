@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 destdir=html
 imgtype=svg
@@ -6,7 +6,8 @@ tempdir=temp
 extraiopt=
 
 
-mkdir -p $tempdir
+mkdir -p $tempdir 
+mkdir -p $destdir
 
 # Run inferno to get the documentation graphs in dot form
 ../../inferno.exe -gd -o$tempdir/ $extraiopt

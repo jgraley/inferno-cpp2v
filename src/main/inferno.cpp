@@ -195,7 +195,7 @@ bool ShouldIQuit( bool on_step = false )
     {
         if( ReadArgs::quitafter_progress==(on_step ? Progress::GetCurrent() : Progress::GetCurrentStage()) )
         {
-            FTRACE("Stopping after ")(ReadArgs::quitafter_progress)("\n");
+            //FTRACE("Stopping after ")(ReadArgs::quitafter_progress)("\n");
             return true;
         }
     }
@@ -222,12 +222,14 @@ int main( int argc, char *argv[] )
         GenerateDocumentationGraphs();
     
     // Build the sequence of steps
+    fprintf(stderr, "Building patterns\n"); 
     vector< shared_ptr<Transformation> > sequence;
     BuildSequence( &sequence );
     if( ShouldIQuit() )
         exit(0);    
         
     // Planning part one
+    fprintf(stderr, "Planning part one\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -244,6 +246,7 @@ int main( int argc, char *argv[] )
     MaybeGeneratePatternGraphs( &sequence );
         
     // Planning part two
+    fprintf(stderr, "Planning part two\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -259,13 +262,13 @@ int main( int argc, char *argv[] )
     // If there was no input program then there's nothing more to do
     if( ReadArgs::infile.empty() )
         return 0;
-
-    Progress(Progress::PARSING).SetAsCurrent();
     
     // Parse the input program
+    Progress(Progress::PARSING).SetAsCurrent();   
+    fprintf(stderr, "Parsing input %s\n", ReadArgs::infile.c_str()); 
     TreePtr<Node> program = TreePtr<Node>();
     {
-        Tracer::RAIIEnable silencer( false ); // make parse be quiet
+        //Tracer::RAIIEnable silencer( false ); // make parse be quiet
         Parse p(ReadArgs::infile);
         p( program, &program );
     }
@@ -277,7 +280,7 @@ int main( int argc, char *argv[] )
         
         shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
         if( !ReadArgs::trace_quiet )
-            fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), ReadArgs::runonlystep, t->GetName().c_str() ); 
+            fprintf(stderr, "%s at T%d: %s\n", ReadArgs::infile.c_str(), ReadArgs::runonlystep, t->GetName().c_str() ); 
         CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
         (*t)( &program );
     }
@@ -291,7 +294,7 @@ int main( int argc, char *argv[] )
                        
             bool allow = !ReadArgs::quitafter || ReadArgs::quitafter_progress==Progress::GetCurrent();
             if( !ReadArgs::trace_quiet )
-                fprintf(stderr, "%s step %03d-%s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
+                fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
             Tracer::Enable( ReadArgs::trace && allow ); 
             HitCount::Enable( ReadArgs::trace_hits && allow ); 
             if( allow )
@@ -324,12 +327,14 @@ int main( int argc, char *argv[] )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
     {
+        fprintf(stderr, "Rendering to graph\n"); 
         Tracer::RAIIEnable silencer( false ); // make grapher be quiet
         Graph g( ReadArgs::outfile );
         g( &program );    
     }
     else if( !ReadArgs::output_all )   
     {
+        fprintf(stderr, "Rendering to code\n"); 
         Tracer::RAIIEnable silencer( false ); // make render be quiet
         Render r( ReadArgs::outfile );
         r( &program );     

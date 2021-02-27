@@ -49,10 +49,10 @@ private:
     };
 
     void PopulateFromTransformation(Transformation *root);
-    void PopulateFromEngine( const Graphable *g,
-                             TreePtr<Node> nbase, 
-                             Graphable::LinkStyle default_link_style, 
-                             bool links_pass );
+    void PopulateFromControl( const Graphable *g,
+                              TreePtr<Node> nbase, 
+                              Graphable::LinkStyle default_link_style, 
+                              bool links_pass );
     void PopulateFromNode( TreePtr<Node> root, bool links_pass );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 

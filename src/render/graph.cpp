@@ -98,7 +98,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    PopulateFromEngine( cr, nullptr, Graphable::THROUGH, false );
+	    PopulateFromControl( cr, nullptr, Graphable::THROUGH, false );
 	}
 	else
     {
@@ -107,10 +107,10 @@ void Graph::PopulateFromTransformation(Transformation *root)
 }
 
 
-void Graph::PopulateFromEngine( const Graphable *g,
-                                TreePtr<Node> nbase, 
-                                Graphable::LinkStyle default_link_style, 
-                                bool links_pass )
+void Graph::PopulateFromControl( const Graphable *g,
+                                 TreePtr<Node> nbase, 
+                                 Graphable::LinkStyle default_link_style, 
+                                 bool links_pass )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
     MyBlock block = PreProcessBlock( gblock, g, nbase, true, default_link_style );
@@ -129,19 +129,21 @@ void Graph::PopulateFromEngine( const Graphable *g,
         {
             if( link.child_node )
             {
-                Walk w( (TreePtr<Node>)(link.child_node), &unique_filter, &block_filter ); // return each node only once; do not recurse through transformations
+                Walk w( (TreePtr<Node>)(link.child_node), &unique_filter, &block_filter );
                 FOREACH( const TreePtrInterface &ni, w )
                 {              
                     TreePtr<Node> node = (TreePtr<Node>)ni;
                     Graphable *g = ShouldDoControlBlock(node);
                     if( g )
                     {
-                        PopulateFromEngine( g, node, link.link_style, links_pass );
+                        PopulateFromControl( g, node, link.link_style, links_pass );
+                        // Walk will not recurse into children due to filter
                     }
                     else
                     {
                         MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), nullptr, node, false, link.link_style );
                         my_blocks.push_back( child_block );
+                        // Walk will recurse into children
                     }
                 }
             }
@@ -654,10 +656,19 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
     if( !g )
         return nullptr; // Need Graphable to do a block
            
-    if( g->GetGraphBlockInfo().block_type == Graphable::NODE )
-        return nullptr;
+    switch( g->GetGraphBlockInfo().block_type )
+    {
+        case Graphable::NODE:
+            return nullptr;
+            break;
         
-    return g;
+        case Graphable::CONTROL:
+            return g;
+            break;
+            
+        default:
+            ASSERTFAIL("Unknown block type");
+    }
 }
 
 
