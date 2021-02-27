@@ -26,7 +26,7 @@ do
   
   # Generate graph of the pattern of the step
   set +e
-  ../../inferno.exe -gtp$i -otemp.dot
+  ../../inferno.exe -gp$i -otemp.dot
   if [ $? -ne 0 ];
   then
     break

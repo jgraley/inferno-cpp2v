@@ -222,14 +222,16 @@ int main( int argc, char *argv[] )
         GenerateDocumentationGraphs();
     
     // Build the sequence of steps
-    fprintf(stderr, "Building patterns\n"); 
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Building patterns\n"); 
     vector< shared_ptr<Transformation> > sequence;
     BuildSequence( &sequence );
     if( ShouldIQuit() )
         exit(0);    
         
     // Planning part one
-    fprintf(stderr, "Planning part one\n"); 
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Planning part one\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -246,7 +248,8 @@ int main( int argc, char *argv[] )
     MaybeGeneratePatternGraphs( &sequence );
         
     // Planning part two
-    fprintf(stderr, "Planning part two\n"); 
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Planning part two\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -265,7 +268,8 @@ int main( int argc, char *argv[] )
     
     // Parse the input program
     Progress(Progress::PARSING).SetAsCurrent();   
-    fprintf(stderr, "Parsing input %s\n", ReadArgs::infile.c_str()); 
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Parsing input %s\n", ReadArgs::infile.c_str()); 
     TreePtr<Node> program = TreePtr<Node>();
     {
         //Tracer::RAIIEnable silencer( false ); // make parse be quiet
@@ -327,14 +331,16 @@ int main( int argc, char *argv[] )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
     {
-        fprintf(stderr, "Rendering to graph\n"); 
+        if( !ReadArgs::trace_quiet )
+			fprintf(stderr, "Rendering to graph\n"); 
         Tracer::RAIIEnable silencer( false ); // make grapher be quiet
         Graph g( ReadArgs::outfile );
         g( &program );    
     }
     else if( !ReadArgs::output_all )   
     {
-        fprintf(stderr, "Rendering to code\n"); 
+        if( !ReadArgs::trace_quiet )
+			fprintf(stderr, "Rendering to code\n"); 
         Tracer::RAIIEnable silencer( false ); // make render be quiet
         Render r( ReadArgs::outfile );
         r( &program );     

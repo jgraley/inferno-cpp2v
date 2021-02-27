@@ -9,24 +9,19 @@ all : clean get_libs inferno.exe resource docs test
 #
 # previous version 58906, 60777, 61676
 LLVM_REVISION ?= 61726
-CLANG_REVISION ?= 61726
 
-LLVM_URL ?= http://llvm.org/svn/llvm-project/llvm/trunk
-CLANG_URL ?= http://llvm.org/svn/llvm-project/cfe/trunk
- 
 #
-# Check out llvm and clang 
+# unpack the LLVM snapshot that we use
 #
-# Patches:
-# - Remove PlistDiagnostics.cpp that we don't need and doesn't seem to compile
-# - Remove -no-rtti from clang parser makefile - we do use RTTI and G++ 4.3.3 doesn't 
-#   like linking an RTTI subclass of a non-RTTI base class.
+# Note: we used to download LLVM and clang from SourceForge and then
+# patch it, but LLVM has moved to github, and while svn access is provided, 
+# I seemed to get the wrong version. Now a tarball of the patched LLVM
+# snapshot is included in our repo. We link to it, as with systemc.
+#
 get_libs : makefile
-	svn checkout --force --revision $(LLVM_REVISION) $(LLVM_URL) llvm
-	cd llvm && ./configure
-	cd llvm/tools && svn checkout --force --revision $(CLANG_REVISION) $(CLANG_URL) clang
-	patches/apply.sh
-								
+	tar -zxf llvm-${LLVM_REVISION}-patched.tgz
+	ln -sf llvm-${LLVM_REVISION)-patched llvm
+							
 #
 # Compile llvm and clang sources
 #		
@@ -89,6 +84,12 @@ pattern_graphs : makefile inferno.exe docs/generated/gen_pattern_graphs.sh
 #
 doc_graphs : makefile inferno.exe docs/generated/gen_doc_graphs.sh
 	cd docs/generated && ./gen_doc_graphs.sh
+
+#
+# Build the development graphs (patterns and inputs with tracing)
+#
+dev_graphs : makefile inferno.exe gen_dev_graphs.sh
+	./gen_dev_graphs.sh
 
 #
 # Build all of the generatable documentation

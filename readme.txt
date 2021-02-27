@@ -51,14 +51,11 @@ Inferno works with gcc/g++ 4.4.5, 4.7.? and 4.8.5
 
 On a Debian/Ubuntu system, you need approximately the following apt packages:
     
-subversion
 make
-patch
 g++
 flex
 bison
-libboost-dev
-libboost-thread-dev
+libboost-all-dev
 graphviz      (only if you want to look at pretty pictures)
 indent        (makes reading inferno C output easier)
 doxygen       (automated class documentation)

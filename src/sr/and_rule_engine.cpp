@@ -912,7 +912,7 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
     // link into the agent.
     InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), keyer_link ) ); 
 }                                                       
-
+ 
 
 void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *new_agent, XLink new_xlink, Agent *parent_agent )
 {
@@ -955,6 +955,3 @@ string AndRuleEngine::GetTrace() const
     string s = Traceable::GetName() + GetSerialString();
     return s;
 }
-
-
-Graph
