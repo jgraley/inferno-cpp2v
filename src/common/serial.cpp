@@ -105,10 +105,10 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
     else
     {
         location = 0;
-        serial = master_serial_by_progress[progress];
+        serial = master_serial_by_step[progress.GetStep()];
         
         // produce a new construction serial number
-        master_serial_by_progress[progress]++;
+        master_serial_by_step[progress.GetStep()]++;
     }
         
 }    
@@ -134,7 +134,7 @@ SerialNumber::SNType SerialNumber::master_location_serial = 1;
 map<void *, SerialNumber::SNType> SerialNumber::location_serial;
 map<SerialNumber::SNType, void *> SerialNumber::location_readback;
 map<SerialNumber::SNType, SerialNumber::SNType> SerialNumber::master_serial_by_location;
-map<Progress, SerialNumber::SNType> SerialNumber::master_serial_by_progress;
+map<int, SerialNumber::SNType> SerialNumber::master_serial_by_step;
 
 //////////////////////////// SatelliteSerial ///////////////////////////////
 

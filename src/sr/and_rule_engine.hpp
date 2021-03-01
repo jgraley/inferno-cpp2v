@@ -1,13 +1,15 @@
 #ifndef AND_RULE_ENGINE_HPP
 #define AND_RULE_ENGINE_HPP
 
-#include "query.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "common/mismatch.hpp"
 #include "common/serial.hpp"
 #include "agents/agent.hpp"
 #include "agents/conjunction_agent.hpp"
+#include "render/graph.hpp"
+
+#include "query.hpp"
 #include "link.hpp"
 #include "the_knowledge.hpp"
 
@@ -90,8 +92,8 @@ public:
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
         unordered_set< Agent *> my_evaluators;   
-        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
+        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         unordered_map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         unordered_set<Agent *> master_boundary_agents;
@@ -141,8 +143,12 @@ private:
     void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
     void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link );
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, XLink new_xlink, Agent *parent_agent );
-    string GetTrace() const; // used for debug
 
+public:
+    string GetTrace() const; // used for debug
+    list<const AndRuleEngine *> GetAndRuleEngines() const;
+
+private:
     // Information about the X tree
     const TheKnowledge *knowledge;
 
@@ -160,9 +166,9 @@ private:
     SolutionMap basic_solution; 
     bool used = false;
     
-    class Graph
+    class Graph : public ::Graph
     {
-        void operator()( AndRuleEngine *engine );
+        void operator()( const AndRuleEngine *engine );
     };    
 };
 

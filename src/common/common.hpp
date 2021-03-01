@@ -144,8 +144,7 @@ void AdvanceWithWrap(const C &c, IT& it, int n)
 template< typename T >
 list<T> operator+( list<T> l, list<T> r ) // Just like in Python!
 {
-    // Note: both l and r are modified by this algo
-    l.splice( l.begin(), r );
+    l.splice( l.end(), r );
     return l;
 }
 

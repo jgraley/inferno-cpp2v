@@ -102,8 +102,6 @@ private:
     TreePtr<Node> Replace() const;
 
 public:
-    virtual Block GetGraphBlockInfo() const;
-
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
     const CompareReplace * GetOverallMaster() const;
 
@@ -113,6 +111,9 @@ public:
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     XLink UniquifyDomainExtension( XLink xlink ) const;
     string GetTrace() const; // used for debug
+    virtual Block GetGraphBlockInfo() const;
+    list<const AndRuleEngine *> GetAndRuleEngines() const;
+    list<const SCREngine *> GetSCREngines() const;
         
 private:    
     static int repetitions;

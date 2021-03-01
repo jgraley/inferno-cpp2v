@@ -955,3 +955,24 @@ string AndRuleEngine::GetTrace() const
     string s = Traceable::GetName() + GetSerialString();
     return s;
 }
+
+
+list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
+{
+	list<const AndRuleEngine *> engines;
+	engines.push_back( this );
+	for( auto p : plan.my_free_abnormal_engines )
+		engines = engines + p.second->GetAndRuleEngines();
+	for( auto p : plan.my_evaluator_abnormal_engines )
+		engines = engines + p.second->GetAndRuleEngines();
+	for( auto p : plan.my_multiplicity_engines )
+		engines = engines + p.second->GetAndRuleEngines();
+	return engines;
+}
+
+
+void AndRuleEngine::Graph::operator()( const AndRuleEngine *engine )
+{
+	
+}
+

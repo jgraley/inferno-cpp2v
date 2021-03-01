@@ -254,74 +254,6 @@ void SCREngine::SetStopAfter( vector<int> ssa, int d )
 }
 
 
-Graphable::Block SCREngine::GetGraphBlockInfo() const
-{
-    list<SubBlock> sub_blocks;
-    if( ReadArgs::graph_trace )
-    {
-        // Actually much simpler in graph trace mode - just show the root node and plink
-        sub_blocks.push_back( { "root", 
-                                "",
-                                true,
-                                { { plan.root_pattern, 
-                                    nullptr,
-                                    SOLID, 
-                                    {},
-                                    {plan.root_plink.GetShortName()} } } } );
-        sub_blocks.push_back( { GetSerialString(), 
-                                "", 
-                                false, 
-                                {} }  );
-        return { false, GetName(), "", "", CONTROL, sub_blocks };
-    }
-    
-    // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
-    // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
-    // should error on them?
-    TreePtr<Node> original_pattern = plan.root_pattern;
-    const TreePtrInterface *original_ptr = nullptr;
-    if( plan.is_search )
-    {
-        TreePtr< Stuff<Node> > stuff = DynamicTreePtrCast< Stuff<Node> >(original_pattern);
-        ASSERT( stuff );
-        original_pattern = *stuff->GetTerminus();
-        original_ptr = stuff->GetTerminus();
-    }
-    TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(original_pattern);
-    if( overlay )
-    {        
-        sub_blocks.push_back( { plan.is_search?"search":"compare", 
-                                "",
-                                false,
-                                { { (TreePtr<Node>)*overlay->GetThrough(), 
-                                    overlay->GetThrough(),
-                                    SOLID, 
-                                    {},
-                                    {} } } } );    
-        sub_blocks.push_back( { "replace", 
-                                "",
-                                false,
-                                { { (TreePtr<Node>)*overlay->GetOverlay(),
-                                    overlay->GetOverlay(),
-                                    DASHED, 
-                                    {},
-                                    {} } } } );
-    }
-    else
-    {
-        sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
-                                "",
-                                true,
-                                { { original_pattern, 
-                                    original_ptr,
-                                    SOLID, 
-                                    {},
-                                    {} } } } );
-    }
-    return { false, GetName(), "", "", CONTROL, sub_blocks };
-}
-
-
 void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
 {
     INDENT("K");   
@@ -490,4 +422,95 @@ string SCREngine::GetTrace() const
 {
     string s = Traceable::GetName() + GetSerialString();
     return s;
+}
+
+
+Graphable::Block SCREngine::GetGraphBlockInfo() const
+{
+    list<SubBlock> sub_blocks;
+    if( ReadArgs::graph_trace )
+    {
+        // Actually much simpler in graph trace mode - just show the root node and plink
+        sub_blocks.push_back( { "root", 
+                                "",
+                                true,
+                                { { plan.root_pattern, 
+                                    nullptr,
+                                    SOLID, 
+                                    {},
+                                    {plan.root_plink.GetShortName()} } } } );
+        sub_blocks.push_back( { GetSerialString(), 
+                                "", 
+                                false, 
+                                {} }  );
+        return { false, GetName(), "", "", CONTROL, sub_blocks };
+    }
+    
+    // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
+    // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
+    // should error on them?
+    TreePtr<Node> original_pattern = plan.root_pattern;
+    const TreePtrInterface *original_ptr = nullptr;
+    if( plan.is_search )
+    {
+        TreePtr< Stuff<Node> > stuff = DynamicTreePtrCast< Stuff<Node> >(original_pattern);
+        ASSERT( stuff );
+        original_pattern = *stuff->GetTerminus();
+        original_ptr = stuff->GetTerminus();
+    }
+    TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(original_pattern);
+    if( overlay )
+    {        
+        sub_blocks.push_back( { plan.is_search?"search":"compare", 
+                                "",
+                                false,
+                                { { (TreePtr<Node>)*overlay->GetThrough(), 
+                                    overlay->GetThrough(),
+                                    SOLID, 
+                                    {},
+                                    {} } } } );    
+        sub_blocks.push_back( { "replace", 
+                                "",
+                                false,
+                                { { (TreePtr<Node>)*overlay->GetOverlay(),
+                                    overlay->GetOverlay(),
+                                    DASHED, 
+                                    {},
+                                    {} } } } );
+    }
+    else
+    {
+        sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
+                                "",
+                                true,
+                                { { original_pattern, 
+                                    original_ptr,
+                                    SOLID, 
+                                    {},
+                                    {} } } } );
+    }
+    return { false, GetName(), "", "", CONTROL, sub_blocks };
+}
+
+
+list<const AndRuleEngine *> SCREngine::GetAndRuleEngines() const
+{
+	list<const AndRuleEngine *> engines;
+	engines = plan.and_rule_engine->GetAndRuleEngines();
+	for( auto p : plan.my_engines )
+    {
+		engines.push_back(nullptr);
+		engines = engines + p.second->GetAndRuleEngines();
+	}
+	return engines;
+}
+
+
+list<const SCREngine *> SCREngine::GetSCREngines() const
+{
+	list<const SCREngine *> engines;
+	engines.push_back( this );
+	for( auto p : plan.my_engines )
+		engines = engines + p.second->GetSCREngines();
+	return engines;
 }

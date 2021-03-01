@@ -4,6 +4,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "node/graphable.hpp"
+#include "and_rule_engine.hpp"
 
 #include <list>
 
@@ -47,6 +48,11 @@ void CompareReplace::Plan::PlanningStageTwo()
     //FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
     // Second, configure the agents and create subordinate AndRuleEngines
     scr_engine->PlanningStageTwo(agent_phases);
+    
+    list<const SCREngine *> scrs = scr_engine->GetSCREngines();
+	TRACE("SCR engines for this step: ")(scrs)("\n");
+    list<const AndRuleEngine *> ares = scr_engine->GetAndRuleEngines();
+	TRACE("And-rule engines for this step: ")(ares)("\n");
 }                                      
 
 
