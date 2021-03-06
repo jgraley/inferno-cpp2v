@@ -79,7 +79,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	(void)context; // Not needed!!
 
     unique_filter.Reset();
-	PopulateFromNode( root, false );
+	PopulateFromNode( root, Graphable::SOLID );
     PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
@@ -98,7 +98,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    PopulateFromControl( cr, nullptr, Graphable::THROUGH, false );
+	    PopulateFromControl( cr, nullptr, Graphable::THROUGH );
 	}
 	else
     {
@@ -109,19 +109,13 @@ void Graph::PopulateFromTransformation(Transformation *root)
 
 void Graph::PopulateFromControl( const Graphable *g,
                                  TreePtr<Node> nbase, 
-                                 Graphable::LinkStyle default_link_style, 
-                                 bool links_pass )
+                                 Graphable::LinkStyle default_link_style )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo();
-    MyBlock block = PreProcessBlock( gblock, g, nbase, true, default_link_style );
+    gblock.default_link_style = default_link_style;
+    MyBlock block = PreProcessBlock( gblock, g, nbase, true );
 	
     my_blocks.push_back( block );
-
-    LambdaFilter block_filter( [&](TreePtr<Node> context,
-                                   TreePtr<Node> root) -> bool
-    {
-        return !ShouldDoControlBlock(root); // Stop where we will do blocks        
-    });
             
     for( const Graphable::SubBlock &sub_block : block.sub_blocks )
     {
@@ -129,41 +123,44 @@ void Graph::PopulateFromControl( const Graphable *g,
         {
             if( link.child_node )
             {
-                Walk w( (TreePtr<Node>)(link.child_node), &unique_filter, &block_filter );
-                FOREACH( const TreePtrInterface &ni, w )
-                {              
-                    TreePtr<Node> node = (TreePtr<Node>)ni;
-                    Graphable *g = ShouldDoControlBlock(node);
-                    if( g )
-                    {
-                        PopulateFromControl( g, node, link.link_style, links_pass );
-                        // Walk will not recurse into children due to filter
-                    }
-                    else
-                    {
-                        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), nullptr, node, false, link.link_style );
-                        my_blocks.push_back( child_block );
-                        // Walk will recurse into children
-                    }
-                }
+				PopulateFromNode( link.child_node, link.link_style );
             }
         }
     }
 }
 
 
-void Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
+void Graph::PopulateFromNode( TreePtr<Node> node,
+                              Graphable::LinkStyle default_link_style )
 {
-    TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
-	::UniqueWalk w( root );
+    LambdaFilter block_filter( [&](TreePtr<Node> context,
+                                   TreePtr<Node> node) -> bool
+    {
+        return !ShouldDoControlBlock(node); // Stop where we will do blocks        
+    });
+
+	Walk w( (TreePtr<Node>)(node), &unique_filter, &block_filter );
 	FOREACH( const TreePtrInterface &ni, w )
-	{
+	{              
 		if( !ni )
-            continue;
-            
-        TreePtr<Node> node = (TreePtr<Node>)ni;
-        MyBlock child_block = PreProcessBlock( GetNodeBlockInfo( node ), nullptr, node, false, Graphable::SOLID );
-        my_blocks.push_back( child_block );
+			continue;
+			
+		TreePtr<Node> node = (TreePtr<Node>)ni;
+		Graphable *g = ShouldDoControlBlock(node);
+		
+		if( g )
+		{
+			PopulateFromControl( g, node, default_link_style );
+			// Walk will not recurse into children due to filter
+		}
+		else
+		{				
+			Graphable::Block nblock = GetNodeBlockInfo( node );
+			nblock.default_link_style = default_link_style;
+			MyBlock child_block = PreProcessBlock( nblock, nullptr, node, false );
+			my_blocks.push_back( child_block );
+			// Walk will recurse into children
+		}
 	}
 }
 
@@ -171,8 +168,7 @@ void Graph::PopulateFromNode( TreePtr<Node> root, bool links_pass )
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
                                        TreePtr<Node> node, 
-                                       bool for_engine_block, 
-                                       Graphable::LinkStyle link_style )
+                                       bool for_control_block )
 {
     // Fill in everything in block 
     MyBlock my_block;
@@ -202,8 +198,8 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 
 
     // Make the titles more wieldy by removing template stuff - note:
-    // different policies for engine blocks vs node blocks.
-    if( for_engine_block )
+    // different policies for control blocks vs node blocks.
+    if( for_control_block )
     {
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
@@ -235,7 +231,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         ASSERT( my_block.symbol.empty() );
 
     // Apply current link style to links as a default
-    PropagateLinkStyle( my_block, link_style );
+    PropagateLinkStyle( my_block, my_block.default_link_style );
 
     return my_block;    
 }
@@ -674,7 +670,10 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
 
 string Graph::Id( const Graphable *g, TreePtr<Node> node )
 {
-	return node ? node->GetSerialString() : SSPrintf("Graphable@%p", g);
+	if( node )
+		g = (const Graphable*)Agent::TryAsAgentConst(node);
+	
+	return g ? g->GetGraphId() : node->GetSerialString();
 }
 
 

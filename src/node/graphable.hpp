@@ -47,6 +47,7 @@ public:
         string symbol;
         string shape;
         BlockType block_type;
+        LinkStyle default_link_style;
         list<SubBlock> sub_blocks;
     };
     virtual Block GetGraphBlockInfo() const 
@@ -54,6 +55,7 @@ public:
         Block g{false, "", "", "", NODE, {}}; 
         return g;
     };
+    virtual string GetGraphId() const { return ""; }
 };
 
 #endif

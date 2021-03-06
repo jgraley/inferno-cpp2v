@@ -31,7 +31,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo() const
                                 DASHED, 
                                 {},
                                 {PatternLink(this, GetOverlay()).GetShortName()} } } } );
-    return { false, GetName(), "", "", CONTROL, sub_blocks };
+    return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
 }
 
 

@@ -111,7 +111,10 @@ public:
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     XLink UniquifyDomainExtension( XLink xlink ) const;
     string GetTrace() const; // used for debug
+    
     virtual Block GetGraphBlockInfo() const;
+    virtual string GetGraphId() const;
+    
     list<const AndRuleEngine *> GetAndRuleEngines() const;
     list<const SCREngine *> GetSCREngines() const;
         

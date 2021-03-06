@@ -24,19 +24,31 @@ Agent& Agent::operator=(Agent& other)
 
 Agent *Agent::AsAgent( shared_ptr<Node> node )
 {
-    ASSERT( node )("Called AsAgent(")(node)(") with null shared_ptr");
-    Agent *agent = dynamic_cast<Agent *>(node.get());
+    Agent *agent = TryAsAgent(node);
     ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
 }
 
 
+Agent *Agent::TryAsAgent( shared_ptr<Node> node )
+{
+    ASSERT( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
+    return dynamic_cast<Agent *>(node.get());
+}
+
+
 const Agent *Agent::AsAgentConst( shared_ptr<const Node> node )
 {
-    ASSERT( node )("Called AsAgent(")(node)(") with null shared_ptr");
-    const Agent *agent = dynamic_cast<const Agent *>(node.get());
+    const Agent *agent = TryAsAgentConst(node);
     ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
+}
+
+
+const Agent *Agent::TryAsAgentConst( shared_ptr<const Node> node )
+{
+    ASSERT( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
+    return dynamic_cast<const Agent *>(node.get());
 }
 
 
@@ -649,6 +661,12 @@ string AgentCommon::GetTrace() const
         break;
     }
     return s;
+}
+
+
+string AgentCommon::GetGraphId() const
+{
+	return GetSerialString();
 }
 
 //---------------------------------- DefaultMMAXAgent ------------------------------------    

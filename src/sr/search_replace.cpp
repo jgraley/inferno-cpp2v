@@ -91,6 +91,11 @@ Graphable::Block CompareReplace::GetGraphBlockInfo() const
 }
 
 
+string CompareReplace::GetGraphId() const
+{
+	return "CR"+plan.scr_engine->GetSerialString();
+}
+
 void CompareReplace::SetStopAfter( vector<int> ssa, int d )
 {
     plan.scr_engine->SetStopAfter( ssa, d );

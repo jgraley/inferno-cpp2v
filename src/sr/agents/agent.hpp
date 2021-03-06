@@ -111,7 +111,9 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;
 		
 	static Agent *AsAgent( shared_ptr<Node> node );
+	static Agent *TryAsAgent( shared_ptr<Node> node );
 	static const Agent *AsAgentConst( shared_ptr<const Node> node );
+	static const Agent *TryAsAgentConst( shared_ptr<const Node> node );
     // Note the constness: thou shalt not try to mutate the agent via this function
     virtual shared_ptr<const Node> GetPatternPtr() const = 0;
 };
@@ -198,6 +200,8 @@ private:
     EquivalenceRelation equivalence_relation;
     shared_ptr<Conjecture> nlq_conjecture;
     Phase phase;
+
+    virtual string GetGraphId() const;
 };
 
 

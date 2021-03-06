@@ -443,7 +443,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
                                 "", 
                                 false, 
                                 {} }  );
-        return { false, GetName(), "", "", CONTROL, sub_blocks };
+        return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
     }
     
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
@@ -489,7 +489,13 @@ Graphable::Block SCREngine::GetGraphBlockInfo() const
                                     {},
                                     {} } } } );
     }
-    return { false, GetName(), "", "", CONTROL, sub_blocks };
+    return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
+}
+
+
+string SCREngine::GetGraphId() const
+{
+	return "SCR"+GetSerialString();
 }
 
 

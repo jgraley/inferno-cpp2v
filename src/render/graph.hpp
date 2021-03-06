@@ -51,15 +51,14 @@ private:
     void PopulateFromTransformation(Transformation *root);
     void PopulateFromControl( const Graphable *g,
                               TreePtr<Node> nbase, 
-                              Graphable::LinkStyle default_link_style, 
-                              bool links_pass );
-    void PopulateFromNode( TreePtr<Node> root, bool links_pass );
+                              Graphable::LinkStyle default_link_style );
+    void PopulateFromNode( TreePtr<Node> root, 
+                           Graphable::LinkStyle default_link_style );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
                              TreePtr<Node> n, 
-                             bool for_engine_block, 
-                             Graphable::LinkStyle link_style );
+                             bool for_control_block );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
     Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n );
