@@ -112,7 +112,7 @@ void Graph::PopulateFromControl( const Graphable *g,
                                  TreePtr<Node> nbase, 
                                  Graphable::LinkStyle default_link_style )
 {
-    Graphable::Block gblock = g->GetGraphBlockInfo();
+    Graphable::Block gblock = g->GetGraphBlockInfo(lnf);
     gblock.default_link_style = default_link_style;
     MyBlock block = PreProcessBlock( gblock, g, nbase, true );
 	
@@ -248,21 +248,27 @@ void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 }
 
 
-Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> n )
+Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
 {
+	const Graphable *g;
+	if( node )
+		g = (const Graphable*)Agent::TryAsAgentConst(node);
+
     Graphable::Block block;
-    if( dynamic_pointer_cast<SpecialBase>(n) )
+
+    if( g )
     {
-        (Graphable::Block &)block = Agent::AsAgent(n)->GetGraphBlockInfo();
+        (Graphable::Block &)block = g->GetGraphBlockInfo(lnf);
         if( !block.title.empty() )
             return block;
+        //ASSERT(false)(node)(" has empty title\n");
     }
     
-    return GetDefaultNodeBlockInfo(n);
+    return GetDefaultNodeBlockInfo(node, lnf);
 }
 
 
-Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
+Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf )
 {    
 	Graphable::Block block;
 	block.title = n->GetGraphName();     
@@ -650,7 +656,7 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
     if( !g )
         return nullptr; // Need Graphable to do a block
            
-    switch( g->GetGraphBlockInfo().block_type )
+    switch( g->GetGraphBlockInfo(lnf).block_type )
     {
         case Graphable::NODE:
             return nullptr;
@@ -769,3 +775,10 @@ string Graph::GetPreRestrictionName(TreePtr<Node> node)
     }
     return "";
 }
+
+
+const Graph::LinkNamingFunction Graph::lnf = []( shared_ptr<const Node> parent_pattern,
+												 const TreePtrInterface *ppattern )
+{
+	return PatternLink( parent_pattern, ppattern ).GetShortName();
+};												 
