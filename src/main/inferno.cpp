@@ -96,9 +96,9 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
         sequence->push_back( shared_ptr<Transformation>( new PlaceLabelsInArray ) );  
- #if 1
+#if 1
         sequence->push_back( shared_ptr<Transformation>( new LabelTypeToEnum ) ); 
- #else
+#else
         for( int i=0; i<2; i++ )
         {
             sequence->push_back( shared_ptr<Transformation>( new LabelVarsToEnum ) ); 

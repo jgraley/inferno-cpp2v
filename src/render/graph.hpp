@@ -54,6 +54,9 @@ private:
                               Graphable::LinkStyle default_link_style );
     void PopulateFromNode( TreePtr<Node> root, 
                            Graphable::LinkStyle default_link_style );
+    void PopulateFrom( TreePtr<Node> root, 
+                       Graphable::LinkStyle default_link_style );
+	void PopulateFromSubBlocks( const MyBlock &block );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
@@ -89,11 +92,11 @@ private:
     bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
     string GetPreRestrictionName(TreePtr<Node> node);
 
-    UniqueFilter unique_filter;
     const string outfile; // empty means stdout
     FILE *filep;
     
     list<MyBlock> my_blocks;
+    set<TreePtr<Node>> reached;
     set<string> block_ids_show_prerestriction;
 };
 
