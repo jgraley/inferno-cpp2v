@@ -7,7 +7,6 @@
 
 #include <string>
 #include <list>
-#include <functional>
 
 using namespace std;
 
@@ -51,15 +50,11 @@ public:
         LinkStyle default_link_style;
         list<SubBlock> sub_blocks;
     };
-
-    typedef std::function<string( shared_ptr<const Node> parent_pattern,
-                                  const TreePtrInterface *ppattern )> LinkNamingFunction;
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const 
+    virtual Block GetGraphBlockInfo() const 
     { 
         Block g{false, "", "", "", NODE, {}}; 
         return g;
     };
-    
     virtual string GetGraphId() const { return ""; }
 };
 

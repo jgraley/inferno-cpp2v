@@ -56,7 +56,7 @@ private:
                            Graphable::LinkStyle default_link_style );
     void PopulateFrom( TreePtr<Node> root, 
                        Graphable::LinkStyle default_link_style );
-	void PopulateFromSubBlocks( const MyBlock &block );
+	void PopulateFromSubBlocks( const MyBlock &block, bool uniquify );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
@@ -64,7 +64,7 @@ private:
                              bool for_control_block );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
-    Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf );
+    Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n );
     string GetInnermostTemplateParam( string s );
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
@@ -98,7 +98,6 @@ private:
     list<MyBlock> my_blocks;
     set<TreePtr<Node>> reached;
     set<string> block_ids_show_prerestriction;
-    static const LinkNamingFunction lnf;
 };
 
 #endif

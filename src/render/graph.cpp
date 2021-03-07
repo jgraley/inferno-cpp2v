@@ -112,13 +112,13 @@ void Graph::PopulateFromControl( const Graphable *g,
                                  TreePtr<Node> nbase, 
                                  Graphable::LinkStyle default_link_style )
 {
-    Graphable::Block gblock = g->GetGraphBlockInfo(lnf);
+    Graphable::Block gblock = g->GetGraphBlockInfo();
     gblock.default_link_style = default_link_style;
     MyBlock block = PreProcessBlock( gblock, g, nbase, true );
 	
     my_blocks.push_back( block );
             
-    PopulateFromSubBlocks( block );
+    PopulateFromSubBlocks( block, false );
 }
 
 
@@ -130,7 +130,7 @@ void Graph::PopulateFromNode( TreePtr<Node> node,
 	MyBlock block = PreProcessBlock( nblock, nullptr, node, false );
 	my_blocks.push_back( block );
 
-	PopulateFromSubBlocks(block);
+	PopulateFromSubBlocks( block, true );
 }
 
                               
@@ -147,13 +147,13 @@ void Graph::PopulateFrom( TreePtr<Node> node,
 }
 
 
-void Graph::PopulateFromSubBlocks( const MyBlock &block )
+void Graph::PopulateFromSubBlocks( const MyBlock &block, bool uniquify )
 {
 	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( link.child_node && reached.count(link.child_node)==0 )
+			if( link.child_node && (reached.count(link.child_node)==0 || !uniquify) )
 			{
 				PopulateFrom( link.child_node, link.link_style );
 				reached.insert( link.child_node );
@@ -248,27 +248,21 @@ void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 }
 
 
-Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
+Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> n )
 {
-	const Graphable *g;
-	if( node )
-		g = (const Graphable*)Agent::TryAsAgentConst(node);
-
     Graphable::Block block;
-
-    if( g )
+    if( dynamic_pointer_cast<SpecialBase>(n) )
     {
-        (Graphable::Block &)block = g->GetGraphBlockInfo(lnf);
+        (Graphable::Block &)block = Agent::AsAgent(n)->GetGraphBlockInfo();
         if( !block.title.empty() )
             return block;
-        //ASSERT(false)(node)(" has empty title\n");
     }
     
-    return GetDefaultNodeBlockInfo(node, lnf);
+    return GetDefaultNodeBlockInfo(n);
 }
 
 
-Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf )
+Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
 {    
 	Graphable::Block block;
 	block.title = n->GetGraphName();     
@@ -656,7 +650,7 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
     if( !g )
         return nullptr; // Need Graphable to do a block
            
-    switch( g->GetGraphBlockInfo(lnf).block_type )
+    switch( g->GetGraphBlockInfo().block_type )
     {
         case Graphable::NODE:
             return nullptr;
@@ -775,10 +769,3 @@ string Graph::GetPreRestrictionName(TreePtr<Node> node)
     }
     return "";
 }
-
-
-const Graph::LinkNamingFunction Graph::lnf = []( shared_ptr<const Node> parent_pattern,
-												 const TreePtrInterface *ppattern )
-{
-	return PatternLink( parent_pattern, ppattern ).GetShortName();
-};												 
