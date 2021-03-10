@@ -82,10 +82,10 @@ void CompareReplace::SetMaxReps( int n, bool e )
 }
 
 
-Graphable::Block CompareReplace::GetGraphBlockInfo() const
+Graphable::Block CompareReplace::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
     // We want our name (via GetName()) but SCREngine's layout
-    Graphable::Block block = plan.scr_engine->GetGraphBlockInfo();
+    Graphable::Block block = plan.scr_engine->GetGraphBlockInfo(lnf);
     block.title = GetName();
     return block;
 }

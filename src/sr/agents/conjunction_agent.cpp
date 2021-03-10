@@ -19,7 +19,7 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
-Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
+Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The Conjunction node appears as a diamond with a ∧ character inside it. The affected subtrees are 
 	// on the right.

@@ -127,7 +127,7 @@ void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_lin
 }
 
 
-Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
+Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The Disjunction node appears as a diamond with a ∨ character inside it. The affected subtrees are 
 	// on the right.

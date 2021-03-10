@@ -11,7 +11,7 @@ using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
-Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
+Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
@@ -121,7 +121,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl()
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
-Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
+Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.
@@ -210,7 +210,7 @@ map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink base_xlink ) const
 }    
 
 
-Graphable::Block NestedAgent::GetGraphBlockInfo() const
+Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
     Block block;
 	block.bold = false;
@@ -292,7 +292,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl()
 }                                                   
 
 
-Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo() const
+Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 
     Block block;
@@ -436,7 +436,7 @@ bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 	return r;
 }
 
-Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo() const
+Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 
     Block block;

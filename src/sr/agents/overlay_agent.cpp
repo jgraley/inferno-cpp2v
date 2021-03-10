@@ -12,7 +12,7 @@ shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
     return pq;
 }
 
-Graphable::Block OverlayAgent::GetGraphBlockInfo() const
+Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
     list<SubBlock> sub_blocks;
     sub_blocks.push_back( { "through", 

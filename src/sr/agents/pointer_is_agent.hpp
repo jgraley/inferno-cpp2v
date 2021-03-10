@@ -19,7 +19,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;
                  
-    virtual Block GetGraphBlockInfo() const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
 };

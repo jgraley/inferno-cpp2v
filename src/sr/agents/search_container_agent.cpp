@@ -77,7 +77,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl()
 }
 
 
-Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
+Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
     Block block;
 	block.bold = true;
@@ -135,11 +135,11 @@ void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
 }                                                                                        
 
 
-Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
+Graphable::Block AnyNodeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
 	// right of the circle. 1 implies the tendancy to match exactly one thing. See #256.
-    Block block = SearchContainerAgent::GetGraphBlockInfo();
+    Block block = SearchContainerAgent::GetGraphBlockInfo(lnf);
     block.title = "AnyNode";
 	block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
@@ -260,12 +260,12 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
-Graphable::Block StuffAgent::GetGraphBlockInfo() const
+Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
 	// right of the circle. # is chosen (as is the name Stuff) for its similarity to * because
 	// the nodes are both able to wildcard multiple nodes in the input tree.
-    Block block = SearchContainerAgent::GetGraphBlockInfo();
+    Block block = SearchContainerAgent::GetGraphBlockInfo(lnf);
 	block.title = "Stuff"; 
 	block.symbol = "#"; 
     if( recurse_restriction )

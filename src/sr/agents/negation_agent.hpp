@@ -22,7 +22,7 @@ public:
                                            XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    virtual Block GetGraphBlockInfo() const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
     
 private:
     virtual const TreePtrInterface *GetPattern() const = 0;

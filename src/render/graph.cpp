@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include "node/graphable.hpp"
 #include "sr/link.hpp"
+#include "sr/agents/standard_agent.hpp" // temporary, I hope
 
 using namespace CPPTree;
 
@@ -112,10 +113,9 @@ void Graph::PopulateFromControl( const Graphable *g,
                                  TreePtr<Node> nbase, 
                                  Graphable::LinkStyle default_link_style )
 {
-    Graphable::Block gblock = g->GetGraphBlockInfo();
+    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);
     gblock.default_link_style = default_link_style;
     MyBlock block = PreProcessBlock( gblock, g, nbase, true );
-	
     my_blocks.push_back( block );
             
     PopulateFromSubBlocks( block );
@@ -248,21 +248,30 @@ void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 }
 
 
-Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> n )
-{
+Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
+{    
+    ASSERT(node);
     Graphable::Block block;
-    if( dynamic_pointer_cast<SpecialBase>(n) )
+	const Graphable *g = (const Graphable*)Agent::TryAsAgentConst(node);
+        
+    // Temporary: StandardAgent is Graphable (because Agent is) but 
+    // does not implement GetGraphBlockInfo() and the default gets used.
+    auto sa = dynamic_cast<const StandardAgent *>(Agent::TryAsAgentConst(node));
+        
+    if( g && !sa )
     {
-        (Graphable::Block &)block = Agent::AsAgent(n)->GetGraphBlockInfo();
-        if( !block.title.empty() )
-            return block;
+        (Graphable::Block &)block = Agent::AsAgent(node)->GetGraphBlockInfo(my_lnf);
+        ASSERT(!block.title.empty());
+        return block;
     }
-    
-    return GetDefaultNodeBlockInfo(n);
+    else // not Graphable or StandardAgent
+    {
+        return GetDefaultNodeBlockInfo(node, my_lnf);
+    }
 }
 
 
-Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n )
+Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf )
 {    
 	Graphable::Block block;
 	block.title = n->GetGraphName();     
@@ -650,7 +659,7 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
     if( !g )
         return nullptr; // Need Graphable to do a block
            
-    switch( g->GetGraphBlockInfo().block_type )
+    switch( g->GetGraphBlockInfo(my_lnf).block_type )
     {
         case Graphable::NODE:
             return nullptr;
@@ -769,3 +778,10 @@ string Graph::GetPreRestrictionName(TreePtr<Node> node)
     }
     return "";
 }
+
+
+const Graph::LinkNamingFunction Graph::my_lnf = []( shared_ptr<const Node> parent_pattern,
+										   		    const TreePtrInterface *ppattern )
+{
+	return PatternLink( parent_pattern, ppattern ).GetShortName();
+};		

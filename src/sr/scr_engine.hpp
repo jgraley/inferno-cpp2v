@@ -112,7 +112,7 @@ public:
     XLink UniquifyDomainExtension( XLink xlink ) const;
     string GetTrace() const; // used for debug
     
-    virtual Block GetGraphBlockInfo() const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
     virtual string GetGraphId() const;
     
     list<const AndRuleEngine *> GetAndRuleEngines() const;

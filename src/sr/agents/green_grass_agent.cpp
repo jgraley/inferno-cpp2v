@@ -29,7 +29,7 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
-Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
+Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
 	// The GreenGrass node appears as a triangle containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was

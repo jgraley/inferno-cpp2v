@@ -64,7 +64,7 @@ private:
                              bool for_control_block );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
-    Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n );
+    Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf );
     string GetInnermostTemplateParam( string s );
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
@@ -98,6 +98,7 @@ private:
     list<MyBlock> my_blocks;
     set<TreePtr<Node>> reached;
     set<string> block_ids_show_prerestriction;
+    static const LinkNamingFunction my_lnf;
 };
 
 #endif

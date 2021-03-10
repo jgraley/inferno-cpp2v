@@ -33,7 +33,7 @@ map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink base_xlink ) c
 }
 
 
-Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
+Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
     Block block;
 	// The TransformOf node appears as a slightly flattened octagon, with the name of the specified 

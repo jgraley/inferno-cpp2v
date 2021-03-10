@@ -36,7 +36,7 @@ public:
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          
     virtual TreePtr<Node> BuildReplaceImpl();
-    virtual Block GetGraphBlockInfo() const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
 
