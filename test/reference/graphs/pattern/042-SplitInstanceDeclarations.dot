@@ -1,0 +1,242 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P42-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> SplitInstanceDeclarations | <port0> search | <port1> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-748" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-753" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-754" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-750" [
+shape = "record"
+fillcolor = "/set28/1"
+label = "<fixed> Overlay | <port0> (LocalVariable) | <port1> through | <port2> overlay"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-749" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LocalVariable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Initialiser</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-751" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InstanceIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-752" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-757" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LocalVariable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Initialiser</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-758" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-755" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-756" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-759" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Assign</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port0">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1">[1]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P42-0":port0 -> "#B-2-748" [style="solid"
+];
+"CR#P42-0":port1 -> "#B-2-756" [style="dashed"
+];
+"#B-2-748":port0 -> "#B-2-753" [style="solid"
+];
+"#B-2-748":port1 -> "#B-2-754" [style="solid"
+];
+"#B-2-748":port2 -> "#B-2-750" [style="solid"
+];
+"#B-2-748":port3 -> "#B-2-755" [style="solid"
+];
+"#B-2-750":port1 -> "#B-2-749" [style="solid"
+];
+"#B-2-750":port2 -> "#B-2-757" [style="dashed"
+];
+"#B-2-749":port0 -> "#B-2-751" [style="solid"
+];
+"#B-2-749":port1 -> "#B-2-752" [style="solid"
+];
+"#B-2-757":port0 -> "#B-2-758" [style="dashed"
+];
+"#B-2-756":port0 -> "#B-2-750" [style="dashed"
+];
+"#B-2-756":port0 -> "#B-2-753" [style="dashed"
+];
+"#B-2-756":port1 -> "#B-2-754" [style="dashed"
+];
+"#B-2-756":port2 -> "#B-2-759" [style="dashed"
+];
+"#B-2-756":port3 -> "#B-2-755" [style="dashed"
+];
+"#B-2-759":port0 -> "#B-2-751" [style="dashed"
+];
+"#B-2-759":port1 -> "#B-2-752" [style="dashed"
+];
+}

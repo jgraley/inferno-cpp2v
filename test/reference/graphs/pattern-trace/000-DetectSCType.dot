@@ -1,0 +1,233 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P0-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> DetectSCType | <port0> root | <port1> #P0-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#P0-6-0" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P0-6-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-3-0" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #B-3-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-1" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Scope</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-3" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-3</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-4" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">UserType</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>TypeIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-4</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-5" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'sc_event'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(TypeIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-5</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-2" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Scope</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-2</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-6" [
+shape = "record"
+label = "<fixed> Slave | <port0> through | <port1> root | <port2> #P0-1 | <port3> #B-2-6"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#P0-8-0" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P0-8-0</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#P0-6-1" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P0-6-1"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-0" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Event</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-0</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P0-0":port0 -> "#P0-6-0" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P0-6-0":port0 -> "#B-3-0" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P0-6-0":port1 -> "#B-2-6" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#B-3-0":port0 -> "#B-2-1" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-3-0":port1 -> "#B-2-2" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#B-2-1":port0 -> "#B-2-3" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-1":port0 -> "#B-2-4" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-4":port0 -> "#B-2-5" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-2":port0 -> "#B-2-3" [style="dashed"
+label = "#1"
+decorate = true
+];
+"#B-2-6":port0 -> "#B-3-0" [style="dashed"
+label = "#1"
+decorate = true
+];
+"#B-2-6":port1 -> "#P0-8-0" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P0-8-0":port0 -> "#P0-6-1" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P0-6-1":port0 -> "#B-2-5" [style="solid"
+label = "#1"
+decorate = true
+];
+"#P0-6-1":port1 -> "#B-2-0" [style="dashed"
+label = "#0"
+decorate = true
+];
+}

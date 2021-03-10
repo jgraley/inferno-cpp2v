@@ -1,0 +1,200 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P14-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> DetectSCNotifyImmediate | <port0> root | <port1> #P14-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#P14-8-14" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P14-8-14</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#P14-6-17" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P14-6-17"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-162" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Call</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>MapOperand</TD>
+  <TD PORT="port0">{}</TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-162</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-163" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Lookup</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-163</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-167" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0"><I>TypeOf</I></FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-167</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-164" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Event</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-164</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-166" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'notify'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-166</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-165" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">NotifyImmediate</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-165</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P14-0":port0 -> "#P14-8-14" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P14-8-14":port0 -> "#P14-6-17" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P14-6-17":port0 -> "#B-2-162" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P14-6-17":port1 -> "#B-2-165" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#B-2-162":port1 -> "#B-2-163" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-163":port0 -> "#B-2-167" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-163":port1 -> "#B-2-166" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-167":port0 -> "#B-2-164" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-165":port0 -> "#B-2-167" [style="dashed"
+label = "#1"
+decorate = true
+];
+}

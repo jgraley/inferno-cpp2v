@@ -1,0 +1,277 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P36-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> WhileToDo | <port0> root | <port1> #P36-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#P36-8-44" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P36-8-44</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#P36-6-49" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P36-6-49"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-634" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∧</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-634</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-628" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">While</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-628</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-629" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Statement</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-629</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-630" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-630</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-4-3" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-4-3</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-635" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Uncombable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-635</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-632" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">If</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-632</TD>
+  <TD PORT="port3"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-633" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Do</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-633</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-631" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Nop</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-631</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P36-0":port0 -> "#P36-8-44" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P36-8-44":port0 -> "#P36-6-49" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P36-6-49":port0 -> "#B-2-634" [style="solid"
+label = "#0"
+decorate = true
+];
+"#P36-6-49":port1 -> "#B-2-632" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#B-2-634":port0 -> "#B-2-628" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-634":port0 -> "#B-4-3" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-628":port0 -> "#B-2-629" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-628":port1 -> "#B-2-630" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-4-3":port0 -> "#B-2-635" [style="solid"
+label = "#0"
+decorate = true
+];
+"#B-2-632":port0 -> "#B-2-630" [style="dashed"
+label = "#1"
+decorate = true
+];
+"#B-2-632":port1 -> "#B-2-633" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#B-2-632":port2 -> "#B-2-631" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#B-2-633":port0 -> "#B-2-629" [style="dashed"
+label = "#1"
+decorate = true
+];
+"#B-2-633":port1 -> "#B-2-630" [style="dashed"
+label = "#2"
+decorate = true
+];
+}

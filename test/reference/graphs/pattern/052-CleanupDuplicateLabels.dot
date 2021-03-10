@@ -1,0 +1,383 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P52-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> CleanupDuplicateLabels | <port0> search | <port1> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-889" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Instance</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Type</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>Initialiser</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-906" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Callable</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-905" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InstanceIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-891" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Compound)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-892" [
+shape = "record"
+fillcolor = "/set28/2"
+label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-893" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port4">[3]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-898" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-899" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-895" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Label</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>LabelIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-901" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LabelIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-896" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Label</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>LabelIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-902" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LabelIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-900" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-894" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-897" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Label</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>LabelIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-903" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'%s_%s'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(LabelIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-890" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Instance</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Type</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>Initialiser</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-907" [
+shape = "record"
+fillcolor = "/set28/2"
+label = "<fixed> Slave | <port0> (Compound) | <port1> through | <port2> search | <port3> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-904" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∨</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(LabelIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P52-0":port0 -> "#B-2-889" [style="solid"
+];
+"CR#P52-0":port1 -> "#B-2-890" [style="dashed"
+];
+"#B-2-889":port0 -> "#B-2-906" [style="solid"
+];
+"#B-2-889":port1 -> "#B-2-905" [style="solid"
+];
+"#B-2-889":port2 -> "#B-2-891" [style="solid"
+];
+"#B-2-891":port1 -> "#B-2-892" [style="solid"
+];
+"#B-2-892":port1 -> "#B-2-893" [style="solid"
+];
+"#B-2-892":port2 -> "#B-2-894" [style="dashed"
+];
+"#B-2-893":port0 -> "#B-2-898" [style="solid"
+];
+"#B-2-893":port1 -> "#B-2-899" [style="solid"
+];
+"#B-2-893":port2 -> "#B-2-895" [style="solid"
+];
+"#B-2-893":port3 -> "#B-2-896" [style="solid"
+];
+"#B-2-893":port4 -> "#B-2-900" [style="solid"
+];
+"#B-2-895":port0 -> "#B-2-901" [style="solid"
+];
+"#B-2-896":port0 -> "#B-2-902" [style="solid"
+];
+"#B-2-894":port0 -> "#B-2-898" [style="dashed"
+];
+"#B-2-894":port1 -> "#B-2-899" [style="dashed"
+];
+"#B-2-894":port2 -> "#B-2-897" [style="dashed"
+];
+"#B-2-894":port3 -> "#B-2-900" [style="dashed"
+];
+"#B-2-897":port0 -> "#B-2-903" [style="dashed"
+];
+"#B-2-890":port0 -> "#B-2-906" [style="dashed"
+];
+"#B-2-890":port1 -> "#B-2-905" [style="dashed"
+];
+"#B-2-890":port2 -> "#B-2-907" [style="dashed"
+];
+"#B-2-907":port1 -> "#B-2-891" [style="dashed"
+];
+"#B-2-907":port2 -> "#B-2-904" [style="solid"
+];
+"#B-2-907":port3 -> "#B-2-903" [style="dashed"
+];
+"#B-2-904":port1 -> "#B-2-901" [style="solid"
+];
+"#B-2-904":port1 -> "#B-2-902" [style="solid"
+];
+}

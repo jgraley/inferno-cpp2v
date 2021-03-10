@@ -1,0 +1,238 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P1-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> DetectSCBase | <port0> compare | <port1> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-3-1" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-8" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Scope</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-10" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-13" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">UserType</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>TypeIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-17" [
+shape = "trapezium"
+fillcolor = "/set28/5"
+label = <'sc_module'>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-9" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Scope</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-18" [
+shape = "record"
+label = "<fixed> Slave | <port0> through | <port1> search | <port2> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-14" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InheritanceRecord</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>TypeIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port1">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Base</TD>
+  <TD PORT="port2">{..}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-16" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">TypeIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-11" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-12" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-15" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Base</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>TypeIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-7" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Module</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>TypeIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port1">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Base</TD>
+  <TD PORT="port2">{.}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P1-0":port0 -> "#B-3-1" [style="solid"
+];
+"CR#P1-0":port1 -> "#B-2-18" [style="dashed"
+];
+"#B-3-1":port0 -> "#B-2-8" [style="solid"
+];
+"#B-3-1":port1 -> "#B-2-9" [style="dashed"
+];
+"#B-2-8":port0 -> "#B-2-10" [style="solid"
+];
+"#B-2-8":port0 -> "#B-2-13" [style="solid"
+];
+"#B-2-13":port0 -> "#B-2-17" [style="solid"
+];
+"#B-2-9":port0 -> "#B-2-10" [style="dashed"
+];
+"#B-2-18":port0 -> "#B-3-1" [style="dashed"
+];
+"#B-2-18":port1 -> "#B-2-14" [style="solid"
+];
+"#B-2-18":port2 -> "#B-2-7" [style="dashed"
+];
+"#B-2-14":port0 -> "#B-2-16" [style="solid"
+];
+"#B-2-14":port1 -> "#B-2-11" [style="solid"
+];
+"#B-2-14":port2 -> "#B-2-12" [style="solid"
+];
+"#B-2-14":port2 -> "#B-2-15" [style="solid"
+];
+"#B-2-15":port0 -> "#B-2-17" [style="solid"
+];
+"#B-2-7":port0 -> "#B-2-16" [style="dashed"
+];
+"#B-2-7":port1 -> "#B-2-11" [style="dashed"
+];
+"#B-2-7":port2 -> "#B-2-12" [style="dashed"
+];
+}

@@ -1,0 +1,175 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P48-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> CleanupCompoundMulti | <port0> search | <port1> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-850" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-856" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-852" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-849" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-855" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-854" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-853" [
+shape = "circle"
+fillcolor = "/set28/2"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-851" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P48-0":port0 -> "#B-2-850" [style="solid"
+];
+"CR#P48-0":port1 -> "#B-2-851" [style="dashed"
+];
+"#B-2-850":port0 -> "#B-2-856" [style="solid"
+];
+"#B-2-850":port1 -> "#B-2-852" [style="solid"
+];
+"#B-2-850":port2 -> "#B-2-849" [style="solid"
+];
+"#B-2-850":port3 -> "#B-2-853" [style="solid"
+];
+"#B-2-849":port0 -> "#B-2-855" [style="solid"
+];
+"#B-2-849":port1 -> "#B-2-854" [style="solid"
+];
+"#B-2-851":port0 -> "#B-2-855" [style="dashed"
+];
+"#B-2-851":port0 -> "#B-2-856" [style="dashed"
+];
+"#B-2-851":port1 -> "#B-2-852" [style="dashed"
+];
+"#B-2-851":port2 -> "#B-2-854" [style="dashed"
+];
+"#B-2-851":port3 -> "#B-2-853" [style="dashed"
+];
+}

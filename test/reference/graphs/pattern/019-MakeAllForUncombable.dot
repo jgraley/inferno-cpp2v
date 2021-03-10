@@ -1,0 +1,191 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P19-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> MakeAllForUncombable | <port0> search | <port1> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-222" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∧</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(For)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-223" [
+shape = "diamond"
+fillcolor = "/set28/2"
+label = <¬>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-224" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">UncombableFor</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-225" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">For</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-229" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Statement</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-226" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Statement</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-227" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-228" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Statement</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-230" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">UncombableFor</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"CR#P19-0":port0 -> "#B-2-222" [style="solid"
+];
+"CR#P19-0":port1 -> "#B-2-230" [style="dashed"
+];
+"#B-2-222":port1 -> "#B-2-223" [style="solid"
+];
+"#B-2-222":port1 -> "#B-2-225" [style="solid"
+];
+"#B-2-223" -> "#B-2-224" [style="solid"
+];
+"#B-2-225":port0 -> "#B-2-229" [style="solid"
+];
+"#B-2-225":port1 -> "#B-2-226" [style="solid"
+];
+"#B-2-225":port2 -> "#B-2-227" [style="solid"
+];
+"#B-2-225":port3 -> "#B-2-228" [style="solid"
+];
+"#B-2-230":port0 -> "#B-2-229" [style="dashed"
+];
+"#B-2-230":port1 -> "#B-2-226" [style="dashed"
+];
+"#B-2-230":port2 -> "#B-2-227" [style="dashed"
+];
+"#B-2-230":port3 -> "#B-2-228" [style="dashed"
+];
+}

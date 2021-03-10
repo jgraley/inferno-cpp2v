@@ -119,6 +119,11 @@ srtest : test/results/sr.pass
 reptest : test/results/rep.pass
 	
 #
+# Run the graph tests
+#
+graphtest : test/results/graph.pass
+	
+#
 # Cleaning up
 #
 clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean

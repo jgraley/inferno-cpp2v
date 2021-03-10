@@ -118,7 +118,7 @@ void Graph::PopulateFromControl( const Graphable *g,
 	
     my_blocks.push_back( block );
             
-    PopulateFromSubBlocks( block, false );
+    PopulateFromSubBlocks( block );
 }
 
 
@@ -130,7 +130,7 @@ void Graph::PopulateFromNode( TreePtr<Node> node,
 	MyBlock block = PreProcessBlock( nblock, nullptr, node, false );
 	my_blocks.push_back( block );
 
-	PopulateFromSubBlocks( block, true );
+	PopulateFromSubBlocks( block );
 }
 
                               
@@ -147,13 +147,13 @@ void Graph::PopulateFrom( TreePtr<Node> node,
 }
 
 
-void Graph::PopulateFromSubBlocks( const MyBlock &block, bool uniquify )
+void Graph::PopulateFromSubBlocks( const MyBlock &block )
 {
 	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( link.child_node && (reached.count(link.child_node)==0 || !uniquify) )
+			if( link.child_node && reached.count(link.child_node)==0 )
 			{
 				PopulateFrom( link.child_node, link.link_style );
 				reached.insert( link.child_node );

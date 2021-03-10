@@ -1,0 +1,382 @@
+digraph Inferno {
+graph [
+rankdir = "LR"
+ranksep = 1.0
+size = "14,20"
+bgcolor = antiquewhite1
+];
+node [
+];
+"CR#P86-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> CleanupUnusedVariables | <port0> compare | <port1> replace"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-1590" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∧</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Scope)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1601" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Scope)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1593" [
+shape = "record"
+fillcolor = "/set28/4"
+label = "<fixed> Overlay | <port0> (Scope) | <port1> through | <port2> overlay"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#B-2-1591" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Scope</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1595" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Instance</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Type</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1596" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0"><I>NestedArrayAgent</I></FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1597" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">¬</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Type)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1598" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∨</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Type)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1608" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Callable</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1599" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0"><I>GetDeclaration</I></FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(TypeIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1606" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InheritanceRecord</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Base</TD>
+  <TD PORT="port1">{.}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1609" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-1610" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-1600" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InstanceIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1594" [
+shape = "circle"
+fillcolor = "/set28/1"
+label = <*>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-1592" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Scope</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1607" [
+shape = "diamond"
+fillcolor = "/set28/4"
+label = <¬>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-1602" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Scope)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#B-2-1603" [
+shape = "diamond"
+label = <∧>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-1604" [
+shape = "square"
+label = <#=1>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"#B-2-1605" [
+shape = "diamond"
+label = <¬>
+style = "filled"
+fontsize = "18"
+penwidth = 0.0
+fixedsize = true
+width = 0.4
+height = 0.4
+];
+"CR#P86-0":port0 -> "#B-2-1590" [style="solid"
+];
+"CR#P86-0":port1 -> "#B-2-1601" [style="dashed"
+];
+"#B-2-1590":port1 -> "#B-2-1601" [style="solid"
+];
+"#B-2-1590":port1 -> "#B-2-1607" [style="solid"
+];
+"#B-2-1601":port1 -> "#B-2-1593" [style="solid"
+];
+"#B-2-1593":port1 -> "#B-2-1591" [style="solid"
+];
+"#B-2-1593":port2 -> "#B-2-1592" [style="dashed"
+];
+"#B-2-1591":port0 -> "#B-2-1595" [style="solid"
+];
+"#B-2-1591":port0 -> "#B-2-1594" [style="solid"
+];
+"#B-2-1595":port0 -> "#B-2-1596" [style="solid"
+];
+"#B-2-1595":port1 -> "#B-2-1600" [style="solid"
+];
+"#B-2-1596":port0 -> "#B-2-1597" [style="solid"
+];
+"#B-2-1597":port1 -> "#B-2-1598" [style="solid"
+];
+"#B-2-1598":port1 -> "#B-2-1608" [style="solid"
+];
+"#B-2-1598":port1 -> "#B-2-1599" [style="solid"
+];
+"#B-2-1599":port1 -> "#B-2-1606" [style="solid"
+];
+"#B-2-1606":port0 -> "#B-2-1609" [style="solid"
+];
+"#B-2-1606":port1 -> "#B-2-1610" [style="solid"
+];
+"#B-2-1592":port0 -> "#B-2-1594" [style="dashed"
+];
+"#B-2-1607" -> "#B-2-1602" [style="solid"
+];
+"#B-2-1602":port1 -> "#B-2-1603" [style="solid"
+];
+"#B-2-1603" -> "#B-2-1604" [style="solid"
+];
+"#B-2-1603" -> "#B-2-1605" [style="solid"
+];
+"#B-2-1604" -> "#B-2-1600" [style="solid"
+];
+"#B-2-1605" -> "#B-2-1595" [style="solid"
+];
+}

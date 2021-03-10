@@ -56,7 +56,7 @@ private:
                            Graphable::LinkStyle default_link_style );
     void PopulateFrom( TreePtr<Node> root, 
                        Graphable::LinkStyle default_link_style );
-	void PopulateFromSubBlocks( const MyBlock &block, bool uniquify );
+	void PopulateFromSubBlocks( const MyBlock &block );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,

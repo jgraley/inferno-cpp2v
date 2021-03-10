@@ -28,7 +28,7 @@ test/results/execution.pass : $(CASES:%=test/results/execution/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "EXECUTION TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have parssed"
+	@spd-say -r -100 -p -100 "the execution tests have parssed"
 
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p test/results/sr
@@ -42,7 +42,7 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "SR TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have parssed"
+	@spd-say -r -100 -p -100 "the search and replace tests have parssed"
 
 test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
 	@touch $@
@@ -50,7 +50,7 @@ test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "MINI EXECUTION TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have parssed"
+	@spd-say -r -100 -p -100 "the mini execution tests have parssed"
 
 $(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh
 	@mkdir -p test/results/rep
@@ -64,6 +64,16 @@ test/results/rep.pass : $(CASES:%=test/results/rep/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "REP TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@spd-say -r -100 -p -100 "the rep tests have passed"
 
-.PHONY: all test
+test/results/graph.pass : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
+	./gen_dev_graphs.sh
+	diff -r graphs/ test/reference/graphs/
+	@touch $@
+	@echo ------------------------------------------
+	@echo -n "Tests Run: "
+	@date
+	@echo "GRAPH TESTS PASSED"
+	@spd-say -r -100 -p -100 "the graph tests have passed"
+
+.PHONY: all test test/results/graph.pass
