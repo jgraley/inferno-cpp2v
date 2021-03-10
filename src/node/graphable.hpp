@@ -3,13 +3,14 @@
 
 #include "common/common.hpp"
 #include "common/trace.hpp"
-#include "tree_ptr.hpp"
 
 #include <string>
 #include <list>
 #include <functional>
 
 using namespace std;
+
+class TreePtrInterface;
 
 class Graphable : public virtual Traceable
 {
@@ -28,7 +29,7 @@ public:
     };
     struct Link
     {
-        TreePtr<Node> child_node;
+        shared_ptr<Node> child_node;
         const TreePtrInterface *ptr;
         LinkStyle link_style;
         list<string> labels;

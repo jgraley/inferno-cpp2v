@@ -48,7 +48,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.trace_labels.push_back( lnf( n, &p ) );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -69,7 +69,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.trace_labels.push_back( lnf( n, &p ) );
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -86,7 +86,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 link.child_node = (TreePtr<Node>)*ptr;
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
+                link.trace_labels.push_back( lnf( n, &p ) );          
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }

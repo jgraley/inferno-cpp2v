@@ -11,7 +11,7 @@
  *
  * Normal nodes and agents are represented as a rectangle with curved corners. At the top of the rectangle, 
  * in large font, is the name of the node's type OR the identifier name if the node is a kind of 
- * SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
+ * SpecificIdentifier. All shared_ptr<>, Sequence<> and Collection<> members are listed below in a 
  * smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
  * this). 
  * 
@@ -41,7 +41,7 @@ public:
 private:
     struct MyBlock : Graphable::Block
     {
-        TreePtr<Node> as_node;
+        shared_ptr<Node> as_node;
         string colour;
         bool specify_ports;
         string base_id;
@@ -50,21 +50,21 @@ private:
 
     void PopulateFromTransformation(Transformation *root);
     void PopulateFromControl( const Graphable *g,
-                              TreePtr<Node> nbase, 
+                              shared_ptr<Node> nbase, 
                               Graphable::LinkStyle default_link_style );
-    void PopulateFromNode( TreePtr<Node> root, 
+    void PopulateFromNode( shared_ptr<Node> root, 
                            Graphable::LinkStyle default_link_style );
-    void PopulateFrom( TreePtr<Node> root, 
+    void PopulateFrom( shared_ptr<Node> root, 
                        Graphable::LinkStyle default_link_style );
 	void PopulateFromSubBlocks( const MyBlock &block );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
-                             TreePtr<Node> n, 
+                             shared_ptr<Node> n, 
                              bool for_control_block );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
-    Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
-    Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf );
+    Graphable::Block GetNodeBlockInfo( shared_ptr<Node> n );
+    Graphable::Block GetDefaultNodeBlockInfo( shared_ptr<Node> n, const LinkNamingFunction &lnf );
     string GetInnermostTemplateParam( string s );
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
@@ -83,20 +83,20 @@ private:
     string DoHeader();
     string DoFooter();
 
-    Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
-    string Id( const Graphable *g, TreePtr<Node> node );
+    Graphable *ShouldDoControlBlock( shared_ptr<Node> node ); 
+    string Id( const Graphable *g, shared_ptr<Node> node );
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
-    string GetPreRestrictionName(TreePtr<Node> node);
+    string GetPreRestrictionName(shared_ptr<Node> node);
 
     const string outfile; // empty means stdout
     FILE *filep;
     
     list<MyBlock> my_blocks;
-    set<TreePtr<Node>> reached;
+    set<shared_ptr<Node>> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
 };
