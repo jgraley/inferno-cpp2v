@@ -110,7 +110,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
 
 
 void Graph::PopulateFromControl( const Graphable *g,
-                                 shared_ptr<Node> nbase, 
+                                 TreePtr<Node> nbase, 
                                  Graphable::LinkStyle default_link_style )
 {
     Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);
@@ -122,7 +122,7 @@ void Graph::PopulateFromControl( const Graphable *g,
 }
 
 
-void Graph::PopulateFromNode( shared_ptr<Node> node,
+void Graph::PopulateFromNode( TreePtr<Node> node,
                               Graphable::LinkStyle default_link_style )
 {
 	Graphable::Block nblock = GetNodeBlockInfo( node );
@@ -134,7 +134,7 @@ void Graph::PopulateFromNode( shared_ptr<Node> node,
 }
 
                               
-void Graph::PopulateFrom( shared_ptr<Node> node,
+void Graph::PopulateFrom( TreePtr<Node> node,
                           Graphable::LinkStyle default_link_style )
 {
 
@@ -165,7 +165,7 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
-                                       shared_ptr<Node> node, 
+                                       TreePtr<Node> node, 
                                        bool for_control_block )
 {
     // Fill in everything in block 
@@ -248,7 +248,7 @@ void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 }
 
 
-Graphable::Block Graph::GetNodeBlockInfo( shared_ptr<Node> node )
+Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
 {    
     ASSERT(node);
     Graphable::Block block;
@@ -271,7 +271,7 @@ Graphable::Block Graph::GetNodeBlockInfo( shared_ptr<Node> node )
 }
 
 
-Graphable::Block Graph::GetDefaultNodeBlockInfo( shared_ptr<Node> n, const LinkNamingFunction &lnf )
+Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf )
 {    
 	Graphable::Block block;
 	block.title = n->GetGraphName();     
@@ -291,7 +291,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( shared_ptr<Node> n, const LinkN
                                                   false,
                                                   {} };
                 Graphable::Link link;
-                link.child_node = (shared_ptr<Node>)p;
+                link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
                 link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
@@ -312,7 +312,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( shared_ptr<Node> n, const LinkN
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
-                link.child_node = (shared_ptr<Node>)p;
+                link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
                 link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
@@ -329,7 +329,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( shared_ptr<Node> n, const LinkN
                                                   false,
                                                   {} };
                 Graphable::Link link;
-                link.child_node = (shared_ptr<Node>)*ptr;
+                link.child_node = (TreePtr<Node>)*ptr;
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
                 link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
@@ -653,7 +653,7 @@ string Graph::DoFooter()
 }
 
 
-Graphable *Graph::ShouldDoControlBlock( shared_ptr<Node> node )
+Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
 {
     Graphable *g = dynamic_cast<Graphable *>(node.get());
     if( !g )
@@ -675,7 +675,7 @@ Graphable *Graph::ShouldDoControlBlock( shared_ptr<Node> node )
 }
 
 
-string Graph::Id( const Graphable *g, shared_ptr<Node> node )
+string Graph::Id( const Graphable *g, TreePtr<Node> node )
 {
 	if( node )
 		g = (const Graphable*)Agent::TryAsAgentConst(node);
@@ -758,7 +758,7 @@ bool Graph::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
 {
     if( ptr )		// is normal tree link
     {
-        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((shared_ptr<Node>)*ptr) )   // is to a special node
+        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*ptr) )   // is to a special node
         {
             if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )    // pre-restrictor is nontrivial
             {
@@ -770,7 +770,7 @@ bool Graph::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
 }
 
 
-string Graph::GetPreRestrictionName(shared_ptr<Node> node)
+string Graph::GetPreRestrictionName(TreePtr<Node> node)
 {
     if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(node) )   // is to a special node
     {

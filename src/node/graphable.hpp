@@ -29,7 +29,7 @@ public:
     };
     struct Link
     {
-        shared_ptr<Node> child_node;
+        TreePtr<Node> child_node;
         const TreePtrInterface *ptr;
         LinkStyle link_style;
         list<string> labels;

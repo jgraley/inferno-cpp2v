@@ -41,7 +41,7 @@ public:
 private:
     struct MyBlock : Graphable::Block
     {
-        shared_ptr<Node> as_node;
+        TreePtr<Node> as_node;
         string colour;
         bool specify_ports;
         string base_id;
@@ -50,21 +50,21 @@ private:
 
     void PopulateFromTransformation(Transformation *root);
     void PopulateFromControl( const Graphable *g,
-                              shared_ptr<Node> nbase, 
+                              TreePtr<Node> nbase, 
                               Graphable::LinkStyle default_link_style );
-    void PopulateFromNode( shared_ptr<Node> root, 
+    void PopulateFromNode( TreePtr<Node> root, 
                            Graphable::LinkStyle default_link_style );
-    void PopulateFrom( shared_ptr<Node> root, 
+    void PopulateFrom( TreePtr<Node> root, 
                        Graphable::LinkStyle default_link_style );
 	void PopulateFromSubBlocks( const MyBlock &block );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
-                             shared_ptr<Node> n, 
+                             TreePtr<Node> n, 
                              bool for_control_block );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
-    Graphable::Block GetNodeBlockInfo( shared_ptr<Node> n );
-    Graphable::Block GetDefaultNodeBlockInfo( shared_ptr<Node> n, const LinkNamingFunction &lnf );
+    Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
+    Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf );
     string GetInnermostTemplateParam( string s );
     string RemoveAllTemplateParam( string s );
     string RemoveOneOuterScope( string s );
@@ -83,20 +83,20 @@ private:
     string DoHeader();
     string DoFooter();
 
-    Graphable *ShouldDoControlBlock( shared_ptr<Node> node ); 
-    string Id( const Graphable *g, shared_ptr<Node> node );
+    Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
+    string Id( const Graphable *g, TreePtr<Node> node );
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
-    string GetPreRestrictionName(shared_ptr<Node> node);
+    string GetPreRestrictionName(TreePtr<Node> node);
 
     const string outfile; // empty means stdout
     FILE *filep;
     
     list<MyBlock> my_blocks;
-    set<shared_ptr<Node>> reached;
+    set<TreePtr<Node>> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
 };
