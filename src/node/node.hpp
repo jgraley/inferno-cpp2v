@@ -71,6 +71,9 @@ struct Node : NodeBases,
         return GetRender();
     }
     
+#ifdef NODE_IS_GRAPHABLE
+    Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf );
+#endif
 };
 
 

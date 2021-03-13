@@ -138,6 +138,7 @@ void Graph::PopulateFrom( TreePtr<Node> node,
                           Graphable::LinkStyle default_link_style )
 {
 
+
 	Graphable *g = ShouldDoControlBlock(node);
 	
 	if( g )
@@ -253,7 +254,7 @@ void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 
 
 Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
-{    
+{
     ASSERT(node);
     Graphable::Block block;
 	const Graphable *g = (const Graphable*)Agent::TryAsAgentConst(node);
@@ -262,16 +263,18 @@ Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
     // does not implement GetGraphBlockInfo() and the default gets used.
     auto sa = dynamic_cast<const StandardAgent *>(Agent::TryAsAgentConst(node));
         
+	TRACE("GetNodeBlockInfo() graphable=")(g)(" standard=")(sa)("\n");
     if( g && !sa )
     {
         (Graphable::Block &)block = Agent::AsAgent(node)->GetGraphBlockInfo(my_lnf);
         ASSERT(!block.title.empty());
-        return block;
     }
     else // not Graphable or StandardAgent
     {
-        return GetDefaultNodeBlockInfo(node, my_lnf);
+        block = GetDefaultNodeBlockInfo(node, my_lnf);
     }
+	TRACE("GetNodeBlockInfo() done\n");		
+    return block;
 }
 
 
@@ -281,6 +284,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
 	block.title = n->GetGraphName();     
 	block.bold = false;
 	block.shape = "plaintext";
+	TreePtr<Node> sp_n = n;
         
     vector< Itemiser::Element * > members = n->Itemise();
 	for( int i=0; i<members.size(); i++ )
@@ -297,7 +301,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
                 Graphable::Link link;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.trace_labels.push_back( lnf( &sp_n, &p ) );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -317,7 +321,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
                 Graphable::Link link;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
+                link.trace_labels.push_back( lnf( &sp_n, &p ) );
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -333,7 +337,7 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
                 Graphable::Link link;
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
+                link.trace_labels.push_back( lnf( &sp_n, ptr ) );          
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }
@@ -735,14 +739,16 @@ string Graph::GetPreRestrictionName(TreePtr<Node> node)
 }
 
 
-const Graph::LinkNamingFunction Graph::my_lnf = []( TreePtr<Node> parent_pattern,
-										   		    const TreePtrInterface *ppattern )
-{
-	return PatternLink( parent_pattern, ppattern ).GetShortName();
-};		
-
-
 TreePtr<Node> Graph::GetChildNode( const Graphable::Link &link )
 {
 	return (TreePtr<Node>)*(link.ptr);
 }
+
+
+const Graph::LinkNamingFunction Graph::my_lnf = []( const TreePtr<Node> *parent_pattern,
+										   		    const TreePtrInterface *ppattern )
+{
+	return PatternLink( *parent_pattern, ppattern ).GetShortName();
+};		
+
+

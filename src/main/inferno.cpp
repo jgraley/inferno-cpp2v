@@ -238,14 +238,14 @@ int main( int argc, char *argv[] )
         Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageOne();
         if( ShouldIQuit(true) )
-            exit(0);
+            break;
     }
-
-    if( ShouldIQuit() )
-        exit(0);
 
     // If a pattern graph was requested, generate it now
     MaybeGeneratePatternGraphs( &sequence );
+    
+    if( ShouldIQuit() )
+        exit(0);
         
     // Planning part two
     if( !ReadArgs::trace_quiet )

@@ -5,6 +5,7 @@
 
 #include "node.hpp"
 #include "specialise_oostd.hpp"
+#include "common/read_args.hpp"
 
 struct MyNode : Node
 {
@@ -31,6 +32,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
 	block.title = GetGraphName();     
 	block.bold = false;
 	block.shape = "plaintext";
+    TreePtr<Node> sp_this( shared_from_this() );
         
     vector< Itemiser::Element * > members = Itemise();
 	for( int i=0; i<members.size(); i++ )
@@ -47,7 +49,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 Graphable::Link link;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
-                link.trace_labels.push_back( lnf( shared_from_this(), &p ) );
+                link.trace_labels.push_back( lnf( &sp_this, &p ) );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -67,7 +69,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 Graphable::Link link;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( lnf( shared_from_this(), &p ) );
+                link.trace_labels.push_back( lnf( &sp_this, &p ) );
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -83,7 +85,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 Graphable::Link link;
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( lnf(shared_from_this(), &p ) );          
+                link.trace_labels.push_back( lnf(&sp_this, ptr ) );          
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }

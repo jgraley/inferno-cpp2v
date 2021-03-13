@@ -88,7 +88,7 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
             
             location_serial[lp] = location;
             location_readback[location] = lp;
-            TRACE("%p assigned serial -%lu-\n", lp, location);
+            //TRACE("%p assigned serial -%lu-\n", lp, location);
 
             master_serial_by_location[location] = 0;
         }

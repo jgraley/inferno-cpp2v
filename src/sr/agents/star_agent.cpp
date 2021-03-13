@@ -104,6 +104,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
 {
 	// The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
 	// filename wildcarding, which is semantically equiviant only when used in a Sequence.
+	TRACE("GetGraphBlockInfo()\n");
     Block block;
 	block.bold = true;
 	block.title = "Star";

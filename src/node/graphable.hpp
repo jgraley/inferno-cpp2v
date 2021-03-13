@@ -11,8 +11,9 @@
 using namespace std;
 
 class TreePtrInterface;
-//template<typename VALUE_TYPE>
-//struct TreePtr;
+template<typename VALUE_TYPE>
+struct TreePtr;
+class Node;
 
 class Graphable : public virtual Traceable
 {
@@ -54,7 +55,7 @@ public:
         list<SubBlock> sub_blocks;
     };
     
-    typedef std::function<string( TreePtr<Node> parent_pattern,
+    typedef std::function<string( const TreePtr<Node> *parent_pattern,
                                   const TreePtrInterface *ppattern )> LinkNamingFunction;
                                   
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const     
