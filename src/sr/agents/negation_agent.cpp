@@ -59,8 +59,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,
-                           { { (TreePtr<Node>)*GetPattern(),
-                               GetPattern(), 
+                           { { GetPattern(), 
                                THROUGH, 
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()} } } } };

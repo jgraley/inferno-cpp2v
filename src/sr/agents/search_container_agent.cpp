@@ -86,8 +86,7 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
     block.sub_blocks = { { "terminus", 
                            "", 
                            true,
-                           { { (TreePtr<Node>)*GetTerminus(),
-                               GetTerminus(), 
+                           { { GetTerminus(), 
                                THROUGH, 
                                {},
                                {PatternLink(this, &terminus).GetShortName()} } } } };
@@ -272,8 +271,7 @@ Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) 
         block.sub_blocks.push_back( { "recurse_restriction", 
                                       "", 
                                       false,
-                                      { { recurse_restriction,
-                                          &recurse_restriction, 
+                                      { { &recurse_restriction, 
                                           THROUGH, 
                                           {},
                                           {PatternLink(this, &recurse_restriction).GetShortName()} } } } );

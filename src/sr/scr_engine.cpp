@@ -434,8 +434,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
         sub_blocks.push_back( { "root", 
                                 "",
                                 true,
-                                { { plan.root_pattern, 
-                                    nullptr,
+                                { { &plan.root_pattern,
                                     SOLID, 
                                     {},
                                     {plan.root_plink.GetShortName()} } } } );
@@ -449,31 +448,27 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
     // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
     // should error on them?
-    TreePtr<Node> original_pattern = plan.root_pattern;
-    const TreePtrInterface *original_ptr = nullptr;
+    const TreePtrInterface *original_ptr = &plan.root_pattern;
     if( plan.is_search )
     {
-        TreePtr< Stuff<Node> > stuff = DynamicTreePtrCast< Stuff<Node> >(original_pattern);
+        TreePtr< Stuff<Node> > stuff = DynamicTreePtrCast< Stuff<Node> >(*original_ptr);
         ASSERT( stuff );
-        original_pattern = *stuff->GetTerminus();
         original_ptr = stuff->GetTerminus();
     }
-    TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(original_pattern);
+    TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(*original_ptr);
     if( overlay )
     {        
         sub_blocks.push_back( { plan.is_search?"search":"compare", 
                                 "",
                                 false,
-                                { { (TreePtr<Node>)*overlay->GetThrough(), 
-                                    overlay->GetThrough(),
+                                { { overlay->GetThrough(),
                                     SOLID, 
                                     {},
                                     {} } } } );    
         sub_blocks.push_back( { "replace", 
                                 "",
                                 false,
-                                { { (TreePtr<Node>)*overlay->GetOverlay(),
-                                    overlay->GetOverlay(),
+                                { { overlay->GetOverlay(),
                                     DASHED, 
                                     {},
                                     {} } } } );
@@ -483,8 +478,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
         sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
                                 "",
                                 true,
-                                { { original_pattern, 
-                                    original_ptr,
+                                { { original_ptr,
                                     SOLID, 
                                     {},
                                     {} } } } );

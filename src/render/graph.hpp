@@ -91,6 +91,7 @@ private:
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
     string GetPreRestrictionName(TreePtr<Node> node);
+    TreePtr<Node> GetChildNode( const Graphable::Link &link );
 
     const string outfile; // empty means stdout
     FILE *filep;

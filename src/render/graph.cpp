@@ -153,10 +153,10 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( link.child_node && reached.count(link.child_node)==0 )
+			if( GetChildNode(link) && reached.count(GetChildNode(link))==0 )
 			{
-				PopulateFrom( link.child_node, link.link_style );
-				reached.insert( link.child_node );
+				PopulateFrom( GetChildNode(link), link.link_style );
+				reached.insert( GetChildNode(link) );
 			}
 		}
 	}
@@ -214,10 +214,14 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         // Actions for links
         for( Graphable::Link &link : sub_block.links )
         {
+			ASSERT( GetChildNode(link) )(block.title)(" ")(sub_block.item_name);
+			ASSERT( link.ptr )(block.title)(" ")(sub_block.item_name);
+			ASSERT( GetChildNode(link) == GetChildNode(link) )(block.title)(" ")(sub_block.item_name);
+
             // Detect pre-restrictions and add to link labels
             if( IsNonTrivialPreRestriction( link.ptr ) )
             {
-                block_ids_show_prerestriction.insert( Id(nullptr, link.child_node) );
+                block_ids_show_prerestriction.insert( Id(nullptr, GetChildNode(link)) );
             }
         }
     }
@@ -291,7 +295,6 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
                                                   false,
                                                   {} };
                 Graphable::Link link;
-                link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
                 link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
@@ -312,7 +315,6 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
-                link.child_node = (TreePtr<Node>)p;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
                 link.trace_labels.push_back( PatternLink( n, &p ).GetShortName() );
@@ -329,7 +331,6 @@ Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNami
                                                   false,
                                                   {} };
                 Graphable::Link link;
-                link.child_node = (TreePtr<Node>)*ptr;
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
                 link.trace_labels.push_back( PatternLink( n, ptr ).GetShortName() );          
@@ -610,7 +611,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += "\""+Id(nullptr, link.child_node)+"\"";
+	s += "\""+Id(nullptr, GetChildNode(link))+"\"";
 	s += " ["+atts+"];\n";
 	return s;
 }
@@ -780,8 +781,14 @@ string Graph::GetPreRestrictionName(TreePtr<Node> node)
 }
 
 
-const Graph::LinkNamingFunction Graph::my_lnf = []( shared_ptr<const Node> parent_pattern,
+const Graph::LinkNamingFunction Graph::my_lnf = []( TreePtr<Node> parent_pattern,
 										   		    const TreePtrInterface *ppattern )
 {
 	return PatternLink( parent_pattern, ppattern ).GetShortName();
 };		
+
+
+TreePtr<Node> Graph::GetChildNode( const Graphable::Link &link )
+{
+	return (TreePtr<Node>)*(link.ptr);
+}

@@ -398,15 +398,20 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "#B-2-1126" [
-shape = "circle"
+shape = "plaintext"
 fillcolor = "/set28/1"
-label = <*>
-style = "filled"
-fontsize = "18"
-penwidth = 0.0
-fixedsize = true
-width = 0.4
-height = 0.4
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Declaration)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
 ];
 "#B-2-1139" [
 shape = "plaintext"

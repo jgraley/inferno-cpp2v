@@ -45,8 +45,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,
-                           { { pattern, 
-                               &pattern,
+                           { { &pattern,
                                THROUGH, 
                                {},
                                {PatternLink(this, &pattern).GetShortName()} } } } };

@@ -228,7 +228,7 @@ struct BuildContainerSizeAgent : public virtual SearchLeafAgent,
         return shared_from_this();
     }
     
-    shared_ptr< StarAgent > container;
+    TreePtr<Node> container;
 private:
 	TreePtr<Node> BuildReplaceImpl();
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;

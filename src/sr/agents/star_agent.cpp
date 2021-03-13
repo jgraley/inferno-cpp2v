@@ -114,8 +114,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
         block.sub_blocks.push_back( { "restriction", 
                                       "", 
                                       false,
-                                      { { (TreePtr<Node>)*GetRestriction(), 
-                                          GetRestriction(),
+                                      { { GetRestriction(),
                                           THROUGH, 
                                           {},
                                           {PatternLink(this, GetRestriction()).GetShortName()} } } } );

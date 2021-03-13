@@ -38,8 +38,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) 
     block.sub_blocks.push_front( { "through", 
                                    "",
                                    true,
-                                   { { (TreePtr<Node>)*GetThrough(),
-                                       GetThrough(), 
+                                   { { GetThrough(), 
                                        THROUGH, 
                                        {},
                                        {PatternLink(this, GetThrough()).GetShortName()} } } } );

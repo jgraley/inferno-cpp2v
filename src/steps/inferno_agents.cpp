@@ -221,8 +221,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf )
         block.sub_blocks.push_back( { "terminus", 
                                       "", 
                                       false,
-                                      { { terminus, 
-                                          &terminus,
+                                      { { &terminus,
                                           THROUGH, 
                                           {},
                                           {PatternLink(this, &terminus).GetShortName()} } } } );
@@ -230,8 +229,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf )
         block.sub_blocks.push_back( { "depth", 
                                       "", 
                                       false,
-                                      { { depth, 
-                                          &depth,
+                                      { { &depth,
                                           THROUGH, 
                                           {},
                                           {PatternLink(this, &depth).GetShortName()} } } } );
@@ -301,14 +299,15 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
 	block.shape = "egg";
     block.block_type = Graphable::NODE;
     if( container )
+    {
         block.sub_blocks.push_back( { "container", 
                                       "", 
                                       false,
-                                      { { (TreePtr<Node>)container, 
-                                          nullptr,
+                                      { { &container,
                                           THROUGH, 
                                           {},
                                           {} } } } );
+    }
     return block;
 }
 
@@ -448,8 +447,7 @@ Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunctio
         block.sub_blocks.push_back( { "pattern", 
                                       "", 
                                       false,
-                                      { { pattern, 
-                                          &pattern,
+                                      { { &pattern,
                                           THROUGH, 
                                           {},
                                           {PatternLink(this, &pattern).GetShortName()} } } } );

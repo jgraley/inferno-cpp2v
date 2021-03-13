@@ -211,12 +211,16 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
   <TD></TD>
  </TR>
  <TR>
-  <TD>terminus</TD>
+  <TD>(Statement)</TD>
   <TD PORT="port0"></TD>
  </TR>
  <TR>
-  <TD>recurse_restriction</TD>
+  <TD>terminus</TD>
   <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>recurse_restriction</TD>
+  <TD PORT="port2"></TD>
  </TR>
 </TABLE>>
 style = "rounded,filled"
@@ -358,9 +362,9 @@ fontsize = "12"
 ];
 "#B-2-625":port1 -> "#B-2-616" [style="solid"
 ];
-"#B-2-616":port0 -> "#B-2-617" [style="solid"
+"#B-2-616":port1 -> "#B-2-617" [style="solid"
 ];
-"#B-2-616":port1 -> "#B-2-618" [style="solid"
+"#B-2-616":port2 -> "#B-2-618" [style="solid"
 ];
 "#B-2-617":port1 -> "#B-2-620" [style="solid"
 ];
