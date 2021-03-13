@@ -65,9 +65,6 @@ private:
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
     Graphable::Block GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf );
-    string GetInnermostTemplateParam( string s );
-    string RemoveAllTemplateParam( string s );
-    string RemoveOneOuterScope( string s );
     
     void PostProcessBlocks();
 

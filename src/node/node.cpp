@@ -47,7 +47,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 Graphable::Link link;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
-                link.trace_labels.push_back( lnf( n, &p ) );
+                link.trace_labels.push_back( lnf( shared_from_this(), &p ) );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -67,7 +67,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 Graphable::Link link;
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( lnf( n, &p ) );
+                link.trace_labels.push_back( lnf( shared_from_this(), &p ) );
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -83,13 +83,13 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                 Graphable::Link link;
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( lnf( n, &p ) );          
+                link.trace_labels.push_back( lnf(shared_from_this(), &p ) );          
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }
             else if( ReadArgs::graph_trace )
 			{
-                Graphable::SubBlock sub_block = { EscapeForGraphviz(GetInnermostTemplateParam(ptr->GetName())), 
+                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
                                                   "NULL",
                                                   false, 
                                                   {} };

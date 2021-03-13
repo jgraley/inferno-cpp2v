@@ -4,6 +4,8 @@
 #include "standard.hpp"
 #include "trace.hpp"
 
+#include <string>
+
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
 class AutoPush
@@ -172,5 +174,9 @@ private:
     const T oldval;
 };
 
+
+string GetInnermostTemplateParam( string s );
+string RemoveAllTemplateParam( string s );
+string RemoveOneOuterScope( string s );
 
 #endif
