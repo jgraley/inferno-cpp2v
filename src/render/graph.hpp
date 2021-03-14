@@ -41,7 +41,7 @@ public:
 private:
     struct MyBlock : Graphable::Block
     {
-        TreePtr<Node> as_node;
+        string prerestriction_name;
         string colour;
         bool specify_ports;
         string base_id;
@@ -50,7 +50,6 @@ private:
 
     void PopulateFromTransformation(Transformation *root);
     void PopulateFromControl( const Graphable *g,
-                              TreePtr<Node> nbase, 
                               Graphable::LinkStyle default_link_style );
     void PopulateFromNode( TreePtr<Node> root, 
                            Graphable::LinkStyle default_link_style );
@@ -60,10 +59,8 @@ private:
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
-                             TreePtr<Node> n, 
                              bool for_control_block );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
-    Graphable::Block GetNodeBlockInfo( TreePtr<Node> n );
     
     void PostProcessBlocks();
 
@@ -80,7 +77,6 @@ private:
     string DoFooter();
 
     Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
-    string Id( const Graphable *g, TreePtr<Node> node );
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );

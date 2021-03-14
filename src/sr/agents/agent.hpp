@@ -284,7 +284,7 @@ class SearchLeafAgent : public PreRestrictedAgent
 class SpecialBase
 {
 public:    
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() const = 0;
 };
 
 
@@ -294,7 +294,7 @@ class Special : public SpecialBase,
                 public virtual PRE_RESTRICTION
 {
 public:
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() const
     {
         // Esta muchos indirection
         return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  

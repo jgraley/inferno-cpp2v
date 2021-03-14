@@ -100,7 +100,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
 		reached.clear();
-	    PopulateFromControl( cr, nullptr, Graphable::THROUGH );
+	    PopulateFromControl( cr, Graphable::THROUGH );
 	}
 	else
     {
@@ -110,14 +110,15 @@ void Graph::PopulateFromTransformation(Transformation *root)
 
 
 void Graph::PopulateFromControl( const Graphable *g,
-                                 TreePtr<Node> nbase, 
                                  Graphable::LinkStyle default_link_style )
 {
+	ASSERT(g);
     Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);
     gblock.default_link_style = default_link_style;
-    MyBlock block = PreProcessBlock( gblock, g, nbase, true );
-    my_blocks.push_back( block );
-            
+    
+    MyBlock block = PreProcessBlock( gblock, g, true );
+    
+    my_blocks.push_back( block );        
     PopulateFromSubBlocks( block );
 }
 
@@ -125,11 +126,12 @@ void Graph::PopulateFromControl( const Graphable *g,
 void Graph::PopulateFromNode( TreePtr<Node> node,
                               Graphable::LinkStyle default_link_style )
 {
-	Graphable::Block nblock = GetNodeBlockInfo( node );
-	nblock.default_link_style = default_link_style;
-	MyBlock block = PreProcessBlock( nblock, nullptr, node, false );
-	my_blocks.push_back( block );
+	Graphable::Block gblock = node->GetGraphBlockInfo(my_lnf);
+	gblock.default_link_style = default_link_style;
+	
+	MyBlock block = PreProcessBlock( gblock, (const Graphable *)(node.get()), false );
 
+	my_blocks.push_back( block );
 	PopulateFromSubBlocks( block );
 }
 
@@ -137,12 +139,10 @@ void Graph::PopulateFromNode( TreePtr<Node> node,
 void Graph::PopulateFrom( TreePtr<Node> node,
                           Graphable::LinkStyle default_link_style )
 {
-
-
 	Graphable *g = ShouldDoControlBlock(node);
 	
 	if( g )
-		PopulateFromControl( g, node, default_link_style );
+		PopulateFromControl( g, default_link_style );
 	else
 		PopulateFromNode( node, default_link_style );
 }
@@ -166,23 +166,27 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
-                                       TreePtr<Node> node, 
                                        bool for_control_block )
 {
+	ASSERT(g);
+	const Node *pnode = dynamic_cast<const Node *>(g);
+    const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
+
     // Fill in everything in block 
     MyBlock my_block;
     (Graphable::Block &)my_block = block;
     
     // Fill in the GraphViz ID that the block will use
-    my_block.base_id = Id(g, node);
+    my_block.base_id = g->GetGraphId();
     
     // Capture the node (if there is one: might be NULL)
-    my_block.as_node = node;
+	if( pspecial )
+		my_block.prerestriction_name = (**(pspecial->GetPreRestrictionArchitype())).GetName();
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
-    if( ReadArgs::graph_trace && node )
+    if( ReadArgs::graph_trace && pnode )
     {
-        my_block.sub_blocks.push_back( { node->GetSerialString(), 
+        my_block.sub_blocks.push_back( { pnode->GetSerialString(), 
                                          "", 
                                          false, 
                                          {} } );
@@ -190,8 +194,8 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     
     // Colour the block in accordance with the node if there is one otherwise leave the colour blank.
     // See #258: "block colour shall be dictated by the node type only"
-    if( node )
-        my_block.colour = node->GetColour();
+    if( pnode )
+        my_block.colour = pnode->GetColour();
     else
         my_block.colour = "transparent";
 
@@ -222,15 +226,15 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
             // Detect pre-restrictions and add to link labels
             if( IsNonTrivialPreRestriction( link.ptr ) )
             {
-                block_ids_show_prerestriction.insert( Id(nullptr, GetChildNode(link)) );
+				string id = GetChildNode(link)->GetGraphId();
+                block_ids_show_prerestriction.insert( id );
             }
         }
     }
     
     // Italic title OR symbol designates a special agent 
-    bool special = node && dynamic_pointer_cast<SpecialBase>(node);
-    my_block.italic_title = special;
-    if( !special )
+    my_block.italic_title = (bool)pspecial;
+    if( !pspecial )
         ASSERT( my_block.symbol.empty() );
 
     // Apply current link style to links as a default
@@ -253,41 +257,14 @@ void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
 }
 
 
-Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
-{
-    ASSERT(node);
-    Graphable::Block block;
-	const Graphable *g = (const Graphable*)Agent::TryAsAgentConst(node);
-        
-    // Temporary: StandardAgent is Graphable (because Agent is) but 
-    // does not implement GetGraphBlockInfo() and the default gets used.
-    auto sa = dynamic_cast<const StandardAgent *>(Agent::TryAsAgentConst(node));
-        
-	TRACE("GetNodeBlockInfo() graphable=")(g)(" standard=")(sa)("\n");
-    if( g && !sa )
-    {
-        block = Agent::AsAgent(node)->GetGraphBlockInfo(my_lnf);
-        ASSERT(!block.title.empty());
-    }
-    else // not Graphable or StandardAgent
-    {
-        block = node->GetGraphBlockInfo(my_lnf);
-    }
-	TRACE("GetNodeBlockInfo() done\n");		
-    return block;
-}
-
-
 void Graph::PostProcessBlocks()
 {
     for( MyBlock &block : my_blocks )
     {
         if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
-        {
-            string prs = GetPreRestrictionName( block.as_node );
-            
+        {          
             // Note: using push_front to get pre-restriction near the top (under title)
-            block.sub_blocks.push_front( { "("+prs+")", 
+            block.sub_blocks.push_front( { "("+block.prerestriction_name+")", 
                                            "", 
                                            false, 
                                            {} } );
@@ -487,7 +464,8 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += "\""+Id(nullptr, GetChildNode(link))+"\"";
+	string id = GetChildNode(link)->GetGraphId();
+	s += "\""+id+"\"";
 	s += " ["+atts+"];\n";
 	return s;
 }
@@ -549,15 +527,6 @@ Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
         default:
             ASSERTFAIL("Unknown block type");
     }
-}
-
-
-string Graph::Id( const Graphable *g, TreePtr<Node> node )
-{
-	if( node )
-		g = (const Graphable*)Agent::TryAsAgentConst(node);
-	
-	return g ? g->GetGraphId() : node->GetSerialString();
 }
 
 
