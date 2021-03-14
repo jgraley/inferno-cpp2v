@@ -108,3 +108,9 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
     
     return block;
 }
+
+
+string Node::GetGraphId() const
+{
+    return GetSerialString();
+} 
