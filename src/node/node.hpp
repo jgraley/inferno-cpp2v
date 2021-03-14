@@ -1,8 +1,6 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
-#define NODE_IS_GRAPHABLE
-
 #include "common/common.hpp"
 #include "itemise.hpp"
 #include "type_info.hpp"
@@ -10,9 +8,7 @@
 #include "common/magic.hpp"
 #include "match.hpp"
 #include "renderable.hpp"
-#ifdef NODE_IS_GRAPHABLE
 #include "graphable.hpp"
-#endif
 #include "coloured.hpp"
 #include "common/serial.hpp"
 
@@ -27,9 +23,7 @@
 /// The node support classes all collected together for convenience
 struct NodeBases : Magic,
                    virtual Renderable,
-#ifdef NODE_IS_GRAPHABLE
                    virtual Graphable,
-#endif
                    Coloured,
                    Matcher,
                    Itemiser,
@@ -71,9 +65,7 @@ struct Node : NodeBases,
         return GetRender();
     }
     
-#ifdef NODE_IS_GRAPHABLE
-    Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
-#endif
+    virtual Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const override;
 };
 
 

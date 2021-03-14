@@ -25,7 +25,7 @@ void GenericsTest()
     ASSERT( i.size() == 1 )("%d elements\n", i.size());
 }
 
-#ifdef NODE_IS_GRAPHABLE
+
 Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {    
 	TRACE(*this)(" GetGraphBlockInfo()\n");
@@ -108,4 +108,3 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
     
     return block;
 }
-#endif

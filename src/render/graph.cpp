@@ -271,92 +271,9 @@ Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
     }
     else // not Graphable or StandardAgent
     {
-        block = GetDefaultNodeBlockInfo(node, my_lnf);
+        block = node->GetGraphBlockInfo(my_lnf);
     }
 	TRACE("GetNodeBlockInfo() done\n");		
-    return block;
-}
-
-
-Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf )
-{    
-	TRACE(*n)(" GetDefaultNodeBlockInfo()\n");
-	Graphable::Block block;
-	block.title = n->GetGraphName();     
-	block.bold = false;
-	block.shape = "plaintext";
-	TreePtr<Node> sp_n = n;
-        
-    vector< Itemiser::Element * > members = n->Itemise();
-	for( int i=0; i<members.size(); i++ )
-	{
-		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
-		{
-            int j=0;
-			FOREACH( const TreePtrInterface &p, *seq )
-			{
-                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(seq->GetName()), 
-                                                  SSPrintf("[%d]", j++),
-                                                  false,
-                                                  {} };
-                Graphable::Link link;
-                link.ptr = &p;
-                link.link_style = Graphable::THROUGH;
-                link.trace_labels.push_back( lnf( &sp_n, &p ) );
-                sub_block.links.push_back( link );
-                block.sub_blocks.push_back( sub_block );
-			}
-		}
-		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
-		{
-            string dots;
-            for( int j=0; j<col->size(); j++ )
-                dots += ".";
-            
-            Graphable::SubBlock sub_block = { GetInnermostTemplateParam(col->GetName()), 
-                                              "{" + dots + "}",
-                                              false,
-                                              {} };
-			FOREACH( const TreePtrInterface &p, *col )
-            {
-                Graphable::Link link;
-                link.ptr = &p;
-                link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( lnf( &sp_n, &p ) );
-                sub_block.links.push_back( link );
-            }
-            block.sub_blocks.push_back( sub_block );
-		}
-		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
-		{
-			if( *ptr )
-			{
-                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
-                                                  "",
-                                                  false,
-                                                  {} };
-                Graphable::Link link;
-                link.ptr = ptr;
-                link.link_style = Graphable::THROUGH;                
-                link.trace_labels.push_back( lnf( &sp_n, ptr ) );          
-                sub_block.links.push_back( link );
-                block.sub_blocks.push_back( sub_block );
-   		    }
-            else if( ReadArgs::graph_trace )
-			{
-                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
-                                                  "NULL",
-                                                  false, 
-                                                  {} };
-                block.sub_blocks.push_back( sub_block );
-            }
-		}
-		else
-		{
-			ASSERT(0);
-		}
-	}
-    
     return block;
 }
 
