@@ -427,6 +427,7 @@ string SCREngine::GetTrace() const
 
 Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {
+	TRACE(*this)(" GetGraphBlockInfo()\n");
     list<SubBlock> sub_blocks;
     if( ReadArgs::graph_trace )
     {

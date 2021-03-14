@@ -62,6 +62,11 @@ public:
     {
         return &restriction;
     }
+
+    //virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+    //{
+	//	return StarAgent::GetGraphBlockInfo(lnf);
+	//}
 };
 
 };

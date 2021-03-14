@@ -1,7 +1,7 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
-//#define NODE_IS_GRAPHABLE
+#define NODE_IS_GRAPHABLE
 
 #include "common/common.hpp"
 #include "itemise.hpp"
@@ -72,7 +72,7 @@ struct Node : NodeBases,
     }
     
 #ifdef NODE_IS_GRAPHABLE
-    Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf );
+    Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
 #endif
 };
 

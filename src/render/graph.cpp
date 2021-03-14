@@ -266,7 +266,7 @@ Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
 	TRACE("GetNodeBlockInfo() graphable=")(g)(" standard=")(sa)("\n");
     if( g && !sa )
     {
-        (Graphable::Block &)block = Agent::AsAgent(node)->GetGraphBlockInfo(my_lnf);
+        block = Agent::AsAgent(node)->GetGraphBlockInfo(my_lnf);
         ASSERT(!block.title.empty());
     }
     else // not Graphable or StandardAgent
@@ -280,6 +280,7 @@ Graphable::Block Graph::GetNodeBlockInfo( TreePtr<Node> node )
 
 Graphable::Block Graph::GetDefaultNodeBlockInfo( TreePtr<Node> n, const LinkNamingFunction &lnf )
 {    
+	TRACE(*n)(" GetDefaultNodeBlockInfo()\n");
 	Graphable::Block block;
 	block.title = n->GetGraphName();     
 	block.bold = false;

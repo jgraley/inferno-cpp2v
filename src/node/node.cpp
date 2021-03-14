@@ -26,13 +26,15 @@ void GenericsTest()
 }
 
 #ifdef NODE_IS_GRAPHABLE
-Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf )
+Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
 {    
+	TRACE(*this)(" GetGraphBlockInfo()\n");
 	Graphable::Block block;
 	block.title = GetGraphName();     
 	block.bold = false;
 	block.shape = "plaintext";
-    TreePtr<Node> sp_this( shared_from_this() );
+    block.block_type = Graphable::NODE;
+    TreePtr<Node> sp_this( const_pointer_cast<Node>( shared_from_this() ) );
         
     vector< Itemiser::Element * > members = Itemise();
 	for( int i=0; i<members.size(); i++ )
