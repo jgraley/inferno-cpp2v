@@ -11,7 +11,8 @@ using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
-Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
@@ -121,7 +122,8 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl()
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
-Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.
@@ -210,7 +212,8 @@ map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink base_xlink ) const
 }    
 
 
-Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
     Block block;
 	block.bold = false;
@@ -224,7 +227,8 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                                       { { &terminus,
                                           THROUGH, 
                                           {},
-                                          {PatternLink(this, &terminus).GetShortName()} } } } );
+                                          {PatternLink(this, &terminus).GetShortName()},
+                                          SpecialBase::IsNonTrivialPreRestriction(&terminus) } } } );
     if( depth )
         block.sub_blocks.push_back( { "depth", 
                                       "", 
@@ -232,7 +236,8 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf )
                                       { { &depth,
                                           THROUGH, 
                                           {},
-                                          {PatternLink(this, &depth).GetShortName()} } } } );
+                                          {PatternLink(this, &depth).GetShortName()},
+                                          SpecialBase::IsNonTrivialPreRestriction(&depth) } } } );
     return block;
 }
 
@@ -290,7 +295,8 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl()
 }                                                   
 
 
-Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 
     Block block;
@@ -306,7 +312,8 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
                                       { { &container,
                                           THROUGH, 
                                           {},
-                                          {} } } } );
+                                          {},
+                                          SpecialBase::IsNonTrivialPreRestriction(&container) } } } );
     }
     return block;
 }
@@ -435,7 +442,8 @@ bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 	return r;
 }
 
-Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 
     Block block;
@@ -450,6 +458,7 @@ Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunctio
                                       { { &pattern,
                                           THROUGH, 
                                           {},
-                                          {PatternLink(this, &pattern).GetShortName()} } } } );
+                                          {PatternLink(this, &pattern).GetShortName()},
+                                          SpecialBase::IsNonTrivialPreRestriction(&pattern) } } } );
     return block;
 }

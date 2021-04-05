@@ -63,7 +63,8 @@ map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink base_xlink ) con
 }
 
 
-Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                                    const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The PointerIs node appears as a slightly flattened pentagon.
     Block block;

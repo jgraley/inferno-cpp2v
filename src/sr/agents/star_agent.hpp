@@ -36,7 +36,8 @@ public:
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          
     virtual TreePtr<Node> BuildReplaceImpl();
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
 
@@ -62,11 +63,6 @@ public:
     {
         return &restriction;
     }
-
-    //virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
-    //{
-	//	return StarAgent::GetGraphBlockInfo(lnf);
-	//}
 };
 
 };

@@ -425,7 +425,8 @@ string SCREngine::GetTrace() const
 }
 
 
-Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	TRACE(*this)(" GetGraphBlockInfo()\n");
     list<SubBlock> sub_blocks;
@@ -438,7 +439,8 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
                                 { { &plan.root_pattern,
                                     SOLID, 
                                     {},
-                                    {plan.root_plink.GetShortName()} } } } );
+                                    {plan.root_plink.GetShortName()},
+                                    SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) } } } );
         sub_blocks.push_back( { GetSerialString(), 
                                 "", 
                                 false, 
@@ -465,14 +467,16 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
                                 { { overlay->GetThrough(),
                                     SOLID, 
                                     {},
-                                    {} } } } );    
+                                    {},
+                                    SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) } } } );    
         sub_blocks.push_back( { "replace", 
                                 "",
                                 false,
                                 { { overlay->GetOverlay(),
                                     DASHED, 
                                     {},
-                                    {} } } } );
+                                    {},
+                                    SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) } } } );
     }
     else
     {
@@ -482,7 +486,8 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf ) c
                                 { { original_ptr,
                                     SOLID, 
                                     {},
-                                    {} } } } );
+                                    {},
+                                    SpecialBase::IsNonTrivialPreRestriction(original_ptr) } } } );
     }
     return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
 }

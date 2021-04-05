@@ -75,15 +75,13 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
-    bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
-    string GetPreRestrictionName(TreePtr<Node> node);
-    TreePtr<Node> GetChildNode( const Graphable::Link &link );
+    Graphable *GetChild( const Graphable::Link &link );
 
     const string outfile; // empty means stdout
     FILE *filep;
     
     list<MyBlock> my_blocks;
-    set<TreePtr<Node>> reached;
+    set<Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
 };

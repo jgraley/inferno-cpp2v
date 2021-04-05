@@ -27,7 +27,8 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual void KeyForOverlay( Agent *from );
     virtual const TreePtrInterface *GetThrough() const = 0;    
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl();

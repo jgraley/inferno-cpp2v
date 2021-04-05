@@ -1019,3 +1019,16 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
     return dest;
 }
 
+
+Graphable::Block StandardAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                                   const NonTrivialPreRestrictionFunction &ntprf) const
+{
+	return Node::GetGraphBlockInfo(lnf, my_ntprf);
+}
+
+
+const StandardAgent::NonTrivialPreRestrictionFunction StandardAgent::my_ntprf = []( const TreePtrInterface *ppattern )
+{
+	return SpecialBase::IsNonTrivialPreRestriction( ppattern );
+};		
+

@@ -12,7 +12,8 @@ shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
     return pq;
 }
 
-Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
     list<SubBlock> sub_blocks;
     sub_blocks.push_back( { "through", 
@@ -21,14 +22,16 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf 
                             { { GetThrough(),
                                 SOLID, 
                                 {},
-                                {PatternLink(this, GetThrough()).GetShortName()} } } } );
+                                {PatternLink(this, GetThrough()).GetShortName()},
+                                SpecialBase::IsNonTrivialPreRestriction(GetThrough()) } } } );
     sub_blocks.push_back( { "overlay", 
                             "",
                             false,
                             { { GetOverlay(),
                                 DASHED, 
                                 {},
-                                {PatternLink(this, GetOverlay()).GetShortName()} } } } );
+                                {PatternLink(this, GetOverlay()).GetShortName()},
+                                SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) } } } );
     return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
 }
 

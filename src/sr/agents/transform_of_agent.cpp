@@ -33,7 +33,8 @@ map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink base_xlink ) c
 }
 
 
-Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
     Block block;
 	// The TransformOf node appears as a slightly flattened octagon, with the name of the specified 
@@ -48,6 +49,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
                            { { &pattern,
                                THROUGH, 
                                {},
-                               {PatternLink(this, &pattern).GetShortName()} } } } };
+                               {PatternLink(this, &pattern).GetShortName()},
+                               SpecialBase::IsNonTrivialPreRestriction(&pattern) } } } };
     return block;
 }

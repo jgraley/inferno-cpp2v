@@ -161,8 +161,14 @@ private:
 	TreePtr<Node> BuildReplaceOverlay(); // under substitution if not nullptr
     TreePtr<Node> BuildReplaceNormal();
     
+public:
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+
+private:
     Plan plan; // can't be const because children added after construct
     bool planned = false;
+	static const NonTrivialPreRestrictionFunction my_ntprf;    
 };
 
 

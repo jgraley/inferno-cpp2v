@@ -285,6 +285,8 @@ class SpecialBase
 {
 public:    
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() const = 0;
+	static bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
+
 };
 
 

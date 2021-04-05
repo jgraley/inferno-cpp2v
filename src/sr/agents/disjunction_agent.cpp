@@ -127,7 +127,8 @@ void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_lin
 }
 
 
-Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The Disjunction node appears as a diamond with a ∨ character inside it. The affected subtrees are 
 	// on the right.
@@ -149,6 +150,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
         block.sub_blocks.front().links.push_back( { &p,
                                                     THROUGH, 
                                                     {},
-                                                    {PatternLink(this, &p).GetShortName()} } );
+                                                    {PatternLink(this, &p).GetShortName()},
+                                                    SpecialBase::IsNonTrivialPreRestriction(&p) } );
     return block;
 }

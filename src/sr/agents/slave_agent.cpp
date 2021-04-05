@@ -31,9 +31,10 @@ void SlaveAgent::KeyForOverlay( Agent *from )
 }
 
 
-Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
-    Block block = my_scr_engine->GetGraphBlockInfo(lnf);
+    Block block = my_scr_engine->GetGraphBlockInfo(lnf, ntprf);
     block.title = "Slave";
     block.sub_blocks.push_front( { "through", 
                                    "",
@@ -41,7 +42,8 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) 
                                    { { GetThrough(), 
                                        THROUGH, 
                                        {},
-                                       {PatternLink(this, GetThrough()).GetShortName()} } } } );
+                                       {PatternLink(this, GetThrough()).GetShortName()},
+                                       SpecialBase::IsNonTrivialPreRestriction(GetThrough()) } } } );
     return block;
 }
 

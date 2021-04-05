@@ -114,7 +114,7 @@ void Graph::PopulateFrom( Graphable *g,
                           Graphable::LinkStyle default_link_style )
 {
 	ASSERT(g);
-    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);	
+    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);	
     gblock.default_link_style = default_link_style;
     
     MyBlock block = PreProcessBlock( gblock, g );
@@ -130,12 +130,11 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( GetChildNode(link) && reached.count(GetChildNode(link))==0 )
+			if( GetChild(link) && reached.count(GetChild(link))==0 )
 			{
-				TreePtr<Node> child_node = GetChildNode(link);
-				Graphable *g = dynamic_cast<Graphable *>(child_node.get());
+				Graphable *g = GetChild(link);
 				PopulateFrom( g, link.link_style );
-				reached.insert( child_node );
+				reached.insert( g );
 			}
 		}
 	}
@@ -201,14 +200,12 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         // Actions for links
         for( Graphable::Link &link : sub_block.links )
         {
-			ASSERT( GetChildNode(link) )(block.title)(" ")(sub_block.item_name);
-			ASSERT( link.ptr )(block.title)(" ")(sub_block.item_name);
-			ASSERT( GetChildNode(link) == GetChildNode(link) )(block.title)(" ")(sub_block.item_name);
+			ASSERT( GetChild(link) )(block.title)(" ")(sub_block.item_name);
 
             // Detect pre-restrictions and add to link labels
-            if( IsNonTrivialPreRestriction( link.ptr ) )
+            if( link.is_ntpr )
             {
-				string id = GetChildNode(link)->GetGraphId();
+				string id = GetChild(link)->GetGraphId();
                 block_ids_show_prerestriction.insert( id );
             }
         }
@@ -446,7 +443,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	string id = GetChildNode(link)->GetGraphId();
+	string id = GetChild(link)->GetGraphId();
 	s += "\""+id+"\"";
 	s += " ["+atts+"];\n";
 	return s;
@@ -560,35 +557,14 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 }
 
 
-bool Graph::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
+Graphable *Graph::GetChild( const Graphable::Link &link )
 {
-    if( ptr )		// is normal tree link
-    {
-        if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*ptr) )   // is to a special node
-        {
-            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )    // pre-restrictor is nontrivial
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-
-string Graph::GetPreRestrictionName(TreePtr<Node> node)
-{
-    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(node) )   // is to a special node
-    {
-        return (**(sbs->GetPreRestrictionArchitype())).GetName();
-    }
-    return "";
-}
-
-
-TreePtr<Node> Graph::GetChildNode( const Graphable::Link &link )
-{
-	return (TreePtr<Node>)*(link.ptr);
+	TreePtr<Node> node = (TreePtr<Node>)*(link.ptr);
+	if( !node )
+		return nullptr;
+	Graphable *g = dynamic_cast<Graphable *>(node.get());
+	ASSERT(g);
+	return g;
 }
 
 
@@ -597,5 +573,4 @@ const Graph::LinkNamingFunction Graph::my_lnf = []( const TreePtr<Node> *parent_
 {
 	return PatternLink( *parent_pattern, ppattern ).GetShortName();
 };		
-
 

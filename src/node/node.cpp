@@ -26,7 +26,8 @@ void GenericsTest()
 }
 
 
-Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                          const NonTrivialPreRestrictionFunction &ntprf ) const
 {    
 	TRACE(*this)(" GetGraphBlockInfo()\n");
 	Graphable::Block block;
@@ -52,6 +53,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;
                 link.trace_labels.push_back( lnf( &sp_this, &p ) );
+                link.is_ntpr = ntprf ? ntprf(&p) : false;
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -72,6 +74,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
                 link.ptr = &p;
                 link.link_style = Graphable::THROUGH;                
                 link.trace_labels.push_back( lnf( &sp_this, &p ) );
+                link.is_ntpr = ntprf ? ntprf(&p) : false;
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -88,6 +91,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
                 link.ptr = ptr;
                 link.link_style = Graphable::THROUGH;                
                 link.trace_labels.push_back( lnf(&sp_this, ptr ) );          
+                link.is_ntpr = ntprf ? ntprf(ptr) : false;
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }

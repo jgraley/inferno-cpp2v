@@ -65,7 +65,8 @@ struct Node : NodeBases,
         return GetRender();
     }
     
-    virtual Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const override;
+    virtual Graphable::Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const override;
     virtual string GetGraphId() const override;    
 };
 

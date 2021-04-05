@@ -42,7 +42,8 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf ) const
+Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The Negation node appears as a diamond with a ¬ character inside it. The affected subtree is 
 	// on the right.
@@ -62,6 +63,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
                            { { GetPattern(), 
                                THROUGH, 
                                {},
-                               {PatternLink(this, GetPattern()).GetShortName()} } } } };
+                               {PatternLink(this, GetPattern()).GetShortName()},
+                               SpecialBase::IsNonTrivialPreRestriction(GetPattern()) } } } };
     return block;
 }

@@ -32,7 +32,8 @@ struct BuildIdentifierAgent : public virtual SearchLeafAgent
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -103,7 +104,8 @@ private:
 struct IdentifierByNameAgent : public virtual SearchLeafAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
 
@@ -169,7 +171,8 @@ struct NestedAgent : public virtual TeleportAgent
     virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;                
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;      
@@ -231,7 +234,8 @@ struct BuildContainerSizeAgent : public virtual SearchLeafAgent,
     TreePtr<Node> container;
 private:
 	TreePtr<Node> BuildReplaceImpl();
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
 }; 
 
 //---------------------------------- IsLabelReachedAgent ------------------------------------    
@@ -252,7 +256,8 @@ struct IsLabelReachedAgent : public virtual SearchLeafAgent,
 	virtual void FlushCache() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     TreePtr<CPPTree::Expression> pattern;           
            
 private:

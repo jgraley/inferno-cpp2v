@@ -36,6 +36,7 @@ public:
         LinkStyle link_style;
         list<string> labels;
         list<string> trace_labels;
+        bool is_ntpr;
     };
     struct SubBlock
     {
@@ -57,8 +58,10 @@ public:
     
     typedef std::function<string( const TreePtr<Node> *parent_pattern,
                                   const TreePtrInterface *ppattern )> LinkNamingFunction;
+    typedef std::function<bool( const TreePtrInterface *ppattern )> NonTrivialPreRestrictionFunction;
                                   
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const     
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const     
     { 
         Block g{false, "", "", "", NODE, {}}; 
         return g;

@@ -24,7 +24,8 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;                
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     TreePtr<Node> pattern; 
     Transformation *transformation;
     TransformOfAgent( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :

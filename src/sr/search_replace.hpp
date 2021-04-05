@@ -66,7 +66,8 @@ public:
     TreePtr<Node> GetContext() const { ASSERT(pcontext && *pcontext); return *pcontext; }
     mutable set< TreePtr<Node> > dirty_grass;
     
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf ) const;
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual string GetGraphId() const; 
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
