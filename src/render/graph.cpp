@@ -81,7 +81,8 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	(void)context; // Not needed!!
 
     reached.clear();
-	PopulateFrom( root, Graphable::SOLID );
+    Graphable *g = dynamic_cast<Graphable *>(root.get());
+	PopulateFrom( g, Graphable::SOLID );
     PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
@@ -100,7 +101,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
 		reached.clear();
-	    PopulateFromControl( cr, Graphable::THROUGH );
+	    PopulateFrom( cr, Graphable::THROUGH );
 	}
 	else
     {
@@ -108,43 +109,20 @@ void Graph::PopulateFromTransformation(Transformation *root)
     }
 }
 
-
-void Graph::PopulateFromControl( const Graphable *g,
-                                 Graphable::LinkStyle default_link_style )
+                   
+void Graph::PopulateFrom( Graphable *g,
+                          Graphable::LinkStyle default_link_style )
 {
 	ASSERT(g);
     Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);
+	
+	bool be_control = gblock.block_type == Graphable::CONTROL;
     gblock.default_link_style = default_link_style;
     
-    MyBlock block = PreProcessBlock( gblock, g, true );
+    MyBlock block = PreProcessBlock( gblock, g, be_control );
     
     my_blocks.push_back( block );        
     PopulateFromSubBlocks( block );
-}
-
-
-void Graph::PopulateFromNode( TreePtr<Node> node,
-                              Graphable::LinkStyle default_link_style )
-{
-	Graphable::Block gblock = node->GetGraphBlockInfo(my_lnf);
-	gblock.default_link_style = default_link_style;
-	
-	MyBlock block = PreProcessBlock( gblock, (const Graphable *)(node.get()), false );
-
-	my_blocks.push_back( block );
-	PopulateFromSubBlocks( block );
-}
-
-                              
-void Graph::PopulateFrom( TreePtr<Node> node,
-                          Graphable::LinkStyle default_link_style )
-{
-	Graphable *g = ShouldDoControlBlock(node);
-	
-	if( g )
-		PopulateFromControl( g, default_link_style );
-	else
-		PopulateFromNode( node, default_link_style );
 }
 
 
@@ -156,8 +134,10 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 		{
 			if( GetChildNode(link) && reached.count(GetChildNode(link))==0 )
 			{
-				PopulateFrom( GetChildNode(link), link.link_style );
-				reached.insert( GetChildNode(link) );
+				TreePtr<Node> child_node = GetChildNode(link);
+				Graphable *g = dynamic_cast<Graphable *>(child_node.get());
+				PopulateFrom( g, link.link_style );
+				reached.insert( child_node );
 			}
 		}
 	}
@@ -505,28 +485,6 @@ string Graph::DoFooter()
 	string s;
 	s += "}\n";
 	return s;
-}
-
-
-Graphable *Graph::ShouldDoControlBlock( TreePtr<Node> node )
-{
-    Graphable *g = dynamic_cast<Graphable *>(node.get());
-    if( !g )
-        return nullptr; // Need Graphable to do a block
-           
-    switch( g->GetGraphBlockInfo(my_lnf).block_type )
-    {
-        case Graphable::NODE:
-            return nullptr;
-            break;
-        
-        case Graphable::CONTROL:
-            return g;
-            break;
-            
-        default:
-            ASSERTFAIL("Unknown block type");
-    }
 }
 
 

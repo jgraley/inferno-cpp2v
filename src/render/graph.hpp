@@ -49,11 +49,7 @@ private:
     };
 
     void PopulateFromTransformation(Transformation *root);
-    void PopulateFromControl( const Graphable *g,
-                              Graphable::LinkStyle default_link_style );
-    void PopulateFromNode( TreePtr<Node> root, 
-                           Graphable::LinkStyle default_link_style );
-    void PopulateFrom( TreePtr<Node> root, 
+    void PopulateFrom( Graphable *g, 
                        Graphable::LinkStyle default_link_style );
 	void PopulateFromSubBlocks( const MyBlock &block );
 
@@ -76,7 +72,6 @@ private:
     string DoHeader();
     string DoFooter();
 
-    Graphable *ShouldDoControlBlock( TreePtr<Node> node ); 
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );
