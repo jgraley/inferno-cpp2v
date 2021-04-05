@@ -54,8 +54,7 @@ private:
 	void PopulateFromSubBlocks( const MyBlock &block );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
-                             const Graphable *g,
-                             bool for_control_block );
+                             const Graphable *g );
     void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
     
     void PostProcessBlocks();

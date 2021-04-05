@@ -114,12 +114,10 @@ void Graph::PopulateFrom( Graphable *g,
                           Graphable::LinkStyle default_link_style )
 {
 	ASSERT(g);
-    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);
-	
-	bool be_control = gblock.block_type == Graphable::CONTROL;
+    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf);	
     gblock.default_link_style = default_link_style;
     
-    MyBlock block = PreProcessBlock( gblock, g, be_control );
+    MyBlock block = PreProcessBlock( gblock, g );
     
     my_blocks.push_back( block );        
     PopulateFromSubBlocks( block );
@@ -145,8 +143,7 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
-                                       const Graphable *g,
-                                       bool for_control_block )
+                                       const Graphable *g )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
@@ -179,20 +176,25 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     else
         my_block.colour = "transparent";
 
-
     // Make the titles more wieldy by removing template stuff - note:
     // different policies for control blocks vs node blocks.
-    if( for_control_block )
+    switch( block.block_type )
     {
+	case Graphable::CONTROL:
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
         my_block.shape = "record";
-    }
-    else
-    {
+        break;
+
+    case Graphable::NODE:
         my_block.title = GetInnermostTemplateParam(my_block.title);
-    }
-    
+        break;
+
+    default:
+		ASSERTFAIL("Unknown block type");
+		break;
+	}
+	
     // Actions for sub-blocks
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {
