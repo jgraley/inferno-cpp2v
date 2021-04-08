@@ -32,7 +32,7 @@ public:
     };
     struct Link
     {
-        const TreePtrInterface *ptr;
+        Graphable *child;
         LinkStyle link_style;
         list<string> labels;
         list<string> trace_labels;

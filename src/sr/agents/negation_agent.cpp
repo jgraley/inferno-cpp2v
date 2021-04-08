@@ -60,7 +60,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,
-                           { { GetPattern(), 
+                           { { dynamic_cast<Graphable *>(GetPattern()->get()), 
                                THROUGH, 
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()},

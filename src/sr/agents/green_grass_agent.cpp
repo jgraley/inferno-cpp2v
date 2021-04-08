@@ -44,7 +44,7 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &l
     block.sub_blocks = { { "through", 
                            "", 
                            true,
-                           { { GetThrough(), 
+                           { { dynamic_cast<Graphable *>( GetThrough()->get()), 
                                THROUGH, 
                                {},
                                {PatternLink(this, GetThrough()).GetShortName()} } } } };

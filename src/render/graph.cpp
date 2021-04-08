@@ -559,12 +559,7 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 
 Graphable *Graph::GetChild( const Graphable::Link &link )
 {
-	TreePtr<Node> node = (TreePtr<Node>)*(link.ptr);
-	if( !node )
-		return nullptr;
-	Graphable *g = dynamic_cast<Graphable *>(node.get());
-	ASSERT(g);
-	return g;
+	return link.child;
 }
 
 

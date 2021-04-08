@@ -147,7 +147,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
                            true,
                            {} } };
     FOREACH( const TreePtrInterface &p, GetPatterns() )
-        block.sub_blocks.front().links.push_back( { &p,
+        block.sub_blocks.front().links.push_back( { dynamic_cast<Graphable *>(p.get()),
                                                     THROUGH, 
                                                     {},
                                                     {PatternLink(this, &p).GetShortName()},
