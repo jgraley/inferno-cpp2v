@@ -222,14 +222,14 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 }
 
 
-void Graph::PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style )
+void Graph::PropagateLinkStyle( Block &dest, Graphable::LinkStyle default_link_style )
 {
     for( Graphable::SubBlock &sub_block : dest.sub_blocks ) 
     {  
         for( Graphable::Link &link : sub_block.links )
         {
             if( link.link_style == Graphable::THROUGH )
-                link.link_style = link_style;    
+                link.link_style = default_link_style;    
         }
     }
 }

@@ -55,7 +55,7 @@ private:
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g );
-    void PropagateLinkStyle( MyBlock &dest, Graphable::LinkStyle link_style );
+    void PropagateLinkStyle( Block &dest, Graphable::LinkStyle default_link_style );
     
     void PostProcessBlocks();
 
