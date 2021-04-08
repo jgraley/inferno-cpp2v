@@ -80,7 +80,7 @@ private:
     FILE *filep;
     
     list<MyBlock> my_blocks;
-    set<const Graphable *> reached;
+    set<const Graphable *> graphables;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
 };

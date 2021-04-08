@@ -68,7 +68,6 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {    
-    reached.clear();
     PopulateFromTransformation(root);	
     PostProcessBlocks();
     string s = DoGraphBody();
@@ -80,7 +79,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
 	(void)context; // Not needed!!
 
-    reached.clear();
+    graphables.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( g, Graphable::SOLID );
     PostProcessBlocks();
@@ -100,7 +99,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     }
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
-		reached.clear();
+		graphables.clear();
 	    PopulateFrom( cr, Graphable::THROUGH );
 	}
 	else
@@ -130,10 +129,10 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( link.child && reached.count(link.child)==0 )
+			if( link.child && graphables.count(link.child)==0 )
 			{
 				PopulateFrom( link.child, link.link_style );
-				reached.insert( link.child );
+				graphables.insert( link.child );
 			}
 		}
 	}
