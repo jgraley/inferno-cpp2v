@@ -130,11 +130,10 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( GetChild(link) && reached.count(GetChild(link))==0 )
+			if( link.child && reached.count(link.child)==0 )
 			{
-				Graphable *g = GetChild(link);
-				PopulateFrom( g, link.link_style );
-				reached.insert( g );
+				PopulateFrom( link.child, link.link_style );
+				reached.insert( link.child );
 			}
 		}
 	}
@@ -200,12 +199,12 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         // Actions for links
         for( Graphable::Link &link : sub_block.links )
         {
-			ASSERT( GetChild(link) )(block.title)(" ")(sub_block.item_name);
+			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
 
             // Detect pre-restrictions and add to link labels
             if( link.is_ntpr )
             {
-				string id = GetChild(link)->GetGraphId();
+				string id = link.child->GetGraphId();
                 block_ids_show_prerestriction.insert( id );
             }
         }
@@ -443,7 +442,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	string id = GetChild(link)->GetGraphId();
+	string id = link.child->GetGraphId();
 	s += "\""+id+"\"";
 	s += " ["+atts+"];\n";
 	return s;
@@ -554,12 +553,6 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
         break;
     }
     return atts;
-}
-
-
-Graphable *Graph::GetChild( const Graphable::Link &link )
-{
-	return link.child;
 }
 
 

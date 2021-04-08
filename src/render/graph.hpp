@@ -75,7 +75,6 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
-    Graphable *GetChild( const Graphable::Link &link );
 
     const string outfile; // empty means stdout
     FILE *filep;
