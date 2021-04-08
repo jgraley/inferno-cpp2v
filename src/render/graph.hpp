@@ -49,7 +49,7 @@ private:
     };
 
     void PopulateFromTransformation(Transformation *root);
-    void PopulateFrom( Graphable *g, 
+    void PopulateFrom( const Graphable *g, 
                        Graphable::LinkStyle default_link_style );
 	void PopulateFromSubBlocks( const MyBlock &block );
 
@@ -80,7 +80,7 @@ private:
     FILE *filep;
     
     list<MyBlock> my_blocks;
-    set<Graphable *> reached;
+    set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
 };

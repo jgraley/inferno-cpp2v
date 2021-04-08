@@ -110,7 +110,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
 }
 
                    
-void Graph::PopulateFrom( Graphable *g,
+void Graph::PopulateFrom( const Graphable *g,
                           Graphable::LinkStyle default_link_style )
 {
 	ASSERT(g);
