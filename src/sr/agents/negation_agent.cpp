@@ -61,7 +61,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
                            "", 
                            true,
                            { { dynamic_cast<Graphable *>(GetPattern()->get()), 
-                               THROUGH, 
+                               phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()},
                                SpecialBase::IsNonTrivialPreRestriction(GetPattern()) } } } };

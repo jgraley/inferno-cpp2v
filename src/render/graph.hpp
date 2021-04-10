@@ -49,13 +49,11 @@ private:
     };
 
     void PopulateFromTransformation(Transformation *root);
-    void PopulateFrom( const Graphable *g, 
-                       Graphable::LinkStyle default_link_style );
+    void PopulateFrom( const Graphable *g );
 	void PopulateFromSubBlocks( const MyBlock &block );
 
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g );
-    void PropagateLinkStyle( Block &dest, Graphable::LinkStyle default_link_style );
     
     void PostProcessBlocks();
 

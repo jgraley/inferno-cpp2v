@@ -117,7 +117,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                       "", 
                                       false,
                                       { { dynamic_cast<Graphable *>(GetRestriction()->get()), 
-                                          THROUGH, 
+                                          phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                           {},
                                           {PatternLink(this, GetRestriction()).GetShortName()},
                                           SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) } } } );

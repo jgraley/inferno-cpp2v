@@ -76,7 +76,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &ln
                            "", 
                            true,
                            { { dynamic_cast<Graphable *>(GetPointer()->get()),
-                               THROUGH, 
+                               phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                {},
                                {PatternLink(this, GetPointer()).GetShortName()} } } } };
     return block;

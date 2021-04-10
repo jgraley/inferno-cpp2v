@@ -1023,7 +1023,17 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
 Graphable::Block StandardAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                    const NonTrivialPreRestrictionFunction &ntprf) const
 {
-	return Node::GetGraphBlockInfo(lnf, my_ntprf);
+	ASSERT( master_scr_engine )("Agent must before configured before graphing");
+
+	// Inject a non-trivial pre-restriction detector
+	Block block = Node::GetGraphBlockInfo( lnf, my_ntprf );
+
+	// Overwrite link style depending on the phase we're in
+    for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
+        for( Graphable::Link &link : sub_block.links )
+            link.link_style = (phase == IN_REPLACE_ONLY ? DASHED : SOLID);    
+
+	return block;
 }
 
 

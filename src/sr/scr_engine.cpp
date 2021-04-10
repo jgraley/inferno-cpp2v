@@ -85,6 +85,17 @@ void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &agent_
 
     // Configure agents on the way out
     ConfigureAgents(agent_phases);
+}
+
+
+void SCREngine::Plan::PlanningStageThree()
+{
+    INDENT("}");
+    TRACE(*this)(" planning part three\n");
+    
+    // Recurse into subordinate SCREngines
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+        p.second->PlanningStageThree();                                      
 
     // Make and-rule engines on the way out - by now, hopefully all
     // the agents this and-rule engine sees have been configured.
@@ -445,7 +456,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 "", 
                                 false, 
                                 {} }  );
-        return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
+        return { false, GetName(), "", "", CONTROL, sub_blocks };
     }
     
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
@@ -489,7 +500,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                     {},
                                     SpecialBase::IsNonTrivialPreRestriction(original_ptr) } } } );
     }
-    return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
+    return { false, GetName(), "", "", CONTROL, sub_blocks };
 }
 
 

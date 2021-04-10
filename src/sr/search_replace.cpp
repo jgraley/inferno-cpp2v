@@ -40,17 +40,25 @@ void CompareReplace::Plan::PlanningStageOne()
     // SCREngines and recurse into them
     // This allows the phases of the agents to be determined correctly
     scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, compare_pattern, replace_pattern);
+
+    list<const SCREngine *> scrs = scr_engine->GetSCREngines();
+	TRACE("SCR engines for this step: ")(scrs)("\n");
 }
 
     
 void CompareReplace::Plan::PlanningStageTwo()
 {
     //FTRACE(*algo)(" agent phases\n")(agent_phases)("\n");
-    // Second, configure the agents and create subordinate AndRuleEngines
+    // Second, configure the agents
     scr_engine->PlanningStageTwo(agent_phases);
+}                                      
+
+
+void CompareReplace::Plan::PlanningStageThree()
+{
+    // Third, create subordinate AndRuleEngines
+    scr_engine->PlanningStageThree();
     
-    list<const SCREngine *> scrs = scr_engine->GetSCREngines();
-	TRACE("SCR engines for this step: ")(scrs)("\n");
     list<const AndRuleEngine *> ares = scr_engine->GetAndRuleEngines();
 	TRACE("And-rule engines for this step: ")(ares)("\n");
 }                                      
@@ -72,6 +80,12 @@ void CompareReplace::PlanningStageOne()
 void CompareReplace::PlanningStageTwo()
 {
     plan.PlanningStageTwo();
+}
+
+
+void CompareReplace::PlanningStageThree()
+{
+    plan.PlanningStageThree();
 }
 
 

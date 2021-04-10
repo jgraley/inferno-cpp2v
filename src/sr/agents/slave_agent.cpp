@@ -34,13 +34,15 @@ void SlaveAgent::KeyForOverlay( Agent *from )
 Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const
 {
+	ASSERT( master_scr_engine )("Agent must before configured before graphing");
+
     Block block = my_scr_engine->GetGraphBlockInfo(lnf, ntprf);
     block.title = "Slave";
     block.sub_blocks.push_front( { "through", 
                                    "",
                                    true,
                                    { { dynamic_cast<Graphable *>(GetThrough()->get()), 
-                                       THROUGH, 
+                                       phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                        {},
                                        {PatternLink(this, GetThrough()).GetShortName()},
                                        SpecialBase::IsNonTrivialPreRestriction(GetThrough()) } } } );

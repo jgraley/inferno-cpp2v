@@ -88,7 +88,7 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
                            "", 
                            true,
                            { { dynamic_cast<Graphable *>(GetTerminus()->get()), 
-                               THROUGH, 
+                               phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                {},
                                {PatternLink(this, &terminus).GetShortName()},
                                SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) } } } };
@@ -276,7 +276,7 @@ Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                       "", 
                                       false,
                                       { { dynamic_cast<Graphable *>(recurse_restriction.get()), 
-                                          THROUGH, 
+                                          phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                           {},
                                           {PatternLink(this, &recurse_restriction).GetShortName()},
                                           SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) } } } );

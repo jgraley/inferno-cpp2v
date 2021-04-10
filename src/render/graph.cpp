@@ -82,7 +82,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
-	PopulateFrom( g, Graphable::SOLID );
+	PopulateFrom( g );
     PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
@@ -101,7 +101,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
 		reached.clear();
-	    PopulateFrom( cr, Graphable::THROUGH );
+	    PopulateFrom( cr );
 	}
 	else
     {
@@ -110,12 +110,10 @@ void Graph::PopulateFromTransformation(Transformation *root)
 }
 
                    
-void Graph::PopulateFrom( const Graphable *g,
-                          Graphable::LinkStyle default_link_style )
+void Graph::PopulateFrom( const Graphable *g )
 {
 	ASSERT(g);
     Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);	
-    gblock.default_link_style = default_link_style;
     
     MyBlock block = PreProcessBlock( gblock, g );
     
@@ -132,7 +130,7 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 		{
 			if( link.child && reached.count(link.child)==0 )
 			{
-				PopulateFrom( link.child, link.link_style );
+				PopulateFrom( link.child );
 				reached.insert( link.child );
 			}
 		}
@@ -215,23 +213,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     if( !pspecial )
         ASSERT( my_block.symbol.empty() );
 
-    // Apply current link style to links as a default
-    PropagateLinkStyle( my_block, my_block.default_link_style );
-
     return my_block;    
-}
-
-
-void Graph::PropagateLinkStyle( Block &dest, Graphable::LinkStyle default_link_style )
-{
-    for( Graphable::SubBlock &sub_block : dest.sub_blocks ) 
-    {  
-        for( Graphable::Link &link : sub_block.links )
-        {
-            if( link.link_style == Graphable::THROUGH )
-                link.link_style = default_link_style;    
-        }
-    }
 }
 
 
@@ -547,9 +529,6 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
         break;
     case Graphable::DASHED:
         atts += "style=\"dashed\"\n";
-        break;
-    case Graphable::THROUGH:
-        ASSERT(false);
         break;
     }
     return atts;

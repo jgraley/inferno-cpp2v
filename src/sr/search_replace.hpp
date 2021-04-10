@@ -36,6 +36,7 @@ private:
                         TreePtr<Node> rp );
         void PlanningStageOne();
         void PlanningStageTwo();
+        void PlanningStageThree();
 
         TreePtr<Node> compare_pattern;
         TreePtr<Node> replace_pattern;
@@ -51,6 +52,7 @@ public:
                             TreePtr<Node> rp = TreePtr<Node>() );
     void PlanningStageOne();
     void PlanningStageTwo();
+    void PlanningStageThree();
     
     static void SetMaxReps( int n, bool e );
                             

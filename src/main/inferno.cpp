@@ -241,9 +241,6 @@ int main( int argc, char *argv[] )
             break;
     }
 
-    // If a pattern graph was requested, generate it now
-    MaybeGeneratePatternGraphs( &sequence );
-    
     if( ShouldIQuit() )
         exit(0);
         
@@ -256,7 +253,28 @@ int main( int argc, char *argv[] )
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageTwo();
         if( ShouldIQuit(true) )
-            exit(0);
+            break;
+    }
+       
+    // If a pattern graph was requested, generate it now. We need the
+    // agents to have been configured (planning stage 2) but want to
+    // get the graphs before And-rule engine planning in case this gets
+    // crashy during development.
+    MaybeGeneratePatternGraphs( &sequence );
+    
+    if( ShouldIQuit() )
+        exit(0);
+
+    // Planning part three
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Planning part three\n"); 
+    i=0;
+    FOREACH( shared_ptr<Transformation> t, sequence )
+    {
+        Progress(Progress::PLANNING_THREE, i++).SetAsCurrent();
+        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageThree();
+        if( ShouldIQuit(true) )
+            break;
     }
        
     if( ShouldIQuit() )
