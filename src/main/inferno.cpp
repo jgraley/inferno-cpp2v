@@ -148,8 +148,9 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 void GenerateGraphs( Graph &graph, shared_ptr<Transformation> t )
 {
 	graph( t.get() );
-	if(  auto cr = dynamic_pointer_cast<CompareReplace>(t) )
-		cr->GenerateGraphs(graph);
+	if( ReadArgs::graph_trace )
+		if(  auto cr = dynamic_pointer_cast<CompareReplace>(t) )
+			cr->GenerateGraphs(graph);
 }
 
 
