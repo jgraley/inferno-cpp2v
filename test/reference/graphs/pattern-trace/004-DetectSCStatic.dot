@@ -7,41 +7,31 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P4-0" [
-shape = "record"
-fillcolor = "transparent"
-label = "<fixed> DetectSCStatic | <port0> root | <port1> #P4-0"
+subgraph "cluster#R4-0" {
+label = "#R4-0"
 style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#P4-8-4" [
+color = antiquewhite2
+"#R4-0/#B-2-40" [
 shape = "plaintext"
+fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
  <TR>
-  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD><FONT POINT-SIZE="16.0">'wait'</FONT></TD>
   <TD></TD>
  </TR>
  <TR>
-  <TD>terminus</TD>
+  <TD>(InstanceIdentifier)</TD>
   <TD PORT="port0"></TD>
  </TR>
  <TR>
-  <TD>#P4-8-4</TD>
+  <TD>#B-2-40</TD>
   <TD PORT="port1"></TD>
  </TR>
 </TABLE>>
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#P4-6-7" [
-shape = "record"
-label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
-style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#B-2-39" [
+"#R4-0/#B-2-39" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,7 +55,108 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-40" [
+"#R4-0/#P4-8-4" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P4-8-4</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R4-0/#P4-6-7" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#R4-0/#B-2-39":port1 -> "#R4-0/#B-2-40" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R4-0/#P4-8-4":port0 -> "#R4-0/#P4-6-7" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R4-0/#P4-6-7":port0 -> "#R4-0/#B-2-39" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R4-0/#P4-6-7":port1 -> "#R4-0/#B-2-38" [style="dashed"
+label = "#0"
+decorate = true
+];
+}
+"/CR#P4-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> DetectSCStatic | <port0> root | <port1> #P4-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#P4-8-4" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P4-8-4</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#P4-6-7" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#B-2-39" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Call</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>MapOperand</TD>
+  <TD PORT="port0">{}</TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-39</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-40" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -85,7 +176,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-38" [
+"/#B-2-38" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -101,23 +192,23 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P4-0":port0 -> "#P4-8-4" [style="solid"
+"/CR#P4-0":port0 -> "/#P4-8-4" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P4-8-4":port0 -> "#P4-6-7" [style="solid"
+"/#P4-8-4":port0 -> "/#P4-6-7" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P4-6-7":port0 -> "#B-2-39" [style="solid"
+"/#P4-6-7":port0 -> "/#B-2-39" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P4-6-7":port1 -> "#B-2-38" [style="dashed"
+"/#P4-6-7":port1 -> "/#B-2-38" [style="dashed"
 label = "#0"
 decorate = true
 ];
-"#B-2-39":port1 -> "#B-2-40" [style="solid"
+"/#B-2-39":port1 -> "/#B-2-40" [style="solid"
 label = "#0"
 decorate = true
 ];

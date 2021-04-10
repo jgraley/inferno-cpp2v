@@ -7,7 +7,7 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P18-0" [
+"/CR#P18-0" [
 shape = "record"
 fillcolor = "transparent"
 label = "<fixed> DetectUncombableSwitch | <port0> search | <port1> replace"
@@ -15,7 +15,7 @@ style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-2-209" [
+"/#B-2-209" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +35,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-210" [
+"/#B-2-210" [
 shape = "diamond"
 fillcolor = "/set28/2"
 label = <¬>
@@ -46,7 +46,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-211" [
+"/#B-2-211" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -58,7 +58,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-212" [
+"/#B-2-212" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -78,7 +78,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-214" [
+"/#B-2-214" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -110,7 +110,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-215" [
+"/#B-2-215" [
 shape = "circle"
 fillcolor = "/set28/1"
 label = <*>
@@ -121,7 +121,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-216" [
+"/#B-2-216" [
 shape = "circle"
 fillcolor = "/set28/2"
 label = <*>
@@ -132,7 +132,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-218" [
+"/#B-2-218" [
 shape = "diamond"
 fillcolor = "/set28/2"
 label = <¬>
@@ -143,7 +143,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-219" [
+"/#B-2-219" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -155,7 +155,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-220" [
+"/#B-2-220" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -167,7 +167,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-217" [
+"/#B-2-217" [
 shape = "circle"
 fillcolor = "/set28/2"
 label = <*>
@@ -178,7 +178,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-213" [
+"/#B-2-213" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -190,7 +190,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-221" [
+"/#B-2-221" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -210,34 +210,34 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P18-0":port0 -> "#B-2-209" [style="solid"
+"/CR#P18-0":port0 -> "/#B-2-209" [style="solid"
 ];
-"CR#P18-0":port1 -> "#B-2-221" [style="dashed"
+"/CR#P18-0":port1 -> "/#B-2-221" [style="dashed"
 ];
-"#B-2-209":port1 -> "#B-2-210" [style="solid"
+"/#B-2-209":port1 -> "/#B-2-210" [style="solid"
 ];
-"#B-2-209":port1 -> "#B-2-212" [style="solid"
+"/#B-2-209":port1 -> "/#B-2-212" [style="solid"
 ];
-"#B-2-210" -> "#B-2-211" [style="solid"
+"/#B-2-210" -> "/#B-2-211" [style="solid"
 ];
-"#B-2-212":port0 -> "#B-2-214" [style="solid"
+"/#B-2-212":port0 -> "/#B-2-214" [style="solid"
 ];
-"#B-2-212":port1 -> "#B-2-213" [style="solid"
+"/#B-2-212":port1 -> "/#B-2-213" [style="solid"
 ];
-"#B-2-214":port0 -> "#B-2-215" [style="solid"
+"/#B-2-214":port0 -> "/#B-2-215" [style="solid"
 ];
-"#B-2-214":port1 -> "#B-2-216" [style="solid"
+"/#B-2-214":port1 -> "/#B-2-216" [style="solid"
 ];
-"#B-2-214":port2 -> "#B-2-218" [style="solid"
+"/#B-2-214":port2 -> "/#B-2-218" [style="solid"
 ];
-"#B-2-214":port3 -> "#B-2-220" [style="solid"
+"/#B-2-214":port3 -> "/#B-2-220" [style="solid"
 ];
-"#B-2-214":port4 -> "#B-2-217" [style="solid"
+"/#B-2-214":port4 -> "/#B-2-217" [style="solid"
 ];
-"#B-2-218" -> "#B-2-219" [style="solid"
+"/#B-2-218" -> "/#B-2-219" [style="solid"
 ];
-"#B-2-221":port0 -> "#B-2-214" [style="dashed"
+"/#B-2-221":port0 -> "/#B-2-214" [style="dashed"
 ];
-"#B-2-221":port1 -> "#B-2-213" [style="dashed"
+"/#B-2-221":port1 -> "/#B-2-213" [style="dashed"
 ];
 }

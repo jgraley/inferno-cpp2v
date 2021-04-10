@@ -7,7 +7,7 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P0-0" [
+"/CR#P0-0" [
 shape = "record"
 fillcolor = "transparent"
 label = "<fixed> DetectSCType | <port0> compare | <port1> replace"
@@ -15,14 +15,14 @@ style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-3-0" [
+"/#B-3-0" [
 shape = "record"
 label = "<fixed> Overlay | <port0> through | <port1> overlay"
 style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-2-1" [
+"/#B-2-1" [
 shape = "plaintext"
 fillcolor = "/set28/4"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -38,7 +38,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-3" [
+"/#B-2-3" [
 shape = "circle"
 fillcolor = "/set28/1"
 label = <*>
@@ -49,7 +49,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-4" [
+"/#B-2-4" [
 shape = "plaintext"
 fillcolor = "/set28/1"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,7 +65,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-5" [
+"/#B-2-5" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -81,7 +81,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-2" [
+"/#B-2-2" [
 shape = "plaintext"
 fillcolor = "/set28/4"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -97,14 +97,14 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-6" [
+"/#B-2-6" [
 shape = "record"
 label = "<fixed> Slave | <port0> through | <port1> search | <port2> replace"
 style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-2-0" [
+"/#B-2-0" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -116,26 +116,26 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P0-0":port0 -> "#B-3-0" [style="solid"
+"/CR#P0-0":port0 -> "/#B-3-0" [style="solid"
 ];
-"CR#P0-0":port1 -> "#B-2-6" [style="dashed"
+"/CR#P0-0":port1 -> "/#B-2-6" [style="dashed"
 ];
-"#B-3-0":port0 -> "#B-2-1" [style="solid"
+"/#B-3-0":port0 -> "/#B-2-1" [style="solid"
 ];
-"#B-3-0":port1 -> "#B-2-2" [style="dashed"
+"/#B-3-0":port1 -> "/#B-2-2" [style="dashed"
 ];
-"#B-2-1":port0 -> "#B-2-3" [style="solid"
+"/#B-2-1":port0 -> "/#B-2-3" [style="solid"
 ];
-"#B-2-1":port0 -> "#B-2-4" [style="solid"
+"/#B-2-1":port0 -> "/#B-2-4" [style="solid"
 ];
-"#B-2-4":port0 -> "#B-2-5" [style="solid"
+"/#B-2-4":port0 -> "/#B-2-5" [style="solid"
 ];
-"#B-2-2":port0 -> "#B-2-3" [style="dashed"
+"/#B-2-2":port0 -> "/#B-2-3" [style="dashed"
 ];
-"#B-2-6":port0 -> "#B-3-0" [style="dashed"
+"/#B-2-6":port0 -> "/#B-3-0" [style="dashed"
 ];
-"#B-2-6":port1 -> "#B-2-5" [style="solid"
+"/#B-2-6":port1 -> "/#B-2-5" [style="solid"
 ];
-"#B-2-6":port2 -> "#B-2-0" [style="dashed"
+"/#B-2-6":port2 -> "/#B-2-0" [style="dashed"
 ];
 }

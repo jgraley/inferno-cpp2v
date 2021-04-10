@@ -7,42 +7,32 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P17-0" [
-shape = "record"
-fillcolor = "transparent"
-label = "<fixed> RemoveVoidInstances | <port0> root | <port1> #P17-0"
+subgraph "cluster#R17-1" {
+label = "#R17-1"
 style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#P17-6-21" [
-shape = "record"
-label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P17-6-21"
-style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#B-2-199" [
+color = antiquewhite2
+"#R17-1/#B-2-205" [
 shape = "plaintext"
-fillcolor = "/set28/4"
+fillcolor = "/set28/1"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
  <TR>
-  <TD><FONT POINT-SIZE="16.0">Program</FONT></TD>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
   <TD></TD>
  </TR>
  <TR>
-  <TD>Declaration</TD>
-  <TD PORT="port0">{..}</TD>
- </TR>
- <TR>
-  <TD>#B-2-199</TD>
-  <TD PORT="port1"></TD>
+  <TD>#B-2-205</TD>
+  <TD PORT="port0"></TD>
  </TR>
 </TABLE>>
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-201" [
+}
+subgraph "cluster#R17-2" {
+label = "#R17-2"
+style = "filled"
+color = antiquewhite2
+"#R17-2/#B-2-201" [
 shape = "plaintext"
 fillcolor = "/set28/1"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -58,7 +48,51 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-202" [
+}
+subgraph "cluster#R17-0" {
+label = "#R17-0"
+style = "filled"
+color = antiquewhite2
+"#R17-0/#B-2-207" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Void</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-207</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R17-0/#B-2-208" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Void</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-208</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R17-0/#P17-6-21" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P17-6-21"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#R17-0/#B-2-202" [
 shape = "plaintext"
 fillcolor = "/set28/1"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -90,7 +124,27 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-203" [
+"#R17-0/#B-2-199" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Program</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-199</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R17-0/#B-2-203" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -110,47 +164,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-204" [
-shape = "plaintext"
-fillcolor = "/set28/3"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">CallableParams</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>Declaration</TD>
-  <TD PORT="port0">{..}</TD>
- </TR>
- <TR>
-  <TD>#B-2-204</TD>
-  <TD PORT="port1"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
-];
-"#B-2-205" [
-shape = "plaintext"
-fillcolor = "/set28/1"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>(Instance)</TD>
-  <TD PORT="port0"></TD>
- </TR>
- <TR>
-  <TD>#B-2-205</TD>
-  <TD PORT="port1"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
-];
-"#B-2-206" [
+"#R17-0/#B-2-206" [
 shape = "plaintext"
 fillcolor = "/set28/1"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -178,7 +192,239 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-208" [
+"#R17-0/#B-2-204" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">CallableParams</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-204</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R17-0/#P17-6-21":port0 -> "#R17-0/#B-2-199" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#P17-6-21":port1 -> "#R17-0/#B-2-200" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-202":port0 -> "#R17-0/#B-2-203" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-199":port0 -> "#R17-0/#B-2-201" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-199":port0 -> "#R17-0/#B-2-202" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-203":port0 -> "#R17-0/#B-2-204" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-203":port0 -> "#R17-0/#B-2-207" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-206":port0 -> "#R17-0/#B-2-208" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-204":port0 -> "#R17-0/#B-2-205" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R17-0/#B-2-204":port0 -> "#R17-0/#B-2-206" [style="solid"
+label = "#0"
+decorate = true
+];
+}
+"/CR#P17-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> RemoveVoidInstances | <port0> root | <port1> #P17-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#P17-6-21" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P17-6-21"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#B-2-199" [
+shape = "plaintext"
+fillcolor = "/set28/4"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Program</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-199</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-201" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-201</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-202" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Static</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Type</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port1">NULL</TD>
+ </TR>
+ <TR>
+  <TD>Initialiser</TD>
+  <TD PORT="port2">NULL</TD>
+ </TR>
+ <TR>
+  <TD>Constancy</TD>
+  <TD PORT="port3">NULL</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-202</TD>
+  <TD PORT="port4"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-203" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∨</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-203</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-204" [
+shape = "plaintext"
+fillcolor = "/set28/3"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">CallableParams</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{..}</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-204</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-205" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Instance)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-205</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-206" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Instance</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Type</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port1">NULL</TD>
+ </TR>
+ <TR>
+  <TD>Initialiser</TD>
+  <TD PORT="port2">NULL</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-206</TD>
+  <TD PORT="port3"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-208" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -194,7 +440,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-207" [
+"/#B-2-207" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -210,7 +456,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-200" [
+"/#B-2-200" [
 shape = "plaintext"
 fillcolor = "/set28/4"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -230,51 +476,51 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P17-0":port0 -> "#P17-6-21" [style="solid"
+"/CR#P17-0":port0 -> "/#P17-6-21" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P17-6-21":port0 -> "#B-2-199" [style="solid"
+"/#P17-6-21":port0 -> "/#B-2-199" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P17-6-21":port1 -> "#B-2-200" [style="dashed"
+"/#P17-6-21":port1 -> "/#B-2-200" [style="dashed"
 label = "#0"
 decorate = true
 ];
-"#B-2-199":port0 -> "#B-2-201" [style="solid"
+"/#B-2-199":port0 -> "/#B-2-201" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-199":port0 -> "#B-2-202" [style="solid"
+"/#B-2-199":port0 -> "/#B-2-202" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-202":port0 -> "#B-2-203" [style="solid"
+"/#B-2-202":port0 -> "/#B-2-203" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-203":port0 -> "#B-2-204" [style="solid"
+"/#B-2-203":port0 -> "/#B-2-204" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-203":port0 -> "#B-2-207" [style="solid"
+"/#B-2-203":port0 -> "/#B-2-207" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-204":port0 -> "#B-2-205" [style="solid"
+"/#B-2-204":port0 -> "/#B-2-205" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-204":port0 -> "#B-2-206" [style="solid"
+"/#B-2-204":port0 -> "/#B-2-206" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-206":port0 -> "#B-2-208" [style="solid"
+"/#B-2-206":port0 -> "/#B-2-208" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-200":port0 -> "#B-2-201" [style="dashed"
+"/#B-2-200":port0 -> "/#B-2-201" [style="dashed"
 label = "#1"
 decorate = true
 ];

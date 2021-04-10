@@ -7,7 +7,7 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P6-0" [
+"/CR#P6-0" [
 shape = "record"
 fillcolor = "transparent"
 label = "<fixed> DetectSCDynamic | <port0> search | <port1> replace"
@@ -15,7 +15,7 @@ style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-2-48" [
+"/#B-2-48" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +35,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-49" [
+"/#B-2-49" [
 shape = "plaintext"
 fillcolor = "/set28/8"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -55,7 +55,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-51" [
+"/#B-2-51" [
 shape = "trapezium"
 fillcolor = "/set28/5"
 label = <'p1'>
@@ -66,7 +66,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"#B-2-52" [
+"/#B-2-52" [
 shape = "octagon"
 fillcolor = "/set28/6"
 label = <<I>TypeOf</I>>
@@ -74,7 +74,7 @@ style = "filled"
 fontsize = "16"
 penwidth = 0.0
 ];
-"#B-2-53" [
+"/#B-2-53" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -86,7 +86,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-50" [
+"/#B-2-50" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -102,7 +102,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-47" [
+"/#B-2-47" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -118,20 +118,20 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P6-0":port0 -> "#B-2-48" [style="solid"
+"/CR#P6-0":port0 -> "/#B-2-48" [style="solid"
 ];
-"CR#P6-0":port1 -> "#B-2-47" [style="dashed"
+"/CR#P6-0":port1 -> "/#B-2-47" [style="dashed"
 ];
-"#B-2-48":port0 -> "#B-2-49" [style="solid"
+"/#B-2-48":port0 -> "/#B-2-49" [style="solid"
 ];
-"#B-2-48":port1 -> "#B-2-50" [style="solid"
+"/#B-2-48":port1 -> "/#B-2-50" [style="solid"
 ];
-"#B-2-49":port0 -> "#B-2-51" [style="solid"
+"/#B-2-49":port0 -> "/#B-2-51" [style="solid"
 ];
-"#B-2-49":port1 -> "#B-2-52" [style="solid"
+"/#B-2-49":port1 -> "/#B-2-52" [style="solid"
 ];
-"#B-2-52" -> "#B-2-53" [style="solid"
+"/#B-2-52" -> "/#B-2-53" [style="solid"
 ];
-"#B-2-47":port0 -> "#B-2-52" [style="dashed"
+"/#B-2-47":port0 -> "/#B-2-52" [style="dashed"
 ];
 }

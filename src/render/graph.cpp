@@ -82,6 +82,7 @@ void Graph::operator()( string region_id_, const list<const Graphable *> &grapha
     GetMyBlocks();
     PostProcessBlocks();
     string s = DoGraphBody();
+    s = DoCluster(s);
 	Remember( s );
 }
 
@@ -309,7 +310,7 @@ string Graph::DoBlock( const MyBlock &block )
         s += "fontsize = \"" FS_MIDDLE "\"\n";
         if( ReadArgs::graph_dark )
         {
-            s += "fillcolor = gray15\n";
+            s += "fillcolor = black\n";
             s += "fontcolor = white\n";
             s += "color = gray70\n";
         }
@@ -465,7 +466,7 @@ string Graph::DoHeader()
   //  s += "concentrate = \"true\"\n"; 
     if( ReadArgs::graph_dark )
     {
-        s += "bgcolor = gray15\n";
+        s += "bgcolor = black\n";
         s += "color = gray70\n";
         s += "fontcolor = white\n";    
     }
@@ -488,6 +489,22 @@ string Graph::DoFooter()
 	string s;
 	s += "}\n";
 	return s;
+}
+
+
+string Graph::DoCluster(string ss)
+{
+    string s;
+    s += "subgraph \"cluster" + region_id + "\" {\n";
+    s += "label = \"" + region_id + "\"\n";
+    s += "style = \"filled\"\n";
+	if( ReadArgs::graph_dark )
+    	s += "color = gray15\n";
+    else
+		s += "color = antiquewhite2\n";
+	s += ss;
+    s += "}\n";
+    return s;
 }
 
 

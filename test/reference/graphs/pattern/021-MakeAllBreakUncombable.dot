@@ -7,7 +7,7 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P21-0" [
+"/CR#P21-0" [
 shape = "record"
 fillcolor = "transparent"
 label = "<fixed> MakeAllBreakUncombable | <port0> search | <port1> replace"
@@ -15,7 +15,7 @@ style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-2-267" [
+"/#B-2-267" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +35,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-268" [
+"/#B-2-268" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -47,7 +47,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-274" [
+"/#B-2-274" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -59,10 +59,10 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P21-0":port0 -> "#B-2-267" [style="solid"
+"/CR#P21-0":port0 -> "/#B-2-267" [style="solid"
 ];
-"CR#P21-0":port1 -> "#B-2-274" [style="dashed"
+"/CR#P21-0":port1 -> "/#B-2-274" [style="dashed"
 ];
-"#B-2-267":port1 -> "#B-2-268" [style="solid"
+"/#B-2-267":port1 -> "/#B-2-268" [style="solid"
 ];
 }

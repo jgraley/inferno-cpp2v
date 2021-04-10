@@ -70,6 +70,7 @@ private:
                    const Graphable::Link &link );
     string DoHeader();
     string DoFooter();
+    string DoCluster(string s);
 
     string SeqField( int i );
     string EscapeForGraphviz( string s );

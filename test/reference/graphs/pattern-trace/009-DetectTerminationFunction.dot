@@ -7,41 +7,34 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P9-0" [
-shape = "record"
-fillcolor = "transparent"
-label = "<fixed> DetectTerminationFunction | <port0> root | <port1> #P9-0"
+subgraph "cluster#R9-0" {
+label = "#R9-0"
 style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#P9-8-9" [
-shape = "plaintext"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>terminus</TD>
-  <TD PORT="port0"></TD>
- </TR>
- <TR>
-  <TD>#P9-8-9</TD>
-  <TD PORT="port1"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
-];
-"#P9-6-12" [
+color = antiquewhite2
+"#R9-0/#P9-6-12" [
 shape = "record"
 label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P9-6-12"
 style = "filled"
 fontsize = "14"
 fillcolor = antiquewhite1
 ];
-"#B-2-65" [
+"#R9-0/#B-2-64" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-64</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R9-0/#B-2-65" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,7 +58,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-66" [
+"#R9-0/#B-2-66" [
 shape = "plaintext"
 fillcolor = "/set28/8"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -89,39 +82,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-68" [
-shape = "plaintext"
-fillcolor = "/set28/5"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">'p1'</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>#B-2-68</TD>
-  <TD PORT="port0"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
-];
-"#B-2-64" [
-shape = "plaintext"
-fillcolor = "/set28/6"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>#B-2-64</TD>
-  <TD PORT="port0"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
-];
-"#B-2-67" [
+"#R9-0/#B-2-67" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -141,7 +102,205 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-63" [
+"#R9-0/#P9-8-9" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P9-8-9</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R9-0/#B-2-68" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'p1'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-68</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R9-0/#P9-6-12":port0 -> "#R9-0/#B-2-65" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R9-0/#P9-6-12":port1 -> "#R9-0/#B-2-63" [style="dashed"
+label = "#0"
+decorate = true
+];
+"#R9-0/#B-2-65":port0 -> "#R9-0/#B-2-66" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R9-0/#B-2-65":port1 -> "#R9-0/#B-2-67" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R9-0/#B-2-66":port0 -> "#R9-0/#B-2-68" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R9-0/#B-2-66":port1 -> "#R9-0/#B-2-64" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R9-0/#P9-8-9":port0 -> "#R9-0/#P9-6-12" [style="solid"
+label = "#0"
+decorate = true
+];
+}
+"/CR#P9-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> DetectTerminationFunction | <port0> root | <port1> #P9-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#P9-8-9" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P9-8-9</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#P9-6-12" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P9-6-12"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#B-2-65" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Call</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>MapOperand</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-65</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-66" [
+shape = "plaintext"
+fillcolor = "/set28/8"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">MapOperand</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>InstanceIdentifier</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-66</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-68" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'p1'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-68</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-64" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-64</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-67" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'exit'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(InstanceIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-67</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-63" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -161,39 +320,39 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P9-0":port0 -> "#P9-8-9" [style="solid"
+"/CR#P9-0":port0 -> "/#P9-8-9" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P9-8-9":port0 -> "#P9-6-12" [style="solid"
+"/#P9-8-9":port0 -> "/#P9-6-12" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P9-6-12":port0 -> "#B-2-65" [style="solid"
+"/#P9-6-12":port0 -> "/#B-2-65" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P9-6-12":port1 -> "#B-2-63" [style="dashed"
+"/#P9-6-12":port1 -> "/#B-2-63" [style="dashed"
 label = "#0"
 decorate = true
 ];
-"#B-2-65":port0 -> "#B-2-66" [style="solid"
+"/#B-2-65":port0 -> "/#B-2-66" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-65":port1 -> "#B-2-67" [style="solid"
+"/#B-2-65":port1 -> "/#B-2-67" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-66":port0 -> "#B-2-68" [style="solid"
+"/#B-2-66":port0 -> "/#B-2-68" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-66":port1 -> "#B-2-64" [style="solid"
+"/#B-2-66":port1 -> "/#B-2-64" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#B-2-63":port0 -> "#B-2-64" [style="dashed"
+"/#B-2-63":port0 -> "/#B-2-64" [style="dashed"
 label = "#1"
 decorate = true
 ];

@@ -7,41 +7,32 @@ bgcolor = antiquewhite1
 ];
 node [
 ];
-"CR#P21-0" [
-shape = "record"
-fillcolor = "transparent"
-label = "<fixed> MakeAllBreakUncombable | <port0> root | <port1> #P21-0"
+subgraph "cluster#R21-1" {
+label = "#R21-1"
 style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#P21-8-20" [
+color = antiquewhite2
+"#R21-1/#B-2-268" [
 shape = "plaintext"
+fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
  <TR>
-  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD><FONT POINT-SIZE="16.0">UncombableBreak</FONT></TD>
   <TD></TD>
  </TR>
  <TR>
-  <TD>terminus</TD>
+  <TD>#B-2-268</TD>
   <TD PORT="port0"></TD>
- </TR>
- <TR>
-  <TD>#P21-8-20</TD>
-  <TD PORT="port1"></TD>
  </TR>
 </TABLE>>
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#P21-6-25" [
-shape = "record"
-label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P21-6-25"
+}
+subgraph "cluster#R21-0" {
+label = "#R21-0"
 style = "filled"
-fontsize = "14"
-fillcolor = antiquewhite1
-];
-"#B-2-267" [
+color = antiquewhite2
+"#R21-0/#B-2-267" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,7 +56,108 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-268" [
+"#R21-0/#P21-8-20" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P21-8-20</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R21-0/#P21-6-25" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P21-6-25"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"#R21-0/#B-2-267":port1 -> "#R21-0/#B-2-268" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R21-0/#P21-8-20":port0 -> "#R21-0/#P21-6-25" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R21-0/#P21-6-25":port0 -> "#R21-0/#B-2-267" [style="solid"
+label = "#0"
+decorate = true
+];
+"#R21-0/#P21-6-25":port1 -> "#R21-0/#B-2-274" [style="dashed"
+label = "#0"
+decorate = true
+];
+}
+"/CR#P21-0" [
+shape = "record"
+fillcolor = "transparent"
+label = "<fixed> MakeAllBreakUncombable | <port0> root | <port1> #P21-0"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#P21-8-20" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P21-8-20</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#P21-6-25" [
+shape = "record"
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P21-6-25"
+style = "filled"
+fontsize = "14"
+fillcolor = antiquewhite1
+];
+"/#B-2-267" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">¬</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Break)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-267</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"/#B-2-268" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -81,7 +173,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"#B-2-274" [
+"/#B-2-274" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -97,23 +189,23 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"CR#P21-0":port0 -> "#P21-8-20" [style="solid"
+"/CR#P21-0":port0 -> "/#P21-8-20" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P21-8-20":port0 -> "#P21-6-25" [style="solid"
+"/#P21-8-20":port0 -> "/#P21-6-25" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P21-6-25":port0 -> "#B-2-267" [style="solid"
+"/#P21-6-25":port0 -> "/#B-2-267" [style="solid"
 label = "#0"
 decorate = true
 ];
-"#P21-6-25":port1 -> "#B-2-274" [style="dashed"
+"/#P21-6-25":port1 -> "/#B-2-274" [style="dashed"
 label = "#0"
 decorate = true
 ];
-"#B-2-267":port1 -> "#B-2-268" [style="solid"
+"/#B-2-267":port1 -> "/#B-2-268" [style="solid"
 label = "#0"
 decorate = true
 ];
