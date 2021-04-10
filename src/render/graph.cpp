@@ -68,8 +68,9 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {    
-    reached.clear();
-    PopulateFromTransformation(root);	
+	reached.clear();
+    PopulateFromTransformation(root);
+    GetMyBlocks();
     PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
@@ -83,6 +84,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( g );
+	GetMyBlocks();
     PostProcessBlocks();
     string s = DoGraphBody();
 	Disburse( s );
@@ -101,7 +103,7 @@ void Graph::PopulateFromTransformation(Transformation *root)
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
 		reached.clear();
-	    PopulateFrom( cr );
+		PopulateFrom( cr );
 	}
 	else
     {
@@ -113,16 +115,14 @@ void Graph::PopulateFromTransformation(Transformation *root)
 void Graph::PopulateFrom( const Graphable *g )
 {
 	ASSERT(g);
-    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);	
-    
-    MyBlock block = PreProcessBlock( gblock, g );
-    
-    my_blocks.push_back( block );        
+    my_graphables.push_back(g);
+
+    Graphable::Block block = g->GetGraphBlockInfo(my_lnf, nullptr);	        
     PopulateFromSubBlocks( block );
 }
 
 
-void Graph::PopulateFromSubBlocks( const MyBlock &block )
+void Graph::PopulateFromSubBlocks( const Graphable::Block &block )
 {
 	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
 	{
@@ -134,6 +134,17 @@ void Graph::PopulateFromSubBlocks( const MyBlock &block )
 				reached.insert( link.child );
 			}
 		}
+	}
+}
+
+
+void Graph::GetMyBlocks()
+{
+	for( const Graphable *g : my_graphables )
+	{
+		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
+        MyBlock block = PreProcessBlock( gblock, g );
+        my_blocks.push_back( block );
 	}
 }
 

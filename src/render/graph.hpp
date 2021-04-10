@@ -50,8 +50,9 @@ private:
 
     void PopulateFromTransformation(Transformation *root);
     void PopulateFrom( const Graphable *g );
-	void PopulateFromSubBlocks( const MyBlock &block );
+	void PopulateFromSubBlocks( const Graphable::Block &block );
 
+	void GetMyBlocks();
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g );
     
@@ -76,7 +77,7 @@ private:
 
     const string outfile; // empty means stdout
     FILE *filep;
-    
+    list<const Graphable *> my_graphables;
     list<MyBlock> my_blocks;
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
