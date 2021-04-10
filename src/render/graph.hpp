@@ -36,6 +36,7 @@ public:
     Graph( string of = string() );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
+	void operator()( string region_id, const list<const Graphable *> &graphables ); // graph just the specified ojects
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -73,7 +74,9 @@ private:
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );
+    void Remember( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
+    string GetFullId(const Graphable *g);
 
     const string outfile; // empty means stdout
     FILE *filep;
@@ -82,6 +85,8 @@ private:
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
+    string region_id;
+    string all_dot;
 };
 
 #endif

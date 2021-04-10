@@ -516,7 +516,7 @@ list<const AndRuleEngine *> SCREngine::GetAndRuleEngines() const
 	engines = plan.and_rule_engine->GetAndRuleEngines();
 	for( auto p : plan.my_engines )
     {
-		engines.push_back(nullptr);
+		//engines.push_back(nullptr);
 		engines = engines + p.second->GetAndRuleEngines();
 	}
 	return engines;

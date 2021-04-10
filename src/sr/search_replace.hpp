@@ -8,6 +8,8 @@
 #include "agents/agent.hpp"
 #include <set>
 
+class Graph;
+
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
@@ -71,6 +73,7 @@ public:
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual string GetGraphId() const; 
+    void GenerateGraphs( Graph &graph ) const;
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();

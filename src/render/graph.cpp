@@ -47,17 +47,14 @@ Graph::Graph( string of ) :
 		ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
     }
     
-    string s;
-    s += DoHeader();
-	Disburse( s );
+	Disburse( DoHeader() );
 }
 
 
 Graph::~Graph()
 {
-    string s;
-  	s += DoFooter();
-	Disburse( s );
+	Disburse( all_dot );
+	Disburse( DoFooter() );
 
     if( !outfile.empty() )
     {
@@ -67,13 +64,25 @@ Graph::~Graph()
 
 
 void Graph::operator()( Transformation *root )
-{    
+{
+	region_id = "";
 	reached.clear();
     PopulateFromTransformation(root);
     GetMyBlocks();
     PostProcessBlocks();
     string s = DoGraphBody();
-	Disburse( s );
+	Remember(s);
+}
+
+
+void Graph::operator()( string region_id_, const list<const Graphable *> &graphables)
+{
+	region_id = region_id_;
+    my_graphables = graphables;
+    GetMyBlocks();
+    PostProcessBlocks();
+    string s = DoGraphBody();
+	Remember( s );
 }
 
 
@@ -81,13 +90,14 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
 	(void)context; // Not needed!!
 
+	region_id = "";
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( g );
 	GetMyBlocks();
     PostProcessBlocks();
     string s = DoGraphBody();
-	Disburse( s );
+	Remember( s );
 
 	return root; // no change
 }
@@ -140,6 +150,8 @@ void Graph::PopulateFromSubBlocks( const Graphable::Block &block )
 
 void Graph::GetMyBlocks()
 {
+	my_blocks.clear();
+	
 	for( const Graphable *g : my_graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
@@ -161,7 +173,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     (Graphable::Block &)my_block = block;
     
     // Fill in the GraphViz ID that the block will use
-    my_block.base_id = g->GetGraphId();
+    my_block.base_id = GetFullId(g);
     
     // Capture the node (if there is one: might be NULL)
 	if( pspecial )
@@ -213,7 +225,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
             // Detect pre-restrictions and add to link labels
             if( link.is_ntpr )
             {
-				string id = link.child->GetGraphId();
+				string id = GetFullId(link.child);
                 block_ids_show_prerestriction.insert( id );
             }
         }
@@ -435,7 +447,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	string id = link.child->GetGraphId();
+	string id = GetFullId(link.child);
 	s += "\""+id+"\"";
 	s += " ["+atts+"];\n";
 	return s;
@@ -530,6 +542,12 @@ void Graph::Disburse( string s )
 }
 
 
+void Graph::Remember( string s )
+{
+	all_dot = s + all_dot; // dot seems to reverse the graphs
+}
+
+
 string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 {
     string atts;
@@ -543,6 +561,12 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
         break;
     }
     return atts;
+}
+
+
+string Graph::GetFullId(const Graphable *g)
+{
+	return region_id+"/"+g->GetGraphId();
 }
 
 

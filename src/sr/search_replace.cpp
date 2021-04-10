@@ -110,6 +110,18 @@ string CompareReplace::GetGraphId() const
 	return "CR"+plan.scr_engine->GetSerialString();
 }
 
+
+void CompareReplace::GenerateGraphs( Graph &graph ) const
+{
+    list<const AndRuleEngine *> ares = plan.scr_engine->GetAndRuleEngines();
+    for( const AndRuleEngine *are : ares )
+    {
+		ASSERT(are);
+		are->GenerateGraph(graph);
+	}
+}
+
+
 void CompareReplace::SetStopAfter( vector<int> ssa, int d )
 {
     plan.scr_engine->SetStopAfter( ssa, d );
@@ -162,4 +174,5 @@ SearchReplace::SearchReplace() :
     CompareReplace( true )                              
 {
 }
+
 
