@@ -4,18 +4,21 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
-"/CR#P15-0" [
+"CR#P15-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectSCNotifyDelta | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
-"/#B-2-168" [
+"#B-2-168" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +38,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-172" [
+"#B-2-172" [
 shape = "plaintext"
 fillcolor = "/set28/8"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -55,7 +58,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-174" [
+"#B-2-174" [
 shape = "trapezium"
 fillcolor = "/set28/5"
 label = <'p1'>
@@ -66,7 +69,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-173" [
+"#B-2-173" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -82,7 +85,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-169" [
+"#B-2-169" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -102,7 +105,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-176" [
+"#B-2-176" [
 shape = "octagon"
 fillcolor = "/set28/6"
 label = <<I>TypeOf</I>>
@@ -110,7 +113,7 @@ style = "filled"
 fontsize = "16"
 penwidth = 0.0
 ];
-"/#B-2-170" [
+"#B-2-170" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -122,7 +125,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-175" [
+"#B-2-175" [
 shape = "trapezium"
 fillcolor = "/set28/5"
 label = <'notify'>
@@ -133,7 +136,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-171" [
+"#B-2-171" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -149,24 +152,44 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/CR#P15-0":port0 -> "/#B-2-168" [style="solid"
+"CR#P15-0":port0 -> "#B-2-168" [style="solid"
+color = black
+fontcolor = black
 ];
-"/CR#P15-0":port1 -> "/#B-2-171" [style="dashed"
+"CR#P15-0":port1 -> "#B-2-171" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-168":port0 -> "/#B-2-172" [style="solid"
+"#B-2-168":port0 -> "#B-2-172" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-168":port1 -> "/#B-2-169" [style="solid"
+"#B-2-168":port1 -> "#B-2-169" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-172":port0 -> "/#B-2-174" [style="solid"
+"#B-2-172":port0 -> "#B-2-174" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-172":port1 -> "/#B-2-173" [style="solid"
+"#B-2-172":port1 -> "#B-2-173" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-169":port0 -> "/#B-2-176" [style="solid"
+"#B-2-169":port0 -> "#B-2-176" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-169":port1 -> "/#B-2-175" [style="solid"
+"#B-2-169":port1 -> "#B-2-175" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-176" -> "/#B-2-170" [style="solid"
+"#B-2-176" -> "#B-2-170" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-171":port0 -> "/#B-2-176" [style="dashed"
+"#B-2-171":port0 -> "#B-2-176" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

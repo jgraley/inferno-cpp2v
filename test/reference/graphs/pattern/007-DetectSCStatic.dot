@@ -4,18 +4,21 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
-"/CR#P7-0" [
+"CR#P7-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectSCStatic | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
-"/#B-2-55" [
+"#B-2-55" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +38,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-56" [
+"#B-2-56" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -51,7 +54,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-54" [
+"#B-2-54" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -63,10 +66,16 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/CR#P7-0":port0 -> "/#B-2-55" [style="solid"
+"CR#P7-0":port0 -> "#B-2-55" [style="solid"
+color = black
+fontcolor = black
 ];
-"/CR#P7-0":port1 -> "/#B-2-54" [style="dashed"
+"CR#P7-0":port1 -> "#B-2-54" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-55":port1 -> "/#B-2-56" [style="solid"
+"#B-2-55":port1 -> "#B-2-56" [style="solid"
+color = black
+fontcolor = black
 ];
 }

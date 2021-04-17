@@ -4,18 +4,21 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
-"/CR#P46-0" [
+"CR#P46-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ReduceVoidStatementExpression | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
-"/#B-2-815" [
+"#B-2-815" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -39,7 +42,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-816" [
+"#B-2-816" [
 shape = "circle"
 fillcolor = "/set28/1"
 label = <*>
@@ -50,7 +53,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-817" [
+"#B-2-817" [
 shape = "circle"
 fillcolor = "/set28/2"
 label = <*>
@@ -61,7 +64,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-818" [
+"#B-2-818" [
 shape = "diamond"
 fillcolor = "/set28/2"
 label = <¬>
@@ -72,7 +75,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-819" [
+"#B-2-819" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -92,7 +95,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-820" [
+"#B-2-820" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -112,7 +115,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-821" [
+"#B-2-821" [
 shape = "plaintext"
 fillcolor = "/set28/3"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -124,7 +127,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-822" [
+"#B-2-822" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -148,26 +151,48 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/CR#P46-0":port0 -> "/#B-2-815" [style="solid"
+"CR#P46-0":port0 -> "#B-2-815" [style="solid"
+color = black
+fontcolor = black
 ];
-"/CR#P46-0":port1 -> "/#B-2-822" [style="dashed"
+"CR#P46-0":port1 -> "#B-2-822" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-815":port0 -> "/#B-2-816" [style="solid"
+"#B-2-815":port0 -> "#B-2-816" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-815":port1 -> "/#B-2-817" [style="solid"
+"#B-2-815":port1 -> "#B-2-817" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-815":port2 -> "/#B-2-818" [style="solid"
+"#B-2-815":port2 -> "#B-2-818" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-818" -> "/#B-2-819" [style="solid"
+"#B-2-818" -> "#B-2-819" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-819":port1 -> "/#B-2-820" [style="solid"
+"#B-2-819":port1 -> "#B-2-820" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-820":port1 -> "/#B-2-821" [style="solid"
+"#B-2-820":port1 -> "#B-2-821" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-822":port0 -> "/#B-2-816" [style="dashed"
+"#B-2-822":port0 -> "#B-2-816" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-822":port1 -> "/#B-2-817" [style="dashed"
+"#B-2-822":port1 -> "#B-2-817" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-822":port2 -> "/#B-2-818" [style="dashed"
+"#B-2-822":port2 -> "#B-2-818" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

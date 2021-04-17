@@ -4,18 +4,21 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
-"/CR#P23-0" [
+"CR#P23-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectCombableBreak | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
-"/#B-2-283" [
+"#B-2-283" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +38,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-284" [
+"#B-2-284" [
 shape = "diamond"
 fillcolor = "/set28/2"
 label = <¬>
@@ -46,7 +49,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-285" [
+"#B-2-285" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -58,7 +61,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-286" [
+"#B-2-286" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -78,7 +81,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-288" [
+"#B-2-288" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -106,7 +109,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-289" [
+"#B-2-289" [
 shape = "circle"
 fillcolor = "/set28/1"
 label = <*>
@@ -117,7 +120,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-290" [
+"#B-2-290" [
 shape = "circle"
 fillcolor = "/set28/2"
 label = <*>
@@ -128,15 +131,16 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-292" [
+"#B-2-292" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> (Break) | <port1> through | <port2> overlay"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
-"/#B-2-293" [
+"#B-2-293" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -148,7 +152,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-294" [
+"#B-2-294" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -160,7 +164,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-291" [
+"#B-2-291" [
 shape = "circle"
 fillcolor = "/set28/2"
 label = <*>
@@ -171,7 +175,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-287" [
+"#B-2-287" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -183,30 +187,56 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/CR#P23-0":port0 -> "/#B-2-283" [style="solid"
+"CR#P23-0":port0 -> "#B-2-283" [style="solid"
+color = black
+fontcolor = black
 ];
-"/CR#P23-0":port1 -> "/#B-2-286" [style="dashed"
+"CR#P23-0":port1 -> "#B-2-286" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-283":port1 -> "/#B-2-284" [style="solid"
+"#B-2-283":port1 -> "#B-2-284" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-283":port1 -> "/#B-2-286" [style="solid"
+"#B-2-283":port1 -> "#B-2-286" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-284" -> "/#B-2-285" [style="solid"
+"#B-2-284" -> "#B-2-285" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-286":port0 -> "/#B-2-288" [style="solid"
+"#B-2-286":port0 -> "#B-2-288" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-286":port1 -> "/#B-2-287" [style="solid"
+"#B-2-286":port1 -> "#B-2-287" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-288":port0 -> "/#B-2-289" [style="solid"
+"#B-2-288":port0 -> "#B-2-289" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-288":port1 -> "/#B-2-290" [style="solid"
+"#B-2-288":port1 -> "#B-2-290" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-288":port2 -> "/#B-2-292" [style="solid"
+"#B-2-288":port2 -> "#B-2-292" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-288":port3 -> "/#B-2-291" [style="solid"
+"#B-2-288":port3 -> "#B-2-291" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-292":port1 -> "/#B-2-293" [style="solid"
+"#B-2-292":port1 -> "#B-2-293" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-292":port2 -> "/#B-2-294" [style="dashed"
+"#B-2-292":port2 -> "#B-2-294" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

@@ -4,18 +4,21 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
-"/CR#P5-0" [
+"CR#P5-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectSCDelta | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
-"/#B-2-42" [
+"#B-2-42" [
 shape = "plaintext"
 fillcolor = "/set28/6"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +38,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-43" [
+"#B-2-43" [
 shape = "plaintext"
 fillcolor = "/set28/8"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -55,7 +58,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-45" [
+"#B-2-45" [
 shape = "trapezium"
 fillcolor = "/set28/5"
 label = <'p1'>
@@ -66,7 +69,7 @@ fixedsize = true
 width = 0.4
 height = 0.4
 ];
-"/#B-2-46" [
+"#B-2-46" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -82,7 +85,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-44" [
+"#B-2-44" [
 shape = "plaintext"
 fillcolor = "/set28/5"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -98,7 +101,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/#B-2-41" [
+"#B-2-41" [
 shape = "plaintext"
 fillcolor = "/set28/2"
 label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -110,16 +113,28 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
-"/CR#P5-0":port0 -> "/#B-2-42" [style="solid"
+"CR#P5-0":port0 -> "#B-2-42" [style="solid"
+color = black
+fontcolor = black
 ];
-"/CR#P5-0":port1 -> "/#B-2-41" [style="dashed"
+"CR#P5-0":port1 -> "#B-2-41" [style="dashed"
+color = black
+fontcolor = black
 ];
-"/#B-2-42":port0 -> "/#B-2-43" [style="solid"
+"#B-2-42":port0 -> "#B-2-43" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-42":port1 -> "/#B-2-44" [style="solid"
+"#B-2-42":port1 -> "#B-2-44" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-43":port0 -> "/#B-2-45" [style="solid"
+"#B-2-43":port0 -> "#B-2-45" [style="solid"
+color = black
+fontcolor = black
 ];
-"/#B-2-43":port1 -> "/#B-2-46" [style="solid"
+"#B-2-43":port1 -> "#B-2-46" [style="solid"
+color = black
+fontcolor = black
 ];
 }

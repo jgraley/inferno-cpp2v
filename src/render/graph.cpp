@@ -39,7 +39,11 @@ using namespace CPPTree;
 #include <functional>
 
 Graph::Graph( string of ) :
-    outfile(of)
+    outfile(of),
+    base_region { "",
+		          ReadArgs::graph_dark ? "black" : "antiquewhite1",
+		          ReadArgs::graph_dark ? "grey70" : "black",
+		          ReadArgs::graph_dark ? "white" : "black" }
 {
 	if( !outfile.empty() )
 	{
@@ -65,7 +69,7 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {
-	region_id = "";
+	my_region = base_region;
 	reached.clear();
     PopulateFromTransformation(root);
     GetMyBlocks();
@@ -77,7 +81,9 @@ void Graph::operator()( Transformation *root )
 
 void Graph::operator()( string region_id_, const list<const Graphable *> &graphables)
 {
-	region_id = region_id_;
+	my_region = base_region;
+    my_region.region_id = region_id_;
+    my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     my_graphables = graphables;
     GetMyBlocks();
     PostProcessBlocks();
@@ -91,7 +97,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
 	(void)context; // Not needed!!
 
-	region_id = "";
+	my_region = base_region;
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( g );
@@ -187,14 +193,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                                          "", 
                                          false, 
                                          {} } );
-    }
-    
-    // Colour the block in accordance with the node if there is one otherwise leave the colour blank.
-    // See #258: "block colour shall be dictated by the node type only"
-    if( pnode )
-        my_block.colour = pnode->GetColour();
-    else
-        my_block.colour = "transparent";
+    }  
 
     // Make the titles more wieldy by removing template stuff - note:
     // different policies for control blocks vs node blocks.
@@ -204,10 +203,13 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
         my_block.shape = "record";
+        my_block.colour = "transparent";
         break;
 
     case Graphable::NODE:
         my_block.title = GetInnermostTemplateParam(my_block.title);
+        // See #258: "block colour shall be dictated by the node type only"
+        my_block.colour = pnode->GetColour();
         break;
 
     default:
@@ -289,7 +291,9 @@ string Graph::DoBlock( const MyBlock &block )
 	s += " [\n";
     
 	s += "shape = \"" + block.shape + "\"\n";
-	if(block.colour != "")
+	if( block.colour=="transparent" )
+		s += "fillcolor = " + my_region.background_colour + "\n";
+	else if(block.colour != "")
 		s += "fillcolor = \"" + block.colour + "\"\n";
 
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
@@ -308,16 +312,8 @@ string Graph::DoBlock( const MyBlock &block )
         s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
         s += "fontsize = \"" FS_MIDDLE "\"\n";
-        if( ReadArgs::graph_dark )
-        {
-            s += "fillcolor = black\n";
-            s += "fontcolor = white\n";
-            s += "color = gray70\n";
-        }
-        else
-        {
-            s += "fillcolor = antiquewhite1\n";
-        }
+        s += "color = " + my_region.line_colour + "\n";
+        s += "fontcolor = " + my_region.font_colour + "\n";
     }
     else
 	{
@@ -436,11 +432,8 @@ string Graph::DoLink( int port_index,
         atts += "decorate = true\n";
     }
 
-    if( ReadArgs::graph_dark )
-    {
-        atts += "color = gray70\n";
-        atts += "fontcolor = white\n";
-    }
+    atts += "color = " + my_region.line_colour + "\n";
+    atts += "fontcolor = " + my_region.font_colour + "\n";
 
     // GraphViz output
 	string s;
@@ -464,17 +457,10 @@ string Graph::DoHeader()
 	s += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
 	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
-    if( ReadArgs::graph_dark )
-    {
-        s += "bgcolor = black\n";
-        s += "color = gray70\n";
-        s += "fontcolor = white\n";    
-    }
-    else
-    {
-        s += "bgcolor = antiquewhite1\n";
-    }
-	s += "];\n";
+    s += "bgcolor = " + base_region.background_colour + "\n";
+    s += "color = " + base_region.line_colour + "\n";
+    s += "fontcolor = " + base_region.font_colour + "\n";
+    s += "];\n";
 	s += "node [\n";
 #ifdef FONT
     s += "fontname = \"" FONT "\"\n";
@@ -495,13 +481,10 @@ string Graph::DoFooter()
 string Graph::DoCluster(string ss)
 {
     string s;
-    s += "subgraph \"cluster" + region_id + "\" {\n";
-    s += "label = \"" + region_id + "\"\n";
+    s += "subgraph \"cluster" + my_region.region_id + "\" {\n";
+    s += "label = \"" + my_region.region_id + "\"\n";
     s += "style = \"filled\"\n";
-	if( ReadArgs::graph_dark )
-    	s += "color = gray15\n";
-    else
-		s += "color = antiquewhite2\n";
+	s += "color = " + my_region.background_colour + "\n";
 	s += ss;
     s += "}\n";
     return s;
@@ -583,7 +566,10 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 
 string Graph::GetFullId(const Graphable *g)
 {
-	return region_id+"/"+g->GetGraphId();
+	if(my_region.region_id.empty() )
+		return g->GetGraphId();
+	else
+		return my_region.region_id+"/"+g->GetGraphId();
 }
 
 
@@ -592,4 +578,3 @@ const Graph::LinkNamingFunction Graph::my_lnf = []( const TreePtr<Node> *parent_
 {
 	return PatternLink( *parent_pattern, ppattern ).GetShortName();
 };		
-

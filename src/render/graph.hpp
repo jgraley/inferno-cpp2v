@@ -49,6 +49,14 @@ private:
         bool italic_title;
     };
 
+    struct Region
+    {
+		string region_id;
+		string background_colour;
+		string line_colour;
+		string font_colour;
+	};
+
     void PopulateFromTransformation(Transformation *root);
     void PopulateFrom( const Graphable *g );
 	void PopulateFromSubBlocks( const Graphable::Block &block );
@@ -86,7 +94,8 @@ private:
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
-    string region_id;
+    Region my_region;
+    const Region base_region;
     string all_dot;
 };
 
