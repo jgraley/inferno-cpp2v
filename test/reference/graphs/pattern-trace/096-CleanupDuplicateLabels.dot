@@ -65,6 +65,39 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+}
+"#R96-1/#B-2-1850" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LabelIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1850</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R96-1/#B-2-1849" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LabelIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1849</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
 "#R96-1/#B-2-1852":port1 -> "#R96-1/#B-2-1849" [style="solid"
 label = "#2"
 decorate = true
@@ -95,7 +128,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R96-3" {
 label = "#R96-3"
 style = "filled"
@@ -392,6 +424,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R96-0/#B-2-1844":port0 -> "#R96-0/#B-2-1850" [style="solid"
 label = "#0"
 decorate = true
@@ -488,7 +521,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 "CR#P96-0" [
 shape = "record"
 fillcolor = antiquewhite1

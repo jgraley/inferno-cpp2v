@@ -58,13 +58,13 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R70-3/#B-2-1256":port0 -> "#R70-3/#B-2-1250" [style="solid"
 label = "#0"
 decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R70-2" {
 label = "#R70-2"
 style = "filled"
@@ -89,13 +89,13 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R70-2/#B-2-1245":port0 -> "#R70-2/#B-2-1256" [style="solid"
 label = "#0"
 decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R70-1" {
 label = "#R70-1"
 style = "filled"
@@ -161,13 +161,13 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R70-6/#B-2-1257":port0 -> "#R70-6/#B-2-1258" [style="solid"
 label = "#0"
 decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R70-5" {
 label = "#R70-5"
 style = "filled"
@@ -192,13 +192,13 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R70-5/#B-2-1246":port0 -> "#R70-5/#B-2-1257" [style="solid"
 label = "#0"
 decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R70-8" {
 label = "#R70-8"
 style = "filled"
@@ -432,6 +432,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R70-0/#B-2-1249":port0 -> "#R70-0/#B-2-1251" [style="solid"
 label = "#1"
 decorate = true
@@ -522,7 +523,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 "CR#P70-0" [
 shape = "record"
 fillcolor = antiquewhite1

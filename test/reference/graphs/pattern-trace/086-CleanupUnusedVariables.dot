@@ -95,6 +95,23 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
+"#R86-1/#B-2-1600" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InstanceIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1600</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
 "#R86-1/#B-2-1604":port0 -> "#R86-1/#B-2-1600" [style="solid"
 label = "#1"
 decorate = true
@@ -125,7 +142,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R86-4" {
 label = "#R86-4"
 style = "filled"
@@ -260,6 +276,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R86-3/#B-2-1606":port1 -> "#R86-3/#B-2-1609" [style="solid"
 label = "#0"
 decorate = true
@@ -290,7 +307,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R86-6" {
 label = "#R86-6"
 style = "filled"
@@ -510,6 +526,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R86-0/#B-2-1597":port1 -> "#R86-0/#B-2-1598" [style="solid"
 label = "#0"
 decorate = true
@@ -594,7 +611,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 "CR#P86-0" [
 shape = "record"
 fillcolor = antiquewhite1

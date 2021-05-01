@@ -974,12 +974,22 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 
 void AndRuleEngine::GenerateGraph( Graph &graph ) const
 {
+	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure graphables;
+	TRACEC("Interior:\n");
 	for( const Agent *agent : plan.my_normal_agents )
+	{
+		TRACEC(*agent)("\n");
 		graphables.interior.push_back( agent );
+	}
+	TRACEC("Exterior:\n");
 	for( const Agent *agent : plan.master_boundary_agents )
+	{
+		TRACEC(*agent)("\n");
 		graphables.exterior.push_back( agent );
+	}
 
+	TRACEC("Graphing ")(*this)("\n");
 	graph(GetSerialString(), graphables);
 }
 

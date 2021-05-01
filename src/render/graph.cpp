@@ -41,9 +41,9 @@ using namespace CPPTree;
 Graph::Graph( string of ) :
     outfile(of),
     base_region { "",
-		          ReadArgs::graph_dark ? "black" : "antiquewhite1",
-		          ReadArgs::graph_dark ? "grey70" : "black",
-		          ReadArgs::graph_dark ? "white" : "black" }
+		          ReadArgs::graph_dark ? "black" : "antiquewhite1" },
+	line_colour( ReadArgs::graph_dark ? "grey70" : "black" ),
+    font_colour( ReadArgs::graph_dark ? "white" : "black" )
 {
 	if( !outfile.empty() )
 	{
@@ -71,31 +71,41 @@ void Graph::operator()( Transformation *root )
 {
     Figure my_graphables;
     list<MyBlock> my_blocks;
-    RegionAppearance my_region = base_region;
+
 	reached.clear();
     PopulateFromTransformation(my_graphables.interior, root);
     my_blocks = GetBlocks(my_graphables.interior, "");
     PostProcessBlocks(my_blocks);
-    string s = DoGraphBody(my_blocks, my_region);
+    string s = DoGraphBody(my_blocks, base_region);
 	Remember(s);
 }
 
 
-void Graph::operator()( string region_id_, const Figure &figure )
-{
-    list<MyBlock> my_blocks;
+void Graph::operator()( string figure_id, const Figure &figure )
+{    
     RegionAppearance my_region = base_region;
-    my_region.region_id = region_id_;
+    my_region.region_id += figure_id;
     my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
 
-    my_blocks = GetBlocks(figure.interior, region_id_);
+    list<MyBlock> my_blocks = GetBlocks(figure.interior, figure_id);
     PostProcessBlocks(my_blocks);
-    string s = DoGraphBody(my_blocks, my_region);
-    s = DoCluster(s, my_region);
+    list<MyBlock> ex_blocks = GetBlocks(figure.exterior, figure_id);
+    PostProcessBlocks(ex_blocks);
 
-    //my_blocks = GetBlocks(figure.exterior);
-    //PostProcessBlocks(my_blocks);
-    //s += DoGraphBody(my_blocks, base_region);
+	string s;
+    for( const MyBlock &block : ex_blocks )
+        s += DoBlock(block, base_region);
+
+    string sc;
+    for( const MyBlock &block : my_blocks )
+        sc += DoBlock(block, my_region);
+    s = DoCluster(sc, my_region);
+
+    s += DoGraphBody(ex_blocks, base_region);
+    for( const MyBlock &block : my_blocks )
+        s += DoLinks(block, my_region);
+    for( const MyBlock &block : ex_blocks )
+        s += DoLinks(block, base_region);
 
 	Remember( s );
 }
@@ -107,13 +117,12 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     list<MyBlock> my_blocks;
 	(void)context; // Not needed!!
 
-	RegionAppearance my_region = base_region;
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables.interior, g );
 	my_blocks = GetBlocks(my_graphables.interior, "");
     PostProcessBlocks(my_blocks);
-    string s = DoGraphBody(my_blocks, my_region);
+    string s = DoGraphBody(my_blocks, base_region);
 	Remember( s );
 
 	return root; // no change
@@ -331,8 +340,8 @@ string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
         s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
         s += "fontsize = \"" FS_MIDDLE "\"\n";
-        s += "color = " + region.line_colour + "\n";
-        s += "fontcolor = " + region.font_colour + "\n";
+        s += "color = " + line_colour + "\n";
+        s += "fontcolor = " + font_colour + "\n";
     }
     else
 	{
@@ -464,8 +473,8 @@ string Graph::DoLink( int port_index,
         atts += "decorate = true\n";
     }
 
-    atts += "color = " + region.line_colour + "\n";
-    atts += "fontcolor = " + region.font_colour + "\n";
+    atts += "color = " + line_colour + "\n";
+    atts += "fontcolor = " + font_colour + "\n";
 
     // GraphViz output
 	string s;
@@ -489,8 +498,8 @@ string Graph::DoHeader()
 	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
     s += "bgcolor = " + base_region.background_colour + "\n";
-    s += "color = " + base_region.line_colour + "\n";
-    s += "fontcolor = " + base_region.font_colour + "\n";
+    s += "color = " + line_colour + "\n";
+    s += "fontcolor = " + font_colour + "\n";
     s += "];\n";
 	s += "node [\n";
 #ifdef FONT

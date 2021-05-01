@@ -85,6 +85,7 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+}
 "#R32-3/#B-2-534":port1 -> "#R32-3/#B-2-529" [style="solid"
 label = "#0"
 decorate = true
@@ -109,7 +110,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R32-2" {
 label = "#R32-2"
 style = "filled"
@@ -142,6 +142,23 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+}
+"#R32-2/#B-2-527" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InstanceIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-527</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
 "#R32-2/#P32-8-37":port0 -> "#R32-2/#P32-6-42" [style="solid"
 label = "#0"
 decorate = true
@@ -160,7 +177,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R32-5" {
 label = "#R32-5"
 style = "filled"
@@ -412,6 +428,23 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+}
+"#R32-1/#B-2-550" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">InstanceIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-550</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
 "#R32-1/#B-2-545":port0 -> "#R32-1/#B-2-547" [style="solid"
 label = "#0"
 decorate = true
@@ -502,7 +535,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R32-10" {
 label = "#R32-10"
 style = "filled"
@@ -559,6 +591,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R32-10/#B-2-507":port0 -> "#R32-10/#B-2-505" [style="solid"
 label = "#0"
 decorate = true
@@ -571,7 +604,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R32-8" {
 label = "#R32-8"
 style = "filled"
@@ -855,6 +887,7 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
 "#R32-0/#B-2-510":port0 -> "#R32-0/#B-2-514" [style="solid"
 label = "#0"
 decorate = true
@@ -951,7 +984,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 "CR#P32-0" [
 shape = "record"
 fillcolor = antiquewhite1

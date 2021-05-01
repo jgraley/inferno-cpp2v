@@ -164,6 +164,7 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
             int index = 0;
             for( shared_ptr<Transformation> t : *sequence )
             {
+				Progress(Progress::RENDERING, index).SetAsCurrent();
                 string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
                 Graph g( filepath );
                 GenerateGraphs( g, t );
@@ -189,6 +190,7 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
                     ASSERT(false);
                 }
             }
+			Progress(Progress::RENDERING, ReadArgs::pattern_graph_index).SetAsCurrent();
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
             ASSERT( ReadArgs::pattern_graph_index < sequence->size() )("There are only %d steps at present\n", sequence->size() );
             Graph g( ReadArgs::outfile );

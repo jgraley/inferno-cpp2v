@@ -431,6 +431,27 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
 style = "rounded,filled"
 fontsize = "12"
 ];
+}
+"#R12-1/#B-2-127" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'SC_CTHREAD'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(InstanceIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-127</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
 "#R12-1/#B-2-117":port0 -> "#R12-1/#B-2-132" [style="solid"
 label = "#0"
 decorate = true
@@ -569,7 +590,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 subgraph "cluster#R12-7" {
 label = "#R12-7"
 style = "filled"
@@ -697,6 +717,7 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+}
 "#R12-0/#B-2-110":port0 -> "#R12-0/#B-2-130" [style="solid"
 label = "#0"
 decorate = true
@@ -745,7 +766,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-}
 "CR#P12-0" [
 shape = "record"
 fillcolor = antiquewhite1

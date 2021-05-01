@@ -42,7 +42,7 @@ public:
     Graph( string of = string() );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
-	void operator()( string region_id, const Figure &graphables ); // graph just the specified ojects
+	void operator()( string figure_id, const Figure &graphables ); // graph just the specified ojects
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -60,8 +60,6 @@ private:
     {
 		string region_id;
 		string background_colour;
-		string line_colour;
-		string font_colour;
 	};
 
     void PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root );
@@ -106,6 +104,8 @@ private:
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
     const RegionAppearance base_region;
+	const string line_colour;
+	const string font_colour;
     string all_dot;
 };
 
