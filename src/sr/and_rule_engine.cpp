@@ -974,9 +974,11 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 
 void AndRuleEngine::GenerateGraph( Graph &graph ) const
 {
-	list<const Graphable *> graphables;
+	Graph::RegionGraphables graphables;
 	for( const Agent *agent : plan.my_normal_agents )
-		graphables.push_back( agent );
+		graphables.interior.push_back( agent );
+	for( const Agent *agent : plan.master_boundary_agents )
+		graphables.exterior.push_back( agent );
 
 	graph(GetSerialString(), graphables);
 }

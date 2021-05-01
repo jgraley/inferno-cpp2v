@@ -69,58 +69,66 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {
+    FigureAppearance my_graphables;
+    list<MyBlock> my_blocks;
+
 	my_region = base_region;
 	reached.clear();
-    PopulateFromTransformation(root);
-    GetMyBlocks();
-    PostProcessBlocks();
-    string s = DoGraphBody();
+    PopulateFromTransformation(my_graphables.interior, root);
+    my_blocks = GetBlocks(my_graphables.interior);
+    PostProcessBlocks(my_blocks);
+    string s = DoGraphBody(my_blocks, my_region);
 	Remember(s);
 }
 
 
-void Graph::operator()( string region_id_, const list<const Graphable *> &graphables)
+void Graph::operator()( string region_id_, const FigureAppearance &graphables )
 {
+    list<MyBlock> my_blocks;
+
 	my_region = base_region;
     my_region.region_id = region_id_;
     my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
-    my_graphables = graphables;
-    GetMyBlocks();
-    PostProcessBlocks();
-    string s = DoGraphBody();
-    s = DoCluster(s);
+
+    my_blocks = GetBlocks(graphables.interior);
+    PostProcessBlocks(my_blocks);
+    string s = DoGraphBody(my_blocks, my_region);
+    s = DoCluster(s, my_region);
+
 	Remember( s );
 }
 
 
 TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
+    FigureAppearance my_graphables;
+    list<MyBlock> my_blocks;
 	(void)context; // Not needed!!
 
 	my_region = base_region;
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
-	PopulateFrom( g );
-	GetMyBlocks();
-    PostProcessBlocks();
-    string s = DoGraphBody();
+	PopulateFrom( my_graphables.interior, g );
+	my_blocks = GetBlocks(my_graphables.interior);
+    PostProcessBlocks(my_blocks);
+    string s = DoGraphBody(my_blocks, my_region);
 	Remember( s );
 
 	return root; // no change
 }
 
 
-void Graph::PopulateFromTransformation(Transformation *root)
+void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root )
 {    
     if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
     {
         FOREACH( shared_ptr<Transformation> t, *tv ) // TODO loop backwards so they come out in the right order in graph
-            PopulateFromTransformation( t.get() );
+            PopulateFromTransformation( graphables, t.get() );
     }
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
 		reached.clear();
-		PopulateFrom( cr );
+		PopulateFrom( graphables, cr );
 	}
 	else
     {
@@ -129,17 +137,17 @@ void Graph::PopulateFromTransformation(Transformation *root)
 }
 
                    
-void Graph::PopulateFrom( const Graphable *g )
+void Graph::PopulateFrom( list<const Graphable *> &graphables, const Graphable *g )
 {
 	ASSERT(g);
-    my_graphables.push_back(g);
+    graphables.push_back(g);
 
     Graphable::Block block = g->GetGraphBlockInfo(my_lnf, nullptr);	        
-    PopulateFromSubBlocks( block );
+    PopulateFromSubBlocks( graphables, block );
 }
 
 
-void Graph::PopulateFromSubBlocks( const Graphable::Block &block )
+void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block )
 {
 	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
 	{
@@ -147,7 +155,7 @@ void Graph::PopulateFromSubBlocks( const Graphable::Block &block )
 		{
 			if( link.child && reached.count(link.child)==0 )
 			{
-				PopulateFrom( link.child );
+				PopulateFrom( graphables, link.child );
 				reached.insert( link.child );
 			}
 		}
@@ -155,16 +163,18 @@ void Graph::PopulateFromSubBlocks( const Graphable::Block &block )
 }
 
 
-void Graph::GetMyBlocks()
+list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables )
 {
-	my_blocks.clear();
+	list<MyBlock> blocks;
 	
-	for( const Graphable *g : my_graphables )
+	for( const Graphable *g : graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
         MyBlock block = PreProcessBlock( gblock, g );
-        my_blocks.push_back( block );
+        blocks.push_back( block );
 	}
+
+	return blocks;
 }
 
 
@@ -243,9 +253,9 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 }
 
 
-void Graph::PostProcessBlocks()
+void Graph::PostProcessBlocks( list<MyBlock> &blocks )
 {
-    for( MyBlock &block : my_blocks )
+    for( MyBlock &block : blocks )
     {
         if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
         {          
@@ -270,21 +280,21 @@ void Graph::PostProcessBlocks()
 }
 
 
-string Graph::DoGraphBody()
+string Graph::DoGraphBody( const list<MyBlock> &blocks, const RegionAppearance &region )
 {
     string s;
     
-    for( const MyBlock &block : my_blocks )
-        s += DoBlock(block);
+    for( const MyBlock &block : blocks )
+        s += DoBlock(block, region);
 
-    for( const MyBlock &block : my_blocks )
-        s += DoLinks(block);
+    for( const MyBlock &block : blocks )
+        s += DoLinks(block, region);
     
     return s;
 }
 
 
-string Graph::DoBlock( const MyBlock &block )
+string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
 {
 	string s;
 	s += "\""+block.base_id+"\"";
@@ -292,7 +302,7 @@ string Graph::DoBlock( const MyBlock &block )
     
 	s += "shape = \"" + block.shape + "\"\n";
 	if( block.colour=="transparent" )
-		s += "fillcolor = " + my_region.background_colour + "\n";
+		s += "fillcolor = " + region.background_colour + "\n";
 	else if(block.colour != "")
 		s += "fillcolor = \"" + block.colour + "\"\n";
 
@@ -312,8 +322,8 @@ string Graph::DoBlock( const MyBlock &block )
         s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
         s += "fontsize = \"" FS_MIDDLE "\"\n";
-        s += "color = " + my_region.line_colour + "\n";
-        s += "fontcolor = " + my_region.font_colour + "\n";
+        s += "color = " + region.line_colour + "\n";
+        s += "fontcolor = " + region.font_colour + "\n";
     }
     else
 	{
@@ -395,7 +405,8 @@ string Graph::DoHTMLLabel( const MyBlock &block )
 }
 
 
-string Graph::DoLinks( const MyBlock &block )
+string Graph::DoLinks( const MyBlock &block,
+                       const RegionAppearance &region )
 {
     string s;
     
@@ -403,7 +414,7 @@ string Graph::DoLinks( const MyBlock &block )
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
         for( Graphable::Link link : sub_block.links )
-            s += DoLink( porti, block, sub_block, link );
+            s += DoLink( porti, block, sub_block, link, region );
         porti++;
     }
 
@@ -414,7 +425,8 @@ string Graph::DoLinks( const MyBlock &block )
 string Graph::DoLink( int port_index, 
                       const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
-                      const Graphable::Link &link )
+                      const Graphable::Link &link,
+                      const RegionAppearance &region )
 {          
     // Atts
     string atts;
@@ -432,8 +444,8 @@ string Graph::DoLink( int port_index,
         atts += "decorate = true\n";
     }
 
-    atts += "color = " + my_region.line_colour + "\n";
-    atts += "fontcolor = " + my_region.font_colour + "\n";
+    atts += "color = " + region.line_colour + "\n";
+    atts += "fontcolor = " + region.font_colour + "\n";
 
     // GraphViz output
 	string s;
@@ -478,13 +490,13 @@ string Graph::DoFooter()
 }
 
 
-string Graph::DoCluster(string ss)
+string Graph::DoCluster(string ss, const RegionAppearance &region)
 {
     string s;
-    s += "subgraph \"cluster" + my_region.region_id + "\" {\n";
-    s += "label = \"" + my_region.region_id + "\"\n";
+    s += "subgraph \"cluster" + region.region_id + "\" {\n";
+    s += "label = \"" + region.region_id + "\"\n";
     s += "style = \"filled\"\n";
-	s += "color = " + my_region.background_colour + "\n";
+	s += "color = " + region.background_colour + "\n";
 	s += ss;
     s += "}\n";
     return s;

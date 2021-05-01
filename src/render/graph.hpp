@@ -33,10 +33,16 @@ class Graph : public OutOfPlaceTransformation
 public:
 	using Transformation::operator();
 
+	struct RegionGraphables
+	{
+		list<const Graphable *> interior;
+		list<const Graphable *> exterior;
+	};
+
     Graph( string of = string() );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
-	void operator()( string region_id, const list<const Graphable *> &graphables ); // graph just the specified ojects
+	void operator()( string region_id, const RegionGraphables &graphables ); // graph just the specified ojects
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -49,7 +55,7 @@ private:
         bool italic_title;
     };
 
-    struct Region
+    struct RegionAppearance
     {
 		string region_id;
 		string background_colour;
@@ -57,28 +63,32 @@ private:
 		string font_colour;
 	};
 
-    void PopulateFromTransformation(Transformation *root);
-    void PopulateFrom( const Graphable *g );
-	void PopulateFromSubBlocks( const Graphable::Block &block );
+    void PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root );
+    void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
+	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
-	void GetMyBlocks();
+	list<MyBlock> GetBlocks( list< const Graphable *> graphables );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g );
     
-    void PostProcessBlocks();
+    void PostProcessBlocks( list<MyBlock> &blocks );
 
-    string DoGraphBody();
-    string DoBlock( const MyBlock &block );
+    string DoGraphBody( const list<MyBlock> &blocks,
+                        const RegionAppearance &region );
+    string DoBlock( const MyBlock &block,
+                    const RegionAppearance &region );
     string DoRecordLabel( const MyBlock &block );
     string DoHTMLLabel( const MyBlock &block );
-    string DoLinks( const MyBlock &block );
+    string DoLinks( const MyBlock &block,
+                    const RegionAppearance &region );
     string DoLink( int port_index, 
                    const MyBlock &block, 
                    const Graphable::SubBlock &sub_block, 
-                   const Graphable::Link &link );
+                   const Graphable::Link &link,
+                   const RegionAppearance &region );
     string DoHeader();
     string DoFooter();
-    string DoCluster(string s);
+    string DoCluster(string s, const RegionAppearance &region);
 
     string SeqField( int i );
     string EscapeForGraphviz( string s );
@@ -89,13 +99,11 @@ private:
 
     const string outfile; // empty means stdout
     FILE *filep;
-    list<const Graphable *> my_graphables;
-    list<MyBlock> my_blocks;
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
-    Region my_region;
-    const Region base_region;
+    RegionAppearance my_region;
+    const RegionAppearance base_region;
     string all_dot;
 };
 
