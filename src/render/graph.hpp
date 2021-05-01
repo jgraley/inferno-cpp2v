@@ -79,13 +79,11 @@ private:
                     const RegionAppearance &region );
     string DoRecordLabel( const MyBlock &block );
     string DoHTMLLabel( const MyBlock &block );
-    string DoLinks( const MyBlock &block,
-                    const RegionAppearance &region );
+    string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 
                    const Graphable::SubBlock &sub_block, 
                    const Graphable::Link &link,
-                   const RegionAppearance &region,
                    string id );
     string DoHeader();
     string DoFooter();

@@ -99,13 +99,12 @@ void Graph::operator()( string figure_id, const Figure &figure )
     string sc;
     for( const MyBlock &block : my_blocks )
         sc += DoBlock(block, my_region);
-    s = DoCluster(sc, my_region);
+    s += DoCluster(sc, my_region);
 
-    s += DoGraphBody(ex_blocks, base_region);
     for( const MyBlock &block : my_blocks )
-        s += DoLinks(block, my_region);
+        s += DoLinks(block);
     for( const MyBlock &block : ex_blocks )
-        s += DoLinks(block, base_region);
+        s += DoLinks(block);
 
 	Remember( s );
 }
@@ -306,7 +305,7 @@ string Graph::DoGraphBody( const list<MyBlock> &blocks, const RegionAppearance &
         s += DoBlock(block, region);
 
     for( const MyBlock &block : blocks )
-        s += DoLinks(block, region);
+        s += DoLinks(block);
     
     return s;
 }
@@ -423,8 +422,7 @@ string Graph::DoHTMLLabel( const MyBlock &block )
 }
 
 
-string Graph::DoLinks( const MyBlock &block,
-                       const RegionAppearance &region )
+string Graph::DoLinks( const MyBlock &block )
 {
     string s;
     
@@ -439,7 +437,7 @@ string Graph::DoLinks( const MyBlock &block,
         for( Graphable::Link link : sub_block.links )
         {
 			ASSERT( lidit != sbidit->end() );
-			s += DoLink( porti, block, sub_block, link, region, *lidit );
+			s += DoLink( porti, block, sub_block, link, *lidit );
 			lidit++;
 		}
         porti++;
@@ -454,7 +452,6 @@ string Graph::DoLink( int port_index,
                       const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
                       const Graphable::Link &link,
-                      const RegionAppearance &region,
                       string id )
 {          
     // Atts

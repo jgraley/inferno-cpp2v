@@ -64,6 +64,22 @@ decorate = true
 color = black
 fontcolor = black
 ];
+"#R99-1/#B-2-1903" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">LabelIdentifier</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1903</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
 subgraph "cluster#R99-1" {
 label = "#R99-1"
 style = "filled"
@@ -93,22 +109,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R99-1/#B-2-1903" [
-shape = "plaintext"
-fillcolor = "/set28/5"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">LabelIdentifier</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>#B-2-1903</TD>
-  <TD PORT="port0"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
-];
 "#R99-1/#B-2-1895":port0 -> "#R99-1/#B-2-1903" [style="solid"
 label = "#1"
 decorate = true
