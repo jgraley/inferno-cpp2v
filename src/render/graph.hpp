@@ -33,7 +33,7 @@ class Graph : public OutOfPlaceTransformation
 public:
 	using Transformation::operator();
 
-	struct RegionGraphables
+	struct Figure
 	{
 		list<const Graphable *> interior;
 		list<const Graphable *> exterior;
@@ -42,7 +42,7 @@ public:
     Graph( string of = string() );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
-	void operator()( string region_id, const RegionGraphables &graphables ); // graph just the specified ojects
+	void operator()( string region_id, const Figure &graphables ); // graph just the specified ojects
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -53,6 +53,7 @@ private:
         bool specify_ports;
         string base_id;
         bool italic_title;
+        list< list<string> > link_ids; 
     };
 
     struct RegionAppearance
@@ -67,9 +68,10 @@ private:
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
-	list<MyBlock> GetBlocks( list< const Graphable *> graphables );
+	list<MyBlock> GetBlocks( list< const Graphable *> graphables, string figure_id );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
-                             const Graphable *g );
+                             const Graphable *g,
+                             string figure_id );
     
     void PostProcessBlocks( list<MyBlock> &blocks );
 
@@ -85,7 +87,8 @@ private:
                    const MyBlock &block, 
                    const Graphable::SubBlock &sub_block, 
                    const Graphable::Link &link,
-                   const RegionAppearance &region );
+                   const RegionAppearance &region,
+                   string id );
     string DoHeader();
     string DoFooter();
     string DoCluster(string s, const RegionAppearance &region);
@@ -95,14 +98,13 @@ private:
     void Disburse( string s );
     void Remember( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
-    string GetFullId(const Graphable *g);
+    string GetFullId(const Graphable *g, string figure_id);
 
     const string outfile; // empty means stdout
     FILE *filep;
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
-    RegionAppearance my_region;
     const RegionAppearance base_region;
     string all_dot;
 };

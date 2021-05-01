@@ -69,31 +69,33 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {
-    FigureAppearance my_graphables;
+    Figure my_graphables;
     list<MyBlock> my_blocks;
-
-	my_region = base_region;
+    RegionAppearance my_region = base_region;
 	reached.clear();
     PopulateFromTransformation(my_graphables.interior, root);
-    my_blocks = GetBlocks(my_graphables.interior);
+    my_blocks = GetBlocks(my_graphables.interior, "");
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, my_region);
 	Remember(s);
 }
 
 
-void Graph::operator()( string region_id_, const FigureAppearance &graphables )
+void Graph::operator()( string region_id_, const Figure &figure )
 {
     list<MyBlock> my_blocks;
-
-	my_region = base_region;
+    RegionAppearance my_region = base_region;
     my_region.region_id = region_id_;
     my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
 
-    my_blocks = GetBlocks(graphables.interior);
+    my_blocks = GetBlocks(figure.interior, region_id_);
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, my_region);
     s = DoCluster(s, my_region);
+
+    //my_blocks = GetBlocks(figure.exterior);
+    //PostProcessBlocks(my_blocks);
+    //s += DoGraphBody(my_blocks, base_region);
 
 	Remember( s );
 }
@@ -101,15 +103,15 @@ void Graph::operator()( string region_id_, const FigureAppearance &graphables )
 
 TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
-    FigureAppearance my_graphables;
+    Figure my_graphables;
     list<MyBlock> my_blocks;
 	(void)context; // Not needed!!
 
-	my_region = base_region;
+	RegionAppearance my_region = base_region;
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables.interior, g );
-	my_blocks = GetBlocks(my_graphables.interior);
+	my_blocks = GetBlocks(my_graphables.interior, "");
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, my_region);
 	Remember( s );
@@ -163,14 +165,14 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 }
 
 
-list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables )
+list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables, string figure_id )
 {
 	list<MyBlock> blocks;
 	
 	for( const Graphable *g : graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
-        MyBlock block = PreProcessBlock( gblock, g );
+        MyBlock block = PreProcessBlock( gblock, g, figure_id );
         blocks.push_back( block );
 	}
 
@@ -179,7 +181,8 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables )
 
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
-                                       const Graphable *g )
+                                       const Graphable *g,
+                                       string figure_id )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
@@ -190,7 +193,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     (Graphable::Block &)my_block = block;
     
     // Fill in the GraphViz ID that the block will use
-    my_block.base_id = GetFullId(g);
+    my_block.base_id = GetFullId(g, figure_id);
     
     // Capture the node (if there is one: might be NULL)
 	if( pspecial )
@@ -228,17 +231,22 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	}
 	
     // Actions for sub-blocks
+    my_block.link_ids.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {
+		my_block.link_ids.push_back( list<string>() );
+		
         // Actions for links
         for( Graphable::Link &link : sub_block.links )
         {
 			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
+			
+			string id = GetFullId(link.child, figure_id);
+            my_block.link_ids.back().push_back( id );
 
             // Detect pre-restrictions and add to link labels
             if( link.is_ntpr )
             {
-				string id = GetFullId(link.child);
                 block_ids_show_prerestriction.insert( id );
             }
         }
@@ -264,6 +272,7 @@ void Graph::PostProcessBlocks( list<MyBlock> &blocks )
                                            "", 
                                            false, 
                                            {} } );
+            block.link_ids.push_front( list<string>() );
         }
         
         // Can we hide sub-blocks?
@@ -410,12 +419,22 @@ string Graph::DoLinks( const MyBlock &block,
 {
     string s;
     
-    int porti=0;    
+    int porti=0;
+    FTRACE( "DoLinks()\n" );
+    auto sbidit = block.link_ids.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
+		ASSERT(sbidit != block.link_ids.end() );
+		FTRACE( "OK\n" );
+		auto lidit = sbidit->begin();
         for( Graphable::Link link : sub_block.links )
-            s += DoLink( porti, block, sub_block, link, region );
+        {
+			ASSERT( lidit != sbidit->end() );
+			s += DoLink( porti, block, sub_block, link, region, *lidit );
+			lidit++;
+		}
         porti++;
+        sbidit++;
     }
 
 	return s;
@@ -426,7 +445,8 @@ string Graph::DoLink( int port_index,
                       const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
                       const Graphable::Link &link,
-                      const RegionAppearance &region )
+                      const RegionAppearance &region,
+                      string id )
 {          
     // Atts
     string atts;
@@ -453,7 +473,6 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	string id = GetFullId(link.child);
 	s += "\""+id+"\"";
 	s += " ["+atts+"];\n";
 	return s;
@@ -576,12 +595,12 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 }
 
 
-string Graph::GetFullId(const Graphable *g)
+string Graph::GetFullId(const Graphable *g, string figure_id)
 {
-	if(my_region.region_id.empty() )
+	if(figure_id.empty() )
 		return g->GetGraphId();
 	else
-		return my_region.region_id+"/"+g->GetGraphId();
+		return figure_id+"/"+g->GetGraphId();
 }
 
 
