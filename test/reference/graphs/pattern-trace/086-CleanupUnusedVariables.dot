@@ -358,16 +358,12 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
   <TD></TD>
  </TR>
  <TR>
-  <TD>(Scope)</TD>
+  <TD>terminus</TD>
   <TD PORT="port0"></TD>
  </TR>
  <TR>
-  <TD>terminus</TD>
-  <TD PORT="port1"></TD>
- </TR>
- <TR>
   <TD>#B-2-1601</TD>
-  <TD PORT="port2"></TD>
+  <TD PORT="port1"></TD>
  </TR>
 </TABLE>>
 style = "rounded,filled"
@@ -1085,12 +1081,6 @@ decorate = true
 color = black
 fontcolor = black
 ];
-"#R86-0/#P86-6-107":port1 -> "#R86-0/#B-2-1601" [style="dashed"
-label = "#1"
-decorate = true
-color = black
-fontcolor = black
-];
 "#R86-0/#B-2-1590":port1 -> "#R86-0/#B-2-1601" [style="solid"
 label = "#0"
 decorate = true
@@ -1103,19 +1093,13 @@ decorate = true
 color = black
 fontcolor = black
 ];
-"#R86-0/#B-2-1601":port1 -> "#R86-0/#B-2-1593" [style="solid"
+"#R86-0/#B-2-1601":port0 -> "#R86-0/#B-2-1593" [style="solid"
 label = "#0"
 decorate = true
 color = black
 fontcolor = black
 ];
 "#R86-0/#B-2-1593":port1 -> "#R86-0/#B-2-1591" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R86-0/#B-2-1593":port2 -> "#R86-0/#B-2-1592" [style="dashed"
 label = "#0"
 decorate = true
 color = black

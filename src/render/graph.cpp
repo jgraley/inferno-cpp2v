@@ -74,7 +74,7 @@ void Graph::operator()( Transformation *root )
 
 	reached.clear();
     PopulateFromTransformation(my_graphables.interior, root);
-    my_blocks = GetBlocks(my_graphables.interior, "");
+    my_blocks = GetBlocks( my_graphables.interior, "", {} );
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, base_region);
 	Remember(s);
@@ -87,13 +87,12 @@ void Graph::operator()( string figure_id, const Figure &figure )
     my_region.region_id += figure_id;
     my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
 
-    list<MyBlock> my_blocks = GetBlocks(figure.interior, figure_id);
-    PostProcessBlocks(my_blocks);
-    list<MyBlock> ex_blocks = GetBlocks(figure.exterior, figure_id);
+    list<MyBlock> ex_blocks = GetBlocks( figure.exterior, figure_id, {Graphable::SOLID, Graphable::DASHED} );
     PostProcessBlocks(ex_blocks);
-
 	string s = DoGraphBody(ex_blocks, base_region);
 
+    list<MyBlock> my_blocks = GetBlocks( figure.interior, figure_id, {Graphable::DASHED} );
+    PostProcessBlocks(my_blocks);
     string sc = DoGraphBody(my_blocks, my_region);
     s += DoCluster(sc, my_region);
 
@@ -110,7 +109,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables.interior, g );
-	my_blocks = GetBlocks(my_graphables.interior, "");
+	my_blocks = GetBlocks( my_graphables.interior, "", {} );
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, base_region);
 	Remember( s );
@@ -164,14 +163,16 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 }
 
 
-list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables, string figure_id )
+list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
+                                       string figure_id,
+                                       const set<Graphable::LinkStyle> &discard_links )
 {
 	list<MyBlock> blocks;
 	
 	for( const Graphable *g : graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
-        MyBlock block = PreProcessBlock( gblock, g, figure_id );
+        MyBlock block = PreProcessBlock( gblock, g, figure_id, discard_links );
         blocks.push_back( block );
 	}
 
@@ -181,7 +182,8 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables, stri
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
-                                       string figure_id )
+                                       string figure_id,
+                                       const set<Graphable::LinkStyle> &discard_links )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
@@ -232,23 +234,29 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     // Actions for sub-blocks
     my_block.link_ids.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
-    {
-		my_block.link_ids.push_back( list<string>() );
-		
+    {			
         // Actions for links
+        list<Graphable::Link> new_links;
+        list<string> new_link_ids;
         for( Graphable::Link &link : sub_block.links )
         {
-			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
+			if( discard_links.count( link.link_style ) )
+				continue;
 			
-			string id = GetFullId(link.child, figure_id);
-            my_block.link_ids.back().push_back( id );
-
+			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
+			string id = GetFullId(link.child, figure_id);			
+			
             // Detect pre-restrictions and add to link labels
             if( link.is_ntpr )
             {
                 block_ids_show_prerestriction.insert( id );
             }
+
+			new_links.push_back( link );
+            new_link_ids.push_back( id );
         }
+        sub_block.links = new_links;
+        my_block.link_ids.push_back( new_link_ids );
     }
     
     // Italic title OR symbol designates a special agent 

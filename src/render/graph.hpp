@@ -66,10 +66,13 @@ private:
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
-	list<MyBlock> GetBlocks( list< const Graphable *> graphables, string figure_id );
+	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
+	                         string figure_id,
+                             const set<Graphable::LinkStyle> &discard_links );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
-                             string figure_id );
+                             string figure_id,
+                             const set<Graphable::LinkStyle> &discard_links );
     
     void PostProcessBlocks( list<MyBlock> &blocks );
 

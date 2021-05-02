@@ -123,12 +123,8 @@ label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
   <TD></TD>
  </TR>
  <TR>
-  <TD>(InstanceIdentifier)</TD>
-  <TD PORT="port0"></TD>
- </TR>
- <TR>
   <TD>#B-2-127</TD>
-  <TD PORT="port1"></TD>
+  <TD PORT="port0"></TD>
  </TR>
 </TABLE>>
 style = "rounded,filled"
@@ -1481,31 +1477,13 @@ decorate = true
 color = black
 fontcolor = black
 ];
-"#R12-0/#P12-6-15":port1 -> "#R12-0/#B-2-129" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "#R12-0/#B-3-4":port0 -> "#R12-0/#B-2-105" [style="solid"
 label = "#0"
 decorate = true
 color = black
 fontcolor = black
 ];
-"#R12-0/#B-3-4":port1 -> "#R12-0/#B-2-106" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "#R12-1/#B-2-117":port0 -> "#R12-1/#B-2-132" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R12-1/#B-2-117":port1 -> "#R12-1/#B-2-104" [style="dashed"
 label = "#0"
 decorate = true
 color = black
@@ -1590,12 +1568,6 @@ color = black
 fontcolor = black
 ];
 "#R12-1/#B-2-116":port1 -> "#R12-1/#B-2-118" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R12-1/#B-2-116":port2 -> "#R12-1/#B-2-119" [style="dashed"
 label = "#0"
 decorate = true
 color = black
