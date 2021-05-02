@@ -90,24 +90,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R102-4/#B-2-1955":port0 -> "#R102-4/#B-2-1965" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-4/#B-2-1955":port0 -> "#R102-4/#B-2-1964" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-4/#B-2-1955":port0 -> "#R102-4/#B-2-1963" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R102-2" {
 label = "#R102-2"
 style = "filled"
@@ -352,84 +334,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R102-0/#B-2-1954":port0 -> "#R102-0/#B-2-1955" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#P102-6-130":port0 -> "#R102-0/#B-2-1949" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#P102-6-130":port1 -> "#R102-0/#B-2-1950" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#P102-8-130":port0 -> "#R102-0/#P102-6-130" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1962" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1961" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1960" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1959" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1949":port0 -> "#R102-0/#B-2-1951" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1949":port1 -> "#R102-0/#B-2-1952" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1949":port2 -> "#R102-0/#B-2-1956" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1949":port3 -> "#R102-0/#B-2-1954" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R102-0/#B-2-1949":port4 -> "#R102-0/#B-2-1953" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P102-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -897,6 +801,102 @@ fontcolor = black
 ];
 "#B-2-1950":port3 -> "#B-2-1953" [style="dashed"
 label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1954":port0 -> "#R102-0/#B-2-1955" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#P102-6-130":port0 -> "#R102-0/#B-2-1949" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#P102-6-130":port1 -> "#R102-0/#B-2-1950" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#P102-8-130":port0 -> "#R102-0/#P102-6-130" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1962" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1961" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1960" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1956":port0 -> "#R102-0/#B-2-1959" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1949":port0 -> "#R102-0/#B-2-1951" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1949":port1 -> "#R102-0/#B-2-1952" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1949":port2 -> "#R102-0/#B-2-1956" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1949":port3 -> "#R102-0/#B-2-1954" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-0/#B-2-1949":port4 -> "#R102-0/#B-2-1953" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-4/#B-2-1955":port0 -> "#R102-4/#B-2-1965" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-4/#B-2-1955":port0 -> "#R102-4/#B-2-1964" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R102-4/#B-2-1955":port0 -> "#R102-4/#B-2-1963" [style="solid"
+label = "#0"
 decorate = true
 color = black
 fontcolor = black

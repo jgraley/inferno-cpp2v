@@ -149,36 +149,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R62-1/#B-2-1039":port0 -> "#R62-1/#B-2-1041" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-1/#B-2-1039":port1 -> "#R62-1/#B-2-1042" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-1/#B-2-1039":port2 -> "#R62-1/#B-2-1044" [style="solid"
-label = "#1"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-1/#B-2-1039":port3 -> "#R62-1/#B-2-1050" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-1/#B-2-1039":port4 -> "#R62-1/#B-2-1043" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R62-0" {
 label = "#R62-0"
 style = "filled"
@@ -297,60 +267,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R62-0/#B-2-1045":port0 -> "#R62-0/#B-2-1039" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1049":port1 -> "#R62-0/#B-2-1046" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1049":port2 -> "#R62-0/#B-2-1047" [style="dashed"
-label = "#1"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#P62-8-73":port0 -> "#R62-0/#B-2-1049" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1048":port1 -> "#R62-0/#B-2-1044" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1048":port2 -> "#R62-0/#B-2-1040" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1046":port0 -> "#R62-0/#B-2-1047" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1046":port0 -> "#R62-0/#B-2-1045" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R62-0/#B-2-1047":port0 -> "#R62-0/#B-2-1048" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P62-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -784,6 +700,90 @@ color = black
 fontcolor = black
 ];
 "#B-2-1039":port4 -> "#B-2-1043" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1045":port0 -> "#R62-0/#B-2-1039" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1049":port1 -> "#R62-0/#B-2-1046" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1049":port2 -> "#R62-0/#B-2-1047" [style="dashed"
+label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#P62-8-73":port0 -> "#R62-0/#B-2-1049" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1048":port1 -> "#R62-0/#B-2-1044" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1048":port2 -> "#R62-0/#B-2-1040" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1046":port0 -> "#R62-0/#B-2-1047" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1046":port0 -> "#R62-0/#B-2-1045" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-0/#B-2-1047":port0 -> "#R62-0/#B-2-1048" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-1/#B-2-1039":port0 -> "#R62-1/#B-2-1041" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-1/#B-2-1039":port1 -> "#R62-1/#B-2-1042" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-1/#B-2-1039":port2 -> "#R62-1/#B-2-1044" [style="solid"
+label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-1/#B-2-1039":port3 -> "#R62-1/#B-2-1050" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R62-1/#B-2-1039":port4 -> "#R62-1/#B-2-1043" [style="solid"
 label = "#0"
 decorate = true
 color = black

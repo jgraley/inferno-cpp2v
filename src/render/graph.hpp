@@ -74,7 +74,7 @@ private:
     void PostProcessBlocks( list<MyBlock> &blocks );
 
     string DoGraphBody( const list<MyBlock> &blocks,
-                        const RegionAppearance &region );
+                       const RegionAppearance &region );
     string DoBlock( const MyBlock &block,
                     const RegionAppearance &region );
     string DoRecordLabel( const MyBlock &block );
@@ -104,6 +104,7 @@ private:
     const RegionAppearance base_region;
 	const string line_colour;
 	const string font_colour;
+	list<MyBlock> blocks_for_links;
     string all_dot;
 };
 

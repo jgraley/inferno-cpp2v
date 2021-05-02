@@ -168,54 +168,6 @@ color = black
 fontcolor = black
 ];
 }
-"#R2-1/#B-2-27":port1 -> "#R2-1/#B-2-29" [style="solid"
-label = "#1"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#B-2-26":port0 -> "#R2-1/#B-2-28" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#B-2-26":port1 -> "#R2-1/#B-2-23" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#B-2-26":port2 -> "#R2-1/#B-2-24" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#B-2-26":port2 -> "#R2-1/#B-2-27" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#P2-8-2":port0 -> "#R2-1/#P2-6-5" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#P2-6-5":port0 -> "#R2-1/#B-2-26" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-1/#P2-6-5":port1 -> "#R2-1/#B-2-19" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R2-4" {
 label = "#R2-4"
 style = "filled"
@@ -316,48 +268,6 @@ color = black
 fontcolor = black
 ];
 }
-"#R2-0/#B-2-25":port0 -> "#R2-0/#B-2-29" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-0/#P2-6-4":port0 -> "#R2-0/#B-3-2" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-0/#P2-6-4":port1 -> "#R2-0/#B-2-30" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-0/#B-2-20":port0 -> "#R2-0/#B-2-22" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-0/#B-2-20":port0 -> "#R2-0/#B-2-25" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-0/#B-3-2":port0 -> "#R2-0/#B-2-20" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R2-0/#B-3-2":port1 -> "#R2-0/#B-2-21" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P2-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -770,6 +680,96 @@ fontcolor = black
 ];
 "#B-2-19":port2 -> "#B-2-24" [style="dashed"
 label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#B-2-25":port0 -> "#R2-0/#B-2-29" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#P2-6-4":port0 -> "#R2-0/#B-3-2" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#P2-6-4":port1 -> "#R2-0/#B-2-30" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#B-2-20":port0 -> "#R2-0/#B-2-22" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#B-2-20":port0 -> "#R2-0/#B-2-25" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#B-3-2":port0 -> "#R2-0/#B-2-20" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-0/#B-3-2":port1 -> "#R2-0/#B-2-21" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#B-2-27":port1 -> "#R2-1/#B-2-29" [style="solid"
+label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#B-2-26":port0 -> "#R2-1/#B-2-28" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#B-2-26":port1 -> "#R2-1/#B-2-23" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#B-2-26":port2 -> "#R2-1/#B-2-24" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#B-2-26":port2 -> "#R2-1/#B-2-27" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#P2-8-2":port0 -> "#R2-1/#P2-6-5" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#P2-6-5":port0 -> "#R2-1/#B-2-26" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R2-1/#P2-6-5":port1 -> "#R2-1/#B-2-19" [style="dashed"
+label = "#0"
 decorate = true
 color = black
 fontcolor = black

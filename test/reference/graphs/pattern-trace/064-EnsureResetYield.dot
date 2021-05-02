@@ -90,24 +90,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R64-4/#B-2-1078":port0 -> "#R64-4/#B-2-1083" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-4/#B-2-1078":port0 -> "#R64-4/#B-2-1082" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-4/#B-2-1078":port0 -> "#R64-4/#B-2-1081" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R64-3" {
 label = "#R64-3"
 style = "filled"
@@ -133,12 +115,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R64-3/#B-2-1077":port0 -> "#R64-3/#B-2-1078" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R64-2" {
 label = "#R64-2"
 style = "filled"
@@ -164,12 +140,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R64-2/#B-2-1075":port0 -> "#R64-2/#B-2-1077" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R64-1" {
 label = "#R64-1"
 style = "filled"
@@ -297,48 +267,6 @@ color = black
 fontcolor = black
 ];
 }
-"#R64-0/#B-2-1072":port0 -> "#R64-0/#B-2-1074" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-0/#B-2-1072":port1 -> "#R64-0/#B-2-1075" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-0/#B-2-1072":port2 -> "#R64-0/#B-2-1079" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-0/#B-2-1072":port3 -> "#R64-0/#B-2-1076" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-0/#P64-8-75":port0 -> "#R64-0/#P64-6-80" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-0/#P64-6-80":port0 -> "#R64-0/#B-2-1072" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R64-0/#P64-6-80":port1 -> "#R64-0/#B-2-1073" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P64-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -736,6 +664,78 @@ fontcolor = black
 ];
 "#B-2-1073":port4 -> "#B-2-1076" [style="dashed"
 label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#B-2-1072":port0 -> "#R64-0/#B-2-1074" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#B-2-1072":port1 -> "#R64-0/#B-2-1075" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#B-2-1072":port2 -> "#R64-0/#B-2-1079" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#B-2-1072":port3 -> "#R64-0/#B-2-1076" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#P64-8-75":port0 -> "#R64-0/#P64-6-80" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#P64-6-80":port0 -> "#R64-0/#B-2-1072" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-0/#P64-6-80":port1 -> "#R64-0/#B-2-1073" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-2/#B-2-1075":port0 -> "#R64-2/#B-2-1077" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-3/#B-2-1077":port0 -> "#R64-3/#B-2-1078" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-4/#B-2-1078":port0 -> "#R64-4/#B-2-1083" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-4/#B-2-1078":port0 -> "#R64-4/#B-2-1082" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R64-4/#B-2-1078":port0 -> "#R64-4/#B-2-1081" [style="solid"
+label = "#0"
 decorate = true
 color = black
 fontcolor = black

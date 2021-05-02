@@ -92,19 +92,10 @@ void Graph::operator()( string figure_id, const Figure &figure )
     list<MyBlock> ex_blocks = GetBlocks(figure.exterior, figure_id);
     PostProcessBlocks(ex_blocks);
 
-	string s;
-    for( const MyBlock &block : ex_blocks )
-        s += DoBlock(block, base_region);
+	string s = DoGraphBody(ex_blocks, base_region);
 
-    string sc;
-    for( const MyBlock &block : my_blocks )
-        sc += DoBlock(block, my_region);
+    string sc = DoGraphBody(my_blocks, my_region);
     s += DoCluster(sc, my_region);
-
-    for( const MyBlock &block : my_blocks )
-        s += DoLinks(block);
-    for( const MyBlock &block : ex_blocks )
-        s += DoLinks(block);
 
 	Remember( s );
 }
@@ -302,10 +293,10 @@ string Graph::DoGraphBody( const list<MyBlock> &blocks, const RegionAppearance &
     string s;
     
     for( const MyBlock &block : blocks )
+    {
         s += DoBlock(block, region);
-
-    for( const MyBlock &block : blocks )
-        s += DoLinks(block);
+        blocks_for_links.push_back(block);
+    }
     
     return s;
 }
@@ -510,6 +501,10 @@ string Graph::DoHeader()
 string Graph::DoFooter()
 {
 	string s;
+
+    for( const MyBlock &block : blocks_for_links )
+        s += DoLinks(block);
+        	
 	s += "}\n";
 	return s;
 }

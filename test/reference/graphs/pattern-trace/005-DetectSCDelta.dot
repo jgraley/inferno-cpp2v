@@ -146,48 +146,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R5-0/#P5-6-8":port0 -> "#R5-0/#B-2-42" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R5-0/#P5-6-8":port1 -> "#R5-0/#B-2-41" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R5-0/#P5-8-5":port0 -> "#R5-0/#P5-6-8" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R5-0/#B-2-42":port0 -> "#R5-0/#B-2-43" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R5-0/#B-2-42":port1 -> "#R5-0/#B-2-44" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R5-0/#B-2-43":port0 -> "#R5-0/#B-2-45" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R5-0/#B-2-43":port1 -> "#R5-0/#B-2-46" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P5-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -388,6 +346,48 @@ color = black
 fontcolor = black
 ];
 "#B-2-43":port1 -> "#B-2-46" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#P5-6-8":port0 -> "#R5-0/#B-2-42" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#P5-6-8":port1 -> "#R5-0/#B-2-41" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#P5-8-5":port0 -> "#R5-0/#P5-6-8" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#B-2-42":port0 -> "#R5-0/#B-2-43" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#B-2-42":port1 -> "#R5-0/#B-2-44" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#B-2-43":port0 -> "#R5-0/#B-2-45" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R5-0/#B-2-43":port1 -> "#R5-0/#B-2-46" [style="solid"
 label = "#0"
 decorate = true
 color = black

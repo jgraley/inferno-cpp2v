@@ -59,12 +59,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R72-3/#B-2-1302":port0 -> "#R72-3/#B-2-1296" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R72-2" {
 label = "#R72-2"
 style = "filled"
@@ -90,12 +84,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R72-2/#B-2-1291":port0 -> "#R72-2/#B-2-1302" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R72-1" {
 label = "#R72-1"
 style = "filled"
@@ -162,12 +150,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R72-6/#B-2-1303":port0 -> "#R72-6/#B-2-1304" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R72-5" {
 label = "#R72-5"
 style = "filled"
@@ -193,12 +175,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R72-5/#B-2-1292":port0 -> "#R72-5/#B-2-1303" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R72-8" {
 label = "#R72-8"
 style = "filled"
@@ -433,96 +409,6 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 }
-"#R72-0/#B-2-1301":port1 -> "#R72-0/#B-2-1300" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#P72-6-92":port0 -> "#R72-0/#B-2-1287" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#P72-6-92":port1 -> "#R72-0/#B-2-1288" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port0 -> "#R72-0/#B-2-1290" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port1 -> "#R72-0/#B-2-1291" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port2 -> "#R72-0/#B-2-1294" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port3 -> "#R72-0/#B-2-1301" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port4 -> "#R72-0/#B-2-1292" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port5 -> "#R72-0/#B-2-1295" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1287":port6 -> "#R72-0/#B-2-1293" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1294":port0 -> "#R72-0/#B-2-1297" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1295":port0 -> "#R72-0/#B-2-1297" [style="solid"
-label = "#1"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#P72-8-88":port0 -> "#R72-0/#P72-6-92" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1297":port0 -> "#R72-0/#B-2-1298" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R72-0/#B-2-1297":port1 -> "#R72-0/#B-2-1299" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P72-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -1203,6 +1089,120 @@ fontcolor = black
 ];
 "#B-2-1289":port1 -> "#B-2-1292" [style="dashed"
 label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1301":port1 -> "#R72-0/#B-2-1300" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#P72-6-92":port0 -> "#R72-0/#B-2-1287" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#P72-6-92":port1 -> "#R72-0/#B-2-1288" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port0 -> "#R72-0/#B-2-1290" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port1 -> "#R72-0/#B-2-1291" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port2 -> "#R72-0/#B-2-1294" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port3 -> "#R72-0/#B-2-1301" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port4 -> "#R72-0/#B-2-1292" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port5 -> "#R72-0/#B-2-1295" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1287":port6 -> "#R72-0/#B-2-1293" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1294":port0 -> "#R72-0/#B-2-1297" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1295":port0 -> "#R72-0/#B-2-1297" [style="solid"
+label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#P72-8-88":port0 -> "#R72-0/#P72-6-92" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1297":port0 -> "#R72-0/#B-2-1298" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-0/#B-2-1297":port1 -> "#R72-0/#B-2-1299" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-5/#B-2-1292":port0 -> "#R72-5/#B-2-1303" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-6/#B-2-1303":port0 -> "#R72-6/#B-2-1304" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-2/#B-2-1291":port0 -> "#R72-2/#B-2-1302" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R72-3/#B-2-1302":port0 -> "#R72-3/#B-2-1296" [style="solid"
+label = "#0"
 decorate = true
 color = black
 fontcolor = black

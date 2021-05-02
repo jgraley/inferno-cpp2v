@@ -87,36 +87,6 @@ color = black
 fontcolor = black
 ];
 }
-"#R66-1/#B-2-1098":port0 -> "#R66-1/#B-2-1104" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-1/#P66-8-78":port0 -> "#R66-1/#P66-6-83" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-1/#B-2-1104":port0 -> "#R66-1/#B-2-1105" [style="solid"
-label = "#1"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-1/#P66-6-83":port0 -> "#R66-1/#B-2-1098" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-1/#P66-6-83":port1 -> "#R66-1/#B-2-1094" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 subgraph "cluster#R66-6" {
 label = "#R66-6"
 style = "filled"
@@ -306,60 +276,6 @@ color = black
 fontcolor = black
 ];
 }
-"#R66-0/#B-2-1103":port0 -> "#R66-0/#B-2-1107" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#P66-8-77":port0 -> "#R66-0/#P66-6-82" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#B-2-1100":port0 -> "#R66-0/#B-2-1103" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#B-2-1092":port0 -> "#R66-0/#B-2-1095" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#B-2-1092":port1 -> "#R66-0/#B-2-1096" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#B-2-1092":port2 -> "#R66-0/#B-2-1100" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#B-2-1092":port3 -> "#R66-0/#B-2-1097" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#P66-6-82":port0 -> "#R66-0/#B-2-1092" [style="solid"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
-"#R66-0/#P66-6-82":port1 -> "#R66-0/#B-2-1106" [style="dashed"
-label = "#0"
-decorate = true
-color = black
-fontcolor = black
-];
 "CR#P66-0" [
 shape = "record"
 fillcolor = antiquewhite1
@@ -969,6 +885,90 @@ fontcolor = black
 ];
 "#B-2-1099":port0 -> "#B-2-1105" [style="dashed"
 label = "#3"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#B-2-1103":port0 -> "#R66-0/#B-2-1107" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#P66-8-77":port0 -> "#R66-0/#P66-6-82" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#B-2-1100":port0 -> "#R66-0/#B-2-1103" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#B-2-1092":port0 -> "#R66-0/#B-2-1095" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#B-2-1092":port1 -> "#R66-0/#B-2-1096" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#B-2-1092":port2 -> "#R66-0/#B-2-1100" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#B-2-1092":port3 -> "#R66-0/#B-2-1097" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#P66-6-82":port0 -> "#R66-0/#B-2-1092" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-0/#P66-6-82":port1 -> "#R66-0/#B-2-1106" [style="dashed"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-1/#B-2-1098":port0 -> "#R66-1/#B-2-1104" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-1/#P66-8-78":port0 -> "#R66-1/#P66-6-83" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-1/#B-2-1104":port0 -> "#R66-1/#B-2-1105" [style="solid"
+label = "#1"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-1/#P66-6-83":port0 -> "#R66-1/#B-2-1098" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R66-1/#P66-6-83":port1 -> "#R66-1/#B-2-1094" [style="dashed"
+label = "#0"
 decorate = true
 color = black
 fontcolor = black
