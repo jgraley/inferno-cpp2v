@@ -86,6 +86,27 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+subgraph "cluster#R21-1" {
+label = "#R21-1"
+style = "filled"
+color = antiquewhite3
+"#R21-0/#B-2-268" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">UncombableBreak</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-268</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
 }
 "CR#P21-0" [
 shape = "record"

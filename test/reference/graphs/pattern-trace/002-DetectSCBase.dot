@@ -167,6 +167,48 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+subgraph "cluster#R2-3" {
+label = "#R2-3"
+style = "filled"
+color = antiquewhite3
+"#R2-1/#B-2-24" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-24</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R2-2" {
+label = "#R2-2"
+style = "filled"
+color = antiquewhite3
+"#R2-1/#B-2-23" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-23</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
 }
 subgraph "cluster#R2-4" {
 label = "#R2-4"
@@ -267,6 +309,27 @@ fontsize = "14"
 color = black
 fontcolor = black
 ];
+subgraph "cluster#R2-4" {
+label = "#R2-4"
+style = "filled"
+color = antiquewhite3
+"#R2-0/#B-2-22" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-22</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
 }
 "CR#P2-0" [
 shape = "record"

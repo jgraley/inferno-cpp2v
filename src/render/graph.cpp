@@ -83,17 +83,30 @@ void Graph::operator()( Transformation *root )
 
 void Graph::operator()( string figure_id, const Figure &figure )
 {    
-    RegionAppearance my_region = base_region;
-    my_region.region_id += figure_id;
-    my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
-
     list<MyBlock> ex_blocks = GetBlocks( figure.exterior, figure_id, {Graphable::SOLID, Graphable::DASHED} );
     PostProcessBlocks(ex_blocks);
 	string s = DoGraphBody(ex_blocks, base_region);
 
+    RegionAppearance my_region = base_region;
+    my_region.region_id += figure_id;
+    my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
+
     list<MyBlock> my_blocks = GetBlocks( figure.interior, figure_id, {Graphable::DASHED} );
     PostProcessBlocks(my_blocks);
     string sc = DoGraphBody(my_blocks, my_region);
+
+    for( auto p: figure.subordinate )
+    {
+		RegionAppearance sub_region = base_region;
+		sub_region.region_id += p.first;
+		sub_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
+
+		list<MyBlock> sub_blocks = GetBlocks( {p.second}, figure_id, {Graphable::SOLID, Graphable::DASHED} );
+		PostProcessBlocks(sub_blocks);
+	    string scs = DoGraphBody(sub_blocks, sub_region);
+		sc += DoCluster(scs, sub_region);
+	}
+
     s += DoCluster(sc, my_region);
 
 	Remember( s );
@@ -301,10 +314,7 @@ string Graph::DoGraphBody( const list<MyBlock> &blocks, const RegionAppearance &
     string s;
     
     for( const MyBlock &block : blocks )
-    {
         s += DoBlock(block, region);
-        blocks_for_links.push_back(block);
-    }
     
     return s;
 }
@@ -312,6 +322,8 @@ string Graph::DoGraphBody( const list<MyBlock> &blocks, const RegionAppearance &
 
 string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
 {
+    blocks_for_links.push_back(block);
+
 	string s;
 	s += "\""+block.base_id+"\"";
 	s += " [\n";

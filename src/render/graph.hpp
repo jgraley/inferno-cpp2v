@@ -37,6 +37,7 @@ public:
 	{
 		list<const Graphable *> interior;
 		list<const Graphable *> exterior;
+		list< pair<string, const Graphable *> > subordinate;
 	};
 
     Graph( string of = string() );
