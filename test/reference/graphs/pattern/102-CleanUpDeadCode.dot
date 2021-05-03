@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P102-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> CleanUpDeadCode | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1949" [
 shape = "plaintext"
@@ -235,41 +238,79 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P102-0":port0 -> "#B-2-1949" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P102-0":port1 -> "#B-2-1950" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1949":port0 -> "#B-2-1951" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1949":port1 -> "#B-2-1952" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1949":port2 -> "#B-2-1956" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1949":port3 -> "#B-2-1954" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1949":port4 -> "#B-2-1953" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1956" -> "#B-2-1962" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1956" -> "#B-2-1961" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1956" -> "#B-2-1960" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1956" -> "#B-2-1959" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1954" -> "#B-2-1955" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1955":port1 -> "#B-2-1965" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1955":port1 -> "#B-2-1964" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1955":port1 -> "#B-2-1963" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1950":port0 -> "#B-2-1951" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1950":port1 -> "#B-2-1952" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1950":port2 -> "#B-2-1956" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1950":port3 -> "#B-2-1953" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

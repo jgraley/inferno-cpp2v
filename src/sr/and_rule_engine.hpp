@@ -16,6 +16,8 @@
 #include <set>
 #include <map>
 
+class Graph;
+
 namespace CSP
 {
 class SolverHolder;
@@ -147,6 +149,7 @@ private:
 public:
     string GetTrace() const; // used for debug
     list<const AndRuleEngine *> GetAndRuleEngines() const;
+    void GenerateGraph( Graph &graph ) const;
 
 private:
     // Information about the X tree
@@ -164,12 +167,7 @@ private:
     // into the agents (half-link model). Note: solutions can specify
     // the MMAX node.
     SolutionMap basic_solution; 
-    bool used = false;
-    
-    class Graph : public ::Graph
-    {
-        void operator()( const AndRuleEngine *engine );
-    };    
+    bool used = false;  
 };
 
 #endif

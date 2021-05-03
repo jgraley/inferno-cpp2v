@@ -23,7 +23,6 @@ public:
     {
         SOLID,
         DASHED,
-        THROUGH // means "inherit from parent"
     };
     enum BlockType
     {
@@ -52,7 +51,6 @@ public:
         string symbol;
         string shape;
         BlockType block_type;
-        LinkStyle default_link_style;
         list<SubBlock> sub_blocks;
     };
     

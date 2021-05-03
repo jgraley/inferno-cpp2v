@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P93-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ExplicitiseReturns | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1780" [
 shape = "plaintext"
@@ -69,27 +72,30 @@ fontsize = "12"
 ];
 "#B-2-1807" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Slave | <port0> (Compound) | <port1> through | <port2> search | <port3> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1806" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Slave | <port0> through | <port1> search_replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1779" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> through | <port1> overlay"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1776" [
 shape = "plaintext"
@@ -326,11 +332,12 @@ height = 0.4
 ];
 "#B-2-1804" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> through | <port1> overlay"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1801" [
 shape = "diamond"
@@ -504,85 +511,167 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P93-0":port0 -> "#B-2-1780" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P93-0":port1 -> "#B-2-1774" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1780":port1 -> "#B-2-1774" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1780":port1 -> "#B-2-1781" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1774":port0 -> "#B-2-1775" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1774":port1 -> "#B-2-1807" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1807":port1 -> "#B-2-1806" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1807":port2 -> "#B-2-1783" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1807":port3 -> "#B-2-1799" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1806":port0 -> "#B-2-1779" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1806":port1 -> "#B-2-1778" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1779":port0 -> "#B-2-1776" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1779":port1 -> "#B-2-1777" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1776":port0 -> "#B-2-1785" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1776":port1 -> "#B-2-1787" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1777":port0 -> "#B-2-1785" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1777":port0 -> "#B-2-1791" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1777":port1 -> "#B-2-1787" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1791":port0 -> "#B-2-1792" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1791":port1 -> "#B-2-1793" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1791":port2 -> "#B-2-1795" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1778":port0 -> "#B-2-1786" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1778":port1 -> "#B-2-1788" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1778":port2 -> "#B-2-1800" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1778":port3 -> "#B-2-1789" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1778":port4 -> "#B-2-1804" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1778":port5 -> "#B-2-1790" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1800" -> "#B-2-1784" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1784":port0 -> "#B-2-1798" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1804":port0 -> "#B-2-1801" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1804":port1 -> "#B-2-1803" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1801" -> "#B-2-1802" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1802":port0 -> "#B-2-1793" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1803":port0 -> "#B-2-1793" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1803":port1 -> "#B-2-1801" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1803":port2 -> "#B-2-1805" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1783":port0 -> "#B-2-1797" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1799":port0 -> "#B-2-1793" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1799":port1 -> "#B-2-1794" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1781" -> "#B-2-1782" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1782":port0 -> "#B-2-1796" [style="solid"
+color = black
+fontcolor = black
 ];
 }

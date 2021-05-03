@@ -145,6 +145,15 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 }
 
 
+void GenerateGraphs( Graph &graph, shared_ptr<Transformation> t )
+{
+	graph( t.get() );
+	if( ReadArgs::graph_trace )
+		if(  auto cr = dynamic_pointer_cast<CompareReplace>(t) )
+			cr->GenerateGraphs(graph);
+}
+
+
 void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence )
 {
     if( !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1 )
@@ -155,9 +164,10 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
             int index = 0;
             for( shared_ptr<Transformation> t : *sequence )
             {
+				Progress(Progress::RENDERING, index).SetAsCurrent();
                 string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
                 Graph g( filepath );
-                g( t.get() );
+                GenerateGraphs( g, t );
                 index++;
             }
         }
@@ -180,10 +190,11 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
                     ASSERT(false);
                 }
             }
+			Progress(Progress::RENDERING, ReadArgs::pattern_graph_index).SetAsCurrent();
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
             ASSERT( ReadArgs::pattern_graph_index < sequence->size() )("There are only %d steps at present\n", sequence->size() );
             Graph g( ReadArgs::outfile );
-            g( sequence->at(ReadArgs::pattern_graph_index).get() );
+            GenerateGraphs( g, sequence->at(ReadArgs::pattern_graph_index) );
         }
     }        
 }
@@ -241,9 +252,6 @@ int main( int argc, char *argv[] )
             break;
     }
 
-    // If a pattern graph was requested, generate it now
-    MaybeGeneratePatternGraphs( &sequence );
-    
     if( ShouldIQuit() )
         exit(0);
         
@@ -256,9 +264,28 @@ int main( int argc, char *argv[] )
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
         dynamic_pointer_cast<CompareReplace>(t)->PlanningStageTwo();
         if( ShouldIQuit(true) )
-            exit(0);
+            break;
+    }
+           
+    if( ShouldIQuit() )
+        exit(0);
+
+    // Planning part three
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Planning part three\n"); 
+    i=0;
+    FOREACH( shared_ptr<Transformation> t, sequence )
+    {
+        Progress(Progress::PLANNING_THREE, i++).SetAsCurrent();
+        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageThree();
+        if( ShouldIQuit(true) )
+            break;
     }
        
+    // If a pattern graph was requested, generate it now. We need the
+    // agents to have been configured (planning stage 2)
+    MaybeGeneratePatternGraphs( &sequence );
+
     if( ShouldIQuit() )
         exit(0);
 

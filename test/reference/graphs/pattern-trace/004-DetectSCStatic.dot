@@ -4,16 +4,96 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
+subgraph "cluster#R4-0" {
+label = "#R4-0"
+style = "filled"
+color = antiquewhite2
+"#R4-0/#B-2-40" [
+shape = "plaintext"
+fillcolor = "/set28/5"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">'wait'</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(InstanceIdentifier)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-40</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R4-0/#B-2-39" [
+shape = "plaintext"
+fillcolor = "/set28/6"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Call</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>MapOperand</TD>
+  <TD PORT="port0">{}</TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-39</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R4-0/#P4-8-4" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P4-8-4</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R4-0/#P4-6-7" [
+shape = "record"
+fillcolor = antiquewhite2
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
+style = "filled"
+fontsize = "14"
+color = black
+fontcolor = black
+];
+}
 "CR#P4-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectSCStatic | <port0> root | <port1> #P4-0"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#P4-8-4" [
 shape = "plaintext"
@@ -36,10 +116,12 @@ fontsize = "12"
 ];
 "#P4-6-7" [
 shape = "record"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-39" [
 shape = "plaintext"
@@ -104,21 +186,49 @@ fontsize = "12"
 "CR#P4-0":port0 -> "#P4-8-4" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#P4-8-4":port0 -> "#P4-6-7" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#P4-6-7":port0 -> "#B-2-39" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#P4-6-7":port1 -> "#B-2-38" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-39":port1 -> "#B-2-40" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
+];
+"#R4-0/#B-2-39":port1 -> "#R4-0/#B-2-40" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R4-0/#P4-8-4":port0 -> "#R4-0/#P4-6-7" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R4-0/#P4-6-7":port0 -> "#R4-0/#B-2-39" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
 ];
 }

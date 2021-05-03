@@ -94,6 +94,7 @@ const map<Progress::Stage, string> Progress::stage_formats =
  { { Progress::BUILDING_STEPS, "B" },
    { Progress::PLANNING_ONE,   "P" },
    { Progress::PLANNING_TWO,   "Q" },
+   { Progress::PLANNING_THREE, "R" },
    { Progress::PARSING,        "I" }, 
    { Progress::TRANSFORMING,   "T" },
    { Progress::RENDERING,      "O" } };

@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P34-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> BreakToGoto | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-606" [
 shape = "diamond"
@@ -63,11 +66,12 @@ fontsize = "12"
 ];
 "#B-2-599" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-601" [
 shape = "plaintext"
@@ -207,33 +211,63 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P34-0":port0 -> "#B-2-606" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P34-0":port1 -> "#B-2-605" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-606" -> "#B-2-596" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-606" -> "#B-4-1" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-596":port0 -> "#B-2-598" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-598":port0 -> "#B-2-599" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-598":port1 -> "#B-2-600" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-599":port1 -> "#B-2-601" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-599":port2 -> "#B-2-602" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-602":port0 -> "#B-2-603" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-600":port1 -> "#B-2-597" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-4-1" -> "#B-2-607" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-605":port1 -> "#B-2-596" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-605":port2 -> "#B-2-604" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-604":port0 -> "#B-2-603" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

@@ -39,7 +39,11 @@ using namespace CPPTree;
 #include <functional>
 
 Graph::Graph( string of ) :
-    outfile(of)
+    outfile(of),
+    base_region { "",
+		          ReadArgs::graph_dark ? "black" : "antiquewhite1" },
+	line_colour( ReadArgs::graph_dark ? "grey70" : "black" ),
+    font_colour( ReadArgs::graph_dark ? "white" : "black" )
 {
 	if( !outfile.empty() )
 	{
@@ -47,17 +51,14 @@ Graph::Graph( string of ) :
 		ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
     }
     
-    string s;
-    s += DoHeader();
-	Disburse( s );
+	Disburse( DoHeader() );
 }
 
 
 Graph::~Graph()
 {
-    string s;
-  	s += DoFooter();
-	Disburse( s );
+	Disburse( all_dot );
+	Disburse( DoFooter() );
 
     if( !outfile.empty() )
     {
@@ -67,40 +68,80 @@ Graph::~Graph()
 
 
 void Graph::operator()( Transformation *root )
+{
+    Figure my_graphables;
+    list<MyBlock> my_blocks;
+
+	reached.clear();
+    PopulateFromTransformation(my_graphables.interior, root);
+    my_blocks = GetBlocks( my_graphables.interior, "", {} );
+    PostProcessBlocks(my_blocks);
+    string s = DoGraphBody(my_blocks, base_region);
+	Remember(s);
+}
+
+
+void Graph::operator()( string figure_id, const Figure &figure )
 {    
-    PopulateFromTransformation(root);	
-    PostProcessBlocks();
-    string s = DoGraphBody();
-	Disburse( s );
+    list<MyBlock> ex_blocks = GetBlocks( figure.exterior, figure_id, {Graphable::SOLID, Graphable::DASHED} );
+    PostProcessBlocks(ex_blocks);
+	string s = DoGraphBody(ex_blocks, base_region);
+
+    RegionAppearance my_region = base_region;
+    my_region.region_id += figure_id;
+    my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
+
+    list<MyBlock> my_blocks = GetBlocks( figure.interior, figure_id, {Graphable::DASHED} );
+    PostProcessBlocks(my_blocks);
+    string sc = DoGraphBody(my_blocks, my_region);
+
+    for( auto p: figure.subordinate )
+    {
+		RegionAppearance sub_region = base_region;
+		sub_region.region_id += p.first;
+		sub_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
+
+		list<MyBlock> sub_blocks = GetBlocks( {p.second}, figure_id, {Graphable::SOLID, Graphable::DASHED} );
+		PostProcessBlocks(sub_blocks);
+	    string scs = DoGraphBody(sub_blocks, sub_region);
+		sc += DoCluster(scs, sub_region);
+	}
+
+    s += DoCluster(sc, my_region);
+
+	Remember( s );
 }
 
 
 TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
+    Figure my_graphables;
+    list<MyBlock> my_blocks;
 	(void)context; // Not needed!!
 
-    graphables.clear();
+    reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
-	PopulateFrom( g, Graphable::SOLID );
-    PostProcessBlocks();
-    string s = DoGraphBody();
-	Disburse( s );
+	PopulateFrom( my_graphables.interior, g );
+	my_blocks = GetBlocks( my_graphables.interior, "", {} );
+    PostProcessBlocks(my_blocks);
+    string s = DoGraphBody(my_blocks, base_region);
+	Remember( s );
 
 	return root; // no change
 }
 
 
-void Graph::PopulateFromTransformation(Transformation *root)
+void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root )
 {    
     if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
     {
         FOREACH( shared_ptr<Transformation> t, *tv ) // TODO loop backwards so they come out in the right order in graph
-            PopulateFromTransformation( t.get() );
+            PopulateFromTransformation( graphables, t.get() );
     }
     else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
-		graphables.clear();
-	    PopulateFrom( cr, Graphable::THROUGH );
+		reached.clear();
+		PopulateFrom( graphables, cr );
 	}
 	else
     {
@@ -109,38 +150,53 @@ void Graph::PopulateFromTransformation(Transformation *root)
 }
 
                    
-void Graph::PopulateFrom( const Graphable *g,
-                          Graphable::LinkStyle default_link_style )
+void Graph::PopulateFrom( list<const Graphable *> &graphables, const Graphable *g )
 {
 	ASSERT(g);
-    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);	
-    gblock.default_link_style = default_link_style;
-    
-    MyBlock block = PreProcessBlock( gblock, g );
-    
-    my_blocks.push_back( block );        
-    PopulateFromSubBlocks( block );
+    graphables.push_back(g);
+
+    Graphable::Block block = g->GetGraphBlockInfo(my_lnf, nullptr);	        
+    PopulateFromSubBlocks( graphables, block );
 }
 
 
-void Graph::PopulateFromSubBlocks( const MyBlock &block )
+void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block )
 {
 	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
 	{
 		for( const Graphable::Link &link : sub_block.links )
 		{
-			if( link.child && graphables.count(link.child)==0 )
+			if( link.child && reached.count(link.child)==0 )
 			{
-				PopulateFrom( link.child, link.link_style );
-				graphables.insert( link.child );
+				PopulateFrom( graphables, link.child );
+				reached.insert( link.child );
 			}
 		}
 	}
 }
 
 
+list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
+                                       string figure_id,
+                                       const set<Graphable::LinkStyle> &discard_links )
+{
+	list<MyBlock> blocks;
+	
+	for( const Graphable *g : graphables )
+	{
+		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
+        MyBlock block = PreProcessBlock( gblock, g, figure_id, discard_links );
+        blocks.push_back( block );
+	}
+
+	return blocks;
+}
+
+
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
-                                       const Graphable *g )
+                                       const Graphable *g,
+                                       string figure_id,
+                                       const set<Graphable::LinkStyle> &discard_links )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
@@ -151,7 +207,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     (Graphable::Block &)my_block = block;
     
     // Fill in the GraphViz ID that the block will use
-    my_block.base_id = g->GetGraphId();
+    my_block.base_id = GetFullId(g, figure_id);
     
     // Capture the node (if there is one: might be NULL)
 	if( pspecial )
@@ -164,14 +220,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                                          "", 
                                          false, 
                                          {} } );
-    }
-    
-    // Colour the block in accordance with the node if there is one otherwise leave the colour blank.
-    // See #258: "block colour shall be dictated by the node type only"
-    if( pnode )
-        my_block.colour = pnode->GetColour();
-    else
-        my_block.colour = "transparent";
+    }  
 
     // Make the titles more wieldy by removing template stuff - note:
     // different policies for control blocks vs node blocks.
@@ -181,10 +230,13 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
         my_block.shape = "record";
+        my_block.colour = "transparent";
         break;
 
     case Graphable::NODE:
         my_block.title = GetInnermostTemplateParam(my_block.title);
+        // See #258: "block colour shall be dictated by the node type only"
+        my_block.colour = pnode->GetColour();
         break;
 
     default:
@@ -193,20 +245,31 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	}
 	
     // Actions for sub-blocks
+    my_block.link_ids.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
-    {
+    {			
         // Actions for links
+        list<Graphable::Link> new_links;
+        list<string> new_link_ids;
         for( Graphable::Link &link : sub_block.links )
         {
+			if( discard_links.count( link.link_style ) )
+				continue;
+			
 			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
-
+			string id = GetFullId(link.child, figure_id);			
+			
             // Detect pre-restrictions and add to link labels
             if( link.is_ntpr )
             {
-				string id = link.child->GetGraphId();
                 block_ids_show_prerestriction.insert( id );
             }
+
+			new_links.push_back( link );
+            new_link_ids.push_back( id );
         }
+        sub_block.links = new_links;
+        my_block.link_ids.push_back( new_link_ids );
     }
     
     // Italic title OR symbol designates a special agent 
@@ -214,29 +277,13 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     if( !pspecial )
         ASSERT( my_block.symbol.empty() );
 
-    // Apply current link style to links as a default
-    PropagateLinkStyle( my_block, my_block.default_link_style );
-
     return my_block;    
 }
 
 
-void Graph::PropagateLinkStyle( Block &dest, Graphable::LinkStyle default_link_style )
+void Graph::PostProcessBlocks( list<MyBlock> &blocks )
 {
-    for( Graphable::SubBlock &sub_block : dest.sub_blocks ) 
-    {  
-        for( Graphable::Link &link : sub_block.links )
-        {
-            if( link.link_style == Graphable::THROUGH )
-                link.link_style = default_link_style;    
-        }
-    }
-}
-
-
-void Graph::PostProcessBlocks()
-{
-    for( MyBlock &block : my_blocks )
+    for( MyBlock &block : blocks )
     {
         if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
         {          
@@ -245,6 +292,7 @@ void Graph::PostProcessBlocks()
                                            "", 
                                            false, 
                                            {} } );
+            block.link_ids.push_front( list<string>() );
         }
         
         // Can we hide sub-blocks?
@@ -261,28 +309,29 @@ void Graph::PostProcessBlocks()
 }
 
 
-string Graph::DoGraphBody()
+string Graph::DoGraphBody( const list<MyBlock> &blocks, const RegionAppearance &region )
 {
     string s;
     
-    for( const MyBlock &block : my_blocks )
-        s += DoBlock(block);
-
-    for( const MyBlock &block : my_blocks )
-        s += DoLinks(block);
+    for( const MyBlock &block : blocks )
+        s += DoBlock(block, region);
     
     return s;
 }
 
 
-string Graph::DoBlock( const MyBlock &block )
+string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
 {
+    blocks_for_links.push_back(block);
+
 	string s;
 	s += "\""+block.base_id+"\"";
 	s += " [\n";
     
 	s += "shape = \"" + block.shape + "\"\n";
-	if(block.colour != "")
+	if( block.colour=="transparent" )
+		s += "fillcolor = " + region.background_colour + "\n";
+	else if(block.colour != "")
 		s += "fillcolor = \"" + block.colour + "\"\n";
 
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
@@ -301,16 +350,8 @@ string Graph::DoBlock( const MyBlock &block )
         s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
         s += "fontsize = \"" FS_MIDDLE "\"\n";
-        if( ReadArgs::graph_dark )
-        {
-            s += "fillcolor = gray15\n";
-            s += "fontcolor = white\n";
-            s += "color = gray70\n";
-        }
-        else
-        {
-            s += "fillcolor = antiquewhite1\n";
-        }
+        s += "color = " + line_colour + "\n";
+        s += "fontcolor = " + font_colour + "\n";
     }
     else
 	{
@@ -396,12 +437,22 @@ string Graph::DoLinks( const MyBlock &block )
 {
     string s;
     
-    int porti=0;    
+    int porti=0;
+    FTRACE( "DoLinks()\n" );
+    auto sbidit = block.link_ids.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
+		ASSERT(sbidit != block.link_ids.end() );
+		FTRACE( "OK\n" );
+		auto lidit = sbidit->begin();
         for( Graphable::Link link : sub_block.links )
-            s += DoLink( porti, block, sub_block, link );
+        {
+			ASSERT( lidit != sbidit->end() );
+			s += DoLink( porti, block, sub_block, link, *lidit );
+			lidit++;
+		}
         porti++;
+        sbidit++;
     }
 
 	return s;
@@ -411,7 +462,8 @@ string Graph::DoLinks( const MyBlock &block )
 string Graph::DoLink( int port_index, 
                       const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
-                      const Graphable::Link &link )
+                      const Graphable::Link &link,
+                      string id )
 {          
     // Atts
     string atts;
@@ -429,11 +481,8 @@ string Graph::DoLink( int port_index,
         atts += "decorate = true\n";
     }
 
-    if( ReadArgs::graph_dark )
-    {
-        atts += "color = gray70\n";
-        atts += "fontcolor = white\n";
-    }
+    atts += "color = " + line_colour + "\n";
+    atts += "fontcolor = " + font_colour + "\n";
 
     // GraphViz output
 	string s;
@@ -441,7 +490,6 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	string id = link.child->GetGraphId();
 	s += "\""+id+"\"";
 	s += " ["+atts+"];\n";
 	return s;
@@ -457,17 +505,10 @@ string Graph::DoHeader()
 	s += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
 	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
-    if( ReadArgs::graph_dark )
-    {
-        s += "bgcolor = gray15\n";
-        s += "color = gray70\n";
-        s += "fontcolor = white\n";    
-    }
-    else
-    {
-        s += "bgcolor = antiquewhite1\n";
-    }
-	s += "];\n";
+    s += "bgcolor = " + base_region.background_colour + "\n";
+    s += "color = " + line_colour + "\n";
+    s += "fontcolor = " + font_colour + "\n";
+    s += "];\n";
 	s += "node [\n";
 #ifdef FONT
     s += "fontname = \"" FONT "\"\n";
@@ -480,8 +521,25 @@ string Graph::DoHeader()
 string Graph::DoFooter()
 {
 	string s;
+
+    for( const MyBlock &block : blocks_for_links )
+        s += DoLinks(block);
+        	
 	s += "}\n";
 	return s;
+}
+
+
+string Graph::DoCluster(string ss, const RegionAppearance &region)
+{
+    string s;
+    s += "subgraph \"cluster" + region.region_id + "\" {\n";
+    s += "label = \"" + region.region_id + "\"\n";
+    s += "style = \"filled\"\n";
+	s += "color = " + region.background_colour + "\n";
+	s += ss;
+    s += "}\n";
+    return s;
 }
 
 
@@ -536,6 +594,12 @@ void Graph::Disburse( string s )
 }
 
 
+void Graph::Remember( string s )
+{
+	all_dot = s + all_dot; // dot seems to reverse the graphs
+}
+
+
 string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 {
     string atts;
@@ -547,11 +611,17 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
     case Graphable::DASHED:
         atts += "style=\"dashed\"\n";
         break;
-    case Graphable::THROUGH:
-        ASSERT(false);
-        break;
     }
     return atts;
+}
+
+
+string Graph::GetFullId(const Graphable *g, string figure_id)
+{
+	if(figure_id.empty() )
+		return g->GetGraphId();
+	else
+		return figure_id+"/"+g->GetGraphId();
 }
 
 
@@ -560,4 +630,3 @@ const Graph::LinkNamingFunction Graph::my_lnf = []( const TreePtr<Node> *parent_
 {
 	return PatternLink( *parent_pattern, ppattern ).GetShortName();
 };		
-

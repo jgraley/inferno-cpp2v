@@ -47,7 +47,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
                            "", 
                            true,
                            { { dynamic_cast<Graphable *>(pattern.get()),
-                               THROUGH, 
+                               phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                {},
                                {PatternLink(this, &pattern).GetShortName()},
                                SpecialBase::IsNonTrivialPreRestriction(&pattern) } } } };

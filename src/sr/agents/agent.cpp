@@ -72,6 +72,8 @@ void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
     ASSERT(e);
     master_scr_engine = e;
     phase = phase_;
+
+	ASSERT( (int)phase != 0 );
     
     if( phase != IN_REPLACE_ONLY )
     {

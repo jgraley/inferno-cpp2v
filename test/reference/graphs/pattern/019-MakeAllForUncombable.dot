@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P19-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> MakeAllForUncombable | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-222" [
 shape = "plaintext"
@@ -163,29 +166,55 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P19-0":port0 -> "#B-2-222" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P19-0":port1 -> "#B-2-230" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-222":port1 -> "#B-2-223" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-222":port1 -> "#B-2-225" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-223" -> "#B-2-224" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-225":port0 -> "#B-2-229" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-225":port1 -> "#B-2-226" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-225":port2 -> "#B-2-227" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-225":port3 -> "#B-2-228" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-230":port0 -> "#B-2-229" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-230":port1 -> "#B-2-226" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-230":port2 -> "#B-2-227" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-230":port3 -> "#B-2-228" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

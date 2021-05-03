@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P70-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ApplyCombGotoPolicy | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1241" [
 shape = "plaintext"
@@ -367,63 +370,123 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P70-0":port0 -> "#B-2-1241" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P70-0":port1 -> "#B-2-1242" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port0 -> "#B-2-1244" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port1 -> "#B-2-1245" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port2 -> "#B-2-1248" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port3 -> "#B-2-1255" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port4 -> "#B-2-1246" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port5 -> "#B-2-1249" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1241":port6 -> "#B-2-1247" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1245":port0 -> "#B-2-1256" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1256" -> "#B-2-1250" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1248":port0 -> "#B-2-1251" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1251":port0 -> "#B-2-1252" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1251":port1 -> "#B-2-1253" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1255":port0 -> "#B-2-1254" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1246":port0 -> "#B-2-1257" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1257" -> "#B-2-1258" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1249":port0 -> "#B-2-1251" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1242":port0 -> "#B-2-1244" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1242":port1 -> "#B-2-1245" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1242":port2 -> "#B-2-1255" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1242":port3 -> "#B-2-1259" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1242":port4 -> "#B-2-1249" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1242":port5 -> "#B-2-1247" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1259":port0 -> "#B-2-1260" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1259":port1 -> "#B-2-1243" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1259":port2 -> "#B-2-1261" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1260":port0 -> "#B-2-1253" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1260":port0 -> "#B-2-1254" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1243":port1 -> "#B-2-1246" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

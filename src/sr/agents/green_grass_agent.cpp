@@ -45,7 +45,7 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &l
                            "", 
                            true,
                            { { dynamic_cast<Graphable *>( GetThrough()->get()), 
-                               THROUGH, 
+                               phase == IN_REPLACE_ONLY ? DASHED : SOLID, 
                                {},
                                {PatternLink(this, GetThrough()).GetShortName()} } } } };
     return block;

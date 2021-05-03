@@ -4,16 +4,556 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
+subgraph "cluster#R83-4" {
+label = "#R83-4"
+style = "filled"
+color = antiquewhite2
+"#R83-4/#B-2-1548" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Uncombable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1548</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-3" {
+label = "#R83-3"
+style = "filled"
+color = antiquewhite2
+"#R83-3/#B-2-1546" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">¬</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1546</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+subgraph "cluster#R83-4" {
+label = "#R83-4"
+style = "filled"
+color = antiquewhite3
+"#R83-3/#B-2-1548" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Uncombable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1548</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+}
+subgraph "cluster#R83-2" {
+label = "#R83-2"
+style = "filled"
+color = antiquewhite2
+"#R83-2/#B-2-1532" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>restriction</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1532</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+subgraph "cluster#R83-3" {
+label = "#R83-3"
+style = "filled"
+color = antiquewhite3
+"#R83-2/#B-2-1546" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">¬</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1546</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+}
+subgraph "cluster#R83-1" {
+label = "#R83-1"
+style = "filled"
+color = antiquewhite2
+"#R83-1/#B-2-1531" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1531</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-7" {
+label = "#R83-7"
+style = "filled"
+color = antiquewhite2
+"#R83-7/#B-2-1549" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Uncombable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1549</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-6" {
+label = "#R83-6"
+style = "filled"
+color = antiquewhite2
+"#R83-6/#B-2-1547" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">¬</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1547</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+subgraph "cluster#R83-7" {
+label = "#R83-7"
+style = "filled"
+color = antiquewhite3
+"#R83-6/#B-2-1549" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Uncombable</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1549</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+}
+subgraph "cluster#R83-5" {
+label = "#R83-5"
+style = "filled"
+color = antiquewhite2
+"#R83-5/#B-2-1533" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>restriction</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1533</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+subgraph "cluster#R83-6" {
+label = "#R83-6"
+style = "filled"
+color = antiquewhite3
+"#R83-5/#B-2-1547" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">¬</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>pattern</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1547</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+}
+subgraph "cluster#R83-8" {
+label = "#R83-8"
+style = "filled"
+color = antiquewhite2
+"#R83-8/#B-2-1534" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1534</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-0" {
+label = "#R83-0"
+style = "filled"
+color = antiquewhite2
+"#R83-0/#B-2-1544" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1544</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R83-0/#B-2-1545" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Goto</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Expression</TD>
+  <TD PORT="port0">NULL</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1545</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R83-0/#B-2-1535" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Label</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>LabelIdentifier</TD>
+  <TD PORT="port0">NULL</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1535</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R83-0/#P83-6-104" [
+shape = "record"
+fillcolor = antiquewhite2
+label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P83-6-104"
+style = "filled"
+fontsize = "14"
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1527" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">∧</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>(Compound)</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>patterns</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1527</TD>
+  <TD PORT="port2"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R83-0/#B-2-1528" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Compound</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>Declaration</TD>
+  <TD PORT="port0">{.}</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port1">[0]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port2">[1]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port3">[2]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port4">[3]</TD>
+ </TR>
+ <TR>
+  <TD>Statement</TD>
+  <TD PORT="port5">[4]</TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1528</TD>
+  <TD PORT="port6"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R83-0/#P83-8-100" [
+shape = "plaintext"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">#</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>terminus</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#P83-8-100</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+"#R83-0/#B-2-1543" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">Wait</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1543</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+subgraph "cluster#R83-8" {
+label = "#R83-8"
+style = "filled"
+color = antiquewhite3
+"#R83-0/#B-2-1534" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1534</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-5" {
+label = "#R83-5"
+style = "filled"
+color = antiquewhite3
+"#R83-0/#B-2-1533" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>restriction</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1533</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-1" {
+label = "#R83-1"
+style = "filled"
+color = antiquewhite3
+"#R83-0/#B-2-1531" [
+shape = "plaintext"
+fillcolor = "/set28/1"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1531</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+subgraph "cluster#R83-2" {
+label = "#R83-2"
+style = "filled"
+color = antiquewhite3
+"#R83-0/#B-2-1532" [
+shape = "plaintext"
+fillcolor = "/set28/2"
+label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+ <TR>
+  <TD><FONT POINT-SIZE="16.0">*</FONT></TD>
+  <TD></TD>
+ </TR>
+ <TR>
+  <TD>restriction</TD>
+  <TD PORT="port0"></TD>
+ </TR>
+ <TR>
+  <TD>#B-2-1532</TD>
+  <TD PORT="port1"></TD>
+ </TR>
+</TABLE>>
+style = "rounded,filled"
+fontsize = "12"
+];
+}
+}
 "CR#P83-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ApplyTopPolicy | <port0> root | <port1> #P83-0"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#P83-8-100" [
 shape = "plaintext"
@@ -36,10 +576,12 @@ fontsize = "12"
 ];
 "#P83-6-104" [
 shape = "record"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P83-6-104"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1527" [
 shape = "plaintext"
@@ -490,121 +1032,271 @@ fontsize = "12"
 "CR#P83-0":port0 -> "#P83-8-100" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#P83-8-100":port0 -> "#P83-6-104" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#P83-6-104":port0 -> "#B-2-1527" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#P83-6-104":port1 -> "#B-2-1529" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1527":port1 -> "#B-2-1528" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1527":port1 -> "#B-2-1544" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1528":port0 -> "#B-2-1531" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1528":port1 -> "#B-2-1532" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1528":port2 -> "#B-2-1543" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1528":port3 -> "#B-2-1533" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1528":port4 -> "#B-2-1535" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1528":port5 -> "#B-2-1534" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1532":port0 -> "#B-2-1546" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1546":port0 -> "#B-2-1548" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1533":port0 -> "#B-2-1547" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1547":port0 -> "#B-2-1549" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1544":port0 -> "#B-2-1545" [style="solid"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1529":port0 -> "#B-2-1531" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1529":port1 -> "#B-2-1535" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1529":port2 -> "#B-2-1539" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1529":port3 -> "#B-2-1534" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1539":port0 -> "#B-2-1540" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1539":port1 -> "#B-2-1530" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1539":port2 -> "#B-2-1550" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1540":port0 -> "#B-2-1541" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1540":port0 -> "#B-2-1542" [style="dashed"
 label = "#0"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1530":port1 -> "#B-2-1532" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1530":port2 -> "#B-2-1543" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1530":port3 -> "#B-2-1533" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
 ];
 "#B-2-1530":port4 -> "#B-2-1545" [style="dashed"
 label = "#1"
 decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1544":port0 -> "#R83-0/#B-2-1545" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#P83-6-104":port0 -> "#R83-0/#B-2-1527" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1527":port1 -> "#R83-0/#B-2-1528" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1527":port1 -> "#R83-0/#B-2-1544" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1528":port0 -> "#R83-0/#B-2-1531" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1528":port1 -> "#R83-0/#B-2-1532" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1528":port2 -> "#R83-0/#B-2-1543" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1528":port3 -> "#R83-0/#B-2-1533" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1528":port4 -> "#R83-0/#B-2-1535" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#B-2-1528":port5 -> "#R83-0/#B-2-1534" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-0/#P83-8-100":port0 -> "#R83-0/#P83-6-104" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-5/#B-2-1533":port0 -> "#R83-5/#B-2-1547" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-6/#B-2-1547":port0 -> "#R83-6/#B-2-1549" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-2/#B-2-1532":port0 -> "#R83-2/#B-2-1546" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
+];
+"#R83-3/#B-2-1546":port0 -> "#R83-3/#B-2-1548" [style="solid"
+label = "#0"
+decorate = true
+color = black
+fontcolor = black
 ];
 }

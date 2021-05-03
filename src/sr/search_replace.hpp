@@ -8,6 +8,8 @@
 #include "agents/agent.hpp"
 #include <set>
 
+class Graph;
+
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
@@ -36,6 +38,7 @@ private:
                         TreePtr<Node> rp );
         void PlanningStageOne();
         void PlanningStageTwo();
+        void PlanningStageThree();
 
         TreePtr<Node> compare_pattern;
         TreePtr<Node> replace_pattern;
@@ -51,6 +54,7 @@ public:
                             TreePtr<Node> rp = TreePtr<Node>() );
     void PlanningStageOne();
     void PlanningStageTwo();
+    void PlanningStageThree();
     
     static void SetMaxReps( int n, bool e );
                             
@@ -69,6 +73,7 @@ public:
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual string GetGraphId() const; 
+    void GenerateGraphs( Graph &graph ) const;
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();

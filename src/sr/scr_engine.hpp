@@ -50,6 +50,10 @@ public:
     {
         plan.PlanningStageTwo(agent_phases); 
     }
+    void PlanningStageThree()
+    {
+        plan.PlanningStageThree(); 
+    }
                     
 private:
     struct Plan : public virtual Traceable
@@ -62,7 +66,8 @@ private:
               TreePtr<Node> rp,
               const unordered_set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
-        void PlanningStageTwo(const CompareReplace::AgentPhases &agent_phases); // Part one is the constructor
+        void PlanningStageTwo(const CompareReplace::AgentPhases &agent_phases); // Stage one is the constructor
+        void PlanningStageThree();
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 

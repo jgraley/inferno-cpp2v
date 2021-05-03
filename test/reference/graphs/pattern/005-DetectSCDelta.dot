@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P5-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectSCDelta | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-42" [
 shape = "plaintext"
@@ -111,15 +114,27 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P5-0":port0 -> "#B-2-42" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P5-0":port1 -> "#B-2-41" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-42":port0 -> "#B-2-43" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-42":port1 -> "#B-2-44" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-43":port0 -> "#B-2-45" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-43":port1 -> "#B-2-46" [style="solid"
+color = black
+fontcolor = black
 ];
 }

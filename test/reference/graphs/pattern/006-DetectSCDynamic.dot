@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P6-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectSCDynamic | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-48" [
 shape = "plaintext"
@@ -119,19 +122,35 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P6-0":port0 -> "#B-2-48" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P6-0":port1 -> "#B-2-47" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-48":port0 -> "#B-2-49" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-48":port1 -> "#B-2-50" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-49":port0 -> "#B-2-51" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-49":port1 -> "#B-2-52" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-52" -> "#B-2-53" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-47":port0 -> "#B-2-52" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

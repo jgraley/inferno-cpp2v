@@ -17,6 +17,7 @@
 #include "link.hpp"
 #include "tree/cpptree.hpp"
 #include "equivalence.hpp"
+#include "render/graph.hpp"
 
 #include <list>
 
@@ -56,7 +57,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     root_agent( root_plink.GetChildAgent() ),
     master_plinks( master_plinks_ )
 {
-    TRACE(GetName());
+    TRACE(algo->GetTrace())(" planning\n");
     INDENT("P");
     
     master_agents.clear();
@@ -71,16 +72,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
             my_normal_links.insert( plink );
             
     my_normal_agents = DifferenceOf( normal_agents, master_agents );       
-    if( ReadArgs::new_feature )
-        FTRACE("Normal agents ")(normal_agents)("\nMaster agents ")(master_agents)("\n");
-    if( my_normal_agents.empty() ) 
-        return;  // Early-out on trivial problems
-        
     reached_agents.clear();
-    reached_links.clear();
+    reached_links.clear();    
     PopulateSomeThings( root_plink, 
                         master_agents );
+    TRACE("Normal agents ")(normal_agents)("\nMaster boundary agents ")(master_boundary_agents)("\n");
 
+    if( my_normal_agents.empty() ) 
+        return;  // Early-out on trivial problems
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
@@ -971,8 +970,38 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 }
 
 
-void AndRuleEngine::Graph::operator()( const AndRuleEngine *engine )
+void AndRuleEngine::GenerateGraph( Graph &graph ) const
 {
+	TRACE("Specifying figure nodes for ")(*this)("\n");
+	Graph::Figure graphables;
 	
+	TRACE("Interior:\n");
+	for( const Agent *agent : plan.my_normal_agents )
+	{
+		TRACEC(*agent)("\n");
+		graphables.interior.push_back( agent );
+	}
+	
+	TRACE("Exterior:\n");
+	for( const Agent *agent : plan.master_boundary_agents )
+	{
+		TRACEC(*agent)("\n");
+		graphables.exterior.push_back( agent );
+	}
+	
+	TRACE("Subordinates:\n");
+	auto my_subordinate_engines = plan.my_free_abnormal_engines;
+	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_evaluator_abnormal_engines );
+	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_multiplicity_engines );		
+	for( auto p : my_subordinate_engines )
+	{
+		const Agent *agent = p.second->plan.root_agent;
+		string id = p.second->GetSerialString();
+		TRACEC(id)(": ")(*agent)("\n");
+		graphables.subordinate.push_back( {id, agent} );
+	}
+	
+	TRACE("Ready to render ")(*this)("\n");
+	graph(GetSerialString(), graphables);
 }
 

@@ -15,6 +15,7 @@ public:
         BUILDING_STEPS,
         PLANNING_ONE,
         PLANNING_TWO,
+        PLANNING_THREE,
         PARSING, 
         TRANSFORMING,
         RENDERING

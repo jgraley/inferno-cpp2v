@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P21-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> MakeAllBreakUncombable | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-267" [
 shape = "plaintext"
@@ -60,9 +63,15 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P21-0":port0 -> "#B-2-267" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P21-0":port1 -> "#B-2-274" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-267":port1 -> "#B-2-268" [style="solid"
+color = black
+fontcolor = black
 ];
 }

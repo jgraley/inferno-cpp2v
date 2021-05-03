@@ -32,7 +32,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 {},
                                 {PatternLink(this, GetOverlay()).GetShortName()},
                                 SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) } } } );
-    return { false, GetName(), "", "", CONTROL, THROUGH, sub_blocks };
+    return { false, GetName(), "", "", CONTROL, sub_blocks };
 }
 
 

@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P10-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> DetectTerminationFunction | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-71" [
 shape = "plaintext"
@@ -111,17 +114,31 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P10-0":port0 -> "#B-2-71" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P10-0":port1 -> "#B-2-69" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-71":port0 -> "#B-2-72" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-71":port1 -> "#B-2-73" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-72":port0 -> "#B-2-74" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-72":port1 -> "#B-2-70" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-69":port0 -> "#B-2-70" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

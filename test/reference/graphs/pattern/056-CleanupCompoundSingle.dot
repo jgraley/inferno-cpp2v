@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P56-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> CleanupCompoundSingle | <port0> search_replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-952" [
 shape = "plaintext"
@@ -48,11 +51,12 @@ height = 0.4
 ];
 "#B-2-956" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-957" [
 shape = "plaintext"
@@ -114,21 +118,39 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P56-0":port0 -> "#B-2-952" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-952":port1 -> "#B-2-955" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-952":port1 -> "#B-2-953" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-955" -> "#B-2-956" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-956":port1 -> "#B-2-957" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-956":port2 -> "#B-2-958" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-957":port1 -> "#B-2-958" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-953" -> "#B-2-954" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-954":port0 -> "#B-2-957" [style="solid"
+color = black
+fontcolor = black
 ];
 }

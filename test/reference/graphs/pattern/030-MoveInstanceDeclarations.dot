@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P30-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> MoveInstanceDeclarations | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-472" [
 shape = "plaintext"
@@ -113,23 +116,43 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P30-0":port0 -> "#B-2-472" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P30-0":port1 -> "#B-2-477" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-472":port0 -> "#B-2-474" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-472":port1 -> "#B-2-475" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-472":port2 -> "#B-2-473" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-472":port3 -> "#B-2-476" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-477":port0 -> "#B-2-473" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-477":port0 -> "#B-2-474" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-477":port1 -> "#B-2-475" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-477":port2 -> "#B-2-476" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P24-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ExtractCallParams | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-312" [
 shape = "diamond"
@@ -311,57 +314,111 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P24-0":port0 -> "#B-2-312" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P24-0":port1 -> "#B-2-299" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-312" -> "#B-2-295" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-312" -> "#B-4-0" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-295":port0 -> "#B-2-301" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-295":port0 -> "#B-2-302" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-295":port1 -> "#B-2-306" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-302":port0 -> "#B-2-307" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-302":port1 -> "#B-2-308" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-308" -> "#B-2-304" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-308" -> "#B-2-309" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-304" -> "#B-2-305" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-309" -> "#B-2-310" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-4-0" -> "#B-2-313" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-299":port0 -> "#B-2-298" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-299":port1 -> "#B-2-300" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-299":port2 -> "#B-2-296" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-298":port0 -> "#B-2-305" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-298":port1 -> "#B-2-297" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-298":port2 -> "#B-2-311" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-300":port0 -> "#B-2-297" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-300":port1 -> "#B-2-304" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-296":port0 -> "#B-2-301" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-296":port0 -> "#B-2-303" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-296":port1 -> "#B-2-306" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-303":port0 -> "#B-2-307" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-303":port1 -> "#B-2-297" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

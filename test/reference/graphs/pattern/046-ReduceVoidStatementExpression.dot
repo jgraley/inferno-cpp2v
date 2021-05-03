@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P46-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ReduceVoidStatementExpression | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-815" [
 shape = "plaintext"
@@ -149,25 +152,47 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P46-0":port0 -> "#B-2-815" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P46-0":port1 -> "#B-2-822" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-815":port0 -> "#B-2-816" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-815":port1 -> "#B-2-817" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-815":port2 -> "#B-2-818" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-818" -> "#B-2-819" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-819":port1 -> "#B-2-820" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-820":port1 -> "#B-2-821" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-822":port0 -> "#B-2-816" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-822":port1 -> "#B-2-817" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-822":port2 -> "#B-2-818" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P92-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> ThreadToMethod | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1749" [
 shape = "plaintext"
@@ -195,35 +198,39 @@ fontsize = "12"
 ];
 "#B-2-1773" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Slave | <port0> (Compound) | <port1> through | <port2> search | <port3> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1772" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Slave | <port0> through | <port1> search | <port2> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1771" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Slave | <port0> through | <port1> search | <port2> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1770" [
 shape = "record"
-fillcolor = "/set28/2"
+fillcolor = antiquewhite1
 label = "<fixed> Slave | <port0> through | <port1> search | <port2> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1766" [
 shape = "plaintext"
@@ -357,59 +364,115 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P92-0":port0 -> "#B-2-1749" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P92-0":port1 -> "#B-2-1750" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1749":port0 -> "#B-2-1751" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1749":port1 -> "#B-2-1755" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1749":port2 -> "#B-2-1753" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1753":port1 -> "#B-2-1756" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1756":port0 -> "#B-2-1754" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1756":port1 -> "#B-2-1757" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1754":port0 -> "#B-2-1758" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1754":port1 -> "#B-2-1759" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1750":port0 -> "#B-2-1752" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1750":port1 -> "#B-2-1755" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1750":port2 -> "#B-2-1773" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1773":port1 -> "#B-2-1772" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1773":port2 -> "#B-2-1760" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1773":port3 -> "#B-2-1761" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1772":port0 -> "#B-2-1771" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1772":port1 -> "#B-2-1762" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1772":port2 -> "#B-2-1763" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1771":port0 -> "#B-2-1770" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1771":port1 -> "#B-2-1764" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1771":port2 -> "#B-2-1765" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1770":port0 -> "#B-2-1754" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1770":port1 -> "#B-2-1766" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1770":port2 -> "#B-2-1767" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1767":port0 -> "#B-2-1768" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1760":port0 -> "#B-2-1769" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1761":port0 -> "#B-2-1769" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

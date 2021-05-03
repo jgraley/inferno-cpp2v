@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P63-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> AddGotoBeforeLabel | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-1069" [
 shape = "plaintext"
@@ -261,45 +264,87 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P63-0":port0 -> "#B-2-1069" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P63-0":port1 -> "#B-2-1057" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1069":port1 -> "#B-2-1056" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1069":port1 -> "#B-2-1070" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1056":port0 -> "#B-2-1060" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1056":port1 -> "#B-2-1062" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1056":port2 -> "#B-2-1067" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1056":port3 -> "#B-2-1063" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1067":port0 -> "#B-2-1068" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1070" -> "#B-2-1058" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1058":port0 -> "#B-2-1061" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1058":port1 -> "#B-2-1064" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1058":port2 -> "#B-2-1071" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1058":port3 -> "#B-2-1067" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1058":port4 -> "#B-2-1065" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-1057":port0 -> "#B-2-1060" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1057":port1 -> "#B-2-1062" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1057":port2 -> "#B-2-1059" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1057":port3 -> "#B-2-1067" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1057":port4 -> "#B-2-1063" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-1059":port0 -> "#B-2-1068" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

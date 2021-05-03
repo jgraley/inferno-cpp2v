@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P57-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> CleanupNop | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-959" [
 shape = "plaintext"
@@ -113,21 +116,39 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P57-0":port0 -> "#B-2-959" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P57-0":port1 -> "#B-2-960" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-959":port0 -> "#B-2-962" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-959":port1 -> "#B-2-963" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-959":port2 -> "#B-2-961" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-959":port3 -> "#B-2-964" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-960":port0 -> "#B-2-962" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-960":port1 -> "#B-2-963" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-960":port2 -> "#B-2-964" [style="dashed"
+color = black
+fontcolor = black
 ];
 }

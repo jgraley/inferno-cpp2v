@@ -33,9 +33,17 @@ class Graph : public OutOfPlaceTransformation
 public:
 	using Transformation::operator();
 
+	struct Figure
+	{
+		list<const Graphable *> interior;
+		list<const Graphable *> exterior;
+		list< pair<string, const Graphable *> > subordinate;
+	};
+
     Graph( string of = string() );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
+	void operator()( string figure_id, const Figure &graphables ); // graph just the specified ojects
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -46,43 +54,62 @@ private:
         bool specify_ports;
         string base_id;
         bool italic_title;
+        list< list<string> > link_ids; 
     };
 
-    void PopulateFromTransformation(Transformation *root);
-    void PopulateFrom( const Graphable *g, 
-                       Graphable::LinkStyle default_link_style );
-	void PopulateFromSubBlocks( const MyBlock &block );
+    struct RegionAppearance
+    {
+		string region_id;
+		string background_colour;
+	};
 
+    void PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root );
+    void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
+	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
+
+	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
+	                         string figure_id,
+                             const set<Graphable::LinkStyle> &discard_links );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
-                             const Graphable *g );
-    void PropagateLinkStyle( Block &dest, Graphable::LinkStyle default_link_style );
+                             const Graphable *g,
+                             string figure_id,
+                             const set<Graphable::LinkStyle> &discard_links );
     
-    void PostProcessBlocks();
+    void PostProcessBlocks( list<MyBlock> &blocks );
 
-    string DoGraphBody();
-    string DoBlock( const MyBlock &block );
+    string DoGraphBody( const list<MyBlock> &blocks,
+                       const RegionAppearance &region );
+    string DoBlock( const MyBlock &block,
+                    const RegionAppearance &region );
     string DoRecordLabel( const MyBlock &block );
     string DoHTMLLabel( const MyBlock &block );
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 
                    const Graphable::SubBlock &sub_block, 
-                   const Graphable::Link &link );
+                   const Graphable::Link &link,
+                   string id );
     string DoHeader();
     string DoFooter();
+    string DoCluster(string s, const RegionAppearance &region);
 
     string SeqField( int i );
     string EscapeForGraphviz( string s );
     void Disburse( string s );
+    void Remember( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
+    string GetFullId(const Graphable *g, string figure_id);
 
     const string outfile; // empty means stdout
     FILE *filep;
-    
-    list<MyBlock> my_blocks;
-    set<const Graphable *> graphables;
+    set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     static const LinkNamingFunction my_lnf;
+    const RegionAppearance base_region;
+	const string line_colour;
+	const string font_colour;
+	list<MyBlock> blocks_for_links;
+    string all_dot;
 };
 
 #endif

@@ -4,16 +4,19 @@ rankdir = "LR"
 ranksep = 1.0
 size = "14,20"
 bgcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 node [
 ];
 "CR#P44-0" [
 shape = "record"
-fillcolor = "transparent"
+fillcolor = antiquewhite1
 label = "<fixed> NormaliseConditionalGotos | <port0> search | <port1> replace"
 style = "filled"
 fontsize = "14"
-fillcolor = antiquewhite1
+color = black
+fontcolor = black
 ];
 "#B-2-798" [
 shape = "plaintext"
@@ -318,51 +321,99 @@ style = "rounded,filled"
 fontsize = "12"
 ];
 "CR#P44-0":port0 -> "#B-2-798" [style="solid"
+color = black
+fontcolor = black
 ];
 "CR#P44-0":port1 -> "#B-2-784" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-798":port1 -> "#B-2-783" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-798":port1 -> "#B-2-799" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-783":port0 -> "#B-2-790" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-783":port1 -> "#B-2-791" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-783":port2 -> "#B-2-781" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-783":port3 -> "#B-2-793" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-781":port0 -> "#B-2-782" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-781":port1 -> "#B-2-786" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-781":port2 -> "#B-2-800" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-799" -> "#B-2-785" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-785":port1 -> "#B-2-792" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-785":port2 -> "#B-2-781" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-785":port3 -> "#B-2-789" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-785":port4 -> "#B-2-794" [style="solid"
+color = black
+fontcolor = black
 ];
 "#B-2-784":port0 -> "#B-2-790" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-784":port1 -> "#B-2-791" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-784":port2 -> "#B-2-781" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-784":port3 -> "#B-2-788" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-784":port4 -> "#B-2-796" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-784":port5 -> "#B-2-793" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-788":port0 -> "#B-2-797" [style="dashed"
+color = black
+fontcolor = black
 ];
 "#B-2-796":port0 -> "#B-2-797" [style="dashed"
+color = black
+fontcolor = black
 ];
 }
