@@ -979,26 +979,28 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
 	for( const Agent *agent : plan.my_normal_agents )
 	{
 		TRACEC(*agent)("\n");
-		graphables.interior.push_back( agent );
+		graphables.interiors.push_back( agent );
 	}
 	
 	TRACE("Exterior:\n");
 	for( const Agent *agent : plan.master_boundary_agents )
 	{
 		TRACEC(*agent)("\n");
-		graphables.exterior.push_back( agent );
+		graphables.exteriors.push_back( agent );
 	}
 	
-	TRACE("Subordinates:\n");
+  	TRACE("Subordinates:\n");
 	auto my_subordinate_engines = plan.my_free_abnormal_engines;
 	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_evaluator_abnormal_engines );
 	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_multiplicity_engines );		
 	for( auto p : my_subordinate_engines )
 	{
-		const Agent *agent = p.second->plan.root_agent;
-		string id = p.second->GetSerialString();
-		TRACEC(id)(": ")(*agent)("\n");
-		graphables.subordinate.push_back( {id, agent} );
+        Graph::Figure::Subordinate sub;
+		sub.id = p.second->GetSerialString();
+        sub.link_name = p.first.GetShortName();
+		sub.root = p.second->plan.root_agent;
+		TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(sub.root)("\n");
+		graphables.subordinates.push_back( sub );
 	}
 	
 	TRACE("Ready to render ")(*this)("\n");

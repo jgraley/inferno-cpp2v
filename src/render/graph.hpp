@@ -35,9 +35,15 @@ public:
 
 	struct Figure
 	{
-		list<const Graphable *> interior;
-		list<const Graphable *> exterior;
-		list< pair<string, const Graphable *> > subordinate;
+        struct Subordinate
+        {
+            string id;
+            string link_name;
+            const Graphable *root;
+        };
+		list<const Graphable *> interiors;
+		list<const Graphable *> exteriors;
+		list<Subordinate> subordinates;
 	};
 
     Graph( string of = string() );

@@ -73,8 +73,8 @@ void Graph::operator()( Transformation *root )
     list<MyBlock> my_blocks;
 
 	reached.clear();
-    PopulateFromTransformation(my_graphables.interior, root);
-    my_blocks = GetBlocks( my_graphables.interior, "", {} );
+    PopulateFromTransformation(my_graphables.interiors, root);
+    my_blocks = GetBlocks( my_graphables.interiors, "", {} );
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, base_region);
 	Remember(s);
@@ -83,7 +83,7 @@ void Graph::operator()( Transformation *root )
 
 void Graph::operator()( string figure_id, const Figure &figure )
 {    
-    list<MyBlock> ex_blocks = GetBlocks( figure.exterior, figure_id, {Graphable::SOLID, Graphable::DASHED} );
+    list<MyBlock> ex_blocks = GetBlocks( figure.exteriors, figure_id, {Graphable::SOLID, Graphable::DASHED} );
     PostProcessBlocks(ex_blocks);
 	string s = DoGraphBody(ex_blocks, base_region);
 
@@ -91,17 +91,17 @@ void Graph::operator()( string figure_id, const Figure &figure )
     my_region.region_id += figure_id;
     my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
 
-    list<MyBlock> my_blocks = GetBlocks( figure.interior, figure_id, {Graphable::DASHED} );
+    list<MyBlock> my_blocks = GetBlocks( figure.interiors, figure_id, {Graphable::DASHED} );
     PostProcessBlocks(my_blocks);
     string sc = DoGraphBody(my_blocks, my_region);
 
-    for( auto p: figure.subordinate )
+    for( const Figure::Subordinate &sub : figure.subordinates )
     {
 		RegionAppearance sub_region = base_region;
-		sub_region.region_id += p.first;
+		sub_region.region_id += sub.id;
 		sub_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-		list<MyBlock> sub_blocks = GetBlocks( {p.second}, figure_id, {Graphable::SOLID, Graphable::DASHED} );
+		list<MyBlock> sub_blocks = GetBlocks( {sub.root}, figure_id, {Graphable::SOLID, Graphable::DASHED} );
 		PostProcessBlocks(sub_blocks);
 	    string scs = DoGraphBody(sub_blocks, sub_region);
 		sc += DoCluster(scs, sub_region);
@@ -121,8 +121,8 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
-	PopulateFrom( my_graphables.interior, g );
-	my_blocks = GetBlocks( my_graphables.interior, "", {} );
+	PopulateFrom( my_graphables.interiors, g );
+	my_blocks = GetBlocks( my_graphables.interiors, "", {} );
     PostProcessBlocks(my_blocks);
     string s = DoGraphBody(my_blocks, base_region);
 	Remember( s );
@@ -438,12 +438,12 @@ string Graph::DoLinks( const MyBlock &block )
     string s;
     
     int porti=0;
-    FTRACE( "DoLinks()\n" );
+    TRACE( "DoLinks()\n" );
     auto sbidit = block.link_ids.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
 		ASSERT(sbidit != block.link_ids.end() );
-		FTRACE( "OK\n" );
+		TRACE( "OK\n" );
 		auto lidit = sbidit->begin();
         for( Graphable::Link link : sub_block.links )
         {
