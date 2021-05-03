@@ -69,6 +69,8 @@ Graph::~Graph()
 
 void Graph::operator()( Transformation *root )
 {
+    string s;
+    s += "// -------------------- transformation figure --------------------\n";
     Figure my_graphables;
     list<MyBlock> my_blocks;
 
@@ -76,38 +78,50 @@ void Graph::operator()( Transformation *root )
     PopulateFromTransformation(my_graphables.interiors, root);
     my_blocks = GetBlocks( my_graphables.interiors, "", {} );
     PostProcessBlocks(my_blocks);
-    string s = DoGraphBody(my_blocks, base_region);
+    s += DoGraphBody(my_blocks, base_region);
+    s += "\n";
 	Remember(s);
 }
 
 
-void Graph::operator()( string figure_id, const Figure &figure )
-{    
-    list<MyBlock> ex_blocks = GetBlocks( figure.exteriors, figure_id, {Graphable::SOLID, Graphable::DASHED} );
-    PostProcessBlocks(ex_blocks);
-	string s = DoGraphBody(ex_blocks, base_region);
-
-    RegionAppearance my_region = base_region;
-    my_region.region_id += figure_id;
-    my_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
-
-    list<MyBlock> my_blocks = GetBlocks( figure.interiors, figure_id, {Graphable::DASHED} );
-    PostProcessBlocks(my_blocks);
-    string sc = DoGraphBody(my_blocks, my_region);
+void Graph::operator()( const Figure &figure )
+{        
+    // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
+    list<MyBlock> exterior_blocks = GetBlocks( figure.exteriors, figure.id, {Graphable::SOLID, Graphable::DASHED} );
+    PostProcessBlocks(exterior_blocks);
+    list<MyBlock> interior_blocks = GetBlocks( figure.interiors, figure.id, {Graphable::DASHED} );
+    PostProcessBlocks(interior_blocks);
+    map< const Figure::Subordinate *, list<MyBlock> > subordinate_blocks;
+    for( const Figure::Subordinate &sub : figure.subordinates )
+    {
+    	list<MyBlock> sub_blocks = GetBlocks( {sub.root}, figure.id+"/"+sub.link_name, {Graphable::SOLID, Graphable::DASHED} );
+        RedirectLinks( interior_blocks, sub, sub_blocks.front() );
+		PostProcessBlocks(sub_blocks);
+        subordinate_blocks[&sub] = sub_blocks;
+	}
+    
+    // Now generate all the dot code
+    string s;
+    s += "// -------------------- figure "+figure.id+" --------------------\n";
+	s += DoGraphBody(exterior_blocks, base_region); // Exterior blocks
+    RegionAppearance interior_region = base_region;
+    interior_region.region_id = figure.id;
+    interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
+    string s_interior = DoGraphBody(interior_blocks, interior_region); // Interior blocks
 
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
-		RegionAppearance sub_region = base_region;
-		sub_region.region_id += sub.id;
-		sub_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
+		RegionAppearance subordinate_region = interior_region;
+		subordinate_region.region_id += "/"+sub.id;
+		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-		list<MyBlock> sub_blocks = GetBlocks( {sub.root}, figure_id, {Graphable::SOLID, Graphable::DASHED} );
-		PostProcessBlocks(sub_blocks);
-	    string scs = DoGraphBody(sub_blocks, sub_region);
-		sc += DoCluster(scs, sub_region);
+        list<MyBlock> sub_blocks = subordinate_blocks.at(&sub);        
+	    string s_subordinate = DoGraphBody(sub_blocks, subordinate_region); // Subordinaet blocks
+		s_interior += DoCluster(s_subordinate, subordinate_region);
 	}
 
-    s += DoCluster(sc, my_region);
+    s += DoCluster(s_interior, interior_region);
+    s += "\n";
 
 	Remember( s );
 }
@@ -115,6 +129,8 @@ void Graph::operator()( string figure_id, const Figure &figure )
 
 TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
+    string s;
+    s += "// -------------------- node figure --------------------\n";
     Figure my_graphables;
     list<MyBlock> my_blocks;
 	(void)context; // Not needed!!
@@ -124,7 +140,8 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	PopulateFrom( my_graphables.interiors, g );
 	my_blocks = GetBlocks( my_graphables.interiors, "", {} );
     PostProcessBlocks(my_blocks);
-    string s = DoGraphBody(my_blocks, base_region);
+    s += DoGraphBody(my_blocks, base_region);
+    s += "\n";
 	Remember( s );
 
 	return root; // no change
@@ -174,6 +191,48 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 		}
 	}
 }
+
+
+void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect, 
+                           const Figure::Subordinate &sub,
+                           const MyBlock &target_block )
+{
+    TRACE("RedirectLinks()\n");
+    // Loop over all the links in all the blocks that we might need to 
+    // redirect (ones in the interior of the figure)
+	for( MyBlock &block : blocks_to_redirect )
+	{
+        TRACEC("    Block: ")(block.base_id)("\n");
+        auto sbidit = block.link_ids.begin();
+        for( Graphable::SubBlock sub_block : block.sub_blocks )
+        {
+            ASSERT(sbidit != block.link_ids.end() );
+            auto lidit = sbidit->begin();
+            for( Graphable::Link link : sub_block.links )
+            {
+                ASSERT( lidit != sbidit->end() );
+                string id = *lidit;
+                TRACEC("        Link: ")(id)(": ")(link.labels)(link.trace_labels)("\n");
+                // Two things must be true for us to redirect this link toward the target block:
+                // - Link must point to the right agent - that being the root agent of the sub-engine
+                // - The link label (sattelite serial number of the PatternLink) must match the one supplied to us for the sub-engine
+                // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
+                if( link.child == sub.root )
+                {
+                    ASSERT( link.trace_labels.size()==1 ); // brittle
+                    if( link.trace_labels.front() == sub.link_name )
+                    {
+                        TRACEC("        Subordinate with matching Graphable * and link number: ")(sub.id)(" ")(sub.link_name)(" ")(target_block.base_id)("\n");    
+                        *lidit = target_block.base_id;                 
+                    }
+                }
+                
+                lidit++;
+            }
+            sbidit++;
+        }
+    }
+}                           
 
 
 list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
@@ -325,9 +384,6 @@ string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
     blocks_for_links.push_back(block);
 
 	string s;
-	s += "\""+block.base_id+"\"";
-	s += " [\n";
-    
 	s += "shape = \"" + block.shape + "\"\n";
 	if( block.colour=="transparent" )
 		s += "fillcolor = " + region.background_colour + "\n";
@@ -378,9 +434,13 @@ string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
 			s += "height = " NS_SMALL "\n";
 		}
 	}
-
-	s += "];\n";
-	return s;
+	string sc;
+    sc += "\""+block.base_id+"\"";
+	sc += " [\n";
+    sc += Indent(s);
+	sc += "];\n";
+    sc += "\n";
+	return sc;
 }
 
 
@@ -413,18 +473,18 @@ string Graph::DoHTMLLabel( const MyBlock &block )
         
     
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
-	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + lt + "</FONT></TD>\n";
-	s += "  <TD></TD>\n";
-	s += " </TR>\n";
+	s += " <TR>";
+	s += "<TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + lt + "</FONT></TD>";
+	s += "<TD></TD>";
+	s += "</TR>\n";
     
     int porti=0;
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
-        s += " <TR>\n";
-        s += "  <TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>\n";
-        s += "  <TD PORT=\"" + SeqField( porti ) + "\">" + EscapeForGraphviz(sub_block.item_extra) + "</TD>\n";
-        s += " </TR>\n";
+        s += " <TR>";
+        s += "<TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>";
+        s += "<TD PORT=\"" + SeqField( porti ) + "\">" + EscapeForGraphviz(sub_block.item_extra) + "</TD>";
+        s += "</TR>\n";
         porti++;
     }
     
@@ -438,12 +498,11 @@ string Graph::DoLinks( const MyBlock &block )
     string s;
     
     int porti=0;
-    TRACE( "DoLinks()\n" );
+    s += "// links for block "+block.base_id+"\n";
     auto sbidit = block.link_ids.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
 		ASSERT(sbidit != block.link_ids.end() );
-		TRACE( "OK\n" );
 		auto lidit = sbidit->begin();
         for( Graphable::Link link : sub_block.links )
         {
@@ -491,7 +550,8 @@ string Graph::DoLink( int port_index,
         s += ":" + SeqField(port_index);
 	s += " -> ";
 	s += "\""+id+"\"";
-	s += " ["+atts+"];\n";
+	s += " [\n"+Indent(atts)+"];\n";
+    s += "\n";
 	return s;
 }
 
@@ -499,22 +559,26 @@ string Graph::DoLink( int port_index,
 string Graph::DoHeader()
 {
 	string s;
-	s += "digraph Inferno {\n"; // g is name of graph
-	s += "graph [\n";
 	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
 	s += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
 	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
     s += "bgcolor = " + base_region.background_colour + "\n";
     s += "color = " + line_colour + "\n";
-    s += "fontcolor = " + font_colour + "\n";
-    s += "];\n";
-	s += "node [\n";
+    s += "fontcolor = " + font_colour + "\n";    
+    
+    string sc;
+	sc += "digraph Inferno {\n"; // g is name of graph
+	sc += "graph [\n";
+    sc += Indent(s);
+    sc += "];\n";
+	sc += "node [\n";
 #ifdef FONT
-    s += "fontname = \"" FONT "\"\n";
+    s = "fontname = \"" FONT "\"\n";
+    sc += Indent(s);
 #endif    
-	s += "];\n";
-	return s;
+	sc += "];\n";
+	return sc;
 }
 
 
@@ -522,6 +586,9 @@ string Graph::DoFooter()
 {
 	string s;
 
+    s += "\n";
+    s += "// -------------------- links --------------------\n";
+    
     for( const MyBlock &block : blocks_for_links )
         s += DoLinks(block);
         	
@@ -533,13 +600,17 @@ string Graph::DoFooter()
 string Graph::DoCluster(string ss, const RegionAppearance &region)
 {
     string s;
-    s += "subgraph \"cluster" + region.region_id + "\" {\n";
     s += "label = \"" + region.region_id + "\"\n";
     s += "style = \"filled\"\n";
 	s += "color = " + region.background_colour + "\n";
 	s += ss;
-    s += "}\n";
-    return s;
+ 
+    string sc;
+    sc += "subgraph \"cluster" + region.region_id + "\" {\n";
+    sc += Indent(s);
+    sc += "}\n";
+    sc += "\n";
+    return sc;
 }
 
 
@@ -630,3 +701,15 @@ const Graph::LinkNamingFunction Graph::my_lnf = []( const TreePtr<Node> *parent_
 {
 	return PatternLink( *parent_pattern, ppattern ).GetShortName();
 };		
+
+
+string Graph::Indent(string s)
+{
+    stringstream ss(s);
+    string sl, sout;
+
+    while(getline(ss, sl, '\n'))
+        sout += "    " + sl + "\n";
+
+    return sout;
+}

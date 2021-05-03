@@ -973,23 +973,24 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 void AndRuleEngine::GenerateGraph( Graph &graph ) const
 {
 	TRACE("Specifying figure nodes for ")(*this)("\n");
-	Graph::Figure graphables;
-	
-	TRACE("Interior:\n");
+	Graph::Figure figure;
+	figure.id = GetSerialString();
+    
+	TRACEC("   Interior:\n");
 	for( const Agent *agent : plan.my_normal_agents )
 	{
 		TRACEC(*agent)("\n");
-		graphables.interiors.push_back( agent );
+		figure.interiors.push_back( agent );
 	}
 	
-	TRACE("Exterior:\n");
+	TRACEC("   Exterior:\n");
 	for( const Agent *agent : plan.master_boundary_agents )
 	{
 		TRACEC(*agent)("\n");
-		graphables.exteriors.push_back( agent );
+		figure.exteriors.push_back( agent );
 	}
 	
-  	TRACE("Subordinates:\n");
+  	TRACEC("   Subordinates:\n");
 	auto my_subordinate_engines = plan.my_free_abnormal_engines;
 	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_evaluator_abnormal_engines );
 	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_multiplicity_engines );		
@@ -1000,10 +1001,10 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
         sub.link_name = p.first.GetShortName();
 		sub.root = p.second->plan.root_agent;
 		TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(sub.root)("\n");
-		graphables.subordinates.push_back( sub );
+		figure.subordinates.push_back( sub );
 	}
 	
 	TRACE("Ready to render ")(*this)("\n");
-	graph(GetSerialString(), graphables);
+	graph(figure);
 }
 

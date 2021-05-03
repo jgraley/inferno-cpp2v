@@ -1,237 +1,226 @@
 digraph Inferno {
 graph [
-rankdir = "LR"
-ranksep = 1.0
-size = "14,20"
-bgcolor = antiquewhite1
-color = black
-fontcolor = black
+    rankdir = "LR"
+    ranksep = 1.0
+    size = "14,20"
+    bgcolor = antiquewhite1
+    color = black
+    fontcolor = black
 ];
 node [
 ];
+// -------------------- transformation figure --------------------
 "CR#P94-0" [
-shape = "record"
-fillcolor = antiquewhite1
-label = "<fixed> CleanupNestedIf | <port0> search | <port1> replace"
-style = "filled"
-fontsize = "14"
-color = black
-fontcolor = black
+    shape = "record"
+    fillcolor = antiquewhite1
+    label = "<fixed> CleanupNestedIf | <port0> search | <port1> replace"
+    style = "filled"
+    fontsize = "14"
+    color = black
+    fontcolor = black
 ];
+
 "#B-2-1808" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">If</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>Expression</TD>
-  <TD PORT="port0"></TD>
- </TR>
- <TR>
-  <TD>Statement</TD>
-  <TD PORT="port1"></TD>
- </TR>
- <TR>
-  <TD>Statement</TD>
-  <TD PORT="port2"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">If</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1816" [
-shape = "plaintext"
-fillcolor = "/set28/6"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
-  <TD></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/6"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">Expression</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1809" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">If</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>Expression</TD>
-  <TD PORT="port0"></TD>
- </TR>
- <TR>
-  <TD>Statement</TD>
-  <TD PORT="port1"></TD>
- </TR>
- <TR>
-  <TD>Statement</TD>
-  <TD PORT="port2"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">If</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1815" [
-shape = "plaintext"
-fillcolor = "/set28/6"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Expression</FONT></TD>
-  <TD></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/6"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">Expression</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1811" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Statement</FONT></TD>
-  <TD></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">Statement</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1812" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Nop</FONT></TD>
-  <TD></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">Nop</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1813" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Nop</FONT></TD>
-  <TD></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">Nop</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1810" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">If</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>Expression</TD>
-  <TD PORT="port0"></TD>
- </TR>
- <TR>
-  <TD>Statement</TD>
-  <TD PORT="port1"></TD>
- </TR>
- <TR>
-  <TD>Statement</TD>
-  <TD PORT="port2"></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">If</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1817" [
-shape = "plaintext"
-fillcolor = "/set28/6"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">LogicalAnd</FONT></TD>
-  <TD></TD>
- </TR>
- <TR>
-  <TD>Expression</TD>
-  <TD PORT="port0">[0]</TD>
- </TR>
- <TR>
-  <TD>Expression</TD>
-  <TD PORT="port1">[1]</TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/6"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">LogicalAnd</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
+
 "#B-2-1814" [
-shape = "plaintext"
-fillcolor = "/set28/2"
-label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
- <TR>
-  <TD><FONT POINT-SIZE="16.0">Nop</FONT></TD>
-  <TD></TD>
- </TR>
-</TABLE>>
-style = "rounded,filled"
-fontsize = "12"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="16.0">Nop</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
-"CR#P94-0":port0 -> "#B-2-1808" [style="solid"
-color = black
-fontcolor = black
+
+
+
+// -------------------- links --------------------
+// links for block CR#P94-0
+"CR#P94-0":port0 -> "#B-2-1808" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"CR#P94-0":port1 -> "#B-2-1810" [style="dashed"
-color = black
-fontcolor = black
+
+"CR#P94-0":port1 -> "#B-2-1810" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1808":port0 -> "#B-2-1816" [style="solid"
-color = black
-fontcolor = black
+
+// links for block #B-2-1808
+"#B-2-1808":port0 -> "#B-2-1816" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1808":port1 -> "#B-2-1809" [style="solid"
-color = black
-fontcolor = black
+
+"#B-2-1808":port1 -> "#B-2-1809" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1808":port2 -> "#B-2-1813" [style="solid"
-color = black
-fontcolor = black
+
+"#B-2-1808":port2 -> "#B-2-1813" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1809":port0 -> "#B-2-1815" [style="solid"
-color = black
-fontcolor = black
+
+// links for block #B-2-1816
+// links for block #B-2-1809
+"#B-2-1809":port0 -> "#B-2-1815" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1809":port1 -> "#B-2-1811" [style="solid"
-color = black
-fontcolor = black
+
+"#B-2-1809":port1 -> "#B-2-1811" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1809":port2 -> "#B-2-1812" [style="solid"
-color = black
-fontcolor = black
+
+"#B-2-1809":port2 -> "#B-2-1812" [
+    style="solid"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1810":port0 -> "#B-2-1817" [style="dashed"
-color = black
-fontcolor = black
+
+// links for block #B-2-1815
+// links for block #B-2-1811
+// links for block #B-2-1812
+// links for block #B-2-1813
+// links for block #B-2-1810
+"#B-2-1810":port0 -> "#B-2-1817" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1810":port1 -> "#B-2-1811" [style="dashed"
-color = black
-fontcolor = black
+
+"#B-2-1810":port1 -> "#B-2-1811" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1810":port2 -> "#B-2-1814" [style="dashed"
-color = black
-fontcolor = black
+
+"#B-2-1810":port2 -> "#B-2-1814" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1817":port0 -> "#B-2-1816" [style="dashed"
-color = black
-fontcolor = black
+
+// links for block #B-2-1817
+"#B-2-1817":port0 -> "#B-2-1816" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
-"#B-2-1817":port1 -> "#B-2-1815" [style="dashed"
-color = black
-fontcolor = black
+
+"#B-2-1817":port1 -> "#B-2-1815" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
+
+// links for block #B-2-1814
 }

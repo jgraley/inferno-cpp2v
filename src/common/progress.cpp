@@ -42,6 +42,9 @@ Progress::Progress( string s )
 
 string Progress::GetPrefix(int width) const
 {
+    if( stage==INVALID )
+        return string( width, ' '); // defensive
+        
     string stage_code = stage_formats.at(stage);
     int width_after_stage_code = max((string::size_type)0, width-stage_code.size());
     

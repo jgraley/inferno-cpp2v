@@ -35,6 +35,7 @@ using namespace std;
 ////////////////////////// Trace() free functions //////////////////////////
     
 string Trace(const Traceable &t); 
+string Trace(string s); 
 string Trace(bool b); 
 string Trace(int i); 
 string Trace(size_t i); 

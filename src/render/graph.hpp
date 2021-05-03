@@ -34,13 +34,14 @@ public:
 	using Transformation::operator();
 
 	struct Figure
-	{
+	{        
         struct Subordinate
         {
             string id;
             string link_name;
             const Graphable *root;
         };
+        string id;
 		list<const Graphable *> interiors;
 		list<const Graphable *> exteriors;
 		list<Subordinate> subordinates;
@@ -49,7 +50,7 @@ public:
     Graph( string of = string() );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
-	void operator()( string figure_id, const Figure &graphables ); // graph just the specified ojects
+	void operator()( const Figure &figure ); // graph just the specified ojects
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -73,6 +74,9 @@ private:
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
+    void RedirectLinks( list<MyBlock> &blocks_to_redirect, 
+                        const Figure::Subordinate &sub,
+                        const MyBlock &target_block );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         string figure_id,
                              const set<Graphable::LinkStyle> &discard_links );
@@ -105,6 +109,7 @@ private:
     void Remember( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     string GetFullId(const Graphable *g, string figure_id);
+    string Indent(string s);
 
     const string outfile; // empty means stdout
     FILE *filep;

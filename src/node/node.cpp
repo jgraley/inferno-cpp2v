@@ -29,7 +29,6 @@ void GenericsTest()
 Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                           const NonTrivialPreRestrictionFunction &ntprf ) const
 {    
-	TRACE(*this)(" GetGraphBlockInfo()\n");
 	Graphable::Block block;
 	block.title = GetGraphName();     
 	block.bold = false;

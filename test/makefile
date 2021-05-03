@@ -68,7 +68,7 @@ test/results/rep.pass : $(CASES:%=test/results/rep/%.pass)
 
 test/results/graph.pass : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
 	./gen_dev_graphs.sh
-	diff -r graphs/ test/reference/graphs/ -x '*.svg'
+	diff -r test/reference/graphs/ graphs/ -x '*.svg'
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
