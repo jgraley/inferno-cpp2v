@@ -236,24 +236,6 @@ subgraph "cluster#R67-2" {
         fontsize = "12"
     ];
     
-    subgraph "cluster#R67-2/#R67-3" {
-        label = "#R67-2/#R67-3"
-        style = "filled"
-        color = antiquewhite3
-        "#R67-2/#0/#B-2-1154" [
-            shape = "plaintext"
-            fillcolor = "/set28/1"
-            label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-             <TR><TD><FONT POINT-SIZE="16.0">Label</FONT></TD><TD></TD></TR>
-             <TR><TD>LabelIdentifier</TD><TD PORT="port0"></TD></TR>
-             <TR><TD>#B-2-1154</TD><TD PORT="port1"></TD></TR>
-            </TABLE>>
-            style = "rounded,filled"
-            fontsize = "12"
-        ];
-        
-    }
-    
     subgraph "cluster#R67-2/#R67-4" {
         label = "#R67-2/#R67-4"
         style = "filled"
@@ -267,6 +249,24 @@ subgraph "cluster#R67-2" {
              <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
              <TR><TD>Expression</TD><TD PORT="port2">[2]</TD></TR>
              <TR><TD>#B-2-1173</TD><TD PORT="port3"></TD></TR>
+            </TABLE>>
+            style = "rounded,filled"
+            fontsize = "12"
+        ];
+        
+    }
+    
+    subgraph "cluster#R67-2/#R67-3" {
+        label = "#R67-2/#R67-3"
+        style = "filled"
+        color = antiquewhite3
+        "#R67-2/#0/#B-2-1154" [
+            shape = "plaintext"
+            fillcolor = "/set28/1"
+            label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+             <TR><TD><FONT POINT-SIZE="16.0">Label</FONT></TD><TD></TD></TR>
+             <TR><TD>LabelIdentifier</TD><TD PORT="port0"></TD></TR>
+             <TR><TD>#B-2-1154</TD><TD PORT="port1"></TD></TR>
             </TABLE>>
             style = "rounded,filled"
             fontsize = "12"
@@ -2525,7 +2525,7 @@ subgraph "cluster#R67-0" {
 
 // links for block #R67-0/#B-2-1179
 "#R67-0/#B-2-1179":port0 -> "#R67-0/#0/#B-2-1185" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2533,7 +2533,7 @@ subgraph "cluster#R67-0" {
 ];
 
 "#R67-0/#B-2-1179":port1 -> "#R67-0/#0/#B-2-1197" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2571,7 +2571,7 @@ subgraph "cluster#R67-0" {
 
 // links for block #R67-0/#B-2-1110
 "#R67-0/#B-2-1110":port0 -> "#R67-0/#0/#B-2-1118" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2649,7 +2649,7 @@ subgraph "cluster#R67-0" {
 
 // links for block #R67-1/#B-2-1171
 "#R67-1/#B-2-1171":port0 -> "#R67-1/#0/#B-2-1176" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2676,7 +2676,7 @@ subgraph "cluster#R67-0" {
 ];
 
 "#R67-1/#B-2-1138":port1 -> "#R67-1/#0/#B-2-1126" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2729,7 +2729,7 @@ subgraph "cluster#R67-0" {
 
 // links for block #R67-1/#B-2-1181
 "#R67-1/#B-2-1181":port0 -> "#R67-1/#0/#B-2-1189" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2745,7 +2745,7 @@ subgraph "cluster#R67-0" {
 ];
 
 "#R67-1/#B-2-1181":port1 -> "#R67-1/#0/#B-2-1191" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2761,7 +2761,7 @@ subgraph "cluster#R67-0" {
 ];
 
 "#R67-1/#B-2-1181":port3 -> "#R67-1/#0/#B-2-1190" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2770,7 +2770,7 @@ subgraph "cluster#R67-0" {
 
 // links for block #R67-1/#B-2-1164
 "#R67-1/#B-2-1164":port0 -> "#R67-1/#0/#B-2-1128" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2822,7 +2822,8 @@ subgraph "cluster#R67-0" {
 // links for block #R67-11/#B-2-1190
 // links for block #R67-12/#B-2-1176
 "#R67-12/#B-2-1176":port0 -> "#R67-12/#0/#B-2-1177" [
-    style="solid"
+    style="dotted"
+    arrowhead="normalnormalnormal"
     label = "#0"
     decorate = true
     color = black
@@ -2832,7 +2833,8 @@ subgraph "cluster#R67-0" {
 // links for block #R67-12/#0/#B-2-1177
 // links for block #R67-13/#B-2-1177
 "#R67-13/#B-2-1177":port0 -> "#R67-13/#0/#B-2-1146" [
-    style="solid"
+    style="dotted"
+    arrowhead="odiamond"
     label = "#0"
     decorate = true
     color = black
@@ -2845,7 +2847,8 @@ subgraph "cluster#R67-0" {
 // links for block #R67-2/#B-2-1146
 // links for block #R67-2/#B-2-1150
 "#R67-2/#B-2-1150":port0 -> "#R67-2/#0/#B-2-1173" [
-    style="solid"
+    style="dotted"
+    arrowhead="odiamond"
     label = "#0"
     decorate = true
     color = black
@@ -2888,7 +2891,8 @@ subgraph "cluster#R67-0" {
 
 // links for block #R67-2/#B-2-1151
 "#R67-2/#B-2-1151":port0 -> "#R67-2/#0/#B-2-1154" [
-    style="solid"
+    style="dotted"
+    arrowhead="odiamond"
     label = "#0"
     decorate = true
     color = black
@@ -2922,12 +2926,12 @@ subgraph "cluster#R67-0" {
     fontcolor = black
 ];
 
-// links for block #R67-2/#0/#B-2-1154
 // links for block #R67-2/#0/#B-2-1173
+// links for block #R67-2/#0/#B-2-1154
 // links for block #R67-4/#B-2-1146
 // links for block #R67-4/#B-2-1173
 "#R67-4/#B-2-1173":port0 -> "#R67-4/#0/#B-2-1187" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -2943,7 +2947,7 @@ subgraph "cluster#R67-0" {
 ];
 
 "#R67-4/#B-2-1173":port2 -> "#R67-4/#0/#B-2-1186" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black

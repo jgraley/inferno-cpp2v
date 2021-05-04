@@ -630,7 +630,7 @@ subgraph "cluster#R64-0" {
 // links for block #B-2-1080
 // links for block #R64-0/#B-2-1072
 "#R64-0/#B-2-1072":port0 -> "#R64-0/#0/#B-2-1074" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -638,7 +638,7 @@ subgraph "cluster#R64-0" {
 ];
 
 "#R64-0/#B-2-1072":port1 -> "#R64-0/#0/#B-2-1075" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -654,7 +654,7 @@ subgraph "cluster#R64-0" {
 ];
 
 "#R64-0/#B-2-1072":port3 -> "#R64-0/#0/#B-2-1076" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -687,7 +687,8 @@ subgraph "cluster#R64-0" {
 // links for block #R64-1/#B-2-1074
 // links for block #R64-2/#B-2-1075
 "#R64-2/#B-2-1075":port0 -> "#R64-2/#0/#B-2-1077" [
-    style="solid"
+    style="dotted"
+    arrowhead="normalnormalnormal"
     label = "#0"
     decorate = true
     color = black
@@ -697,7 +698,8 @@ subgraph "cluster#R64-0" {
 // links for block #R64-2/#0/#B-2-1077
 // links for block #R64-3/#B-2-1077
 "#R64-3/#B-2-1077":port0 -> "#R64-3/#0/#B-2-1078" [
-    style="solid"
+    style="dotted"
+    arrowhead="odiamond"
     label = "#0"
     decorate = true
     color = black

@@ -23,6 +23,9 @@ public:
     {
         SOLID,
         DASHED,
+        DOTTED,
+        DOTTED_DIAMOND,
+        DOTTED_MULTI,
     };
     enum BlockType
     {

@@ -116,7 +116,7 @@ void Graph::operator()( const Figure &figure )
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
         list<MyBlock> sub_blocks = subordinate_blocks.at(&sub);        
-	    string s_subordinate = DoGraphBody(sub_blocks, subordinate_region); // Subordinaet blocks
+	    string s_subordinate = DoGraphBody(sub_blocks, subordinate_region); // Subordinate blocks
 		s_interior += DoCluster(s_subordinate, subordinate_region);
 	}
 
@@ -204,11 +204,11 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 	{
         TRACEC("    Block: ")(block.base_id)("\n");
         auto sbidit = block.link_ids.begin();
-        for( Graphable::SubBlock sub_block : block.sub_blocks )
+        for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
             ASSERT(sbidit != block.link_ids.end() );
             auto lidit = sbidit->begin();
-            for( Graphable::Link link : sub_block.links )
+            for( Graphable::Link &link : sub_block.links )
             {
                 ASSERT( lidit != sbidit->end() );
                 string id = *lidit;
@@ -223,7 +223,8 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     if( link.trace_labels.front() == sub.link_name )
                     {
                         TRACEC("        Subordinate with matching Graphable * and link number: ")(sub.id)(" ")(sub.link_name)(" ")(target_block.base_id)("\n");    
-                        *lidit = target_block.base_id;                 
+                        *lidit = target_block.base_id;     
+                        link.link_style = sub.link_style;            
                     }
                 }
                 
@@ -681,6 +682,17 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
         break;
     case Graphable::DASHED:
         atts += "style=\"dashed\"\n";
+        break;
+    case Graphable::DOTTED:
+        atts += "style=\"dotted\"\n";
+        break;
+    case Graphable::DOTTED_DIAMOND:
+        atts += "style=\"dotted\"\n";
+        atts += "arrowhead=\"odiamond\"\n";
+        break;
+    case Graphable::DOTTED_MULTI:
+        atts += "style=\"dotted\"\n";
+        atts += "arrowhead=\"normalnormalnormal\"\n";
         break;
     }
     return atts;

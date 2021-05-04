@@ -990,20 +990,23 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
 		figure.exteriors.push_back( agent );
 	}
 	
-  	TRACEC("   Subordinates:\n");
-	auto my_subordinate_engines = plan.my_free_abnormal_engines;
-	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_evaluator_abnormal_engines );
-	my_subordinate_engines = UnionOfSolo( my_subordinate_engines, plan.my_multiplicity_engines );		
-	for( auto p : my_subordinate_engines )
-	{
-        Graph::Figure::Subordinate sub;
-		sub.id = p.second->GetSerialString();
-        sub.link_name = p.first.GetShortName();
-		sub.root = p.second->plan.root_agent;
-		TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(sub.root)("\n");
-		figure.subordinates.push_back( sub );
-	}
-	
+  	TRACEC("   Subordinates:\n");	
+	auto lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graphable::LinkStyle style )
+    {
+        for( auto p : engines )
+        {
+            Graph::Figure::Subordinate sub;
+            sub.id = p.second->GetSerialString();
+            sub.link_style = style;
+            sub.link_name = p.first.GetShortName();
+            sub.root = p.second->plan.root_agent;
+            TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(sub.root)("\n");
+            figure.subordinates.push_back( sub );
+        }
+	};
+    lambda( plan.my_free_abnormal_engines, Graphable::DOTTED );
+    lambda( plan.my_evaluator_abnormal_engines, Graphable::DOTTED_DIAMOND );
+    lambda( plan.my_multiplicity_engines, Graphable::DOTTED_MULTI );
 	TRACE("Ready to render ")(*this)("\n");
 	graph(figure);
 }

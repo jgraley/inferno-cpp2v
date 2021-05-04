@@ -760,7 +760,7 @@ subgraph "cluster#R84-0" {
 
 // links for block #R84-0/#B-2-1552
 "#R84-0/#B-2-1552":port0 -> "#R84-0/#0/#B-2-1555" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -776,7 +776,7 @@ subgraph "cluster#R84-0" {
 ];
 
 "#R84-0/#B-2-1552":port2 -> "#R84-0/#0/#B-2-1556" [
-    style="solid"
+    style="dotted"
     label = "#0"
     decorate = true
     color = black
@@ -815,7 +815,8 @@ subgraph "cluster#R84-0" {
 // links for block #R84-0/#0/#B-2-1555
 // links for block #R84-3/#B-2-1556
 "#R84-3/#B-2-1556":port0 -> "#R84-3/#0/#B-2-1561" [
-    style="solid"
+    style="dotted"
+    arrowhead="normalnormalnormal"
     label = "#0"
     decorate = true
     color = black
@@ -825,7 +826,8 @@ subgraph "cluster#R84-0" {
 // links for block #R84-3/#0/#B-2-1561
 // links for block #R84-4/#B-2-1561
 "#R84-4/#B-2-1561":port0 -> "#R84-4/#0/#B-2-1568" [
-    style="solid"
+    style="dotted"
+    arrowhead="odiamond"
     label = "#0"
     decorate = true
     color = black

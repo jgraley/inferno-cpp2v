@@ -38,6 +38,7 @@ public:
         struct Subordinate
         {
             string id;
+            Graphable::LinkStyle link_style;
             string link_name;
             const Graphable *root;
         };
