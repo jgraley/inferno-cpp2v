@@ -35,7 +35,7 @@ public:
     struct Link
     {
         const Graphable *child;
-        LinkStyle link_style;
+        LinkStyle style;
         list<string> labels;
         list<string> trace_labels;
         bool is_ntpr;

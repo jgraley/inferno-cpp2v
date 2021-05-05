@@ -224,7 +224,7 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     {
                         TRACEC("        Subordinate with matching Graphable * and link number: ")(sub.id)(" ")(sub.link_name)(" ")(target_block.base_id)("\n");    
                         *lidit = target_block.base_id;     
-                        link.link_style = sub.link_style;            
+                        link.style = sub.link_style;            
                     }
                 }
                 
@@ -313,7 +313,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         list<string> new_link_ids;
         for( Graphable::Link &link : sub_block.links )
         {
-			if( discard_links.count( link.link_style ) )
+			if( discard_links.count( link.style ) )
 				continue;
 			
 			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
@@ -527,7 +527,7 @@ string Graph::DoLink( int port_index,
 {          
     // Atts
     string atts;
-    atts += LinkStyleAtt(link.link_style);
+    atts += LinkStyleAtt(link.style);
 
     // Labels
     list<string> labels;

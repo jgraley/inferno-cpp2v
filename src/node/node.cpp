@@ -50,7 +50,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                   {} };
                 Graphable::Link link;
                 link.child = dynamic_cast<Graphable *>(p.get());
-                link.link_style = Graphable::SOLID;
+                link.style = Graphable::SOLID;
                 link.trace_labels.push_back( lnf( &sp_this, &p ) );
                 link.is_ntpr = ntprf ? ntprf(&p) : false;
                 sub_block.links.push_back( link );
@@ -71,7 +71,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
             {
                 Graphable::Link link;
                 link.child = dynamic_cast<Graphable *>(p.get());
-                link.link_style = Graphable::SOLID;                
+                link.style = Graphable::SOLID;                
                 link.trace_labels.push_back( lnf( &sp_this, &p ) );
                 link.is_ntpr = ntprf ? ntprf(&p) : false;
                 sub_block.links.push_back( link );
@@ -88,7 +88,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                   {} };
                 Graphable::Link link;
                 link.child = dynamic_cast<Graphable *>(ptr->get());
-                link.link_style = Graphable::SOLID;                
+                link.style = Graphable::SOLID;                
                 link.trace_labels.push_back( lnf(&sp_this, ptr ) );          
                 link.is_ntpr = ntprf ? ntprf(ptr) : false;
                 sub_block.links.push_back( link );
