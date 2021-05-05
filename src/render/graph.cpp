@@ -71,12 +71,12 @@ void Graph::operator()( Transformation *root )
 {
     string s;
     s += "// -------------------- transformation figure --------------------\n";
-    Figure my_graphables;
+    list<const Graphable *> my_graphables;
     list<MyBlock> my_blocks;
 
 	reached.clear();
-    PopulateFromTransformation(my_graphables.interiors, root);
-    my_blocks = GetBlocks( my_graphables.interiors, "", {} );
+    PopulateFromTransformation(my_graphables, root);
+    my_blocks = GetBlocks( my_graphables, "", {} );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -87,18 +87,31 @@ void Graph::operator()( Transformation *root )
 void Graph::operator()( const Figure &figure )
 {        
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
-    list<MyBlock> exterior_blocks = GetBlocks( figure.exteriors, figure.id, {Graphable::SOLID, Graphable::DASHED} );
-    PostProcessBlocks(exterior_blocks);
-    list<MyBlock> interior_blocks = GetBlocks( figure.interiors, figure.id, {Graphable::DASHED} );
-    PostProcessBlocks(interior_blocks);
+    list<const Graphable *> interior_gs, exterior_gs;
     map< const Figure::Subordinate *, list<MyBlock> > subordinate_blocks;
+
+    for( const Figure::LinkAndBlock &lb : figure.exteriors )
+        exterior_gs.push_back( lb.graphable );
+    for( const Figure::LinkAndBlock &lb : figure.interiors )
+        interior_gs.push_back( lb.graphable );
+
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::SOLID, Graphable::DASHED} );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::DASHED} );
     for( const Figure::Subordinate &sub : figure.subordinates )
-    {
-    	list<MyBlock> sub_blocks = GetBlocks( {sub.root}, figure.id+"/"+sub.link_name, {Graphable::SOLID, Graphable::DASHED} );
-        RedirectLinks( interior_blocks, sub, sub_blocks.front() );
-		PostProcessBlocks(sub_blocks);
-        subordinate_blocks[&sub] = sub_blocks;
-	}
+    	subordinate_blocks[&sub] = GetBlocks( {sub.root}, figure.id+"/"+sub.link_name, {Graphable::SOLID, Graphable::DASHED} );
+
+    // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
+    for( const Figure::LinkAndBlock &lb : figure.interiors )
+        RedirectLinks( interior_blocks, lb.graphable, lb.link_name, lb.link_style );
+    for( const Figure::LinkAndBlock &lb : figure.exteriors )
+        RedirectLinks( interior_blocks, lb.graphable, lb.link_name, lb.link_style );
+    for( const Figure::Subordinate &sub : figure.subordinates )
+        RedirectLinks( interior_blocks, sub.root, sub.link_name, sub.link_style, &(subordinate_blocks[&sub].front()) );
+
+    PostProcessBlocks(exterior_blocks);
+    PostProcessBlocks(interior_blocks);
+    for( const Figure::Subordinate &sub : figure.subordinates )
+		PostProcessBlocks(subordinate_blocks[&sub]);	
     
     // Now generate all the dot code
     string s;
@@ -131,14 +144,14 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
     string s;
     s += "// -------------------- node figure --------------------\n";
-    Figure my_graphables;
+    list<const Graphable *> my_graphables;
     list<MyBlock> my_blocks;
 	(void)context; // Not needed!!
 
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
-	PopulateFrom( my_graphables.interiors, g );
-	my_blocks = GetBlocks( my_graphables.interiors, "", {} );
+	PopulateFrom( my_graphables, g );
+	my_blocks = GetBlocks( my_graphables, "", {} );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -194,9 +207,12 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 
 
 void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect, 
-                           const Figure::Subordinate &sub,
-                           const MyBlock &target_block )
+                           const Graphable *child_g,
+                           string trace_label,
+                           Graphable::LinkStyle target_link_style,
+                           const MyBlock *target_block )
 {
+    bool hit = false;
     TRACE("RedirectLinks()\n");
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
@@ -217,14 +233,15 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (sattelite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link.child == sub.root )
+                if( link.child == child_g )
                 {
                     ASSERT( link.trace_labels.size()==1 ); // brittle
-                    if( link.trace_labels.front() == sub.link_name )
+                    if( link.trace_labels.front() == trace_label )
                     {
-                        TRACEC("        Subordinate with matching Graphable * and link number: ")(sub.id)(" ")(sub.link_name)(" ")(target_block.base_id)("\n");    
-                        *lidit = target_block.base_id;     
-                        link.style = sub.link_style;            
+                        if( target_block )
+                            *lidit = target_block->base_id;     
+                        link.style = target_link_style;            
+                        hit = true;
                     }
                 }
                 
@@ -233,6 +250,7 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
             sbidit++;
         }
     }
+    //ASSERT( hit );
 }                           
 
 
@@ -679,6 +697,14 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
     {
     case Graphable::SOLID:
         atts += "style=\"solid\"\n";
+        break;
+    case Graphable::SOLID_SQUARE:
+        atts += "style=\"solid\"\n";
+        atts += "arrowhead=\"normalnonebox\"\n";
+        break;
+    case Graphable::SOLID_TEE:
+        atts += "style=\"solid\"\n";
+        atts += "arrowhead=\"normalnonetee\"\n";
         break;
     case Graphable::DASHED:
         atts += "style=\"dashed\"\n";

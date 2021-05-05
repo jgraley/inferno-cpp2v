@@ -210,6 +210,7 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
         // 1. It's a master agent
         // 2. It's not the child of a master agent (we don't recurse on them)
         // See #125
+        master_boundary_links.insert( link );
         master_boundary_agents.insert( agent );
 
         // We don't need the original keyer link for this agent (it belongs
@@ -977,17 +978,35 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
 	figure.id = GetSerialString();
     
 	TRACEC("   Interior:\n");
-	for( const Agent *agent : plan.my_normal_agents )
+	for( PatternLink plink : plan.my_normal_links )
 	{
-		TRACEC(*agent)("\n");
-		figure.interiors.push_back( agent );
+        Graph::Figure::LinkAndBlock lb;
+        if( plan.coupling_residual_links.count(plink)>0 )
+            lb.link_style = Graphable::SOLID_TEE;
+        else if( plan.coupling_keyer_links.count(plink)>0 )
+            lb.link_style = Graphable::SOLID_SQUARE;
+        else
+            lb.link_style = Graphable::SOLID;
+        lb.link_name = plink.GetShortName();
+        lb.graphable = plink.GetChildAgent();
+		TRACEC(plink)("\n");
+		figure.interiors.push_back( lb );
 	}
 	
 	TRACEC("   Exterior:\n");
-	for( const Agent *agent : plan.master_boundary_agents )
+	for( PatternLink plink : plan.master_boundary_links )
 	{
-		TRACEC(*agent)("\n");
-		figure.exteriors.push_back( agent );
+        Graph::Figure::LinkAndBlock lb;
+        if( plan.master_boundary_residual_links.count(plink)>0 )
+            lb.link_style = Graphable::SOLID_TEE;
+        else if( plan.master_boundary_keyer_links.count(plink)>0 )
+            lb.link_style = Graphable::SOLID_SQUARE;
+        else
+            lb.link_style = Graphable::SOLID;
+        lb.link_name = plink.GetShortName();
+        lb.graphable = plink.GetChildAgent();
+        TRACEC(plink)("\n");
+		figure.exteriors.push_back( lb );
 	}
 	
   	TRACEC("   Subordinates:\n");	

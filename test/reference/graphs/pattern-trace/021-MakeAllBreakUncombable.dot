@@ -33,6 +33,16 @@ subgraph "cluster#R21-0" {
     label = "#R21-0"
     style = "filled"
     color = antiquewhite2
+    "#R21-0/#P21-6-25" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P21-6-25"
+        style = "filled"
+        fontsize = "14"
+        color = black
+        fontcolor = black
+    ];
+    
     "#R21-0/#B-2-267" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -55,16 +65,6 @@ subgraph "cluster#R21-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
-    ];
-    
-    "#R21-0/#P21-6-25" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P21-6-25"
-        style = "filled"
-        fontsize = "14"
-        color = black
-        fontcolor = black
     ];
     
     subgraph "cluster#R21-0/#R21-1" {
@@ -203,6 +203,15 @@ subgraph "cluster#R21-0" {
 
 // links for block #B-2-268
 // links for block #B-2-274
+// links for block #R21-0/#P21-6-25
+"#R21-0/#P21-6-25":port0 -> "#R21-0/#B-2-267" [
+    style="solid"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 // links for block #R21-0/#B-2-267
 "#R21-0/#B-2-267":port1 -> "#R21-0/#0/#B-2-268" [
     style="dotted"
@@ -215,15 +224,6 @@ subgraph "cluster#R21-0" {
 
 // links for block #R21-0/#P21-8-20
 "#R21-0/#P21-8-20":port0 -> "#R21-0/#P21-6-25" [
-    style="solid"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block #R21-0/#P21-6-25
-"#R21-0/#P21-6-25":port0 -> "#R21-0/#B-2-267" [
     style="solid"
     label = "#0"
     decorate = true

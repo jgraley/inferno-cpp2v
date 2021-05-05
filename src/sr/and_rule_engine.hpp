@@ -99,6 +99,7 @@ public:
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         unordered_map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         unordered_set<Agent *> master_boundary_agents;
+        unordered_set<PatternLink> master_boundary_links;
         unordered_set<PatternLink> master_boundary_keyer_links;
         unordered_set<PatternLink> master_boundary_residual_links;
         unordered_set<PatternLink> coupling_keyer_links;

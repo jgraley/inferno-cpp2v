@@ -109,6 +109,16 @@ subgraph "cluster#R48-0" {
     label = "#R48-0"
     style = "filled"
     color = antiquewhite2
+    "#R48-0/#P48-6-63" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P48-6-63"
+        style = "filled"
+        fontsize = "14"
+        color = black
+        fontcolor = black
+    ];
+    
     "#R48-0/#B-2-849" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -117,6 +127,17 @@ subgraph "cluster#R48-0" {
          <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
          <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
          <TR><TD>#B-2-849</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "#R48-0/#P48-8-55" [
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P48-8-55</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -135,27 +156,6 @@ subgraph "cluster#R48-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
-    ];
-    
-    "#R48-0/#P48-8-55" [
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P48-8-55</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "#R48-0/#P48-6-63" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P48-6-63"
-        style = "filled"
-        fontsize = "14"
-        color = black
-        fontcolor = black
     ];
     
     subgraph "cluster#R48-0/#R48-3" {
@@ -510,6 +510,15 @@ subgraph "cluster#R48-0" {
     fontcolor = black
 ];
 
+// links for block #R48-0/#P48-6-63
+"#R48-0/#P48-6-63":port0 -> "#R48-0/#B-2-850" [
+    style="solid"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 // links for block #R48-0/#B-2-849
 "#R48-0/#B-2-849":port0 -> "#R48-0/#0/#B-2-855" [
     style="dotted"
@@ -523,6 +532,15 @@ subgraph "cluster#R48-0" {
 "#R48-0/#B-2-849":port1 -> "#R48-0/#0/#B-2-854" [
     style="dotted"
     arrowhead="normalnoneodot"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block #R48-0/#P48-8-55
+"#R48-0/#P48-8-55":port0 -> "#R48-0/#P48-6-63" [
+    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -559,24 +577,6 @@ subgraph "cluster#R48-0" {
 "#R48-0/#B-2-850":port3 -> "#R48-0/#0/#B-2-853" [
     style="dotted"
     arrowhead="normalnoneodot"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block #R48-0/#P48-8-55
-"#R48-0/#P48-8-55":port0 -> "#R48-0/#P48-6-63" [
-    style="solid"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block #R48-0/#P48-6-63
-"#R48-0/#P48-6-63":port0 -> "#R48-0/#B-2-850" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black

@@ -45,11 +45,12 @@ public:
         struct LinkAndBlock
         {
             Graphable::LinkStyle link_style;
-            const Graphable *root;
+            string link_name;
+            const Graphable *graphable;
         };
         string id;
-		list<const Graphable *> interiors;
-		list<const Graphable *> exteriors;
+		list<LinkAndBlock> interiors;
+		list<LinkAndBlock> exteriors;
 		list<Subordinate> subordinates;
 	};
 
@@ -81,8 +82,10 @@ private:
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
     void RedirectLinks( list<MyBlock> &blocks_to_redirect, 
-                        const Figure::Subordinate &sub,
-                        const MyBlock &target_block );
+                        const Graphable *child_g,
+                        string trace_label,
+                        Graphable::LinkStyle target_link_style,
+                        const MyBlock *target_block = nullptr );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         string figure_id,
                              const set<Graphable::LinkStyle> &discard_links );

@@ -22,10 +22,12 @@ public:
     enum LinkStyle
     {
         SOLID,
+        SOLID_SQUARE,
+        SOLID_TEE,
         DASHED,
         DOTTED_CIRCLE,
         DOTTED_DIAMOND,
-        DOTTED_MULTI,
+        DOTTED_MULTI,        
     };
     enum BlockType
     {
