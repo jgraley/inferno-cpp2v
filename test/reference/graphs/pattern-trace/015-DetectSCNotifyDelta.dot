@@ -1,8 +1,6 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
@@ -388,6 +386,7 @@ subgraph "cluster#R15-0" {
 // links for block #R15-0/#B-2-176
 "#R15-0/#B-2-176":port0 -> "#R15-0/#B-2-170" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -397,6 +396,7 @@ subgraph "cluster#R15-0" {
 // links for block #R15-0/#B-2-169
 "#R15-0/#B-2-169":port0 -> "#R15-0/#B-2-176" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -405,6 +405,7 @@ subgraph "cluster#R15-0" {
 
 "#R15-0/#B-2-169":port1 -> "#R15-0/#B-2-175" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -415,6 +416,7 @@ subgraph "cluster#R15-0" {
 // links for block #R15-0/#B-2-168
 "#R15-0/#B-2-168":port0 -> "#R15-0/#B-2-172" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -423,6 +425,7 @@ subgraph "cluster#R15-0" {
 
 "#R15-0/#B-2-168":port1 -> "#R15-0/#B-2-169" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -432,6 +435,7 @@ subgraph "cluster#R15-0" {
 // links for block #R15-0/#P15-8-15
 "#R15-0/#P15-8-15":port0 -> "#R15-0/#P15-6-18" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -444,6 +448,7 @@ subgraph "cluster#R15-0" {
 // links for block #R15-0/#B-2-172
 "#R15-0/#B-2-172":port0 -> "#R15-0/#B-2-174" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -452,6 +457,7 @@ subgraph "cluster#R15-0" {
 
 "#R15-0/#B-2-172":port1 -> "#R15-0/#B-2-173" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -461,6 +467,7 @@ subgraph "cluster#R15-0" {
 // links for block #R15-0/#P15-6-18
 "#R15-0/#P15-6-18":port0 -> "#R15-0/#B-2-168" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black

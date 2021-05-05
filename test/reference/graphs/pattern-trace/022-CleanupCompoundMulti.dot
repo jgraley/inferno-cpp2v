@@ -1,8 +1,6 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
@@ -513,6 +511,7 @@ subgraph "cluster#R22-0" {
 // links for block #R22-0/#P22-6-26
 "#R22-0/#P22-6-26":port0 -> "#R22-0/#B-2-276" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -559,6 +558,7 @@ subgraph "cluster#R22-0" {
 
 "#R22-0/#B-2-276":port2 -> "#R22-0/#B-2-275" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -577,6 +577,7 @@ subgraph "cluster#R22-0" {
 // links for block #R22-0/#P22-8-21
 "#R22-0/#P22-8-21":port0 -> "#R22-0/#P22-6-26" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black

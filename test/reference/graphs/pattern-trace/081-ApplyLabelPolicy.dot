@@ -1,8 +1,6 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
@@ -809,6 +807,7 @@ subgraph "cluster#R81-0" {
 
 "#R81-0/#B-2-1493":port2 -> "#R81-0/#B-2-1499" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -817,6 +816,7 @@ subgraph "cluster#R81-0" {
 
 "#R81-0/#B-2-1493":port3 -> "#R81-0/#B-2-1502" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -825,6 +825,7 @@ subgraph "cluster#R81-0" {
 
 "#R81-0/#B-2-1493":port4 -> "#R81-0/#B-2-1500" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -852,6 +853,7 @@ subgraph "cluster#R81-0" {
 // links for block #R81-0/#B-2-1502
 "#R81-0/#B-2-1502":port0 -> "#R81-0/#B-2-1503" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -861,6 +863,7 @@ subgraph "cluster#R81-0" {
 // links for block #R81-0/#B-2-1503
 "#R81-0/#B-2-1503":port0 -> "#R81-0/#B-2-1505" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -869,6 +872,7 @@ subgraph "cluster#R81-0" {
 
 "#R81-0/#B-2-1503":port0 -> "#R81-0/#B-2-1506" [
     style="solid"
+    arrowhead="normalnonetee"
     label = "#1"
     decorate = true
     color = black
@@ -879,6 +883,7 @@ subgraph "cluster#R81-0" {
 // links for block #R81-0/#P81-6-101
 "#R81-0/#P81-6-101":port0 -> "#R81-0/#B-2-1493" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -888,6 +893,7 @@ subgraph "cluster#R81-0" {
 // links for block #R81-0/#P81-8-97
 "#R81-0/#P81-8-97":port0 -> "#R81-0/#P81-6-101" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -897,6 +903,7 @@ subgraph "cluster#R81-0" {
 // links for block #R81-0/#B-2-1499
 "#R81-0/#B-2-1499":port1 -> "#R81-0/#B-2-1506" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black

@@ -1,8 +1,6 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
@@ -1277,6 +1275,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-0/#B-2-81
 "#R11-0/#B-2-81":port0 -> "#R11-0/#B-2-101" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1285,6 +1284,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-0/#B-2-81":port1 -> "#R11-0/#B-2-98" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1295,6 +1295,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-0/#B-3-3
 "#R11-0/#B-3-3":port0 -> "#R11-0/#B-2-76" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1304,6 +1305,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-0/#P11-6-14
 "#R11-0/#P11-6-14":port0 -> "#R11-0/#B-3-3" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1322,6 +1324,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-0/#B-2-76":port0 -> "#R11-0/#B-2-81" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1335,6 +1338,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-85
 "#R11-1/#B-2-85":port0 -> "#R11-1/#B-2-86" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1343,6 +1347,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-85":port1 -> "#R11-1/#B-2-98" [
     style="solid"
+    arrowhead="normalnonetee"
     label = "#1"
     decorate = true
     color = black
@@ -1354,6 +1359,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-96
 "#R11-1/#B-2-96":port0 -> "#R11-1/#B-2-102" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1364,6 +1370,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-91
 "#R11-1/#B-2-91":port0 -> "#R11-1/#B-2-88" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1372,6 +1379,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-91":port1 -> "#R11-1/#B-2-94" [
     style="solid"
+    arrowhead="normalnonetee"
     label = "#1"
     decorate = true
     color = black
@@ -1382,6 +1390,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-88
 "#R11-1/#B-2-88":port0 -> "#R11-1/#B-2-103" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1391,6 +1400,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-84
 "#R11-1/#B-2-84":port1 -> "#R11-1/#B-2-87" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1399,6 +1409,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-84":port1 -> "#R11-1/#B-2-91" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1427,6 +1438,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-86
 "#R11-1/#B-2-86":port0 -> "#R11-1/#B-2-99" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1435,6 +1447,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-86":port1 -> "#R11-1/#B-2-94" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1444,6 +1457,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-89
 "#R11-1/#B-2-89":port0 -> "#R11-1/#B-2-96" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1452,6 +1466,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-89":port1 -> "#R11-1/#B-2-97" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1460,6 +1475,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-89":port2 -> "#R11-1/#B-2-82" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1469,6 +1485,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#B-2-87
 "#R11-1/#B-2-87":port1 -> "#R11-1/#B-2-89" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1496,6 +1513,7 @@ subgraph "cluster#R11-0" {
 
 "#R11-1/#B-2-82":port2 -> "#R11-1/#B-2-85" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -1514,6 +1532,7 @@ subgraph "cluster#R11-0" {
 // links for block #R11-1/#P11-8-11
 "#R11-1/#P11-8-11":port0 -> "#R11-1/#B-2-84" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black

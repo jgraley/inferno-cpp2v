@@ -1,8 +1,6 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
@@ -289,6 +287,7 @@ subgraph "cluster#R14-0" {
 // links for block #R14-0/#B-2-163
 "#R14-0/#B-2-163":port0 -> "#R14-0/#B-2-167" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -297,6 +296,7 @@ subgraph "cluster#R14-0" {
 
 "#R14-0/#B-2-163":port1 -> "#R14-0/#B-2-166" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -307,6 +307,7 @@ subgraph "cluster#R14-0" {
 // links for block #R14-0/#P14-8-14
 "#R14-0/#P14-8-14":port0 -> "#R14-0/#P14-6-17" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -316,6 +317,7 @@ subgraph "cluster#R14-0" {
 // links for block #R14-0/#P14-6-17
 "#R14-0/#P14-6-17":port0 -> "#R14-0/#B-2-162" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -325,6 +327,7 @@ subgraph "cluster#R14-0" {
 // links for block #R14-0/#B-2-167
 "#R14-0/#B-2-167":port0 -> "#R14-0/#B-2-164" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -335,6 +338,7 @@ subgraph "cluster#R14-0" {
 // links for block #R14-0/#B-2-162
 "#R14-0/#B-2-162":port1 -> "#R14-0/#B-2-163" [
     style="solid"
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
