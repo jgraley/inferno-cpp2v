@@ -42,6 +42,11 @@ public:
             string link_name;
             const Graphable *root;
         };
+        struct LinkAndBlock
+        {
+            Graphable::LinkStyle link_style;
+            const Graphable *root;
+        };
         string id;
 		list<const Graphable *> interiors;
 		list<const Graphable *> exteriors;

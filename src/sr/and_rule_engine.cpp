@@ -215,7 +215,7 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
         // We don't need the original keyer link for this agent (it belongs
         // to master) so just create a new one. These will be the FORCED
         // variables that permit us to inject master keys into CSP.
-        master_boundary_keyer_links.insert( PatternLink::CreateDistinct(agent_pattern) );
+        master_boundary_keyer_links.insert( PatternLink::CreateDistinct(agent_pattern) );  // suspicious
         return;
     } 
          
