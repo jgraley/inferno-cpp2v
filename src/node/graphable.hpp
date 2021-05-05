@@ -23,7 +23,7 @@ public:
     {
         SOLID,
         DASHED,
-        DOTTED,
+        DOTTED_CIRCLE,
         DOTTED_DIAMOND,
         DOTTED_MULTI,
     };

@@ -1004,7 +1004,7 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
             figure.subordinates.push_back( sub );
         }
 	};
-    lambda( plan.my_free_abnormal_engines, Graphable::DOTTED );
+    lambda( plan.my_free_abnormal_engines, Graphable::DOTTED_CIRCLE );
     lambda( plan.my_evaluator_abnormal_engines, Graphable::DOTTED_DIAMOND );
     lambda( plan.my_multiplicity_engines, Graphable::DOTTED_MULTI );
 	TRACE("Ready to render ")(*this)("\n");

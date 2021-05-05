@@ -683,16 +683,17 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
     case Graphable::DASHED:
         atts += "style=\"dashed\"\n";
         break;
-    case Graphable::DOTTED:
+    case Graphable::DOTTED_CIRCLE:
         atts += "style=\"dotted\"\n";
+        atts += "arrowhead=\"normalnoneodot\"\n";
         break;
     case Graphable::DOTTED_DIAMOND:
         atts += "style=\"dotted\"\n";
-        atts += "arrowhead=\"odiamond\"\n";
+        atts += "arrowhead=\"normalnoneodiamond\"\n";
         break;
     case Graphable::DOTTED_MULTI:
         atts += "style=\"dotted\"\n";
-        atts += "arrowhead=\"normalnormalnormal\"\n";
+        atts += "arrowhead=\"normalonormalonormalonormal\"\n";
         break;
     }
     return atts;
