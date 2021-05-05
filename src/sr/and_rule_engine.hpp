@@ -69,7 +69,7 @@ public:
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
         void PopulateSomeThings( PatternLink link,
                                  const unordered_set<Agent *> &master_agents );
-        void DetermineKeyersModuloDisjucntion( PatternLink plink,
+        void DetermineKeyersModuloDisjunction( PatternLink plink,
                                                unordered_set<Agent *> *master_agents,
                                                unordered_set<Agent *> *match_any_agents );
         void DetermineKeyers( PatternLink plink,

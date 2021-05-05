@@ -231,7 +231,7 @@ void AndRuleEngine::Plan::PopulateSomeThings( PatternLink link,
 }
 
         
-void AndRuleEngine::Plan::DetermineKeyersModuloDisjucntion( PatternLink plink,
+void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
                                                             unordered_set<Agent *> *senior_agents,
                                                             unordered_set<Agent *> *disjunction_agents )
 {
@@ -255,7 +255,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloDisjucntion( PatternLink plink,
     shared_ptr<PatternQuery> pq = plink.GetChildAgent()->GetPatternQuery();
     FOREACH( PatternLink plink, pq->GetNormalLinks() )
     {
-        DetermineKeyersModuloDisjucntion( plink, senior_agents, disjunction_agents );        
+        DetermineKeyersModuloDisjunction( plink, senior_agents, disjunction_agents );        
     }
 }
         
@@ -266,8 +266,8 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
     // Scan the senior region. We wish to break off at Disjunction nodes. Senior is the
     // region up to and including a Disjunction; junior is the region under each of its
     // links.
-    unordered_set<Agent *> my_matchany_agents;
-    DetermineKeyersModuloDisjucntion( plink, &senior_agents, &my_matchany_agents );
+    unordered_set<Agent *> my_disjunction_agents;
+    DetermineKeyersModuloDisjunction( plink, &senior_agents, &my_disjunction_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the Disjunction agents that we saw, BUT SKIPPED
@@ -276,7 +276,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
     // of these junior regions individually, but no cross-keying is allowed if not keyed already.
     // Where that happens, there will be a conflict writing to coupling_nontrivial_keyer_links and the
     // ASSERT will fail.
-    for( Agent *ma_agent : my_matchany_agents )
+    for( Agent *ma_agent : my_disjunction_agents )
     {
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
         FOREACH( PatternLink link, pq->GetNormalLinks() )
