@@ -1,28 +1,20 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
+    ranksep = 1.0
+    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
 ];
 node [
 ];
+
 // -------------------- figure #R36-0 --------------------
 subgraph "cluster#R36-0" {
     label = "#R36-0"
     style = "filled"
     color = antiquewhite2
-    "#R36-0/#B-2-629" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Statement</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-629</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "#R36-0/#B-4-3" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,19 +57,6 @@ subgraph "cluster#R36-0" {
         fontsize = "12"
     ];
     
-    "#R36-0/#B-2-628" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">While</FONT></TD><TD></TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-628</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "#R36-0/#P36-8-44" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -95,6 +74,30 @@ subgraph "cluster#R36-0" {
          <TR><TD><FONT POINT-SIZE="16.0">∧</FONT></TD><TD></TD></TR>
          <TR><TD>patterns</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#B-2-634</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "#R36-0/#B-2-628" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="16.0">While</FONT></TD><TD></TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-628</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "#R36-0/#B-2-629" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="16.0">Statement</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-629</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -241,7 +244,6 @@ subgraph "cluster#R36-0" {
 ];
 
 
-
 // -------------------- links --------------------
 // links for block CR#P36-0
 "CR#P36-0":port0 -> "#P36-8-44" [
@@ -367,7 +369,6 @@ subgraph "cluster#R36-0" {
 ];
 
 // links for block #B-2-631
-// links for block #R36-0/#B-2-629
 // links for block #R36-0/#B-4-3
 "#R36-0/#B-4-3":port0 -> "#R36-0/#B-2-635" [
     style="solid"
@@ -390,25 +391,6 @@ subgraph "cluster#R36-0" {
 ];
 
 // links for block #R36-0/#B-2-630
-// links for block #R36-0/#B-2-628
-"#R36-0/#B-2-628":port0 -> "#R36-0/#B-2-629" [
-    style="solid"
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"#R36-0/#B-2-628":port1 -> "#R36-0/#B-2-630" [
-    style="solid"
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 // links for block #R36-0/#P36-8-44
 "#R36-0/#P36-8-44":port0 -> "#R36-0/#P36-6-49" [
     style="solid"
@@ -438,4 +420,24 @@ subgraph "cluster#R36-0" {
     fontcolor = black
 ];
 
+// links for block #R36-0/#B-2-628
+"#R36-0/#B-2-628":port0 -> "#R36-0/#B-2-629" [
+    style="solid"
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#R36-0/#B-2-628":port1 -> "#R36-0/#B-2-630" [
+    style="solid"
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block #R36-0/#B-2-629
 }

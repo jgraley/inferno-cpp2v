@@ -42,15 +42,14 @@ public:
             string link_name;
             const Graphable *root;
         };
-        struct LinkAndBlock
+        struct GraphableAndIncomingLinks
         {
-            Graphable::LinkStyle link_style;
-            string link_name;
+            map<string, Graphable::LinkStyle> link_styles;
             const Graphable *graphable;
         };
         string id;
-		list<LinkAndBlock> interiors;
-		list<LinkAndBlock> exteriors;
+		list<GraphableAndIncomingLinks> interiors;
+		list<GraphableAndIncomingLinks> exteriors;
 		list<Subordinate> subordinates;
 	};
 

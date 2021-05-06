@@ -977,37 +977,44 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
 	Graph::Figure figure;
 	figure.id = GetSerialString();
     
-	TRACEC("   Interior:\n");
-	for( PatternLink plink : plan.my_normal_links )
-	{
-        Graph::Figure::LinkAndBlock lb;
-        if( plan.coupling_residual_links.count(plink)>0 )
-            lb.link_style = Graphable::SOLID_TEE;
-        else if( plan.coupling_keyer_links.count(plink)>0 )
-            lb.link_style = Graphable::SOLID_SQUARE;
-        else
-            lb.link_style = Graphable::SOLID;
-        lb.link_name = plink.GetShortName();
-        lb.graphable = plink.GetChildAgent();
-		TRACEC(plink)("\n");
-		figure.interiors.push_back( lb );
-	}
+	TRACEC("   Interior:\n");    
+	for( const Agent *agent : plan.my_normal_agents )
+    {
+        Graph::Figure::GraphableAndIncomingLinks lb;
+        for( PatternLink plink : plan.my_normal_links )
+        {
+            if( plink.GetChildAgent() == agent )
+            {
+                if( plan.coupling_residual_links.count(plink)>0 )
+                    lb.link_styles[plink.GetShortName()] = Graphable::SOLID_TEE;
+                else if( plan.coupling_keyer_links.count(plink)>0 )
+                    lb.link_styles[plink.GetShortName()] = Graphable::SOLID_SQUARE;
+                else
+                    lb.link_styles[plink.GetShortName()] = Graphable::SOLID;
+            }
+        }
+        lb.graphable = agent;
+        TRACEC(*agent)("\n");
+        figure.interiors.push_back( lb );
+    }
 	
 	TRACEC("   Exterior:\n");
-	for( PatternLink plink : plan.master_boundary_links )
-	{
-        Graph::Figure::LinkAndBlock lb;
-        if( plan.master_boundary_residual_links.count(plink)>0 )
-            lb.link_style = Graphable::SOLID_TEE;
-        else if( plan.master_boundary_keyer_links.count(plink)>0 )
-            lb.link_style = Graphable::SOLID_SQUARE;
-        else
-            lb.link_style = Graphable::SOLID;
-        lb.link_name = plink.GetShortName();
-        lb.graphable = plink.GetChildAgent();
-        TRACEC(plink)("\n");
-		figure.exteriors.push_back( lb );
-	}
+	for( const Agent *agent : plan.master_boundary_agents )
+    {
+        Graph::Figure::GraphableAndIncomingLinks lb;
+        for( PatternLink plink : plan.master_boundary_links )
+        {
+            if( plan.master_boundary_residual_links.count(plink)>0 )
+                lb.link_styles[plink.GetShortName()] = Graphable::SOLID_TEE;
+            else if( plan.master_boundary_keyer_links.count(plink)>0 )
+                lb.link_styles[plink.GetShortName()] = Graphable::SOLID_SQUARE;
+            else
+                lb.link_styles[plink.GetShortName()] = Graphable::SOLID;
+        }
+        lb.graphable = agent;
+        TRACEC(*agent)("\n");
+        figure.exteriors.push_back( lb );
+    }
 	
   	TRACEC("   Subordinates:\n");	
 	auto lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graphable::LinkStyle style )

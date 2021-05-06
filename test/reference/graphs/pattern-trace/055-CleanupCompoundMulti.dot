@@ -1,12 +1,15 @@
 digraph Inferno {
 graph [
     rankdir = "LR"
+    ranksep = 1.0
+    size = "14,20"
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
 ];
 node [
 ];
+
 // -------------------- figure #R55-2 --------------------
 subgraph "cluster#R55-2" {
     label = "#R55-2"
@@ -107,16 +110,6 @@ subgraph "cluster#R55-0" {
     label = "#R55-0"
     style = "filled"
     color = antiquewhite2
-    "#R55-0/#P55-6-71" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P55-6-71"
-        style = "filled"
-        fontsize = "14"
-        color = black
-        fontcolor = black
-    ];
-    
     "#R55-0/#B-2-944" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -154,6 +147,16 @@ subgraph "cluster#R55-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
+    ];
+    
+    "#R55-0/#P55-6-71" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P55-6-71"
+        style = "filled"
+        fontsize = "14"
+        color = black
+        fontcolor = black
     ];
     
     subgraph "cluster#R55-0/#R55-5" {
@@ -375,7 +378,6 @@ subgraph "cluster#R55-0" {
 ];
 
 
-
 // -------------------- links --------------------
 // links for block CR#P55-0
 "CR#P55-0":port0 -> "#P55-8-64" [
@@ -508,16 +510,6 @@ subgraph "cluster#R55-0" {
     fontcolor = black
 ];
 
-// links for block #R55-0/#P55-6-71
-"#R55-0/#P55-6-71":port0 -> "#R55-0/#B-2-945" [
-    style="solid"
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 // links for block #R55-0/#B-2-944
 "#R55-0/#B-2-944":port0 -> "#R55-0/#0/#B-2-950" [
     style="dotted"
@@ -576,6 +568,16 @@ subgraph "cluster#R55-0" {
 
 // links for block #R55-0/#P55-8-64
 "#R55-0/#P55-8-64":port0 -> "#R55-0/#P55-6-71" [
+    style="solid"
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block #R55-0/#P55-6-71
+"#R55-0/#P55-6-71":port0 -> "#R55-0/#B-2-945" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"

@@ -90,9 +90,9 @@ void Graph::operator()( const Figure &figure )
     list<const Graphable *> interior_gs, exterior_gs;
     map< const Figure::Subordinate *, list<MyBlock> > subordinate_blocks;
 
-    for( const Figure::LinkAndBlock &lb : figure.exteriors )
+    for( const Figure::GraphableAndIncomingLinks &lb : figure.exteriors )
         exterior_gs.push_back( lb.graphable );
-    for( const Figure::LinkAndBlock &lb : figure.interiors )
+    for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
         interior_gs.push_back( lb.graphable );
 
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::SOLID, Graphable::DASHED} );
@@ -101,10 +101,12 @@ void Graph::operator()( const Figure &figure )
     	subordinate_blocks[&sub] = GetBlocks( {sub.root}, figure.id+"/"+sub.link_name, {Graphable::SOLID, Graphable::DASHED} );
 
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
-    for( const Figure::LinkAndBlock &lb : figure.interiors )
-        RedirectLinks( interior_blocks, lb.graphable, lb.link_name, lb.link_style );
-    for( const Figure::LinkAndBlock &lb : figure.exteriors )
-        RedirectLinks( interior_blocks, lb.graphable, lb.link_name, lb.link_style );
+    for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
+        for( pair<string, Graphable::LinkStyle> p : lb.link_styles )
+            RedirectLinks( interior_blocks, lb.graphable, p.first, p.second );
+    for( const Figure::GraphableAndIncomingLinks &lb : figure.exteriors )
+        for( pair<string, Graphable::LinkStyle> p : lb.link_styles )
+            RedirectLinks( interior_blocks, lb.graphable, p.first, p.second );
     for( const Figure::Subordinate &sub : figure.subordinates )
         RedirectLinks( interior_blocks, sub.root, sub.link_name, sub.link_style, &(subordinate_blocks[&sub].front()) );
 
@@ -597,6 +599,7 @@ string Graph::DoHeader()
     sc += Indent(s);
 #endif    
 	sc += "];\n";
+    sc += "\n";
 	return sc;
 }
 
@@ -605,7 +608,6 @@ string Graph::DoFooter()
 {
 	string s;
 
-    s += "\n";
     s += "// -------------------- links --------------------\n";
     
     for( const MyBlock &block : blocks_for_links )
