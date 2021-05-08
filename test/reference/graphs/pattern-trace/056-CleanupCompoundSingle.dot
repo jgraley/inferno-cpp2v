@@ -11,7 +11,7 @@ node [
 ];
 
 // -------------------- figure #R56-1 --------------------
-"#R56-1/#B-2-957" [
+"#R56-1 / #B-2-957" [
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -28,7 +28,7 @@ subgraph "cluster#R56-1" {
     label = "#R56-1"
     style = "filled"
     color = antiquewhite2
-    "#R56-1/#B-2-954" [
+    "#R56-1 / #B-2-954" [
         shape = "plaintext"
         fillcolor = "/set28/1"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -50,7 +50,7 @@ subgraph "cluster#R56-0" {
     label = "#R56-0"
     style = "filled"
     color = antiquewhite2
-    "#R56-0/#B-2-953" [
+    "#R56-0 / #B-2-953" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -62,7 +62,7 @@ subgraph "cluster#R56-0" {
         fontsize = "12"
     ];
     
-    "#R56-0/#B-2-958" [
+    "#R56-0 / #B-2-958" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -73,7 +73,7 @@ subgraph "cluster#R56-0" {
         fontsize = "12"
     ];
     
-    "#R56-0/#B-2-952" [
+    "#R56-0 / #B-2-952" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -86,7 +86,7 @@ subgraph "cluster#R56-0" {
         fontsize = "12"
     ];
     
-    "#R56-0/#B-2-957" [
+    "#R56-0 / #B-2-957" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -99,7 +99,7 @@ subgraph "cluster#R56-0" {
         fontsize = "12"
     ];
     
-    "#R56-0/#P56-8-65" [
+    "#R56-0 / #P56-8-65" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
@@ -110,7 +110,7 @@ subgraph "cluster#R56-0" {
         fontsize = "12"
     ];
     
-    "#R56-0/#B-2-955" [
+    "#R56-0 / #B-2-955" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -122,7 +122,7 @@ subgraph "cluster#R56-0" {
         fontsize = "12"
     ];
     
-    "#R56-0/#B-2-956" [
+    "#R56-0 / #B-2-956" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay | <port3> #B-2-956"
@@ -132,13 +132,12 @@ subgraph "cluster#R56-0" {
         fontcolor = black
     ];
     
-    subgraph "cluster#R56-0/#R56-1" {
-        label = "#R56-0/#R56-1"
+    subgraph "cluster#R56-0 / #R56-1" {
+        label = "#R56-0 / #R56-1"
         style = "filled"
         color = antiquewhite3
-        "#R56-0/#0/#B-2-954" [
+        "#R56-0 / #0 / #B-2-954" [
             shape = "none"
-            fillcolor = "/set28/1"
             style = "invisible"
         ];
         
@@ -345,8 +344,8 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#B-2-953
-"#R56-0/#B-2-953":port0 -> "#R56-0/#0/#B-2-954" [
+// links for block #R56-0 / #B-2-953
+"#R56-0 / #B-2-953":port0 -> "#R56-0 / #0 / #B-2-954" [
     style="dotted"
     arrowhead="normalnoneodiamond"
     label = "#0"
@@ -355,9 +354,9 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#B-2-958
-// links for block #R56-0/#B-2-952
-"#R56-0/#B-2-952":port1 -> "#R56-0/#B-2-955" [
+// links for block #R56-0 / #B-2-958
+// links for block #R56-0 / #B-2-952
+"#R56-0 / #B-2-952":port1 -> "#R56-0 / #B-2-955" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -366,7 +365,7 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-"#R56-0/#B-2-952":port1 -> "#R56-0/#B-2-953" [
+"#R56-0 / #B-2-952":port1 -> "#R56-0 / #B-2-953" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -375,8 +374,8 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#B-2-957
-"#R56-0/#B-2-957":port1 -> "#R56-0/#B-2-958" [
+// links for block #R56-0 / #B-2-957
+"#R56-0 / #B-2-957":port1 -> "#R56-0 / #B-2-958" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -385,8 +384,8 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#P56-8-65
-"#R56-0/#P56-8-65":port0 -> "#R56-0/#B-2-952" [
+// links for block #R56-0 / #P56-8-65
+"#R56-0 / #P56-8-65":port0 -> "#R56-0 / #B-2-952" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -395,8 +394,8 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#B-2-955
-"#R56-0/#B-2-955":port0 -> "#R56-0/#B-2-956" [
+// links for block #R56-0 / #B-2-955
+"#R56-0 / #B-2-955":port0 -> "#R56-0 / #B-2-956" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -405,8 +404,8 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#B-2-956
-"#R56-0/#B-2-956":port1 -> "#R56-0/#B-2-957" [
+// links for block #R56-0 / #B-2-956
+"#R56-0 / #B-2-956":port1 -> "#R56-0 / #B-2-957" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -415,10 +414,10 @@ subgraph "cluster#R56-0" {
     fontcolor = black
 ];
 
-// links for block #R56-0/#0/#B-2-954
-// links for block #R56-1/#B-2-957
-// links for block #R56-1/#B-2-954
-"#R56-1/#B-2-954":port2 -> "#R56-1/#B-2-957" [
+// links for block #R56-0 / #0 / #B-2-954
+// links for block #R56-1 / #B-2-957
+// links for block #R56-1 / #B-2-954
+"#R56-1 / #B-2-954":port2 -> "#R56-1 / #B-2-957" [
     style="solid"
     arrowhead="normalnonetee"
     label = "#1"

@@ -15,7 +15,7 @@ subgraph "cluster#R4-0" {
     label = "#R4-0"
     style = "filled"
     color = antiquewhite2
-    "#R4-0/#B-2-40" [
+    "#R4-0 / #B-2-40" [
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -27,7 +27,7 @@ subgraph "cluster#R4-0" {
         fontsize = "12"
     ];
     
-    "#R4-0/#B-2-39" [
+    "#R4-0 / #B-2-39" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -40,7 +40,7 @@ subgraph "cluster#R4-0" {
         fontsize = "12"
     ];
     
-    "#R4-0/#P4-8-4" [
+    "#R4-0 / #P4-8-4" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
@@ -51,7 +51,7 @@ subgraph "cluster#R4-0" {
         fontsize = "12"
     ];
     
-    "#R4-0/#P4-6-7" [
+    "#R4-0 / #P4-6-7" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
@@ -180,9 +180,9 @@ subgraph "cluster#R4-0" {
 
 // links for block #B-2-40
 // links for block #B-2-38
-// links for block #R4-0/#B-2-40
-// links for block #R4-0/#B-2-39
-"#R4-0/#B-2-39":port1 -> "#R4-0/#B-2-40" [
+// links for block #R4-0 / #B-2-40
+// links for block #R4-0 / #B-2-39
+"#R4-0 / #B-2-39":port1 -> "#R4-0 / #B-2-40" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -191,8 +191,8 @@ subgraph "cluster#R4-0" {
     fontcolor = black
 ];
 
-// links for block #R4-0/#P4-8-4
-"#R4-0/#P4-8-4":port0 -> "#R4-0/#P4-6-7" [
+// links for block #R4-0 / #P4-8-4
+"#R4-0 / #P4-8-4":port0 -> "#R4-0 / #P4-6-7" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -201,8 +201,8 @@ subgraph "cluster#R4-0" {
     fontcolor = black
 ];
 
-// links for block #R4-0/#P4-6-7
-"#R4-0/#P4-6-7":port0 -> "#R4-0/#B-2-39" [
+// links for block #R4-0 / #P4-6-7
+"#R4-0 / #P4-6-7":port0 -> "#R4-0 / #B-2-39" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"

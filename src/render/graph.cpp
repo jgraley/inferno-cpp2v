@@ -99,9 +99,14 @@ void Graph::operator()( const Figure &figure )
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::DASHED} );
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
-    	subordinate_blocks[&sub] = GetBlocks( {sub.root}, figure.id+"/"+sub.link_name, {Graphable::SOLID, Graphable::DASHED} );
-        subordinate_blocks[&sub].front().shape = "none"; // make invisible
+        string sub_figure_id = figure.id+" / "+sub.link_name;
+    	//subordinate_blocks[&sub] = GetBlocks( {sub.root}, sub_figure_id, {Graphable::SOLID, Graphable::DASHED} );
+        //subordinate_blocks[&sub].front().shape = "none"; // make invisible
+        subordinate_blocks[&sub].push_back( CreateInvisibleNode( sub.root->GetGraphId(), {}, sub_figure_id ) );
     }
+    
+    if( interior_blocks.empty() )
+        interior_blocks.push_back( CreateInvisibleNode( "engine", { exterior_gs.front()->GetGraphId() }, figure.id ) );
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
     for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
@@ -130,7 +135,7 @@ void Graph::operator()( const Figure &figure )
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
 		RegionAppearance subordinate_region = interior_region;
-		subordinate_region.region_id += "/"+sub.id;
+		subordinate_region.region_id += " / "+sub.id;
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
         list<MyBlock> sub_blocks = subordinate_blocks.at(&sub);        
@@ -273,6 +278,41 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
 	}
 
 	return blocks;
+}
+
+
+Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, string figure_id )
+{
+	MyBlock block;
+	block.title = "";     
+	block.bold = false;
+	block.shape = "none";
+    block.block_type = Graphable::NODE;
+    block.link_ids.push_back( {} );
+    block.prerestriction_name = "";
+    block.colour = "";
+    block.specify_ports = false;
+    block.base_id = GetFullId(id, figure_id);
+    block.italic_title = false;
+    
+    Graphable::SubBlock sub_block = { "", 
+                                      "",
+                                      false,
+                                      {} };
+    for( string child_id : child_ids )
+    {
+        Graphable::Link link;
+        link.child = nullptr;
+        link.style = Graphable::SOLID;                
+        //link.trace_labels.push_back( lnf( ... ) ); TODO
+        //link.is_ntpr = ntprf ? ntprf(&p) : false;
+        sub_block.links.push_back( link );
+        block.link_ids.back().push_back( GetFullId(child_id, figure_id) );
+    }
+    block.sub_blocks.push_back( sub_block );
+		    
+                
+    return block;
 }
 
 
@@ -737,10 +777,16 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
 
 string Graph::GetFullId(const Graphable *g, string figure_id)
 {
+	return GetFullId(g->GetGraphId(), figure_id);
+}
+
+
+string Graph::GetFullId(string id, string figure_id)
+{
 	if(figure_id.empty() )
-		return g->GetGraphId();
+		return id;
 	else
-		return figure_id+"/"+g->GetGraphId();
+		return figure_id+" / "+id;
 }
 
 

@@ -15,7 +15,7 @@ subgraph "cluster#R7-0" {
     label = "#R7-0"
     style = "filled"
     color = antiquewhite2
-    "#R7-0/#B-2-56" [
+    "#R7-0 / #B-2-56" [
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -27,7 +27,7 @@ subgraph "cluster#R7-0" {
         fontsize = "12"
     ];
     
-    "#R7-0/#B-2-55" [
+    "#R7-0 / #B-2-55" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -40,7 +40,7 @@ subgraph "cluster#R7-0" {
         fontsize = "12"
     ];
     
-    "#R7-0/#P7-8-7" [
+    "#R7-0 / #P7-8-7" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
@@ -51,7 +51,7 @@ subgraph "cluster#R7-0" {
         fontsize = "12"
     ];
     
-    "#R7-0/#P7-6-10" [
+    "#R7-0 / #P7-6-10" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P7-6-10"
@@ -180,9 +180,9 @@ subgraph "cluster#R7-0" {
 
 // links for block #B-2-56
 // links for block #B-2-54
-// links for block #R7-0/#B-2-56
-// links for block #R7-0/#B-2-55
-"#R7-0/#B-2-55":port1 -> "#R7-0/#B-2-56" [
+// links for block #R7-0 / #B-2-56
+// links for block #R7-0 / #B-2-55
+"#R7-0 / #B-2-55":port1 -> "#R7-0 / #B-2-56" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -191,8 +191,8 @@ subgraph "cluster#R7-0" {
     fontcolor = black
 ];
 
-// links for block #R7-0/#P7-8-7
-"#R7-0/#P7-8-7":port0 -> "#R7-0/#P7-6-10" [
+// links for block #R7-0 / #P7-8-7
+"#R7-0 / #P7-8-7":port0 -> "#R7-0 / #P7-6-10" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -201,8 +201,8 @@ subgraph "cluster#R7-0" {
     fontcolor = black
 ];
 
-// links for block #R7-0/#P7-6-10
-"#R7-0/#P7-6-10":port0 -> "#R7-0/#B-2-55" [
+// links for block #R7-0 / #P7-6-10
+"#R7-0 / #P7-6-10":port0 -> "#R7-0 / #B-2-55" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"

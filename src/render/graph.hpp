@@ -88,6 +88,7 @@ private:
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         string figure_id,
                              const set<Graphable::LinkStyle> &discard_links );
+    MyBlock CreateInvisibleNode( string base_id, list<string> child_ids, string figure_id );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
                              string figure_id,
@@ -117,6 +118,7 @@ private:
     void Remember( string s );
     string LinkStyleAtt(Graphable::LinkStyle link_style);
     string GetFullId(const Graphable *g, string figure_id);
+    string GetFullId(string id, string figure_id);
     string Indent(string s);
 
     const string outfile; // empty means stdout
