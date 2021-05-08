@@ -52,15 +52,9 @@ subgraph "cluster#R34-1" {
         style = "filled"
         color = antiquewhite3
         "#R34-1/#0/#B-2-597" [
-            shape = "plaintext"
+            shape = "none"
             fillcolor = "/set28/2"
-            label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-             <TR><TD><FONT POINT-SIZE="16.0">Breakable</FONT></TD><TD></TD></TR>
-             <TR><TD>Statement</TD><TD PORT="port0">NULL</TD></TR>
-             <TR><TD>#B-2-597</TD><TD PORT="port1"></TD></TR>
-            </TABLE>>
-            style = "rounded,filled"
-            fontsize = "12"
+            style = "invisible"
         ];
         
     }
@@ -177,15 +171,9 @@ subgraph "cluster#R34-0" {
         style = "filled"
         color = antiquewhite3
         "#R34-0/#0/#B-2-600" [
-            shape = "plaintext"
+            shape = "none"
             fillcolor = "/set28/2"
-            label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-             <TR><TD><FONT POINT-SIZE="16.0">¬</FONT></TD><TD></TD></TR>
-             <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
-             <TR><TD>#B-2-600</TD><TD PORT="port1"></TD></TR>
-            </TABLE>>
-            style = "rounded,filled"
-            fontsize = "12"
+            style = "invisible"
         ];
         
     }

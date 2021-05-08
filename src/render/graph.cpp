@@ -98,8 +98,11 @@ void Graph::operator()( const Figure &figure )
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::SOLID, Graphable::DASHED} );
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::DASHED} );
     for( const Figure::Subordinate &sub : figure.subordinates )
+    {
     	subordinate_blocks[&sub] = GetBlocks( {sub.root}, figure.id+"/"+sub.link_name, {Graphable::SOLID, Graphable::DASHED} );
-
+        subordinate_blocks[&sub].front().shape = "none"; // make invisible
+    }
+    
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
     for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
         for( pair<string, Graphable::LinkStyle> p : lb.link_styles )
@@ -380,7 +383,7 @@ void Graph::PostProcessBlocks( list<MyBlock> &blocks )
                                      (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
 
         // If not, make sure we're using a shape that allows for sub_blocks
-        if( !sub_blocks_hideable && !(block.shape == "plaintext" || block.shape == "record") )
+        if( !sub_blocks_hideable && !(block.shape == "none" || block.shape == "plaintext" || block.shape == "record") )
             block.shape = "plaintext";      
         
         // These kinds of blocks require port names to be to be specified so links can tell them apart
@@ -429,6 +432,10 @@ string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
         s += "fontsize = \"" FS_MIDDLE "\"\n";
         s += "color = " + line_colour + "\n";
         s += "fontcolor = " + font_colour + "\n";
+    }
+	else if( block.shape == "none" )
+    {
+        s += "style = \"invisible\"\n";
     }
     else
 	{
