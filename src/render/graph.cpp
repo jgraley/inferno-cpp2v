@@ -34,7 +34,7 @@ using namespace CPPTree;
 #define FS_LARGE "16"
 #define FS_HUGE "18"
 #define NS_SMALL "0.4"
-//#define FONT "Arial"
+#define FONT "Arial"
 
 #include <functional>
 
@@ -100,8 +100,6 @@ void Graph::operator()( const Figure &figure )
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
         string sub_figure_id = figure.id+" / "+sub.link_name;
-    	//subordinate_blocks[&sub] = GetBlocks( {sub.root}, sub_figure_id, {Graphable::SOLID, Graphable::DASHED} );
-        //subordinate_blocks[&sub].front().shape = "none"; // make invisible
         subordinate_blocks[&sub].push_back( CreateInvisibleNode( sub.root->GetGraphId(), {}, sub_figure_id ) );
     }
     
@@ -626,28 +624,33 @@ string Graph::DoLink( int port_index,
 
 string Graph::DoHeader()
 {
-	string s;
-	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
-	s += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
-	s += "size = \"14,20\"\n"; // make it smaller
-  //  s += "concentrate = \"true\"\n"; 
-    s += "bgcolor = " + base_region.background_colour + "\n";
-    s += "color = " + line_colour + "\n";
-    s += "fontcolor = " + font_colour + "\n";    
-    
-    string sc;
-	sc += "digraph Inferno {\n"; // g is name of graph
-	sc += "graph [\n";
-    sc += Indent(s);
-    sc += "];\n";
-	sc += "node [\n";
+	string sg, sn, se;
+	sg += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
+	sg += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
+	sg += "size = \"14,20\"\n"; // make it smaller
+  //  sg += "concentrate = \"true\"\n"; 
+    sg += "bgcolor = " + base_region.background_colour + "\n";
+    sg += "color = " + line_colour + "\n";
+    sg += "fontcolor = " + font_colour + "\n";    
 #ifdef FONT
-    s = "fontname = \"" FONT "\"\n";
-    sc += Indent(s);
+    sg += "fontname = \"" FONT "\"\n";
+    sn += "fontname = \"" FONT "\"\n";
+    se += "fontname = \"" FONT "\"\n";
 #endif    
-	sc += "];\n";
-    sc += "\n";
-	return sc;
+    
+    string s;
+	s += "digraph Inferno {\n"; // g is name of graph
+	s += "graph [\n";
+    s += Indent(sg);
+    s += "];\n";
+	s += "node [\n";
+    s += Indent(sn);
+	s += "];\n";
+	s += "edge [\n";
+    s += Indent(se);
+	s += "];\n";
+    s += "\n";
+	return s;
 }
 
 
