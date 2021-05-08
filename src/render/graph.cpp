@@ -626,8 +626,8 @@ string Graph::DoHeader()
 {
 	string sg, sn, se;
 	sg += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
-	sg += "ranksep = 1.0\n"; // 1-inch separation parent-child (default 0.5)
-	sg += "size = \"14,20\"\n"; // make it smaller
+	sg += "ranksep = 0.3\n"; // separation parent-child (default 0.5)
+	//sg += "size = \"14,20\"\n"; // make it smaller
   //  sg += "concentrate = \"true\"\n"; 
     sg += "bgcolor = " + base_region.background_colour + "\n";
     sg += "color = " + line_colour + "\n";
