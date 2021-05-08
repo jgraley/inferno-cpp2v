@@ -28,19 +28,20 @@ using namespace CPPTree;
 // The colours are defined by the nodes themselves and always reflect the node type of a
 // block, if applicable.
 
-#define FS_TINY "8"
-#define FS_SMALL "12"
-#define FS_MIDDLE "14"
-#define FS_LARGE "16"
+#define FS_MIDDLE "12"
+#define FS_LARGE "15"
 #define FS_HUGE "18"
+#define FS_TITLE "36"
+
 #define NS_SMALL "0.4"
 #define FONT "Arial"
 
 #include <functional>
 
-Graph::Graph( string of ) :
+Graph::Graph( string of, string title ) :
     outfile(of),
     base_region { "",
+                  "",
 		          ReadArgs::graph_dark ? "black" : "antiquewhite1" },
 	line_colour( ReadArgs::graph_dark ? "grey70" : "black" ),
     font_colour( ReadArgs::graph_dark ? "white" : "black" )
@@ -51,7 +52,7 @@ Graph::Graph( string of ) :
 		ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
     }
     
-	Disburse( DoHeader() );
+	Disburse( DoHeader(title) );
 }
 
 
@@ -126,6 +127,7 @@ void Graph::operator()( const Figure &figure )
     s += "// -------------------- figure "+figure.id+" --------------------\n";
 	s += DoGraphBody(exterior_blocks, base_region); // Exterior blocks
     RegionAppearance interior_region = base_region;
+    interior_region.title = figure.id;
     interior_region.region_id = figure.id;
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     string s_interior = DoGraphBody(interior_blocks, interior_region); // Interior blocks
@@ -133,6 +135,7 @@ void Graph::operator()( const Figure &figure )
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
 		RegionAppearance subordinate_region = interior_region;
+		subordinate_region.title = sub.id;
 		subordinate_region.region_id += " / "+sub.id;
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
@@ -461,7 +464,7 @@ string Graph::DoBlock( const MyBlock &block, const RegionAppearance &region )
 	{
 		s += "label = " + DoHTMLLabel( block );
 		s += "style = \"rounded,filled\"\n";
-		s += "fontsize = \"" FS_SMALL "\"\n";
+		s += "fontsize = \"" FS_MIDDLE "\"\n";
 	}
 	else if( block.shape == "record" )
     {
@@ -622,7 +625,7 @@ string Graph::DoLink( int port_index,
 }
 
 
-string Graph::DoHeader()
+string Graph::DoHeader(string title)
 {
 	string sg, sn, se;
 	sg += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
@@ -639,7 +642,10 @@ string Graph::DoHeader()
 #endif    
     
     string s;
-	s += "digraph Inferno {\n"; // g is name of graph
+	s += "digraph \""+title+"\" {\n"; 
+    s += "label = \""+title+"\"\n";
+    s += "labelloc = t\n";
+    s += "fontsize = \"" FS_TITLE "\"\n";
 	s += "graph [\n";
     s += Indent(sg);
     s += "];\n";
@@ -671,10 +677,10 @@ string Graph::DoFooter()
 string Graph::DoCluster(string ss, const RegionAppearance &region)
 {
     string s;
-    s += "label = \"" + region.region_id + "\"\n";
+    s += "label = \"" + region.title + "\"\n";
     s += "style = \"filled\"\n";
 	s += "color = " + region.background_colour + "\n";
-	s += "rank = \"min\"\n";
+    s += "fontsize = \"" FS_LARGE "\"\n";
 	s += ss;
  
     string sc;

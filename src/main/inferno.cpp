@@ -166,7 +166,7 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
             {
 				Progress(Progress::RENDERING, index).SetAsCurrent();
                 string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
-                Graph g( filepath );
+                Graph g( filepath, t->GetName() );
                 GenerateGraphs( g, t );
                 index++;
             }
@@ -193,7 +193,7 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
 			Progress(Progress::RENDERING, ReadArgs::pattern_graph_index).SetAsCurrent();
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
             ASSERT( ReadArgs::pattern_graph_index < sequence->size() )("There are only %d steps at present\n", sequence->size() );
-            Graph g( ReadArgs::outfile );
+            Graph g( ReadArgs::outfile, sequence->at(ReadArgs::pattern_graph_index)->GetName() );
             GenerateGraphs( g, sequence->at(ReadArgs::pattern_graph_index) );
         }
     }        
@@ -361,7 +361,7 @@ int main( int argc, char *argv[] )
         if( !ReadArgs::trace_quiet )
 			fprintf(stderr, "Rendering to graph\n"); 
         Tracer::RAIIEnable silencer( false ); // make grapher be quiet
-        Graph g( ReadArgs::outfile );
+        Graph g( ReadArgs::outfile, ReadArgs::outfile );
         g( &program );    
     }
     else if( !ReadArgs::output_all )   

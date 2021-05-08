@@ -16,7 +16,7 @@ static void Output( TreePtr<Node> root, string name )
 {
     string path = ReadArgs::outfile + name + string(".dot");
     TRACE("Generating graph ")(path)("\n");    
-    Graph g( path );
+    Graph g( path, __FILE__ );
     g( root ); 
 }
 

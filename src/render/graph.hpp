@@ -53,7 +53,7 @@ public:
 		list<Subordinate> subordinates;
 	};
 
-    Graph( string of = string() );
+    Graph( string of, string title );
     ~Graph();
     void operator()( Transformation *root ); // Graph the search/replace pattern
 	void operator()( const Figure &figure ); // graph just the specified ojects
@@ -73,6 +73,7 @@ private:
     struct RegionAppearance
     {
 		string region_id;
+		string title;
 		string background_colour;
 	};
 
@@ -108,7 +109,7 @@ private:
                    const Graphable::SubBlock &sub_block, 
                    const Graphable::Link &link,
                    string id );
-    string DoHeader();
+    string DoHeader( string title );
     string DoFooter();
     string DoCluster(string s, const RegionAppearance &region);
 
