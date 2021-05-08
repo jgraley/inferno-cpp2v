@@ -1,13 +1,20 @@
-digraph Inferno {
+digraph "DetectSCType" {
+label = "DetectSCType"
+labelloc = t
+fontsize = "36"
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
+    ranksep = 0.3
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
+    fontname = "Arial"
 ];
 node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
 ];
 
 // -------------------- transformation figure --------------------
@@ -16,7 +23,7 @@ node [
     fillcolor = antiquewhite1
     label = "<fixed> DetectSCType | <port0> compare | <port1> replace"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -26,7 +33,7 @@ node [
     fillcolor = antiquewhite1
     label = "<fixed> Overlay | <port0> through | <port1> overlay"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -35,7 +42,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/4"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Scope</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Scope</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{..}</TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -47,7 +54,7 @@ node [
     fillcolor = "/set28/1"
     label = <*>
     style = "filled"
-    fontsize = "18"
+    fontsize = "20"
     penwidth = 0.0
     fixedsize = true
     width = 0.4
@@ -58,7 +65,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">UserType</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">UserType</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -69,7 +76,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'sc_event'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'sc_event'</FONT></TD><TD></TD></TR>
      <TR><TD>(TypeIdentifier)</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -80,7 +87,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/4"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Scope</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Scope</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -92,7 +99,7 @@ node [
     fillcolor = antiquewhite1
     label = "<fixed> Slave | <port0> through | <port1> search | <port2> replace"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -101,7 +108,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Event</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Event</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"

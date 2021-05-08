@@ -1,13 +1,20 @@
-digraph Inferno {
+digraph "RemoveVoidInstances" {
+label = "RemoveVoidInstances"
+labelloc = t
+fontsize = "36"
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
+    ranksep = 0.3
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
+    fontname = "Arial"
 ];
 node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
 ];
 
 // -------------------- transformation figure --------------------
@@ -16,7 +23,7 @@ node [
     fillcolor = antiquewhite1
     label = "<fixed> RemoveVoidInstances | <port0> compare | <port1> replace"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -25,7 +32,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/4"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Program</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Program</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{..}</TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -37,7 +44,7 @@ node [
     fillcolor = "/set28/1"
     label = <*>
     style = "filled"
-    fontsize = "18"
+    fontsize = "20"
     penwidth = 0.0
     fixedsize = true
     width = 0.4
@@ -48,7 +55,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -60,7 +67,7 @@ node [
     fillcolor = "/set28/3"
     label = <∨>
     style = "filled"
-    fontsize = "18"
+    fontsize = "20"
     penwidth = 0.0
     fixedsize = true
     width = 0.4
@@ -71,7 +78,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">CallableParams</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">CallableParams</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{..}</TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -82,7 +89,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">*</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
      <TR><TD>(Instance)</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -93,7 +100,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Instance</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Instance</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -104,7 +111,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Void</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Void</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -114,7 +121,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Void</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Void</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -124,7 +131,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/4"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Program</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Program</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
     </TABLE>>
     style = "rounded,filled"

@@ -1,13 +1,20 @@
-digraph Inferno {
+digraph "" {
+label = ""
+labelloc = t
+fontsize = "36"
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
+    ranksep = 0.3
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
+    fontname = "Arial"
 ];
 node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
 ];
 
 
@@ -16,7 +23,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/4"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Program</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Program</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{.........}</TD></TR>
      <TR><TD>#I-2-1966</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -28,7 +35,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Struct</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Struct</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{.}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{}</TD></TR>
@@ -42,7 +49,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'__anon0'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'__anon0'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1969</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -53,7 +60,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -70,7 +77,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-1975</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -82,7 +89,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1976</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -93,7 +100,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'a'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'a'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1974</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -103,7 +110,7 @@ node [
 "#I-2-1977" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1977</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -114,7 +121,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1973</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -125,7 +132,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1970</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -136,7 +143,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1971</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -147,7 +154,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -162,7 +169,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'b'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'b'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1981</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -172,7 +179,7 @@ node [
 "#I-2-1982" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1982</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -183,7 +190,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1979</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -194,7 +201,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Class</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Class</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{.....}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{}</TD></TR>
@@ -208,7 +215,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'Test'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'Test'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1984</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -219,7 +226,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Union</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Union</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{..}</TD></TR>
      <TR><TD>#I-2-1985</TD><TD PORT="port2"></TD></TR>
@@ -232,7 +239,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'__anon1'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'__anon1'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1986</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -243,7 +250,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -260,7 +267,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-1992</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -272,7 +279,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1993</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -283,7 +290,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'i'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'i'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1991</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -293,7 +300,7 @@ node [
 "#I-2-1994" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1994</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -304,7 +311,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1990</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -315,7 +322,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1987</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -326,7 +333,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1988</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -337,7 +344,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -354,7 +361,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Floating</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Floating</FONT></TD><TD></TD></TR>
      <TR><TD>FloatSemantics</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2001</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -366,7 +373,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">SpecificFloatSemantics</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">SpecificFloatSemantics</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2000</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -377,7 +384,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'f'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'f'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1999</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -387,7 +394,7 @@ node [
 "#I-2-2002" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2002</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -398,7 +405,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1998</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -409,7 +416,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1995</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -420,7 +427,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-1996</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -431,7 +438,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -448,7 +455,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'d'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'d'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2007</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -458,7 +465,7 @@ node [
 "#I-2-2008" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2008</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -469,7 +476,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2006</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -480,7 +487,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2003</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -491,7 +498,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2004</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -502,7 +509,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -519,7 +526,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Function</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Function</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
      <TR><TD>Type</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2021</TD><TD PORT="port2"></TD></TR>
@@ -532,7 +539,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Automatic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Automatic</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -546,7 +553,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2013</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -558,7 +565,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2014</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -569,7 +576,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'p'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'p'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2012</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -579,7 +586,7 @@ node [
 "#I-2-2015" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2015</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -590,7 +597,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2022</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -602,7 +609,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">8U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">8U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2023</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -613,7 +620,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'f'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'f'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2020</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -624,7 +631,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{}</TD></TR>
      <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
      <TR><TD>#I-2-2039</TD><TD PORT="port2"></TD></TR>
@@ -637,7 +644,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Return</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2038</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -649,7 +656,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Add</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Add</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
      <TR><TD>#I-2-2037</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -661,7 +668,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Lookup</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Lookup</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2036</TD><TD PORT="port2"></TD></TR>
@@ -674,7 +681,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Virtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Virtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2019</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -685,7 +692,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2016</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -696,7 +703,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2017</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -707,7 +714,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -724,7 +731,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Function</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Function</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{}</TD></TR>
      <TR><TD>Type</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2030</TD><TD PORT="port2"></TD></TR>
@@ -737,7 +744,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Void</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Void</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2031</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -748,7 +755,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'g'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'g'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2029</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -759,7 +766,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{}</TD></TR>
      <TR><TD>#I-2-2049</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -771,7 +778,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2028</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -782,7 +789,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Private</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Private</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2025</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -793,7 +800,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2026</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -804,7 +811,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Class</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Class</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{}</TD></TR>
@@ -818,7 +825,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'Nested'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'Nested'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2034</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -829,7 +836,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Class</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Class</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{}</TD></TR>
@@ -843,7 +850,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'Other'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'Other'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2041</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -854,7 +861,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Class</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Class</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{..}</TD></TR>
@@ -868,7 +875,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'Sub'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'Sub'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2043</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -879,7 +886,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Base</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Base</FONT></TD><TD></TD></TR>
      <TR><TD>AccessSpec</TD><TD PORT="port0"></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2044</TD><TD PORT="port2"></TD></TR>
@@ -892,7 +899,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2045</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -903,7 +910,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Base</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Base</FONT></TD><TD></TD></TR>
      <TR><TD>AccessSpec</TD><TD PORT="port0"></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2046</TD><TD PORT="port2"></TD></TR>
@@ -916,7 +923,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Private</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Private</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2047</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -927,7 +934,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Enum</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Enum</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{....}</TD></TR>
      <TR><TD>#I-2-2050</TD><TD PORT="port2"></TD></TR>
@@ -940,7 +947,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'GGFF'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'GGFF'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2051</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -951,7 +958,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -966,7 +973,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'A'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'A'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2053</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -977,7 +984,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">0U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">0U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2055</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -988,7 +995,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Const</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Const</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2054</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -999,7 +1006,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1014,7 +1021,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'B'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'B'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2057</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1025,7 +1032,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Add</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Add</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
      <TR><TD>#I-2-2059</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1037,7 +1044,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">1U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">1U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2060</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1048,7 +1055,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Const</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Const</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2058</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1059,7 +1066,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1074,7 +1081,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'C'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'C'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2063</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1085,7 +1092,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">100</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">100</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2061</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1096,7 +1103,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Const</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Const</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2064</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1107,7 +1114,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1122,7 +1129,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'D'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'D'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2066</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1133,7 +1140,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Add</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Add</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
      <TR><TD>#I-2-2068</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1145,7 +1152,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">1U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">1U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2069</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1156,7 +1163,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Const</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Const</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2067</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1167,7 +1174,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Struct</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Struct</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{.}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{}</TD></TR>
@@ -1181,7 +1188,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'__anon2'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'__anon2'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2071</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1192,7 +1199,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1209,7 +1216,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2077</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1221,7 +1228,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2078</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1232,7 +1239,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'c'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'c'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2076</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1242,7 +1249,7 @@ node [
 "#I-2-2079" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2079</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1253,7 +1260,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2075</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1264,7 +1271,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2072</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1275,7 +1282,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2073</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1286,7 +1293,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1301,7 +1308,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'d'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'d'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2083</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1311,7 +1318,7 @@ node [
 "#I-2-2084" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2084</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1322,7 +1329,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2081</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1333,7 +1340,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Static</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Static</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1348,7 +1355,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Function</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Function</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{}</TD></TR>
      <TR><TD>Type</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2089</TD><TD PORT="port2"></TD></TR>
@@ -1361,7 +1368,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2090</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1373,7 +1380,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2091</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1384,7 +1391,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'main'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'main'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2088</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1395,7 +1402,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
      <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
      <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
@@ -1414,7 +1421,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Struct</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Struct</FONT></TD><TD></TD></TR>
      <TR><TD>TypeIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Declaration</TD><TD PORT="port1">{.}</TD></TR>
      <TR><TD>Base</TD><TD PORT="port2">{}</TD></TR>
@@ -1428,7 +1435,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'__anon3'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'__anon3'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2095</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1439,7 +1446,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Field</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Field</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1456,7 +1463,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2101</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1468,7 +1475,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2102</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1479,7 +1486,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'a'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'a'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2100</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1489,7 +1496,7 @@ node [
 "#I-2-2103" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2103</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1500,7 +1507,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonVirtual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonVirtual</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2099</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1511,7 +1518,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Public</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Public</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2096</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1522,7 +1529,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2097</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1533,7 +1540,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Automatic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Automatic</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1547,7 +1554,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'b'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'b'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2107</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1557,7 +1564,7 @@ node [
 "#I-2-2108" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2108</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1568,7 +1575,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Automatic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Automatic</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1582,7 +1589,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'t'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'t'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2112</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1592,7 +1599,7 @@ node [
 "#I-2-2113" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Uninitialised</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2113</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1603,7 +1610,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#I-2-2117</TD><TD PORT="port2"></TD></TR>
@@ -1616,7 +1623,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Lookup</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Lookup</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2115</TD><TD PORT="port2"></TD></TR>
@@ -1629,7 +1636,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Lookup</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Lookup</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2114</TD><TD PORT="port2"></TD></TR>
@@ -1642,7 +1649,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">22</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">22</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2116</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1653,7 +1660,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Automatic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Automatic</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1667,7 +1674,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Pointer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Pointer</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2122</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1679,7 +1686,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'pt'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'pt'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2121</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1690,7 +1697,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">AddressOf</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">AddressOf</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>#I-2-2124</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1702,7 +1709,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Automatic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Automatic</FONT></TD><TD></TD></TR>
      <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
@@ -1716,7 +1723,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Signed</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Signed</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2129</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1728,7 +1735,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">32U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">32U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2130</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1739,7 +1746,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'y'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'y'</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2128</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1750,7 +1757,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Call</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
      <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2135</TD><TD PORT="port2"></TD></TR>
@@ -1763,7 +1770,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/8"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">MapOperand</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">MapOperand</FONT></TD><TD></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2136</TD><TD PORT="port2"></TD></TR>
@@ -1776,7 +1783,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">11</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">11</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2134</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1787,7 +1794,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Lookup</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Lookup</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
      <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2132</TD><TD PORT="port2"></TD></TR>
@@ -1800,7 +1807,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Dereference</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Dereference</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>#I-2-2133</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1812,7 +1819,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">AssignmentAdd</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">AssignmentAdd</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#I-2-2139</TD><TD PORT="port2"></TD></TR>
@@ -1825,7 +1832,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Subtract</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Subtract</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#I-2-2138</TD><TD PORT="port2"></TD></TR>
@@ -1838,7 +1845,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Add</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Add</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
      <TR><TD>#I-2-2137</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1850,7 +1857,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Return</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
      <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2143</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1862,7 +1869,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Cast</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Cast</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Type</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#I-2-2142</TD><TD PORT="port2"></TD></TR>
@@ -1875,7 +1882,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Unsigned</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Unsigned</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#I-2-2140</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -1887,7 +1894,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">8U</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">8U</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2141</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -1898,7 +1905,7 @@ node [
     shape = "plaintext"
     fillcolor = "/set28/7"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NonConst</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NonConst</FONT></TD><TD></TD></TR>
      <TR><TD>#I-2-2086</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"

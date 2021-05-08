@@ -30,7 +30,7 @@ using namespace CPPTree;
 
 #define FS_MIDDLE "12"
 #define FS_LARGE "15"
-#define FS_HUGE "18"
+#define FS_HUGE "20"
 #define FS_TITLE "36"
 
 #define NS_SMALL "0.4"

@@ -1,13 +1,20 @@
-digraph Inferno {
+digraph "DetectCombableFor" {
+label = "DetectCombableFor"
+labelloc = t
+fontsize = "36"
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
+    ranksep = 0.3
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
+    fontname = "Arial"
 ];
 node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
 ];
 
 // -------------------- figure #R20-2 --------------------
@@ -15,11 +22,12 @@ subgraph "cluster#R20-2" {
     label = "#R20-2"
     style = "filled"
     color = antiquewhite2
+    fontsize = "15"
     "#R20-2 / #B-2-266" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">*</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-266</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -34,7 +42,7 @@ subgraph "cluster#R20-2" {
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
      <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#B-2-255</TD><TD PORT="port2"></TD></TR>
@@ -47,11 +55,12 @@ subgraph "cluster#R20-1" {
     label = "#R20-1"
     style = "filled"
     color = antiquewhite2
+    fontsize = "15"
     "#R20-1 / #B-2-252" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
          <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#B-2-252</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -63,7 +72,7 @@ subgraph "cluster#R20-1" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">AssignmentOperator</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">AssignmentOperator</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-253</TD><TD PORT="port2"></TD></TR>
@@ -73,9 +82,10 @@ subgraph "cluster#R20-1" {
     ];
     
     subgraph "cluster#R20-1 / #R20-2" {
-        label = "#R20-1 / #R20-2"
+        label = "#R20-2"
         style = "filled"
         color = antiquewhite3
+        fontsize = "15"
         "#R20-1 / #0 / #B-2-266" [
             shape = "none"
             style = "invisible"
@@ -91,11 +101,12 @@ subgraph "cluster#R20-0" {
     label = "#R20-0"
     style = "filled"
     color = antiquewhite2
+    fontsize = "15"
     "#R20-0 / #B-2-265" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-265</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -106,7 +117,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Subtract</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Subtract</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-250</TD><TD PORT="port2"></TD></TR>
@@ -119,7 +130,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-248</TD><TD PORT="port2"></TD></TR>
@@ -132,7 +143,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-247</TD><TD PORT="port2"></TD></TR>
@@ -145,7 +156,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-263</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -156,7 +167,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">AssignmentSubtract</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">AssignmentSubtract</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-246</TD><TD PORT="port2"></TD></TR>
@@ -169,7 +180,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">AssignmentAdd</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">AssignmentAdd</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-245</TD><TD PORT="port2"></TD></TR>
@@ -182,7 +193,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">PostDecrement</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">PostDecrement</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>#B-2-243</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -194,7 +205,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-257</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -205,7 +216,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">∨</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">∨</FONT></TD><TD></TD></TR>
          <TR><TD>(Operator)</TD><TD PORT="port0"></TD></TR>
          <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-233</TD><TD PORT="port2"></TD></TR>
@@ -218,7 +229,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">∨</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">∨</FONT></TD><TD></TD></TR>
          <TR><TD>(AssignmentOperator)</TD><TD PORT="port0"></TD></TR>
          <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-240</TD><TD PORT="port2"></TD></TR>
@@ -232,7 +243,7 @@ subgraph "cluster#R20-0" {
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P20-6-24"
         style = "filled"
-        fontsize = "14"
+        fontsize = "12"
         color = black
         fontcolor = black
     ];
@@ -241,7 +252,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">UncombableFor</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">UncombableFor</FONT></TD><TD></TD></TR>
          <TR><TD>Statement</TD><TD PORT="port0"></TD></TR>
          <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port2"></TD></TR>
@@ -256,7 +267,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-239</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -267,7 +278,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Less</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Less</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-234</TD><TD PORT="port2"></TD></TR>
@@ -280,7 +291,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-262</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -291,7 +302,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">PostIncrement</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">PostIncrement</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>#B-2-241</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -303,7 +314,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Add</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Add</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
          <TR><TD>#B-2-249</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -314,7 +325,7 @@ subgraph "cluster#R20-0" {
     "#R20-0 / #P20-8-19" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
          <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#P20-8-19</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -326,7 +337,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-232</TD><TD PORT="port2"></TD></TR>
@@ -339,7 +350,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
          <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
          <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-255</TD><TD PORT="port2"></TD></TR>
@@ -352,7 +363,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/3"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integral</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integral</FONT></TD><TD></TD></TR>
          <TR><TD>Integer</TD><TD PORT="port0">NULL</TD></TR>
          <TR><TD>#B-2-256</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -364,7 +375,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-259</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -375,7 +386,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-264</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -386,7 +397,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Greater</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Greater</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-236</TD><TD PORT="port2"></TD></TR>
@@ -399,7 +410,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">¬</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
          <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#B-2-251</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -411,7 +422,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">GreaterOrEqual</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">GreaterOrEqual</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-237</TD><TD PORT="port2"></TD></TR>
@@ -424,7 +435,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">PreDecrement</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">PreDecrement</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>#B-2-244</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -436,7 +447,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-258</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -447,7 +458,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">PreIncrement</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">PreIncrement</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>#B-2-242</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -459,7 +470,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">LessOrEqual</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">LessOrEqual</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
          <TR><TD>#B-2-235</TD><TD PORT="port2"></TD></TR>
@@ -472,7 +483,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-260</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -483,7 +494,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">NotEqual</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">NotEqual</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
          <TR><TD>#B-2-238</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -495,7 +506,7 @@ subgraph "cluster#R20-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-261</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
@@ -503,9 +514,10 @@ subgraph "cluster#R20-0" {
     ];
     
     subgraph "cluster#R20-0 / #R20-1" {
-        label = "#R20-0 / #R20-1"
+        label = "#R20-1"
         style = "filled"
         color = antiquewhite3
+        fontsize = "15"
         "#R20-0 / #0 / #B-2-252" [
             shape = "none"
             style = "invisible"
@@ -522,7 +534,7 @@ subgraph "cluster#R20-0" {
     fillcolor = antiquewhite1
     label = "<fixed> DetectCombableFor | <port0> root | <port1> #P20-0"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -530,7 +542,7 @@ subgraph "cluster#R20-0" {
 "#P20-8-19" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
      <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#P20-8-19</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -543,7 +555,7 @@ subgraph "cluster#R20-0" {
     fillcolor = antiquewhite1
     label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P20-6-24"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -552,7 +564,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">UncombableFor</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">UncombableFor</FONT></TD><TD></TD></TR>
      <TR><TD>Statement</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port2"></TD></TR>
@@ -567,7 +579,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">¬</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
      <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#B-2-251</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -579,7 +591,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
      <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>terminus</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#B-2-252</TD><TD PORT="port2"></TD></TR>
@@ -592,7 +604,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">AssignmentOperator</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">AssignmentOperator</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-253</TD><TD PORT="port2"></TD></TR>
@@ -605,7 +617,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
      <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#B-2-255</TD><TD PORT="port2"></TD></TR>
@@ -618,7 +630,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integral</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integral</FONT></TD><TD></TD></TR>
      <TR><TD>Integer</TD><TD PORT="port0">NULL</TD></TR>
      <TR><TD>#B-2-256</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -630,7 +642,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">*</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-266</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -641,7 +653,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-232</TD><TD PORT="port2"></TD></TR>
@@ -654,7 +666,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-239</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -665,7 +677,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">∨</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">∨</FONT></TD><TD></TD></TR>
      <TR><TD>(Operator)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#B-2-233</TD><TD PORT="port2"></TD></TR>
@@ -678,7 +690,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Greater</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Greater</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-236</TD><TD PORT="port2"></TD></TR>
@@ -691,7 +703,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-257</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -702,7 +714,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">GreaterOrEqual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">GreaterOrEqual</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-237</TD><TD PORT="port2"></TD></TR>
@@ -715,7 +727,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-258</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -726,7 +738,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Less</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Less</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-234</TD><TD PORT="port2"></TD></TR>
@@ -739,7 +751,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-259</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -750,7 +762,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">LessOrEqual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">LessOrEqual</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-235</TD><TD PORT="port2"></TD></TR>
@@ -763,7 +775,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-260</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -774,7 +786,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">NotEqual</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">NotEqual</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
      <TR><TD>#B-2-238</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -786,7 +798,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-261</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -797,7 +809,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">∨</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">∨</FONT></TD><TD></TD></TR>
      <TR><TD>(AssignmentOperator)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#B-2-240</TD><TD PORT="port2"></TD></TR>
@@ -810,7 +822,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">PreIncrement</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">PreIncrement</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>#B-2-242</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -822,7 +834,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">PostIncrement</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">PostIncrement</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>#B-2-241</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -834,7 +846,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">PreDecrement</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">PreDecrement</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>#B-2-244</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -846,7 +858,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">PostDecrement</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">PostDecrement</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>#B-2-243</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -858,7 +870,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">AssignmentAdd</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">AssignmentAdd</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-245</TD><TD PORT="port2"></TD></TR>
@@ -871,7 +883,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-262</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -882,7 +894,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">AssignmentSubtract</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">AssignmentSubtract</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-246</TD><TD PORT="port2"></TD></TR>
@@ -895,7 +907,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-263</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -906,7 +918,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-247</TD><TD PORT="port2"></TD></TR>
@@ -919,7 +931,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Add</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Add</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">{..}</TD></TR>
      <TR><TD>#B-2-249</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -931,7 +943,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-264</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -942,7 +954,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Assign</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-248</TD><TD PORT="port2"></TD></TR>
@@ -955,7 +967,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Subtract</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Subtract</FONT></TD><TD></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
      <TR><TD>#B-2-250</TD><TD PORT="port2"></TD></TR>
@@ -968,7 +980,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Integer</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Integer</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-265</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
@@ -979,7 +991,7 @@ subgraph "cluster#R20-0" {
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">CombableFor</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">CombableFor</FONT></TD><TD></TD></TR>
      <TR><TD>Statement</TD><TD PORT="port0"></TD></TR>
      <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
      <TR><TD>Expression</TD><TD PORT="port2"></TD></TR>

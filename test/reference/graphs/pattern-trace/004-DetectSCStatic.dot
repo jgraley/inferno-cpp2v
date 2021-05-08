@@ -1,13 +1,20 @@
-digraph Inferno {
+digraph "DetectSCStatic" {
+label = "DetectSCStatic"
+labelloc = t
+fontsize = "36"
 graph [
     rankdir = "LR"
-    ranksep = 1.0
-    size = "14,20"
+    ranksep = 0.3
     bgcolor = antiquewhite1
     color = black
     fontcolor = black
+    fontname = "Arial"
 ];
 node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
 ];
 
 // -------------------- figure #R4-0 --------------------
@@ -15,11 +22,12 @@ subgraph "cluster#R4-0" {
     label = "#R4-0"
     style = "filled"
     color = antiquewhite2
+    fontsize = "15"
     "#R4-0 / #B-2-40" [
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">'wait'</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">'wait'</FONT></TD><TD></TD></TR>
          <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#B-2-40</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -31,7 +39,7 @@ subgraph "cluster#R4-0" {
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">Call</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
          <TR><TD>MapOperand</TD><TD PORT="port0">{}</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-39</TD><TD PORT="port2"></TD></TR>
@@ -43,7 +51,7 @@ subgraph "cluster#R4-0" {
     "#R4-0 / #P4-8-4" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
          <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#P4-8-4</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -56,7 +64,7 @@ subgraph "cluster#R4-0" {
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
         style = "filled"
-        fontsize = "14"
+        fontsize = "12"
         color = black
         fontcolor = black
     ];
@@ -70,7 +78,7 @@ subgraph "cluster#R4-0" {
     fillcolor = antiquewhite1
     label = "<fixed> DetectSCStatic | <port0> root | <port1> #P4-0"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -78,7 +86,7 @@ subgraph "cluster#R4-0" {
 "#P4-8-4" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">#</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
      <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#P4-8-4</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -91,7 +99,7 @@ subgraph "cluster#R4-0" {
     fillcolor = antiquewhite1
     label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
     style = "filled"
-    fontsize = "14"
+    fontsize = "12"
     color = black
     fontcolor = black
 ];
@@ -100,7 +108,7 @@ subgraph "cluster#R4-0" {
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">Call</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
      <TR><TD>MapOperand</TD><TD PORT="port0">{}</TD></TR>
      <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
      <TR><TD>#B-2-39</TD><TD PORT="port2"></TD></TR>
@@ -113,7 +121,7 @@ subgraph "cluster#R4-0" {
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">'wait'</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">'wait'</FONT></TD><TD></TD></TR>
      <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>#B-2-40</TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -125,7 +133,7 @@ subgraph "cluster#R4-0" {
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="16.0">WaitStatic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15.0">WaitStatic</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-38</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
