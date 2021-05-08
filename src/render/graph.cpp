@@ -674,6 +674,7 @@ string Graph::DoCluster(string ss, const RegionAppearance &region)
     s += "label = \"" + region.region_id + "\"\n";
     s += "style = \"filled\"\n";
 	s += "color = " + region.background_colour + "\n";
+	s += "rank = \"min\"\n";
 	s += ss;
  
     string sc;
