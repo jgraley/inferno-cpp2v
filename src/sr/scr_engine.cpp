@@ -447,7 +447,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 "",
                                 true,
                                 { { dynamic_cast<Graphable *>(plan.root_pattern.get()),
-                                    SOLID, 
+                                    SOLID_ROOT, 
                                     {},
                                     {plan.root_plink.GetShortName()},
                                     SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) } } } );

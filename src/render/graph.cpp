@@ -96,8 +96,8 @@ void Graph::operator()( const Figure &figure )
     for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
         interior_gs.push_back( lb.graphable );
 
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::SOLID, Graphable::DASHED} );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::DASHED} );
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::SOLID, Graphable::SOLID_ROOT, Graphable::DASHED} );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::DASHED, Graphable::SOLID_ROOT} );
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
         string sub_figure_id = figure.id+" / "+sub.link_name;
@@ -755,6 +755,7 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
     switch(link_style)
     {
     case Graphable::SOLID:
+    case Graphable::SOLID_ROOT:
         atts += "style=\"solid\"\n";
         break;
     case Graphable::SOLID_SQUARE:

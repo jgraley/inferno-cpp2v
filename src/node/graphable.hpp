@@ -22,9 +22,10 @@ public:
     enum LinkStyle
     {
         SOLID,
+        SOLID_ROOT, // Like SOLID but disappears in And-rule graphs
         SOLID_SQUARE,
         SOLID_TEE,
-        DASHED,
+        DASHED, // Disappears in And-rule graphs
         DOTTED_CIRCLE,
         DOTTED_DIAMOND,
         DOTTED_MULTI,        
