@@ -971,7 +971,7 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 }
 
 
-void AndRuleEngine::GenerateGraph( Graph &graph ) const
+void AndRuleEngine::GenerateMyGraphRegion( Graph &graph ) const
 {
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
@@ -1037,3 +1037,13 @@ void AndRuleEngine::GenerateGraph( Graph &graph ) const
 	graph(figure);
 }
 
+void AndRuleEngine::GenerateGraphRegions( Graph &graph ) const
+{
+	GenerateMyGraphRegion(graph); // this engine
+	for( auto p : plan.my_free_abnormal_engines )
+		p.second->GenerateGraphRegions(graph);
+	for( auto p : plan.my_evaluator_abnormal_engines )
+		p.second->GenerateGraphRegions(graph);
+	for( auto p : plan.my_multiplicity_engines )
+		p.second->GenerateGraphRegions(graph);
+}

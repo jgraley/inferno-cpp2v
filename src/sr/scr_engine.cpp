@@ -530,3 +530,11 @@ list<const SCREngine *> SCREngine::GetSCREngines() const
 		engines = engines + p.second->GetSCREngines();
 	return engines;
 }
+
+
+void SCREngine::GenerateGraphRegions( Graph &graph ) const
+{
+	plan.and_rule_engine->GenerateGraphRegions(graph);
+	for( auto p : plan.my_engines )
+		p.second->GenerateGraphRegions(graph);	
+}

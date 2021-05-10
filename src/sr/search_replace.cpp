@@ -111,14 +111,9 @@ string CompareReplace::GetGraphId() const
 }
 
 
-void CompareReplace::GenerateGraphs( Graph &graph ) const
+void CompareReplace::GenerateGraphRegions( Graph &graph ) const
 {
-    list<const AndRuleEngine *> ares = plan.scr_engine->GetAndRuleEngines();
-    for( const AndRuleEngine *are : ares )
-    {
-		ASSERT(are);
-		are->GenerateGraph(graph);
-	}
+	plan.scr_engine->GenerateGraphRegions(graph);
 }
 
 

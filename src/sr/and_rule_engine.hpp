@@ -150,7 +150,8 @@ private:
 public:
     string GetTrace() const; // used for debug
     list<const AndRuleEngine *> GetAndRuleEngines() const;
-    void GenerateGraph( Graph &graph ) const;
+    void GenerateGraphRegions( Graph &graph ) const;
+    void GenerateMyGraphRegion( Graph &graph ) const;
 
 private:
     // Information about the X tree

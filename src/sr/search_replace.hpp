@@ -73,7 +73,7 @@ public:
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual string GetGraphId() const; 
-    void GenerateGraphs( Graph &graph ) const;
+    void GenerateGraphRegions( Graph &graph ) const;
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();

@@ -145,12 +145,12 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 }
 
 
-void GenerateGraphs( Graph &graph, shared_ptr<Transformation> t )
+void GenerateGraphRegions( Graph &graph, shared_ptr<Transformation> t )
 {
 	graph( t.get() );
 	if( ReadArgs::graph_trace )
 		if(  auto cr = dynamic_pointer_cast<CompareReplace>(t) )
-			cr->GenerateGraphs(graph);
+			cr->GenerateGraphRegions(graph);
 }
 
 
@@ -167,7 +167,7 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
 				Progress(Progress::RENDERING, index).SetAsCurrent();
                 string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
                 Graph g( filepath, t->GetName() );
-                GenerateGraphs( g, t );
+                GenerateGraphRegions( g, t );
                 index++;
             }
         }
@@ -194,7 +194,7 @@ void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence 
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
             ASSERT( ReadArgs::pattern_graph_index < sequence->size() )("There are only %d steps at present\n", sequence->size() );
             Graph g( ReadArgs::outfile, sequence->at(ReadArgs::pattern_graph_index)->GetName() );
-            GenerateGraphs( g, sequence->at(ReadArgs::pattern_graph_index) );
+            GenerateGraphRegions( g, sequence->at(ReadArgs::pattern_graph_index) );
         }
     }        
 }

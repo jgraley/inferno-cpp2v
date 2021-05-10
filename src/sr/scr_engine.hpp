@@ -123,7 +123,8 @@ public:
     
     list<const AndRuleEngine *> GetAndRuleEngines() const;
     list<const SCREngine *> GetSCREngines() const;
-        
+    void GenerateGraphRegions( Graph &graph ) const;
+
 private:    
     static int repetitions;
     static bool rep_error;
