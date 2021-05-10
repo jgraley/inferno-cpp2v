@@ -443,7 +443,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     if( ReadArgs::graph_trace )
     {
         // Actually much simpler in graph trace mode - just show the root node and plink
-        sub_blocks.push_back( { "root", 
+        sub_blocks.push_back( { GetGraphId(), 
                                 "",
                                 true,
                                 { { dynamic_cast<Graphable *>(plan.root_pattern.get()),
@@ -451,10 +451,6 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                     {},
                                     {plan.root_plink.GetShortName()},
                                     SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) } } } );
-        sub_blocks.push_back( { GetSerialString(), 
-                                "", 
-                                false, 
-                                {} }  );
         return { false, GetName(), "", "", CONTROL, sub_blocks };
     }
     
@@ -534,7 +530,7 @@ list<const SCREngine *> SCREngine::GetSCREngines() const
 
 void SCREngine::GenerateGraphRegions( Graph &graph ) const
 {
-	plan.and_rule_engine->GenerateGraphRegions(graph);
+	plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
 	for( auto p : plan.my_engines )
 		p.second->GenerateGraphRegions(graph);	
 }

@@ -17,13 +17,13 @@ edge [
     fontname = "Arial"
 ];
 
-// -------------------- figure #R21-1 --------------------
-subgraph "cluster#R21-1" {
-    label = "#R21-1"
+// -------------------- figure And#R21-1 --------------------
+subgraph "clusterAnd#R21-1" {
+    label = "And#R21-1"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "#R21-1 / #B-2-268" [
+    "And#R21-1 / #B-2-268" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -37,13 +37,13 @@ subgraph "cluster#R21-1" {
 }
 
 
-// -------------------- figure #R21-0 --------------------
-subgraph "cluster#R21-0" {
-    label = "#R21-0"
+// -------------------- figure And#R21-0 --------------------
+subgraph "clusterAnd#R21-0" {
+    label = "SCR#P21-0 / And#R21-0"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "#R21-0 / #B-2-267" [
+    "And#R21-0 / #B-2-267" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -56,7 +56,7 @@ subgraph "cluster#R21-0" {
         fontsize = "12"
     ];
     
-    "#R21-0 / #P21-8-20" [
+    "And#R21-0 / #P21-8-20" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
@@ -67,7 +67,7 @@ subgraph "cluster#R21-0" {
         fontsize = "12"
     ];
     
-    "#R21-0 / #P21-6-25" [
+    "And#R21-0 / #P21-6-25" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P21-6-25"
@@ -77,12 +77,12 @@ subgraph "cluster#R21-0" {
         fontcolor = black
     ];
     
-    subgraph "cluster#R21-0 / #R21-1" {
-        label = "#R21-1"
+    subgraph "clusterAnd#R21-0 / And#R21-1" {
+        label = "And#R21-1"
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        "#R21-0 / #0 / #B-2-268" [
+        "And#R21-0 / #0 / #B-2-268" [
             shape = "none"
             style = "invisible"
         ];
@@ -96,7 +96,7 @@ subgraph "cluster#R21-0" {
 "CR#P21-0" [
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> MakeAllBreakUncombable | <port0> root | <port1> #P21-0"
+    label = "<fixed> MakeAllBreakUncombable | <port0> SCR#P21-0"
     style = "filled"
     fontsize = "12"
     color = black
@@ -207,8 +207,8 @@ subgraph "cluster#R21-0" {
 
 // links for block #B-2-268
 // links for block #B-2-274
-// links for block #R21-0 / #B-2-267
-"#R21-0 / #B-2-267":port1 -> "#R21-0 / #0 / #B-2-268" [
+// links for block And#R21-0 / #B-2-267
+"And#R21-0 / #B-2-267":port1 -> "And#R21-0 / #0 / #B-2-268" [
     style="dotted"
     arrowhead="normalnoneodiamond"
     label = "#0"
@@ -217,8 +217,8 @@ subgraph "cluster#R21-0" {
     fontcolor = black
 ];
 
-// links for block #R21-0 / #P21-8-20
-"#R21-0 / #P21-8-20":port0 -> "#R21-0 / #P21-6-25" [
+// links for block And#R21-0 / #P21-8-20
+"And#R21-0 / #P21-8-20":port0 -> "And#R21-0 / #P21-6-25" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -227,8 +227,8 @@ subgraph "cluster#R21-0" {
     fontcolor = black
 ];
 
-// links for block #R21-0 / #P21-6-25
-"#R21-0 / #P21-6-25":port0 -> "#R21-0 / #B-2-267" [
+// links for block And#R21-0 / #P21-6-25
+"And#R21-0 / #P21-6-25":port0 -> "And#R21-0 / #B-2-267" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -237,6 +237,6 @@ subgraph "cluster#R21-0" {
     fontcolor = black
 ];
 
-// links for block #R21-0 / #0 / #B-2-268
-// links for block #R21-1 / #B-2-268
+// links for block And#R21-0 / #0 / #B-2-268
+// links for block And#R21-1 / #B-2-268
 }

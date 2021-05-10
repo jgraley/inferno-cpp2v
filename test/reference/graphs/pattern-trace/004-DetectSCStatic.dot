@@ -17,13 +17,13 @@ edge [
     fontname = "Arial"
 ];
 
-// -------------------- figure #R4-0 --------------------
-subgraph "cluster#R4-0" {
-    label = "#R4-0"
+// -------------------- figure And#R4-0 --------------------
+subgraph "clusterAnd#R4-0" {
+    label = "SCR#P4-0 / And#R4-0"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "#R4-0 / #B-2-40" [
+    "And#R4-0 / #B-2-40" [
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -35,7 +35,7 @@ subgraph "cluster#R4-0" {
         fontsize = "12"
     ];
     
-    "#R4-0 / #B-2-39" [
+    "And#R4-0 / #B-2-39" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -48,7 +48,7 @@ subgraph "cluster#R4-0" {
         fontsize = "12"
     ];
     
-    "#R4-0 / #P4-8-4" [
+    "And#R4-0 / #P4-8-4" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
@@ -59,7 +59,7 @@ subgraph "cluster#R4-0" {
         fontsize = "12"
     ];
     
-    "#R4-0 / #P4-6-7" [
+    "And#R4-0 / #P4-6-7" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P4-6-7"
@@ -76,7 +76,7 @@ subgraph "cluster#R4-0" {
 "CR#P4-0" [
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> DetectSCStatic | <port0> root | <port1> #P4-0"
+    label = "<fixed> DetectSCStatic | <port0> SCR#P4-0"
     style = "filled"
     fontsize = "12"
     color = black
@@ -188,9 +188,9 @@ subgraph "cluster#R4-0" {
 
 // links for block #B-2-40
 // links for block #B-2-38
-// links for block #R4-0 / #B-2-40
-// links for block #R4-0 / #B-2-39
-"#R4-0 / #B-2-39":port1 -> "#R4-0 / #B-2-40" [
+// links for block And#R4-0 / #B-2-40
+// links for block And#R4-0 / #B-2-39
+"And#R4-0 / #B-2-39":port1 -> "And#R4-0 / #B-2-40" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -199,8 +199,8 @@ subgraph "cluster#R4-0" {
     fontcolor = black
 ];
 
-// links for block #R4-0 / #P4-8-4
-"#R4-0 / #P4-8-4":port0 -> "#R4-0 / #P4-6-7" [
+// links for block And#R4-0 / #P4-8-4
+"And#R4-0 / #P4-8-4":port0 -> "And#R4-0 / #P4-6-7" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"
@@ -209,8 +209,8 @@ subgraph "cluster#R4-0" {
     fontcolor = black
 ];
 
-// links for block #R4-0 / #P4-6-7
-"#R4-0 / #P4-6-7":port0 -> "#R4-0 / #B-2-39" [
+// links for block And#R4-0 / #P4-6-7
+"And#R4-0 / #P4-6-7":port0 -> "And#R4-0 / #B-2-39" [
     style="solid"
     arrowhead="normalnonebox"
     label = "#0"

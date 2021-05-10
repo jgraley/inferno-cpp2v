@@ -150,8 +150,9 @@ private:
 public:
     string GetTrace() const; // used for debug
     list<const AndRuleEngine *> GetAndRuleEngines() const;
-    void GenerateGraphRegions( Graph &graph ) const;
-    void GenerateMyGraphRegion( Graph &graph ) const;
+    virtual string GetGraphId() const;
+    void GenerateGraphRegions( Graph &graph, string scr_engine_id ) const;
+    void GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const;
 
 private:
     // Information about the X tree

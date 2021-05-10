@@ -127,7 +127,7 @@ void Graph::operator()( const Figure &figure )
     s += "// -------------------- figure "+figure.id+" --------------------\n";
 	s += DoGraphBody(exterior_blocks, base_region); // Exterior blocks
     RegionAppearance interior_region = base_region;
-    interior_region.title = figure.id;
+    interior_region.title = figure.title;
     interior_region.region_id = figure.id;
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     string s_interior = DoGraphBody(interior_blocks, interior_region); // Interior blocks

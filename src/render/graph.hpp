@@ -48,6 +48,7 @@ public:
             const Graphable *graphable;
         };
         string id;
+        string title;
 		list<GraphableAndIncomingLinks> interiors;
 		list<GraphableAndIncomingLinks> exteriors;
 		list<Subordinate> subordinates;

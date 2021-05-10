@@ -971,11 +971,30 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 }
 
 
-void AndRuleEngine::GenerateMyGraphRegion( Graph &graph ) const
+string AndRuleEngine::GetGraphId() const
+{
+	return "And"+GetSerialString();
+}
+
+
+void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) const
+{
+	GenerateMyGraphRegion(graph, scr_engine_id); // this engine
+	for( auto p : plan.my_free_abnormal_engines )
+		p.second->GenerateGraphRegions(graph, "");
+	for( auto p : plan.my_evaluator_abnormal_engines )
+		p.second->GenerateGraphRegions(graph, "");
+	for( auto p : plan.my_multiplicity_engines )
+		p.second->GenerateGraphRegions(graph, "");
+}
+
+
+void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const
 {
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
-	figure.id = GetSerialString();
+	figure.id = GetGraphId();
+	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
     
 	TRACEC("   Interior:\n");    
 	for( const Agent *agent : plan.my_normal_agents )
@@ -1022,7 +1041,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph ) const
         for( auto p : engines )
         {
             Graph::Figure::Subordinate sub;
-            sub.id = p.second->GetSerialString();
+            sub.id = p.second->GetGraphId();
             sub.link_style = style;
             sub.link_name = p.first.GetShortName();
             sub.root = p.second->plan.root_agent;
@@ -1037,13 +1056,3 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph ) const
 	graph(figure);
 }
 
-void AndRuleEngine::GenerateGraphRegions( Graph &graph ) const
-{
-	GenerateMyGraphRegion(graph); // this engine
-	for( auto p : plan.my_free_abnormal_engines )
-		p.second->GenerateGraphRegions(graph);
-	for( auto p : plan.my_evaluator_abnormal_engines )
-		p.second->GenerateGraphRegions(graph);
-	for( auto p : plan.my_multiplicity_engines )
-		p.second->GenerateGraphRegions(graph);
-}
