@@ -1005,11 +1005,11 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             if( plink.GetChildAgent() == agent )
             {
                 if( plan.coupling_residual_links.count(plink)>0 )
-                    lb.link_styles[plink.GetShortName()] = Graphable::SOLID_TEE;
+                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_RESIDUAL;
                 else if( plan.coupling_keyer_links.count(plink)>0 )
-                    lb.link_styles[plink.GetShortName()] = Graphable::SOLID_SQUARE;
+                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_KEYER;
                 else
-                    lb.link_styles[plink.GetShortName()] = Graphable::SOLID;
+                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_NORMAL;
             }
         }
         lb.graphable = agent;
@@ -1024,11 +1024,11 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
         for( PatternLink plink : plan.master_boundary_links )
         {
             if( plan.master_boundary_residual_links.count(plink)>0 )
-                lb.link_styles[plink.GetShortName()] = Graphable::SOLID_TEE;
+                lb.link_styles[plink.GetShortName()] = Graphable::LINK_RESIDUAL;
             else if( plan.master_boundary_keyer_links.count(plink)>0 )
-                lb.link_styles[plink.GetShortName()] = Graphable::SOLID_SQUARE;
+                lb.link_styles[plink.GetShortName()] = Graphable::LINK_KEYER;
             else
-                lb.link_styles[plink.GetShortName()] = Graphable::SOLID;
+                lb.link_styles[plink.GetShortName()] = Graphable::LINK_NORMAL;
         }
         lb.graphable = agent;
         TRACEC(*agent)("\n");
@@ -1049,9 +1049,9 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             figure.subordinates.push_back( sub );
         }
 	};
-    lambda( plan.my_free_abnormal_engines, Graphable::DOTTED_CIRCLE );
-    lambda( plan.my_evaluator_abnormal_engines, Graphable::DOTTED_DIAMOND );
-    lambda( plan.my_multiplicity_engines, Graphable::DOTTED_MULTI );
+    lambda( plan.my_free_abnormal_engines, Graphable::LINK_ABNORMAL );
+    lambda( plan.my_evaluator_abnormal_engines, Graphable::LINK_EVALUATOR );
+    lambda( plan.my_multiplicity_engines, Graphable::LINK_MULTIPLICITY );
 	TRACE("Ready to render ")(*this)("\n");
 	graph(figure);
 }

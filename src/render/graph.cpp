@@ -96,8 +96,8 @@ void Graph::operator()( const Figure &figure )
     for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
         interior_gs.push_back( lb.graphable );
 
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::SOLID, Graphable::SOLID_ROOT, Graphable::DASHED} );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::DASHED, Graphable::SOLID_ROOT} );
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::LINK_NORMAL, Graphable::LINK_ROOT, Graphable::LINK_ONLY_REPLACE} );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::LINK_ONLY_REPLACE, Graphable::LINK_ROOT} );
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
         string sub_figure_id = figure.id+" / "+sub.link_name;
@@ -304,7 +304,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
     {
         Graphable::Link link;
         link.child = nullptr;
-        link.style = Graphable::SOLID;                
+        link.style = Graphable::LINK_NORMAL;                
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_ntpr = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( link );
@@ -754,31 +754,25 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
     string atts;
     switch(link_style)
     {
-    case Graphable::SOLID:
-    case Graphable::SOLID_ROOT:
-        atts += "style=\"solid\"\n";
+    case Graphable::LINK_NORMAL:
+    case Graphable::LINK_ROOT:
         break;
-    case Graphable::SOLID_SQUARE:
-        atts += "style=\"solid\"\n";
+    case Graphable::LINK_KEYER:
         atts += "arrowhead=\"normalnonebox\"\n";
         break;
-    case Graphable::SOLID_TEE:
-        atts += "style=\"solid\"\n";
+    case Graphable::LINK_RESIDUAL:
         atts += "arrowhead=\"normalnonetee\"\n";
         break;
-    case Graphable::DASHED:
+    case Graphable::LINK_ONLY_REPLACE:
         atts += "style=\"dashed\"\n";
         break;
-    case Graphable::DOTTED_CIRCLE:
-        atts += "style=\"dotted\"\n";
+    case Graphable::LINK_ABNORMAL:
         atts += "arrowhead=\"normalnoneodot\"\n";
         break;
-    case Graphable::DOTTED_DIAMOND:
-        atts += "style=\"dotted\"\n";
+    case Graphable::LINK_EVALUATOR:
         atts += "arrowhead=\"normalnoneodiamond\"\n";
         break;
-    case Graphable::DOTTED_MULTI:
-        atts += "style=\"dotted\"\n";
+    case Graphable::LINK_MULTIPLICITY:
         atts += "arrowhead=\"normalonormalonormalonormal\"\n";
         break;
     }

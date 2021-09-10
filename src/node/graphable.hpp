@@ -21,14 +21,14 @@ public:
 
     enum LinkStyle
     {
-        SOLID,
-        SOLID_ROOT, // Like SOLID but disappears in And-rule graphs
-        SOLID_SQUARE,
-        SOLID_TEE,
-        DASHED, // Disappears in And-rule graphs
-        DOTTED_CIRCLE,
-        DOTTED_DIAMOND,
-        DOTTED_MULTI,        
+        LINK_NORMAL,
+        LINK_ROOT, // Like LINK_NORMAL but disappears in And-rule graphs
+        LINK_KEYER,
+        LINK_RESIDUAL,
+        LINK_ONLY_REPLACE, // Disappears in And-rule graphs
+        LINK_ABNORMAL,
+        LINK_EVALUATOR,
+        LINK_MULTIPLICITY        
     };
     enum BlockType
     {

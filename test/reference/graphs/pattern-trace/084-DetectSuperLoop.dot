@@ -535,7 +535,6 @@ subgraph "clusterAnd#R84-0" {
 // -------------------- links --------------------
 // links for block CR#P84-0
 "CR#P84-0":port0 -> "#P84-8-101" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -544,7 +543,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block #P84-8-101
 "#P84-8-101":port0 -> "#B-2-1551" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -553,7 +551,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block #B-2-1551
 "#B-2-1551":port0 -> "#B-2-1567" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -561,7 +558,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "#B-2-1551":port2 -> "#B-2-1563" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -571,7 +567,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block #B-2-1567
 // links for block #B-2-1563
 "#B-2-1563":port1 -> "#B-2-1552" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -588,7 +583,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block #B-2-1552
 "#B-2-1552":port0 -> "#B-2-1555" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -596,7 +590,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "#B-2-1552":port1 -> "#B-2-1557" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -604,7 +597,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "#B-2-1552":port2 -> "#B-2-1556" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -612,7 +604,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "#B-2-1552":port3 -> "#B-2-1559" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -623,7 +614,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block #B-2-1557
 // links for block #B-2-1556
 "#B-2-1556":port0 -> "#B-2-1561" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -632,7 +622,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block #B-2-1561
 "#B-2-1561":port0 -> "#B-2-1568" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -685,7 +674,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "#B-2-1566":port1 -> "#P84-8-102" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -703,7 +691,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block #P84-8-102
 "#P84-8-102":port0 -> "#P84-6-105" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -712,7 +699,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block #P84-6-105
 "#P84-6-105":port0 -> "#B-2-1565" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -733,7 +719,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block And#R84-0 / #B-2-1557
 // links for block And#R84-0 / #B-2-1551
 "And#R84-0 / #B-2-1551":port0 -> "And#R84-0 / #B-2-1567" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -742,7 +727,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "And#R84-0 / #B-2-1551":port2 -> "And#R84-0 / #B-2-1563" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -752,7 +736,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block And#R84-0 / #B-2-1552
 "And#R84-0 / #B-2-1552":port0 -> "And#R84-0 / #0 / #B-2-1555" [
-    style="dotted"
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -761,7 +744,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "And#R84-0 / #B-2-1552":port1 -> "And#R84-0 / #B-2-1557" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -770,7 +752,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "And#R84-0 / #B-2-1552":port2 -> "And#R84-0 / #0 / #B-2-1556" [
-    style="dotted"
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -779,7 +760,6 @@ subgraph "clusterAnd#R84-0" {
 ];
 
 "And#R84-0 / #B-2-1552":port3 -> "And#R84-0 / #B-2-1559" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -789,7 +769,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block And#R84-0 / #P84-8-101
 "And#R84-0 / #P84-8-101":port0 -> "And#R84-0 / #B-2-1551" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -801,7 +780,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block And#R84-0 / #B-2-1559
 // links for block And#R84-0 / #B-2-1563
 "And#R84-0 / #B-2-1563":port1 -> "And#R84-0 / #B-2-1552" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -813,7 +791,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block And#R84-0 / #0 / #B-2-1555
 // links for block And#R84-3 / #B-2-1556
 "And#R84-3 / #B-2-1556":port0 -> "And#R84-3 / #0 / #B-2-1561" [
-    style="dotted"
     arrowhead="normalonormalonormalonormal"
     label = "#0"
     decorate = true
@@ -824,7 +801,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block And#R84-3 / #0 / #B-2-1561
 // links for block And#R84-4 / #B-2-1561
 "And#R84-4 / #B-2-1561":port0 -> "And#R84-4 / #0 / #B-2-1568" [
-    style="dotted"
     arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true
@@ -838,7 +814,6 @@ subgraph "clusterAnd#R84-0" {
 // links for block And#R84-1 / #B-2-1565
 // links for block And#R84-1 / #P84-8-102
 "And#R84-1 / #P84-8-102":port0 -> "And#R84-1 / #P84-6-105" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -848,7 +823,6 @@ subgraph "clusterAnd#R84-0" {
 
 // links for block And#R84-1 / #P84-6-105
 "And#R84-1 / #P84-6-105":port0 -> "And#R84-1 / #B-2-1565" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true

@@ -278,7 +278,6 @@ subgraph "clusterAnd#R57-0" {
 // -------------------- links --------------------
 // links for block CR#P57-0
 "CR#P57-0":port0 -> "#P57-8-66" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -287,7 +286,6 @@ subgraph "clusterAnd#R57-0" {
 
 // links for block #P57-8-66
 "#P57-8-66":port0 -> "#P57-6-72" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -296,7 +294,6 @@ subgraph "clusterAnd#R57-0" {
 
 // links for block #P57-6-72
 "#P57-6-72":port0 -> "#B-2-959" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -313,7 +310,6 @@ subgraph "clusterAnd#R57-0" {
 
 // links for block #B-2-959
 "#B-2-959":port0 -> "#B-2-962" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -321,7 +317,6 @@ subgraph "clusterAnd#R57-0" {
 ];
 
 "#B-2-959":port1 -> "#B-2-963" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -329,7 +324,6 @@ subgraph "clusterAnd#R57-0" {
 ];
 
 "#B-2-959":port2 -> "#B-2-961" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -337,7 +331,6 @@ subgraph "clusterAnd#R57-0" {
 ];
 
 "#B-2-959":port3 -> "#B-2-964" [
-    style="solid"
     label = "#0"
     decorate = true
     color = black
@@ -376,7 +369,6 @@ subgraph "clusterAnd#R57-0" {
 // links for block And#R57-0 / #B-2-961
 // links for block And#R57-0 / #B-2-959
 "And#R57-0 / #B-2-959":port0 -> "And#R57-0 / #0 / #B-2-962" [
-    style="dotted"
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -385,7 +377,6 @@ subgraph "clusterAnd#R57-0" {
 ];
 
 "And#R57-0 / #B-2-959":port1 -> "And#R57-0 / #0 / #B-2-963" [
-    style="dotted"
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -394,7 +385,6 @@ subgraph "clusterAnd#R57-0" {
 ];
 
 "And#R57-0 / #B-2-959":port2 -> "And#R57-0 / #B-2-961" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -403,7 +393,6 @@ subgraph "clusterAnd#R57-0" {
 ];
 
 "And#R57-0 / #B-2-959":port3 -> "And#R57-0 / #0 / #B-2-964" [
-    style="dotted"
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -413,7 +402,6 @@ subgraph "clusterAnd#R57-0" {
 
 // links for block And#R57-0 / #P57-8-66
 "And#R57-0 / #P57-8-66":port0 -> "And#R57-0 / #P57-6-72" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -423,7 +411,6 @@ subgraph "clusterAnd#R57-0" {
 
 // links for block And#R57-0 / #P57-6-72
 "And#R57-0 / #P57-6-72":port0 -> "And#R57-0 / #B-2-959" [
-    style="solid"
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
