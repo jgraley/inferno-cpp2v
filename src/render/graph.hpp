@@ -40,18 +40,16 @@ public:
             string id;
             Graphable::LinkStyle link_style;
             string link_name;
-            const Graphable *root_graphable;
         };
-        struct GraphableAndIncomingLinks
+        struct Agent
         {
             map<string, Graphable::LinkStyle> link_styles;
-            const Graphable *graphable;
         };
         string id;
         string title;
-		list<GraphableAndIncomingLinks> interiors;
-		list<GraphableAndIncomingLinks> exteriors;
-		list<Subordinate> subordinates;
+		map<Graphable *, Agent> interior_agents;
+		map<Graphable *, Agent> exterior_agents;
+		map<Graphable *, Subordinate> subordinates;
 	};
 
     Graph( string of, string title );

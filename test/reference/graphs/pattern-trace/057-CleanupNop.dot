@@ -83,17 +83,6 @@ subgraph "clusterAnd#R57-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R57-0 / #B-2-961" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-961</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R57-0 / #B-2-959" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -104,6 +93,17 @@ subgraph "clusterAnd#R57-0" {
          <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
          <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
          <TR><TD>#B-2-959</TD><TD PORT="port4"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R57-0 / #B-2-961" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-961</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -130,18 +130,6 @@ subgraph "clusterAnd#R57-0" {
         fontsize = "12"
     ];
     
-    subgraph "clusterAnd#R57-0 / And#R57-3" {
-        label = "And#R57-3"
-        style = "filled"
-        color = antiquewhite3
-        fontsize = "15"
-        "And#R57-0 / #0 / #B-2-964" [
-            shape = "none"
-            style = "invisible"
-        ];
-        
-    }
-    
     subgraph "clusterAnd#R57-0 / And#R57-1" {
         label = "And#R57-1"
         style = "filled"
@@ -160,6 +148,18 @@ subgraph "clusterAnd#R57-0" {
         color = antiquewhite3
         fontsize = "15"
         "And#R57-0 / #0 / #B-2-963" [
+            shape = "none"
+            style = "invisible"
+        ];
+        
+    }
+    
+    subgraph "clusterAnd#R57-0 / And#R57-3" {
+        label = "And#R57-3"
+        style = "filled"
+        color = antiquewhite3
+        fontsize = "15"
+        "And#R57-0 / #0 / #B-2-964" [
             shape = "none"
             style = "invisible"
         ];
@@ -366,7 +366,6 @@ subgraph "clusterAnd#R57-0" {
     fontcolor = black
 ];
 
-// links for block And#R57-0 / #B-2-961
 // links for block And#R57-0 / #B-2-959
 "And#R57-0 / #B-2-959":port0 -> "And#R57-0 / #0 / #B-2-962" [
     arrowhead="normalnoneodot"
@@ -400,6 +399,7 @@ subgraph "clusterAnd#R57-0" {
     fontcolor = black
 ];
 
+// links for block And#R57-0 / #B-2-961
 // links for block And#R57-0 / #P57-6-72
 "And#R57-0 / #P57-6-72":port0 -> "And#R57-0 / #B-2-959" [
     arrowhead="normalnonebox"
@@ -418,9 +418,9 @@ subgraph "clusterAnd#R57-0" {
     fontcolor = black
 ];
 
-// links for block And#R57-0 / #0 / #B-2-964
 // links for block And#R57-0 / #0 / #B-2-962
 // links for block And#R57-0 / #0 / #B-2-963
+// links for block And#R57-0 / #0 / #B-2-964
 // links for block And#R57-3 / #B-2-964
 // links for block And#R57-1 / #B-2-962
 // links for block And#R57-2 / #B-2-963

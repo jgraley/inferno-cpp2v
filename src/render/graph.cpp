@@ -89,19 +89,19 @@ void Graph::operator()( const Figure &figure )
 {        
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
     list<const Graphable *> interior_gs, exterior_gs;
-    map< const Figure::Subordinate *, list<MyBlock> > subordinate_blocks;
+    map< Graphable *, list<MyBlock> > subordinate_blocks;
 
-    for( const Figure::GraphableAndIncomingLinks &lb : figure.exteriors )
-        exterior_gs.push_back( lb.graphable );
-    for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
-        interior_gs.push_back( lb.graphable );
+    for( auto p : figure.exterior_agents )
+        exterior_gs.push_back( p.first );
+    for( auto p : figure.interior_agents )
+        interior_gs.push_back( p.first );
 
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::LINK_NORMAL, Graphable::LINK_ROOT, Graphable::LINK_ONLY_REPLACE} );
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::LINK_ONLY_REPLACE, Graphable::LINK_ROOT} );
-    for( const Figure::Subordinate &sub : figure.subordinates )
+    for( auto p : figure.subordinates )
     {
-        string sub_figure_id = figure.id+" / "+sub.link_name;
-        subordinate_blocks[&sub].push_back( CreateInvisibleNode( sub.root_graphable->GetGraphId(), {}, sub_figure_id ) );
+        string sub_figure_id = figure.id+" / "+p.second.link_name;
+        subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.first->GetGraphId(), {}, sub_figure_id ) );
     }
     
     if( interior_blocks.empty() )
@@ -111,19 +111,19 @@ void Graph::operator()( const Figure &figure )
     }
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
-    for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
-        for( pair<string, Graphable::LinkStyle> p : lb.link_styles )
-            RedirectLinks( interior_blocks, lb.graphable, p.first, p.second );
-    for( const Figure::GraphableAndIncomingLinks &lb : figure.exteriors )
-        for( pair<string, Graphable::LinkStyle> p : lb.link_styles )
-            RedirectLinks( interior_blocks, lb.graphable, p.first, p.second );
-    for( const Figure::Subordinate &sub : figure.subordinates )
-        RedirectLinks( interior_blocks, sub.root_graphable, sub.link_name, sub.link_style, &(subordinate_blocks[&sub].front()) );
+    for( auto p1 : figure.interior_agents )
+        for( pair<string, Graphable::LinkStyle> p : p1.second.link_styles )
+            RedirectLinks( interior_blocks, p1.first, p.first, p.second );
+    for( auto p1 : figure.exterior_agents )
+        for( pair<string, Graphable::LinkStyle> p : p1.second.link_styles )
+            RedirectLinks( interior_blocks, p1.first, p.first, p.second );
+    for( auto p : figure.subordinates )
+        RedirectLinks( interior_blocks, p.first, p.second.link_name, p.second.link_style, &(subordinate_blocks[p.first].front()) );
 
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
-    for( const Figure::Subordinate &sub : figure.subordinates )
-		PostProcessBlocks(subordinate_blocks[&sub]);	
+    for( auto p : figure.subordinates )
+		PostProcessBlocks(subordinate_blocks[p.first]);	
     
     // Now generate all the dot code
     string s;
@@ -135,14 +135,14 @@ void Graph::operator()( const Figure &figure )
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     string s_interior = DoGraphBody(interior_blocks, interior_region); // Interior blocks
 
-    for( const Figure::Subordinate &sub : figure.subordinates )
+    for( auto p : figure.subordinates )
     {
 		RegionAppearance subordinate_region = interior_region;
-		subordinate_region.title = sub.id;
-		subordinate_region.region_id += " / "+sub.id;
+		subordinate_region.title = p.second.id;
+		subordinate_region.region_id += " / "+p.second.id;
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-        list<MyBlock> sub_blocks = subordinate_blocks.at(&sub);        
+        list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
 	    string s_subordinate = DoGraphBody(sub_blocks, subordinate_region); // Subordinate blocks
 		s_interior += DoCluster(s_subordinate, subordinate_region);
 	}
