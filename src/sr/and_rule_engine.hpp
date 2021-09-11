@@ -105,6 +105,9 @@ public:
         unordered_set<PatternLink> coupling_keyer_links;
         unordered_set<PatternLink> coupling_residual_links;
         unordered_set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link
+        unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
+        unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_master_boundary_agents;
+
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
         list<PatternLink> normal_links_ordered;

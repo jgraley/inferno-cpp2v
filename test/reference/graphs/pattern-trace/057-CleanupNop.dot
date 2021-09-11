@@ -109,6 +109,16 @@ subgraph "clusterAnd#R57-0" {
         fontsize = "12"
     ];
     
+    "And#R57-0 / #P57-6-72" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P57-6-72"
+        style = "filled"
+        fontsize = "12"
+        color = black
+        fontcolor = black
+    ];
+    
     "And#R57-0 / #P57-8-66" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -118,16 +128,6 @@ subgraph "clusterAnd#R57-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
-    ];
-    
-    "And#R57-0 / #P57-6-72" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P57-6-72"
-        style = "filled"
-        fontsize = "12"
-        color = black
-        fontcolor = black
     ];
     
     subgraph "clusterAnd#R57-0 / And#R57-3" {
@@ -400,8 +400,8 @@ subgraph "clusterAnd#R57-0" {
     fontcolor = black
 ];
 
-// links for block And#R57-0 / #P57-8-66
-"And#R57-0 / #P57-8-66":port0 -> "And#R57-0 / #P57-6-72" [
+// links for block And#R57-0 / #P57-6-72
+"And#R57-0 / #P57-6-72":port0 -> "And#R57-0 / #B-2-959" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -409,8 +409,8 @@ subgraph "clusterAnd#R57-0" {
     fontcolor = black
 ];
 
-// links for block And#R57-0 / #P57-6-72
-"And#R57-0 / #P57-6-72":port0 -> "And#R57-0 / #B-2-959" [
+// links for block And#R57-0 / #P57-8-66
+"And#R57-0 / #P57-8-66":port0 -> "And#R57-0 / #P57-6-72" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true

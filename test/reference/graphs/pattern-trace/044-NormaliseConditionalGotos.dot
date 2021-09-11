@@ -209,6 +209,40 @@ subgraph "clusterAnd#R44-0" {
         fontsize = "12"
     ];
     
+    "And#R44-0 / #P44-6-60" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P44-6-60"
+        style = "filled"
+        fontsize = "12"
+        color = black
+        fontcolor = black
+    ];
+    
+    "And#R44-0 / #B-2-782" [
+        shape = "plaintext"
+        fillcolor = "/set28/6"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Expression</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-782</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R44-0 / #B-2-798" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
+         <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-798</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R44-0 / #B-2-786" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -219,16 +253,6 @@ subgraph "clusterAnd#R44-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
-    ];
-    
-    "And#R44-0 / #P44-6-60" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P44-6-60"
-        style = "filled"
-        fontsize = "12"
-        color = black
-        fontcolor = black
     ];
     
     "And#R44-0 / #P44-8-52" [
@@ -257,25 +281,15 @@ subgraph "clusterAnd#R44-0" {
         fontsize = "12"
     ];
     
-    "And#R44-0 / #B-2-782" [
-        shape = "plaintext"
-        fillcolor = "/set28/6"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Expression</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-782</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R44-0 / #B-2-798" [
+    "And#R44-0 / #B-2-781" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
-         <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-798</TD><TD PORT="port2"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
+         <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
+         <TR><TD>#B-2-781</TD><TD PORT="port3"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -288,20 +302,6 @@ subgraph "clusterAnd#R44-0" {
          <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
          <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
          <TR><TD>#B-2-799</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R44-0 / #B-2-781" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
-         <TR><TD>#B-2-781</TD><TD PORT="port3"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -829,7 +829,6 @@ subgraph "clusterAnd#R44-0" {
 ];
 
 // links for block And#R44-0 / #B-2-800
-// links for block And#R44-0 / #B-2-786
 // links for block And#R44-0 / #P44-6-60
 "And#R44-0 / #P44-6-60":port0 -> "And#R44-0 / #B-2-798" [
     arrowhead="normalnonebox"
@@ -839,6 +838,25 @@ subgraph "clusterAnd#R44-0" {
     fontcolor = black
 ];
 
+// links for block And#R44-0 / #B-2-782
+// links for block And#R44-0 / #B-2-798
+"And#R44-0 / #B-2-798":port1 -> "And#R44-0 / #B-2-783" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R44-0 / #B-2-798":port1 -> "And#R44-0 / #B-2-799" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block And#R44-0 / #B-2-786
 // links for block And#R44-0 / #P44-8-52
 "And#R44-0 / #P44-8-52":port0 -> "And#R44-0 / #P44-6-60" [
     arrowhead="normalnonebox"
@@ -881,33 +899,6 @@ subgraph "clusterAnd#R44-0" {
     fontcolor = black
 ];
 
-// links for block And#R44-0 / #B-2-782
-// links for block And#R44-0 / #B-2-798
-"And#R44-0 / #B-2-798":port1 -> "And#R44-0 / #B-2-783" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R44-0 / #B-2-798":port1 -> "And#R44-0 / #B-2-799" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block And#R44-0 / #B-2-799
-"And#R44-0 / #B-2-799":port0 -> "And#R44-0 / #0 / #B-2-785" [
-    arrowhead="normalnoneodiamond"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 // links for block And#R44-0 / #B-2-781
 "And#R44-0 / #B-2-781":port0 -> "And#R44-0 / #B-2-782" [
     arrowhead="normalnonebox"
@@ -927,6 +918,15 @@ subgraph "clusterAnd#R44-0" {
 
 "And#R44-0 / #B-2-781":port2 -> "And#R44-0 / #B-2-800" [
     arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block And#R44-0 / #B-2-799
+"And#R44-0 / #B-2-799":port0 -> "And#R44-0 / #0 / #B-2-785" [
+    arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true
     color = black

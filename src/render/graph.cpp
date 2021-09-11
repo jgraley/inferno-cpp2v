@@ -101,11 +101,14 @@ void Graph::operator()( const Figure &figure )
     for( const Figure::Subordinate &sub : figure.subordinates )
     {
         string sub_figure_id = figure.id+" / "+sub.link_name;
-        subordinate_blocks[&sub].push_back( CreateInvisibleNode( sub.root->GetGraphId(), {}, sub_figure_id ) );
+        subordinate_blocks[&sub].push_back( CreateInvisibleNode( sub.root_graphable->GetGraphId(), {}, sub_figure_id ) );
     }
     
     if( interior_blocks.empty() )
+    {
+        ASSERT( !exterior_gs.empty() )(figure.title); // not sure we can handle these but shouldn't happen?
         interior_blocks.push_back( CreateInvisibleNode( "engine", { exterior_gs.front()->GetGraphId() }, figure.id ) );
+    }
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
     for( const Figure::GraphableAndIncomingLinks &lb : figure.interiors )
@@ -115,7 +118,7 @@ void Graph::operator()( const Figure &figure )
         for( pair<string, Graphable::LinkStyle> p : lb.link_styles )
             RedirectLinks( interior_blocks, lb.graphable, p.first, p.second );
     for( const Figure::Subordinate &sub : figure.subordinates )
-        RedirectLinks( interior_blocks, sub.root, sub.link_name, sub.link_style, &(subordinate_blocks[&sub].front()) );
+        RedirectLinks( interior_blocks, sub.root_graphable, sub.link_name, sub.link_style, &(subordinate_blocks[&sub].front()) );
 
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);

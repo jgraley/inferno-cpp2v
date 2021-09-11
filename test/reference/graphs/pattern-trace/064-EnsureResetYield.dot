@@ -46,18 +46,6 @@ subgraph "clusterAnd#R64-4" {
         fontsize = "12"
     ];
     
-    "And#R64-4 / #B-2-1082" [
-        shape = "plaintext"
-        fillcolor = "/set28/1"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
-         <TR><TD>LabelIdentifier</TD><TD PORT="port0">NULL</TD></TR>
-         <TR><TD>#B-2-1082</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R64-4 / #B-2-1083" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -65,6 +53,18 @@ subgraph "clusterAnd#R64-4" {
          <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port0">NULL</TD></TR>
          <TR><TD>#B-2-1083</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R64-4 / #B-2-1082" [
+        shape = "plaintext"
+        fillcolor = "/set28/1"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
+         <TR><TD>LabelIdentifier</TD><TD PORT="port0">NULL</TD></TR>
+         <TR><TD>#B-2-1082</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -212,6 +212,16 @@ subgraph "clusterAnd#R64-0" {
         fontsize = "12"
     ];
     
+    "And#R64-0 / #P64-6-80" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P64-6-80"
+        style = "filled"
+        fontsize = "12"
+        color = black
+        fontcolor = black
+    ];
+    
     "And#R64-0 / #P64-8-75" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -221,16 +231,6 @@ subgraph "clusterAnd#R64-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
-    ];
-    
-    "And#R64-0 / #P64-6-80" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P64-6-80"
-        style = "filled"
-        fontsize = "12"
-        color = black
-        fontcolor = black
     ];
     
     subgraph "clusterAnd#R64-0 / And#R64-5" {
@@ -635,8 +635,8 @@ subgraph "clusterAnd#R64-0" {
 ];
 
 // links for block And#R64-0 / #B-2-1079
-// links for block And#R64-0 / #P64-8-75
-"And#R64-0 / #P64-8-75":port0 -> "And#R64-0 / #P64-6-80" [
+// links for block And#R64-0 / #P64-6-80
+"And#R64-0 / #P64-6-80":port0 -> "And#R64-0 / #B-2-1072" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -644,8 +644,8 @@ subgraph "clusterAnd#R64-0" {
     fontcolor = black
 ];
 
-// links for block And#R64-0 / #P64-6-80
-"And#R64-0 / #P64-6-80":port0 -> "And#R64-0 / #B-2-1072" [
+// links for block And#R64-0 / #P64-8-75
+"And#R64-0 / #P64-8-75":port0 -> "And#R64-0 / #P64-6-80" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -704,6 +704,6 @@ subgraph "clusterAnd#R64-0" {
     fontcolor = black
 ];
 
-// links for block And#R64-4 / #B-2-1082
 // links for block And#R64-4 / #B-2-1083
+// links for block And#R64-4 / #B-2-1082
 }

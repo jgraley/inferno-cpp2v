@@ -34,22 +34,14 @@ subgraph "clusterAnd#R14-0" {
         fontsize = "12"
     ];
     
-    "And#R14-0 / #P14-6-17" [
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P14-6-17"
-        style = "filled"
-        fontsize = "12"
-        color = black
-        fontcolor = black
-    ];
-    
-    "And#R14-0 / #P14-8-14" [
+    "And#R14-0 / #B-2-162" [
         shape = "plaintext"
+        fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P14-8-14</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
+         <TR><TD>MapOperand</TD><TD PORT="port0">{}</TD></TR>
+         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-162</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -61,19 +53,6 @@ subgraph "clusterAnd#R14-0" {
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">'notify'</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-166</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R14-0 / #B-2-162" [
-        shape = "plaintext"
-        fillcolor = "/set28/6"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
-         <TR><TD>MapOperand</TD><TD PORT="port0">{}</TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-162</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -102,6 +81,27 @@ subgraph "clusterAnd#R14-0" {
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
+    ];
+    
+    "And#R14-0 / #P14-8-14" [
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P14-8-14</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R14-0 / #P14-6-17" [
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P14-6-17"
+        style = "filled"
+        fontsize = "12"
+        color = black
+        fontcolor = black
     ];
     
 }
@@ -288,25 +288,6 @@ subgraph "clusterAnd#R14-0" {
 ];
 
 // links for block And#R14-0 / #B-2-164
-// links for block And#R14-0 / #P14-6-17
-"And#R14-0 / #P14-6-17":port0 -> "And#R14-0 / #B-2-162" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block And#R14-0 / #P14-8-14
-"And#R14-0 / #P14-8-14":port0 -> "And#R14-0 / #P14-6-17" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block And#R14-0 / #B-2-166
 // links for block And#R14-0 / #B-2-162
 "And#R14-0 / #B-2-162":port1 -> "And#R14-0 / #B-2-163" [
     arrowhead="normalnonebox"
@@ -316,6 +297,7 @@ subgraph "clusterAnd#R14-0" {
     fontcolor = black
 ];
 
+// links for block And#R14-0 / #B-2-166
 // links for block And#R14-0 / #B-2-163
 "And#R14-0 / #B-2-163":port0 -> "And#R14-0 / #B-2-167" [
     arrowhead="normalnonebox"
@@ -335,6 +317,24 @@ subgraph "clusterAnd#R14-0" {
 
 // links for block And#R14-0 / #B-2-167
 "And#R14-0 / #B-2-167":port0 -> "And#R14-0 / #B-2-164" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block And#R14-0 / #P14-8-14
+"And#R14-0 / #P14-8-14":port0 -> "And#R14-0 / #P14-6-17" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block And#R14-0 / #P14-6-17
+"And#R14-0 / #P14-6-17":port0 -> "And#R14-0 / #B-2-162" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true

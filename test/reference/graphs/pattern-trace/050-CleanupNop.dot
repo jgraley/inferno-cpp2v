@@ -83,17 +83,6 @@ subgraph "clusterAnd#R50-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R50-0 / #B-2-866" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-866</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R50-0 / #B-2-864" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -128,6 +117,17 @@ subgraph "clusterAnd#R50-0" {
         fontsize = "12"
         color = black
         fontcolor = black
+    ];
+    
+    "And#R50-0 / #B-2-866" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-866</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
     ];
     
     subgraph "clusterAnd#R50-0 / And#R50-3" {
@@ -366,7 +366,6 @@ subgraph "clusterAnd#R50-0" {
     fontcolor = black
 ];
 
-// links for block And#R50-0 / #B-2-866
 // links for block And#R50-0 / #B-2-864
 "And#R50-0 / #B-2-864":port0 -> "And#R50-0 / #0 / #B-2-867" [
     arrowhead="normalnoneodot"
@@ -418,6 +417,7 @@ subgraph "clusterAnd#R50-0" {
     fontcolor = black
 ];
 
+// links for block And#R50-0 / #B-2-866
 // links for block And#R50-0 / #0 / #B-2-869
 // links for block And#R50-0 / #0 / #B-2-867
 // links for block And#R50-0 / #0 / #B-2-868

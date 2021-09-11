@@ -40,7 +40,7 @@ public:
             string id;
             Graphable::LinkStyle link_style;
             string link_name;
-            const Graphable *root;
+            const Graphable *root_graphable;
         };
         struct GraphableAndIncomingLinks
         {

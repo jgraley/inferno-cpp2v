@@ -123,34 +123,6 @@ subgraph "clusterAnd#R22-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R22-0 / #B-2-275" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-         <TR><TD>#B-2-275</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R22-0 / #B-2-276" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
-         <TR><TD>#B-2-276</TD><TD PORT="port4"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R22-0 / #P22-8-21" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -170,6 +142,34 @@ subgraph "clusterAnd#R22-0" {
         fontsize = "12"
         color = black
         fontcolor = black
+    ];
+    
+    "And#R22-0 / #B-2-276" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
+         <TR><TD>#B-2-276</TD><TD PORT="port4"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R22-0 / #B-2-275" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
+         <TR><TD>#B-2-275</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
     ];
     
     subgraph "clusterAnd#R22-0 / And#R22-5" {
@@ -489,17 +489,18 @@ subgraph "clusterAnd#R22-0" {
     fontcolor = black
 ];
 
-// links for block And#R22-0 / #B-2-275
-"And#R22-0 / #B-2-275":port0 -> "And#R22-0 / #0 / #B-2-281" [
-    arrowhead="normalnoneodot"
+// links for block And#R22-0 / #P22-8-21
+"And#R22-0 / #P22-8-21":port0 -> "And#R22-0 / #P22-6-26" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R22-0 / #B-2-275":port1 -> "And#R22-0 / #0 / #B-2-280" [
-    arrowhead="normalnoneodot"
+// links for block And#R22-0 / #P22-6-26
+"And#R22-0 / #P22-6-26":port0 -> "And#R22-0 / #B-2-276" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -539,18 +540,17 @@ subgraph "clusterAnd#R22-0" {
     fontcolor = black
 ];
 
-// links for block And#R22-0 / #P22-8-21
-"And#R22-0 / #P22-8-21":port0 -> "And#R22-0 / #P22-6-26" [
-    arrowhead="normalnonebox"
+// links for block And#R22-0 / #B-2-275
+"And#R22-0 / #B-2-275":port0 -> "And#R22-0 / #0 / #B-2-281" [
+    arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-// links for block And#R22-0 / #P22-6-26
-"And#R22-0 / #P22-6-26":port0 -> "And#R22-0 / #B-2-276" [
-    arrowhead="normalnonebox"
+"And#R22-0 / #B-2-275":port1 -> "And#R22-0 / #0 / #B-2-280" [
+    arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
     color = black

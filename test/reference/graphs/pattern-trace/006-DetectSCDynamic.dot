@@ -23,23 +23,24 @@ subgraph "clusterAnd#R6-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R6-0 / #B-2-53" [
+    "And#R6-0 / #B-2-50" [
         shape = "plaintext"
-        fillcolor = "/set28/3"
+        fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Event</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-53</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">'next_trigger'</FONT></TD><TD></TD></TR>
+         <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-50</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
     ];
     
-    "And#R6-0 / #B-2-51" [
+    "And#R6-0 / #P6-8-6" [
         shape = "plaintext"
-        fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">'p1'</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-51</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P6-8-6</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -67,29 +68,6 @@ subgraph "clusterAnd#R6-0" {
         fontcolor = black
     ];
     
-    "And#R6-0 / #P6-8-6" [
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P6-8-6</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R6-0 / #B-2-50" [
-        shape = "plaintext"
-        fillcolor = "/set28/5"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">'next_trigger'</FONT></TD><TD></TD></TR>
-         <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-50</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R6-0 / #B-2-49" [
         shape = "plaintext"
         fillcolor = "/set28/8"
@@ -111,6 +89,28 @@ subgraph "clusterAnd#R6-0" {
          <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-48</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R6-0 / #B-2-51" [
+        shape = "plaintext"
+        fillcolor = "/set28/5"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">'p1'</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-51</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R6-0 / #B-2-53" [
+        shape = "plaintext"
+        fillcolor = "/set28/3"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Event</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-53</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -319,8 +319,16 @@ subgraph "clusterAnd#R6-0" {
     fontcolor = black
 ];
 
-// links for block And#R6-0 / #B-2-53
-// links for block And#R6-0 / #B-2-51
+// links for block And#R6-0 / #B-2-50
+// links for block And#R6-0 / #P6-8-6
+"And#R6-0 / #P6-8-6":port0 -> "And#R6-0 / #P6-6-9" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 // links for block And#R6-0 / #B-2-52
 "And#R6-0 / #B-2-52":port0 -> "And#R6-0 / #B-2-53" [
     arrowhead="normalnonebox"
@@ -339,16 +347,6 @@ subgraph "clusterAnd#R6-0" {
     fontcolor = black
 ];
 
-// links for block And#R6-0 / #P6-8-6
-"And#R6-0 / #P6-8-6":port0 -> "And#R6-0 / #P6-6-9" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block And#R6-0 / #B-2-50
 // links for block And#R6-0 / #B-2-49
 "And#R6-0 / #B-2-49":port0 -> "And#R6-0 / #B-2-51" [
     arrowhead="normalnonebox"
@@ -383,4 +381,6 @@ subgraph "clusterAnd#R6-0" {
     fontcolor = black
 ];
 
+// links for block And#R6-0 / #B-2-51
+// links for block And#R6-0 / #B-2-53
 }

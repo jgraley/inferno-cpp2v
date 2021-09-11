@@ -43,19 +43,6 @@ subgraph "clusterAnd#R21-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R21-0 / #B-2-267" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
-         <TR><TD>(Break)</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-267</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R21-0 / #P21-8-20" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -75,6 +62,19 @@ subgraph "clusterAnd#R21-0" {
         fontsize = "12"
         color = black
         fontcolor = black
+    ];
+    
+    "And#R21-0 / #B-2-267" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
+         <TR><TD>(Break)</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-267</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
     ];
     
     subgraph "clusterAnd#R21-0 / And#R21-1" {
@@ -203,15 +203,6 @@ subgraph "clusterAnd#R21-0" {
 
 // links for block #B-2-268
 // links for block #B-2-274
-// links for block And#R21-0 / #B-2-267
-"And#R21-0 / #B-2-267":port1 -> "And#R21-0 / #0 / #B-2-268" [
-    arrowhead="normalnoneodiamond"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 // links for block And#R21-0 / #P21-8-20
 "And#R21-0 / #P21-8-20":port0 -> "And#R21-0 / #P21-6-25" [
     arrowhead="normalnonebox"
@@ -224,6 +215,15 @@ subgraph "clusterAnd#R21-0" {
 // links for block And#R21-0 / #P21-6-25
 "And#R21-0 / #P21-6-25":port0 -> "And#R21-0 / #B-2-267" [
     arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block And#R21-0 / #B-2-267
+"And#R21-0 / #B-2-267":port1 -> "And#R21-0 / #0 / #B-2-268" [
+    arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true
     color = black

@@ -78,6 +78,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
                         master_agents );
     TRACE("Normal agents ")(normal_agents)("\nMaster boundary agents ")(master_boundary_agents)("\n");
 
+    // Collect together the parent links to agents
+    for( PatternLink plink : my_normal_links )
+        parent_links_to_my_normal_agents[plink.GetChildAgent()].insert(plink);
+    // my_normal_agents should be same set of agents as those reached by my_normal_links (uniquified)
+    ASSERT( parent_links_to_my_normal_agents.size() == my_normal_agents.size() );
+    for( PatternLink plink : master_boundary_links )
+        parent_links_to_master_boundary_agents[plink.GetChildAgent()].insert(plink);
+    // master_boundary_agents should be same set of agents as those reached by master_boundary_links (uniquified)
+    ASSERT( parent_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
+
     if( my_normal_agents.empty() ) 
         return;  // Early-out on trivial problems
     DetermineKeyers( root_plink, master_agents );
@@ -991,37 +1001,36 @@ void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) c
 
 void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const
 {
+    FTRACE(*this)(" parent_links_to_master_boundary_agents ")( plan.parent_links_to_master_boundary_agents )("\n");
+    FTRACE(*this)(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
 	figure.id = GetGraphId();
 	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
     
-	TRACEC("   Interior:\n");    
-	for( const Agent *agent : plan.my_normal_agents )
+	TRACE("   Interior:\n");    
+	for( auto p : plan.parent_links_to_my_normal_agents )
     {
         Graph::Figure::GraphableAndIncomingLinks lb;
-        for( PatternLink plink : plan.my_normal_links )
+        for( PatternLink plink : p.second )
         {
-            if( plink.GetChildAgent() == agent )
-            {
-                if( plan.coupling_residual_links.count(plink)>0 )
-                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_RESIDUAL;
-                else if( plan.coupling_keyer_links.count(plink)>0 )
-                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_KEYER;
-                else
-                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_NORMAL;
-            }
+            if( plan.coupling_residual_links.count(plink)>0 )
+                lb.link_styles[plink.GetShortName()] = Graphable::LINK_RESIDUAL;
+            else if( plan.coupling_keyer_links.count(plink)>0 )
+                lb.link_styles[plink.GetShortName()] = Graphable::LINK_KEYER;
+            else
+                lb.link_styles[plink.GetShortName()] = Graphable::LINK_NORMAL;
         }
-        lb.graphable = agent;
-        TRACEC(*agent)("\n");
+        lb.graphable = p.first;
+        TRACEC(*p.first)("\n");
         figure.interiors.push_back( lb );
     }
 	
-	TRACEC("   Exterior:\n");
-	for( const Agent *agent : plan.master_boundary_agents )
+	TRACE("   Exterior:\n");
+	for( auto p : plan.parent_links_to_master_boundary_agents )
     {
         Graph::Figure::GraphableAndIncomingLinks lb;
-        for( PatternLink plink : plan.master_boundary_links )
+        for( PatternLink plink : p.second )
         {
             if( plan.master_boundary_residual_links.count(plink)>0 )
                 lb.link_styles[plink.GetShortName()] = Graphable::LINK_RESIDUAL;
@@ -1030,12 +1039,12 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             else
                 lb.link_styles[plink.GetShortName()] = Graphable::LINK_NORMAL;
         }
-        lb.graphable = agent;
-        TRACEC(*agent)("\n");
+        lb.graphable = p.first;
+        TRACEC(*p.first)("\n");
         figure.exteriors.push_back( lb );
     }
-	
-  	TRACEC("   Subordinates:\n");	
+    	
+  	TRACE("   Subordinates:\n");	
 	auto lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graphable::LinkStyle style )
     {
         for( auto p : engines )
@@ -1044,8 +1053,8 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             sub.id = p.second->GetGraphId();
             sub.link_style = style;
             sub.link_name = p.first.GetShortName();
-            sub.root = p.second->plan.root_agent;
-            TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(sub.root)("\n");
+            sub.root_graphable = p.second->plan.root_agent;
+            TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(sub.root_graphable)("\n");
             figure.subordinates.push_back( sub );
         }
 	};

@@ -123,19 +123,6 @@ subgraph "clusterAnd#R48-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R48-0 / #B-2-849" [
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-         <TR><TD>#B-2-849</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R48-0 / #B-2-850" [
         shape = "plaintext"
         fillcolor = "/set28/2"
@@ -170,6 +157,19 @@ subgraph "clusterAnd#R48-0" {
         fontsize = "12"
         color = black
         fontcolor = black
+    ];
+    
+    "And#R48-0 / #B-2-849" [
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
+         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
+         <TR><TD>#B-2-849</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
     ];
     
     subgraph "clusterAnd#R48-0 / And#R48-3" {
@@ -489,23 +489,6 @@ subgraph "clusterAnd#R48-0" {
     fontcolor = black
 ];
 
-// links for block And#R48-0 / #B-2-849
-"And#R48-0 / #B-2-849":port0 -> "And#R48-0 / #0 / #B-2-855" [
-    arrowhead="normalnoneodot"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R48-0 / #B-2-849":port1 -> "And#R48-0 / #0 / #B-2-854" [
-    arrowhead="normalnoneodot"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 // links for block And#R48-0 / #B-2-850
 "And#R48-0 / #B-2-850":port0 -> "And#R48-0 / #0 / #B-2-856" [
     arrowhead="normalnoneodot"
@@ -551,6 +534,23 @@ subgraph "clusterAnd#R48-0" {
 // links for block And#R48-0 / #P48-6-63
 "And#R48-0 / #P48-6-63":port0 -> "And#R48-0 / #B-2-850" [
     arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// links for block And#R48-0 / #B-2-849
+"And#R48-0 / #B-2-849":port0 -> "And#R48-0 / #0 / #B-2-855" [
+    arrowhead="normalnoneodot"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R48-0 / #B-2-849":port1 -> "And#R48-0 / #0 / #B-2-854" [
+    arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
     color = black
