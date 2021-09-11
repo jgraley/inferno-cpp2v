@@ -18,23 +18,23 @@ edge [
 ];
 
 // -------------------- figure And#R82-1 --------------------
-"And#R82-1 / #B-2-1521" [
-    shape = "plaintext"
-    fillcolor = "/set28/5"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">LabelIdentifier</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1521</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
 "And#R82-1 / #B-2-1520" [
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">LabelIdentifier</FONT></TD><TD></TD></TR>
      <TR><TD>#B-2-1520</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+"And#R82-1 / #B-2-1521" [
+    shape = "plaintext"
+    fillcolor = "/set28/5"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">LabelIdentifier</FONT></TD><TD></TD></TR>
+     <TR><TD>#B-2-1521</TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -1004,8 +1004,8 @@ subgraph "clusterAnd#R82-0" {
 // links for block And#R82-4 / #B-2-1519
 // links for block And#R82-2 / #B-2-1517
 // links for block And#R82-3 / #B-2-1518
-// links for block And#R82-1 / #B-2-1521
 // links for block And#R82-1 / #B-2-1520
+// links for block And#R82-1 / #B-2-1521
 // links for block And#R82-1 / #P82-8-99
 "And#R82-1 / #P82-8-99":port0 -> "And#R82-1 / #P82-6-103" [
     arrowhead="normalnonebox"
