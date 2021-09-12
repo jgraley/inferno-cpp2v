@@ -371,19 +371,29 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 		break;
 	}
 	
+    for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
+    {			
+        // Actions for links
+        list<Graphable::Link> new_links;
+        for( Graphable::Link &link : sub_block.links )
+        {
+			if( link_styles_to_discard.count( link.style ) == 0 )
+            {
+                ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
+                new_links.push_back( link );
+            }
+        }
+        sub_block.links = new_links;
+    }
+    
     // Actions for sub-blocks
     my_block.link_ids.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {			
         // Actions for links
-        list<Graphable::Link> new_links;
         list<string> new_link_ids;
         for( Graphable::Link &link : sub_block.links )
-        {
-			if( link_styles_to_discard.count( link.style ) )
-				continue;
-			
-			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
+        {			
 			string id = GetFullId(link.child, figure_id);			
 			
             // Detect pre-restrictions and add to link labels
@@ -392,10 +402,8 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                 block_ids_show_prerestriction.insert( id );
             }
 
-			new_links.push_back( link );
             new_link_ids.push_back( id );
         }
-        sub_block.links = new_links;
         my_block.link_ids.push_back( new_link_ids );
     }
     
