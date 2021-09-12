@@ -775,7 +775,6 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style, Graphable::Phase pha
     switch(link_style)
     {
     case Graphable::LINK_NORMAL:
-    case Graphable::LINK_ONLY_REPLACE:
         break;
     case Graphable::LINK_KEYER:
         atts += "arrowhead=\"normalnonebox\"\n";

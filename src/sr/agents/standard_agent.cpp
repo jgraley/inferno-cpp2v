@@ -1032,7 +1032,7 @@ Graphable::Block StandardAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
     for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
         for( Graphable::Link &link : sub_block.links )
         {
-            link.style = (phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL);    
+            link.style = (LINK_NORMAL);    
             link.phase = phase;
         }
 

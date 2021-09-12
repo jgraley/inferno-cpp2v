@@ -24,7 +24,6 @@ public:
         LINK_NORMAL,
         LINK_KEYER,
         LINK_RESIDUAL,
-        LINK_ONLY_REPLACE, // Disappears in And-rule graphs
         LINK_ABNORMAL,
         LINK_EVALUATOR,
         LINK_MULTIPLICITY        
