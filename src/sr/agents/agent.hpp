@@ -31,13 +31,7 @@ class Agent : public virtual Graphable,
               public virtual Node
 {
 public:  
-    enum Phase
-    {
-        // Really a bitfield
-        IN_COMPARE_ONLY = 1,
-        IN_COMPARE_AND_REPLACE = 3,
-        IN_REPLACE_ONLY = 2
-    };
+    typedef Graphable::Phase Phase;
     
     enum Path
     {

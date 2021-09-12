@@ -64,6 +64,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
                                phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                {},
                                {PatternLink(this, GetPattern()).GetShortName()},
+                               phase,
                                SpecialBase::IsNonTrivialPreRestriction(GetPattern()) } } } };
     return block;
 }

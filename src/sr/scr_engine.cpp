@@ -447,9 +447,10 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 "",
                                 true,
                                 { { dynamic_cast<Graphable *>(plan.root_pattern.get()),
-                                    LINK_ROOT, 
+                                    LINK_NORMAL, 
                                     {},
                                     {plan.root_plink.GetShortName()},
+                                    IN_COMPARE_AND_REPLACE,
                                     SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) } } } );
         return { false, GetName(), "", "", CONTROL, sub_blocks };
     }
@@ -474,6 +475,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                     LINK_NORMAL, 
                                     {},
                                     {},
+                                    IN_COMPARE_ONLY,
                                     SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) } } } );    
         sub_blocks.push_back( { "replace", 
                                 "",
@@ -482,6 +484,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                     LINK_ONLY_REPLACE, 
                                     {},
                                     {},
+                                    IN_REPLACE_ONLY,
                                     SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) } } } );
     }
     else
@@ -493,6 +496,7 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                     LINK_NORMAL, 
                                     {},
                                     {},
+                                    IN_COMPARE_AND_REPLACE,
                                     SpecialBase::IsNonTrivialPreRestriction(original_ptr) } } } );
     }
     return { false, GetName(), "", "", CONTROL, sub_blocks };

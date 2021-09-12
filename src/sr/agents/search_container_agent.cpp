@@ -91,6 +91,7 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
                                phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                {},
                                {PatternLink(this, &terminus).GetShortName()},
+                               phase,
                                SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) } } } };
     return block;
 }
@@ -279,6 +280,7 @@ Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                           phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                           {},
                                           {PatternLink(this, &recurse_restriction).GetShortName()},
+                                          phase,
                                           SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) } } } );
     return block;
 }

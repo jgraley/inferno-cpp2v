@@ -45,6 +45,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                        phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                        {},
                                        {PatternLink(this, GetThrough()).GetShortName()},
+                                       phase,
                                        SpecialBase::IsNonTrivialPreRestriction(GetThrough()) } } } );
     return block;
 }

@@ -77,7 +77,7 @@ void Graph::operator()( Transformation *root )
 
 	reached.clear();
     PopulateFromTransformation(my_graphables, root);
-    my_blocks = GetBlocks( my_graphables, my_graphables, "", {} );
+    my_blocks = GetBlocks( my_graphables, my_graphables, "", false );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -105,8 +105,8 @@ void Graph::operator()( const Figure &figure )
         all_gs.push_back( p.first );
     }
 
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, figure.id, { Graphable::LINK_ONLY_REPLACE} );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, figure.id, { Graphable::LINK_ONLY_REPLACE} );
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, figure.id, true );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, figure.id, true );
     
     if( interior_blocks.empty() )
     {
@@ -169,7 +169,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables, g );
-	my_blocks = GetBlocks( my_graphables, my_graphables, "", {} );
+	my_blocks = GetBlocks( my_graphables, my_graphables, "", false );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -275,7 +275,7 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
                                        list< const Graphable *> all_graphables,
                                        string figure_id,
-                                       const set<Graphable::LinkStyle> &link_styles_to_discard )
+                                       bool hide_replace_only )
 {
 	list<MyBlock> blocks;
 	
@@ -292,7 +292,8 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
             list<Graphable::Link> new_links;
             for( Graphable::Link &link : sub_block.links )
             {
-                if( link_styles_to_discard.count( link.style ) == 0 && sg.count( link.child ) > 0 )
+                bool hide = (hide_replace_only && link.phase == IN_REPLACE_ONLY);
+                if( sg.count( link.child ) > 0 && !hide )
                 {
                     ASSERT( link.child )(gblock.title)(" ")(sub_block.item_name);
                     new_links.push_back( link );
@@ -333,7 +334,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
         link.child = nullptr;
         link.style = Graphable::LINK_NORMAL;                
         //link.trace_labels.push_back( lnf( ... ) ); TODO
-        //link.is_ntpr = ntprf ? ntprf(&p) : false;
+        //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( link );
         block.link_ids.back().push_back( GetFullId(child_id, figure_id) );
     }
@@ -405,7 +406,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 			string id = GetFullId(link.child, figure_id);			
 			
             // Detect pre-restrictions and add to link labels
-            if( link.is_ntpr )
+            if( link.is_nontrivial_prerestriction )
             {
                 block_ids_show_prerestriction.insert( id );
             }
@@ -614,7 +615,7 @@ string Graph::DoLink( int port_index,
 {          
     // Atts
     string atts;
-    atts += LinkStyleAtt(link.style);
+    atts += LinkStyleAtt(link.style, link.phase);
 
     // Labels
     list<string> labels;
@@ -768,22 +769,19 @@ void Graph::Remember( string s )
 }
 
 
-string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
+string Graph::LinkStyleAtt(Graphable::LinkStyle link_style, Graphable::Phase phase)
 {
     string atts;
     switch(link_style)
     {
     case Graphable::LINK_NORMAL:
-    case Graphable::LINK_ROOT:
+    case Graphable::LINK_ONLY_REPLACE:
         break;
     case Graphable::LINK_KEYER:
         atts += "arrowhead=\"normalnonebox\"\n";
         break;
     case Graphable::LINK_RESIDUAL:
         atts += "arrowhead=\"normalnonetee\"\n";
-        break;
-    case Graphable::LINK_ONLY_REPLACE:
-        atts += "style=\"dashed\"\n";
         break;
     case Graphable::LINK_ABNORMAL:
         atts += "arrowhead=\"normalnoneodot\"\n";
@@ -793,6 +791,17 @@ string Graph::LinkStyleAtt(Graphable::LinkStyle link_style)
         break;
     case Graphable::LINK_MULTIPLICITY:
         atts += "arrowhead=\"normalonormalonormalonormal\"\n";
+        break;
+    }
+    
+    switch( phase )
+    {
+    case IN_COMPARE_ONLY:
+    case IN_COMPARE_AND_REPLACE:
+        //atts += "style=\"solid\"\n";
+        break;
+    case IN_REPLACE_ONLY:
+        atts += "style=\"dashed\"\n";
         break;
     }
     return atts;

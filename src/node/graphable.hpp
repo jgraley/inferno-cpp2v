@@ -22,7 +22,6 @@ public:
     enum LinkStyle
     {
         LINK_NORMAL,
-        LINK_ROOT, // Like LINK_NORMAL but disappears in And-rule graphs
         LINK_KEYER,
         LINK_RESIDUAL,
         LINK_ONLY_REPLACE, // Disappears in And-rule graphs
@@ -35,13 +34,21 @@ public:
         CONTROL,
         NODE    
     };
+    enum Phase
+    {
+        // Really a bitfield
+        IN_COMPARE_ONLY = 1,
+        IN_COMPARE_AND_REPLACE = 3,
+        IN_REPLACE_ONLY = 2
+    };
     struct Link
     {
         const Graphable *child;
         LinkStyle style;
         list<string> labels;
         list<string> trace_labels;
-        bool is_ntpr;
+        Phase phase;
+        bool is_nontrivial_prerestriction;
     };
     struct SubBlock
     {

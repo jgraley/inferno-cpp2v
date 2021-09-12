@@ -88,7 +88,7 @@ private:
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,
 	                         string figure_id,
-                             const set<Graphable::LinkStyle> &link_styles_to_discard );
+                             bool hide_replace_only );
     MyBlock CreateInvisibleNode( string base_id, list<string> child_ids, string figure_id );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
@@ -116,7 +116,7 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     void Remember( string s );
-    string LinkStyleAtt(Graphable::LinkStyle link_style);
+    string LinkStyleAtt(Graphable::LinkStyle link_style, Graphable::Phase phase);
     string GetFullId(const Graphable *g, string figure_id);
     string GetFullId(string id, string figure_id);
     string Indent(string s);

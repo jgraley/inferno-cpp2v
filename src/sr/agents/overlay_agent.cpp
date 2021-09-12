@@ -23,6 +23,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 LINK_NORMAL, 
                                 {},
                                 {PatternLink(this, GetThrough()).GetShortName()},
+                                IN_COMPARE_ONLY,
                                 SpecialBase::IsNonTrivialPreRestriction(GetThrough()) } } } );
     sub_blocks.push_back( { "overlay", 
                             "",
@@ -31,6 +32,7 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 LINK_ONLY_REPLACE, 
                                 {},
                                 {PatternLink(this, GetOverlay()).GetShortName()},
+                                IN_REPLACE_ONLY,
                                 SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) } } } );
     return { false, GetName(), "", "", CONTROL, sub_blocks };
 }

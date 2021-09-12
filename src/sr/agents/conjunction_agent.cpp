@@ -43,6 +43,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
                                                     phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                                     {},
                                                     {PatternLink(this, &p).GetShortName()},
+                                                    phase,
                                                     SpecialBase::IsNonTrivialPreRestriction(&p) } );
     return block;
 }

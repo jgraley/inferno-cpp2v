@@ -228,6 +228,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                           phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                           {},
                                           {PatternLink(this, &terminus).GetShortName()},
+                                          phase,
                                           SpecialBase::IsNonTrivialPreRestriction(&terminus) } } } );
     if( depth )
         block.sub_blocks.push_back( { "depth", 
@@ -237,6 +238,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                           phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                           {},
                                           {PatternLink(this, &depth).GetShortName()},
+                                          phase,
                                           SpecialBase::IsNonTrivialPreRestriction(&depth) } } } );
     return block;
 }
@@ -313,6 +315,7 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
                                           phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                           {},
                                           {},
+                                          phase,
                                           SpecialBase::IsNonTrivialPreRestriction(&container) } } } );
     }
     return block;
@@ -459,6 +462,7 @@ Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunctio
                                           phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                           {},
                                           {PatternLink(this, &pattern).GetShortName()},
+                                          phase,
                                           SpecialBase::IsNonTrivialPreRestriction(&pattern) } } } );
     return block;
 }

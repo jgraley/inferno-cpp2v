@@ -50,6 +50,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
                                phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                {},
                                {PatternLink(this, &pattern).GetShortName()},
+                               phase,
                                SpecialBase::IsNonTrivialPreRestriction(&pattern) } } } };
     return block;
 }

@@ -119,6 +119,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                           phase == IN_REPLACE_ONLY ? LINK_ONLY_REPLACE : LINK_NORMAL, 
                                           {},
                                           {PatternLink(this, GetRestriction()).GetShortName()},
+                                          phase,
                                           SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) } } } );
     return block;
 }
