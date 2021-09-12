@@ -89,7 +89,7 @@ private:
 	                         string figure_id,
                              const set<Graphable::LinkStyle> &link_styles_to_discard );
     MyBlock CreateInvisibleNode( string base_id, list<string> child_ids, string figure_id );
-    MyBlock PreProcessBlock( const Graphable::Block &block, 
+    MyBlock PreProcessBlock( Graphable::Block &block, 
                              const Graphable *g,
                              string figure_id,
                              const set<Graphable::LinkStyle> &link_styles_to_discard );

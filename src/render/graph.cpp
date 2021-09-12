@@ -320,7 +320,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
 }
 
 
-Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
+Graph::MyBlock Graph::PreProcessBlock( Graphable::Block &block, 
                                        const Graphable *g,
                                        string figure_id,
                                        const set<Graphable::LinkStyle> &link_styles_to_discard )
@@ -328,6 +328,21 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
     const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
+
+    for( Graphable::SubBlock &sub_block : block.sub_blocks )
+    {			
+        // Actions for links
+        list<Graphable::Link> new_links;
+        for( Graphable::Link &link : sub_block.links )
+        {
+			if( link_styles_to_discard.count( link.style ) == 0 )
+            {
+                ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
+                new_links.push_back( link );
+            }
+        }
+        sub_block.links = new_links;
+    }
 
     // Fill in everything in block 
     MyBlock my_block;
@@ -370,22 +385,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 		ASSERTFAIL("Unknown block type");
 		break;
 	}
-	
-    for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
-    {			
-        // Actions for links
-        list<Graphable::Link> new_links;
-        for( Graphable::Link &link : sub_block.links )
-        {
-			if( link_styles_to_discard.count( link.style ) == 0 )
-            {
-                ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
-                new_links.push_back( link );
-            }
-        }
-        sub_block.links = new_links;
-    }
-    
+	    
     // Actions for sub-blocks
     my_block.link_ids.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
