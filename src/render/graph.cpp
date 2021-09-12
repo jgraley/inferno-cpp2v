@@ -77,7 +77,7 @@ void Graph::operator()( Transformation *root )
 
 	reached.clear();
     PopulateFromTransformation(my_graphables, root);
-    my_blocks = GetBlocks( my_graphables, "", {} );
+    my_blocks = GetBlocks( my_graphables, my_graphables, "", {} );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -88,7 +88,7 @@ void Graph::operator()( Transformation *root )
 void Graph::operator()( const Figure &figure )
 {        
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
-    list<const Graphable *> interior_gs, exterior_gs;
+    list<const Graphable *> interior_gs, exterior_gs, all_gs;
     map< Graphable *, list<MyBlock> > subordinate_blocks;
 
     for( auto p : figure.exterior_agents )
@@ -96,13 +96,17 @@ void Graph::operator()( const Figure &figure )
     for( auto p : figure.interior_agents )
         interior_gs.push_back( p.first );
 
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::LINK_NORMAL, Graphable::LINK_ROOT, Graphable::LINK_ONLY_REPLACE} );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {                        Graphable::LINK_ROOT, Graphable::LINK_ONLY_REPLACE} );
+    all_gs = interior_gs + exterior_gs;
+
     for( auto p : figure.subordinates )
     {
         string sub_figure_id = figure.id+" / "+p.second.link_name;
         subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.first->GetGraphId(), {}, sub_figure_id ) );
+        all_gs.push_back( p.first );
     }
+
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, figure.id, { Graphable::LINK_ONLY_REPLACE} );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, figure.id, { Graphable::LINK_ONLY_REPLACE} );
     
     if( interior_blocks.empty() )
     {
@@ -165,7 +169,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables, g );
-	my_blocks = GetBlocks( my_graphables, "", {} );
+	my_blocks = GetBlocks( my_graphables, my_graphables, "", {} );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -269,15 +273,35 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 
 
 list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
+                                       list< const Graphable *> all_graphables,
                                        string figure_id,
                                        const set<Graphable::LinkStyle> &link_styles_to_discard )
 {
 	list<MyBlock> blocks;
 	
+    set<const Graphable *> sg;
+    for( const Graphable *g : all_graphables )
+        sg.insert( g );
+    
 	for( const Graphable *g : graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
-        MyBlock block = PreProcessBlock( gblock, g, figure_id, link_styles_to_discard );
+        
+        for( Graphable::SubBlock &sub_block : gblock.sub_blocks )
+        {			
+            list<Graphable::Link> new_links;
+            for( Graphable::Link &link : sub_block.links )
+            {
+                if( link_styles_to_discard.count( link.style ) == 0 && sg.count( link.child ) > 0 )
+                {
+                    ASSERT( link.child )(gblock.title)(" ")(sub_block.item_name);
+                    new_links.push_back( link );
+                }
+            }
+            sub_block.links = new_links;
+        }
+        
+        MyBlock block = PreProcessBlock( gblock, g, figure_id );
         blocks.push_back( block );
 	}
 
@@ -320,29 +344,13 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
 }
 
 
-Graph::MyBlock Graph::PreProcessBlock( Graphable::Block &block, 
+Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
-                                       string figure_id,
-                                       const set<Graphable::LinkStyle> &link_styles_to_discard )
+                                       string figure_id )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
     const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
-
-    for( Graphable::SubBlock &sub_block : block.sub_blocks )
-    {			
-        // Actions for links
-        list<Graphable::Link> new_links;
-        for( Graphable::Link &link : sub_block.links )
-        {
-			if( link_styles_to_discard.count( link.style ) == 0 )
-            {
-                ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
-                new_links.push_back( link );
-            }
-        }
-        sub_block.links = new_links;
-    }
 
     // Fill in everything in block 
     MyBlock my_block;
