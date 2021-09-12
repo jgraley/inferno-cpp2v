@@ -87,12 +87,12 @@ private:
                         const MyBlock *target_block = nullptr );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         string figure_id,
-                             const set<Graphable::LinkStyle> &discard_links );
+                             const set<Graphable::LinkStyle> &link_styles_to_discard );
     MyBlock CreateInvisibleNode( string base_id, list<string> child_ids, string figure_id );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
                              string figure_id,
-                             const set<Graphable::LinkStyle> &discard_links );
+                             const set<Graphable::LinkStyle> &link_styles_to_discard );
     
     void PostProcessBlocks( list<MyBlock> &blocks );
 

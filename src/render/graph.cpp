@@ -97,7 +97,7 @@ void Graph::operator()( const Figure &figure )
         interior_gs.push_back( p.first );
 
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, figure.id, {Graphable::LINK_NORMAL, Graphable::LINK_ROOT, Graphable::LINK_ONLY_REPLACE} );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {Graphable::LINK_ONLY_REPLACE, Graphable::LINK_ROOT} );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, figure.id, {                        Graphable::LINK_ROOT, Graphable::LINK_ONLY_REPLACE} );
     for( auto p : figure.subordinates )
     {
         string sub_figure_id = figure.id+" / "+p.second.link_name;
@@ -270,14 +270,14 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 
 list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
                                        string figure_id,
-                                       const set<Graphable::LinkStyle> &discard_links )
+                                       const set<Graphable::LinkStyle> &link_styles_to_discard )
 {
 	list<MyBlock> blocks;
 	
 	for( const Graphable *g : graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
-        MyBlock block = PreProcessBlock( gblock, g, figure_id, discard_links );
+        MyBlock block = PreProcessBlock( gblock, g, figure_id, link_styles_to_discard );
         blocks.push_back( block );
 	}
 
@@ -323,7 +323,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
                                        string figure_id,
-                                       const set<Graphable::LinkStyle> &discard_links )
+                                       const set<Graphable::LinkStyle> &link_styles_to_discard )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
@@ -380,7 +380,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         list<string> new_link_ids;
         for( Graphable::Link &link : sub_block.links )
         {
-			if( discard_links.count( link.style ) )
+			if( link_styles_to_discard.count( link.style ) )
 				continue;
 			
 			ASSERT( link.child )(block.title)(" ")(sub_block.item_name);
