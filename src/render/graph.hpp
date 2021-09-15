@@ -33,17 +33,27 @@ class Graph : public OutOfPlaceTransformation
 public:
 	using Transformation::operator();
 
+    enum LinkStyle
+    {
+        LINK_NORMAL,
+        LINK_KEYER,
+        LINK_RESIDUAL,
+        LINK_ABNORMAL,
+        LINK_EVALUATOR,
+        LINK_MULTIPLICITY        
+    };
+
 	struct Figure
 	{        
         struct Subordinate
         {
             string id;
-            Graphable::LinkStyle link_style;
+            LinkStyle link_style;
             string link_name;
         };
         struct Agent
         {
-            map<string, Graphable::LinkStyle> link_styles;
+            map<string, LinkStyle> link_styles;
         };
         string id;
         string title;
@@ -63,7 +73,7 @@ private:
     struct MyLinkAdditional
     {
         string id;
-        Graphable::LinkStyle style;
+        LinkStyle style;
     };
 
     struct MyBlock : Graphable::Block
@@ -90,7 +100,7 @@ private:
     void RedirectLinks( list<MyBlock> &blocks_to_redirect, 
                         const Graphable *child_g,
                         string trace_label,
-                        Graphable::LinkStyle target_link_style,
+                        LinkStyle target_link_style,
                         const MyBlock *target_block = nullptr );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,
@@ -123,7 +133,7 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     void Remember( string s );
-    string LinkStyleAtt(Graphable::LinkStyle link_style, Graphable::Phase phase);
+    string LinkStyleAtt(LinkStyle link_style, Graphable::Phase phase);
     string GetFullId(const Graphable *g, string figure_id);
     string GetFullId(string id, string figure_id);
     string Indent(string s);

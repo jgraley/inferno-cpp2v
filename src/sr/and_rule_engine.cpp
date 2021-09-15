@@ -1020,11 +1020,11 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             for( PatternLink plink : p.second )
             {
                 if( residuals.count(plink) > 0 )
-                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_RESIDUAL;
+                    lb.link_styles[plink.GetShortName()] = Graph::LINK_RESIDUAL;
                 else if( keyers.count(plink) > 0 )
-                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_KEYER;
+                    lb.link_styles[plink.GetShortName()] = Graph::LINK_KEYER;
                 else
-                    lb.link_styles[plink.GetShortName()] = Graphable::LINK_NORMAL;
+                    lb.link_styles[plink.GetShortName()] = Graph::LINK_NORMAL;
             }            
             TRACEC(*p.first)("\n");
             figure_agents[p.first] = lb;
@@ -1039,7 +1039,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                                             plan.master_boundary_keyer_links,
                                             plan.master_boundary_residual_links );       
         
-	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graphable::LinkStyle style )
+	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkStyle style )
     {
         for( auto p : engines )
         {
@@ -1051,9 +1051,9 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             figure.subordinates[p.second->plan.root_agent] = sub;
         }
 	};
-    subordinates_lambda( plan.my_free_abnormal_engines, Graphable::LINK_ABNORMAL );
-    subordinates_lambda( plan.my_evaluator_abnormal_engines, Graphable::LINK_EVALUATOR );
-    subordinates_lambda( plan.my_multiplicity_engines, Graphable::LINK_MULTIPLICITY );
+    subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABNORMAL );
+    subordinates_lambda( plan.my_evaluator_abnormal_engines, Graph::LINK_EVALUATOR );
+    subordinates_lambda( plan.my_multiplicity_engines, Graph::LINK_MULTIPLICITY );
 	TRACE("Ready to render ")(*this)("\n");
 	graph(figure);
 }

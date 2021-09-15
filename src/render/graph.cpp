@@ -116,10 +116,10 @@ void Graph::operator()( const Figure &figure )
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
     for( auto p1 : figure.interior_agents )
-        for( pair<string, Graphable::LinkStyle> p : p1.second.link_styles )
+        for( pair<string, LinkStyle> p : p1.second.link_styles )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     for( auto p1 : figure.exterior_agents )
-        for( pair<string, Graphable::LinkStyle> p : p1.second.link_styles )
+        for( pair<string, LinkStyle> p : p1.second.link_styles )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     for( auto p : figure.subordinates )
         RedirectLinks( interior_blocks, p.first, p.second.link_name, p.second.link_style, &(subordinate_blocks[p.first].front()) );
@@ -227,7 +227,7 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect, 
                            const Graphable *child_g,
                            string trace_label,
-                           Graphable::LinkStyle target_link_style,
+                           LinkStyle target_link_style,
                            const MyBlock *target_block )
 {
     bool hit = false;
@@ -337,7 +337,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
         sub_block.links.push_back( link );
         MyLinkAdditional la;
         la.id = GetFullId(child_id, figure_id);
-        la.style = Graphable::LINK_NORMAL;
+        la.style = LINK_NORMAL;
         block.link_additional.back().push_back( la );
     }
     block.sub_blocks.push_back( sub_block );
@@ -407,7 +407,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         {			
             MyLinkAdditional la;
 			la.id = GetFullId(link.child, figure_id);	
-            la.style = Graphable::LINK_NORMAL;		
+            la.style = LINK_NORMAL;		
 			
             // Detect pre-restrictions and add to link labels
             if( link.is_nontrivial_prerestriction )
@@ -774,26 +774,26 @@ void Graph::Remember( string s )
 }
 
 
-string Graph::LinkStyleAtt(Graphable::LinkStyle link_style, Graphable::Phase phase)
+string Graph::LinkStyleAtt(LinkStyle link_style, Graphable::Phase phase)
 {
     string atts;
     switch(link_style)
     {
-    case Graphable::LINK_NORMAL:
+    case LINK_NORMAL:
         break;
-    case Graphable::LINK_KEYER:
+    case LINK_KEYER:
         atts += "arrowhead=\"normalnonebox\"\n";
         break;
-    case Graphable::LINK_RESIDUAL:
+    case LINK_RESIDUAL:
         atts += "arrowhead=\"normalnonetee\"\n";
         break;
-    case Graphable::LINK_ABNORMAL:
+    case LINK_ABNORMAL:
         atts += "arrowhead=\"normalnoneodot\"\n";
         break;
-    case Graphable::LINK_EVALUATOR:
+    case LINK_EVALUATOR:
         atts += "arrowhead=\"normalnoneodiamond\"\n";
         break;
-    case Graphable::LINK_MULTIPLICITY:
+    case LINK_MULTIPLICITY:
         atts += "arrowhead=\"normalonormalonormalonormal\"\n";
         break;
     }

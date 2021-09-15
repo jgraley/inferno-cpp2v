@@ -19,15 +19,6 @@ class Graphable : public virtual Traceable
 {
 public:    
 
-    enum LinkStyle
-    {
-        LINK_NORMAL,
-        LINK_KEYER,
-        LINK_RESIDUAL,
-        LINK_ABNORMAL,
-        LINK_EVALUATOR,
-        LINK_MULTIPLICITY        
-    };
     enum BlockType
     {
         CONTROL,
