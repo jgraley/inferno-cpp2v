@@ -47,7 +47,6 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
                            "", 
                            true,
                            { { dynamic_cast<Graphable *>(pattern.get()),
-                               LINK_NORMAL, 
                                {},
                                {PatternLink(this, &pattern).GetShortName()},
                                phase,

@@ -40,8 +40,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
                            {} } };
     FOREACH( const TreePtrInterface &p, GetPatterns() )
         block.sub_blocks.front().links.push_back( { dynamic_cast<Graphable *>(p.get()),
-                                                    LINK_NORMAL, 
-                                                    {},
+                                                                    {},
                                                     {PatternLink(this, &p).GetShortName()},
                                                     phase,
                                                     SpecialBase::IsNonTrivialPreRestriction(&p) } );

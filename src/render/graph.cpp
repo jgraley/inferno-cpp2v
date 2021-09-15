@@ -258,7 +258,6 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     {
                         if( target_block )
                             la.id = target_block->base_id;     
-                        link.style = target_link_style;            
                         la.style = target_link_style;            
                         hit = true;
                     }
@@ -333,7 +332,6 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
     {
         Graphable::Link link;
         link.child = nullptr;
-        link.style = Graphable::LINK_NORMAL;                
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( link );

@@ -1031,10 +1031,7 @@ Graphable::Block StandardAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
 	// Overwrite link style depending on the phase we're in
     for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
         for( Graphable::Link &link : sub_block.links )
-        {
-            link.style = (LINK_NORMAL);    
             link.phase = phase;
-        }
 
 	return block;
 }

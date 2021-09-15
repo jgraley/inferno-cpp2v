@@ -49,8 +49,8 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                   false,
                                                   {} };
                 Graphable::Link link;
+                link.phase = Graphable::IS_X_NODE; // StandardAgent should overwrite this
                 link.child = dynamic_cast<Graphable *>(p.get());
-                link.style = Graphable::LINK_NORMAL;
                 link.trace_labels.push_back( lnf( &sp_this, &p ) );
                 link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
                 sub_block.links.push_back( link );
@@ -70,8 +70,8 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 			FOREACH( const TreePtrInterface &p, *col )
             {
                 Graphable::Link link;
+                link.phase = Graphable::IS_X_NODE; // StandardAgent should overwrite this
                 link.child = dynamic_cast<Graphable *>(p.get());
-                link.style = Graphable::LINK_NORMAL;                
                 link.trace_labels.push_back( lnf( &sp_this, &p ) );
                 link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
                 sub_block.links.push_back( link );
@@ -87,8 +87,8 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                   false,
                                                   {} };
                 Graphable::Link link;
+                link.phase = Graphable::IS_X_NODE; // StandardAgent should overwrite this
                 link.child = dynamic_cast<Graphable *>(ptr->get());
-                link.style = Graphable::LINK_NORMAL;                
                 link.trace_labels.push_back( lnf(&sp_this, ptr ) );          
                 link.is_nontrivial_prerestriction = ntprf ? ntprf(ptr) : false;
                 sub_block.links.push_back( link );

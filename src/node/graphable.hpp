@@ -36,14 +36,14 @@ public:
     enum Phase
     {
         // Really a bitfield
+        IS_X_NODE = 0,
         IN_COMPARE_ONLY = 1,
         IN_COMPARE_AND_REPLACE = 3,
-        IN_REPLACE_ONLY = 2
+        IN_REPLACE_ONLY = 2,
     };
     struct Link
     {
         const Graphable *child;
-        LinkStyle style;
         list<string> labels;
         list<string> trace_labels;
         Phase phase;
