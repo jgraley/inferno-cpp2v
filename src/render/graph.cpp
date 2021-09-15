@@ -116,13 +116,13 @@ void Graph::operator()( const Figure &figure )
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
     for( auto p1 : figure.interior_agents )
-        for( pair<string, LinkStyle> p : p1.second.link_styles )
+        for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     for( auto p1 : figure.exterior_agents )
-        for( pair<string, LinkStyle> p : p1.second.link_styles )
+        for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     for( auto p : figure.subordinates )
-        RedirectLinks( interior_blocks, p.first, p.second.link_name, p.second.link_style, &(subordinate_blocks[p.first].front()) );
+        RedirectLinks( interior_blocks, p.first, p.second.link_name, p.second.link_planned_as, &(subordinate_blocks[p.first].front()) );
 
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
@@ -227,7 +227,7 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect, 
                            const Graphable *child_g,
                            string trace_label,
-                           LinkStyle target_link_style,
+                           LinkPlannedAs target_link_planned_as,
                            const MyBlock *target_block )
 {
     bool hit = false;
@@ -258,7 +258,7 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     {
                         if( target_block )
                             la.id = target_block->base_id;     
-                        la.style = target_link_style;            
+                        la.planned_as = target_link_planned_as;            
                         hit = true;
                     }
                 }
@@ -337,7 +337,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
         sub_block.links.push_back( link );
         MyLinkAdditional la;
         la.id = GetFullId(child_id, figure_id);
-        la.style = LINK_NORMAL;
+        la.planned_as = LINK_NORMAL;
         block.link_additional.back().push_back( la );
     }
     block.sub_blocks.push_back( sub_block );
@@ -407,7 +407,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         {			
             MyLinkAdditional la;
 			la.id = GetFullId(link.child, figure_id);	
-            la.style = LINK_NORMAL;		
+            la.planned_as = LINK_NORMAL;		
 			
             // Detect pre-restrictions and add to link labels
             if( link.is_nontrivial_prerestriction )
@@ -620,7 +620,7 @@ string Graph::DoLink( int port_index,
 {          
     // Atts
     string atts;
-    atts += LinkStyleAtt(la.style, link.phase);
+    atts += LinkStyleAtt(la.planned_as, link.phase);
 
     // Labels
     list<string> labels;
@@ -774,10 +774,10 @@ void Graph::Remember( string s )
 }
 
 
-string Graph::LinkStyleAtt(LinkStyle link_style, Graphable::Phase phase)
+string Graph::LinkStyleAtt(LinkPlannedAs link_planned_as, Graphable::Phase phase)
 {
     string atts;
-    switch(link_style)
+    switch(link_planned_as)
     {
     case LINK_NORMAL:
         break;

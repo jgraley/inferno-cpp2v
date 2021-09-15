@@ -1020,11 +1020,11 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             for( PatternLink plink : p.second )
             {
                 if( residuals.count(plink) > 0 )
-                    lb.link_styles[plink.GetShortName()] = Graph::LINK_RESIDUAL;
+                    lb.links_planned_as[plink.GetShortName()] = Graph::LINK_RESIDUAL;
                 else if( keyers.count(plink) > 0 )
-                    lb.link_styles[plink.GetShortName()] = Graph::LINK_KEYER;
+                    lb.links_planned_as[plink.GetShortName()] = Graph::LINK_KEYER;
                 else
-                    lb.link_styles[plink.GetShortName()] = Graph::LINK_NORMAL;
+                    lb.links_planned_as[plink.GetShortName()] = Graph::LINK_NORMAL;
             }            
             TRACEC(*p.first)("\n");
             figure_agents[p.first] = lb;
@@ -1039,13 +1039,13 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                                             plan.master_boundary_keyer_links,
                                             plan.master_boundary_residual_links );       
         
-	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkStyle style )
+	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs style )
     {
         for( auto p : engines )
         {
             Graph::Figure::Subordinate sub;
             sub.id = p.second->GetGraphId();
-            sub.link_style = style;
+            sub.link_planned_as = style;
             sub.link_name = p.first.GetShortName();
             TRACEC(sub.id)(": ")(sub.link_name)(" -> ")(p.second->plan.root_agent)("\n");
             figure.subordinates[p.second->plan.root_agent] = sub;
