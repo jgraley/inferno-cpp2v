@@ -237,19 +237,19 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 	for( MyBlock &block : blocks_to_redirect )
 	{
         TRACEC("    Block: ")(block.base_id)("\n");
-        auto sbidit = block.link_ids.begin();
+        auto sbidit = block.link_additional.begin();
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
-            ASSERT(sbidit != block.link_ids.end() );
+            ASSERT(sbidit != block.link_additional.end() );
             auto lidit = sbidit->begin();
             for( Graphable::Link &link : sub_block.links )
             {
                 ASSERT( lidit != sbidit->end() );
-                string id = *lidit;
-                TRACEC("        Link: ")(id)(": ")(link.labels)(link.trace_labels)("\n");
+                MyLinkAdditional &la = *lidit;
+                TRACEC("        Link: ")(la.id)(": ")(link.labels)(link.trace_labels)("\n");
                 // Two things must be true for us to redirect this link toward the target block:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
-                // - The link label (sattelite serial number of the PatternLink) must match the one supplied to us for the sub-engine
+                // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
                 if( link.child == child_g )
                 {
@@ -257,8 +257,9 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     if( link.trace_labels.front() == trace_label )
                     {
                         if( target_block )
-                            *lidit = target_block->base_id;     
+                            la.id = target_block->base_id;     
                         link.style = target_link_style;            
+                        la.style = target_link_style;            
                         hit = true;
                     }
                 }
@@ -317,7 +318,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
 	block.bold = false;
 	block.shape = "none";
     block.block_type = Graphable::NODE;
-    block.link_ids.push_back( {} );
+    block.link_additional.push_back( {} );
     block.prerestriction_name = "";
     block.colour = "";
     block.specify_ports = false;
@@ -336,7 +337,10 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( link );
-        block.link_ids.back().push_back( GetFullId(child_id, figure_id) );
+        MyLinkAdditional la;
+        la.id = GetFullId(child_id, figure_id);
+        la.style = Graphable::LINK_NORMAL;
+        block.link_additional.back().push_back( la );
     }
     block.sub_blocks.push_back( sub_block );
 		    
@@ -396,24 +400,26 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	}
 	    
     // Actions for sub-blocks
-    my_block.link_ids.clear();
+    my_block.link_additional.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {			
         // Actions for links
-        list<string> new_link_ids;
+        list<MyLinkAdditional> new_las;
         for( Graphable::Link &link : sub_block.links )
         {			
-			string id = GetFullId(link.child, figure_id);			
+            MyLinkAdditional la;
+			la.id = GetFullId(link.child, figure_id);	
+            la.style = Graphable::LINK_NORMAL;		
 			
             // Detect pre-restrictions and add to link labels
             if( link.is_nontrivial_prerestriction )
             {
-                block_ids_show_prerestriction.insert( id );
+                block_ids_show_prerestriction.insert( la.id );
             }
-
-            new_link_ids.push_back( id );
+            
+            new_las.push_back( la );
         }
-        my_block.link_ids.push_back( new_link_ids );
+        my_block.link_additional.push_back( new_las );
     }
     
     // Italic title OR symbol designates a special agent 
@@ -436,7 +442,7 @@ void Graph::PostProcessBlocks( list<MyBlock> &blocks )
                                            "", 
                                            false, 
                                            {} } );
-            block.link_ids.push_front( list<string>() );
+            block.link_additional.push_front( list<MyLinkAdditional>() );
         }
         
         // Can we hide sub-blocks?
@@ -588,15 +594,16 @@ string Graph::DoLinks( const MyBlock &block )
     
     int porti=0;
     s += "// links for block "+block.base_id+"\n";
-    auto sbidit = block.link_ids.begin();
+    auto sbidit = block.link_additional.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
-		ASSERT(sbidit != block.link_ids.end() );
+		ASSERT(sbidit != block.link_additional.end() );
 		auto lidit = sbidit->begin();
         for( Graphable::Link link : sub_block.links )
         {
 			ASSERT( lidit != sbidit->end() );
-			s += DoLink( porti, block, sub_block, link, *lidit );
+            const MyLinkAdditional &la = *lidit;
+			s += DoLink( porti, block, sub_block, link, la );
 			lidit++;
 		}
         porti++;
@@ -611,11 +618,11 @@ string Graph::DoLink( int port_index,
                       const MyBlock &block, 
                       const Graphable::SubBlock &sub_block, 
                       const Graphable::Link &link,
-                      string id )
+                      const MyLinkAdditional &la )
 {          
     // Atts
     string atts;
-    atts += LinkStyleAtt(link.style, link.phase);
+    atts += LinkStyleAtt(la.style, link.phase);
 
     // Labels
     list<string> labels;
@@ -638,7 +645,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += "\""+id+"\"";
+	s += "\""+la.id+"\"";
 	s += " [\n"+Indent(atts)+"];\n";
     s += "\n";
 	return s;
