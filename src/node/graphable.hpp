@@ -15,10 +15,15 @@ template<typename VALUE_TYPE>
 struct TreePtr;
 class Node;
 
-class Graphable : public virtual Traceable
+class GraphIdable : public virtual Traceable
 {
 public:    
+    virtual string GetGraphId() const { return ""; }
+};
 
+class Graphable : public GraphIdable
+{
+public:    
     enum BlockType
     {
         CONTROL,
@@ -67,7 +72,6 @@ public:
         Block g{false, "", "", "", NODE, {}}; 
         return g;
     };
-    virtual string GetGraphId() const { return ""; }
 };
 
 #endif

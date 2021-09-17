@@ -23,7 +23,7 @@ subgraph "clusterAnd#R42-2" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R42-2 / #B-2-754" [
+    "And#R42-2[#B-2-754]" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -43,7 +43,7 @@ subgraph "clusterAnd#R42-1" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R42-1 / #B-2-753" [
+    "And#R42-1[#B-2-753]" [
         shape = "plaintext"
         fillcolor = "/set28/1"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -63,7 +63,7 @@ subgraph "clusterAnd#R42-3" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R42-3 / #B-2-755" [
+    "And#R42-3[#B-2-755]" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -83,7 +83,7 @@ subgraph "clusterAnd#R42-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R42-0 / #B-2-748" [
+    "And#R42-0[#B-2-748]" [
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -98,7 +98,7 @@ subgraph "clusterAnd#R42-0" {
         fontsize = "12"
     ];
     
-    "And#R42-0 / #B-2-749" [
+    "And#R42-0[#B-2-749]" [
         shape = "plaintext"
         fillcolor = "/set28/1"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -112,7 +112,7 @@ subgraph "clusterAnd#R42-0" {
         fontsize = "12"
     ];
     
-    "And#R42-0 / #B-2-750" [
+    "And#R42-0[#B-2-750]" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> (LocalVariable) | <port1> through | <port2> overlay | <port3> #B-2-750"
@@ -122,7 +122,7 @@ subgraph "clusterAnd#R42-0" {
         fontcolor = black
     ];
     
-    "And#R42-0 / #B-2-751" [
+    "And#R42-0[#B-2-751]" [
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -133,7 +133,7 @@ subgraph "clusterAnd#R42-0" {
         fontsize = "12"
     ];
     
-    "And#R42-0 / #B-2-752" [
+    "And#R42-0[#B-2-752]" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -144,7 +144,7 @@ subgraph "clusterAnd#R42-0" {
         fontsize = "12"
     ];
     
-    "And#R42-0 / #P42-6-58" [
+    "And#R42-0[#P42-6-58]" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P42-6-58"
@@ -154,7 +154,7 @@ subgraph "clusterAnd#R42-0" {
         fontcolor = black
     ];
     
-    "And#R42-0 / #P42-8-50" [
+    "And#R42-0[#P42-8-50]" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
@@ -165,36 +165,36 @@ subgraph "clusterAnd#R42-0" {
         fontsize = "12"
     ];
     
-    subgraph "clusterAnd#R42-0 / And#R42-1" {
+    subgraph "clusterAnd#R42-0[And#R42-1]" {
         label = "And#R42-1"
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        "And#R42-0 / #0 / #B-2-753" [
+        "#0->And#R42-0[#B-2-753]" [
             shape = "none"
             style = "invisible"
         ];
         
     }
     
-    subgraph "clusterAnd#R42-0 / And#R42-2" {
+    subgraph "clusterAnd#R42-0[And#R42-2]" {
         label = "And#R42-2"
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        "And#R42-0 / #0 / #B-2-754" [
+        "#0->And#R42-0[#B-2-754]" [
             shape = "none"
             style = "invisible"
         ];
         
     }
     
-    subgraph "clusterAnd#R42-0 / And#R42-3" {
+    subgraph "clusterAnd#R42-0[And#R42-3]" {
         label = "And#R42-3"
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        "And#R42-0 / #0 / #B-2-755" [
+        "#0->And#R42-0[#B-2-755]" [
             shape = "none"
             style = "invisible"
         ];
@@ -549,8 +549,8 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-// links for block And#R42-0 / #B-2-748
-"And#R42-0 / #B-2-748":port0 -> "And#R42-0 / #0 / #B-2-753" [
+// links for block And#R42-0[#B-2-748]
+"And#R42-0[#B-2-748]":port0 -> "#0->And#R42-0[#B-2-753]" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -558,7 +558,7 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-"And#R42-0 / #B-2-748":port1 -> "And#R42-0 / #0 / #B-2-754" [
+"And#R42-0[#B-2-748]":port1 -> "#0->And#R42-0[#B-2-754]" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -566,7 +566,7 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-"And#R42-0 / #B-2-748":port2 -> "And#R42-0 / #B-2-750" [
+"And#R42-0[#B-2-748]":port2 -> "And#R42-0[#B-2-750]" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -574,7 +574,7 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-"And#R42-0 / #B-2-748":port3 -> "And#R42-0 / #0 / #B-2-755" [
+"And#R42-0[#B-2-748]":port3 -> "#0->And#R42-0[#B-2-755]" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -582,8 +582,8 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-// links for block And#R42-0 / #B-2-749
-"And#R42-0 / #B-2-749":port1 -> "And#R42-0 / #B-2-751" [
+// links for block And#R42-0[#B-2-749]
+"And#R42-0[#B-2-749]":port1 -> "And#R42-0[#B-2-751]" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -591,7 +591,7 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-"And#R42-0 / #B-2-749":port2 -> "And#R42-0 / #B-2-752" [
+"And#R42-0[#B-2-749]":port2 -> "And#R42-0[#B-2-752]" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -599,8 +599,8 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-// links for block And#R42-0 / #B-2-750
-"And#R42-0 / #B-2-750":port1 -> "And#R42-0 / #B-2-749" [
+// links for block And#R42-0[#B-2-750]
+"And#R42-0[#B-2-750]":port1 -> "And#R42-0[#B-2-749]" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -608,10 +608,10 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-// links for block And#R42-0 / #B-2-751
-// links for block And#R42-0 / #B-2-752
-// links for block And#R42-0 / #P42-6-58
-"And#R42-0 / #P42-6-58":port0 -> "And#R42-0 / #B-2-748" [
+// links for block And#R42-0[#B-2-751]
+// links for block And#R42-0[#B-2-752]
+// links for block And#R42-0[#P42-6-58]
+"And#R42-0[#P42-6-58]":port0 -> "And#R42-0[#B-2-748]" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -619,8 +619,8 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-// links for block And#R42-0 / #P42-8-50
-"And#R42-0 / #P42-8-50":port0 -> "And#R42-0 / #P42-6-58" [
+// links for block And#R42-0[#P42-8-50]
+"And#R42-0[#P42-8-50]":port0 -> "And#R42-0[#P42-6-58]" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -628,10 +628,10 @@ subgraph "clusterAnd#R42-0" {
     fontcolor = black
 ];
 
-// links for block And#R42-0 / #0 / #B-2-753
-// links for block And#R42-0 / #0 / #B-2-754
-// links for block And#R42-0 / #0 / #B-2-755
-// links for block And#R42-3 / #B-2-755
-// links for block And#R42-1 / #B-2-753
-// links for block And#R42-2 / #B-2-754
+// links for block #0->And#R42-0[#B-2-753]
+// links for block #0->And#R42-0[#B-2-754]
+// links for block #0->And#R42-0[#B-2-755]
+// links for block And#R42-3[#B-2-755]
+// links for block And#R42-1[#B-2-753]
+// links for block And#R42-2[#B-2-754]
 }

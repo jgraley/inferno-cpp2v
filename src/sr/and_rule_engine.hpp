@@ -34,7 +34,7 @@ class SpecialBase;
 class CompareReplace;
 
 /// Solve an and-rule matching problem
-class AndRuleEngine : public virtual Traceable,
+class AndRuleEngine : public virtual GraphIdable,
                       public SerialNumber
 {
 public:

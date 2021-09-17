@@ -43,23 +43,27 @@ public:
         LINK_MULTIPLICITY        
     };
 
-	struct Figure
+    struct Region
+    {
+        string id;
+        string title;        
+    };
+    
+	struct Figure : Region
 	{        
         struct Subordinate
         {
-            string id;
-            LinkPlannedAs link_planned_as;
-            string link_name;
+            const GraphIdable *graphidable;
+            string root_link_short_name;
+            LinkPlannedAs root_link_planned_as;
         };
         struct Agent
         {
             map<string, LinkPlannedAs> links_planned_as;
         };
-        string id;
-        string title;
 		map<Graphable *, Agent> interior_agents;
 		map<Graphable *, Agent> exterior_agents;
-		map<Graphable *, Subordinate> subordinates;
+        map<Graphable *, Subordinate> subordinates;
 	};
 
     Graph( string of, string title );
@@ -86,10 +90,9 @@ private:
         list< list<MyLinkAdditional> > link_additional; 
     };
 
-    struct RegionAppearance
+    struct RegionAppearance : Region
     {
-		string region_id;
-		string title;
+        RegionAppearance( string bg ) : background_colour(bg) {}
 		string background_colour;
 	};
 
@@ -104,12 +107,14 @@ private:
                         const MyBlock *target_block = nullptr );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,
-	                         string figure_id,
+	                         const Region *region,
                              bool hide_replace_only );
-    MyBlock CreateInvisibleNode( string base_id, list<string> child_ids, string figure_id );
+    MyBlock CreateInvisibleNode( string base_id, 
+                                 list<const Graphable *> children, 
+                                 const Region *region );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,
-                             string figure_id );
+                             const Region *region );
     
     void PostProcessBlocks( list<MyBlock> &blocks );
 
@@ -133,9 +138,9 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     void Remember( string s );
-    string LinkStyleAtt(LinkPlannedAs link_planned_as, Graphable::Phase phase);
-    string GetFullId(const Graphable *g, string figure_id);
-    string GetFullId(string id, string figure_id);
+    string LinkStyleAtt(LinkPlannedAs root_link_planned_as, Graphable::Phase phase);
+    string GetRegionGraphId(const Region *region, const GraphIdable *g);
+    string GetRegionGraphId(const Region *region, string id);
     string Indent(string s);
 
     const string outfile; // empty means stdout

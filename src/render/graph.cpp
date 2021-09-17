@@ -40,9 +40,7 @@ using namespace CPPTree;
 
 Graph::Graph( string of, string title ) :
     outfile(of),
-    base_region { "",
-                  "",
-		          ReadArgs::graph_dark ? "black" : "antiquewhite1" },
+    base_region( ReadArgs::graph_dark ? "black" : "antiquewhite1" ),
 	line_colour( ReadArgs::graph_dark ? "grey70" : "black" ),
     font_colour( ReadArgs::graph_dark ? "white" : "black" )
 {
@@ -77,7 +75,7 @@ void Graph::operator()( Transformation *root )
 
 	reached.clear();
     PopulateFromTransformation(my_graphables, root);
-    my_blocks = GetBlocks( my_graphables, my_graphables, "", false );
+    my_blocks = GetBlocks( my_graphables, my_graphables, nullptr, false );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -100,18 +98,19 @@ void Graph::operator()( const Figure &figure )
 
     for( auto p : figure.subordinates )
     {
-        string sub_figure_id = figure.id+" / "+p.second.link_name;
-        subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.first->GetGraphId(), {}, sub_figure_id ) );
+        Region sub_region;
+        sub_region.id = p.second.root_link_short_name + "->" + figure.id;
+        subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.first->GetGraphId(), {}, &sub_region ) );
         all_gs.push_back( p.first );
     }
 
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, figure.id, true );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, figure.id, true );
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, &figure, true );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, &figure, true );
     
     if( interior_blocks.empty() )
     {
         ASSERT( !exterior_gs.empty() )(figure.title); // not sure we can handle these but shouldn't happen?
-        interior_blocks.push_back( CreateInvisibleNode( "engine", { exterior_gs.front()->GetGraphId() }, figure.id ) );
+        interior_blocks.push_back( CreateInvisibleNode( "trivial", { exterior_gs.front() }, &figure ) );
     }
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
@@ -122,7 +121,7 @@ void Graph::operator()( const Figure &figure )
         for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     for( auto p : figure.subordinates )
-        RedirectLinks( interior_blocks, p.first, p.second.link_name, p.second.link_planned_as, &(subordinate_blocks[p.first].front()) );
+        RedirectLinks( interior_blocks, p.first, p.second.root_link_short_name, p.second.root_link_planned_as, &(subordinate_blocks[p.first].front()) );
 
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
@@ -135,15 +134,15 @@ void Graph::operator()( const Figure &figure )
 	s += DoGraphBody(exterior_blocks, base_region); // Exterior blocks
     RegionAppearance interior_region = base_region;
     interior_region.title = figure.title;
-    interior_region.region_id = figure.id;
+    interior_region.id = figure.id;
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     string s_interior = DoGraphBody(interior_blocks, interior_region); // Interior blocks
 
     for( auto p : figure.subordinates )
     {
 		RegionAppearance subordinate_region = interior_region;
-		subordinate_region.title = p.second.id;
-		subordinate_region.region_id += " / "+p.second.id;
+		subordinate_region.title = p.second.graphidable->GetGraphId();
+		subordinate_region.id = GetRegionGraphId(&figure, p.second.graphidable);
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
         list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
@@ -169,7 +168,7 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables, g );
-	my_blocks = GetBlocks( my_graphables, my_graphables, "", false );
+	my_blocks = GetBlocks( my_graphables, my_graphables, nullptr, false );
     PostProcessBlocks(my_blocks);
     s += DoGraphBody(my_blocks, base_region);
     s += "\n";
@@ -274,7 +273,7 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 
 list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
                                        list< const Graphable *> all_graphables,
-                                       string figure_id,
+                                       const Region *region,
                                        bool hide_replace_only )
 {
 	list<MyBlock> blocks;
@@ -302,7 +301,7 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
             sub_block.links = new_links;
         }
         
-        MyBlock block = PreProcessBlock( gblock, g, figure_id );
+        MyBlock block = PreProcessBlock( gblock, g, region );
         blocks.push_back( block );
 	}
 
@@ -310,7 +309,9 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
 }
 
 
-Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, string figure_id )
+Graph::MyBlock Graph::CreateInvisibleNode( string id, 
+                                           list<const Graphable *> children, 
+                                           const Region *region )
 {
 	MyBlock block;
 	block.title = "";     
@@ -321,14 +322,14 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
     block.prerestriction_name = "";
     block.colour = "";
     block.specify_ports = false;
-    block.base_id = GetFullId(id, figure_id);
+    block.base_id = GetRegionGraphId(region, id);
     block.italic_title = false;
     
     Graphable::SubBlock sub_block = { "", 
                                       "",
                                       false,
                                       {} };
-    for( string child_id : child_ids )
+    for( const Graphable *child : children )
     {
         Graphable::Link link;
         link.child = nullptr;
@@ -336,7 +337,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( link );
         MyLinkAdditional la;
-        la.id = GetFullId(child_id, figure_id);
+        la.id = GetRegionGraphId(region, child);
         la.planned_as = LINK_NORMAL;
         block.link_additional.back().push_back( la );
     }
@@ -349,7 +350,7 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id, list<string> child_ids, st
 
 Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block, 
                                        const Graphable *g,
-                                       string figure_id )
+                                       const Region *region )
 {
 	ASSERT(g);
 	const Node *pnode = dynamic_cast<const Node *>(g);
@@ -360,7 +361,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     (Graphable::Block &)my_block = block;
     
     // Fill in the GraphViz ID that the block will use
-    my_block.base_id = GetFullId(g, figure_id);
+    my_block.base_id = GetRegionGraphId(region, g);
     
     // Capture the node (if there is one: might be NULL)
 	if( pspecial )
@@ -406,7 +407,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         for( Graphable::Link &link : sub_block.links )
         {			
             MyLinkAdditional la;
-			la.id = GetFullId(link.child, figure_id);	
+			la.id = GetRegionGraphId(region, link.child);	
             la.planned_as = LINK_NORMAL;		
 			
             // Detect pre-restrictions and add to link labels
@@ -709,7 +710,7 @@ string Graph::DoCluster(string ss, const RegionAppearance &region)
 	s += ss;
  
     string sc;
-    sc += "subgraph \"cluster" + region.region_id + "\" {\n";
+    sc += "subgraph \"cluster" + region.id + "\" {\n";
     sc += Indent(s);
     sc += "}\n";
     sc += "\n";
@@ -774,10 +775,10 @@ void Graph::Remember( string s )
 }
 
 
-string Graph::LinkStyleAtt(LinkPlannedAs link_planned_as, Graphable::Phase phase)
+string Graph::LinkStyleAtt(LinkPlannedAs root_link_planned_as, Graphable::Phase phase)
 {
     string atts;
-    switch(link_planned_as)
+    switch(root_link_planned_as)
     {
     case LINK_NORMAL:
         break;
@@ -812,18 +813,18 @@ string Graph::LinkStyleAtt(LinkPlannedAs link_planned_as, Graphable::Phase phase
 }
 
 
-string Graph::GetFullId(const Graphable *g, string figure_id)
+string Graph::GetRegionGraphId(const Region *region, const GraphIdable *g)
 {
-	return GetFullId(g->GetGraphId(), figure_id);
+	return GetRegionGraphId(region, g->GetGraphId());
 }
 
 
-string Graph::GetFullId(string id, string figure_id)
+string Graph::GetRegionGraphId(const Region *region, string id)
 {
-	if(figure_id.empty() )
+	if( !region )
 		return id;
 	else
-		return figure_id+" / "+id;
+		return region->id+"["+id+"]";
 }
 
 
