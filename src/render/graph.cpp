@@ -100,7 +100,7 @@ void Graph::operator()( const Figure &figure )
     {
         Region sub_region;
         sub_region.id = p.second.root_link_short_name + "->" + figure.id;
-        subordinate_blocks[p.second.root_g].push_back( CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region ) );
+        subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region ) );
         all_gs.push_back( p.second.root_g );
     }
 
@@ -124,7 +124,7 @@ void Graph::operator()( const Figure &figure )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     TRACE("Redirect interior to our subordinates\n");
     for( auto p : figure.subordinates )
-        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as, &(subordinate_blocks[p.second.root_g].front()) );
+        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as, &(subordinate_blocks[p.first].front()) );
 
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
@@ -152,7 +152,7 @@ void Graph::operator()( const Figure &figure )
 		subordinate_region.id = GetRegionGraphId(&figure, p.first);
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-        list<MyBlock> sub_blocks = subordinate_blocks.at(p.second.root_g);        
+        list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
 	    string s_subordinate = DoBlocksAndLinks(sub_blocks, subordinate_region); // Subordinate blocks
         all_blocks = all_blocks + sub_blocks;
 		s_interior += DoRegion(s_subordinate, subordinate_region);
