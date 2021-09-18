@@ -528,6 +528,20 @@ subgraph "clusterAnd#R13-1" {
         
     }
     
+    // -------- region And#R13-1[And#R13-3] ----------
+    subgraph "clusterAnd#R13-1[And#R13-3]" {
+        label = "And#R13-3"
+        style = "filled"
+        color = antiquewhite3
+        fontsize = "15"
+        // -------- block #0->And#R13-1[#B-2-153] ----------
+        "#0->And#R13-1[#B-2-153]" [
+            shape = "none"
+            style = "invisible"
+        ];
+        
+    }
+    
     // -------- region And#R13-1[And#R13-4] ----------
     subgraph "clusterAnd#R13-1[And#R13-4]" {
         label = "And#R13-4"
@@ -564,20 +578,6 @@ subgraph "clusterAnd#R13-1" {
         fontsize = "15"
         // -------- block #0->And#R13-1[#B-2-151] ----------
         "#0->And#R13-1[#B-2-151]" [
-            shape = "none"
-            style = "invisible"
-        ];
-        
-    }
-    
-    // -------- region And#R13-1[And#R13-3] ----------
-    subgraph "clusterAnd#R13-1[And#R13-3]" {
-        label = "And#R13-3"
-        style = "filled"
-        color = antiquewhite3
-        fontsize = "15"
-        // -------- block #0->And#R13-1[#B-2-153] ----------
-        "#0->And#R13-1[#B-2-153]" [
             shape = "none"
             style = "invisible"
         ];

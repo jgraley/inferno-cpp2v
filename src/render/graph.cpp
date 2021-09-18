@@ -80,6 +80,8 @@ void Graph::operator()( Transformation *root )
     s += DoBlocksAndLinks(my_blocks, base_region);
     s += "\n";
 	Remember(s);
+    
+    CheckLinks(my_blocks);    
 }
 
 
@@ -183,6 +185,8 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     s += DoBlocksAndLinks(my_blocks, base_region);
     s += "\n";
 	Remember( s );
+    
+    CheckLinks(my_blocks);
 
 	return root; // no change
 }
