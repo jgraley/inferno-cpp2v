@@ -53,7 +53,7 @@ public:
 	{        
         struct Subordinate
         {
-            const GraphIdable *graphidable;
+            const Graphable *root_g;
             string root_link_short_name;
             LinkPlannedAs root_link_planned_as;
         };
@@ -63,7 +63,7 @@ public:
         };
 		map<Graphable *, Agent> interior_agents;
 		map<Graphable *, Agent> exterior_agents;
-        map<Graphable *, Subordinate> subordinates;
+        map<GraphIdable *, Subordinate> subordinates;
 	};
 
     Graph( string of, string title );

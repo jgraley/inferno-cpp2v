@@ -87,7 +87,7 @@ void Graph::operator()( const Figure &figure )
 {        
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
-    map< Graphable *, list<MyBlock> > subordinate_blocks;
+    map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
 
     for( auto p : figure.exterior_agents )
         exterior_gs.push_back( p.first );
@@ -100,8 +100,8 @@ void Graph::operator()( const Figure &figure )
     {
         Region sub_region;
         sub_region.id = p.second.root_link_short_name + "->" + figure.id;
-        subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.first->GetGraphId(), {}, &sub_region ) );
-        all_gs.push_back( p.first );
+        subordinate_blocks[p.second.root_g].push_back( CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region ) );
+        all_gs.push_back( p.second.root_g );
     }
 
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, &figure, true );
@@ -124,7 +124,7 @@ void Graph::operator()( const Figure &figure )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     TRACE("Redirect interior to our subordinates\n");
     for( auto p : figure.subordinates )
-        RedirectLinks( interior_blocks, p.first, p.second.root_link_short_name, p.second.root_link_planned_as, &(subordinate_blocks[p.first].front()) );
+        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as, &(subordinate_blocks[p.second.root_g].front()) );
 
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
@@ -148,11 +148,11 @@ void Graph::operator()( const Figure &figure )
     for( auto p : figure.subordinates )
     {
 		RegionAppearance subordinate_region = interior_region;
-		subordinate_region.title = p.second.graphidable->GetGraphId();
-		subordinate_region.id = GetRegionGraphId(&figure, p.second.graphidable);
+		subordinate_region.title = p.first->GetGraphId();
+		subordinate_region.id = GetRegionGraphId(&figure, p.first);
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-        list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
+        list<MyBlock> sub_blocks = subordinate_blocks.at(p.second.root_g);        
 	    string s_subordinate = DoBlocksAndLinks(sub_blocks, subordinate_region); // Subordinate blocks
         all_blocks = all_blocks + sub_blocks;
 		s_interior += DoRegion(s_subordinate, subordinate_region);
