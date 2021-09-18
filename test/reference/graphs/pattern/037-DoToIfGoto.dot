@@ -18,6 +18,7 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P37-0 ----------
 "CR#P37-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -28,6 +29,18 @@ edge [
     fontcolor = black
 ];
 
+"CR#P37-0":port0 -> "#B-2-654" [
+    color = black
+    fontcolor = black
+];
+
+"CR#P37-0":port1 -> "#B-2-643" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-654 ----------
 "#B-2-654" [
     shape = "diamond"
     label = <∧>
@@ -39,6 +52,17 @@ edge [
     height = 0.4
 ];
 
+"#B-2-654" -> "#B-2-636" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-654" -> "#B-4-4" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-636 ----------
 "#B-2-636" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -51,6 +75,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-636":port0 -> "#B-2-638" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-636":port1 -> "#B-2-639" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-638 ----------
 "#B-2-638" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -61,6 +96,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-639 ----------
 "#B-2-639" [
     shape = "plaintext"
     fillcolor = "/set28/6"
@@ -71,6 +107,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-4-4 ----------
 "#B-4-4" [
     shape = "square"
     label = <#>
@@ -82,6 +119,12 @@ edge [
     height = 0.4
 ];
 
+"#B-4-4" -> "#B-2-655" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-655 ----------
 "#B-2-655" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -91,6 +134,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-643 ----------
 "#B-2-643" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -106,206 +150,6 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-646" [
-    shape = "plaintext"
-    fillcolor = "/set28/1"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
-     <TR><TD>LabelIdentifier</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-644" [
-    shape = "plaintext"
-    fillcolor = "/set28/5"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">'NEXT'</FONT></TD><TD></TD></TR>
-     <TR><TD>(LabelIdentifier)</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-653" [
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Slave | <port0> through | <port1> compare_replace"
-    style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
-];
-
-"#B-2-648" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>terminus</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>recurse_restriction</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-649" [
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
-    style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
-];
-
-"#B-2-650" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Continue</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-641" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-645" [
-    shape = "plaintext"
-    fillcolor = "/set28/5"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">'CONTINUE'</FONT></TD><TD></TD></TR>
-     <TR><TD>(LabelIdentifier)</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-651" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
-     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-652" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Loop</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-647" [
-    shape = "plaintext"
-    fillcolor = "/set28/1"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
-     <TR><TD>LabelIdentifier</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-637" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-640" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-642" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-
-// -------------------- links --------------------
-// links for block CR#P37-0
-"CR#P37-0":port0 -> "#B-2-654" [
-    color = black
-    fontcolor = black
-];
-
-"CR#P37-0":port1 -> "#B-2-643" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-654
-"#B-2-654" -> "#B-2-636" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-654" -> "#B-4-4" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-636
-"#B-2-636":port0 -> "#B-2-638" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-636":port1 -> "#B-2-639" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-638
-// links for block #B-2-639
-// links for block #B-4-4
-"#B-4-4" -> "#B-2-655" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-655
-// links for block #B-2-643
 "#B-2-643":port1 -> "#B-2-646" [
     style="dashed"
     color = black
@@ -330,15 +174,47 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-646
+// -------- block #B-2-646 ----------
+"#B-2-646" [
+    shape = "plaintext"
+    fillcolor = "/set28/1"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
+     <TR><TD>LabelIdentifier</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-646":port0 -> "#B-2-644" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-// links for block #B-2-644
-// links for block #B-2-653
+// -------- block #B-2-644 ----------
+"#B-2-644" [
+    shape = "plaintext"
+    fillcolor = "/set28/5"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">'NEXT'</FONT></TD><TD></TD></TR>
+     <TR><TD>(LabelIdentifier)</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+// -------- block #B-2-653 ----------
+"#B-2-653" [
+    shape = "record"
+    fillcolor = antiquewhite1
+    label = "<fixed> Slave | <port0> through | <port1> compare_replace"
+    style = "filled"
+    fontsize = "12"
+    color = black
+    fontcolor = black
+];
+
 "#B-2-653":port0 -> "#B-2-638" [
     style="dashed"
     color = black
@@ -350,7 +226,20 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-648
+// -------- block #B-2-648 ----------
+"#B-2-648" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>terminus</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>recurse_restriction</TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-648":port1 -> "#B-2-649" [
     color = black
     fontcolor = black
@@ -361,7 +250,17 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-649
+// -------- block #B-2-649 ----------
+"#B-2-649" [
+    shape = "record"
+    fillcolor = antiquewhite1
+    label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
+    style = "filled"
+    fontsize = "12"
+    color = black
+    fontcolor = black
+];
+
 "#B-2-649":port1 -> "#B-2-650" [
     color = black
     fontcolor = black
@@ -373,30 +272,108 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-650
-// links for block #B-2-641
+// -------- block #B-2-650 ----------
+"#B-2-650" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Continue</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+// -------- block #B-2-641 ----------
+"#B-2-641" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-641":port0 -> "#B-2-645" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-// links for block #B-2-645
-// links for block #B-2-651
+// -------- block #B-2-645 ----------
+"#B-2-645" [
+    shape = "plaintext"
+    fillcolor = "/set28/5"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">'CONTINUE'</FONT></TD><TD></TD></TR>
+     <TR><TD>(LabelIdentifier)</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+// -------- block #B-2-651 ----------
+"#B-2-651" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
+     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-651":port1 -> "#B-2-652" [
     color = black
     fontcolor = black
 ];
 
-// links for block #B-2-652
-// links for block #B-2-647
+// -------- block #B-2-652 ----------
+"#B-2-652" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Loop</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+// -------- block #B-2-647 ----------
+"#B-2-647" [
+    shape = "plaintext"
+    fillcolor = "/set28/1"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
+     <TR><TD>LabelIdentifier</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-647":port0 -> "#B-2-645" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-// links for block #B-2-637
+// -------- block #B-2-637 ----------
+"#B-2-637" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-637":port0 -> "#B-2-639" [
     style="dashed"
     color = black
@@ -415,12 +392,34 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-640
+// -------- block #B-2-640 ----------
+"#B-2-640" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-640":port0 -> "#B-2-644" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-// links for block #B-2-642
+// -------- block #B-2-642 ----------
+"#B-2-642" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+
 }

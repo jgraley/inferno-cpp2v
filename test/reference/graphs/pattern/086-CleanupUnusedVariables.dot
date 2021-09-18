@@ -18,6 +18,7 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P86-0 ----------
 "CR#P86-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -28,6 +29,18 @@ edge [
     fontcolor = black
 ];
 
+"CR#P86-0":port0 -> "#B-2-1590" [
+    color = black
+    fontcolor = black
+];
+
+"CR#P86-0":port1 -> "#B-2-1601" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1590 ----------
 "#B-2-1590" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -40,6 +53,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1590":port1 -> "#B-2-1601" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1590":port1 -> "#B-2-1607" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1601 ----------
 "#B-2-1601" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -52,6 +76,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1601":port1 -> "#B-2-1593" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1593 ----------
 "#B-2-1593" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -62,6 +92,18 @@ edge [
     fontcolor = black
 ];
 
+"#B-2-1593":port1 -> "#B-2-1591" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1593":port2 -> "#B-2-1592" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1591 ----------
 "#B-2-1591" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -73,6 +115,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1591":port0 -> "#B-2-1595" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1591":port0 -> "#B-2-1594" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1595 ----------
 "#B-2-1595" [
     shape = "plaintext"
     fillcolor = "/set28/1"
@@ -85,6 +138,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1595":port0 -> "#B-2-1596" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1595":port1 -> "#B-2-1600" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1596 ----------
 "#B-2-1596" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -96,6 +160,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1596":port0 -> "#B-2-1597" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1597 ----------
 "#B-2-1597" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -108,6 +178,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1597":port1 -> "#B-2-1598" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1598 ----------
 "#B-2-1598" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -120,6 +196,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1598":port1 -> "#B-2-1608" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1598":port1 -> "#B-2-1599" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1608 ----------
 "#B-2-1608" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -130,6 +217,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-1599 ----------
 "#B-2-1599" [
     shape = "plaintext"
     fillcolor = "/set28/5"
@@ -142,6 +230,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1599":port1 -> "#B-2-1606" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1606 ----------
 "#B-2-1606" [
     shape = "plaintext"
     fillcolor = "/set28/1"
@@ -154,6 +248,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1606":port0 -> "#B-2-1609" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1606":port1 -> "#B-2-1610" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1609 ----------
 "#B-2-1609" [
     shape = "circle"
     fillcolor = "/set28/1"
@@ -166,6 +271,7 @@ edge [
     height = 0.4
 ];
 
+// -------- block #B-2-1610 ----------
 "#B-2-1610" [
     shape = "circle"
     fillcolor = "/set28/1"
@@ -178,6 +284,7 @@ edge [
     height = 0.4
 ];
 
+// -------- block #B-2-1600 ----------
 "#B-2-1600" [
     shape = "plaintext"
     fillcolor = "/set28/5"
@@ -188,6 +295,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-1594 ----------
 "#B-2-1594" [
     shape = "circle"
     fillcolor = "/set28/1"
@@ -200,6 +308,7 @@ edge [
     height = 0.4
 ];
 
+// -------- block #B-2-1592 ----------
 "#B-2-1592" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -211,6 +320,13 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1592":port0 -> "#B-2-1594" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1607 ----------
 "#B-2-1607" [
     shape = "diamond"
     fillcolor = "/set28/4"
@@ -223,6 +339,12 @@ edge [
     height = 0.4
 ];
 
+"#B-2-1607" -> "#B-2-1602" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1602 ----------
 "#B-2-1602" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -235,6 +357,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-1602":port1 -> "#B-2-1603" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1603 ----------
 "#B-2-1603" [
     shape = "diamond"
     label = <∧>
@@ -246,6 +374,17 @@ edge [
     height = 0.4
 ];
 
+"#B-2-1603" -> "#B-2-1604" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1603" -> "#B-2-1605" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1604 ----------
 "#B-2-1604" [
     shape = "square"
     label = <#=1>
@@ -257,6 +396,12 @@ edge [
     height = 0.4
 ];
 
+"#B-2-1604" -> "#B-2-1600" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-1605 ----------
 "#B-2-1605" [
     shape = "diamond"
     label = <¬>
@@ -268,156 +413,10 @@ edge [
     height = 0.4
 ];
 
-
-// -------------------- links --------------------
-// links for block CR#P86-0
-"CR#P86-0":port0 -> "#B-2-1590" [
-    color = black
-    fontcolor = black
-];
-
-"CR#P86-0":port1 -> "#B-2-1601" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1590
-"#B-2-1590":port1 -> "#B-2-1601" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1590":port1 -> "#B-2-1607" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1601
-"#B-2-1601":port1 -> "#B-2-1593" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1593
-"#B-2-1593":port1 -> "#B-2-1591" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1593":port2 -> "#B-2-1592" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1591
-"#B-2-1591":port0 -> "#B-2-1595" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1591":port0 -> "#B-2-1594" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1595
-"#B-2-1595":port0 -> "#B-2-1596" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1595":port1 -> "#B-2-1600" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1596
-"#B-2-1596":port0 -> "#B-2-1597" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1597
-"#B-2-1597":port1 -> "#B-2-1598" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1598
-"#B-2-1598":port1 -> "#B-2-1608" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1598":port1 -> "#B-2-1599" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1608
-// links for block #B-2-1599
-"#B-2-1599":port1 -> "#B-2-1606" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1606
-"#B-2-1606":port0 -> "#B-2-1609" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1606":port1 -> "#B-2-1610" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1609
-// links for block #B-2-1610
-// links for block #B-2-1600
-// links for block #B-2-1594
-// links for block #B-2-1592
-"#B-2-1592":port0 -> "#B-2-1594" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1607
-"#B-2-1607" -> "#B-2-1602" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1602
-"#B-2-1602":port1 -> "#B-2-1603" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1603
-"#B-2-1603" -> "#B-2-1604" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-1603" -> "#B-2-1605" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1604
-"#B-2-1604" -> "#B-2-1600" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-1605
 "#B-2-1605" -> "#B-2-1595" [
     color = black
     fontcolor = black
 ];
+
 
 }

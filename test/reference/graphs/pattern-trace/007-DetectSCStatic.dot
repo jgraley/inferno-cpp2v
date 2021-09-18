@@ -18,11 +18,13 @@ edge [
 ];
 
 // -------------------- figure And#R7-0 --------------------
+// -------- region And#R7-0 ----------
 subgraph "clusterAnd#R7-0" {
     label = "SCR#P7-0 / And#R7-0"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R7-0[#B-2-55] ----------
     "And#R7-0[#B-2-55]" [
         shape = "plaintext"
         fillcolor = "/set28/6"
@@ -36,6 +38,15 @@ subgraph "clusterAnd#R7-0" {
         fontsize = "12"
     ];
     
+    "And#R7-0[#B-2-55]":port1 -> "And#R7-0[#B-2-56]" [
+        arrowhead="normalnonebox"
+        label = "#0"
+        decorate = true
+        color = black
+        fontcolor = black
+    ];
+    
+    // -------- block And#R7-0[#B-2-56] ----------
     "And#R7-0[#B-2-56]" [
         shape = "plaintext"
         fillcolor = "/set28/5"
@@ -48,6 +59,7 @@ subgraph "clusterAnd#R7-0" {
         fontsize = "12"
     ];
     
+    // -------- block And#R7-0[#P7-6-10] ----------
     "And#R7-0[#P7-6-10]" [
         shape = "record"
         fillcolor = antiquewhite2
@@ -58,6 +70,15 @@ subgraph "clusterAnd#R7-0" {
         fontcolor = black
     ];
     
+    "And#R7-0[#P7-6-10]":port0 -> "And#R7-0[#B-2-55]" [
+        arrowhead="normalnonebox"
+        label = "#0"
+        decorate = true
+        color = black
+        fontcolor = black
+    ];
+    
+    // -------- block And#R7-0[#P7-8-7] ----------
     "And#R7-0[#P7-8-7]" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -69,10 +90,19 @@ subgraph "clusterAnd#R7-0" {
         fontsize = "12"
     ];
     
+    "And#R7-0[#P7-8-7]":port0 -> "And#R7-0[#P7-6-10]" [
+        arrowhead="normalnonebox"
+        label = "#0"
+        decorate = true
+        color = black
+        fontcolor = black
+    ];
+    
 }
 
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P7-0 ----------
 "CR#P7-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -83,6 +113,14 @@ subgraph "clusterAnd#R7-0" {
     fontcolor = black
 ];
 
+"CR#P7-0":port0 -> "#P7-8-7" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// -------- block #P7-8-7 ----------
 "#P7-8-7" [
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -94,6 +132,14 @@ subgraph "clusterAnd#R7-0" {
     fontsize = "12"
 ];
 
+"#P7-8-7":port0 -> "#P7-6-10" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+// -------- block #P7-6-10 ----------
 "#P7-6-10" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -104,61 +150,6 @@ subgraph "clusterAnd#R7-0" {
     fontcolor = black
 ];
 
-"#B-2-55" [
-    shape = "plaintext"
-    fillcolor = "/set28/6"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
-     <TR><TD>MapOperand</TD><TD PORT="port0">{}</TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>#B-2-55</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-56" [
-    shape = "plaintext"
-    fillcolor = "/set28/5"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">'next_trigger'</FONT></TD><TD></TD></TR>
-     <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-56</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-54" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">NextTriggerStatic</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-54</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-
-// -------------------- links --------------------
-// links for block CR#P7-0
-"CR#P7-0":port0 -> "#P7-8-7" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block #P7-8-7
-"#P7-8-7":port0 -> "#P7-6-10" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-// links for block #P7-6-10
 "#P7-6-10":port0 -> "#B-2-55" [
     label = "#0"
     decorate = true
@@ -174,7 +165,20 @@ subgraph "clusterAnd#R7-0" {
     fontcolor = black
 ];
 
-// links for block #B-2-55
+// -------- block #B-2-55 ----------
+"#B-2-55" [
+    shape = "plaintext"
+    fillcolor = "/set28/6"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
+     <TR><TD>MapOperand</TD><TD PORT="port0">{}</TD></TR>
+     <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>#B-2-55</TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
 "#B-2-55":port1 -> "#B-2-56" [
     label = "#0"
     decorate = true
@@ -182,34 +186,30 @@ subgraph "clusterAnd#R7-0" {
     fontcolor = black
 ];
 
-// links for block #B-2-56
-// links for block #B-2-54
-// links for block And#R7-0[#B-2-55]
-"And#R7-0[#B-2-55]":port1 -> "And#R7-0[#B-2-56]" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
+// -------- block #B-2-56 ----------
+"#B-2-56" [
+    shape = "plaintext"
+    fillcolor = "/set28/5"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">'next_trigger'</FONT></TD><TD></TD></TR>
+     <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>#B-2-56</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
 
-// links for block And#R7-0[#B-2-56]
-// links for block And#R7-0[#P7-6-10]
-"And#R7-0[#P7-6-10]":port0 -> "And#R7-0[#B-2-55]" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
+// -------- block #B-2-54 ----------
+"#B-2-54" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">NextTriggerStatic</FONT></TD><TD></TD></TR>
+     <TR><TD>#B-2-54</TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
 ];
 
-// links for block And#R7-0[#P7-8-7]
-"And#R7-0[#P7-8-7]":port0 -> "And#R7-0[#P7-6-10]" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
 
 }

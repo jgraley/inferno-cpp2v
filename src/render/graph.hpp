@@ -76,7 +76,7 @@ private:
     // Additional to what's in Graphable::Link
     struct MyLinkAdditional
     {
-        string id;
+        string child_id;
         LinkPlannedAs planned_as;
     };
 
@@ -105,6 +105,7 @@ private:
                         string trace_label,
                         LinkPlannedAs target_link_planned_as,
                         const MyBlock *target_block = nullptr );
+    void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,
 	                         const Region *region,
@@ -118,8 +119,10 @@ private:
     
     void PostProcessBlocks( list<MyBlock> &blocks );
 
-    string DoGraphBody( const list<MyBlock> &blocks,
+    string DoBlocksAndLinks( const list<MyBlock> &blocks,
                        const RegionAppearance &region );
+    string DoBlockAndLinks( const MyBlock &block,
+                            const RegionAppearance &region );
     string DoBlock( const MyBlock &block,
                     const RegionAppearance &region );
     string DoRecordLabel( const MyBlock &block );
@@ -127,12 +130,11 @@ private:
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 
-                   const Graphable::SubBlock &sub_block, 
                    const Graphable::Link &link,
                    const MyLinkAdditional &la );
     string DoHeader( string title );
     string DoFooter();
-    string DoCluster(string s, const RegionAppearance &region);
+    string DoRegion(string s, const RegionAppearance &region);
 
     string SeqField( int i );
     string EscapeForGraphviz( string s );
@@ -151,7 +153,6 @@ private:
     const RegionAppearance base_region;
 	const string line_colour;
 	const string font_colour;
-	list<MyBlock> blocks_for_links;
     string all_dot;
 };
 

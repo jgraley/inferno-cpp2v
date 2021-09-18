@@ -18,6 +18,7 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P17-0 ----------
 "CR#P17-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -28,6 +29,18 @@ edge [
     fontcolor = black
 ];
 
+"CR#P17-0":port0 -> "#B-2-199" [
+    color = black
+    fontcolor = black
+];
+
+"CR#P17-0":port1 -> "#B-2-200" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-199 ----------
 "#B-2-199" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -39,6 +52,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-199":port0 -> "#B-2-201" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-199":port0 -> "#B-2-202" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-201 ----------
 "#B-2-201" [
     shape = "circle"
     fillcolor = "/set28/1"
@@ -51,6 +75,7 @@ edge [
     height = 0.4
 ];
 
+// -------- block #B-2-202 ----------
 "#B-2-202" [
     shape = "plaintext"
     fillcolor = "/set28/1"
@@ -62,6 +87,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-202":port0 -> "#B-2-203" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-203 ----------
 "#B-2-203" [
     shape = "diamond"
     fillcolor = "/set28/3"
@@ -74,6 +105,17 @@ edge [
     height = 0.4
 ];
 
+"#B-2-203" -> "#B-2-204" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-203" -> "#B-2-207" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-204 ----------
 "#B-2-204" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -85,6 +127,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-204":port0 -> "#B-2-205" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-204":port0 -> "#B-2-206" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-205 ----------
 "#B-2-205" [
     shape = "plaintext"
     fillcolor = "/set28/1"
@@ -96,6 +149,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-206 ----------
 "#B-2-206" [
     shape = "plaintext"
     fillcolor = "/set28/1"
@@ -107,6 +161,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-206":port0 -> "#B-2-208" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-208 ----------
 "#B-2-208" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -117,6 +177,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-207 ----------
 "#B-2-207" [
     shape = "plaintext"
     fillcolor = "/set28/3"
@@ -127,6 +188,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-200 ----------
 "#B-2-200" [
     shape = "plaintext"
     fillcolor = "/set28/4"
@@ -138,74 +200,11 @@ edge [
     fontsize = "12"
 ];
 
-
-// -------------------- links --------------------
-// links for block CR#P17-0
-"CR#P17-0":port0 -> "#B-2-199" [
-    color = black
-    fontcolor = black
-];
-
-"CR#P17-0":port1 -> "#B-2-200" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-199
-"#B-2-199":port0 -> "#B-2-201" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-199":port0 -> "#B-2-202" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-201
-// links for block #B-2-202
-"#B-2-202":port0 -> "#B-2-203" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-203
-"#B-2-203" -> "#B-2-204" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-203" -> "#B-2-207" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-204
-"#B-2-204":port0 -> "#B-2-205" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-204":port0 -> "#B-2-206" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-205
-// links for block #B-2-206
-"#B-2-206":port0 -> "#B-2-208" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-208
-// links for block #B-2-207
-// links for block #B-2-200
 "#B-2-200":port0 -> "#B-2-201" [
     style="dashed"
     color = black
     fontcolor = black
 ];
+
 
 }

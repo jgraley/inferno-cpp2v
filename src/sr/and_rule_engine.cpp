@@ -1008,7 +1008,6 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 	figure.id = GetGraphId();
 	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
     
-	TRACE("   Interior:\n");    
 	auto agents_lambda = [&](const unordered_map< Agent *, unordered_set<PatternLink> > &parent_links_to_agents,
                              const unordered_set<PatternLink> &keyers,
                              const unordered_set<PatternLink> &residuals ) -> map<Graphable *, Graph::Figure::Agent>
@@ -1032,9 +1031,11 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
         return figure_agents;
 	};
     
+	TRACE("   Interior (my agents/links):\n");    
     figure.interior_agents = agents_lambda( plan.parent_links_to_my_normal_agents,
                                             plan.coupling_keyer_links,
                                             plan.coupling_residual_links );
+	TRACE("   Exterior (master boundary agents/links):\n");    
     figure.exterior_agents = agents_lambda( plan.parent_links_to_master_boundary_agents,
                                             plan.master_boundary_keyer_links,
                                             plan.master_boundary_residual_links );       
@@ -1047,12 +1048,15 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             sub.graphidable = p.second.get();
             sub.root_link_planned_as = root_link_planned_as;
             sub.root_link_short_name = p.first.GetShortName();
-            TRACEC(sub.graphidable->GetGraphId())(": ")(sub.root_link_short_name)(" -> ")(p.second->plan.root_agent)("\n");
+            TRACEC(p.second->plan.root_agent)(" : ( ")(sub.graphidable->GetGraphId())(", ")(sub.root_link_short_name)(" )\n");
             figure.subordinates[p.second->plan.root_agent] = sub;
         }
 	};
+	TRACE("   Subordinates (my free abnormals):\n");    
     subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABNORMAL );
+	TRACE("   Subordinates (my evaluator abnormals):\n");    
     subordinates_lambda( plan.my_evaluator_abnormal_engines, Graph::LINK_EVALUATOR );
+	TRACE("   Subordinates (my multiplicity engines):\n");    
     subordinates_lambda( plan.my_multiplicity_engines, Graph::LINK_MULTIPLICITY );
 	TRACE("Ready to render ")(*this)("\n");
 	graph(figure);

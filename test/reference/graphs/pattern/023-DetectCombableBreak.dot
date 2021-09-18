@@ -18,6 +18,7 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P23-0 ----------
 "CR#P23-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -28,6 +29,18 @@ edge [
     fontcolor = black
 ];
 
+"CR#P23-0":port0 -> "#B-2-283" [
+    color = black
+    fontcolor = black
+];
+
+"CR#P23-0":port1 -> "#B-2-286" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-283 ----------
 "#B-2-283" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -40,6 +53,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-283":port1 -> "#B-2-284" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-283":port1 -> "#B-2-286" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-284 ----------
 "#B-2-284" [
     shape = "diamond"
     fillcolor = "/set28/2"
@@ -52,6 +76,12 @@ edge [
     height = 0.4
 ];
 
+"#B-2-284" -> "#B-2-285" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-285 ----------
 "#B-2-285" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -62,6 +92,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-286 ----------
 "#B-2-286" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -74,6 +105,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-286":port0 -> "#B-2-288" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-286":port1 -> "#B-2-287" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-288 ----------
 "#B-2-288" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -88,126 +130,6 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-289" [
-    shape = "circle"
-    fillcolor = "/set28/1"
-    label = <*>
-    style = "filled"
-    fontsize = "20"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-"#B-2-290" [
-    shape = "circle"
-    fillcolor = "/set28/2"
-    label = <*>
-    style = "filled"
-    fontsize = "20"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-"#B-2-292" [
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Break) | <port1> through | <port2> overlay"
-    style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
-];
-
-"#B-2-293" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">UncombableBreak</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-294" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">CombableBreak</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-291" [
-    shape = "circle"
-    fillcolor = "/set28/2"
-    label = <*>
-    style = "filled"
-    fontsize = "20"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-"#B-2-287" [
-    shape = "plaintext"
-    fillcolor = "/set28/6"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Expression</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-
-// -------------------- links --------------------
-// links for block CR#P23-0
-"CR#P23-0":port0 -> "#B-2-283" [
-    color = black
-    fontcolor = black
-];
-
-"CR#P23-0":port1 -> "#B-2-286" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-283
-"#B-2-283":port1 -> "#B-2-284" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-283":port1 -> "#B-2-286" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-284
-"#B-2-284" -> "#B-2-285" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-285
-// links for block #B-2-286
-"#B-2-286":port0 -> "#B-2-288" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-286":port1 -> "#B-2-287" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-288
 "#B-2-288":port0 -> "#B-2-289" [
     color = black
     fontcolor = black
@@ -228,9 +150,43 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-289
-// links for block #B-2-290
-// links for block #B-2-292
+// -------- block #B-2-289 ----------
+"#B-2-289" [
+    shape = "circle"
+    fillcolor = "/set28/1"
+    label = <*>
+    style = "filled"
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-2-290 ----------
+"#B-2-290" [
+    shape = "circle"
+    fillcolor = "/set28/2"
+    label = <*>
+    style = "filled"
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-2-292 ----------
+"#B-2-292" [
+    shape = "record"
+    fillcolor = antiquewhite1
+    label = "<fixed> Overlay | <port0> (Break) | <port1> through | <port2> overlay"
+    style = "filled"
+    fontsize = "12"
+    color = black
+    fontcolor = black
+];
+
 "#B-2-292":port1 -> "#B-2-293" [
     color = black
     fontcolor = black
@@ -242,8 +198,51 @@ edge [
     fontcolor = black
 ];
 
-// links for block #B-2-293
-// links for block #B-2-294
-// links for block #B-2-291
-// links for block #B-2-287
+// -------- block #B-2-293 ----------
+"#B-2-293" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">UncombableBreak</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+// -------- block #B-2-294 ----------
+"#B-2-294" [
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">CombableBreak</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+// -------- block #B-2-291 ----------
+"#B-2-291" [
+    shape = "circle"
+    fillcolor = "/set28/2"
+    label = <*>
+    style = "filled"
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-2-287 ----------
+"#B-2-287" [
+    shape = "plaintext"
+    fillcolor = "/set28/6"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Expression</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+
 }

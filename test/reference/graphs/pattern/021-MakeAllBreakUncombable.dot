@@ -18,6 +18,7 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P21-0 ----------
 "CR#P21-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -28,6 +29,18 @@ edge [
     fontcolor = black
 ];
 
+"CR#P21-0":port0 -> "#B-2-267" [
+    color = black
+    fontcolor = black
+];
+
+"CR#P21-0":port1 -> "#B-2-274" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-267 ----------
 "#B-2-267" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -40,6 +53,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-267":port1 -> "#B-2-268" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-268 ----------
 "#B-2-268" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -50,6 +69,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-274 ----------
 "#B-2-274" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -61,25 +81,4 @@ edge [
 ];
 
 
-// -------------------- links --------------------
-// links for block CR#P21-0
-"CR#P21-0":port0 -> "#B-2-267" [
-    color = black
-    fontcolor = black
-];
-
-"CR#P21-0":port1 -> "#B-2-274" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-267
-"#B-2-267":port1 -> "#B-2-268" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-268
-// links for block #B-2-274
 }

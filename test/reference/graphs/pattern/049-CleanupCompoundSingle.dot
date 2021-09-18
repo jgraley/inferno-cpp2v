@@ -18,6 +18,7 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#P49-0 ----------
 "CR#P49-0" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -28,6 +29,12 @@ edge [
     fontcolor = black
 ];
 
+"CR#P49-0":port0 -> "#B-2-857" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-857 ----------
 "#B-2-857" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -40,6 +47,17 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-857":port1 -> "#B-2-860" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-857":port1 -> "#B-2-858" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-860 ----------
 "#B-2-860" [
     shape = "square"
     fillcolor = "/set28/2"
@@ -52,6 +70,12 @@ edge [
     height = 0.4
 ];
 
+"#B-2-860" -> "#B-2-861" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-861 ----------
 "#B-2-861" [
     shape = "record"
     fillcolor = antiquewhite1
@@ -62,6 +86,18 @@ edge [
     fontcolor = black
 ];
 
+"#B-2-861":port1 -> "#B-2-862" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-861":port2 -> "#B-2-863" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-862 ----------
 "#B-2-862" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -74,6 +110,12 @@ edge [
     fontsize = "12"
 ];
 
+"#B-2-862":port1 -> "#B-2-863" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-863 ----------
 "#B-2-863" [
     shape = "plaintext"
     fillcolor = "/set28/2"
@@ -84,6 +126,7 @@ edge [
     fontsize = "12"
 ];
 
+// -------- block #B-2-858 ----------
 "#B-2-858" [
     shape = "diamond"
     fillcolor = "/set28/2"
@@ -96,6 +139,12 @@ edge [
     height = 0.4
 ];
 
+"#B-2-858" -> "#B-2-859" [
+    color = black
+    fontcolor = black
+];
+
+// -------- block #B-2-859 ----------
 "#B-2-859" [
     shape = "plaintext"
     fillcolor = "/set28/1"
@@ -107,60 +156,10 @@ edge [
     fontsize = "12"
 ];
 
-
-// -------------------- links --------------------
-// links for block CR#P49-0
-"CR#P49-0":port0 -> "#B-2-857" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-857
-"#B-2-857":port1 -> "#B-2-860" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-857":port1 -> "#B-2-858" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-860
-"#B-2-860" -> "#B-2-861" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-861
-"#B-2-861":port1 -> "#B-2-862" [
-    color = black
-    fontcolor = black
-];
-
-"#B-2-861":port2 -> "#B-2-863" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-862
-"#B-2-862":port1 -> "#B-2-863" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-863
-// links for block #B-2-858
-"#B-2-858" -> "#B-2-859" [
-    color = black
-    fontcolor = black
-];
-
-// links for block #B-2-859
 "#B-2-859":port0 -> "#B-2-862" [
     color = black
     fontcolor = black
 ];
+
 
 }
