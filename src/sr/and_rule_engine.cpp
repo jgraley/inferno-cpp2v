@@ -1042,8 +1042,12 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
         
 	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs root_link_planned_as )
     {
+        set< shared_ptr<AndRuleEngine> > reached;
         for( auto p : engines )
         {
+            ASSERT( reached.count(p.second) == 0 );
+            reached.insert( p.second );
+            
             Graph::Figure::Subordinate sub;
             sub.graphidable = p.second.get();
             sub.root_link_planned_as = root_link_planned_as;
