@@ -118,6 +118,7 @@ private:
                              const Region *region );
     
     void PostProcessBlocks( list<MyBlock> &blocks );
+    void PostProcessBlock( MyBlock &block );
 
     string DoBlocksAndLinks( const list<MyBlock> &blocks,
                        const RegionAppearance &region );

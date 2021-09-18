@@ -89,7 +89,7 @@ void Graph::operator()( const Figure &figure )
 {        
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
-    map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
+    map< const GraphIdable *, MyBlock > subordinate_root_blocks;
 
     for( auto p : figure.exterior_agents )
         exterior_gs.push_back( p.first );
@@ -102,7 +102,7 @@ void Graph::operator()( const Figure &figure )
     {
         Region sub_region;
         sub_region.id = p.second.root_link_short_name + "->" + figure.id;
-        subordinate_blocks[p.first].push_back( CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region ) );
+        subordinate_root_blocks[p.first] = CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region );
         all_gs.push_back( p.second.root_g );
     }
 
@@ -126,12 +126,15 @@ void Graph::operator()( const Figure &figure )
             RedirectLinks( interior_blocks, p1.first, p.first, p.second );
     TRACE("Redirect interior to our subordinates\n");
     for( auto p : figure.subordinates )
-        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as, &(subordinate_blocks[p.first].front()) );
-
+    {
+        MyBlock &root_block = subordinate_root_blocks.at(p.first);        
+        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as, &root_block );
+    }
+    
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
     for( auto p : figure.subordinates )
-		PostProcessBlocks(subordinate_blocks[p.first]);	
+		PostProcessBlock( subordinate_root_blocks[p.first] );	
     
     // Now generate all the dot code
     string s;
@@ -154,9 +157,9 @@ void Graph::operator()( const Figure &figure )
 		subordinate_region.id = GetRegionGraphId(&figure, p.first);
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-        list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
-	    string s_subordinate = DoBlocksAndLinks(sub_blocks, subordinate_region); // Subordinate blocks
-        all_blocks = all_blocks + sub_blocks;
+        MyBlock root_block = subordinate_root_blocks.at(p.first);        
+	    string s_subordinate = DoBlocksAndLinks({root_block}, subordinate_region); // Subordinate blocks
+        all_blocks.push_back( root_block );
 		s_interior += DoRegion(s_subordinate, subordinate_region);
 	}
 
@@ -484,27 +487,33 @@ void Graph::PostProcessBlocks( list<MyBlock> &blocks )
 {
     for( MyBlock &block : blocks )
     {
-        if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
-        {          
-            // Note: using push_front to get pre-restriction near the top (under title)
-            block.sub_blocks.push_front( { "("+block.prerestriction_name+")", 
-                                           "", 
-                                           false, 
-                                           {} } );
-            block.link_additional.push_front( list<MyLinkAdditional>() );
-        }
-        
-        // Can we hide sub-blocks?
-        bool sub_blocks_hideable = ( block.sub_blocks.size() == 0 || 
-                                     (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
-
-        // If not, make sure we're using a shape that allows for sub_blocks
-        if( !sub_blocks_hideable && !(block.shape == "none" || block.shape == "plaintext" || block.shape == "record") )
-            block.shape = "plaintext";      
-        
-        // These kinds of blocks require port names to be to be specified so links can tell them apart
-        block.specify_ports = (block.shape=="record" || block.shape=="plaintext");              
+        PostProcessBlock(block);
     }
+}
+
+
+void Graph::PostProcessBlock( MyBlock &block )
+{
+    if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
+    {          
+        // Note: using push_front to get pre-restriction near the top (under title)
+        block.sub_blocks.push_front( { "("+block.prerestriction_name+")", 
+                                       "", 
+                                       false, 
+                                       {} } );
+        block.link_additional.push_front( list<MyLinkAdditional>() );
+    }
+    
+    // Can we hide sub-blocks?
+    bool sub_blocks_hideable = ( block.sub_blocks.size() == 0 || 
+                                 (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
+
+    // If not, make sure we're using a shape that allows for sub_blocks
+    if( !sub_blocks_hideable && !(block.shape == "none" || block.shape == "plaintext" || block.shape == "record") )
+        block.shape = "plaintext";      
+    
+    // These kinds of blocks require port names to be to be specified so links can tell them apart
+    block.specify_ports = (block.shape=="record" || block.shape=="plaintext");              
 }
 
 
