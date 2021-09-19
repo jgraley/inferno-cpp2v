@@ -73,13 +73,6 @@ public:
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 
 private:
-    // Additional to what's in Graphable::Link
-    struct MyLinkAdditional
-    {
-        string child_id;
-        LinkPlannedAs planned_as;
-    };
-
     struct MyBlock : Graphable::Block
     {
         string prerestriction_name;
@@ -87,7 +80,6 @@ private:
         bool specify_ports;
         string base_id;
         bool italic_title;
-        list< list<MyLinkAdditional> > link_additional; 
     };
 
     struct MyLink : Graphable::Link
@@ -151,8 +143,7 @@ private:
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 
-                   shared_ptr<const Graphable::Link> link,
-                   const MyLinkAdditional &la );
+                   shared_ptr<const Graphable::Link> link );
     string DoHeader( string title );
     string DoFooter();
     string DoRegion(string s, const RegionAppearance &region);

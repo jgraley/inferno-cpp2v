@@ -253,15 +253,10 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 	for( MyBlock &block : blocks_to_redirect )
 	{
         TRACEC("    Block: ")(block.base_id)("\n");
-        auto sub_additional_it = block.link_additional.begin();
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
-            ASSERT(sub_additional_it != block.link_additional.end() );
-            auto link_additional_it = sub_additional_it->begin();
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
-                ASSERT( link_additional_it != sub_additional_it->end() );
-                MyLinkAdditional &la = *link_additional_it;
                 auto my_link = dynamic_pointer_cast<MyLink>(link);
                 ASSERT( my_link );
                 TRACEC("        Link: child_id=")(my_link->child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");            
@@ -275,14 +270,10 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     if( link->trace_labels.front() == target_trace_label )
                     {
                         TRACEC("        REDIRECTED from ")(my_link->child_id)(" to ")(new_block->base_id)("\n");
-                        la.child_id = new_block->base_id;        
                         my_link->child_id = new_block->base_id;        
                     }
                 }
-                
-                link_additional_it++;
             }
-            sub_additional_it++;
         }
     }
 }                           
@@ -299,15 +290,10 @@ void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect,
 	for( MyBlock &block : blocks_to_redirect )
 	{
         TRACEC("    Block: ")(block.base_id)("\n");
-        auto sub_additional_it = block.link_additional.begin();
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
-            ASSERT(sub_additional_it != block.link_additional.end() );
-            auto link_additional_it = sub_additional_it->begin();
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
-                ASSERT( link_additional_it != sub_additional_it->end() );
-                MyLinkAdditional &la = *link_additional_it;
                 auto my_link = dynamic_pointer_cast<MyLink>(link);
                 ASSERT( my_link );
                 TRACEC("        Link: child_id=")(my_link->child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
@@ -321,14 +307,10 @@ void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect,
                     if( link->trace_labels.front() == target_trace_label )
                     {
                         TRACEC("        planned_as from ")(my_link->planned_as)(" to ")(new_planned_as)("\n");
-                        la.planned_as = new_planned_as;            
                         my_link->planned_as = new_planned_as;            
                     }
                 }
-                
-                link_additional_it++;
             }
-            sub_additional_it++;
         }
     }
 }                           
@@ -343,27 +325,17 @@ void Graph::CheckLinks( list<MyBlock> blocks )
     
   	for( MyBlock &block : blocks )
 	{
-        auto sub_additional_it = block.link_additional.begin();
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
-            ASSERT(sub_additional_it != block.link_additional.end() );
-            auto link_additional_it = sub_additional_it->begin();
             for( shared_ptr<const Graphable::Link> link : sub_block.links )
-            {
-                ASSERT( link_additional_it != sub_additional_it->end() );
-                MyLinkAdditional &la = *link_additional_it;                
-                
+            {                
                 auto my_link = dynamic_pointer_cast<const MyLink>(link);
                 ASSERT( my_link );
-                ASSERT( my_link->child_id == la.child_id );
-                ASSERT( my_link->planned_as == la.planned_as );
+
                 ASSERT( base_ids.count( my_link->child_id ) > 0 )
                       ("Link to child id ")(my_link->child_id)(" but no such block\n")
-                      (DoLink(0, block, link, la));
-                
-                link_additional_it++;
+                      (DoLink(0, block, link));
             }
-            sub_additional_it++;
         }
     }
 }
@@ -416,7 +388,6 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id,
 	block.bold = false;
 	block.shape = "none";
     block.block_type = Graphable::NODE;
-    block.link_additional.push_back( {} );
     block.prerestriction_name = "";
     block.colour = "";
     block.specify_ports = false;
@@ -440,10 +411,6 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id,
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( my_link );
-        MyLinkAdditional la;
-        la.child_id = GetRegionGraphId(region, child);
-        la.planned_as = LINK_NORMAL;
-        block.link_additional.back().push_back( la );
     }
     block.sub_blocks.push_back( sub_block );
 		    
@@ -503,17 +470,11 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	}
 	    
     // Actions for sub-blocks
-    my_block.link_additional.clear();
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
     {			
         // Actions for links
-        list<MyLinkAdditional> new_las;
         for( shared_ptr<Graphable::Link> &link : sub_block.links )
-        {			
-            MyLinkAdditional la;
-			la.child_id = GetRegionGraphId(region, link->child);	
-            la.planned_as = LINK_NORMAL;		
-			
+        {							
             // Fill in everything in my link 
             auto my_link = make_shared<MyLink>( link, 
                                                 GetRegionGraphId(region, link->child), 
@@ -525,10 +486,8 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                 block_ids_show_prerestriction.insert( my_link->child_id );
             }
             
-            new_las.push_back( la );
             link = my_link;
         }
-        my_block.link_additional.push_back( new_las );
     }
     
     // Italic title OR symbol designates a special agent 
@@ -558,7 +517,6 @@ void Graph::PostProcessBlock( MyBlock &block )
                                        "", 
                                        false, 
                                        {} } );
-        block.link_additional.push_front( list<MyLinkAdditional>() );
     }
     
     // Can we hide sub-blocks?
@@ -722,20 +680,13 @@ string Graph::DoLinks( const MyBlock &block )
     string s;
     
     int porti=0;
-    auto sub_additional_it = block.link_additional.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
-		ASSERT(sub_additional_it != block.link_additional.end() );
-		auto link_additional_it = sub_additional_it->begin();
         for( shared_ptr<const Graphable::Link> link : sub_block.links )
         {
-			ASSERT( link_additional_it != sub_additional_it->end() );
-            const MyLinkAdditional &la = *link_additional_it;
-			s += DoLink( porti, block, link, la );
-			link_additional_it++;
+			s += DoLink( porti, block, link );
 		}
         porti++;
-        sub_additional_it++;
     }
 
 	return s;
@@ -744,13 +695,10 @@ string Graph::DoLinks( const MyBlock &block )
 
 string Graph::DoLink( int port_index, 
                       const MyBlock &block, 
-                      shared_ptr<const Graphable::Link> link,
-                      const MyLinkAdditional &la )
+                      shared_ptr<const Graphable::Link> link )
 {          
     auto my_link = dynamic_pointer_cast<const MyLink>(link);
     ASSERT( my_link );
-    ASSERT( my_link->child_id == la.child_id );
-    ASSERT( my_link->planned_as == la.planned_as );
     
     // Atts
     string atts;
