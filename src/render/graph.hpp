@@ -103,8 +103,11 @@ private:
     void RedirectLinks( list<MyBlock> &blocks_to_redirect, 
                         const Graphable *child_g,
                         string trace_label,
-                        LinkPlannedAs target_link_planned_as,
                         const MyBlock *target_block = nullptr );
+    void UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect, 
+                               const Graphable *child_g,
+                               string trace_label,
+                               LinkPlannedAs target_link_planned_as );
     void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,

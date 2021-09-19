@@ -119,16 +119,18 @@ void Graph::operator()( const Figure &figure )
     TRACE("Redirect interior to our interior\n");
     for( auto p1 : figure.interior_agents )
         for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
-            RedirectLinks( interior_blocks, p1.first, p.first, p.second );
+            UpdateLinksPlannedAs( interior_blocks, p1.first, p.first, p.second );
     TRACE("Redirect interior to our exterior\n");
     for( auto p1 : figure.exterior_agents )
         for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
-            RedirectLinks( interior_blocks, p1.first, p.first, p.second );
+            UpdateLinksPlannedAs( interior_blocks, p1.first, p.first, p.second );
     TRACE("Redirect interior to our subordinates\n");
     for( auto p : figure.subordinates )
     {
+        UpdateLinksPlannedAs( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as );
+
         MyBlock &root_block = subordinate_root_blocks.at(p.first);        
-        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as, &root_block );
+        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, &root_block );
     }
     
     PostProcessBlocks(exterior_blocks);
@@ -243,25 +245,23 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect, 
                            const Graphable *child_g,
                            string target_trace_label,
-                           LinkPlannedAs target_link_planned_as,
-                           const MyBlock *target_block )
+                           const MyBlock *new_block )
 {
-    bool hit = false;
     TRACE("RedirectLinks( child_g=")(child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
 	for( MyBlock &block : blocks_to_redirect )
 	{
         TRACEC("    Block: ")(block.base_id)("\n");
-        auto sbidit = block.link_additional.begin();
+        auto sub_additional_it = block.link_additional.begin();
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
-            ASSERT(sbidit != block.link_additional.end() );
-            auto lidit = sbidit->begin();
+            ASSERT(sub_additional_it != block.link_additional.end() );
+            auto link_additional_it = sub_additional_it->begin();
             for( Graphable::Link &link : sub_block.links )
             {
-                ASSERT( lidit != sbidit->end() );
-                MyLinkAdditional &la = *lidit;
+                ASSERT( link_additional_it != sub_additional_it->end() );
+                MyLinkAdditional &la = *link_additional_it;
                 TRACEC("        Link: child_id=")(la.child_id)(" child=")(link.child)(" labels=")(link.labels)(link.trace_labels)("\n");
                 // Two things must be true for us to redirect this link toward the target block:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
@@ -272,23 +272,59 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     ASSERT( link.trace_labels.size()==1 ); // brittle
                     if( link.trace_labels.front() == target_trace_label )
                     {
-                        if( target_block )
-                        {
-                            TRACEC("        REDIRECTED from ")(la.child_id)(" to ")(target_block->base_id)("\n");
-                            la.child_id = target_block->base_id;     
-                        }
-                        TRACEC("        planned_as from ")(la.planned_as)(" to ")(target_link_planned_as)("\n");
-                        la.planned_as = target_link_planned_as;            
-                        hit = true;
+                        TRACEC("        REDIRECTED from ")(la.child_id)(" to ")(new_block->base_id)("\n");
+                        la.child_id = new_block->base_id;                                 
                     }
                 }
                 
-                lidit++;
+                link_additional_it++;
             }
-            sbidit++;
+            sub_additional_it++;
         }
     }
-    //ASSERT( hit );
+}                           
+
+
+void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect, 
+                                  const Graphable *child_g,
+                                  string target_trace_label,
+                                  LinkPlannedAs new_planned_as )
+{
+    TRACE("UpdateLinksPlannedAs( child_g=")(child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
+    // Loop over all the links in all the blocks that we might need to 
+    // redirect (ones in the interior of the figure)
+	for( MyBlock &block : blocks_to_redirect )
+	{
+        TRACEC("    Block: ")(block.base_id)("\n");
+        auto sub_additional_it = block.link_additional.begin();
+        for( Graphable::SubBlock &sub_block : block.sub_blocks )
+        {
+            ASSERT(sub_additional_it != block.link_additional.end() );
+            auto link_additional_it = sub_additional_it->begin();
+            for( Graphable::Link &link : sub_block.links )
+            {
+                ASSERT( link_additional_it != sub_additional_it->end() );
+                MyLinkAdditional &la = *link_additional_it;
+                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link.child)(" labels=")(link.labels)(link.trace_labels)("\n");
+                // Two things must be true for us to update this link's planned_as field:
+                // - Link must point to the right agent - that being the root agent of the sub-engine
+                // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
+                // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
+                if( link.child == child_g )
+                {
+                    ASSERT( link.trace_labels.size()==1 ); // brittle
+                    if( link.trace_labels.front() == target_trace_label )
+                    {
+                        TRACEC("        planned_as from ")(la.planned_as)(" to ")(new_planned_as)("\n");
+                        la.planned_as = new_planned_as;            
+                    }
+                }
+                
+                link_additional_it++;
+            }
+            sub_additional_it++;
+        }
+    }
 }                           
 
 
@@ -301,23 +337,23 @@ void Graph::CheckLinks( list<MyBlock> blocks )
     
   	for( MyBlock &block : blocks )
 	{
-        auto sbidit = block.link_additional.begin();
+        auto sub_additional_it = block.link_additional.begin();
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
-            ASSERT(sbidit != block.link_additional.end() );
-            auto lidit = sbidit->begin();
+            ASSERT(sub_additional_it != block.link_additional.end() );
+            auto link_additional_it = sub_additional_it->begin();
             for( Graphable::Link &link : sub_block.links )
             {
-                ASSERT( lidit != sbidit->end() );
-                MyLinkAdditional &la = *lidit;                
+                ASSERT( link_additional_it != sub_additional_it->end() );
+                MyLinkAdditional &la = *link_additional_it;                
                 
                 ASSERT( base_ids.count( la.child_id ) > 0 )
                       ("Link to child id ")(la.child_id)(" but no such block\n")
                       (DoLink(0, block, link, la));
                 
-                lidit++;
+                link_additional_it++;
             }
-            sbidit++;
+            sub_additional_it++;
         }
     }
     //ASSERT( hit );
@@ -665,20 +701,20 @@ string Graph::DoLinks( const MyBlock &block )
     string s;
     
     int porti=0;
-    auto sbidit = block.link_additional.begin();
+    auto sub_additional_it = block.link_additional.begin();
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
-		ASSERT(sbidit != block.link_additional.end() );
-		auto lidit = sbidit->begin();
+		ASSERT(sub_additional_it != block.link_additional.end() );
+		auto link_additional_it = sub_additional_it->begin();
         for( Graphable::Link link : sub_block.links )
         {
-			ASSERT( lidit != sbidit->end() );
-            const MyLinkAdditional &la = *lidit;
+			ASSERT( link_additional_it != sub_additional_it->end() );
+            const MyLinkAdditional &la = *link_additional_it;
 			s += DoLink( porti, block, link, la );
-			lidit++;
+			link_additional_it++;
 		}
         porti++;
-        sbidit++;
+        sub_additional_it++;
     }
 
 	return s;
