@@ -50,7 +50,7 @@ public:
         string item_name;
         string item_extra;
         bool hideable;
-        list<Link> links;
+        list< shared_ptr<Link> > links;
     };
     struct Block
     {

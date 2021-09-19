@@ -230,12 +230,12 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 {
 	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
 	{
-		for( const Graphable::Link &link : sub_block.links )
+		for( shared_ptr<const Graphable::Link> link : sub_block.links )
 		{
-			if( link.child && reached.count(link.child)==0 )
+			if( link->child && reached.count(link->child)==0 )
 			{
-				PopulateFrom( graphables, link.child );
-				reached.insert( link.child );
+				PopulateFrom( graphables, link->child );
+				reached.insert( link->child );
 			}
 		}
 	}
@@ -258,19 +258,19 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
         {
             ASSERT(sub_additional_it != block.link_additional.end() );
             auto link_additional_it = sub_additional_it->begin();
-            for( Graphable::Link &link : sub_block.links )
+            for( shared_ptr<const Graphable::Link> link : sub_block.links )
             {
                 ASSERT( link_additional_it != sub_additional_it->end() );
                 MyLinkAdditional &la = *link_additional_it;
-                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link.child)(" labels=")(link.labels)(link.trace_labels)("\n");
+                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
                 // Two things must be true for us to redirect this link toward the target block:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link.child == child_g )
+                if( link->child == child_g )
                 {
-                    ASSERT( link.trace_labels.size()==1 ); // brittle
-                    if( link.trace_labels.front() == target_trace_label )
+                    ASSERT( link->trace_labels.size()==1 ); // brittle
+                    if( link->trace_labels.front() == target_trace_label )
                     {
                         TRACEC("        REDIRECTED from ")(la.child_id)(" to ")(new_block->base_id)("\n");
                         la.child_id = new_block->base_id;                                 
@@ -301,19 +301,19 @@ void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect,
         {
             ASSERT(sub_additional_it != block.link_additional.end() );
             auto link_additional_it = sub_additional_it->begin();
-            for( Graphable::Link &link : sub_block.links )
+            for( shared_ptr<const Graphable::Link> link : sub_block.links )
             {
                 ASSERT( link_additional_it != sub_additional_it->end() );
                 MyLinkAdditional &la = *link_additional_it;
-                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link.child)(" labels=")(link.labels)(link.trace_labels)("\n");
+                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
                 // Two things must be true for us to update this link's planned_as field:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link.child == child_g )
+                if( link->child == child_g )
                 {
-                    ASSERT( link.trace_labels.size()==1 ); // brittle
-                    if( link.trace_labels.front() == target_trace_label )
+                    ASSERT( link->trace_labels.size()==1 ); // brittle
+                    if( link->trace_labels.front() == target_trace_label )
                     {
                         TRACEC("        planned_as from ")(la.planned_as)(" to ")(new_planned_as)("\n");
                         la.planned_as = new_planned_as;            
@@ -342,7 +342,7 @@ void Graph::CheckLinks( list<MyBlock> blocks )
         {
             ASSERT(sub_additional_it != block.link_additional.end() );
             auto link_additional_it = sub_additional_it->begin();
-            for( Graphable::Link &link : sub_block.links )
+            for( shared_ptr<const Graphable::Link> link : sub_block.links )
             {
                 ASSERT( link_additional_it != sub_additional_it->end() );
                 MyLinkAdditional &la = *link_additional_it;                
@@ -356,7 +356,6 @@ void Graph::CheckLinks( list<MyBlock> blocks )
             sub_additional_it++;
         }
     }
-    //ASSERT( hit );
 }
 
 
@@ -377,13 +376,13 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
         
         for( Graphable::SubBlock &sub_block : gblock.sub_blocks )
         {			
-            list<Graphable::Link> new_links;
-            for( Graphable::Link &link : sub_block.links )
+            list< shared_ptr<Graphable::Link> > new_links;
+            for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
-                bool hide = (hide_replace_only && link.phase == IN_REPLACE_ONLY);
-                if( sg.count( link.child ) > 0 && !hide )
+                bool hide = (hide_replace_only && link->phase == IN_REPLACE_ONLY);
+                if( sg.count( link->child ) > 0 && !hide )
                 {
-                    ASSERT( link.child )(gblock.title)(" ")(sub_block.item_name);
+                    ASSERT( link->child )(gblock.title)(" ")(sub_block.item_name);
                     new_links.push_back( link );
                 }
             }
@@ -420,8 +419,8 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id,
                                       {} };
     for( const Graphable *child : children )
     {
-        Graphable::Link link;
-        link.child = nullptr;
+        auto link = make_shared<Graphable::Link>();
+        link->child = nullptr;
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( link );
@@ -493,14 +492,14 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     {			
         // Actions for links
         list<MyLinkAdditional> new_las;
-        for( Graphable::Link &link : sub_block.links )
+        for( shared_ptr<const Graphable::Link> link : sub_block.links )
         {			
             MyLinkAdditional la;
-			la.child_id = GetRegionGraphId(region, link.child);	
+			la.child_id = GetRegionGraphId(region, link->child);	
             la.planned_as = LINK_NORMAL;		
 			
             // Detect pre-restrictions and add to link labels
-            if( link.is_nontrivial_prerestriction )
+            if( link->is_nontrivial_prerestriction )
             {
                 block_ids_show_prerestriction.insert( la.child_id );
             }
@@ -706,7 +705,7 @@ string Graph::DoLinks( const MyBlock &block )
     {
 		ASSERT(sub_additional_it != block.link_additional.end() );
 		auto link_additional_it = sub_additional_it->begin();
-        for( Graphable::Link link : sub_block.links )
+        for( shared_ptr<const Graphable::Link> link : sub_block.links )
         {
 			ASSERT( link_additional_it != sub_additional_it->end() );
             const MyLinkAdditional &la = *link_additional_it;
@@ -723,19 +722,19 @@ string Graph::DoLinks( const MyBlock &block )
 
 string Graph::DoLink( int port_index, 
                       const MyBlock &block, 
-                      const Graphable::Link &link,
+                      shared_ptr<const Graphable::Link> link,
                       const MyLinkAdditional &la )
 {          
     // Atts
     string atts;
-    atts += LinkStyleAtt(la.planned_as, link.phase);
+    atts += LinkStyleAtt(la.planned_as, link->phase);
 
     // Labels
     list<string> labels;
     if( ReadArgs::graph_trace )
-        labels = link.labels + link.trace_labels;
+        labels = link->labels + link->trace_labels;
     else
-        labels = link.labels;
+        labels = link->labels;
     if( !labels.empty() )
     {
         atts += "label = \""+EscapeForGraphviz(Join(labels))+"\"\n"; 

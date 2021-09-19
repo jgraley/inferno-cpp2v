@@ -16,22 +16,26 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const
 {
     list<SubBlock> sub_blocks;
+    auto link = make_shared<Graphable::Link>();
+    *link = { dynamic_cast<Graphable *>(GetThrough()->get()), 
+              {},
+              {PatternLink(this, GetThrough()).GetShortName()},
+              IN_COMPARE_ONLY,
+              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) };
     sub_blocks.push_back( { "through", 
                             "",
                             false,
-                            { { dynamic_cast<Graphable *>(GetThrough()->get()), 
-                                {},
-                                {PatternLink(this, GetThrough()).GetShortName()},
-                                IN_COMPARE_ONLY,
-                                SpecialBase::IsNonTrivialPreRestriction(GetThrough()) } } } );
+                            { link } } );
+    link = make_shared<Graphable::Link>();
+    *link = { dynamic_cast<Graphable *>(GetOverlay()->get()), 
+              {},
+              {PatternLink(this, GetOverlay()).GetShortName()},
+              IN_REPLACE_ONLY,
+              SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) };
     sub_blocks.push_back( { "overlay", 
                             "",
                             false,
-                            { { dynamic_cast<Graphable *>(GetOverlay()->get()), 
-                                {},
-                                {PatternLink(this, GetOverlay()).GetShortName()},
-                                IN_REPLACE_ONLY,
-                                SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) } } } );
+                            { link } } );
     return { false, GetName(), "", "", CONTROL, sub_blocks };
 }
 

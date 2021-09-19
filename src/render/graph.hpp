@@ -134,7 +134,7 @@ private:
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 
-                   const Graphable::Link &link,
+                   shared_ptr<const Graphable::Link> link,
                    const MyLinkAdditional &la );
     string DoHeader( string title );
     string DoFooter();

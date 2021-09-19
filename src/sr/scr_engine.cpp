@@ -443,14 +443,16 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     if( ReadArgs::graph_trace )
     {
         // Actually much simpler in graph trace mode - just show the root node and plink
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(plan.root_pattern.get()),
+                  {},
+                  {plan.root_plink.GetShortName()},
+                  IN_COMPARE_AND_REPLACE,
+                  SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) };                                                                        
         sub_blocks.push_back( { GetGraphId(), 
                                 "",
                                 true,
-                                { { dynamic_cast<Graphable *>(plan.root_pattern.get()),
-                                    {},
-                                    {plan.root_plink.GetShortName()},
-                                    IN_COMPARE_AND_REPLACE,
-                                    SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) } } } );
+                                { link } } );
         return { false, GetName(), "", "", CONTROL, sub_blocks };
     }
     
@@ -467,33 +469,39 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(*original_ptr);
     if( overlay )
     {        
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(overlay->GetThrough()->get()),
+                  {},
+                  {},
+                  IN_COMPARE_ONLY,
+                  SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) };
         sub_blocks.push_back( { plan.is_search?"search":"compare", 
                                 "",
                                 false,
-                                { { dynamic_cast<Graphable *>(overlay->GetThrough()->get()),
-                                    {},
-                                    {},
-                                    IN_COMPARE_ONLY,
-                                    SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) } } } );    
+                                { link } } );    
+        link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(overlay->GetOverlay()->get()),
+                  {},
+                  {},
+                  IN_REPLACE_ONLY,
+                  SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) };
         sub_blocks.push_back( { "replace", 
                                 "",
                                 false,
-                                { { dynamic_cast<Graphable *>(overlay->GetOverlay()->get()),
-                                    {},
-                                    {},
-                                    IN_REPLACE_ONLY,
-                                    SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) } } } );
+                                { link } } );
     }
     else
     {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(original_ptr->get()),
+                  {},
+                  {},
+                  IN_COMPARE_AND_REPLACE,
+                  SpecialBase::IsNonTrivialPreRestriction(original_ptr) };
         sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
                                 "",
                                 true,
-                                { { dynamic_cast<Graphable *>(original_ptr->get()),
-                                    {},
-                                    {},
-                                    IN_COMPARE_AND_REPLACE,
-                                    SpecialBase::IsNonTrivialPreRestriction(original_ptr) } } } );
+                                { link } } );
     }
     return { false, GetName(), "", "", CONTROL, sub_blocks };
 }

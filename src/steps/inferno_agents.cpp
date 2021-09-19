@@ -221,23 +221,31 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.shape = "plaintext";
     block.block_type = Graphable::NODE;
     if( terminus )
+    {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(terminus.get()),
+                  {},
+                  {PatternLink(this, &terminus).GetShortName()},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(&terminus) };
         block.sub_blocks.push_back( { "terminus", 
                                       "", 
                                       false,
-                                      { { dynamic_cast<Graphable *>(terminus.get()),
-                                                {},
-                                          {PatternLink(this, &terminus).GetShortName()},
-                                          phase,
-                                          SpecialBase::IsNonTrivialPreRestriction(&terminus) } } } );
+                                      { link } } );
+    }
     if( depth )
+    {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(depth.get()),
+                  {},
+                  {PatternLink(this, &depth).GetShortName()},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(&depth) };
         block.sub_blocks.push_back( { "depth", 
                                       "", 
                                       false,
-                                      { { dynamic_cast<Graphable *>(depth.get()),
-                                                {},
-                                          {PatternLink(this, &depth).GetShortName()},
-                                          phase,
-                                          SpecialBase::IsNonTrivialPreRestriction(&depth) } } } );
+                                      { link } } );
+    }
     return block;
 }
 
@@ -306,14 +314,16 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
     block.block_type = Graphable::NODE;
     if( container )
     {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(container.get()),
+                  {},
+                  {},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(&container) };
         block.sub_blocks.push_back( { "container", 
                                       "", 
                                       false,
-                                      { { dynamic_cast<Graphable *>(container.get()),
-                                                {},
-                                          {},
-                                          phase,
-                                          SpecialBase::IsNonTrivialPreRestriction(&container) } } } );
+                                      { link } } );
     }
     return block;
 }
@@ -452,13 +462,17 @@ Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunctio
 	block.shape = "egg";
     block.block_type = Graphable::NODE;
     if( pattern )
+    {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(pattern.get()),
+                  {},
+                  {PatternLink(this, &pattern).GetShortName()},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(&pattern) };
         block.sub_blocks.push_back( { "pattern", 
                                       "", 
                                       false,
-                                      { { dynamic_cast<Graphable *>(pattern.get()),
-                                                {},
-                                          {PatternLink(this, &pattern).GetShortName()},
-                                          phase,
-                                          SpecialBase::IsNonTrivialPreRestriction(&pattern) } } } );
+                                      { link } } );
+    }
     return block;
 }

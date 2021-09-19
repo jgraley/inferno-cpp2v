@@ -84,14 +84,16 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
 	block.bold = true;
     block.shape = "square";
     block.block_type = Graphable::NODE;
+    auto link = make_shared<Graphable::Link>();
+    *link = { dynamic_cast<Graphable *>(GetTerminus()->get()), 
+              {},
+              {PatternLink(this, &terminus).GetShortName()},
+              phase,
+              SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) };
     block.sub_blocks = { { "terminus", 
                            "", 
                            true,
-                           { { dynamic_cast<Graphable *>(GetTerminus()->get()), 
-                               {},
-                               {PatternLink(this, &terminus).GetShortName()},
-                               phase,
-                               SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) } } } };
+                           { link } } };
     return block;
 }
 
@@ -272,13 +274,17 @@ Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.title = "Stuff"; 
 	block.symbol = "#"; 
     if( recurse_restriction )
+    {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(recurse_restriction.get()), 
+                  {},
+                  {PatternLink(this, &recurse_restriction).GetShortName()},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) };
         block.sub_blocks.push_back( { "recurse_restriction", 
                                       "", 
                                       false,
-                                      { { dynamic_cast<Graphable *>(recurse_restriction.get()), 
-                                                {},
-                                          {PatternLink(this, &recurse_restriction).GetShortName()},
-                                          phase,
-                                          SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) } } } );
+                                      { link } } );
+    }
     return block;
 }

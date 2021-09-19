@@ -112,14 +112,18 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.shape = "circle";
     block.block_type = Graphable::NODE;
     if( *GetRestriction() )
+    {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(GetRestriction()->get()), 
+                  {},
+                  {PatternLink(this, GetRestriction()).GetShortName()},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) };
         block.sub_blocks.push_back( { "restriction", 
                                       "", 
                                       false,
-                                      { { dynamic_cast<Graphable *>(GetRestriction()->get()), 
-                                                {},
-                                          {PatternLink(this, GetRestriction()).GetShortName()},
-                                          phase,
-                                          SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) } } } );
+                                      { link } } );
+    }
     return block;
 }
 

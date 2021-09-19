@@ -147,10 +147,15 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
                            true,
                            {} } };
     FOREACH( const TreePtrInterface &p, GetPatterns() )
-        block.sub_blocks.front().links.push_back( { dynamic_cast<Graphable *>(p.get()),
-                                                                    {},
-                                                    {PatternLink(this, &p).GetShortName()},
-                                                    phase,
-                                                    SpecialBase::IsNonTrivialPreRestriction(&p) } );
+    {
+        auto link = make_shared<Graphable::Link>();
+        *link = { dynamic_cast<Graphable *>(p.get()),
+                  {},
+                  {PatternLink(this, &p).GetShortName()},
+                  phase,
+                  SpecialBase::IsNonTrivialPreRestriction(&p) };
+        block.sub_blocks.front().links.push_back( link );
+    }
+
     return block;
 }

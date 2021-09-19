@@ -1028,10 +1028,10 @@ Graphable::Block StandardAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
 	// Inject a non-trivial pre-restriction detector
 	Block block = Node::GetGraphBlockInfo( lnf, my_ntprf );
 
-	// Overwrite link style depending on the phase we're in
+	// Overwrite link phase depending on the phase we're in
     for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
-        for( Graphable::Link &link : sub_block.links )
-            link.phase = phase;
+        for( shared_ptr<Graphable::Link> link : sub_block.links )
+            link->phase = phase;
 
 	return block;
 }
