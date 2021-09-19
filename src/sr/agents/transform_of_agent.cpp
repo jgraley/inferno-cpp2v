@@ -43,12 +43,11 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
 	block.title = transformation->GetName();
 	block.shape = "octagon";
     block.block_type = Graphable::NODE;
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(pattern.get()),
-              {},
-              {PatternLink(this, &pattern).GetShortName()},
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(pattern.get()),
+              list<string>{},
+              list<string>{PatternLink(this, &pattern).GetShortName()},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(&pattern) };
+              SpecialBase::IsNonTrivialPreRestriction(&pattern) );
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,

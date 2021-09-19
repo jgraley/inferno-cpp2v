@@ -222,12 +222,11 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     block.block_type = Graphable::NODE;
     if( terminus )
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(terminus.get()),
-                  {},
-                  {PatternLink(this, &terminus).GetShortName()},
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(terminus.get()),
+                  list<string>{},
+                  list<string>{PatternLink(this, &terminus).GetShortName()},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&terminus) };
+                  SpecialBase::IsNonTrivialPreRestriction(&terminus) );
         block.sub_blocks.push_back( { "terminus", 
                                       "", 
                                       false,
@@ -235,12 +234,11 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     }
     if( depth )
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(depth.get()),
-                  {},
-                  {PatternLink(this, &depth).GetShortName()},
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(depth.get()),
+                  list<string>{},
+                  list<string>{PatternLink(this, &depth).GetShortName()},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&depth) };
+                  SpecialBase::IsNonTrivialPreRestriction(&depth) );
         block.sub_blocks.push_back( { "depth", 
                                       "", 
                                       false,
@@ -314,12 +312,11 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
     block.block_type = Graphable::NODE;
     if( container )
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(container.get()),
-                  {},
-                  {},
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(container.get()),
+                  list<string>{},
+                  list<string>{},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&container) };
+                  SpecialBase::IsNonTrivialPreRestriction(&container) );
         block.sub_blocks.push_back( { "container", 
                                       "", 
                                       false,
@@ -463,12 +460,11 @@ Graphable::Block IsLabelReachedAgent::GetGraphBlockInfo( const LinkNamingFunctio
     block.block_type = Graphable::NODE;
     if( pattern )
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(pattern.get()),
-                  {},
-                  {PatternLink(this, &pattern).GetShortName()},
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(pattern.get()),
+                  list<string>{},
+                  list<string>{PatternLink(this, &pattern).GetShortName()},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&pattern) };
+                  SpecialBase::IsNonTrivialPreRestriction(&pattern) );
         block.sub_blocks.push_back( { "pattern", 
                                       "", 
                                       false,

@@ -39,6 +39,26 @@ public:
     };
     struct Link
     {
+        Link( const Graphable *child_,
+              list<string> labels_,
+              list<string> trace_labels_,
+              Phase phase_,
+              bool is_nontrivial_prerestriction_ ) :
+            child( child_ ),
+            labels( labels_ ),
+            trace_labels( trace_labels_ ),
+            phase( phase_ ),
+            is_nontrivial_prerestriction( is_nontrivial_prerestriction_ )
+        {
+        }
+               
+        Link( const Link &other ) : 
+            Link( other.child, other.labels, other.trace_labels, other.phase, other.is_nontrivial_prerestriction )
+        {
+        }
+               
+        virtual ~Link() = default;
+
         const Graphable *child;
         list<string> labels;
         list<string> trace_labels;

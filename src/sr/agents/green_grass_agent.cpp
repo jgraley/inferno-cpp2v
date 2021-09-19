@@ -41,11 +41,11 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &l
 	block.symbol = "||||";
 	block.shape = "triangle";
     block.block_type = Graphable::NODE;
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>( GetThrough()->get()), 
-              {},
-              {PatternLink(this, GetThrough()).GetShortName()},
-              phase };
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>( GetThrough()->get()), 
+              list<string>{},
+              list<string>{PatternLink(this, GetThrough()).GetShortName()},
+              phase,
+              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
     block.sub_blocks = { { "through", 
                            "", 
                            true,

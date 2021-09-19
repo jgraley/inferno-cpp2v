@@ -72,11 +72,11 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &ln
 	block.title = "PointerIs"; 
 	block.shape = "house";
     block.block_type = Graphable::NODE;
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(GetPointer()->get()),
-              {},
-              {PatternLink(this, GetPointer()).GetShortName()},
-              phase };
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetPointer()->get()),
+              list<string>{},
+              list<string>{PatternLink(this, GetPointer()).GetShortName()},
+              phase,
+              SpecialBase::IsNonTrivialPreRestriction(GetPointer()) );
     block.sub_blocks = { { "pointer", 
                            "", 
                            true,

@@ -113,12 +113,11 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     block.block_type = Graphable::NODE;
     if( *GetRestriction() )
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(GetRestriction()->get()), 
-                  {},
-                  {PatternLink(this, GetRestriction()).GetShortName()},
-                  phase,
-                  SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) };
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetRestriction()->get()), 
+                                                  list<string>{},
+                                                  list<string>{PatternLink(this, GetRestriction()).GetShortName()},
+                                                  phase,
+                                                  SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) );
         block.sub_blocks.push_back( { "restriction", 
                                       "", 
                                       false,

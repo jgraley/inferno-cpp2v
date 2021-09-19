@@ -57,12 +57,11 @@ Graphable::Block NegationAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf
 	block.symbol = string("¬");
 	block.shape = "diamond";
     block.block_type = Graphable::NODE;
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(GetPattern()->get()), 
-              {},
-              {PatternLink(this, GetPattern()).GetShortName()},
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetPattern()->get()), 
+              list<string>{},
+              list<string>{PatternLink(this, GetPattern()).GetShortName()},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetPattern()) };
+              SpecialBase::IsNonTrivialPreRestriction(GetPattern()) );
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,

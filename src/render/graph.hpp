@@ -90,6 +90,23 @@ private:
         list< list<MyLinkAdditional> > link_additional; 
     };
 
+    struct MyLink : Graphable::Link
+    {
+        MyLink( shared_ptr<const Graphable::Link> link,
+                string child_id_,
+                LinkPlannedAs planned_as_ ) : 
+            Graphable::Link( *link ),
+            child_id( child_id_ ),
+            planned_as( planned_as_ )
+        {
+        }
+
+        virtual ~MyLink() = default;
+        
+        string child_id;
+        LinkPlannedAs planned_as;
+    };
+
     struct RegionAppearance : Region
     {
         RegionAppearance( string bg ) : background_colour(bg) {}

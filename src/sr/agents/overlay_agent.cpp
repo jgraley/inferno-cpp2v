@@ -16,22 +16,20 @@ Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const
 {
     list<SubBlock> sub_blocks;
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(GetThrough()->get()), 
-              {},
-              {PatternLink(this, GetThrough()).GetShortName()},
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
+              list<string>{},
+              list<string>{PatternLink(this, GetThrough()).GetShortName()},
               IN_COMPARE_ONLY,
-              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) };
+              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
     sub_blocks.push_back( { "through", 
                             "",
                             false,
                             { link } } );
-    link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(GetOverlay()->get()), 
-              {},
-              {PatternLink(this, GetOverlay()).GetShortName()},
+    link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
+              list<string>{},
+              list<string>{PatternLink(this, GetOverlay()).GetShortName()},
               IN_REPLACE_ONLY,
-              SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) };
+              SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) );
     sub_blocks.push_back( { "overlay", 
                             "",
                             false,

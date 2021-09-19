@@ -38,12 +38,11 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 
     Block block = my_scr_engine->GetGraphBlockInfo(lnf, ntprf);
     block.title = "Slave";
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(GetThrough()->get()), 
-              {},
-              {PatternLink(this, GetThrough()).GetShortName()},
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
+              list<string>{},
+              list<string>{PatternLink(this, GetThrough()).GetShortName()},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) };
+              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
     block.sub_blocks.push_front( { "through", 
                                    "",
                                    true,

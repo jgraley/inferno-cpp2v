@@ -443,12 +443,11 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     if( ReadArgs::graph_trace )
     {
         // Actually much simpler in graph trace mode - just show the root node and plink
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(plan.root_pattern.get()),
-                  {},
-                  {plan.root_plink.GetShortName()},
-                  IN_COMPARE_AND_REPLACE,
-                  SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) };                                                                        
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(plan.root_pattern.get()),
+                                                  list<string>{},
+                                                  list<string>{plan.root_plink.GetShortName()},
+                                                  IN_COMPARE_AND_REPLACE,
+                                                  SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) );                                  
         sub_blocks.push_back( { GetGraphId(), 
                                 "",
                                 true,
@@ -469,22 +468,20 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(*original_ptr);
     if( overlay )
     {        
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(overlay->GetThrough()->get()),
-                  {},
-                  {},
-                  IN_COMPARE_ONLY,
-                  SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) };
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(overlay->GetThrough()->get()),
+                                                  list<string>{},
+                                                  list<string>{},
+                                                  IN_COMPARE_ONLY,
+                                                  SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) );
         sub_blocks.push_back( { plan.is_search?"search":"compare", 
                                 "",
                                 false,
                                 { link } } );    
-        link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(overlay->GetOverlay()->get()),
-                  {},
-                  {},
-                  IN_REPLACE_ONLY,
-                  SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) };
+        link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(overlay->GetOverlay()->get()),
+                                             list<string>{},
+                                             list<string>{},
+                                             IN_REPLACE_ONLY,
+                                             SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) );
         sub_blocks.push_back( { "replace", 
                                 "",
                                 false,
@@ -492,12 +489,11 @@ Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     }
     else
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(original_ptr->get()),
-                  {},
-                  {},
-                  IN_COMPARE_AND_REPLACE,
-                  SpecialBase::IsNonTrivialPreRestriction(original_ptr) };
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(original_ptr->get()),
+                                                  list<string>{},
+                                                  list<string>{},
+                                                  IN_COMPARE_AND_REPLACE,
+                                                  SpecialBase::IsNonTrivialPreRestriction(original_ptr) );
         sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
                                 "",
                                 true,

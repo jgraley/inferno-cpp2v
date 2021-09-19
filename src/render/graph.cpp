@@ -258,11 +258,13 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
         {
             ASSERT(sub_additional_it != block.link_additional.end() );
             auto link_additional_it = sub_additional_it->begin();
-            for( shared_ptr<const Graphable::Link> link : sub_block.links )
+            for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
                 ASSERT( link_additional_it != sub_additional_it->end() );
                 MyLinkAdditional &la = *link_additional_it;
-                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
+                auto my_link = dynamic_pointer_cast<MyLink>(link);
+                ASSERT( my_link );
+                TRACEC("        Link: child_id=")(my_link->child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");            
                 // Two things must be true for us to redirect this link toward the target block:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
@@ -272,8 +274,9 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
                     ASSERT( link->trace_labels.size()==1 ); // brittle
                     if( link->trace_labels.front() == target_trace_label )
                     {
-                        TRACEC("        REDIRECTED from ")(la.child_id)(" to ")(new_block->base_id)("\n");
-                        la.child_id = new_block->base_id;                                 
+                        TRACEC("        REDIRECTED from ")(my_link->child_id)(" to ")(new_block->base_id)("\n");
+                        la.child_id = new_block->base_id;        
+                        my_link->child_id = new_block->base_id;        
                     }
                 }
                 
@@ -301,11 +304,13 @@ void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect,
         {
             ASSERT(sub_additional_it != block.link_additional.end() );
             auto link_additional_it = sub_additional_it->begin();
-            for( shared_ptr<const Graphable::Link> link : sub_block.links )
+            for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
                 ASSERT( link_additional_it != sub_additional_it->end() );
                 MyLinkAdditional &la = *link_additional_it;
-                TRACEC("        Link: child_id=")(la.child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
+                auto my_link = dynamic_pointer_cast<MyLink>(link);
+                ASSERT( my_link );
+                TRACEC("        Link: child_id=")(my_link->child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
                 // Two things must be true for us to update this link's planned_as field:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
@@ -315,8 +320,9 @@ void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect,
                     ASSERT( link->trace_labels.size()==1 ); // brittle
                     if( link->trace_labels.front() == target_trace_label )
                     {
-                        TRACEC("        planned_as from ")(la.planned_as)(" to ")(new_planned_as)("\n");
+                        TRACEC("        planned_as from ")(my_link->planned_as)(" to ")(new_planned_as)("\n");
                         la.planned_as = new_planned_as;            
+                        my_link->planned_as = new_planned_as;            
                     }
                 }
                 
@@ -347,8 +353,12 @@ void Graph::CheckLinks( list<MyBlock> blocks )
                 ASSERT( link_additional_it != sub_additional_it->end() );
                 MyLinkAdditional &la = *link_additional_it;                
                 
-                ASSERT( base_ids.count( la.child_id ) > 0 )
-                      ("Link to child id ")(la.child_id)(" but no such block\n")
+                auto my_link = dynamic_pointer_cast<const MyLink>(link);
+                ASSERT( my_link );
+                ASSERT( my_link->child_id == la.child_id );
+                ASSERT( my_link->planned_as == la.planned_as );
+                ASSERT( base_ids.count( my_link->child_id ) > 0 )
+                      ("Link to child id ")(my_link->child_id)(" but no such block\n")
                       (DoLink(0, block, link, la));
                 
                 link_additional_it++;
@@ -418,12 +428,18 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id,
                                       false,
                                       {} };
     for( const Graphable *child : children )
-    {
-        auto link = make_shared<Graphable::Link>();
-        link->child = nullptr;
+    {        
+        auto link = make_shared<Graphable::Link>( nullptr, 
+                                                  list<string>{},
+                                                  list<string>{},
+                                                  IS_X_NODE,
+                                                  false );
+        auto my_link = make_shared<MyLink>( link,
+                                            GetRegionGraphId(region, child),
+                                            LINK_NORMAL );
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
-        sub_block.links.push_back( link );
+        sub_block.links.push_back( my_link );
         MyLinkAdditional la;
         la.child_id = GetRegionGraphId(region, child);
         la.planned_as = LINK_NORMAL;
@@ -444,7 +460,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	const Node *pnode = dynamic_cast<const Node *>(g);
     const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
 
-    // Fill in everything in block 
+    // Fill in everything in my block 
     MyBlock my_block;
     (Graphable::Block &)my_block = block;
     
@@ -492,19 +508,25 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     {			
         // Actions for links
         list<MyLinkAdditional> new_las;
-        for( shared_ptr<const Graphable::Link> link : sub_block.links )
+        for( shared_ptr<Graphable::Link> &link : sub_block.links )
         {			
             MyLinkAdditional la;
 			la.child_id = GetRegionGraphId(region, link->child);	
             la.planned_as = LINK_NORMAL;		
 			
+            // Fill in everything in my link 
+            auto my_link = make_shared<MyLink>( link, 
+                                                GetRegionGraphId(region, link->child), 
+                                                LINK_NORMAL );		
+            
             // Detect pre-restrictions and add to link labels
             if( link->is_nontrivial_prerestriction )
             {
-                block_ids_show_prerestriction.insert( la.child_id );
+                block_ids_show_prerestriction.insert( my_link->child_id );
             }
             
             new_las.push_back( la );
+            link = my_link;
         }
         my_block.link_additional.push_back( new_las );
     }
@@ -725,9 +747,14 @@ string Graph::DoLink( int port_index,
                       shared_ptr<const Graphable::Link> link,
                       const MyLinkAdditional &la )
 {          
+    auto my_link = dynamic_pointer_cast<const MyLink>(link);
+    ASSERT( my_link );
+    ASSERT( my_link->child_id == la.child_id );
+    ASSERT( my_link->planned_as == la.planned_as );
+    
     // Atts
     string atts;
-    atts += LinkStyleAtt(la.planned_as, link->phase);
+    atts += LinkStyleAtt(my_link->planned_as, link->phase);
 
     // Labels
     list<string> labels;
@@ -750,7 +777,7 @@ string Graph::DoLink( int port_index,
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
 	s += " -> ";
-	s += "\""+la.child_id+"\"";
+	s += "\""+my_link->child_id+"\"";
 	s += " [\n"+Indent(atts)+"];\n";
     s += "\n";
 	return s;

@@ -84,12 +84,11 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
 	block.bold = true;
     block.shape = "square";
     block.block_type = Graphable::NODE;
-    auto link = make_shared<Graphable::Link>();
-    *link = { dynamic_cast<Graphable *>(GetTerminus()->get()), 
-              {},
-              {PatternLink(this, &terminus).GetShortName()},
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetTerminus()->get()), 
+              list<string>{},
+              list<string>{PatternLink(this, &terminus).GetShortName()},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) };
+              SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) );
     block.sub_blocks = { { "terminus", 
                            "", 
                            true,
@@ -275,12 +274,11 @@ Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.symbol = "#"; 
     if( recurse_restriction )
     {
-        auto link = make_shared<Graphable::Link>();
-        *link = { dynamic_cast<Graphable *>(recurse_restriction.get()), 
-                  {},
-                  {PatternLink(this, &recurse_restriction).GetShortName()},
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(recurse_restriction.get()), 
+                  list<string>{},
+                  list<string>{PatternLink(this, &recurse_restriction).GetShortName()},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) };
+                  SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) );
         block.sub_blocks.push_back( { "recurse_restriction", 
                                       "", 
                                       false,
