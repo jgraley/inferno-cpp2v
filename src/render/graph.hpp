@@ -109,12 +109,12 @@ private:
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
-    void RedirectLinks( list<MyBlock> &blocks_to_redirect, 
-                        const Graphable *child_g,
+    void RedirectLinks( list<MyBlock> &blocks_to_act_on, 
+                        const Graphable *target_child_g,
                         string trace_label,
                         const MyBlock *target_block = nullptr );
-    void UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect, 
-                               const Graphable *child_g,
+    void UpdateLinksPlannedAs( list<MyBlock> &blocks_to_act_on, 
+                               const Graphable *target_child_g,
                                string trace_label,
                                LinkPlannedAs target_link_planned_as );
     void CheckLinks( list<MyBlock> blocks );

@@ -242,35 +242,37 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 }
 
 
-void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect, 
-                           const Graphable *child_g,
+void Graph::RedirectLinks( list<MyBlock> &blocks_to_act_on, 
+                           const Graphable *target_child_g,
                            string target_trace_label,
                            const MyBlock *new_block )
 {
-    TRACE("RedirectLinks( child_g=")(child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
+    TRACE("RedirectLinks( child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
-	for( MyBlock &block : blocks_to_redirect )
+	for( MyBlock &block_to_act_on : blocks_to_act_on )
 	{
-        TRACEC("    Block: ")(block.base_id)("\n");
-        for( Graphable::SubBlock &sub_block : block.sub_blocks )
+        TRACEC("    Block: ")(block_to_act_on.base_id)("\n");
+        for( Graphable::SubBlock &sub_block_to_act_on : block_to_act_on.sub_blocks )
         {
-            for( shared_ptr<Graphable::Link> link : sub_block.links )
+            for( shared_ptr<Graphable::Link> link_to_act_on : sub_block_to_act_on.links )
             {
-                auto my_link = dynamic_pointer_cast<MyLink>(link);
-                ASSERT( my_link );
-                TRACEC("        Link: child_id=")(my_link->child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");            
+                auto my_link_to_act_on = dynamic_pointer_cast<MyLink>(link_to_act_on);
+                ASSERT( my_link_to_act_on );
+                TRACEC("        To act on: child_id=")(my_link_to_act_on->child_id)
+                      (" child=")(link_to_act_on->child)
+                      (" labels=")(link_to_act_on->labels)(link_to_act_on->trace_labels)("\n");            
                 // Two things must be true for us to redirect this link toward the target block:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link->child == child_g )
+                if( link_to_act_on->child == target_child_g )
                 {
-                    ASSERT( link->trace_labels.size()==1 ); // brittle
-                    if( link->trace_labels.front() == target_trace_label )
+                    ASSERT( link_to_act_on->trace_labels.size()==1 ); // brittle
+                    if( link_to_act_on->trace_labels.front() == target_trace_label )
                     {
-                        TRACEC("        REDIRECTED from ")(my_link->child_id)(" to ")(new_block->base_id)("\n");
-                        my_link->child_id = new_block->base_id;        
+                        TRACEC("        REDIRECTED from ")(my_link_to_act_on->child_id)(" to ")(new_block->base_id)("\n");
+                        my_link_to_act_on->child_id = new_block->base_id;        
                     }
                 }
             }
@@ -279,35 +281,37 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_redirect,
 }                           
 
 
-void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_redirect, 
-                                  const Graphable *child_g,
+void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_act_on, 
+                                  const Graphable *target_child_g,
                                   string target_trace_label,
                                   LinkPlannedAs new_planned_as )
 {
-    TRACE("UpdateLinksPlannedAs( child_g=")(child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
+    TRACE("UpdateLinksPlannedAs( target_child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
-	for( MyBlock &block : blocks_to_redirect )
+	for( MyBlock &block_to_act_on : blocks_to_act_on )
 	{
-        TRACEC("    Block: ")(block.base_id)("\n");
-        for( Graphable::SubBlock &sub_block : block.sub_blocks )
+        TRACEC("    Block: ")(block_to_act_on.base_id)("\n");
+        for( Graphable::SubBlock &sub_block_to_act_on : block_to_act_on.sub_blocks )
         {
-            for( shared_ptr<Graphable::Link> link : sub_block.links )
+            for( shared_ptr<Graphable::Link> link_to_act_on : sub_block_to_act_on.links )
             {
-                auto my_link = dynamic_pointer_cast<MyLink>(link);
-                ASSERT( my_link );
-                TRACEC("        Link: child_id=")(my_link->child_id)(" child=")(link->child)(" labels=")(link->labels)(link->trace_labels)("\n");
+                auto my_link_to_act_on = dynamic_pointer_cast<MyLink>(link_to_act_on);
+                ASSERT( my_link_to_act_on );
+                TRACEC("        To act on: child_id=")(my_link_to_act_on->child_id)
+                      (" child=")(link_to_act_on->child)
+                      (" labels=")(link_to_act_on->labels)(link_to_act_on->trace_labels)("\n");
                 // Two things must be true for us to update this link's planned_as field:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link->child == child_g )
+                if( link_to_act_on->child == target_child_g )
                 {
-                    ASSERT( link->trace_labels.size()==1 ); // brittle
-                    if( link->trace_labels.front() == target_trace_label )
+                    ASSERT( link_to_act_on->trace_labels.size()==1 ); // brittle
+                    if( link_to_act_on->trace_labels.front() == target_trace_label )
                     {
-                        TRACEC("        planned_as from ")(my_link->planned_as)(" to ")(new_planned_as)("\n");
-                        my_link->planned_as = new_planned_as;            
+                        TRACEC("        planned_as from ")(my_link_to_act_on->planned_as)(" to ")(new_planned_as)("\n");
+                        my_link_to_act_on->planned_as = new_planned_as;            
                     }
                 }
             }
