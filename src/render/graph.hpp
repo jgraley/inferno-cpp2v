@@ -132,14 +132,13 @@ private:
     void PostProcessBlocks( list<MyBlock> &blocks );
     void PostProcessBlock( MyBlock &block );
 
-    string DoBlocksAndLinks( const list<MyBlock> &blocks,
-                       const RegionAppearance &region );
-    string DoBlockAndLinks( const MyBlock &block,
-                            const RegionAppearance &region );
+    string DoBlocks( const list<MyBlock> &blocks,
+                     const RegionAppearance &region );
     string DoBlock( const MyBlock &block,
                     const RegionAppearance &region );
     string DoRecordLabel( const MyBlock &block );
     string DoHTMLLabel( const MyBlock &block );
+    string DoLinks( const list<MyBlock> &blocks );
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
                    const MyBlock &block, 

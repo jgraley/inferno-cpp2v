@@ -77,7 +77,8 @@ void Graph::operator()( Transformation *root )
     PopulateFromTransformation(my_graphables, root);
     my_blocks = GetBlocks( my_graphables, my_graphables, nullptr, false );
     PostProcessBlocks(my_blocks);
-    s += DoBlocksAndLinks(my_blocks, base_region);
+    s += DoBlocks(my_blocks, base_region);
+    s += DoLinks(my_blocks);
     s += "\n";
 	Remember(s);
     
@@ -114,7 +115,8 @@ void Graph::operator()( const Figure &figure )
     if( interior_blocks.empty() )
     {
         ASSERT( !exterior_gs.empty() )(figure.title); // not sure we can handle these but shouldn't happen?
-        interior_blocks.push_back( CreateInvisibleNode( "trivial", { exterior_gs.front() }, &figure ) );
+        interior_blocks.push_back( CreateInvisibleNode( "IRIP", { exterior_gs.front() }, &figure ) ); 
+        // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
     }
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
@@ -144,14 +146,12 @@ void Graph::operator()( const Figure &figure )
     string s;
     s += "// -------------------- figure "+figure.id+" --------------------\n";
     list<MyBlock> all_blocks;
-    s += DoBlocksAndLinks(exterior_blocks, base_region); // Exterior blocks
-    all_blocks = all_blocks + exterior_blocks;
     
     RegionAppearance interior_region = base_region;
     interior_region.title = figure.title;
     interior_region.id = figure.id;
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
-    string s_interior = DoBlocksAndLinks(interior_blocks, interior_region); // Interior blocks
+    string s_interior = DoBlocks(interior_blocks, interior_region); // Interior blocks
     all_blocks = all_blocks + interior_blocks;
 
     for( auto p : figure.subordinates )
@@ -162,14 +162,20 @@ void Graph::operator()( const Figure &figure )
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
         MyBlock root_block = subordinate_root_blocks.at(p.first);        
-	    string s_subordinate = DoBlocksAndLinks({root_block}, subordinate_region); // Subordinate blocks
+	    string s_subordinate = DoBlocks({root_block}, subordinate_region); // Subordinate blocks
         all_blocks.push_back( root_block );
 		s_interior += DoRegion(s_subordinate, subordinate_region);
 	}
 
-    CheckLinks(all_blocks);
-
     s += DoRegion(s_interior, interior_region);
+
+    s += DoBlocks(exterior_blocks, base_region); // Exterior blocks
+    all_blocks = all_blocks + exterior_blocks;
+
+    // Links must be checked for a whole figure because figures dont link to each other
+    CheckLinks(all_blocks);
+    // Links must be done at top-level otherwise they "pull" blocks into regions
+    s += DoLinks(all_blocks); 
     s += "\n";        
 
 	Remember( s );
@@ -189,7 +195,8 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	PopulateFrom( my_graphables, g );
 	my_blocks = GetBlocks( my_graphables, my_graphables, nullptr, false );
     PostProcessBlocks(my_blocks);
-    s += DoBlocksAndLinks(my_blocks, base_region);
+    s += DoBlocks(my_blocks, base_region);
+    s += DoLinks(my_blocks);
     s += "\n";
 	Remember( s );
     
@@ -538,26 +545,14 @@ void Graph::PostProcessBlock( MyBlock &block )
 }
 
 
-string Graph::DoBlocksAndLinks( const list<MyBlock> &blocks, 
-                           const RegionAppearance &region )
+string Graph::DoBlocks( const list<MyBlock> &blocks, 
+                        const RegionAppearance &region )
 {
     string s;
     
     for( const MyBlock &block : blocks )
-        s += DoBlockAndLinks(block, region);
+        s += DoBlock(block, region);
     
-    return s;
-}
-
-
-string Graph::DoBlockAndLinks( const MyBlock &block, 
-                               const RegionAppearance &region )
-{
-	string s;
-    
-    s += "// -------- block " + block.base_id + " ----------\n";
-    s += DoBlock( block, region );
-    s += DoLinks( block );
     return s;
 }
 
@@ -567,6 +562,7 @@ string Graph::DoBlock( const MyBlock &block,
 {
 	string s;
     
+    s += "// -------- block " + block.base_id + " ----------\n";
 	s += "shape = \"" + block.shape + "\"\n";
 	if( block.colour=="transparent" )
 		s += "fillcolor = " + region.background_colour + "\n";
@@ -678,6 +674,17 @@ string Graph::DoHTMLLabel( const MyBlock &block )
     
 	s += "</TABLE>>\n";
 	return s;
+}
+
+
+string Graph::DoLinks( const list<MyBlock> &blocks )
+{
+	string s;
+    
+    for( const MyBlock &block : blocks )
+        s += DoLinks(block);
+
+    return s;
 }
 
 

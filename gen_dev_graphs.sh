@@ -27,3 +27,4 @@ done
 # and deletes the dot files after successful conversion.
 find graphs -depth -name "*.dot" -exec sh -c 'dot -T svg < "$1" > "${1%.dot}.svg"' _ {} \;
 
+./convert_all_svg.sh
