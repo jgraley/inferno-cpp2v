@@ -101,7 +101,9 @@ void Graph::operator()( const Figure &figure )
     for( auto p : figure.subordinates )
     {
         Region sub_region;
-        sub_region.id = p.second.root_link_short_name + "->" + figure.id;
+        sub_region.id = GetRegionGraphId(&figure, p.first); 
+        // Note: the same root agent can be used in multiple engines, but because we've got the
+        // current subordinate's id in the sub_region.id, the new node will be unique enough
         subordinate_root_blocks[p.first] = CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region );
         all_gs.push_back( p.second.root_g );
     }
@@ -904,7 +906,7 @@ string Graph::GetRegionGraphId(const Region *region, string id)
 	if( !region )
 		return id;
 	else
-		return region->id+"["+id+"]";
+		return region->id+"/"+id;
 }
 
 

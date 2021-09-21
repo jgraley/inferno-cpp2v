@@ -24,8 +24,8 @@ subgraph "clusterAnd#R7-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R7-0[#B-2-55] ----------
-    "And#R7-0[#B-2-55]" [
+    // -------- block And#R7-0/#B-2-55 ----------
+    "And#R7-0/#B-2-55" [
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -38,7 +38,7 @@ subgraph "clusterAnd#R7-0" {
         fontsize = "12"
     ];
     
-    "And#R7-0[#B-2-55]":port1 -> "And#R7-0[#B-2-56]" [
+    "And#R7-0/#B-2-55":port1 -> "And#R7-0/#B-2-56" [
         arrowhead="normalnonebox"
         label = "#0"
         decorate = true
@@ -46,8 +46,8 @@ subgraph "clusterAnd#R7-0" {
         fontcolor = black
     ];
     
-    // -------- block And#R7-0[#B-2-56] ----------
-    "And#R7-0[#B-2-56]" [
+    // -------- block And#R7-0/#B-2-56 ----------
+    "And#R7-0/#B-2-56" [
         shape = "plaintext"
         fillcolor = "/set28/5"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -59,8 +59,8 @@ subgraph "clusterAnd#R7-0" {
         fontsize = "12"
     ];
     
-    // -------- block And#R7-0[#P7-6-10] ----------
-    "And#R7-0[#P7-6-10]" [
+    // -------- block And#R7-0/#P7-6-10 ----------
+    "And#R7-0/#P7-6-10" [
         shape = "record"
         fillcolor = antiquewhite2
         label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P7-6-10"
@@ -70,7 +70,7 @@ subgraph "clusterAnd#R7-0" {
         fontcolor = black
     ];
     
-    "And#R7-0[#P7-6-10]":port0 -> "And#R7-0[#B-2-55]" [
+    "And#R7-0/#P7-6-10":port0 -> "And#R7-0/#B-2-55" [
         arrowhead="normalnonebox"
         label = "#0"
         decorate = true
@@ -78,8 +78,8 @@ subgraph "clusterAnd#R7-0" {
         fontcolor = black
     ];
     
-    // -------- block And#R7-0[#P7-8-7] ----------
-    "And#R7-0[#P7-8-7]" [
+    // -------- block And#R7-0/#P7-8-7 ----------
+    "And#R7-0/#P7-8-7" [
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
@@ -90,7 +90,7 @@ subgraph "clusterAnd#R7-0" {
         fontsize = "12"
     ];
     
-    "And#R7-0[#P7-8-7]":port0 -> "And#R7-0[#P7-6-10]" [
+    "And#R7-0/#P7-8-7":port0 -> "And#R7-0/#P7-6-10" [
         arrowhead="normalnonebox"
         label = "#0"
         decorate = true
