@@ -18,8 +18,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#P57-0 ----------
 "CR#P57-0" [
+    // -------- block CR#P57-0 ----------
     shape = "record"
     fillcolor = antiquewhite1
     label = "<fixed> CleanupNop | <port0> search | <port1> replace"
@@ -29,19 +29,8 @@ edge [
     fontcolor = black
 ];
 
-"CR#P57-0":port0 -> "#B-2-959" [
-    color = black
-    fontcolor = black
-];
-
-"CR#P57-0":port1 -> "#B-2-960" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-// -------- block #B-2-959 ----------
 "#B-2-959" [
+    // -------- block #B-2-959 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -53,6 +42,81 @@ edge [
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
+];
+
+"#B-2-962" [
+    // -------- block #B-2-962 ----------
+    shape = "circle"
+    fillcolor = "/set28/1"
+    label = <*>
+    style = "filled"
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+"#B-2-963" [
+    // -------- block #B-2-963 ----------
+    shape = "circle"
+    fillcolor = "/set28/2"
+    label = <*>
+    style = "filled"
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+"#B-2-961" [
+    // -------- block #B-2-961 ----------
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+"#B-2-964" [
+    // -------- block #B-2-964 ----------
+    shape = "circle"
+    fillcolor = "/set28/2"
+    label = <*>
+    style = "filled"
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+"#B-2-960" [
+    // -------- block #B-2-960 ----------
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
+     <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+"CR#P57-0":port0 -> "#B-2-959" [
+    color = black
+    fontcolor = black
+];
+
+"CR#P57-0":port1 -> "#B-2-960" [
+    style="dashed"
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-959":port0 -> "#B-2-962" [
@@ -73,70 +137,6 @@ edge [
 "#B-2-959":port3 -> "#B-2-964" [
     color = black
     fontcolor = black
-];
-
-// -------- block #B-2-962 ----------
-"#B-2-962" [
-    shape = "circle"
-    fillcolor = "/set28/1"
-    label = <*>
-    style = "filled"
-    fontsize = "20"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-2-963 ----------
-"#B-2-963" [
-    shape = "circle"
-    fillcolor = "/set28/2"
-    label = <*>
-    style = "filled"
-    fontsize = "20"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-2-961 ----------
-"#B-2-961" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-// -------- block #B-2-964 ----------
-"#B-2-964" [
-    shape = "circle"
-    fillcolor = "/set28/2"
-    label = <*>
-    style = "filled"
-    fontsize = "20"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-2-960 ----------
-"#B-2-960" [
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-     <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
 ];
 
 "#B-2-960":port0 -> "#B-2-962" [

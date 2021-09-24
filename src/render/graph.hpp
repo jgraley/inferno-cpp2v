@@ -57,9 +57,13 @@ public:
             string root_link_short_name;
             LinkPlannedAs root_link_planned_as;
         };
+        struct LinkDetails
+        {
+            LinkPlannedAs planned_as;
+        };
         struct Agent
         {
-            map<string, LinkPlannedAs> links_planned_as;
+            map<string, LinkDetails> incoming_links;
         };
 		map<Graphable *, Agent> interior_agents;
 		map<Graphable *, Agent> exterior_agents;
@@ -111,19 +115,19 @@ private:
 
     void RedirectLinks( list<MyBlock> &blocks_to_act_on, 
                         const Graphable *target_child_g,
-                        string trace_label,
-                        const MyBlock *target_block = nullptr );
-    void UpdateLinksPlannedAs( list<MyBlock> &blocks_to_act_on, 
-                               const Graphable *target_child_g,
-                               string trace_label,
-                               LinkPlannedAs target_link_planned_as );
+                        string target_trace_label,
+                        const MyBlock *new_block );
+    void UpdateLinksDetails( list<MyBlock> &blocks_to_act_on, 
+                             const Graphable *target_child_g,
+                             string target_trace_label,
+                             Figure::LinkDetails new_details );
     void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,
 	                         const Region *region,
                              bool hide_replace_only );
     MyBlock CreateInvisibleNode( string base_id, 
-                                 list<const Graphable *> children, 
+                                 list< pair<const Graphable *, string> > children_and_link_trace_ids, 
                                  const Region *region );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,

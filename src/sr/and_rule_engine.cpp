@@ -1018,12 +1018,14 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             Graph::Figure::Agent lb;
             for( PatternLink plink : p.second )
             {
+                Graph::Figure::LinkDetails details;
                 if( residuals.count(plink) > 0 )
-                    lb.links_planned_as[plink.GetShortName()] = Graph::LINK_RESIDUAL;
+                    details.planned_as = Graph::LINK_RESIDUAL;
                 else if( keyers.count(plink) > 0 )
-                    lb.links_planned_as[plink.GetShortName()] = Graph::LINK_KEYER;
+                    details.planned_as = Graph::LINK_KEYER;
                 else
-                    lb.links_planned_as[plink.GetShortName()] = Graph::LINK_NORMAL;
+                    details.planned_as = Graph::LINK_NORMAL;
+                lb.incoming_links[plink.GetShortName()] = details;
             }            
             TRACEC(*p.first)("\n");
             figure_agents[p.first] = lb;

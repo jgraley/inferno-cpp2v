@@ -112,26 +112,32 @@ void Graph::operator()( const Figure &figure )
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, &figure, true );
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, &figure, true );
     
-    if( interior_blocks.empty() )
+    if( figure.interior_agents.empty() )
     {
-        ASSERT( !exterior_gs.empty() )(figure.title); // not sure we can handle these but shouldn't happen?
-        interior_blocks.push_back( CreateInvisibleNode( "IRIP", { exterior_gs.front() }, &figure ) ); 
+        ASSERT( figure.exterior_agents.size()==1 )(figure.title); // We have to assume the presence of one external
+        pair<Graphable *, Figure::Agent> the_p1 = *(figure.exterior_agents.begin());
+        ASSERT( the_p1.second.incoming_links.size() == 1 ); // This external can only have one incoming link
+        pair<string, Figure::LinkDetails> the_p2 = *(the_p1.second.incoming_links.begin());
+        ASSERT( the_p2.second.planned_as == LINK_NORMAL );
+        interior_blocks.push_back( CreateInvisibleNode( "IRIP", { make_pair(the_p1.first, the_p2.first) }, &figure ) ); 
         // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
     }
     
     // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
     TRACE("Redirect interior to our interior\n");
     for( auto p1 : figure.interior_agents )
-        for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
-            UpdateLinksPlannedAs( interior_blocks, p1.first, p.first, p.second );
+        for( pair<string, Figure::LinkDetails> p2 : p1.second.incoming_links )
+            UpdateLinksDetails( interior_blocks, p1.first, p2.first, p2.second );
     TRACE("Redirect interior to our exterior\n");
     for( auto p1 : figure.exterior_agents )
-        for( pair<string, LinkPlannedAs> p : p1.second.links_planned_as )
-            UpdateLinksPlannedAs( interior_blocks, p1.first, p.first, p.second );
+        for( pair<string, Figure::LinkDetails> p2 : p1.second.incoming_links )
+            UpdateLinksDetails( interior_blocks, p1.first, p2.first, p2.second );
     TRACE("Redirect interior to our subordinates\n");
     for( auto p : figure.subordinates )
     {
-        UpdateLinksPlannedAs( interior_blocks, p.second.root_g, p.second.root_link_short_name, p.second.root_link_planned_as );
+        Figure::LinkDetails details;
+        details.planned_as = p.second.root_link_planned_as;
+        UpdateLinksDetails( interior_blocks, p.second.root_g, p.second.root_link_short_name, details );
 
         MyBlock &root_block = subordinate_root_blocks.at(p.first);        
         RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, &root_block );
@@ -290,10 +296,10 @@ void Graph::RedirectLinks( list<MyBlock> &blocks_to_act_on,
 }                           
 
 
-void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_act_on, 
-                                  const Graphable *target_child_g,
-                                  string target_trace_label,
-                                  LinkPlannedAs new_planned_as )
+void Graph::UpdateLinksDetails( list<MyBlock> &blocks_to_act_on, 
+                                const Graphable *target_child_g,
+                                string target_trace_label,
+                                Figure::LinkDetails new_details )
 {
     TRACE("UpdateLinksPlannedAs( target_child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
@@ -319,8 +325,8 @@ void Graph::UpdateLinksPlannedAs( list<MyBlock> &blocks_to_act_on,
                     ASSERT( link_to_act_on->trace_labels.size()==1 ); // brittle
                     if( link_to_act_on->trace_labels.front() == target_trace_label )
                     {
-                        TRACEC("        planned_as from ")(my_link_to_act_on->planned_as)(" to ")(new_planned_as)("\n");
-                        my_link_to_act_on->planned_as = new_planned_as;            
+                        TRACEC("        planned_as from ")(my_link_to_act_on->planned_as)(" to ")(new_details.planned_as)("\n");
+                        my_link_to_act_on->planned_as = new_details.planned_as;            
                     }
                 }
             }
@@ -393,7 +399,7 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
 
 
 Graph::MyBlock Graph::CreateInvisibleNode( string id, 
-                                           list<const Graphable *> children, 
+                                           list< pair<const Graphable *, string> > children_and_link_trace_ids,  
                                            const Region *region )
 {
 	MyBlock block;
@@ -411,15 +417,15 @@ Graph::MyBlock Graph::CreateInvisibleNode( string id,
                                       "",
                                       false,
                                       {} };
-    for( const Graphable *child : children )
+    for( auto p : children_and_link_trace_ids )
     {        
         auto link = make_shared<Graphable::Link>( nullptr, 
                                                   list<string>{},
-                                                  list<string>{},
+                                                  list<string>{p.second},
                                                   IS_X_NODE,
                                                   false );
         auto my_link = make_shared<MyLink>( link,
-                                            GetRegionGraphId(region, child),
+                                            GetRegionGraphId(region, p.first),
                                             LINK_NORMAL );
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
