@@ -377,19 +377,7 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
 
 	for( const Graphable *g : graphables )
 	{
-		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
-        
-        for( Graphable::SubBlock &sub_block : gblock.sub_blocks )
-        {			
-            list< shared_ptr<Graphable::Link> > new_links;
-            for( shared_ptr<Graphable::Link> link : sub_block.links )
-            {
-                ASSERT( link->child )(gblock.title)(" ")(sub_block.item_name);
-                new_links.push_back( link );
-            }
-            sub_block.links = new_links;
-        }
-        
+		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);       
         MyBlock block = PreProcessBlock( gblock, g, region );
         blocks.push_back( block );
 	}
