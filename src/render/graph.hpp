@@ -124,13 +124,15 @@ private:
     void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         const Region *region );
+	MyBlock GetBlock( const Graphable *g,
+	                  const Region *region );
     void TrimLinksByChild( list<MyBlock> &blocks,
                            list<const Graphable *> to_keep );
     void TrimLinksByChild( list<MyBlock> &blocks,
                            set<const Graphable *> to_keep );
     void TrimLinksByPhase( list<MyBlock> &blocks,
                            set<Graphable::Phase> to_keep );
-    MyBlock CreateInvisibleNode( string base_id, 
+    MyBlock CreateInvisibleBlock( string base_id, 
                                  list< pair<const Graphable *, string> > children_and_link_trace_ids, 
                                  const Region *region );
     MyBlock PreProcessBlock( const Graphable::Block &block, 

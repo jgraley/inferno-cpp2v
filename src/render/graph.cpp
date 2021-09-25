@@ -107,7 +107,8 @@ void Graph::operator()( const Figure &figure )
         sub_region.id = GetRegionGraphId(&figure, p.first); 
         // Note: the same root agent can be used in multiple engines, but because we've got the
         // current subordinate's id in the sub_region.id, the new node will be unique enough
-        subordinate_root_blocks[p.first] = CreateInvisibleNode( p.second.root_g->GetGraphId(), {}, &sub_region );
+        subordinate_root_blocks[p.first] = CreateInvisibleBlock( p.second.root_g->GetGraphId(), {}, &sub_region );
+        
         all_gs.push_back( p.second.root_g );
     }
 
@@ -128,7 +129,7 @@ void Graph::operator()( const Figure &figure )
         pair<Graphable *, Figure::Agent> the_p1 = *(figure.exterior_agents.begin());
         ASSERT( the_p1.second.incoming_links.size() == 1 ); // This external can only have one incoming link
         pair<string, Figure::LinkDetails> the_p2 = *(the_p1.second.incoming_links.begin());
-        interior_blocks.push_back( CreateInvisibleNode( "IRIP", { make_pair(the_p1.first, the_p2.first) }, &figure ) ); 
+        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", { make_pair(the_p1.first, the_p2.first) }, &figure ) ); 
         // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
     }
     
@@ -375,16 +376,21 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
 {
 	list<MyBlock> blocks;
 
-	for( const Graphable *g : graphables )
-	{
-		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);       
-        MyBlock block = PreProcessBlock( gblock, g, region );
-        blocks.push_back( block );
-	}
+	for( const Graphable *g : graphables )	
+        blocks.push_back( GetBlock( g, region ) );	
 
 	return blocks;
 }
 
+
+Graph::MyBlock Graph::GetBlock( const Graphable *g,
+                                const Region *region )
+{
+    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);       
+    MyBlock block = PreProcessBlock( gblock, g, region );
+    return block;
+}
+                  
 
 void Graph::TrimLinksByChild( list<MyBlock> &blocks,
                               list<const Graphable *> to_keep )
@@ -441,7 +447,7 @@ void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
 }
 
 
-Graph::MyBlock Graph::CreateInvisibleNode( string id, 
+Graph::MyBlock Graph::CreateInvisibleBlock( string id, 
                                            list< pair<const Graphable *, string> > children_and_link_trace_ids,  
                                            const Region *region )
 {
