@@ -124,8 +124,9 @@ private:
     void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
 	                         list< const Graphable *> all_graphables,
-	                         const Region *region,
-                             bool hide_replace_only );
+	                         const Region *region );
+    void TrimLinksByPhase( list<MyBlock> &blocks,
+                           set<Graphable::Phase> to_keep );
     MyBlock CreateInvisibleNode( string base_id, 
                                  list< pair<const Graphable *, string> > children_and_link_trace_ids, 
                                  const Region *region );

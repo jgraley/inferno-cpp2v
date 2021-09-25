@@ -483,8 +483,9 @@ subgraph "clusterAnd#R86-0" {
         fillcolor = "/set28/4"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1601</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>(Scope)</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-1601</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -630,7 +631,7 @@ subgraph "clusterAnd#R86-0" {
     fontcolor = black
 ];
 
-"And#R86-0/#B-2-1601":port0 -> "And#R86-0/#B-2-1593" [
+"And#R86-0/#B-2-1601":port1 -> "And#R86-0/#B-2-1593" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
