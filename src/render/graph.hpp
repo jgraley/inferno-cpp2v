@@ -122,7 +122,7 @@ private:
                              string target_trace_label,
                              Figure::LinkDetails new_details );
     void CheckLinks( list<MyBlock> blocks );
-	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
+	list<MyBlock> GetBlocks( list<const Graphable *> graphables,
 	                         const Region *region );
 	MyBlock GetBlock( const Graphable *g,
 	                  const Region *region );
@@ -133,7 +133,7 @@ private:
     void TrimLinksByPhase( list<MyBlock> &blocks,
                            set<Graphable::Phase> to_keep );
     MyBlock CreateInvisibleBlock( string base_id, 
-                                 list< pair<const Graphable *, string> > children_and_link_trace_ids, 
+                                 list< tuple<const Graphable *, string, Graphable::Phase> > links_info,
                                  const Region *region );
     MyBlock PreProcessBlock( const Graphable::Block &block, 
                              const Graphable *g,

@@ -92,44 +92,56 @@ void Graph::operator()( const Figure &figure )
 {        
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
-    map< const GraphIdable *, MyBlock > subordinate_root_blocks;
 
     for( auto p : figure.exterior_agents )
         exterior_gs.push_back( p.first );
     for( auto p : figure.interior_agents )
         interior_gs.push_back( p.first );
 
-    all_gs = interior_gs + exterior_gs;
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, &figure );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
 
+    map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
     for( auto p : figure.subordinates )
     {
+        list<const Graphable *> sub_gs = { p.second.root_g };
+        all_gs = all_gs + sub_gs;
+
         Region sub_region;
         sub_region.id = GetRegionGraphId(&figure, p.first); 
         // Note: the same root agent can be used in multiple engines, but because we've got the
         // current subordinate's id in the sub_region.id, the new node will be unique enough
-        subordinate_root_blocks[p.first] = CreateInvisibleBlock( p.second.root_g->GetGraphId(), {}, &sub_region );
+        list<MyBlock> sub_blocks = GetBlocks( sub_gs, &sub_region );
         
-        all_gs.push_back( p.second.root_g );
+        // Snip off all links that leave this subordinate region
+        TrimLinksByChild( sub_blocks, sub_gs );
+        
+        // Make them all invisible
+        for( MyBlock &sub_block : sub_blocks )
+            sub_block.shape = "invisible";
+            
+        subordinate_blocks[p.first] = sub_blocks;
     }
-
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, &figure );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
     
+    all_gs = all_gs + interior_gs + exterior_gs;
     TrimLinksByChild( exterior_blocks, all_gs );
     TrimLinksByChild( interior_blocks, all_gs );
-    
+                
     set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
                                              Graphable::IN_COMPARE_AND_REPLACE };
     TrimLinksByPhase( exterior_blocks, phases_to_keep );
     TrimLinksByPhase( interior_blocks, phases_to_keep );
-    
+    for( auto p : figure.subordinates )
+        TrimLinksByPhase( subordinate_blocks[p.first], phases_to_keep );
+
     if( figure.interior_agents.empty() )
     {
         ASSERT( figure.exterior_agents.size()==1 )(figure.title); // We have to assume the presence of one external
         pair<Graphable *, Figure::Agent> the_p1 = *(figure.exterior_agents.begin());
         ASSERT( the_p1.second.incoming_links.size() == 1 ); // This external can only have one incoming link
         pair<string, Figure::LinkDetails> the_p2 = *(the_p1.second.incoming_links.begin());
-        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", { make_pair(the_p1.first, the_p2.first) }, &figure ) ); 
+        // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
+        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", { make_tuple(the_p1.first, the_p2.first, IN_COMPARE_ONLY) }, &figure ) ); 
         // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
     }
     
@@ -149,14 +161,15 @@ void Graph::operator()( const Figure &figure )
         details.planned_as = p.second.root_link_planned_as;
         UpdateLinksDetails( interior_blocks, p.second.root_g, p.second.root_link_short_name, details );
 
-        MyBlock &root_block = subordinate_root_blocks.at(p.first);        
+        ASSERT( subordinate_blocks.at(p.first).size() == 1 );
+        MyBlock &root_block = subordinate_blocks.at(p.first).front();        
         RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, &root_block );
     }
     
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
-    for( auto p : figure.subordinates )
-		PostProcessBlock( subordinate_root_blocks[p.first] );	
+    for( auto p : figure.subordinates ) 
+		PostProcessBlocks( subordinate_blocks[p.first] );
     
     // Now generate all the dot code
     string s;
@@ -177,10 +190,11 @@ void Graph::operator()( const Figure &figure )
 		subordinate_region.id = GetRegionGraphId(&figure, p.first);
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-        MyBlock root_block = subordinate_root_blocks.at(p.first);        
-	    string s_subordinate = DoBlocks({root_block}, subordinate_region); // Subordinate blocks
-        all_blocks.push_back( root_block );
+        list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
+	    string s_subordinate = DoBlocks(sub_blocks, subordinate_region); // Subordinate blocks
 		s_interior += DoRegion(s_subordinate, subordinate_region);
+
+        all_blocks = all_blocks + sub_blocks;
 	}
 
     s += DoRegion(s_interior, interior_region);
@@ -371,7 +385,7 @@ void Graph::CheckLinks( list<MyBlock> blocks )
 }
 
 
-list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
+list<Graph::MyBlock> Graph::GetBlocks( list<const Graphable *> graphables,
                                        const Region *region )
 {
 	list<MyBlock> blocks;
@@ -448,13 +462,13 @@ void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
 
 
 Graph::MyBlock Graph::CreateInvisibleBlock( string id, 
-                                           list< pair<const Graphable *, string> > children_and_link_trace_ids,  
+                                           list< tuple<const Graphable *, string, Graphable::Phase> > links_info,  
                                            const Region *region )
 {
 	MyBlock block;
 	block.title = "";     
 	block.bold = false;
-	block.shape = "none";
+	block.shape = "invisible";
     block.block_type = Graphable::NODE;
     block.prerestriction_name = "";
     block.colour = "";
@@ -466,15 +480,15 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
                                       "",
                                       false,
                                       {} };
-    for( auto p : children_and_link_trace_ids )
+    for( auto link_info : links_info )
     {        
         auto link = make_shared<Graphable::Link>( nullptr, 
                                                   list<string>{},
-                                                  list<string>{p.second},
-                                                  IS_X_NODE,
+                                                  list<string>{get<1>(link_info)},
+                                                  get<2>(link_info),
                                                   false );
         auto my_link = make_shared<MyLink>( link,
-                                            GetRegionGraphId(region, p.first),
+                                            GetRegionGraphId(region, get<0>(link_info)),
                                             LINK_NORMAL );
         //link.trace_labels.push_back( lnf( ... ) ); TODO
         //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
@@ -592,7 +606,7 @@ void Graph::PostProcessBlock( MyBlock &block )
                                  (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
 
     // If not, make sure we're using a shape that allows for sub_blocks
-    if( !sub_blocks_hideable && !(block.shape == "none" || block.shape == "plaintext" || block.shape == "record") )
+    if( !sub_blocks_hideable && !(block.shape == "invisible" || block.shape == "plaintext" || block.shape == "record") )
         block.shape = "plaintext";      
     
     // These kinds of blocks require port names to be to be specified so links can tell them apart
@@ -618,7 +632,10 @@ string Graph::DoBlock( const MyBlock &block,
 	string s;
     
     s += "// -------- block " + block.base_id + " ----------\n";
-	s += "shape = \"" + block.shape + "\"\n";
+    if( block.shape == "invisible" )
+        s += "shape = none\n";
+    else
+        s += "shape = \"" + block.shape + "\"\n";
 	if( block.colour=="transparent" )
 		s += "fillcolor = " + region.background_colour + "\n";
 	else if(block.colour != "")
@@ -643,7 +660,7 @@ string Graph::DoBlock( const MyBlock &block,
         s += "color = " + line_colour + "\n";
         s += "fontcolor = " + font_colour + "\n";
     }
-	else if( block.shape == "none" )
+	else if( block.shape == "invisible" )
     {
         s += "style = \"invisible\"\n";
     }
