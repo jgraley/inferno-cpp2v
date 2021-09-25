@@ -1059,7 +1059,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             incoming_link.short_name = p.first.GetShortName();
             root_agent.incoming_links.push_back( incoming_link );
             TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(root_agent.g->GetGraphId())(" )\n");
-            figure.subordinates[p.second.get()] = root_agent;
+            figure.subordinate_engines_and_root_agents[p.second.get()] = root_agent;
         }
 	};
 	TRACE("   Subordinates (my free abnormals):\n");    

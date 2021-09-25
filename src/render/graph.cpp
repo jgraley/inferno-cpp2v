@@ -90,25 +90,41 @@ void Graph::operator()( Transformation *root )
 
 void Graph::operator()( const Figure &figure )
 {        
-    // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
+    // Compile handy "all"s: Figure::Agents and Graphables
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
-
-    for( const Figure::Agent &agent : figure.exterior_agents )
-        exterior_gs.push_back( agent.g );
-    for( const Figure::Agent &agent : figure.interior_agents )
-        interior_gs.push_back(agent.g );
-    all_gs = interior_gs + exterior_gs;
-    for( auto engine_agent : figure.subordinates )
-        all_gs.push_back(engine_agent.second.g);
+    list<Figure::Agent> all_agents = figure.interior_agents + figure.exterior_agents;
+    for( auto engine_agent : figure.subordinate_engines_and_root_agents )
+        all_agents.push_back(engine_agent.second);      
+    for( const Figure::Agent &agent : all_agents )
+        all_gs.push_back(agent.g);
     
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, &figure );
-    TrimLinksByChild( exterior_blocks, all_gs );
-
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
-    TrimLinksByChild( interior_blocks, all_gs );
-
+    // Exterior agents (shown outside of region): get blocks for them and 
+    // remove links to graphables not in this figure
+    list<MyBlock> exterior_blocks;
+    {
+        list<const Graphable *> exterior_gs;
+        for( const Figure::Agent &agent : figure.exterior_agents )
+            exterior_gs.push_back( agent.g );
+        exterior_blocks = GetBlocks( exterior_gs, &figure );
+        TrimLinksByChild( exterior_blocks, all_gs );
+    }
+    
+    // Interior agents (shown inside region): get blocks for them and 
+    // remove links to graphables not in this figure
+    list<MyBlock> interior_blocks;
+    {
+        list<const Graphable *> interior_gs;
+        for( const Figure::Agent &agent : figure.interior_agents )
+            interior_gs.push_back(agent.g );
+        interior_blocks = GetBlocks( interior_gs, &figure );
+        TrimLinksByChild( interior_blocks, all_gs );
+    }
+    
+    // Subordinate engines (shown as shaded sub-regions) and their 
+    // agents (invisible): get blocks for them, remove links to graphables 
+    // not in this SUB-REGION, make them invisible.    
     map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
-    for( auto engine_agent : figure.subordinates )
+    for( auto engine_agent : figure.subordinate_engines_and_root_agents )
     {
         list<const Graphable *> sub_gs = { engine_agent.second.g };
 
@@ -128,24 +144,19 @@ void Graph::operator()( const Figure &figure )
         subordinate_blocks[engine_agent.first] = sub_blocks;
     }    
                     
-	auto update_details_lambda = [&](const Figure::Agent &agent)
+    // Set the planned_as on all the links from all the interior nodes. 
+    // Note: ALL redirections/updates apply to interior nodes, because 
+    // these are the only ones with outgoing links.
+    for( const Figure::Agent &agent : all_agents )
     {
-        // Note: ALL redirections apply to interior nodes, because 
-        // these are the only ones with outgoing links.
         for( const Figure::Link &link : agent.incoming_links )
             UpdateLinksDetails( interior_blocks, // Act on interior blocks
                                 agent.g, link.short_name, // Match graphable pointer and link's short name
                                 link.details ); // New details for the link
     };
-
-    for( const Figure::Agent &agent : figure.interior_agents )
-        update_details_lambda( agent );
-    for( const Figure::Agent &agent : figure.exterior_agents )
-        update_details_lambda( agent );          
-    for( auto engine_agent : figure.subordinates )    
-        update_details_lambda( engine_agent.second );
      
-    for( auto engine_agent : figure.subordinates )
+    // Set the child id correctly on all the links from all the interior nodes. 
+    for( auto engine_agent : figure.subordinate_engines_and_root_agents )
     {
         ASSERT( subordinate_blocks.at(engine_agent.first).size() == 1 );
         MyBlock &root_block = subordinate_blocks.at(engine_agent.first).front();        
@@ -153,42 +164,55 @@ void Graph::operator()( const Figure &figure )
             RedirectLinks( interior_blocks, engine_agent.second.g, link.short_name, &root_block );
     }
     
+    // Special case for trivial engines (aka no normal agents): a new invisible 
+    // node goes into the INTERNAL region and points to all externals.
     if( figure.interior_agents.empty() )
     {
-        ASSERT( figure.exterior_agents.size()==1 )(figure.title); // We have to assume the presence of one external
-        const Figure::Agent &agent = *(figure.exterior_agents.begin());
-        ASSERT( agent.incoming_links.size() == 1 ); // This external can only have one incoming link
-        const Figure::Link &link = *(agent.incoming_links.begin());
-        // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
-        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", { make_tuple(agent.g, link.short_name, IN_COMPARE_ONLY) }, &figure ) ); 
-        // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
+        list< tuple<const Graphable *, string, Graphable::Phase> > links_info;
+        for( const Figure::Agent &agent : figure.exterior_agents )
+        {
+            for( const Figure::Link &link : agent.incoming_links )
+            {
+                // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
+                links_info.push_back( make_tuple(agent.g, link.short_name, IN_COMPARE_ONLY) );
+            }
+        }
+        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", links_info, &figure ) ); 
+        // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!    
     }
     
+    // Trim off replace-only links
     set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
                                              Graphable::IN_COMPARE_AND_REPLACE };
     TrimLinksByPhase( exterior_blocks, phases_to_keep );
     TrimLinksByPhase( interior_blocks, phases_to_keep );
-    for( auto p : figure.subordinates )
+    for( auto p : figure.subordinate_engines_and_root_agents )
         TrimLinksByPhase( subordinate_blocks[p.first], phases_to_keep );
 
+    // Post-process blocks
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
-    for( auto p : figure.subordinates ) 
+    for( auto p : figure.subordinate_engines_and_root_agents ) 
 		PostProcessBlocks( subordinate_blocks[p.first] );
     
-    // Now generate all the dot code
+    // Check for broken links (no block with matching child id)
+    list<MyBlock> all_blocks = interior_blocks + exterior_blocks;
+    for( auto p : figure.subordinate_engines_and_root_agents )
+        all_blocks = all_blocks + subordinate_blocks.at(p.first);
+    // Links must be checked for a whole figure because figures dont link to each other
+    CheckLinks(all_blocks);    
+    
+    // Now generate all the dot code for the current figure
     string s;
-    s += "// -------------------- figure "+figure.id+" --------------------\n";
-    list<MyBlock> all_blocks;
+    s += "// -------------------- figure "+figure.id+" --------------------\n";   
     
     RegionAppearance interior_region = base_region;
     interior_region.title = figure.title;
     interior_region.id = figure.id;
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     string s_interior = DoBlocks(interior_blocks, interior_region); // Interior blocks
-    all_blocks = all_blocks + interior_blocks;
 
-    for( auto p : figure.subordinates )
+    for( auto p : figure.subordinate_engines_and_root_agents )
     {
 		RegionAppearance subordinate_region = interior_region;
 		subordinate_region.title = p.first->GetGraphId();
@@ -198,18 +222,13 @@ void Graph::operator()( const Figure &figure )
         list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
 	    string s_subordinate = DoBlocks(sub_blocks, subordinate_region); 
 		s_interior += DoRegion(s_subordinate, subordinate_region);
-
-        all_blocks = all_blocks + sub_blocks;
 	}
 
     s += DoRegion(s_interior, interior_region);
 
     s += DoBlocks(exterior_blocks, base_region); // Exterior blocks
-    all_blocks = all_blocks + exterior_blocks;
 
-    // Links must be checked for a whole figure because figures dont link to each other
-    CheckLinks(all_blocks);
-    // Links must be done at top-level otherwise they "pull" blocks into regions
+    // Links must be done at figure-level otherwise they "pull" blocks into regions
     s += DoLinks(all_blocks); 
     s += "\n";        
 
