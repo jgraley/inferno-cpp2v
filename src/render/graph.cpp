@@ -93,10 +93,10 @@ void Graph::operator()( const Figure &figure )
     // First we will get blocks, pre-and pos-process them and redirect links to subordinate engines
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
 
-    for( auto p : figure.exterior_agents )
-        exterior_gs.push_back( p.first );
-    for( auto p : figure.interior_agents )
-        interior_gs.push_back( p.first );
+    for( const Figure::Agent &agent : figure.exterior_agents )
+        exterior_gs.push_back( agent.g );
+    for( const Figure::Agent &agent : figure.interior_agents )
+        interior_gs.push_back(agent.g );
 
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, &figure );
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
@@ -104,7 +104,7 @@ void Graph::operator()( const Figure &figure )
     map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
     for( auto p : figure.subordinates )
     {
-        list<const Graphable *> sub_gs = { p.second.root_g };
+        list<const Graphable *> sub_gs = { p.second.g };
         all_gs = all_gs + sub_gs;
 
         Region sub_region;
@@ -129,43 +129,45 @@ void Graph::operator()( const Figure &figure )
                 
     set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
                                              Graphable::IN_COMPARE_AND_REPLACE };
+    // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
+    for( const Figure::Agent &agent : figure.interior_agents )
+        for( const Figure::Link &link : agent.incoming_links )
+            UpdateLinksDetails( interior_blocks, agent.g, link.short_name, link.details );
+
+    for( const Figure::Agent &agent : figure.exterior_agents )
+        for( const Figure::Link &link : agent.incoming_links )
+            UpdateLinksDetails( interior_blocks, agent.g, link.short_name, link.details );
+            
+    for( auto p : figure.subordinates )
+    {
+        Figure::LinkDetails details;
+        details = p.second.incoming_link.details;
+        UpdateLinksDetails( interior_blocks, p.second.g, p.second.incoming_link.short_name, details );
+    }
+    
+    for( auto p : figure.subordinates )
+    {
+        ASSERT( subordinate_blocks.at(p.first).size() == 1 );
+        MyBlock &root_block = subordinate_blocks.at(p.first).front();        
+        RedirectLinks( interior_blocks, p.second.g, p.second.incoming_link.short_name, &root_block );
+    }
+    
+    if( figure.interior_agents.empty() )
+    {
+        ASSERT( figure.exterior_agents.size()==1 )(figure.title); // We have to assume the presence of one external
+        const Figure::Agent &agent = *(figure.exterior_agents.begin());
+        ASSERT( agent.incoming_links.size() == 1 ); // This external can only have one incoming link
+        const Figure::Link &link = *(agent.incoming_links.begin());
+        // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
+        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", { make_tuple(agent.g, link.short_name, IN_COMPARE_ONLY) }, &figure ) ); 
+        // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
+    }
+    
     TrimLinksByPhase( exterior_blocks, phases_to_keep );
     TrimLinksByPhase( interior_blocks, phases_to_keep );
     for( auto p : figure.subordinates )
         TrimLinksByPhase( subordinate_blocks[p.first], phases_to_keep );
 
-    if( figure.interior_agents.empty() )
-    {
-        ASSERT( figure.exterior_agents.size()==1 )(figure.title); // We have to assume the presence of one external
-        pair<Graphable *, Figure::Agent> the_p1 = *(figure.exterior_agents.begin());
-        ASSERT( the_p1.second.incoming_links.size() == 1 ); // This external can only have one incoming link
-        pair<string, Figure::LinkDetails> the_p2 = *(the_p1.second.incoming_links.begin());
-        // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
-        interior_blocks.push_back( CreateInvisibleBlock( "IRIP", { make_tuple(the_p1.first, the_p2.first, IN_COMPARE_ONLY) }, &figure ) ); 
-        // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
-    }
-    
-    // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
-    TRACE("Redirect interior to our interior\n");
-    for( auto p1 : figure.interior_agents )
-        for( pair<string, Figure::LinkDetails> p2 : p1.second.incoming_links )
-            UpdateLinksDetails( interior_blocks, p1.first, p2.first, p2.second );
-    TRACE("Redirect interior to our exterior\n");
-    for( auto p1 : figure.exterior_agents )
-        for( pair<string, Figure::LinkDetails> p2 : p1.second.incoming_links )
-            UpdateLinksDetails( interior_blocks, p1.first, p2.first, p2.second );
-    TRACE("Redirect interior to our subordinates\n");
-    for( auto p : figure.subordinates )
-    {
-        Figure::LinkDetails details;
-        details.planned_as = p.second.root_link_planned_as;
-        UpdateLinksDetails( interior_blocks, p.second.root_g, p.second.root_link_short_name, details );
-
-        ASSERT( subordinate_blocks.at(p.first).size() == 1 );
-        MyBlock &root_block = subordinate_blocks.at(p.first).front();        
-        RedirectLinks( interior_blocks, p.second.root_g, p.second.root_link_short_name, &root_block );
-    }
-    
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
     for( auto p : figure.subordinates ) 
@@ -191,7 +193,7 @@ void Graph::operator()( const Figure &figure )
 		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
         list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
-	    string s_subordinate = DoBlocks(sub_blocks, subordinate_region); // Subordinate blocks
+	    string s_subordinate = DoBlocks(sub_blocks, subordinate_region); 
 		s_interior += DoRegion(s_subordinate, subordinate_region);
 
         all_blocks = all_blocks + sub_blocks;
@@ -450,10 +452,7 @@ void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
                 if( to_keep.count(link->phase) > 0 )
-                {
-                    ASSERT( link->child )(block.title)(" ")(sub_block.item_name);
                     new_links.push_back( link );
-                }
             }
             sub_block.links = new_links;
         }
@@ -936,10 +935,10 @@ void Graph::Remember( string s )
 }
 
 
-string Graph::LinkStyleAtt(LinkPlannedAs root_link_planned_as, Graphable::Phase phase)
+string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Phase phase)
 {
     string atts;
-    switch(root_link_planned_as)
+    switch(incoming_link_planned_as)
     {
     case LINK_NORMAL:
         break;

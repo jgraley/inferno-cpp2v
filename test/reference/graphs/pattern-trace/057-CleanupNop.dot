@@ -90,6 +90,18 @@ subgraph "clusterAnd#R57-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R57-0/#B-2-961" [
+        // -------- block And#R57-0/#B-2-961 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-961</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R57-0/#B-2-959" [
         // -------- block And#R57-0/#B-2-959 ----------
         shape = "plaintext"
@@ -101,18 +113,6 @@ subgraph "clusterAnd#R57-0" {
          <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
          <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
          <TR><TD>#B-2-959</TD><TD PORT="port4"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R57-0/#B-2-961" [
-        // -------- block And#R57-0/#B-2-961 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-961</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"

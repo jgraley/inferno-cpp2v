@@ -24,15 +24,51 @@ subgraph "clusterAnd#R3-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R3-0/#B-2-32" [
-        // -------- block And#R3-0/#B-2-32 ----------
+    "And#R3-0/#P3-8-3" [
+        // -------- block And#R3-0/#P3-8-3 ----------
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P3-8-3</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R3-0/#B-2-37" [
+        // -------- block And#R3-0/#B-2-37 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/3"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Event</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-37</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R3-0/#B-2-36" [
+        // -------- block And#R3-0/#B-2-36 ----------
         shape = "plaintext"
         fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
-         <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-32</TD><TD PORT="port2"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
+         <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-36</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R3-0/#B-2-34" [
+        // -------- block And#R3-0/#B-2-34 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/5"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">'wait'</FONT></TD><TD></TD></TR>
+         <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-34</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -52,14 +88,15 @@ subgraph "clusterAnd#R3-0" {
         fontsize = "12"
     ];
     
-    "And#R3-0/#B-2-34" [
-        // -------- block And#R3-0/#B-2-34 ----------
+    "And#R3-0/#B-2-32" [
+        // -------- block And#R3-0/#B-2-32 ----------
         shape = "plaintext"
-        fillcolor = "/set28/5"
+        fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">'wait'</FONT></TD><TD></TD></TR>
-         <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-34</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
+         <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
+         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-32</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -77,31 +114,6 @@ subgraph "clusterAnd#R3-0" {
         fontsize = "12"
     ];
     
-    "And#R3-0/#B-2-36" [
-        // -------- block And#R3-0/#B-2-36 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/6"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
-         <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-36</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R3-0/#B-2-37" [
-        // -------- block And#R3-0/#B-2-37 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/3"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Event</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-37</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R3-0/#P3-6-6" [
         // -------- block And#R3-0/#P3-6-6 ----------
         shape = "record"
@@ -113,21 +125,9 @@ subgraph "clusterAnd#R3-0" {
         fontcolor = black
     ];
     
-    "And#R3-0/#P3-8-3" [
-        // -------- block And#R3-0/#P3-8-3 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P3-8-3</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
 }
 
-"And#R3-0/#B-2-32":port0 -> "And#R3-0/#B-2-33" [
+"And#R3-0/#P3-8-3":port0 -> "And#R3-0/#P3-6-6" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -135,7 +135,7 @@ subgraph "clusterAnd#R3-0" {
     fontcolor = black
 ];
 
-"And#R3-0/#B-2-32":port1 -> "And#R3-0/#B-2-34" [
+"And#R3-0/#B-2-36":port0 -> "And#R3-0/#B-2-37" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -159,7 +159,15 @@ subgraph "clusterAnd#R3-0" {
     fontcolor = black
 ];
 
-"And#R3-0/#B-2-36":port0 -> "And#R3-0/#B-2-37" [
+"And#R3-0/#B-2-32":port0 -> "And#R3-0/#B-2-33" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R3-0/#B-2-32":port1 -> "And#R3-0/#B-2-34" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -168,14 +176,6 @@ subgraph "clusterAnd#R3-0" {
 ];
 
 "And#R3-0/#P3-6-6":port0 -> "And#R3-0/#B-2-32" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R3-0/#P3-8-3":port0 -> "And#R3-0/#P3-6-6" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true

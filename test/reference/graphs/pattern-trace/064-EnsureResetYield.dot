@@ -24,6 +24,18 @@ subgraph "clusterAnd#R64-4" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R64-4/#B-2-1081" [
+        // -------- block And#R64-4/#B-2-1081 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Wait</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-1081</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R64-4/#B-2-1078" [
         // -------- block And#R64-4/#B-2-1078 ----------
         shape = "plaintext"
@@ -37,13 +49,14 @@ subgraph "clusterAnd#R64-4" {
         fontsize = "12"
     ];
     
-    "And#R64-4/#B-2-1081" [
-        // -------- block And#R64-4/#B-2-1081 ----------
+    "And#R64-4/#B-2-1083" [
+        // -------- block And#R64-4/#B-2-1083 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Wait</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1081</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
+         <TR><TD>Expression</TD><TD PORT="port0">NULL</TD></TR>
+         <TR><TD>#B-2-1083</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -57,19 +70,6 @@ subgraph "clusterAnd#R64-4" {
          <TR><TD><FONT POINT-SIZE="15.0">Label</FONT></TD><TD></TD></TR>
          <TR><TD>LabelIdentifier</TD><TD PORT="port0">NULL</TD></TR>
          <TR><TD>#B-2-1082</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R64-4/#B-2-1083" [
-        // -------- block And#R64-4/#B-2-1083 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Goto</FONT></TD><TD></TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port0">NULL</TD></TR>
-         <TR><TD>#B-2-1083</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"

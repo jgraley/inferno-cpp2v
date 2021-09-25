@@ -106,13 +106,13 @@ subgraph "clusterAnd#R50-0" {
         fontsize = "12"
     ];
     
-    "And#R50-0/#B-2-866" [
-        // -------- block And#R50-0/#B-2-866 ----------
+    "And#R50-0/#P50-8-57" [
+        // -------- block And#R50-0/#P50-8-57 ----------
         shape = "plaintext"
-        fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-866</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P50-8-57</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -129,13 +129,13 @@ subgraph "clusterAnd#R50-0" {
         fontcolor = black
     ];
     
-    "And#R50-0/#P50-8-57" [
-        // -------- block And#R50-0/#P50-8-57 ----------
+    "And#R50-0/#B-2-866" [
+        // -------- block And#R50-0/#B-2-866 ----------
         shape = "plaintext"
+        fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P50-8-57</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-866</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -220,7 +220,7 @@ subgraph "clusterAnd#R50-0" {
     fontcolor = black
 ];
 
-"And#R50-0/#P50-6-64":port0 -> "And#R50-0/#B-2-864" [
+"And#R50-0/#P50-8-57":port0 -> "And#R50-0/#P50-6-64" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -228,7 +228,7 @@ subgraph "clusterAnd#R50-0" {
     fontcolor = black
 ];
 
-"And#R50-0/#P50-8-57":port0 -> "And#R50-0/#P50-6-64" [
+"And#R50-0/#P50-6-64":port0 -> "And#R50-0/#B-2-864" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true

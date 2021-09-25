@@ -51,23 +51,28 @@ public:
     
 	struct Figure : Region
 	{        
-        struct Subordinate
-        {
-            const Graphable *root_g;
-            string root_link_short_name;
-            LinkPlannedAs root_link_planned_as;
-        };
         struct LinkDetails
         {
             LinkPlannedAs planned_as;
         };
+        struct Link
+        {
+            string short_name;
+            LinkDetails details;
+        };
+        struct RootAgent
+        {
+            const Graphable *g;
+            Link incoming_link;
+        };
         struct Agent
         {
-            map<string, LinkDetails> incoming_links;
+            const Graphable *g;
+            list<Link> incoming_links;
         };
-		map<Graphable *, Agent> interior_agents;
-		map<Graphable *, Agent> exterior_agents;
-        map<GraphIdable *, Subordinate> subordinates;
+		list<Agent> interior_agents;
+		list<Agent> exterior_agents;
+        map<GraphIdable *, RootAgent> subordinates;
 	};
 
     Graph( string of, string title );
@@ -161,7 +166,7 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     void Remember( string s );
-    string LinkStyleAtt(LinkPlannedAs root_link_planned_as, Graphable::Phase phase);
+    string LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Phase phase);
     string GetRegionGraphId(const Region *region, const GraphIdable *g);
     string GetRegionGraphId(const Region *region, string id);
     string Indent(string s);

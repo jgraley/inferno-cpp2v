@@ -1010,25 +1010,27 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
     
 	auto agents_lambda = [&](const unordered_map< Agent *, unordered_set<PatternLink> > &parent_links_to_agents,
                              const unordered_set<PatternLink> &keyers,
-                             const unordered_set<PatternLink> &residuals ) -> map<Graphable *, Graph::Figure::Agent>
+                             const unordered_set<PatternLink> &residuals ) -> list<Graph::Figure::Agent>
     {
-        map<Graphable *, Graph::Figure::Agent> figure_agents;
+        list<Graph::Figure::Agent> figure_agents;
         for( auto p : parent_links_to_agents )
         {
-            Graph::Figure::Agent lb;
+            Graph::Figure::Agent gf_agent;
+            gf_agent.g = p.first;
             for( PatternLink plink : p.second )
             {
-                Graph::Figure::LinkDetails details;
+                Graph::Figure::Link link;
+                link.short_name = plink.GetShortName();
                 if( residuals.count(plink) > 0 )
-                    details.planned_as = Graph::LINK_RESIDUAL;
+                    link.details.planned_as = Graph::LINK_RESIDUAL;
                 else if( keyers.count(plink) > 0 )
-                    details.planned_as = Graph::LINK_KEYER;
+                    link.details.planned_as = Graph::LINK_KEYER;
                 else
-                    details.planned_as = Graph::LINK_NORMAL;
-                lb.incoming_links[plink.GetShortName()] = details;
+                    link.details.planned_as = Graph::LINK_NORMAL;
+                gf_agent.incoming_links.push_back( link );
             }            
-            TRACEC(*p.first)("\n");
-            figure_agents[p.first] = lb;
+            TRACEC(*p.first)("\n");            
+            figure_agents.push_back(gf_agent);
         }
         return figure_agents;
 	};
@@ -1042,7 +1044,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                                             plan.master_boundary_keyer_links,
                                             plan.master_boundary_residual_links );       
         
-	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs root_link_planned_as )
+	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
     {
         set< shared_ptr<AndRuleEngine> > reached;
         for( auto p : engines )
@@ -1050,12 +1052,12 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             ASSERT( reached.count(p.second) == 0 );
             reached.insert( p.second );
             
-            Graph::Figure::Subordinate sub;
-            sub.root_g = p.second->plan.root_agent;
-            sub.root_link_planned_as = root_link_planned_as;
-            sub.root_link_short_name = p.first.GetShortName();
-            TRACEC(p.second.get())(" : ( ")(sub.root_link_short_name)("->")(sub.root_g->GetGraphId())(" )\n");
-            figure.subordinates[p.second.get()] = sub;
+            Graph::Figure::RootAgent root;
+            root.g = p.second->plan.root_agent;
+            root.incoming_link.details.planned_as = incoming_link_planned_as;
+            root.incoming_link.short_name = p.first.GetShortName();
+            TRACEC(p.second.get())(" : ( ")(root.incoming_link.short_name)("->")(root.g->GetGraphId())(" )\n");
+            figure.subordinates[p.second.get()] = root;
         }
 	};
 	TRACE("   Subordinates (my free abnormals):\n");    

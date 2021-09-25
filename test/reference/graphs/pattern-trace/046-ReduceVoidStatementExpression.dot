@@ -46,19 +46,6 @@ subgraph "clusterAnd#R46-1" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R46-1/#B-2-819" [
-        // -------- block And#R46-1/#B-2-819 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/6"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
-         <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-819</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R46-1/#B-2-820" [
         // -------- block And#R46-1/#B-2-820 ----------
         shape = "plaintext"
@@ -68,6 +55,19 @@ subgraph "clusterAnd#R46-1" {
          <TR><TD>(Type)</TD><TD PORT="port0"></TD></TR>
          <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-820</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R46-1/#B-2-819" [
+        // -------- block And#R46-1/#B-2-819 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/6"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0"><I>TypeOf</I></FONT></TD><TD></TD></TR>
+         <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-819</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -90,16 +90,16 @@ subgraph "clusterAnd#R46-1" {
     
 }
 
-"And#R46-1/#B-2-819":port0 -> "And#R46-1/#B-2-820" [
-    arrowhead="normalnonebox"
+"And#R46-1/#B-2-820":port1 -> "And#R46-1/And#R46-2/#B-2-821" [
+    arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R46-1/#B-2-820":port1 -> "And#R46-1/And#R46-2/#B-2-821" [
-    arrowhead="normalnoneodiamond"
+"And#R46-1/#B-2-819":port0 -> "And#R46-1/#B-2-820" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
