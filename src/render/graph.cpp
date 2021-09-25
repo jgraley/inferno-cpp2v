@@ -97,15 +97,20 @@ void Graph::operator()( const Figure &figure )
         exterior_gs.push_back( agent.g );
     for( const Figure::Agent &agent : figure.interior_agents )
         interior_gs.push_back(agent.g );
-
+    all_gs = interior_gs + exterior_gs;
+    for( auto engine_agent : figure.subordinates )
+        all_gs.push_back(engine_agent.second.g);
+    
     list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, &figure );
+    TrimLinksByChild( exterior_blocks, all_gs );
+
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
+    TrimLinksByChild( interior_blocks, all_gs );
 
     map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
     for( auto engine_agent : figure.subordinates )
     {
         list<const Graphable *> sub_gs = { engine_agent.second.g };
-        all_gs = all_gs + sub_gs;
 
         Region sub_region;
         sub_region.id = GetRegionGraphId(&figure, engine_agent.first); 
@@ -121,12 +126,8 @@ void Graph::operator()( const Figure &figure )
             sub_block.shape = "invisible";
             
         subordinate_blocks[engine_agent.first] = sub_blocks;
-    }
-    
-    all_gs = all_gs + interior_gs + exterior_gs;
-    TrimLinksByChild( exterior_blocks, all_gs );
-    TrimLinksByChild( interior_blocks, all_gs );
-                
+    }    
+                    
 	auto update_details_lambda = [&](const Figure::Agent &agent)
     {
         // Note: ALL redirections apply to interior nodes, because 
