@@ -75,7 +75,9 @@ void Graph::operator()( Transformation *root )
 
 	reached.clear();
     PopulateFromTransformation(my_graphables, root);
-    my_blocks = GetBlocks( my_graphables, my_graphables, nullptr );
+    my_blocks = GetBlocks( my_graphables, nullptr );
+    TrimLinksByChild( my_blocks, my_graphables );
+
     PostProcessBlocks(my_blocks);
     s += DoBlocks(my_blocks, base_region);
     s += DoLinks(my_blocks);
@@ -109,8 +111,11 @@ void Graph::operator()( const Figure &figure )
         all_gs.push_back( p.second.root_g );
     }
 
-    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, all_gs, &figure );
-    list<MyBlock> interior_blocks = GetBlocks( interior_gs, all_gs, &figure );
+    list<MyBlock> exterior_blocks = GetBlocks( exterior_gs, &figure );
+    list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
+    
+    TrimLinksByChild( exterior_blocks, all_gs );
+    TrimLinksByChild( interior_blocks, all_gs );
     
     set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
                                              Graphable::IN_COMPARE_AND_REPLACE };
@@ -203,7 +208,8 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
 	PopulateFrom( my_graphables, g );
-	my_blocks = GetBlocks( my_graphables, my_graphables, nullptr );
+	my_blocks = GetBlocks( my_graphables, nullptr );
+    TrimLinksByChild( my_blocks, my_graphables );
     PostProcessBlocks(my_blocks);
     s += DoBlocks(my_blocks, base_region);
     s += DoLinks(my_blocks);
@@ -365,15 +371,10 @@ void Graph::CheckLinks( list<MyBlock> blocks )
 
 
 list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
-                                       list< const Graphable *> all_graphables,
                                        const Region *region )
 {
 	list<MyBlock> blocks;
-	
-    set<const Graphable *> sg;
-    for( const Graphable *g : all_graphables )
-        sg.insert( g );
-    
+
 	for( const Graphable *g : graphables )
 	{
 		Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);
@@ -383,11 +384,8 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
             list< shared_ptr<Graphable::Link> > new_links;
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
-                if( sg.count( link->child ) > 0 )
-                {
-                    ASSERT( link->child )(gblock.title)(" ")(sub_block.item_name);
-                    new_links.push_back( link );
-                }
+                ASSERT( link->child )(gblock.title)(" ")(sub_block.item_name);
+                new_links.push_back( link );
             }
             sub_block.links = new_links;
         }
@@ -397,6 +395,39 @@ list<Graph::MyBlock> Graph::GetBlocks( list< const Graphable *> graphables,
 	}
 
 	return blocks;
+}
+
+
+void Graph::TrimLinksByChild( list<MyBlock> &blocks,
+                              list<const Graphable *> to_keep )
+{
+    set<const Graphable *> to_keep_set;
+    for( const Graphable *g : to_keep )
+        to_keep_set.insert( g );
+        
+    TrimLinksByChild( blocks, to_keep_set );
+}                              
+
+                              
+void Graph::TrimLinksByChild( list<MyBlock> &blocks,
+                              set<const Graphable *> to_keep )
+{
+	for( MyBlock &block : blocks )
+	{       
+        for( Graphable::SubBlock &sub_block : block.sub_blocks )
+        {			
+            list< shared_ptr<Graphable::Link> > new_links;
+            for( shared_ptr<Graphable::Link> link : sub_block.links )
+            {
+                if( to_keep.count(link->child) > 0 )
+                {
+                    ASSERT( link->child )(block.title)(" ")(sub_block.item_name);
+                    new_links.push_back( link );
+                }
+            }
+            sub_block.links = new_links;
+        }
+	}
 }
 
 

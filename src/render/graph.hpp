@@ -123,8 +123,11 @@ private:
                              Figure::LinkDetails new_details );
     void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list< const Graphable *> graphables,
-	                         list< const Graphable *> all_graphables,
 	                         const Region *region );
+    void TrimLinksByChild( list<MyBlock> &blocks,
+                           list<const Graphable *> to_keep );
+    void TrimLinksByChild( list<MyBlock> &blocks,
+                           set<const Graphable *> to_keep );
     void TrimLinksByPhase( list<MyBlock> &blocks,
                            set<Graphable::Phase> to_keep );
     MyBlock CreateInvisibleNode( string base_id, 
