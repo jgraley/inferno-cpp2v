@@ -1052,12 +1052,14 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             ASSERT( reached.count(p.second) == 0 );
             reached.insert( p.second );
             
-            Graph::Figure::RootAgent root;
-            root.g = p.second->plan.root_agent;
-            root.incoming_link.details.planned_as = incoming_link_planned_as;
-            root.incoming_link.short_name = p.first.GetShortName();
-            TRACEC(p.second.get())(" : ( ")(root.incoming_link.short_name)("->")(root.g->GetGraphId())(" )\n");
-            figure.subordinates[p.second.get()] = root;
+            Graph::Figure::Agent root_agent;
+            root_agent.g = p.second->plan.root_agent;
+            Graph::Figure::Link incoming_link;
+            incoming_link.details.planned_as = incoming_link_planned_as;
+            incoming_link.short_name = p.first.GetShortName();
+            root_agent.incoming_links.push_back( incoming_link );
+            TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(root_agent.g->GetGraphId())(" )\n");
+            figure.subordinates[p.second.get()] = root_agent;
         }
 	};
 	TRACE("   Subordinates (my free abnormals):\n");    

@@ -60,11 +60,6 @@ public:
             string short_name;
             LinkDetails details;
         };
-        struct RootAgent
-        {
-            const Graphable *g;
-            Link incoming_link;
-        };
         struct Agent
         {
             const Graphable *g;
@@ -72,7 +67,7 @@ public:
         };
 		list<Agent> interior_agents;
 		list<Agent> exterior_agents;
-        map<GraphIdable *, RootAgent> subordinates;
+        map<GraphIdable *, Agent> subordinates;
 	};
 
     Graph( string of, string title );

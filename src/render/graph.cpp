@@ -102,13 +102,13 @@ void Graph::operator()( const Figure &figure )
     list<MyBlock> interior_blocks = GetBlocks( interior_gs, &figure );
 
     map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
-    for( auto p : figure.subordinates )
+    for( auto engine_agent : figure.subordinates )
     {
-        list<const Graphable *> sub_gs = { p.second.g };
+        list<const Graphable *> sub_gs = { engine_agent.second.g };
         all_gs = all_gs + sub_gs;
 
         Region sub_region;
-        sub_region.id = GetRegionGraphId(&figure, p.first); 
+        sub_region.id = GetRegionGraphId(&figure, engine_agent.first); 
         // Note: the same root agent can be used in multiple engines, but because we've got the
         // current subordinate's id in the sub_region.id, the new node will be unique enough
         list<MyBlock> sub_blocks = GetBlocks( sub_gs, &sub_region );
@@ -120,36 +120,36 @@ void Graph::operator()( const Figure &figure )
         for( MyBlock &sub_block : sub_blocks )
             sub_block.shape = "invisible";
             
-        subordinate_blocks[p.first] = sub_blocks;
+        subordinate_blocks[engine_agent.first] = sub_blocks;
     }
     
     all_gs = all_gs + interior_gs + exterior_gs;
     TrimLinksByChild( exterior_blocks, all_gs );
     TrimLinksByChild( interior_blocks, all_gs );
                 
-    set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
-                                             Graphable::IN_COMPARE_AND_REPLACE };
-    // Note: ALL redirections apply to interior nodes, because these are the only ones with outgoing links.
-    for( const Figure::Agent &agent : figure.interior_agents )
+	auto update_details_lambda = [&](const Figure::Agent &agent)
+    {
+        // Note: ALL redirections apply to interior nodes, because 
+        // these are the only ones with outgoing links.
         for( const Figure::Link &link : agent.incoming_links )
-            UpdateLinksDetails( interior_blocks, agent.g, link.short_name, link.details );
+            UpdateLinksDetails( interior_blocks, // Act on interior blocks
+                                agent.g, link.short_name, // Match graphable pointer and link's short name
+                                link.details ); // New details for the link
+    };
 
+    for( const Figure::Agent &agent : figure.interior_agents )
+        update_details_lambda( agent );
     for( const Figure::Agent &agent : figure.exterior_agents )
-        for( const Figure::Link &link : agent.incoming_links )
-            UpdateLinksDetails( interior_blocks, agent.g, link.short_name, link.details );
-            
-    for( auto p : figure.subordinates )
+        update_details_lambda( agent );          
+    for( auto engine_agent : figure.subordinates )    
+        update_details_lambda( engine_agent.second );
+     
+    for( auto engine_agent : figure.subordinates )
     {
-        Figure::LinkDetails details;
-        details = p.second.incoming_link.details;
-        UpdateLinksDetails( interior_blocks, p.second.g, p.second.incoming_link.short_name, details );
-    }
-    
-    for( auto p : figure.subordinates )
-    {
-        ASSERT( subordinate_blocks.at(p.first).size() == 1 );
-        MyBlock &root_block = subordinate_blocks.at(p.first).front();        
-        RedirectLinks( interior_blocks, p.second.g, p.second.incoming_link.short_name, &root_block );
+        ASSERT( subordinate_blocks.at(engine_agent.first).size() == 1 );
+        MyBlock &root_block = subordinate_blocks.at(engine_agent.first).front();        
+        for( const Figure::Link &link : engine_agent.second.incoming_links )
+            RedirectLinks( interior_blocks, engine_agent.second.g, link.short_name, &root_block );
     }
     
     if( figure.interior_agents.empty() )
@@ -163,6 +163,8 @@ void Graph::operator()( const Figure &figure )
         // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!
     }
     
+    set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
+                                             Graphable::IN_COMPARE_AND_REPLACE };
     TrimLinksByPhase( exterior_blocks, phases_to_keep );
     TrimLinksByPhase( interior_blocks, phases_to_keep );
     for( auto p : figure.subordinates )
