@@ -113,14 +113,9 @@ private:
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
-    void RedirectLinks( list<MyBlock> &blocks_to_act_on, 
-                        const Graphable *target_child_g,
-                        string target_trace_label,
-                        const MyBlock *new_block );
-    void UpdateLinksDetails( list<MyBlock> &blocks_to_act_on, 
-                             const Graphable *target_child_g,
-                             string target_trace_label,
-                             Figure::LinkDetails new_details );
+    shared_ptr<MyLink> FindLink( list<MyBlock> &blocks_to_act_on, 
+                                 const Graphable *target_child_g,
+                                 string target_trace_label );
     void CheckLinks( list<MyBlock> blocks );
 	list<MyBlock> GetBlocks( list<const Graphable *> graphables,
 	                         const Region *region );

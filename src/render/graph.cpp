@@ -142,25 +142,34 @@ void Graph::operator()( const Figure &figure )
             sub_block.shape = "invisible";
                             
         // Set the child id correctly on all the links from all the interior nodes to our nodes. 
-        //ASSERT( sub_blocks.size() == 1 );
-        for( auto p : Zip( sub_gs, sub_blocks ) )        
-            for( const Figure::Link &link : engine_agent.second.incoming_links )
-                RedirectLinks( interior_blocks, // Act on interior blocks
-                               p.first, link.short_name, // Match graphable pointer and link's short name
-                               &p.second ); // Child id now matches the root block id
+        // Note: ALL redirections/updates apply to interior nodes, because 
+        // these are the only ones with outgoing links that we care about.
+        for( auto p : Zip( sub_gs, sub_blocks ) )     
+        {   
+            for( const Figure::Link &figure_link : engine_agent.second.incoming_links )
+            {
+                shared_ptr<MyLink> link = FindLink( interior_blocks, 
+                                                    p.first, 
+                                                    figure_link.short_name );
+                if( link )
+                    link->child_id = p.second.base_id;       
+            }
+        }
                             
         subordinate_blocks[engine_agent.first] = sub_blocks;    
     }
     
-    // Set the planned_as on all the links from all the interior nodes. 
-    // Note: ALL redirections/updates apply to interior nodes, because 
-    // these are the only ones with outgoing links.
+    // Set the planned_as on all the links from all the interior nodes.
     for( const Figure::Agent &agent : all_agents )
     {
-        for( const Figure::Link &link : agent.incoming_links )
-            UpdateLinksDetails( interior_blocks, // Act on interior blocks
-                                agent.g, link.short_name, // Match graphable pointer and link's short name
-                                link.details ); // New details for the link
+        for( const Figure::Link &figure_link : agent.incoming_links )
+        {
+            shared_ptr<MyLink> link = FindLink( interior_blocks, 
+                                                agent.g, 
+                                                figure_link.short_name );
+            if( link )
+                link->planned_as = figure_link.details.planned_as;     
+        }     
     };
      
     // Special case for trivial engines (aka no normal agents): a new invisible 
@@ -170,10 +179,10 @@ void Graph::operator()( const Figure &figure )
         list< tuple<const Graphable *, string, Graphable::Phase> > links_info;
         for( const Figure::Agent &agent : figure.exterior_agents )
         {
-            for( const Figure::Link &link : agent.incoming_links )
+            for( const Figure::Link &figure_link : agent.incoming_links )
             {
                 // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
-                links_info.push_back( make_tuple(agent.g, link.short_name, IN_COMPARE_ONLY) );
+                links_info.push_back( make_tuple(agent.g, figure_link.short_name, IN_COMPARE_ONLY) );
             }
         }
         interior_blocks.push_back( CreateInvisibleBlock( "IRIP", links_info, &figure ) ); 
@@ -304,50 +313,10 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 	}
 }
 
-
-void Graph::RedirectLinks( list<MyBlock> &blocks_to_act_on, 
-                           const Graphable *target_child_g,
-                           string target_trace_label,
-                           const MyBlock *new_block )
-{
-    TRACE("RedirectLinks( child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
-    // Loop over all the links in all the blocks that we might need to 
-    // redirect (ones in the interior of the figure)
-	for( MyBlock &block_to_act_on : blocks_to_act_on )
-	{
-        TRACEC("    Block: ")(block_to_act_on.base_id)("\n");
-        for( Graphable::SubBlock &sub_block_to_act_on : block_to_act_on.sub_blocks )
-        {
-            for( shared_ptr<Graphable::Link> link_to_act_on : sub_block_to_act_on.links )
-            {
-                auto my_link_to_act_on = dynamic_pointer_cast<MyLink>(link_to_act_on);
-                ASSERT( my_link_to_act_on );
-                TRACEC("        To act on: child_id=")(my_link_to_act_on->child_id)
-                      (" child=")(link_to_act_on->child)
-                      (" labels=")(link_to_act_on->labels)(link_to_act_on->trace_labels)("\n");            
-                // Two things must be true for us to redirect this link toward the target block:
-                // - Link must point to the right agent - that being the root agent of the sub-engine
-                // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
-                // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link_to_act_on->child == target_child_g )
-                {
-                    ASSERT( link_to_act_on->trace_labels.size()==1 ); // brittle
-                    if( link_to_act_on->trace_labels.front() == target_trace_label )
-                    {
-                        TRACEC("        REDIRECTED from ")(my_link_to_act_on->child_id)(" to ")(new_block->base_id)("\n");
-                        my_link_to_act_on->child_id = new_block->base_id;        
-                    }
-                }
-            }
-        }
-    }
-}                           
-
-
-void Graph::UpdateLinksDetails( list<MyBlock> &blocks_to_act_on, 
-                                const Graphable *target_child_g,
-                                string target_trace_label,
-                                Figure::LinkDetails new_details )
+  
+shared_ptr<Graph::MyLink> Graph::FindLink( list<MyBlock> &blocks_to_act_on, 
+                                           const Graphable *target_child_g,
+                                           string target_trace_label )
 {
     TRACE("UpdateLinksDetails( target_child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
@@ -373,13 +342,13 @@ void Graph::UpdateLinksDetails( list<MyBlock> &blocks_to_act_on,
                     ASSERT( link_to_act_on->trace_labels.size()==1 ); // brittle
                     if( link_to_act_on->trace_labels.front() == target_trace_label )
                     {
-                        TRACEC("        planned_as from ")(my_link_to_act_on->planned_as)(" to ")(new_details.planned_as)("\n");
-                        my_link_to_act_on->planned_as = new_details.planned_as;            
+                        return my_link_to_act_on;
                     }
                 }
             }
         }
     }
+    return nullptr;
 }                           
 
 
