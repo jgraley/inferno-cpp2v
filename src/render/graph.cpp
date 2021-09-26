@@ -140,10 +140,18 @@ void Graph::operator()( const Figure &figure )
         // Make them all invisible
         for( MyBlock &sub_block : sub_blocks )
             sub_block.shape = "invisible";
-            
-        subordinate_blocks[engine_agent.first] = sub_blocks;
-    }    
-                    
+                            
+        // Set the child id correctly on all the links from all the interior nodes to our nodes. 
+        //ASSERT( sub_blocks.size() == 1 );
+        for( auto p : Zip( sub_gs, sub_blocks ) )        
+            for( const Figure::Link &link : engine_agent.second.incoming_links )
+                RedirectLinks( interior_blocks, // Act on interior blocks
+                               p.first, link.short_name, // Match graphable pointer and link's short name
+                               &p.second ); // Child id now matches the root block id
+                            
+        subordinate_blocks[engine_agent.first] = sub_blocks;    
+    }
+    
     // Set the planned_as on all the links from all the interior nodes. 
     // Note: ALL redirections/updates apply to interior nodes, because 
     // these are the only ones with outgoing links.
@@ -155,15 +163,6 @@ void Graph::operator()( const Figure &figure )
                                 link.details ); // New details for the link
     };
      
-    // Set the child id correctly on all the links from all the interior nodes. 
-    for( auto engine_agent : figure.subordinate_engines_and_root_agents )
-    {
-        ASSERT( subordinate_blocks.at(engine_agent.first).size() == 1 );
-        MyBlock &root_block = subordinate_blocks.at(engine_agent.first).front();        
-        for( const Figure::Link &link : engine_agent.second.incoming_links )
-            RedirectLinks( interior_blocks, engine_agent.second.g, link.short_name, &root_block );
-    }
-    
     // Special case for trivial engines (aka no normal agents): a new invisible 
     // node goes into the INTERNAL region and points to all externals.
     if( figure.interior_agents.empty() )
@@ -350,7 +349,7 @@ void Graph::UpdateLinksDetails( list<MyBlock> &blocks_to_act_on,
                                 string target_trace_label,
                                 Figure::LinkDetails new_details )
 {
-    TRACE("UpdateLinksPlannedAs( target_child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
+    TRACE("UpdateLinksDetails( target_child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
 	for( MyBlock &block_to_act_on : blocks_to_act_on )
