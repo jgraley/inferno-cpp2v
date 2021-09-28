@@ -93,6 +93,7 @@ public:
         unordered_set<Agent *> master_agents;
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
+        bool trivial_problem;
         unordered_set< Agent *> my_evaluators;   
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;

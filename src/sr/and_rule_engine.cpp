@@ -88,8 +88,12 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // master_boundary_agents should be same set of agents as those reached by master_boundary_links (uniquified)
     ASSERT( parent_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
 
-    if( my_normal_agents.empty() ) 
+    // these two conditions for trivial problem should be equivalent
+    ASSERT( my_normal_agents.empty() == my_normal_links.empty() ); 
+    trivial_problem = my_normal_agents.empty();
+    if( trivial_problem ) 
         return;  // Early-out on trivial problems
+        
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
@@ -766,12 +770,12 @@ void AndRuleEngine::Compare( XLink root_xlink,
 
     TRACE("Compare root ")(root_link)("\n");
 
-#ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
+#ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
     if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
         ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
 
-    if( plan.my_normal_agents.empty() )
+    if( plan.trivial_problem )
     {
         CompareTrivialProblem( root_link );
         return;
