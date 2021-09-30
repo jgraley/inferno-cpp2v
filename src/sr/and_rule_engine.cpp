@@ -1011,6 +1011,8 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 	Graph::Figure figure;
 	figure.id = GetGraphId();
 	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
+    if( plan.trivial_problem )
+        figure.title += "\\n(trivial)";
     
 	auto agents_lambda = [&](const unordered_map< Agent *, unordered_set<PatternLink> > &parent_links_to_agents,
                              const unordered_set<PatternLink> &keyers,
