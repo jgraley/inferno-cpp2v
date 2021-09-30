@@ -30,6 +30,7 @@
 
 //#define NLQ_TEST
 
+//#define TRACE_COUPLED_SUBORDINATES
 
 using namespace SR;
 
@@ -114,7 +115,28 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 #endif                      
 
     unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    CreateSubordniateEngines( my_normal_agents, surrounding_plinks );    
+    CreateSubordniateEngines( my_normal_agents, surrounding_plinks );   
+    
+#ifdef TRACE_COUPLED_SUBORDINATES
+	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, string type )
+    {
+        set< Agent * > reached;
+        set< Agent * > reached_twice;
+        for( auto p : engines )
+        {
+            Agent *agent = p.first.GetChildAgent();
+            if( reached.count(agent) > 0 )
+                reached_twice.insert( agent );
+            else
+                reached.insert( agent );
+        }
+        if( !reached_twice.empty() )
+            FTRACE("Found coupled ")(type)(": ")(reached_twice)("\n");
+	};
+    subordinates_lambda( my_free_abnormal_engines, "free abnormal" );
+    subordinates_lambda( my_evaluator_abnormal_engines, "evaluator" );
+    subordinates_lambda( my_multiplicity_engines, "multiplicity" );
+#endif    
 }
 
 
@@ -1005,8 +1027,8 @@ void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) c
 
 void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const
 {
-    FTRACE(*this)(" parent_links_to_master_boundary_agents ")( plan.parent_links_to_master_boundary_agents )("\n");
-    FTRACE(*this)(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
+    TRACE(*this)(" parent_links_to_master_boundary_agents ")( plan.parent_links_to_master_boundary_agents )("\n");
+    TRACE(*this)(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
 	figure.id = GetGraphId();
