@@ -757,13 +757,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
     INDENT("C");
     ASSERT( root_xlink );
     used = true;
-
-    if( ReadArgs::new_feature )
-    {
-        FTRACE(*this)(" Coupling keyers ")(plan.my_normal_links_unique_by_agent)("\n");
-        FTRACE(*this)(" Master boundary keyers ")(plan.master_boundary_keyer_links)("\n");
-    }
-           
+         
     master_keys = master_keys_;    
     knowledge = knowledge_;
     
