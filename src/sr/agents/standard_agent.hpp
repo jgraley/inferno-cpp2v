@@ -38,7 +38,7 @@ public:
     class SurplusXCollectionMismatch : public CollectionMismatch {};
     class InsufficientXCollectionMismatch : public CollectionMismatch {};
     
-	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
+	virtual void SCRConfigure( Phase phase, const SCREngine *master_scr_engine );
 
     struct Plan
     {

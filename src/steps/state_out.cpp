@@ -688,9 +688,11 @@ LoopRotation::LoopRotation()
     MakePatternPtr<Instance> fn, s_var_decl;
     MakePatternPtr<InstanceIdentifier> fn_id, s_var_id, s_cur_enum_id, s_outer_enum_id;
     MakePatternPtr<Thread> thread; // Must be SC_THREAD since we introduce SC stuff
-    MakePatternPtr< Star<Declaration> > func_decls, decls, s_enums;
+    MakePatternPtr< Star<Declaration> > func_decls, s_enums;
+    MakePatternPtr< Star<Declaration> > comp_loop_decls, comp_yield_decls, x_comp_decls;
     MakePatternPtr<Static> s_cur_enum, s_outer_enum;
-    MakePatternPtr< Star<Statement> > inits, stmts, pre, post, prepre, prepost, postpre, postpost;    
+    MakePatternPtr< Star<Statement> > inits, stmts, prepre, prepost, postpre, postpost;    
+    MakePatternPtr< Star<Statement> > comp_loop_pre, comp_loop_post, comp_yield_pre, comp_yield_post;    
     MakePatternPtr<Loop> loop;
     MakePatternPtr<Compound> func_comp, s_comp_loop, s_comp_yield, r_comp, r_if_comp, sx_comp;
     MakePatternPtr<If> loop_top, loop_bottom, yield, outer_bottom, outer_top;
@@ -723,11 +725,11 @@ LoopRotation::LoopRotation()
     loop->body = over;
     over->through = s_all;
     s_all->patterns = (s_comp_loop, s_comp_yield, s_notmatch);
-    s_comp_loop->members = (decls);
+    s_comp_loop->members = (comp_loop_decls);
     // Search for a loop. Assume that a state enum value in a body means "could transition to the state" and one in
     // the condition means "acts on the state". If we see the latter with the former blow it somewhere, we call
     // it a loop and assume the upward branch is normally takner as with C compilers.    
-    s_comp_loop->statements = (pre, loop_top, loop_body, loop_bottom, post);    
+    s_comp_loop->statements = (comp_loop_pre, loop_top, loop_body, loop_bottom, comp_loop_post);    
     loop_top->condition = loop_top_stuff;
     loop_top_stuff->terminus = loop_top_equal;
     loop_top_equal->operands = (s_var_id, s_cur_enum_id);
@@ -736,11 +738,11 @@ LoopRotation::LoopRotation()
     loop_bottom_stuff_enum->terminus = s_cur_enum_id;
     loop_bottom_notmatch->pattern = loop_bottom_stuff_noyield;
     loop_bottom_stuff_noyield->terminus = MakePatternPtr<Wait>();    
-    s_comp_yield->members = (decls);
+    s_comp_yield->members = (comp_yield_decls);
     
     // We need to restruct to loops that contain a yield anywhere but the bottom - these are the ones
     // that would benefit from loop rotation.
-    s_comp_yield->statements = (pre, pre_yield, yield, post_yield, loop_bottom, post);    
+    s_comp_yield->statements = (comp_yield_pre, pre_yield, yield, post_yield, loop_bottom, comp_yield_post);    
     yield->body = yield_stuff;
     yield_stuff->terminus = MakePatternPtr<Wait>();
     
@@ -748,7 +750,7 @@ LoopRotation::LoopRotation()
     // the current one, if it does not end in a yield, then do not transform. This way the outer loop will
     // keep getting hits until the yield is at the bottom, then inner loops can have a go.
     s_notmatch->pattern = sx_comp;
-    sx_comp->members = (decls);
+    sx_comp->members = (x_comp_decls);
     sx_comp->statements = (prepre, outer_top, postpre, inner_state, prepost, outer_bottom, postpost);
     outer_top->condition = outer_top_stuff;
     outer_top_stuff->terminus = outer_top_equal;
@@ -761,8 +763,8 @@ LoopRotation::LoopRotation()
     inner_state->patterns = (loop_top, loop_bottom); // outer loop can share top or bottom state with inner loop; but not both, so at least one must be here
    
     over->overlay = r_comp;
-    r_comp->members = (decls);
-    r_comp->statements = (pre, loop_bottom, loop_top, loop_body, post);    // rotated version of s_comp_loop
+    r_comp->members = (comp_loop_decls);
+    r_comp->statements = (comp_loop_pre, loop_bottom, loop_top, loop_body, comp_loop_post);    // rotated version of s_comp_loop
         
     Configure( fn );            
 }

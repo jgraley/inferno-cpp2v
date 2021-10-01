@@ -31,7 +31,7 @@ public:
     
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
-    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
+    virtual void SCRConfigure( Phase phase, const SCREngine *master_scr_engine );
     shared_ptr< Collection<Node> > options;
 };
 

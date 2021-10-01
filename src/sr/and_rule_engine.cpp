@@ -388,7 +388,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
             
-        agent->ConfigureParents( keyer_plink, residual_plinks, GetTrace() );
+        agent->AndRuleConfigure( keyer_plink, residual_plinks, algo );
     }
 }
 

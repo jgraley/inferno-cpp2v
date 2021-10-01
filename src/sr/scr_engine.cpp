@@ -232,7 +232,7 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
     // Give agents pointers to here and our coupling keys
     for( Agent *agent : my_agents )
     {        
-        agent->AgentConfigure( agent_phases.at(agent),
+        agent->SCRConfigure( agent_phases.at(agent),
                                algo );                                                 
     }
     
@@ -241,7 +241,7 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
         Agent *agent = plink.GetChildAgent();
         // Replace-only nodes are self-keying
         if( agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
-            agent->ConfigureParents( PatternLink(), {plink}, GetTrace() );
+            agent->AndRuleConfigure( PatternLink(), {plink}, nullptr );
     }    
 }
 

@@ -4,9 +4,9 @@
 
 using namespace SR;
 
-void DisjunctionAgent::AgentConfigure( Phase phase, const SCREngine *master_scr_engine )
+void DisjunctionAgent::SCRConfigure( Phase phase, const SCREngine *master_scr_engine )
 {
-    AgentCommon::AgentConfigure(phase, master_scr_engine);
+    AgentCommon::SCRConfigure(phase, master_scr_engine);
 
     options = make_shared< Collection<Node> >();
     FOREACH( const TreePtrInterface &p, GetPatterns() )

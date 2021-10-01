@@ -23,6 +23,7 @@ namespace SR
 { 
 class SpecialBase;
 class SCREngine;
+class AndRuleEngine;
 class Agent;
 class TheKnowledge;
 
@@ -57,11 +58,11 @@ public:
     class CouplingMismatch : public Mismatch {};
         
     Agent& operator=(Agent& other);
-	virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
-    virtual void ConfigureParents( PatternLink base_plink, 
-                                   set<PatternLink> coupled_plinks,
-                                   string are ) = 0;
-
+	virtual void SCRConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
+    virtual void AndRuleConfigure( PatternLink base_plink_, 
+                                   set<PatternLink> coupled_plinks_,
+                                   const AndRuleEngine *e ) = 0;
+                                   
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
@@ -122,10 +123,10 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    virtual void AgentConfigure( Phase phase, const SCREngine *master_scr_engine );
-    virtual void ConfigureParents( PatternLink base_plink, 
-                                   set<PatternLink> coupled_plinks,
-                                   string are );
+    virtual void SCRConfigure( Phase phase, const SCREngine *master_scr_engine );
+    virtual void AndRuleConfigure( PatternLink base_plink_, 
+                                   set<PatternLink> coupled_plinks_,
+                                   const AndRuleEngine *e );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
@@ -182,9 +183,9 @@ public:
 
 protected:                                  
     const SCREngine *master_scr_engine = nullptr;    
+    const AndRuleEngine *master_and_rule_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink base_plink;
-    string configuring_engine;
     set<PatternLink> coupled_plinks;
     list<PatternLink> base_and_normal_plinks;
     Phase phase;

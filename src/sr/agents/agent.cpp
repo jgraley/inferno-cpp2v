@@ -3,6 +3,7 @@
 #include "common/hit_count.hpp"
 #include "agent.hpp"
 #include "scr_engine.hpp"
+#include "and_rule_engine.hpp"
 #include "link.hpp"
 // Temporary
 #include "tree/cpptree.hpp"
@@ -60,16 +61,19 @@ AgentCommon::AgentCommon() :
 }
 
 
-void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
+void AgentCommon::SCRConfigure( Phase phase_, const SCREngine *e )
 {
+    ASSERT(e);
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
     // rule enforcement.
     // Why no coupling across sibling slaves? Would need an ordering for keying
     // but ordering not defined on sibling slaves.
+    // Stronger reason: siblings each hit multiple times with respect to parent
+    // and not necessarily the same number of times, so there's no single
+    // well defined key.
     ASSERT(!master_scr_engine)("Detected repeat configuration of ")(*this)
                               ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
-    ASSERT(e);
     master_scr_engine = e;
     phase = phase_;
 
@@ -87,23 +91,31 @@ void AgentCommon::AgentConfigure( Phase phase_, const SCREngine *e )
 }
 
 
-void AgentCommon::ConfigureParents( PatternLink base_plink_, 
+void AgentCommon::AndRuleConfigure( PatternLink base_plink_, 
                                     set<PatternLink> coupled_plinks_,
-                                    string are )
+                                    const AndRuleEngine *e )
 {  
-    ASSERT(master_scr_engine)("Must call AgentConfigure() before ConfigureParents()");
+    //ASSERT(e); Note: is null if called from SCR engine for replace-only node
+    
+    // Enforcing rule #149 - breaking that rule will cause the same root node to appear in
+    // more than one subordinate and-rule engine, so that it will get configured more than once.
+    // Also see #316
+    ASSERT(!master_and_rule_engine)("Detected repeat configuration of ")(*this)
+                                   ("\nCould be result of coupling abnormal links - not allowed :(");
+    ASSERT(master_scr_engine)("Must call SCRConfigure() before AndRuleConfigure()");
+    master_and_rule_engine = e;
+                                       
     if( ReadArgs::new_feature )
-        FTRACE(*this)(" ConfigureParents ")(base_plink_)("\n");
+        FTRACE(*this)(" AndRuleConfigure ")(base_plink_)("\n");
     
     if( base_plink_ )
     {
         if( ReadArgs::new_feature )
             ASSERT( !base_plink )("Base plink should only be configured once ")
-                                 (configuring_engine)(" vs ")(are)("\n")
+                                 (e)(" vs ")(master_and_rule_engine)("\n")
                                  (base_plink)(" vs ")(base_plink_);
         ASSERT( base_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
         base_plink = base_plink_;
-        configuring_engine = are;
     }
     
     for( PatternLink plink : coupled_plinks_ )
