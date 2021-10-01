@@ -138,17 +138,14 @@ private:
                                     const TheKnowledge *knowledge ) const;
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
-                                    XLink base_xlink,
                                     SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;
     void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink,
                                       CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
                                       const SolutionMap *required_links,

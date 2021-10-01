@@ -230,7 +230,6 @@ void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
 
 
 void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const
 {
@@ -241,6 +240,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     if( !recurse_restriction )
         return;
 
+    XLink base_xlink = required_links->at(base_plink);
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
     PatternLink terminus_plink(this, &terminus);

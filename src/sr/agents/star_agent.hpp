@@ -32,7 +32,6 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                  
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          
     virtual TreePtr<Node> BuildReplaceImpl();

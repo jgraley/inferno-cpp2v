@@ -281,7 +281,6 @@ void AgentCommon::RunCouplingQuery( multiset<XLink> candidate_links )
 
 
 void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                            XLink base_xlink,
                                             const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
 {
@@ -289,7 +288,6 @@ void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     
     
 void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                                        XLink base_xlink,
                                         const SolutionMap *required_links,
                                         const TheKnowledge *knowledge ) const
 {
@@ -298,13 +296,13 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset(); 
 
+    XLink base_xlink = required_links->at(base_plink);
     if( base_xlink != XLink::MMAX_Link )
-        this->RunRegenerationQueryImpl( query, base_xlink, required_links, knowledge );
+        this->RunRegenerationQueryImpl( query, required_links, knowledge );
 }                             
                       
                       
-AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
-                                                              const SolutionMap *required_links,
+AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap *required_links,
                                                               const TheKnowledge *knowledge,
                                                               bool use_DQ ) const
 {
@@ -333,7 +331,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 query = nlq_conjecture->GetQuery(this);
-                RunRegenerationQuery( *query, base_xlink, required_links, knowledge );       
+                RunRegenerationQuery( *query, required_links, knowledge );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
@@ -360,8 +358,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( XLink base_xlink,
 }   
                                               
                                               
-AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xlink,
-                                                                  const SolutionMap *required_links,
+AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const SolutionMap *required_links,
                                                                   const TheKnowledge *knowledge ) const
 {
     QueryLambda mut_lambda;
@@ -370,16 +367,16 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xli
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartRegenerationQuery( base_xlink, required_links, knowledge, false );
+        mut_lambda = StartRegenerationQuery( required_links, knowledge, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIEnable silencer( false ); // make ref algo be quiet            
-            (void)StartRegenerationQuery( base_xlink, required_links, knowledge, true );
+            (void)StartRegenerationQuery( required_links, knowledge, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
-                         (*this)(" at ")(base_xlink)("\n")
+                         (*this)("\n")
                          ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
                          ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
                          ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
@@ -394,12 +391,12 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xli
     try
     {
         Tracer::RAIIEnable silencer( false ); // make ref algo be quiet             
-        ref_lambda = StartRegenerationQuery( base_xlink, required_links, knowledge, true );        
+        ref_lambda = StartRegenerationQuery( required_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
     {
         ASSERT(false)("Ref start threw ")(e)(" but MUT didn't\n")
-                     (*this)(" at ")(base_xlink)("\n")
+                     (*this)("\n")
                      ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
                      ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
                      ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
@@ -430,7 +427,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xli
                 (*ref_hits)++;                
                 ASSERT(false)("MUT lambda threw ")(e)(" but ref didn't\n")
                              ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
-                             (*this)(" at ")(base_xlink)("\n")
+                             (*this)("\n")
                              ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
                              ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
                              ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
@@ -456,7 +453,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( XLink base_xli
         {
             ASSERT(false)("Ref lambda threw ")(e)(" but MUT didn't\n")
                          ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
-                         (*this)(" at ")(base_xlink)("\n")
+                         (*this)("\n")
                          ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
                          ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
                          ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");

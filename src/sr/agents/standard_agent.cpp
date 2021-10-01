@@ -620,30 +620,29 @@ void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_sing,
 
                                                
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                              XLink base_xlink,
                                               const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
 
     // Get the members of x corresponding to pattern's class
+    XLink base_xlink = required_links->at(base_plink);
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )
     {
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
-        RegenerationQueryCollection( query, base_xlink, p_x_col, plan_col, required_links, knowledge );
+        RegenerationQueryCollection( query, p_x_col, plan_col, required_links, knowledge );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
-        RegenerationQuerySequence( query, base_xlink, p_x_seq, plan_seq, required_links, knowledge );
+        RegenerationQuerySequence( query, p_x_seq, plan_seq, required_links, knowledge );
     }
 }
 
 
 void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query,
-                                               XLink base_xlink,
                                                SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *required_links,
@@ -711,6 +710,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             }
             
             // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
+            XLink base_xlink = required_links->at(base_plink);
             TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
@@ -722,7 +722,6 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 
 
 void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &query,
-                                                 XLink base_xlink,
                                                  CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *required_links,
@@ -738,6 +737,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
             excluded_x.insert( required_links->at(plink).GetXPtr() );
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
+        XLink base_xlink = required_links->at(base_plink);
         TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       

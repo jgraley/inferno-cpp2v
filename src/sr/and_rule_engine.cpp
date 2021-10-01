@@ -492,6 +492,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // or recurse to DecidedCompare(). We never DC() after a
         // coupling compare, because couplings are only keyed
         // after a successful DC().  
+        // NOTE: Probable bug in couplings algo, see #315
         if( plan.coupling_residual_links.count( (PatternLink)link ) > 0 )
         {
             CompareCoupling( my_coupling_keys, link );
@@ -502,7 +503,8 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         }
         else
         {
-            DecidedCompare(link);   
+            DecidedCompare(link);  
+             
             if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
                 KeyCoupling( my_coupling_keys, link );
         }
@@ -627,25 +629,22 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 
 void AndRuleEngine::RegenerationPassAgent( Agent *agent,
-                                           XLink base_xlink,
                                            const CouplingKeysMap &subordinate_keys )
 {
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
-    TRACE("Trying to regenerate ")(*agent)(" at ")(base_xlink)("\n");    
+    TRACE("Trying to regenerate ")(*agent)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
-    if( !dynamic_cast<StarAgent*>(agent) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( knowledge->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
     for( XLink xlink : pq->GetNormalLinks() )    
         ASSERT( knowledge->domain.count(xlink) > 0 )(xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
     
 #ifdef NLQ_TEST
-    auto nlq_lambda = agent->TestStartRegenerationQuery( base_xlink, &basic_solution, knowledge );
+    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, knowledge );
 #else    
-    auto nlq_lambda = agent->StartRegenerationQuery( base_xlink, &basic_solution, knowledge );
+    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, knowledge );
 #endif
     
     int i=0;
@@ -719,10 +718,9 @@ void AndRuleEngine::RegenerationPass()
     TRACEC("Subordinate keys ")(subordinate_keys)("\n");       
     TRACEC("Basic solution ")(basic_solution)("\n");    
 
-    for( auto plink : plan.my_normal_links_unique_by_agent )
+    for( Agent *agent : plan.my_normal_agents )
     {
-        RegenerationPassAgent( plink.GetChildAgent(), 
-                               basic_solution.at(plink), 
+        RegenerationPassAgent( agent, 
                                subordinate_keys );
     }
 

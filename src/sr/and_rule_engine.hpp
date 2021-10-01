@@ -130,7 +130,6 @@ private:
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const CouplingKeysMap *combined_keys ); 
     void RegenerationPassAgent( Agent *agent,
-                                XLink xlink,
                                 const CouplingKeysMap &subordinate_keys );
     void RegenerationPass();
     

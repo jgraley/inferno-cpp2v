@@ -58,11 +58,11 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 
 
 void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                          XLink base_xlink,
                                           const SolutionMap *required_links,
                                           const TheKnowledge *knowledge ) const
 { 
     // This agent has no normal links, so just do this to populate query
+    XLink base_xlink = required_links->at(base_plink);
     RunDecidedQueryImpl( query, base_xlink ); 
 }
 

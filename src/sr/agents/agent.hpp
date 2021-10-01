@@ -84,12 +84,10 @@ public:
     virtual void RunCouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
-    virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
-                                                const SolutionMap *required_links,
+    virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
                                                 bool use_DQ = false ) const = 0;
-    virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
-                                                    const SolutionMap *required_links,
+    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const = 0;
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
@@ -148,19 +146,15 @@ public:
     virtual void RunCouplingQuery( multiset<XLink> candidate_links );                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           XLink base_xlink,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                               XLink base_xlink,
                                const SolutionMap *required_links,
                                const TheKnowledge *knowledge ) const;
-    virtual QueryLambda StartRegenerationQuery( XLink base_xlink,
-                                                const SolutionMap *required_links,
+    virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
                                                 const TheKnowledge *knowledge,
                                                 bool use_DQ = false ) const;
-    virtual QueryLambda TestStartRegenerationQuery( XLink base_xlink,
-                                                    const SolutionMap *required_links,
+    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *required_links,
                                                     const TheKnowledge *knowledge ) const;
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
