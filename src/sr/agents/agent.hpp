@@ -58,10 +58,11 @@ public:
     class CouplingMismatch : public Mismatch {};
         
     Agent& operator=(Agent& other);
-	virtual void SCRConfigure( Phase phase, const SCREngine *master_scr_engine ) = 0;
-    virtual void AndRuleConfigure( PatternLink base_plink_, 
-                                   set<PatternLink> coupled_plinks_,
-                                   const AndRuleEngine *e ) = 0;
+	virtual void SCRConfigure( const SCREngine *e,
+                               Phase phase ) = 0;
+    virtual void AndRuleConfigure( const AndRuleEngine *e,
+                                   PatternLink base_plink_, 
+                                   set<PatternLink> coupled_plinks_ ) = 0;
                                    
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -123,10 +124,11 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    virtual void SCRConfigure( Phase phase, const SCREngine *master_scr_engine );
-    virtual void AndRuleConfigure( PatternLink base_plink_, 
-                                   set<PatternLink> coupled_plinks_,
-                                   const AndRuleEngine *e );
+    virtual void SCRConfigure( const SCREngine *e,
+                               Phase phase );
+    virtual void AndRuleConfigure( const AndRuleEngine *e,
+                                   PatternLink base_plink_, 
+                                   set<PatternLink> coupled_plinks_ );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,

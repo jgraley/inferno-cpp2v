@@ -11,10 +11,11 @@
 
 using namespace SR;
 
-void StandardAgent::SCRConfigure( Phase phase, const SCREngine *master_scr_engine )
+void StandardAgent::SCRConfigure( const SCREngine *e,
+                                  Phase phase )
 {
     plan.ConstructPlan( this, phase );    
-    AgentCommon::SCRConfigure(phase, master_scr_engine);
+    AgentCommon::SCRConfigure(e, phase);
 }
 
 

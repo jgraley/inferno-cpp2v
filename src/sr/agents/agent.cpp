@@ -61,7 +61,8 @@ AgentCommon::AgentCommon() :
 }
 
 
-void AgentCommon::SCRConfigure( Phase phase_, const SCREngine *e )
+void AgentCommon::SCRConfigure( const SCREngine *e,
+                                Phase phase_ )
 {
     ASSERT(e);
     // Repeat configuration regarded as an error because it suggests I maybe don't
@@ -91,12 +92,11 @@ void AgentCommon::SCRConfigure( Phase phase_, const SCREngine *e )
 }
 
 
-void AgentCommon::AndRuleConfigure( PatternLink base_plink_, 
-                                    set<PatternLink> coupled_plinks_,
-                                    const AndRuleEngine *e )
+void AgentCommon::AndRuleConfigure( const AndRuleEngine *e,
+                                    PatternLink base_plink_, 
+                                    set<PatternLink> coupled_plinks_ )
 {  
-    //ASSERT(e); Note: is null if called from SCR engine for replace-only node
-    
+    ASSERT(e);
     // Enforcing rule #149 - breaking that rule will cause the same root node to appear in
     // more than one subordinate and-rule engine, so that it will get configured more than once.
     // Also see #316

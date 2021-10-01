@@ -97,6 +97,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
     
+    // Well, obviously...
     ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
     
     
@@ -353,8 +354,6 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 
 void AndRuleEngine::Plan::ConfigureAgents()
 {
-    if( ReadArgs::new_feature )
-        FTRACE(*algo)(" ConfigureAgents keyers:\n")(my_normal_links_unique_by_agent)("\n");
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent )
     {
         ASSERT( keyer_plink );
@@ -368,7 +367,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
             
-        agent->AndRuleConfigure( keyer_plink, residual_plinks, algo );
+        agent->AndRuleConfigure( algo, keyer_plink, residual_plinks );
     }
 }
 
