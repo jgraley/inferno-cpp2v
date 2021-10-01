@@ -30,8 +30,6 @@
 
 //#define NLQ_TEST
 
-//#define TRACE_COUPLED_SUBORDINATES
-
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -99,6 +97,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     DetermineResiduals( root_agent, master_agents );
     DetermineNontrivialKeyers();
     
+    ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
+    
+    
     ConfigureAgents();
         
 #ifdef USE_SOLVER   
@@ -116,34 +117,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
     unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks );   
-    
-#ifdef TRACE_COUPLED_SUBORDINATES
-	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, string type )
-    {
-        set< Agent * > reached;
-        set< Agent * > reached_twice;
-        for( auto p : engines )
-        {
-            Agent *agent = p.first.GetChildAgent();
-            if( reached.count(agent) > 0 )
-                reached_twice.insert( agent );
-            else
-                reached.insert( agent );
-        }
-        if( !reached_twice.empty() )
-            FTRACE("Found coupled ")(type)(": ")(reached_twice)("\n");
-	};
-    subordinates_lambda( my_free_abnormal_engines, "free abnormal" );
-    subordinates_lambda( my_evaluator_abnormal_engines, "evaluator" );
-    subordinates_lambda( my_multiplicity_engines, "multiplicity" );
-#endif    
 }
 
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     unordered_set<Agent *> check_we_got_the_right_agents;
-    for( PatternLink keyer_plink : coupling_keyer_links )
+    for( PatternLink keyer_plink : my_normal_links_unique_by_agent )
     {        
         // Only one constraint per agent
         ASSERT( check_we_got_the_right_agents.count( keyer_plink.GetChildAgent() ) == 0 );
@@ -277,11 +257,11 @@ void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
     senior_agents->insert( plink.GetChildAgent() );
 
     // See #129, can fail on legal patterns - will also fail on illegal Disjunction couplings
-    for( PatternLink l : coupling_keyer_links )        
+    for( PatternLink l : my_normal_links_unique_by_agent )        
         ASSERT( l.GetChildAgent() != plink.GetChildAgent() )
               ("Conflicting coupling in and-rule pattern: check Disjunction nodes\n");
 
-    coupling_keyer_links.insert(plink);
+    my_normal_links_unique_by_agent.insert(plink);
 
     if( dynamic_cast<DisjunctionAgent *>(plink.GetChildAgent()) )
     {
@@ -311,7 +291,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
     
     // Now do all the links under the Disjunction nodes' links. Keying is allowed in each
     // of these junior regions individually, but no cross-keying is allowed if not keyed already.
-    // Where that happens, there will be a conflict writing to coupling_nontrivial_keyer_links and the
+    // Where that happens, there will be a conflict writing to coupling_keyer_links and the
     // ASSERT will fail.
     for( Agent *ma_agent : my_disjunction_agents )
     {
@@ -331,7 +311,7 @@ void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
     FOREACH( PatternLink link, pq->GetNormalLinks() )
     {            
         PatternLink keyer;
-        for( PatternLink l : coupling_keyer_links )
+        for( PatternLink l : my_normal_links_unique_by_agent )
         {
             if( l.GetChildAgent() == link.GetChildAgent() )
                 keyer = l; // keyer keys the same child node that we're looking at
@@ -351,8 +331,8 @@ void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
 
 void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 {
-    coupling_nontrivial_keyer_links.clear();
-    for( PatternLink keyer_plink : coupling_keyer_links )
+    coupling_keyer_links.clear();
+    for( PatternLink keyer_plink : my_normal_links_unique_by_agent )
     {
         bool found_residual_on_same_child_node = false;
         for( PatternLink residual_plink : coupling_residual_links )
@@ -365,7 +345,7 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
         }
         if( found_residual_on_same_child_node )
         {
-            coupling_nontrivial_keyer_links.insert( keyer_plink );
+            coupling_keyer_links.insert( keyer_plink );
         }
     }
 }
@@ -374,8 +354,8 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 void AndRuleEngine::Plan::ConfigureAgents()
 {
     if( ReadArgs::new_feature )
-        FTRACE(*algo)(" ConfigureAgents keyers:\n")(coupling_keyer_links)("\n");
-    for( PatternLink keyer_plink : coupling_keyer_links )
+        FTRACE(*algo)(" ConfigureAgents keyers:\n")(my_normal_links_unique_by_agent)("\n");
+    for( PatternLink keyer_plink : my_normal_links_unique_by_agent )
     {
         ASSERT( keyer_plink );
         Agent *agent = keyer_plink.GetChildAgent();
@@ -420,7 +400,7 @@ void AndRuleEngine::Plan::PopulateNormalAgents( unordered_set<Agent *> *normal_a
 void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
                                                     const unordered_set<PatternLink> &surrounding_plinks )
 {
-    for( PatternLink plink : coupling_keyer_links )
+    for( PatternLink plink : my_normal_links_unique_by_agent )
     {
         Agent *agent = plink.GetChildAgent();
         
@@ -504,7 +484,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 
         TRACE("Comparing normal link ")(link)
              (" keyer? %d residual? %d master? %d\n", 
-             plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ), 
+             plan.coupling_keyer_links.count( (PatternLink)link ), 
              plan.coupling_residual_links.count( (PatternLink)link ), 
              plan.master_boundary_residual_links.count( (PatternLink)link ) );
         ASSERT( link.GetChildX() );
@@ -524,7 +504,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         else
         {
             DecidedCompare(link);   
-            if( plan.coupling_nontrivial_keyer_links.count( (PatternLink)link ) > 0 )
+            if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
                 KeyCoupling( my_coupling_keys, link );
         }
 
@@ -740,7 +720,7 @@ void AndRuleEngine::RegenerationPass()
     TRACEC("Subordinate keys ")(subordinate_keys)("\n");       
     TRACEC("Basic solution ")(basic_solution)("\n");    
 
-    for( auto plink : plan.coupling_keyer_links )
+    for( auto plink : plan.my_normal_links_unique_by_agent )
     {
         RegenerationPassAgent( plink.GetChildAgent(), 
                                basic_solution.at(plink), 
@@ -781,7 +761,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
 
     if( ReadArgs::new_feature )
     {
-        FTRACE(*this)(" Coupling keyers ")(plan.coupling_keyer_links)("\n");
+        FTRACE(*this)(" Coupling keyers ")(plan.my_normal_links_unique_by_agent)("\n");
         FTRACE(*this)(" Master boundary keyers ")(plan.master_boundary_keyer_links)("\n");
     }
            

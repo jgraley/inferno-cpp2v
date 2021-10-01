@@ -148,7 +148,6 @@ subgraph "clusterAnd#R37-1" {
 }
 
 "And#R37-1/#B-2-648":port0 -> "And#R37-1/#B-2-649" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -164,7 +163,6 @@ subgraph "clusterAnd#R37-1" {
 ];
 
 "And#R37-1/#B-2-649":port1 -> "And#R37-1/#B-2-650" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -179,6 +177,17 @@ subgraph "clusterAnd#R37-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R37-0/#B-2-655" [
+        // -------- block And#R37-0/#B-2-655 ----------
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Uncombable</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-655</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R37-0/#P37-6-50" [
         // -------- block And#R37-0/#P37-6-50 ----------
         shape = "record"
@@ -190,6 +199,18 @@ subgraph "clusterAnd#R37-0" {
         fontcolor = black
     ];
     
+    "And#R37-0/#B-2-638" [
+        // -------- block And#R37-0/#B-2-638 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-638</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R37-0/#B-2-636" [
         // -------- block And#R37-0/#B-2-636 ----------
         shape = "plaintext"
@@ -199,41 +220,6 @@ subgraph "clusterAnd#R37-0" {
          <TR><TD>Statement</TD><TD PORT="port0"></TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-636</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R37-0/#P37-8-45" [
-        // -------- block And#R37-0/#P37-8-45 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P37-8-45</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R37-0/#B-2-654" [
-        // -------- block And#R37-0/#B-2-654 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
-         <TR><TD>patterns</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-654</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R37-0/#B-2-655" [
-        // -------- block And#R37-0/#B-2-655 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Uncombable</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-655</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -251,13 +237,13 @@ subgraph "clusterAnd#R37-0" {
         fontsize = "12"
     ];
     
-    "And#R37-0/#B-2-638" [
-        // -------- block And#R37-0/#B-2-638 ----------
+    "And#R37-0/#B-2-654" [
+        // -------- block And#R37-0/#B-2-654 ----------
         shape = "plaintext"
-        fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-638</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
+         <TR><TD>patterns</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-654</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -275,10 +261,21 @@ subgraph "clusterAnd#R37-0" {
         fontsize = "12"
     ];
     
+    "And#R37-0/#P37-8-45" [
+        // -------- block And#R37-0/#P37-8-45 ----------
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P37-8-45</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
 }
 
 "And#R37-0/#P37-6-50":port0 -> "And#R37-0/#B-2-654" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -286,7 +283,6 @@ subgraph "clusterAnd#R37-0" {
 ];
 
 "And#R37-0/#B-2-636":port0 -> "And#R37-0/#B-2-638" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -294,15 +290,6 @@ subgraph "clusterAnd#R37-0" {
 ];
 
 "And#R37-0/#B-2-636":port1 -> "And#R37-0/#B-2-639" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R37-0/#P37-8-45":port0 -> "And#R37-0/#P37-6-50" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -310,7 +297,6 @@ subgraph "clusterAnd#R37-0" {
 ];
 
 "And#R37-0/#B-2-654":port0 -> "And#R37-0/#B-2-636" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -318,7 +304,6 @@ subgraph "clusterAnd#R37-0" {
 ];
 
 "And#R37-0/#B-2-654":port0 -> "And#R37-0/#B-4-4" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -326,7 +311,13 @@ subgraph "clusterAnd#R37-0" {
 ];
 
 "And#R37-0/#B-4-4":port0 -> "And#R37-0/#B-2-655" [
-    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R37-0/#P37-8-45":port0 -> "And#R37-0/#P37-6-50" [
     label = "#0"
     decorate = true
     color = black

@@ -93,6 +93,7 @@ public:
         unordered_set<Agent *> master_agents;
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
+        unordered_set<PatternLink> my_normal_links_unique_by_agent;
         bool trivial_problem;
         unordered_set< Agent *> my_evaluators;   
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
@@ -103,9 +104,8 @@ public:
         unordered_set<PatternLink> master_boundary_links;
         unordered_set<PatternLink> master_boundary_keyer_links;
         unordered_set<PatternLink> master_boundary_residual_links;
-        unordered_set<PatternLink> coupling_keyer_links;
         unordered_set<PatternLink> coupling_residual_links;
-        unordered_set<PatternLink> coupling_nontrivial_keyer_links; // nontrivial means: child X has at least one residual link
+        unordered_set<PatternLink> coupling_keyer_links; // only where child X has at least one residual link (i.e. non-trivial)
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_master_boundary_agents;
 

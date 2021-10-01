@@ -24,6 +24,20 @@ subgraph "clusterAnd#R8-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R8-0/#B-2-59" [
+        // -------- block And#R8-0/#B-2-59 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/8"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">MapOperand</FONT></TD><TD></TD></TR>
+         <TR><TD>InstanceIdentifier</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-59</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R8-0/#B-2-60" [
         // -------- block And#R8-0/#B-2-60 ----------
         shape = "plaintext"
@@ -37,17 +51,6 @@ subgraph "clusterAnd#R8-0" {
         fontsize = "12"
     ];
     
-    "And#R8-0/#P8-6-11" [
-        // -------- block And#R8-0/#P8-6-11 ----------
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P8-6-11"
-        style = "filled"
-        fontsize = "12"
-        color = black
-        fontcolor = black
-    ];
-    
     "And#R8-0/#B-2-58" [
         // -------- block And#R8-0/#B-2-58 ----------
         shape = "plaintext"
@@ -57,20 +60,6 @@ subgraph "clusterAnd#R8-0" {
          <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-58</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R8-0/#B-2-59" [
-        // -------- block And#R8-0/#B-2-59 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/8"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">MapOperand</FONT></TD><TD></TD></TR>
-         <TR><TD>InstanceIdentifier</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-59</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -113,34 +102,20 @@ subgraph "clusterAnd#R8-0" {
         fontsize = "12"
     ];
     
+    "And#R8-0/#P8-6-11" [
+        // -------- block And#R8-0/#P8-6-11 ----------
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> through | <port1> overlay | <port2> #P8-6-11"
+        style = "filled"
+        fontsize = "12"
+        color = black
+        fontcolor = black
+    ];
+    
 }
 
-"And#R8-0/#P8-6-11":port0 -> "And#R8-0/#B-2-58" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R8-0/#B-2-58":port0 -> "And#R8-0/#B-2-59" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R8-0/#B-2-58":port1 -> "And#R8-0/#B-2-60" [
-    arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 "And#R8-0/#B-2-59":port0 -> "And#R8-0/#B-2-61" [
-    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -148,7 +123,20 @@ subgraph "clusterAnd#R8-0" {
 ];
 
 "And#R8-0/#B-2-59":port1 -> "And#R8-0/#B-2-62" [
-    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R8-0/#B-2-58":port0 -> "And#R8-0/#B-2-59" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R8-0/#B-2-58":port1 -> "And#R8-0/#B-2-60" [
     label = "#0"
     decorate = true
     color = black
@@ -156,7 +144,13 @@ subgraph "clusterAnd#R8-0" {
 ];
 
 "And#R8-0/#P8-8-8":port0 -> "And#R8-0/#P8-6-11" [
-    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R8-0/#P8-6-11":port0 -> "And#R8-0/#B-2-58" [
     label = "#0"
     decorate = true
     color = black
