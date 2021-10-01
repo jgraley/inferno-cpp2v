@@ -235,6 +235,16 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
         agent->SCRConfigure( algo,
                              agent_phases.at(agent) );                                                 
     }
+
+/* Not sure if needed
+    for( PatternLink plink : my_plinks )
+    {
+        Agent *agent = plink.GetChildAgent();
+        // Replace-only nodes are self-keying
+        if( agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
+            agent->AndRuleConfigure( nullptr, PatternLink(), {plink} );
+    }    
+*/
 }
 
 

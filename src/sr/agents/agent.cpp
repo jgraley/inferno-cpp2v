@@ -110,10 +110,6 @@ void AgentCommon::AndRuleConfigure( const AndRuleEngine *e,
     
     if( base_plink_ )
     {
-        if( ReadArgs::new_feature )
-            ASSERT( !base_plink )("Base plink should only be configured once ")
-                                 (e)(" vs ")(master_and_rule_engine)("\n")
-                                 (base_plink)(" vs ")(base_plink_);
         ASSERT( base_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
         base_plink = base_plink_;
     }
@@ -706,11 +702,11 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 {
-    // Baseless query strategy: hand-rolled
     XLink base_xlink;
     if( required_links->count(base_plink) > 0 )
         base_xlink = required_links->at(base_plink);
 
+    // Baseless or MMAX query strategy: hand-rolled
     if( !base_xlink || base_xlink == XLink::MMAX_Link )
     {
         bool saw_non_mmax = false;
@@ -758,10 +754,14 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *required_links,
                                                    const TheKnowledge *knowledge ) const
 {
-    // Baseless query strategy: don't check PR
-    if( required_links->count(base_plink) == 1 )
+    // Baseless query strategy: don't check pre-restriction
+    bool based = (required_links->count(base_plink) == 1);
+    if( based )
+    { 
+        // Check pre-restriction
         if( !IsLocalMatch( required_links->at(base_plink).GetChildX().get() ) )
             throw PreRestrictionMismatch();
+    }
     
     RunNormalLinkedQueryPRed( required_links, knowledge );
 }
