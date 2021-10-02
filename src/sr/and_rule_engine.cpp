@@ -86,12 +86,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         parent_links_to_master_boundary_agents[plink.GetChildAgent()].insert(plink);
     // master_boundary_agents should be same set of agents as those reached by master_boundary_links (uniquified)
     ASSERT( parent_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
-
-    // these two conditions for trivial problem should be equivalent
-    ASSERT( my_normal_agents.empty() == my_normal_links.empty() ); 
-    trivial_problem = my_normal_agents.empty();
-    if( trivial_problem ) 
-        return;  // Early-out on trivial problems
         
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
@@ -100,8 +94,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // Well, obviously...
     ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
     
-    ConfigureAgents();
-        
+    ConfigureAgents();       
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    CreateSubordniateEngines( my_normal_agents, surrounding_plinks );   
+    
+    // these two conditions for trivial problem should be equivalent
+    ASSERT( my_normal_agents.empty() == my_normal_links.empty() ); 
+    trivial_problem = my_normal_agents.empty();
+    if( trivial_problem ) 
+        return;  // Early-out on trivial problems
+
 #ifdef USE_SOLVER   
     {
         list< shared_ptr<CSP::Constraint> > constraints_list;
@@ -114,9 +116,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
 #endif                      
-
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    CreateSubordniateEngines( my_normal_agents, surrounding_plinks );   
 }
 
 
