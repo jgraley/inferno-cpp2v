@@ -176,6 +176,7 @@ void SystemicConstraint::Test( Assignments frees_map )
         
         case Kind::RESIDUAL:
             coupling_links.insert(v);
+            required_links[var.id] = v;     
             break;
             
         case Kind::CHILD:
@@ -191,7 +192,7 @@ void SystemicConstraint::Test( Assignments frees_map )
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {
             // First check any coupling at this pattern node
-            plan.agent->RunCouplingQuery( coupling_links );
+            plan.agent->RunCouplingQuery( &required_links, coupling_links );
         }
                       
         if( plan.action==Action::FULL && required_links.size() > 0 )

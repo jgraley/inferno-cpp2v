@@ -100,7 +100,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // Well, obviously...
     ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
     
-    
     ConfigureAgents();
         
 #ifdef USE_SOLVER   
@@ -363,11 +362,27 @@ void AndRuleEngine::Plan::ConfigureAgents()
         for( PatternLink residual_plink : coupling_residual_links )
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
+        /*
+         * This gets no hits: my_normal_links_unique_by_agent only contains
+         * links to my agents, whereas master_boundary_residual_links only
+         * contains links to master agents. There's no easy way around this
+         * since we should only configure my agents.
+         
         for( PatternLink residual_plink : master_boundary_residual_links )
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
-            
+          */  
         agent->AndRuleConfigure( algo, keyer_plink, residual_plinks );
+    }
+
+    if( ReadArgs::new_feature )
+    {
+        for( PatternLink residual_plink : master_boundary_residual_links )
+        {
+            ASSERT( residual_plink );
+            Agent *agent = residual_plink.GetChildAgent();
+            agent->AddResiduals( {residual_plink} );
+        }
     }
 }
 
@@ -897,15 +912,23 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 
-    
-    if( ReadArgs::new_feature )
-    {
-        FTRACE(*this)(" Keyer ")(keyer_xlink)("\nResidual ")(residual_link)("\n");
-        PatternLink keyer_plink = agent->GetKeyerPatternLink();
-    }
 
     multiset<XLink> candidate_links { keyer_xlink, residual_link };
-    agent->RunCouplingQuery( candidate_links );
+    
+    // Only filling in two required liks: keyer and one residual - this may
+    // lead to a partial query if there are really more residuals.
+    // Note: it would be great to split the constraint into binaries (keyer 
+    // plus one residual) and then this old solver could use those and 
+    // not need to make partial queries)
+    SolutionMap required_links;
+    if( ReadArgs::new_feature )
+    {
+        PatternLink keyer_plink = agent->GetKeyerPatternLink();
+        required_links[keyer_plink] = keyer_xlink;
+        required_links[(PatternLink)residual_link] = (XLink)residual_link;
+    }
+    
+    agent->RunCouplingQuery( &required_links, candidate_links );
 }                                     
 
 

@@ -63,6 +63,7 @@ public:
     virtual void AndRuleConfigure( const AndRuleEngine *e,
                                    PatternLink base_plink_, 
                                    set<PatternLink> coupled_plinks_ ) = 0;
+    virtual void AddResiduals( set<PatternLink> coupled_plinks_ ) = 0;
                                    
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -81,7 +82,7 @@ public:
                                        const TheKnowledge *knowledge ) const = 0;
 
     /// Test an agent given given partial map of locations of keyer and residuals.  
-    virtual void RunCouplingQuery( multiset<XLink> candidate_links ) = 0;                                       
+    virtual void RunCouplingQuery( const SolutionMap *required_links, multiset<XLink> candidate_links ) = 0;                                       
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
@@ -127,6 +128,7 @@ public:
     virtual void AndRuleConfigure( const AndRuleEngine *e,
                                    PatternLink base_plink_, 
                                    set<PatternLink> coupled_plinks_ );
+    virtual void AddResiduals( set<PatternLink> coupled_plinks_ );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
@@ -143,7 +145,7 @@ public:
     virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const;
                                        
-    virtual void RunCouplingQuery( multiset<XLink> candidate_links );                                       
+    virtual void RunCouplingQuery( const SolutionMap *required_links, multiset<XLink> candidate_links );                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *required_links,

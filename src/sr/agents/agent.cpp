@@ -104,10 +104,7 @@ void AgentCommon::AndRuleConfigure( const AndRuleEngine *e,
                                    ("\nCould be result of coupling abnormal links - not allowed :(");
     ASSERT(master_scr_engine)("Must call SCRConfigure() before AndRuleConfigure()");
     master_and_rule_engine = e;
-                                       
-    if( ReadArgs::new_feature )
-        FTRACE(*this)(" AndRuleConfigure ")(base_plink_)("\n");
-    
+                                           
     if( base_plink_ )
     {
         ASSERT( base_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
@@ -133,6 +130,17 @@ void AgentCommon::AndRuleConfigure( const AndRuleEngine *e,
     }
 }
                                 
+
+void AgentCommon::AddResiduals( set<PatternLink> coupled_plinks_ )
+{
+    for( PatternLink plink : coupled_plinks_ )
+    {
+        ASSERT( plink );
+        ASSERT( plink.GetChildAgent() == this )("Parent link supplied for different agent");
+        InsertSolo( coupled_plinks, plink );
+    }
+}
+
 
 list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 {
@@ -253,12 +261,30 @@ void AgentCommon::RunNormalLinkedQuery( const SolutionMap *required_links,
 }                                            
 
 
-void AgentCommon::RunCouplingQuery( multiset<XLink> candidate_links )
+void AgentCommon::RunCouplingQuery( const SolutionMap *required_links, multiset<XLink> candidate_links )
 {    
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
+
+    if( ReadArgs::new_feature )
+    {
+        multiset<XLink> my_candidate_links;    
+        my_candidate_links.insert( required_links->at(base_plink) ); // insert base xlink (keyer)
+        for( PatternLink coupled_plink : coupled_plinks )
+            if( required_links->count(coupled_plink) ) // could be partial query
+                my_candidate_links.insert( required_links->at(coupled_plink) ); // insert coupled x links if required (residuals)
+
+        ASSERT( candidate_links.size() == my_candidate_links.size() )(*this)
+              ("\ncandidate_links:\n")(candidate_links)
+              ("\nmy_candidate_links:\n")(my_candidate_links)
+              ("\nrequired_links:\n")(required_links)
+              ("\ncoupled_plinks:\n")(coupled_plinks)("\n");
+    }
+    
+    // Note: having combined keyer and residuals into a single multimap,
+    // we proceed with a symmetrical algorithm.
 
     // We will always accept MMAX links, so ignore them
     candidate_links.erase(XLink::MMAX_Link);
@@ -501,7 +527,8 @@ CouplingKey AgentCommon::GetKey()
 
 PatternLink AgentCommon::GetKeyerPatternLink()
 {
-    ASSERT( base_plink )(*this)(" has no base_plink");
+    ASSERT( master_and_rule_engine )(*this)(" has not been configured by any AndRuleEngine");
+    ASSERT( base_plink )(*this)(" has no base_plink, engine=")(master_and_rule_engine)("\n");
     
     return base_plink;
 }
