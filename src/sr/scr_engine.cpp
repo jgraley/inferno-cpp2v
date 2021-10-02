@@ -312,7 +312,7 @@ void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 	// Get couplings from agents into the supplied map if not there already
     FOREACH( Agent *a, plan.my_agents )
         if( a->GetKey() && !coupling_keys->count( a ) > 0 )
-            (*coupling_keys)[a] = a->GetKey();	
+            (*coupling_keys)[a] = make_pair(a->GetKey(), PLACE_5);	
 }
 
 

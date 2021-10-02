@@ -456,7 +456,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     for( PatternLink link : plan.master_boundary_keyer_links )
     {
         // distinct OK because this only runs once per solve
-        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).GetChildX();
+        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).first.GetChildX();
         master_and_root_links[link] = XLink::CreateDistinct(node);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
@@ -476,7 +476,7 @@ void AndRuleEngine::GetNextCSPSolution()
     // Recreate my_coupling_keys
     for( pair< PatternLink, XLink > pxp : csp_solution )
     {
-        RecordLink( LocatedLink(pxp) );                        
+        RecordLink( LocatedLink(pxp), PLACE_4 );                        
     }
 }
 
@@ -520,10 +520,10 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             DecidedCompare(link);  
              
             if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
-                KeyCoupling( my_coupling_keys, link );
+                KeyCoupling( my_coupling_keys, link, PLACE_0 );
         }
 
-        RecordLink( link );        
+        RecordLink( link, PLACE_1 );        
     }
 }
 
@@ -691,7 +691,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                         e->Compare( link, &subordinate_keys, knowledge );
                         
                         // Replace needs these keys
-                        KeyCoupling( provisional_external_keys, link );
+                        KeyCoupling( provisional_external_keys, link, PLACE_2 );
                     }
                 }                    
                 
@@ -819,7 +819,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
             basic_solution[plan.root_plink] = root_xlink;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             if( root_xlink != XLink::MMAX_Link )
-                KeyCoupling( external_keys, root_link );            
+                KeyCoupling( external_keys, root_link, PLACE_3 );            
 
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
@@ -887,7 +887,7 @@ const void AndRuleEngine::ClearCouplingKeys()
 }
 
 
-void AndRuleEngine::RecordLink( LocatedLink link )
+void AndRuleEngine::RecordLink( LocatedLink link, KeyingPlace place )
 {
     // All go into the basic solution which is enough to
     // regenerate a full solution.
@@ -899,7 +899,7 @@ void AndRuleEngine::RecordLink( LocatedLink link )
         plan.master_boundary_residual_links.count( (PatternLink)link ) == 0 &&
         plan.coupling_residual_links.count( (PatternLink)link ) == 0 && 
         (XLink)link != XLink::MMAX_Link )
-        KeyCoupling( external_keys, link );        
+        KeyCoupling( external_keys, link, place );        
 }
 
 
@@ -907,7 +907,9 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 {
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
-    XLink keyer_xlink = keys.at(agent);
+    XLink keyer_xlink = keys.at(agent).first;
+
+    FTRACE("Coupling was keyed in PLACE_%d\n", keys.at(agent).second);
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 
@@ -931,7 +933,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 }                                     
 
 
-void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link )
+void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyingPlace place )
 {
     // A coupling keyed to Magic-Match-Anything-X would not be able to 
     // restrict the residuals wrt to each other. 
@@ -939,7 +941,7 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
     
     // A coupling relates the coupled agent to an X node, not the
     // link into the agent.
-    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), keyer_link ) ); 
+    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), make_pair(keyer_link, place) ) ); 
 }                                                       
  
 
@@ -947,23 +949,24 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
 {
     TreePtr<Node> new_xnode = new_xlink.GetChildX();
     ASSERT( extracted.count(new_agent) == 1 );
+    CouplingKey extracted_key = extracted.at(new_agent).first;
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
-        CompareResult cr  = equivalence_relation.Compare( extracted.at(new_agent), new_xlink );
+        CompareResult cr  = equivalence_relation.Compare( extracted_key, new_xlink );
         if( cr != EQUAL )
         {
-            FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted.at(new_agent))
+            FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted_key)
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
-            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted.at(new_agent).GetChildX()))
+            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted_key.GetChildX()))
                 FTRACEC("SubSequence\n");
-            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted.at(new_agent).GetChildX()))
+            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted_key.GetChildX()))
                 FTRACEC("SubSequenceRange\n");
-            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted.at(new_agent).GetChildX()))
+            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted_key.GetChildX()))
                 FTRACEC("SubCollections\n");
             else
                 FTRACEC("Container types don't match\n");
-            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted.at(new_agent).GetChildX().get());
+            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted_key.GetChildX().get());
             FOREACH( const TreePtrInterface &node, *xc )
                 FTRACEC("ext: ")( node )("\n");
             xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
@@ -974,7 +977,7 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     }
     else
     {
-        ASSERT( extracted.at(new_agent).GetChildX() == new_xnode );
+        ASSERT( extracted_key.GetChildX() == new_xnode );
     }
 }
 

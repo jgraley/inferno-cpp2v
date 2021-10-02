@@ -119,8 +119,18 @@ private: friend class PatternLink; friend class XLink;
     XLink xlink; 
 };
 
+enum KeyingPlace
+{
+    PLACE_0,
+    PLACE_1,
+    PLACE_2,
+    PLACE_3,
+    PLACE_4,
+    PLACE_5    
+};
+
 typedef XLink CouplingKey;
-typedef map< Agent *, CouplingKey > CouplingKeysMap;
+typedef map< Agent *, pair<CouplingKey, KeyingPlace> > CouplingKeysMap;
 typedef unordered_map< PatternLink, XLink > SolutionMap;
 
 //bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );

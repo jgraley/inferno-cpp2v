@@ -60,8 +60,8 @@ bool SearchContainerAgent::ImplHasNLQ() const
 
 void SearchContainerAgent::KeyReplace( const CouplingKeysMap *coupling_keys )
 {
-    terminus_key = coupling_keys->at(AsAgent(terminus)).GetChildX();
-    SetKey( coupling_keys->at(this) );  
+    terminus_key = coupling_keys->at(AsAgent(terminus)).first.GetChildX();
+    SetKey( coupling_keys->at(this).first );  
 }
 
 
