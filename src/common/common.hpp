@@ -29,7 +29,7 @@ template< typename S >
 inline void InsertSolo( S &s, const typename S::value_type &p )
 {
     auto pr = s.insert( p );
-    ASSERT( pr.second )(p)(" already in container ")(s);
+    ASSERT( pr.second )("Already in container");
 }
 
 

@@ -277,7 +277,7 @@ void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
         TRACEC(*a);
         bool keyed = ( coupling_keys->count( a ) > 0 );
         if( keyed )
-            TRACEC(" is in coupling_keys: ")(coupling_keys->at( a ));
+            TRACEC(" is in coupling_keys: ")(coupling_keys->at( a ).key);
         else
             TRACEC(" is not in coupling_keys");
         CouplingKey self_coupled = a->GetKey();
@@ -312,7 +312,10 @@ void SCREngine::GatherCouplings( CouplingKeysMap *coupling_keys ) const
 	// Get couplings from agents into the supplied map if not there already
     FOREACH( Agent *a, plan.my_agents )
         if( a->GetKey() && !coupling_keys->count( a ) > 0 )
-            (*coupling_keys)[a] = make_pair(a->GetKey(), PLACE_5);	
+        {
+            CouplingKeyMapBlock b {a->GetKey(), PLACE_5, PatternLink(), nullptr, this};
+            (*coupling_keys)[a] = b;	
+        }
 }
 
 

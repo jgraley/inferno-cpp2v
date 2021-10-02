@@ -128,9 +128,21 @@ enum KeyingPlace
     PLACE_4,
     PLACE_5    
 };
-
 typedef XLink CouplingKey;
-typedef map< Agent *, pair<CouplingKey, KeyingPlace> > CouplingKeysMap;
+
+struct CouplingKeyMapBlock
+{
+    // This is the real key
+    CouplingKey key;
+    // These are just for investigations and checks 
+    KeyingPlace place;
+    PatternLink plink;
+    const class AndRuleEngine *are;
+    const class SCREngine *scre;
+};
+
+typedef map< Agent *, CouplingKeyMapBlock > CouplingKeysMap;
+
 typedef unordered_map< PatternLink, XLink > SolutionMap;
 
 //bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
