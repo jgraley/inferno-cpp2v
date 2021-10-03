@@ -521,7 +521,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             DecidedCompare(link);  
              
             if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
-                KeyCoupling( my_coupling_keys, link, PLACE_5 );
+                KeyCoupling( my_coupling_keys, link, PLACE_6 );
         }
 
         RecordLink( link, PLACE_1 );        
@@ -910,7 +910,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     ASSERT( keys.count(agent) > 0 );
     XLink keyer_xlink = keys.at(agent);
 
-    FTRACE(keys.at(agent))("\n");
+    //FTRACE(keys.at(agent))("\n");
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 

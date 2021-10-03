@@ -78,7 +78,7 @@ TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl()
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        CouplingKey keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) ) );
+        CouplingKey keylink(XLink::CreateDistinct( TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) ) ), PLACE_7 );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
@@ -95,7 +95,7 @@ TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl()
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        CouplingKey keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) ) );
+        CouplingKey keylink( XLink::CreateDistinct( TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) ) ), PLACE_7 );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
@@ -112,7 +112,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl()
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        CouplingKey keylink = XLink::CreateDistinct( TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) ) );
+        CouplingKey keylink( XLink::CreateDistinct( TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) ) ), PLACE_7 );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
@@ -292,7 +292,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl()
 		ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 		ASSERT( n_container );
 		int size = n_container->size();
-        CouplingKey keylink = XLink::CreateDistinct( MakePatternPtr<SpecificInteger>(size) );
+        CouplingKey keylink( XLink::CreateDistinct( MakePatternPtr<SpecificInteger>(size) ), PLACE_7 );
 		SetKey( keylink );
 	}
 	// Note that the keylink could have been set via coupling - but still not

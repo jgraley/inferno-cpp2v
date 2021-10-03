@@ -4,6 +4,7 @@
 
 using namespace SR;
 
+#ifdef COUPLINGKEY_DEFAULT_CONSTRUCTOR
 CouplingKey::CouplingKey() :
     xlink(XLink()),
     place(PLACE_UNKNOWN),
@@ -12,19 +13,11 @@ CouplingKey::CouplingKey() :
     scre(nullptr)
 {
 }
+#endif
 
 
-CouplingKey::CouplingKey( const CouplingKey &other ) :
-    xlink(other.xlink),
-    place(other.place),
-    plink(other.plink),
-    are(other.are),
-    scre(other.scre)
-{
-};
-
-
-CouplingKey::CouplingKey( const XLink &xlink_ ) :
+#ifdef COUPLINGKEY_XLINK_CONSTRUCTOR
+CouplingKey::CouplingKey( XLink xlink_ ) :
     xlink(xlink_),
     place(PLACE_UNKNOWN),
     plink(PatternLink()),
@@ -32,6 +25,7 @@ CouplingKey::CouplingKey( const XLink &xlink_ ) :
     scre(nullptr)
 {
 }
+#endif
 
 
 CouplingKey::CouplingKey( XLink xlink_,
@@ -46,6 +40,16 @@ CouplingKey::CouplingKey( XLink xlink_,
     scre(scre_)
 {
 }
+
+
+CouplingKey::CouplingKey( const CouplingKey &other ) :
+    xlink(other.xlink),
+    place(other.place),
+    plink(other.plink),
+    are(other.are),
+    scre(other.scre)
+{
+};
 
 
 CouplingKey::~CouplingKey()

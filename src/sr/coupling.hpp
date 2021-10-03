@@ -5,6 +5,9 @@
 #include "node/specialise_oostd.hpp"
 #include "link.hpp"
 
+#define COUPLINGKEY_DEFAULT_CONSTRUCTOR
+#define COUPLINGKEY_XLINK_CONSTRUCTOR
+
 namespace SR
 { 
 
@@ -15,21 +18,29 @@ enum KeyingPlace
     PLACE_2,
     PLACE_3,
     PLACE_4,
-    PLACE_5   
+    PLACE_5,
+    PLACE_6,
+    PLACE_7,
+    PLACE_8,
+    PLACE_9       
 };
 
 
 class CouplingKey : public Traceable
 {
 public:
+#ifdef COUPLINGKEY_DEFAULT_CONSTRUCTOR
     CouplingKey();
-    CouplingKey( const CouplingKey &other );
-    CouplingKey( const XLink &xlink_ );
+#endif    
+#ifdef COUPLINGKEY_XLINK_CONSTRUCTOR
+    explicit CouplingKey( XLink xlink_ );
+#endif    
     explicit CouplingKey( XLink xlink_,
                           KeyingPlace place_,
-                          PatternLink plink_,
-                          const class AndRuleEngine *are_,
-                          const class SCREngine *scre_ );
+                          PatternLink plink_ = PatternLink(),
+                          const class AndRuleEngine *are_ = nullptr,
+                          const class SCREngine *scre_ = nullptr );
+    CouplingKey( const CouplingKey &other );
     ~CouplingKey();
     XLink &operator =( const XLink &xlink_ );
     operator XLink() const;
