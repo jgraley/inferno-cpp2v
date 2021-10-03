@@ -18,7 +18,23 @@ enum KeyingPlace
     PLACE_5    
 };
 
-typedef XLink CouplingKey;
+
+class CouplingKey : public Traceable
+{
+public:
+    CouplingKey();
+    CouplingKey( const XLink &o ); // implicit allowed
+    ~CouplingKey();
+    XLink &operator =( const XLink &o );
+    operator XLink() const;
+    operator bool() const;
+    TreePtr<Node> GetChildX() const;
+    string GetTrace() const; // used for debug
+    
+private:    
+    XLink xlink;
+};
+
 
 struct CouplingKeyMapBlock
 {
