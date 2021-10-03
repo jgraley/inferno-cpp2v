@@ -11,6 +11,7 @@
 
 #include "query.hpp"
 #include "link.hpp"
+#include "coupling.hpp"
 #include "the_knowledge.hpp"
 
 #include <set>

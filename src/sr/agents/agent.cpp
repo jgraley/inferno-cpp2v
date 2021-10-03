@@ -5,6 +5,7 @@
 #include "scr_engine.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
+#include "coupling.hpp"
 // Temporary
 #include "tree/cpptree.hpp"
 #include "transform_of_agent.hpp"

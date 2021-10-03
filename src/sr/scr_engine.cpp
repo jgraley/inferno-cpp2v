@@ -9,6 +9,7 @@
 #include "agents/agent.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
+#include "coupling.hpp"
 #include "equivalence.hpp"
 
 #include <list>

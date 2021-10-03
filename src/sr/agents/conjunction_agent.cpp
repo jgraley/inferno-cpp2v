@@ -1,6 +1,7 @@
 #include "conjunction_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
+#include "coupling.hpp"
 
 using namespace SR;
 

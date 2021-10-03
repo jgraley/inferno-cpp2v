@@ -15,6 +15,7 @@
 #include "common/common.hpp"
 #include "agents/disjunction_agent.hpp"
 #include "link.hpp"
+#include "coupling.hpp"
 #include "tree/cpptree.hpp"
 #include "equivalence.hpp"
 #include "render/graph.hpp"
@@ -910,8 +911,8 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     XLink keyer_xlink = keys.at(agent).key;
 
     const CouplingKeyMapBlock &block = keys.at(agent);
-    FTRACE("Coupling ")(keyer_xlink)(" PLACE_%d", block.place)
-          (" plink=")(block.plink)(" ARE=")(block.are)(" SCRE=")(block.scre)("\n");
+    //FTRACE("Coupling ")(keyer_xlink)(" PLACE_%d", block.place)
+    //      (" plink=")(block.plink)(" ARE=")(block.are)(" SCRE=")(block.scre)("\n");
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 

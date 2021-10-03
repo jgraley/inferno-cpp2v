@@ -3,6 +3,7 @@
 #include "../conjecture.hpp" 
 #include "link.hpp"
 #include "the_knowledge.hpp"
+#include "coupling.hpp"
 
 using namespace SR;
 
@@ -61,7 +62,7 @@ bool SearchContainerAgent::ImplHasNLQ() const
 void SearchContainerAgent::KeyReplace( const CouplingKeysMap *coupling_keys )
 {
     terminus_key = coupling_keys->at(AsAgent(terminus)).key.GetChildX();
-    SetKey( coupling_keys->at(this).key );  
+    AgentCommon::KeyReplace( coupling_keys );
 }
 
 

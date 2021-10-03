@@ -6,6 +6,7 @@
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
+#include "coupling.hpp"
 
 #define ITEMS_BY_PLAN
 
