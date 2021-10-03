@@ -61,7 +61,7 @@ bool SearchContainerAgent::ImplHasNLQ() const
 
 void SearchContainerAgent::KeyReplace( const CouplingKeysMap *coupling_keys )
 {
-    terminus_key = coupling_keys->at(AsAgent(terminus)).key.GetChildX();
+    terminus_key = coupling_keys->at(AsAgent(terminus)).key.GetKeyX();
     AgentCommon::KeyReplace( coupling_keys );
 }
 
@@ -74,7 +74,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl()
     ASSERT(terminus_key);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(GetKey().GetChildX(), terminus_key, term);   
+    return DuplicateSubtree(GetKey().GetKeyX(), terminus_key, term);   
 }
 
 

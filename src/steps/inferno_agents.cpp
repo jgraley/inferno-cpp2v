@@ -83,7 +83,7 @@ TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl()
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(GetKey().GetChildX());   
+    return DuplicateSubtree(GetKey().GetKeyX());   
 }                                                   
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
@@ -100,7 +100,7 @@ TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl()
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(GetKey().GetChildX());   
+    return DuplicateSubtree(GetKey().GetKeyX());   
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
@@ -117,7 +117,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl()
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(GetKey().GetChildX());   
+    return DuplicateSubtree(GetKey().GetKeyX());   
 }                                                   
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -297,7 +297,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl()
 	}
 	// Note that the keylink could have been set via coupling - but still not
 	// likely to do anything sensible, so explicitly check
-	return DuplicateSubtree(GetKey().GetChildX());   
+	return DuplicateSubtree(GetKey().GetKeyX());   
 }                                                   
 
 
@@ -346,7 +346,7 @@ void IsLabelReachedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query
 	// y is nominally the goto expression, coupled in
 	FlushCache();
 	
-	TreePtr<Node> child_x = AsAgent(pattern)->GetKey().GetChildX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+	TreePtr<Node> child_x = AsAgent(pattern)->GetKey().GetKeyX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
 	if( !child_x )
 		child_x = pattern;
 	TreePtr<Expression> e_child_x = DynamicTreePtrCast<Expression>( child_x );

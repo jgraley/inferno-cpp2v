@@ -37,7 +37,7 @@ CouplingKey::operator bool() const
 }
 
 
-TreePtr<Node> CouplingKey::GetChildX() const
+TreePtr<Node> CouplingKey::GetKeyX() const
 {
     return xlink.GetChildX();
 }

@@ -511,7 +511,7 @@ void AgentCommon::SetKey( CouplingKey keylink )
 {
     ASSERT(keylink);
     if( phase != IN_COMPARE_ONLY )
-        ASSERT(keylink.GetChildX()->IsFinal() )(*this)(" trying to key with non-final ")(keylink)("\n"); 
+        ASSERT(keylink.GetKeyX()->IsFinal() )(*this)(" trying to key with non-final ")(keylink)("\n"); 
    
     if( !coupling_key )
     { 
@@ -565,7 +565,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.   
-    ASSERT( !GetKey() || GetKey().GetChildX()->IsFinal() )(*this)(" keyed with non-final ")(GetKey())("\n"); 
+    ASSERT( !GetKey() || GetKey().GetKeyX()->IsFinal() )(*this)(" keyed with non-final ")(GetKey())("\n"); 
     
     TreePtr<Node> dest = BuildReplaceImpl();    
     ASSERT( dest );
@@ -578,7 +578,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
 TreePtr<Node> AgentCommon::BuildReplaceImpl()
 {
     ASSERT(GetKey())("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(GetKey().GetChildX());   
+    return DuplicateSubtree(GetKey().GetKeyX());   
 }
 
 

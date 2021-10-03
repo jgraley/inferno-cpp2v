@@ -457,7 +457,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     for( PatternLink link : plan.master_boundary_keyer_links )
     {
         // distinct OK because this only runs once per solve
-        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).key.GetChildX();
+        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).key.GetKeyX();
         master_and_root_links[link] = XLink::CreateDistinct(node);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
@@ -962,15 +962,15 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
         {
             FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted_key)
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
-            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted_key.GetChildX()))
+            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted_key.GetKeyX()))
                 FTRACEC("SubSequence\n");
-            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted_key.GetChildX()))
+            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted_key.GetKeyX()))
                 FTRACEC("SubSequenceRange\n");
-            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted_key.GetChildX()))
+            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted_key.GetKeyX()))
                 FTRACEC("SubCollections\n");
             else
                 FTRACEC("Container types don't match\n");
-            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted_key.GetChildX().get());
+            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted_key.GetKeyX().get());
             FOREACH( const TreePtrInterface &node, *xc )
                 FTRACEC("ext: ")( node )("\n");
             xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
@@ -981,7 +981,7 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     }
     else
     {
-        ASSERT( extracted_key.GetChildX() == new_xnode );
+        ASSERT( extracted_key.GetKeyX() == new_xnode );
     }
 }
 

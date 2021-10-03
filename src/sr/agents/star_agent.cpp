@@ -72,7 +72,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl()
 {
     INDENT("*");
     ASSERT( GetKey() );
-    TreePtr<Node> keynode = GetKey().GetChildX();
+    TreePtr<Node> keynode = GetKey().GetKeyX();
     ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
     ASSERT( psc )("Star node ")(*this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");  
     TRACE("Walking container length %d\n", psc->size() );

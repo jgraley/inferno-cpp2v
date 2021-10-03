@@ -793,7 +793,7 @@ void StandardAgent::KeyForOverlay( Agent *from )
 TreePtr<Node> StandardAgent::BuildReplaceImpl() 
 {
     INDENT("B");
-    if( GetKey() && IsLocalMatch(GetKey().GetChildX().get()) ) 
+    if( GetKey() && IsLocalMatch(GetKey().GetKeyX().get()) ) 
         return BuildReplaceOverlay();
     else
         return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
@@ -803,7 +803,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl()
 TreePtr<Node> StandardAgent::BuildReplaceOverlay()  // under substitution if not nullptr
 {
 	INDENT("O");
-    TreePtr<Node> keynode = GetKey().GetChildX();
+    TreePtr<Node> keynode = GetKey().GetKeyX();
     ASSERT( keynode );
     
     ASSERT( IsLocalMatch(keynode.get()) )
