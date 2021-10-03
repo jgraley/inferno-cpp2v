@@ -543,7 +543,7 @@ void AgentCommon::Reset()
 
 void AgentCommon::KeyReplace( const CouplingKeysMap *coupling_keys )
 {   
-    SetKey( coupling_keys->at(this).key );  
+    SetKey( coupling_keys->at(this) );  
 }
 
 

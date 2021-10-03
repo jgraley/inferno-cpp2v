@@ -457,7 +457,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     for( PatternLink link : plan.master_boundary_keyer_links )
     {
         // distinct OK because this only runs once per solve
-        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).key.GetKeyX();
+        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).GetKeyX();
         master_and_root_links[link] = XLink::CreateDistinct(node);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
@@ -521,7 +521,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             DecidedCompare(link);  
              
             if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
-                KeyCoupling( my_coupling_keys, link, PLACE_0 );
+                KeyCoupling( my_coupling_keys, link, PLACE_5 );
         }
 
         RecordLink( link, PLACE_1 );        
@@ -908,11 +908,9 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 {
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
-    XLink keyer_xlink = keys.at(agent).key;
+    XLink keyer_xlink = keys.at(agent);
 
-    const CouplingKeyMapBlock &block = keys.at(agent);
-    //FTRACE("Coupling ")(keyer_xlink)(" PLACE_%d", block.place)
-    //      (" plink=")(block.plink)(" ARE=")(block.are)(" SCRE=")(block.scre)("\n");
+    FTRACE(keys.at(agent))("\n");
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 
@@ -944,8 +942,8 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
     
     // A coupling relates the coupled agent to an X node, not the
     // link into the agent.
-    CouplingKeyMapBlock b {(XLink)keyer_link, place, (PatternLink)keyer_link, this, nullptr};
-    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), b ) ); 
+    CouplingKey key( (XLink)keyer_link, place, (PatternLink)keyer_link, this, nullptr );
+    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), key ) ); 
 }                                                       
  
 
@@ -953,7 +951,7 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
 {
     TreePtr<Node> new_xnode = new_xlink.GetChildX();
     ASSERT( extracted.count(new_agent) == 1 );
-    CouplingKey extracted_key = extracted.at(new_agent).key;
+    CouplingKey extracted_key = extracted.at(new_agent);
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
