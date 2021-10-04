@@ -511,7 +511,7 @@ void AgentCommon::SetKey( CouplingKey keylink )
 {
     ASSERT(keylink);
     if( phase != IN_COMPARE_ONLY )
-        ASSERT(keylink.GetKeyX()->IsFinal() )(*this)(" trying to key with non-final ")(keylink)("\n"); 
+        ASSERT(keylink.IsFinal() )(*this)(" trying to key with non-final ")(keylink)("\n"); 
    
     if( !coupling_key )
     { 
@@ -562,8 +562,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
-    ASSERT( !GetKey() || GetKey().GetKeyX() )(*this)(" if there is a coupling key, then its node should not be NULL ")(GetKey())("\n"); 
-    ASSERT( !GetKey() || GetKey().GetKeyX()->IsFinal() )(*this)(" keyed with non-final node ")(GetKey())("\n"); 
+    ASSERT( !GetKey() || GetKey().IsFinal() )(*this)(" keyed with non-final node ")(GetKey())("\n"); 
     
     TreePtr<Node> dest = BuildReplaceImpl();    
     ASSERT( dest );

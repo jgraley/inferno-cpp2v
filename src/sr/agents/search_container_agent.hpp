@@ -17,7 +17,7 @@ namespace SR
 class SearchContainerAgent : public virtual PreRestrictedAgent
 {
 private:
-    TreePtr<Node> terminus_key;
+    TreePtr<Node> terminus_keynode;
 
 public:
     class TerminusMismatch : public Mismatch {};

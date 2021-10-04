@@ -72,6 +72,8 @@ CouplingKey::operator XLink() const
 
 CouplingKey::operator bool() const
 {
+    if( xlink )
+        ASSERT( xlink.GetChildX() );
     return (bool)xlink;
 }
 
@@ -100,3 +102,7 @@ string CouplingKey::GetTrace() const
     return s;
 }
 
+bool CouplingKey::IsFinal() const
+{
+    return xlink ? xlink.GetChildX()->IsFinal() : false;
+}

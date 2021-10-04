@@ -350,7 +350,7 @@ void IsLabelReachedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query
 	// y is nominally the goto expression, coupled in
 	FlushCache();
 	
-	TreePtr<Node> child_x = AsAgent(pattern)->GetKey().GetKeyX(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+	TreePtr<Node> child_x = AsAgent(pattern)->GetKey().GetKeyX(); // TODO a templated version that returns same type as pattern, so we don't need to convert here?
 	if( !child_x )
 		child_x = pattern;
 	TreePtr<Expression> e_child_x = DynamicTreePtrCast<Expression>( child_x );

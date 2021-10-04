@@ -47,6 +47,7 @@ public:
     operator bool() const;
     TreePtr<Node> GetKeyX() const;
     string GetTrace() const; // used for debug
+    bool IsFinal() const;
     
 private:    
     // This is the real key

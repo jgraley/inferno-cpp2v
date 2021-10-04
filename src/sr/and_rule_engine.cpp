@@ -457,8 +457,8 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     for( PatternLink link : plan.master_boundary_keyer_links )
     {
         // distinct OK because this only runs once per solve
-        TreePtr<Node> node = master_keys->at(link.GetChildAgent()).GetKeyX();
-        master_and_root_links[link] = XLink::CreateDistinct(node);
+        TreePtr<Node> keynode = master_keys->at(link.GetChildAgent()).GetKeyX();
+        master_and_root_links[link] = XLink::CreateDistinct(keynode);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
 
