@@ -169,7 +169,6 @@ public:
     virtual void Reset();    
     virtual void KeyForOverlay( Agent *from );
     virtual TreePtr<Node> BuildReplace();
-    virtual TreePtr<Node> BuildReplaceImpl();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;

@@ -81,7 +81,7 @@ void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
-TreePtr<Node> ColocatedAgent::BuildReplaceImpl() 
+TreePtr<Node> ColocatedAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     auto plinks = pattern_query->GetNormalLinks();
     PatternLink replace_plink = plinks.front();

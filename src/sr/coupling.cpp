@@ -6,7 +6,7 @@ using namespace SR;
 
 CouplingKey::CouplingKey() :
     xlink(XLink()),
-    place(PLACE_UNKNOWN),
+    producer(KEY_PRODUCER_U),
     plink(PatternLink()),
     are(nullptr),
     scre(nullptr)
@@ -15,12 +15,12 @@ CouplingKey::CouplingKey() :
 
 
 CouplingKey::CouplingKey( XLink xlink_,
-                          KeyingPlace place_,
+                          KeyProducer producer_,
                           PatternLink plink_,
                           const class AndRuleEngine *are_,
                           const class SCREngine *scre_ ) :
     xlink(xlink_),
-    place(place_),
+    producer(producer_),
     plink(plink_),
     are(are_),
     scre(scre_)
@@ -30,7 +30,7 @@ CouplingKey::CouplingKey( XLink xlink_,
 
 CouplingKey::CouplingKey( const CouplingKey &other ) :
     xlink(other.xlink),
-    place(other.place),
+    producer(other.producer),
     plink(other.plink),
     are(other.are),
     scre(other.scre)
@@ -58,14 +58,16 @@ CouplingKey::operator bool() const
 }
 
 
-XLink CouplingKey::GetKeyXLink() const
+XLink CouplingKey::GetKeyXLink( KeyConsumer consumer ) const
 {
+    Dump( consumer );
     return xlink;
 }
 
 
-TreePtr<Node> CouplingKey::GetKeyXNode() const
+TreePtr<Node> CouplingKey::GetKeyXNode( KeyConsumer consumer ) const
 {
+    Dump( consumer );
     return xlink.GetChildX();
 }
 
@@ -73,10 +75,10 @@ TreePtr<Node> CouplingKey::GetKeyXNode() const
 string CouplingKey::GetTrace() const
 {
     string s;
-    if( place == PLACE_UNKNOWN )
-        s += "PLACE_UNKNOWN ";                                               
+    if( producer == KEY_PRODUCER_U )
+        s += "KEY_PRODUCER_U ";                                               
     else
-        s += SSPrintf(" PLACE_%d ", place);
+        s += SSPrintf("KEY_PRODUCER_%d ", producer);
     s += plink.GetTrace();
     s += " := ";
     s += xlink.GetTrace();
@@ -88,7 +90,20 @@ string CouplingKey::GetTrace() const
     return s;
 }
 
+
 bool CouplingKey::IsFinal() const
 {
     return xlink ? xlink.GetChildX()->IsFinal() : false;
+}
+
+
+void CouplingKey::Dump( KeyConsumer consumer ) const
+{
+    string s;
+    if( consumer == KEY_CONSUMER_U )
+        s += "KEY_CONSUMER_U";                                               
+    else
+        s += SSPrintf(" KEY_CONSUMER_%d", consumer);
+    s += " <- " + GetTrace();
+    printf("%s\n", s.c_str());
 }

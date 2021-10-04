@@ -555,20 +555,15 @@ TreePtr<Node> AgentCommon::BuildReplace()
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     ASSERT( !GetKey() || GetKey().IsFinal() )(*this)(" keyed with non-final node ")(GetKey())("\n"); 
     
-    TreePtr<Node> dest = BuildReplaceImpl();    
+    TreePtr<Node> dest;
+    if( GetKey() )
+        dest = BuildReplaceImpl(GetKey().GetKeyXNode(KEY_CONSUMER_5));
+    else 
+        dest = BuildReplaceImpl(nullptr);    
     ASSERT( dest );
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
     
     return dest;
-}
-
-
-TreePtr<Node> AgentCommon::BuildReplaceImpl()
-{
-    if( GetKey() )
-        return BuildReplaceImpl(GetKey().GetKeyXNode());
-    else 
-        return BuildReplaceImpl(nullptr);
 }
 
 

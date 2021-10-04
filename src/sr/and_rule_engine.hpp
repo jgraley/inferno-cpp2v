@@ -146,9 +146,9 @@ public:
     const void ClearCouplingKeys();
 
 private:    
-    void RecordLink( LocatedLink link, KeyingPlace place );
-    void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link );
-    void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyingPlace place );
+    void RecordLink( LocatedLink link, KeyProducer place );
+    void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link, KeyConsumer consumer );
+    void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyProducer place );
     void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, XLink new_xlink, Agent *parent_agent );
 
 public:

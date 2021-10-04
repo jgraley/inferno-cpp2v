@@ -55,7 +55,7 @@ list<PatternLink> OverlayAgent::GetVisibleChildren( Path v ) const
 }
 
 
-TreePtr<Node> OverlayAgent::BuildReplaceImpl() 
+TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("O");    
     ASSERT( *GetOverlay() );          

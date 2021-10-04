@@ -31,7 +31,7 @@ public:
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
-    virtual TreePtr<Node> BuildReplaceImpl();
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }

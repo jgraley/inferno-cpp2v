@@ -457,7 +457,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     for( PatternLink link : plan.master_boundary_keyer_links )
     {
         // distinct OK because this only runs once per solve
-        TreePtr<Node> keynode = master_keys->at(link.GetChildAgent()).GetKeyXNode();
+        TreePtr<Node> keynode = master_keys->at(link.GetChildAgent()).GetKeyXNode(KEY_CONSUMER_4);
         master_and_root_links[link] = XLink::CreateDistinct(keynode);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
@@ -477,7 +477,7 @@ void AndRuleEngine::GetNextCSPSolution()
     // Recreate my_coupling_keys
     for( pair< PatternLink, XLink > pxp : csp_solution )
     {
-        RecordLink( LocatedLink(pxp), PLACE_4 );                        
+        RecordLink( LocatedLink(pxp), KEY_PRODUCER_4 );                        
     }
 }
 
@@ -510,21 +510,21 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // NOTE: Probable bug in couplings algo, see #315
         if( plan.coupling_residual_links.count( (PatternLink)link ) > 0 )
         {
-            CompareCoupling( my_coupling_keys, link );
+            CompareCoupling( my_coupling_keys, link, KEY_CONSUMER_1 );
         }
         else if( plan.master_boundary_residual_links.count( (PatternLink)link ) > 0 )
         {
-            CompareCoupling( *master_keys, link );
+            CompareCoupling( *master_keys, link, KEY_CONSUMER_6 );
         }
         else
         {
             DecidedCompare(link);  
              
             if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
-                KeyCoupling( my_coupling_keys, link, PLACE_6 );
+                KeyCoupling( my_coupling_keys, link, KEY_PRODUCER_6 );
         }
 
-        RecordLink( link, PLACE_1 );        
+        RecordLink( link, KEY_PRODUCER_1 );        
     }
 }
 
@@ -692,7 +692,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                         e->Compare( link, &subordinate_keys, knowledge );
                         
                         // Replace needs these keys
-                        KeyCoupling( provisional_external_keys, link, PLACE_2 );
+                        KeyCoupling( provisional_external_keys, link, KEY_PRODUCER_2 );
                     }
                 }                    
                 
@@ -752,7 +752,7 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
     ASSERT( master_keys->count(plan.root_agent) );
     try
     {            
-        CompareCoupling( *master_keys, root_link );
+        CompareCoupling( *master_keys, root_link, KEY_CONSUMER_7 );
     }
     catch( const ::Mismatch& mismatch ) 
     {
@@ -820,7 +820,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
             basic_solution[plan.root_plink] = root_xlink;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             if( root_xlink != XLink::MMAX_Link )
-                KeyCoupling( external_keys, root_link, PLACE_3 );            
+                KeyCoupling( external_keys, root_link, KEY_PRODUCER_3 );            
 
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
@@ -888,7 +888,7 @@ const void AndRuleEngine::ClearCouplingKeys()
 }
 
 
-void AndRuleEngine::RecordLink( LocatedLink link, KeyingPlace place )
+void AndRuleEngine::RecordLink( LocatedLink link, KeyProducer place )
 {
     // All go into the basic solution which is enough to
     // regenerate a full solution.
@@ -904,11 +904,11 @@ void AndRuleEngine::RecordLink( LocatedLink link, KeyingPlace place )
 }
 
 
-void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link )
+void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link, KeyConsumer consumer )
 {
     Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys.count(agent) > 0 );
-    XLink keyer_xlink = keys.at(agent).GetKeyXLink();
+    XLink keyer_xlink = keys.at(agent).GetKeyXLink(consumer);
 
     //FTRACE(keys.at(agent))("\n");
 
@@ -934,7 +934,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
 }                                     
 
 
-void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyingPlace place )
+void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyProducer place )
 {
     // A coupling keyed to Magic-Match-Anything-X would not be able to 
     // restrict the residuals wrt to each other. 
@@ -952,7 +952,7 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     TreePtr<Node> new_xnode = new_xlink.GetChildX();
     ASSERT( extracted.count(new_agent) == 1 );
     CouplingKey extracted_key = extracted.at(new_agent);
-    XLink extracted_xlink = extracted_key.GetKeyXLink();
+    XLink extracted_xlink = extracted_key.GetKeyXLink(KEY_CONSUMER_2);
     TreePtr<Node> extracted_xnode = extracted_xlink.GetChildX();
     
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )

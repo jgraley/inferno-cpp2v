@@ -8,18 +8,29 @@
 namespace SR
 { 
 
-enum KeyingPlace
+enum KeyProducer
 {
-    PLACE_UNKNOWN,
-    PLACE_1,
-    PLACE_2,
-    PLACE_3,
-    PLACE_4,
-    PLACE_5,
-    PLACE_6,
-    PLACE_7,
-    PLACE_8,
-    PLACE_9       
+    KEY_PRODUCER_U,
+    KEY_PRODUCER_1,
+    KEY_PRODUCER_2,
+    KEY_PRODUCER_3,
+    KEY_PRODUCER_4,
+    KEY_PRODUCER_5,
+    KEY_PRODUCER_6,
+    KEY_PRODUCER_7
+};
+
+
+enum KeyConsumer
+{
+    KEY_CONSUMER_U,
+    KEY_CONSUMER_1,
+    KEY_CONSUMER_2,
+    KEY_CONSUMER_3,
+    KEY_CONSUMER_4,
+    KEY_CONSUMER_5,
+    KEY_CONSUMER_6,
+    KEY_CONSUMER_7
 };
 
 
@@ -28,7 +39,7 @@ class CouplingKey : public Traceable
 public:
     CouplingKey();   
     explicit CouplingKey( XLink xlink_,
-                          KeyingPlace place_,
+                          KeyProducer producer_,
                           PatternLink plink_ = PatternLink(),
                           const class AndRuleEngine *are_ = nullptr,
                           const class SCREngine *scre_ = nullptr );
@@ -36,17 +47,19 @@ public:
     ~CouplingKey();
     XLink &operator =( const XLink &xlink_ );
     operator bool() const;
-    XLink GetKeyXLink() const;
-    TreePtr<Node> GetKeyXNode() const;
+    XLink GetKeyXLink( KeyConsumer consumer = KEY_CONSUMER_U ) const;
+    TreePtr<Node> GetKeyXNode( KeyConsumer consumer = KEY_CONSUMER_U ) const;
     string GetTrace() const; // used for debug
     bool IsFinal() const;
     
 private:    
+    void Dump( KeyConsumer consumer ) const;
+
     // This is the real key
     XLink xlink;
 
     // These are just for investigations and checks 
-    KeyingPlace place;
+    KeyProducer producer;
     PatternLink plink;
     const class AndRuleEngine *are;
     const class SCREngine *scre;

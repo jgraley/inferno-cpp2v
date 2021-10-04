@@ -79,7 +79,7 @@ TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keyn
         // Call the soft pattern impl 
         string newname = GetNewName();
         keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-        CouplingKey keylink(XLink::CreateDistinct( keynode ), PLACE_7 );
+        CouplingKey keylink(XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
@@ -97,7 +97,7 @@ TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode 
         // Call the soft pattern impl 
         string newname = GetNewName();
         keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-        CouplingKey keylink( XLink::CreateDistinct( keynode ), PLACE_7 );
+        CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
@@ -115,7 +115,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode
         // Call the soft pattern impl
         string newname = GetNewName();
         keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-        CouplingKey keylink( XLink::CreateDistinct( keynode ), PLACE_7 );
+        CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
         SetKey( keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
@@ -296,7 +296,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 		ASSERT( n_container );
 		int size = n_container->size();
         keynode = MakePatternPtr<SpecificInteger>(size); // Not sure about using MakePattenPtr here
-        CouplingKey keylink( XLink::CreateDistinct( keynode ), PLACE_7 );
+        CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
 		SetKey( keylink );
 	}
 	// Note that the keylink could have been set via coupling - but still not
