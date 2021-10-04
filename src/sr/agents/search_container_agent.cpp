@@ -63,9 +63,9 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 {
     INDENT("#");
     TreePtr<Node> terminus_keynode = AsAgent(terminus)->GetKey().GetKeyX();
+    ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
                                                         (", term=")(*(terminus_keynode))("\n");
-    ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
     return DuplicateSubtree(keynode, terminus_keynode, term);   

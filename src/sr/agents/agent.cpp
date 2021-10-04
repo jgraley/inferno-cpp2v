@@ -512,12 +512,8 @@ void AgentCommon::SetKey( CouplingKey key )
     ASSERT(key);
     if( phase != IN_COMPARE_ONLY )
         ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
-   
     ASSERT( !coupling_key );
-    if( !coupling_key )
-    { 
-        coupling_key = key;
-    }
+    coupling_key = key;
 }
 
 
