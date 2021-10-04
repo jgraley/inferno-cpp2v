@@ -4,7 +4,6 @@
 
 using namespace SR;
 
-#ifdef COUPLINGKEY_DEFAULT_CONSTRUCTOR
 CouplingKey::CouplingKey() :
     xlink(XLink()),
     place(PLACE_UNKNOWN),
@@ -13,19 +12,6 @@ CouplingKey::CouplingKey() :
     scre(nullptr)
 {
 }
-#endif
-
-
-#ifdef COUPLINGKEY_XLINK_CONSTRUCTOR
-CouplingKey::CouplingKey( XLink xlink_ ) :
-    xlink(xlink_),
-    place(PLACE_UNKNOWN),
-    plink(PatternLink()),
-    are(nullptr),
-    scre(nullptr)
-{
-}
-#endif
 
 
 CouplingKey::CouplingKey( XLink xlink_,
@@ -64,17 +50,17 @@ XLink &CouplingKey::operator =( const XLink &xlink_ )
 }
 
 
-CouplingKey::operator XLink() const
-{
-    return xlink;
-}
-
-
 CouplingKey::operator bool() const
 {
     if( xlink )
         ASSERT( xlink.GetChildX() );
     return (bool)xlink;
+}
+
+
+XLink CouplingKey::GetKeyXLink() const
+{
+    return xlink;
 }
 
 
