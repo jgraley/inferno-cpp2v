@@ -562,10 +562,8 @@ TreePtr<Node> AgentCommon::BuildReplace()
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
-    
-    // See if the pattern node is coupled to anything. The keynode that was passed
-    // in is just a suggestion and will be overriden if we are keyed.   
-    ASSERT( !GetKey() || GetKey().GetKeyX()->IsFinal() )(*this)(" keyed with non-final ")(GetKey())("\n"); 
+    ASSERT( !GetKey() || GetKey().GetKeyX() )(*this)(" if there is a coupling key, then its node should not be NULL ")(GetKey())("\n"); 
+    ASSERT( !GetKey() || GetKey().GetKeyX()->IsFinal() )(*this)(" keyed with non-final node ")(GetKey())("\n"); 
     
     TreePtr<Node> dest = BuildReplaceImpl();    
     ASSERT( dest );
@@ -577,8 +575,17 @@ TreePtr<Node> AgentCommon::BuildReplace()
 
 TreePtr<Node> AgentCommon::BuildReplaceImpl()
 {
-    ASSERT(GetKey())("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(GetKey().GetKeyX());   
+    if( GetKey() )
+        return BuildReplaceImpl(GetKey().GetKeyX());
+    else 
+        return BuildReplaceImpl(nullptr);
+}
+
+
+TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> keynode )
+{
+    ASSERT(keynode)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(keynode);   
 }
 
 

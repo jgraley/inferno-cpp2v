@@ -910,7 +910,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     ASSERT( keys.count(agent) > 0 );
     XLink keyer_xlink = keys.at(agent);
 
-    FTRACE(keys.at(agent))("\n");
+    //FTRACE(keys.at(agent))("\n");
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 

@@ -34,7 +34,7 @@ public:
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          
-    virtual TreePtr<Node> BuildReplaceImpl();
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
 private:

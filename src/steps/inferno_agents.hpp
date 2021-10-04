@@ -55,7 +55,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 private:
     
-	TreePtr<Node> BuildReplaceImpl();
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 };
 
 
@@ -71,7 +71,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
     
     BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-	TreePtr<Node> BuildReplaceImpl();       
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );       
 };
 
 
@@ -88,7 +88,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
     BuildLabelIdentifierAgent() : BuildIdentifierAgent("UNNAMED") {}
     BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-	TreePtr<Node> BuildReplaceImpl();   
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );   
 };
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -233,7 +233,7 @@ struct BuildContainerSizeAgent : public virtual SearchLeafAgent,
     
     TreePtr<Node> container;
 private:
-	TreePtr<Node> BuildReplaceImpl();
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
 }; 
