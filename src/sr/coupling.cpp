@@ -84,13 +84,15 @@ TreePtr<Node> CouplingKey::GetKeyX() const
 
 string CouplingKey::GetTrace() const
 {
-    string s = plink.GetTrace();
-    s += " := ";
-    s += xlink.GetTrace();
+    string s;
     if( place == PLACE_UNKNOWN )
-        s += "PLACE_UNKNOWN";
+        s += "PLACE_UNKNOWN ";                                               
     else
         s += SSPrintf(" PLACE_%d ", place);
+    s += plink.GetTrace();
+    s += " := ";
+    s += xlink.GetTrace();
+    s += " ";                                                    
     if( are )
         s += are->GetTrace();
     else if( scre )

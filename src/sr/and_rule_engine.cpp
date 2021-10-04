@@ -910,7 +910,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     ASSERT( keys.count(agent) > 0 );
     XLink keyer_xlink = keys.at(agent);
 
-    //FTRACE(keys.at(agent))("\n");
+    FTRACE(keys.at(agent))("\n");
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keyer_xlink.GetChildX() ) ); 
@@ -952,6 +952,8 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     TreePtr<Node> new_xnode = new_xlink.GetChildX();
     ASSERT( extracted.count(new_agent) == 1 );
     CouplingKey extracted_key = extracted.at(new_agent);
+    TreePtr<Node> extracted_xnode = extracted_key.GetKeyX();
+    
     if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
     {                    
         EquivalenceRelation equivalence_relation;
@@ -960,15 +962,15 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
         {
             FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted_key)
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
-            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted_key.GetKeyX()))
+            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted_xnode))
                 FTRACEC("SubSequence\n");
-            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted_key.GetKeyX()))
+            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted_xnode))
                 FTRACEC("SubSequenceRange\n");
-            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted_key.GetKeyX()))
+            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted_xnode))
                 FTRACEC("SubCollections\n");
             else
                 FTRACEC("Container types don't match\n");
-            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted_key.GetKeyX().get());
+            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted_xnode.get());
             FOREACH( const TreePtrInterface &node, *xc )
                 FTRACEC("ext: ")( node )("\n");
             xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
@@ -979,7 +981,7 @@ void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *
     }
     else
     {
-        ASSERT( extracted_key.GetKeyX() == new_xnode );
+        ASSERT( extracted_xnode == new_xnode );
     }
 }
 
