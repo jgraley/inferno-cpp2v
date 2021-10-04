@@ -45,7 +45,7 @@ public:
     XLink &operator =( const XLink &xlink_ );
     operator XLink() const;
     operator bool() const;
-    TreePtr<Node> GetKeyX() const;
+    TreePtr<Node> GetKeyXNode() const;
     string GetTrace() const; // used for debug
     bool IsFinal() const;
     

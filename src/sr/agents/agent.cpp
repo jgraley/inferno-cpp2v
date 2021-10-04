@@ -566,7 +566,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
 TreePtr<Node> AgentCommon::BuildReplaceImpl()
 {
     if( GetKey() )
-        return BuildReplaceImpl(GetKey().GetKeyX());
+        return BuildReplaceImpl(GetKey().GetKeyXNode());
     else 
         return BuildReplaceImpl(nullptr);
 }

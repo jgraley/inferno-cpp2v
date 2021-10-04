@@ -62,7 +62,7 @@ bool SearchContainerAgent::ImplHasNLQ() const
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("#");
-    TreePtr<Node> terminus_keynode = AsAgent(terminus)->GetKey().GetKeyX();
+    TreePtr<Node> terminus_keynode = AsAgent(terminus)->GetKey().GetKeyXNode();
     ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
                                                         (", term=")(*(terminus_keynode))("\n");
