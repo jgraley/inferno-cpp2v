@@ -507,15 +507,15 @@ void AgentCommon::ResetNLQConjecture()
 }
 
 
-void AgentCommon::SetKey( CouplingKey keylink )
+void AgentCommon::SetKey( CouplingKey key )
 {
-    ASSERT(keylink);
+    ASSERT(key);
     if( phase != IN_COMPARE_ONLY )
-        ASSERT(keylink.IsFinal() )(*this)(" trying to key with non-final ")(keylink)("\n"); 
+        ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
    
     if( !coupling_key )
     { 
-        coupling_key = keylink;
+        coupling_key = key;
     }
 }
 
@@ -538,12 +538,6 @@ PatternLink AgentCommon::GetKeyerPatternLink()
 void AgentCommon::Reset()
 {
     coupling_key = LocatedLink();
-}
-
-
-void AgentCommon::KeyReplace( const CouplingKeysMap *coupling_keys )
-{   
-    SetKey( coupling_keys->at(this) );  
 }
 
 

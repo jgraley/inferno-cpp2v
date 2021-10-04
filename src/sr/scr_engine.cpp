@@ -288,7 +288,7 @@ void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
             TRACEC(" and is not self-coupled\n");
             
         if( keyed && !self_coupled )
-            a->KeyReplace(coupling_keys);
+            a->SetKey( coupling_keys->at(a) );
     }
 }
 
