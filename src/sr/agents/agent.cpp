@@ -862,7 +862,7 @@ shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
 
 
 void SearchLeafAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                        XLink base_xlink ) const
+                                           XLink base_xlink ) const
 {
 }
 

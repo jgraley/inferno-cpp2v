@@ -28,7 +28,7 @@ using namespace SR;
 /// `BYPASS_WHEN_IDENTICAL` means if all the names of the source nodes are the
 /// same, that name is used. This reduces verbosity and is a good fit when
 /// in some sense you are "merging" objects with identifiers.
-struct BuildIdentifierAgent : public virtual SearchLeafAgent
+struct BuildIdentifierAgent : public virtual SearchLeafAgent    
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
@@ -101,7 +101,7 @@ private:
 /// a minimum due to the risk of co-incidentla unwanted matches and the 
 /// general principle that identifier names should not be important (it is
 /// the identiy proprty itself that matters with identifiers). 
-struct IdentifierByNameAgent : public virtual SearchLeafAgent
+struct IdentifierByNameAgent : public virtual SearchLeafAgent 
 {
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
@@ -143,8 +143,9 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
 };
 
 
+// OUT OF TEST COVERAGE - keep consistent or de-duplicate/template/macro
 struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,                             
-                                    IdentifierByNameAgent
+                                    IdentifierByNameAgent  
 {
     SPECIAL_NODE_FUNCTIONS
 
@@ -237,49 +238,5 @@ private:
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
 }; 
-
-//---------------------------------- IsLabelReachedAgent ------------------------------------    
-
-/// `IsLabelReachedAgent` matches a `LabelIdentifier` if that label is used
-/// anywhere in the expression pointed to by `pattern`.
-/// TODO generalise to more than just labels.
-struct IsLabelReachedAgent : public virtual SearchLeafAgent, 
-                             Special<CPPTree::LabelIdentifier>
-{
-	SPECIAL_NODE_FUNCTIONS	
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-	virtual void FlushCache() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
-    TreePtr<CPPTree::Expression> pattern;           
-           
-private:
-    bool CanReachExpr( set< TreePtr<CPPTree::InstanceIdentifier> > *f,
-                       TreePtr<CPPTree::LabelIdentifier> x, 
-                       TreePtr<CPPTree::Expression> y ) const; // y is expression. Can it yield label x?
-    
-    bool CanReachVar( set< TreePtr<CPPTree::InstanceIdentifier> > *f,
-                      TreePtr<CPPTree::LabelIdentifier> x, 
-                      TreePtr<CPPTree::InstanceIdentifier> y ) const; // y is instance identifier. Can expression x be assigned to it?
-    
-    struct Reaching
-    {
-        Reaching( TreePtr<CPPTree::LabelIdentifier> f, TreePtr<CPPTree::InstanceIdentifier> t ) : from(f), to(t) {}
-        const TreePtr<CPPTree::LabelIdentifier> from;
-        const TreePtr<CPPTree::InstanceIdentifier> to;
-        bool operator<( const Reaching &other ) const 
-        {
-            return from==other.from ? to<other.to : from<other.from;
-        }
-    };
-    mutable map<Reaching, bool> cache; // it's a cache, so sue me
-};
 
 #endif
