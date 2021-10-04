@@ -21,6 +21,7 @@ CouplingKey::CouplingKey( XLink xlink_,
                           const class SCREngine *scre_ ) :
     xlink(xlink_),
     producer(producer_),
+    producer_pre( Tracer::GetPrefix() ),
     plink(plink_),
     are(are_),
     scre(scre_)
@@ -31,6 +32,7 @@ CouplingKey::CouplingKey( XLink xlink_,
 CouplingKey::CouplingKey( const CouplingKey &other ) :
     xlink(other.xlink),
     producer(other.producer),
+    producer_pre( Tracer::GetPrefix() ),
     plink(other.plink),
     are(other.are),
     scre(other.scre)
@@ -79,14 +81,15 @@ string CouplingKey::GetTrace() const
         s += "KEY_PRODUCER_U ";                                               
     else
         s += SSPrintf("KEY_PRODUCER_%d ", producer);
-    s += plink.GetTrace();
+    s += producer_pre + " ";
+    /*s += plink.GetTrace();
     s += " := ";
     s += xlink.GetTrace();
     s += " ";                                                    
     if( are )
         s += are->GetTrace();
     else if( scre )
-        s += scre->GetTrace();
+        s += scre->GetTrace();*/
     return s;
 }
 
@@ -100,10 +103,20 @@ bool CouplingKey::IsFinal() const
 void CouplingKey::Dump( KeyConsumer consumer ) const
 {
     string s;
-    if( consumer == KEY_CONSUMER_U )
-        s += "KEY_CONSUMER_U";                                               
+    if( producer == KEY_PRODUCER_U )
+        s += "PRODUCER_U";                                               
     else
-        s += SSPrintf(" KEY_CONSUMER_%d", consumer);
-    s += " <- " + GetTrace();
+        s += SSPrintf("PRODUCER_%d", producer);
+    s += "->";
+    if( consumer == KEY_CONSUMER_U )
+        s += "CONSUMER_U";                                               
+    else
+        s += SSPrintf("CONSUMER_%d", consumer);
+        
+    string pp = producer_pre;
+    string cp = Tracer::GetPrefix() + " ";
+    RemoveCommonPrefix( pp, cp );
+    s += " " + pp + "->"+ cp;
+    
     printf("%s\n", s.c_str());
 }

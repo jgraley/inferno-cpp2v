@@ -67,11 +67,10 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     InstallRootAgents(cp, rp);
             
-    set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
-    CategoriseSubs( master_plinks, my_agents_needing_engines, agent_phases );    
+    CategoriseSubs( master_plinks, agent_phases );    
 
     // This recurses SCR engine planning
-    CreateMyEngines( my_agents_needing_engines, agent_phases );    
+    CreateMyEngines( agent_phases );    
 }
 
     
@@ -145,7 +144,6 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     
 
 void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
-                                      set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                                       CompareReplace::AgentPhases &agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
@@ -188,6 +186,7 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
         my_agents.insert( plink.GetChildAgent() );
 
     // Determine who our slaves are
+    my_agents_needing_engines.clear();
     for( PatternLink plink : my_plinks )
     {
         Agent *a = plink.GetChildAgent();
@@ -208,8 +207,7 @@ void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
 }
 
 
-void SCREngine::Plan::CreateMyEngines( const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
-                                       CompareReplace::AgentPhases &agent_phases )
+void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &agent_phases )
 {
     // Determine which agents our slaves should not configure
     unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
@@ -268,28 +266,35 @@ void SCREngine::SetStopAfter( vector<int> ssa, int d )
 }
 
 
-void SCREngine::KeyReplaceNodes( const CouplingKeysMap *coupling_keys ) const
+void SCREngine::KeyReplaceNodes( const CouplingKeysMap *master_keys ) const
 {
     INDENT("K");   
+        
+    CouplingKeysMap and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
+    CouplingKeysMap all_keys = UnionOfSolo( *master_keys, 
+                                            plan.and_rule_engine->GetCouplingKeys() );    
         
     TRACE("My agents coupling status:\n");
     FOREACH( Agent *a, plan.my_agents )
     {
         TRACEC(*a);
-        bool keyed = ( coupling_keys->count( a ) > 0 );
+        bool keyed = ( and_rule_keys.count( a ) > 0 );
         if( keyed )
-            TRACEC(" is in coupling_keys: ")(coupling_keys->at( a ));
+            TRACEC(" is in coupling_keys: ")(and_rule_keys.at( a ));
         else
             TRACEC(" is not in coupling_keys");
-        CouplingKey self_coupled = a->GetKey();
+        bool self_coupled = a->GetKey();
         if( self_coupled )
-            TRACEC(" and is self-coupled: ")(self_coupled)("\n");
+            TRACEC(" and is self-coupled: ")(and_rule_keys)("\n");
         else
             TRACEC(" and is not self-coupled\n");
             
         if( keyed && !self_coupled )
-            a->SetKey( coupling_keys->at(a) );
+            a->SetKey( and_rule_keys.at(a) );
     }
+
+    for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
+        ae->SetMasterCouplingKeys( all_keys );
 }
 
 
@@ -364,16 +369,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 
     TRACE("Search successful, now keying replace nodes\n");
     plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
-    KeyReplaceNodes( &plan.and_rule_engine->GetCouplingKeys() );
-
-    if( !plan.my_engines.empty() )
-    {
-		CouplingKeysMap coupling_keys = UnionOfSolo( *master_keys, 
-                                                     plan.and_rule_engine->GetCouplingKeys() );    
-		
-        for( const pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > &p : plan.my_engines )
-            p.first->SetMasterCouplingKeys( coupling_keys );
-	}
+    KeyReplaceNodes(master_keys);
 
     TRACE("Now replacing\n");
     *p_root_xnode = Replace();

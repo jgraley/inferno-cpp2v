@@ -60,6 +60,7 @@ private:
 
     // These are just for investigations and checks 
     KeyProducer producer;
+    string producer_pre;
     PatternLink plink;
     const class AndRuleEngine *are;
     const class SCREngine *scre;

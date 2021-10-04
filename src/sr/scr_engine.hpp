@@ -71,13 +71,11 @@ private:
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
-                             set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
                              CompareReplace::AgentPhases &agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
                           PatternLink base_plink, 
                           Agent::Path path ) const;
-        void CreateMyEngines( const set<RequiresSubordinateSCREngine *> &my_agents_needing_engines,
-                              CompareReplace::AgentPhases &agent_phases );
+        void CreateMyEngines( CompareReplace::AgentPhases &agent_phases );
         void ConfigureAgents(const CompareReplace::AgentPhases &agent_phases);
         string GetTrace() const; // used for debug
         
@@ -92,6 +90,7 @@ private:
         unordered_set<Agent *> master_agents;
         unordered_set<PatternLink> my_plinks;   
         unordered_set<Agent *> my_agents;   
+        set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
@@ -103,7 +102,7 @@ public:
                                  const CouplingKeysMap *master_keys );                   
                                             
 private:
-    void KeyReplaceNodes( const CouplingKeysMap *coupling_keys) const;
+    void KeyReplaceNodes( const CouplingKeysMap *master_keys ) const;
     TreePtr<Node> Replace() const;
 
 public:

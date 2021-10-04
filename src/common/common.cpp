@@ -49,3 +49,14 @@ string RemoveOneOuterScope( string s )
 	    s = s.substr( n+2 );
     return s;
 }
+
+
+void RemoveCommonPrefix( string &s1, string &s2 )
+{
+    while( !s1.empty() && !s2.empty() && s1[0] == s2[0] )
+    {
+        s1 = s1.substr(1);
+        s2 = s2.substr(1);
+    }
+}
+

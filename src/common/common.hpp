@@ -178,5 +178,6 @@ private:
 string GetInnermostTemplateParam( string s );
 string RemoveAllTemplateParam( string s );
 string RemoveOneOuterScope( string s );
+void RemoveCommonPrefix( string &s1, string &s2 );
 
 #endif
