@@ -31,6 +31,8 @@
 
 //#define NLQ_TEST
 
+#define NO_SPECIAL_CASE_TRIVIAL_PROBLEM
+
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -418,7 +420,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
         {
             CSP::SystemicConstraint::VariableFlags flags;
                                   
-            if( plink == keyer_plink ) // keyer will be forced
+            if( plink == root_plink || plink == keyer_plink ) // keyer will be forced
                 flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
             else // residual
                 flags.freedom = CSP::SystemicConstraint::Freedom::FREE;
