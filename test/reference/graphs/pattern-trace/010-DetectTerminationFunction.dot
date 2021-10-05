@@ -24,6 +24,18 @@ subgraph "clusterAnd#R10-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R10-0/#B-2-74" [
+        // -------- block And#R10-0/#B-2-74 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/5"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">'p1'</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-74</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R10-0/#B-2-72" [
         // -------- block And#R10-0/#B-2-72 ----------
         shape = "plaintext"
@@ -74,13 +86,13 @@ subgraph "clusterAnd#R10-0" {
         fontcolor = black
     ];
     
-    "And#R10-0/#B-2-74" [
-        // -------- block And#R10-0/#B-2-74 ----------
+    "And#R10-0/#B-2-70" [
+        // -------- block And#R10-0/#B-2-70 ----------
         shape = "plaintext"
-        fillcolor = "/set28/5"
+        fillcolor = "/set28/6"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">'p1'</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-74</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Expression</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-70</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -95,18 +107,6 @@ subgraph "clusterAnd#R10-0" {
          <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
          <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-71</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R10-0/#B-2-70" [
-        // -------- block And#R10-0/#B-2-70 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/6"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Expression</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-70</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"

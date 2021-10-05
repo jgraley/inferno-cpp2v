@@ -71,6 +71,19 @@ subgraph "clusterAnd#R49-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R49-0/#B-2-860" [
+        // -------- block And#R49-0/#B-2-860 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">#=1</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-860</TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R49-0/#P49-8-56" [
         // -------- block And#R49-0/#P49-8-56 ----------
         shape = "plaintext"
@@ -83,6 +96,17 @@ subgraph "clusterAnd#R49-0" {
         fontsize = "12"
     ];
     
+    "And#R49-0/#B-2-861" [
+        // -------- block And#R49-0/#B-2-861 ----------
+        shape = "record"
+        fillcolor = antiquewhite2
+        label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay | <port3> #B-2-861"
+        style = "filled"
+        fontsize = "12"
+        color = black
+        fontcolor = black
+    ];
+    
     "And#R49-0/#B-2-857" [
         // -------- block And#R49-0/#B-2-857 ----------
         shape = "plaintext"
@@ -92,18 +116,6 @@ subgraph "clusterAnd#R49-0" {
          <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
          <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
          <TR><TD>#B-2-857</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R49-0/#B-2-863" [
-        // -------- block And#R49-0/#B-2-863 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-863</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -123,25 +135,13 @@ subgraph "clusterAnd#R49-0" {
         fontsize = "12"
     ];
     
-    "And#R49-0/#B-2-861" [
-        // -------- block And#R49-0/#B-2-861 ----------
-        shape = "record"
-        fillcolor = antiquewhite2
-        label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay | <port3> #B-2-861"
-        style = "filled"
-        fontsize = "12"
-        color = black
-        fontcolor = black
-    ];
-    
-    "And#R49-0/#B-2-860" [
-        // -------- block And#R49-0/#B-2-860 ----------
+    "And#R49-0/#B-2-863" [
+        // -------- block And#R49-0/#B-2-863 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#=1</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-860</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-863</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -177,7 +177,21 @@ subgraph "clusterAnd#R49-0" {
     
 }
 
+"And#R49-0/#B-2-860":port0 -> "And#R49-0/#B-2-861" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 "And#R49-0/#P49-8-56":port0 -> "And#R49-0/#B-2-857" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R49-0/#B-2-861":port1 -> "And#R49-0/#B-2-862" [
     label = "#0"
     decorate = true
     color = black
@@ -199,20 +213,6 @@ subgraph "clusterAnd#R49-0" {
 ];
 
 "And#R49-0/#B-2-862":port1 -> "And#R49-0/#B-2-863" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R49-0/#B-2-861":port1 -> "And#R49-0/#B-2-862" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R49-0/#B-2-860":port0 -> "And#R49-0/#B-2-861" [
     label = "#0"
     decorate = true
     color = black

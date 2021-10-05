@@ -105,14 +105,15 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     if( trivial_problem ) 
     {
         ASSERT( master_boundary_residual_links_excluding_root.size() == 0 )
-              ("\nmbrc_ex_root:\n")(master_boundary_residual_links_excluding_root)
-              ("\nmbrc:\n")(master_boundary_residual_links);
-        ASSERT( master_boundary_residual_links.size() == 1 )
-              ("\nmbrc_ex_root:\n")(master_boundary_residual_links_excluding_root)
-              ("\nmbrc:\n")(master_boundary_residual_links);
-        ASSERT( *(master_boundary_residual_links.begin()) == root_plink )
-              ("\nmbrc_ex_root:\n")(master_boundary_residual_links_excluding_root)
-              ("\nmbrc:\n")(master_boundary_residual_links);
+              ("\nmbrl_ex_root:\n")(master_boundary_residual_links_excluding_root)
+              ("\nmbrl:\n")(master_boundary_residual_links);
+        ASSERT( master_boundary_residual_links.size() == 1 && master_boundary_residual_links.count(root_plink) == 1 )
+              ("\nmbrl_ex_root:\n")(master_boundary_residual_links_excluding_root)
+              ("\nmbrl:\n")(master_boundary_residual_links);
+        ASSERT( master_boundary_links.size() == 1 && master_boundary_links.count(root_plink) == 1 )
+              ("\nmbl:\n")(master_boundary_links);
+        ASSERT( parent_links_to_master_boundary_agents.size() == 1 && parent_links_to_master_boundary_agents.count(root_agent) == 1 )
+              ("\nmbl:\n")(master_boundary_links);
         return;  // Early-out on trivial problems
     }
     else
@@ -1086,7 +1087,13 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 	TRACE("   Exterior (master boundary agents/links):\n");    
     figure.exterior_agents = agents_lambda( plan.parent_links_to_master_boundary_agents,
                                             plan.master_boundary_keyer_links,
-                                            plan.master_boundary_residual_links_excluding_root );       
+                                            plan.master_boundary_residual_links );       
+    if( plan.trivial_problem )
+    {
+        ASSERT( figure.exterior_agents.size()==1 );
+        ASSERT( figure.exterior_agents.front().incoming_links.size()==1 );
+        ASSERT( figure.exterior_agents.front().incoming_links.front().details.planned_as==Graph::LINK_RESIDUAL );
+    }
         
 	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
     {

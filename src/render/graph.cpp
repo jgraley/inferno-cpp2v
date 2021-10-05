@@ -159,19 +159,6 @@ void Graph::operator()( const Figure &figure )
         subordinate_blocks[engine_agent.first] = sub_blocks;    
     }
     
-    // Set the planned_as on all the links from all the interior nodes.
-    for( const Figure::Agent &agent : all_agents )
-    {
-        for( const Figure::Link &figure_link : agent.incoming_links )
-        {
-            shared_ptr<MyLink> link = FindLink( interior_blocks, 
-                                                agent.g, 
-                                                figure_link.short_name );
-            if( link )
-                link->planned_as = figure_link.details.planned_as;     
-        }     
-    };
-     
     // Special case for trivial engines (aka no normal agents): a new invisible 
     // node goes into the INTERNAL region and points to all externals.
     if( figure.interior_agents.empty() )
@@ -189,6 +176,19 @@ void Graph::operator()( const Figure &figure )
         // IRIP short for InvisibleRootInteriorPlaceholder, but the length of the string sets the width of the region!    
     }
     
+    // Set the planned_as on all the links from all the interior nodes.
+    for( const Figure::Agent &agent : all_agents )
+    {
+        for( const Figure::Link &figure_link : agent.incoming_links )
+        {
+            shared_ptr<MyLink> link = FindLink( interior_blocks, 
+                                                agent.g, 
+                                                figure_link.short_name );
+            if( link )
+                link->planned_as = figure_link.details.planned_as;     
+        }     
+    };
+     
     // Trim off replace-only links
     set<Graphable::Phase> phases_to_keep = { Graphable::IN_COMPARE_ONLY, 
                                              Graphable::IN_COMPARE_AND_REPLACE };

@@ -242,18 +242,6 @@ subgraph "clusterAnd#R64-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    "And#R64-0/#P64-8-75" [
-        // -------- block And#R64-0/#P64-8-75 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#P64-8-75</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R64-0/#B-2-1079" [
         // -------- block And#R64-0/#B-2-1079 ----------
         shape = "plaintext"
@@ -278,6 +266,18 @@ subgraph "clusterAnd#R64-0" {
          <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
          <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
          <TR><TD>#B-2-1072</TD><TD PORT="port4"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R64-0/#P64-8-75" [
+        // -------- block And#R64-0/#P64-8-75 ----------
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
+         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#P64-8-75</TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -341,13 +341,6 @@ subgraph "clusterAnd#R64-0" {
     
 }
 
-"And#R64-0/#P64-8-75":port0 -> "And#R64-0/#P64-6-80" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 "And#R64-0/#B-2-1072":port0 -> "And#R64-0/And#R64-1/#B-2-1074" [
     arrowhead="normalnoneodot"
     label = "#0"
@@ -373,6 +366,13 @@ subgraph "clusterAnd#R64-0" {
 
 "And#R64-0/#B-2-1072":port3 -> "And#R64-0/And#R64-5/#B-2-1076" [
     arrowhead="normalnoneodot"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R64-0/#P64-8-75":port0 -> "And#R64-0/#P64-6-80" [
     label = "#0"
     decorate = true
     color = black
