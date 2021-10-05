@@ -105,7 +105,6 @@ public:
         unordered_set<PatternLink> master_boundary_links;
         unordered_set<PatternLink> master_boundary_keyer_links;
         unordered_set<PatternLink> master_boundary_residual_links;
-        unordered_set<PatternLink> master_boundary_residual_links_excluding_root;
         unordered_set<PatternLink> coupling_residual_links;
         unordered_set<PatternLink> coupling_keyer_links; // only where child X has at least one residual link (i.e. non-trivial)
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
