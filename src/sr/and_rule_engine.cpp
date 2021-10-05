@@ -31,8 +31,6 @@
 
 //#define NLQ_TEST
 
-#define NO_SPECIAL_CASE_TRIVIAL_PROBLEM
-
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -102,17 +100,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks );   
     
     // these two conditions for trivial problem should be equivalent
-    ASSERT( my_normal_agents.empty() == my_normal_links.empty() ); 
-    trivial_problem = my_normal_agents.empty();
+    ASSERT( my_normal_agents.empty() == my_normal_links.empty() );     
+    trivial_problem = my_normal_agents.empty(); // Note: now only used in pattern-trace graphs
     if( trivial_problem ) 
     {
         ASSERT( master_boundary_residual_links.size() == 1 && master_boundary_residual_links.count(root_plink) == 1 )
               ("\nmbrl:\n")(master_boundary_residual_links);
         ASSERT( parent_residual_links_to_master_boundary_agents.size() == 1 && parent_residual_links_to_master_boundary_agents.count(root_agent) == 1 )
-              ("\nmbl:\n")(parent_residual_links_to_master_boundary_agents);
-#ifndef NO_SPECIAL_CASE_TRIVIAL_PROBLEM
-        return;  // Early-out on trivial problems
-#endif        
+              ("\nmbl:\n")(parent_residual_links_to_master_boundary_agents);      
     }
 
 #ifdef USE_SOLVER   
@@ -754,27 +749,6 @@ void AndRuleEngine::RegenerationPass()
 }
 
 
-void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
-{
-    // Trivial case: we have no agents, so there won't be any decisions
-    // and so no problem to solve. Spare all algorithms the hassle of 
-    // dealing with this. Root agent should have been keyed by master,
-    // otherwise it'd be in my_normal_agents.
-    ASSERT( master_keys->count(plan.root_agent) );
-    ASSERT( plan.master_boundary_residual_links.count( (PatternLink)root_link ) > 0 );
-    ASSERT( plan.master_boundary_agents.count( root_link.GetChildAgent() ) > 0 );
-    try
-    {            
-        CompareCoupling( *master_keys, root_link, KEY_CONSUMER_7 );
-    }
-    catch( const ::Mismatch& mismatch ) 
-    {
-        throw NoSolution();
-    }
-    return;
-}
-
-
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( XLink root_xlink,
                              const CouplingKeysMap *master_keys_,
@@ -794,14 +768,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
     if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
         ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
-#endif
-
-#ifndef NO_SPECIAL_CASE_TRIVIAL_PROBLEM
-    if( plan.trivial_problem )
-    {
-        CompareTrivialProblem( root_link );
-        return;
-    }
 #endif
                      
 #ifdef USE_SOLVER

@@ -139,7 +139,6 @@ public:
     void Compare( XLink root_xlink,
                   const CouplingKeysMap *master_keys,
                   const TheKnowledge *knowledge );
-    void CompareTrivialProblem( LocatedLink root_link );
     void Compare( TreePtr<Node> root_xnode );
     void EnsureChoicesHaveIterators();
 
