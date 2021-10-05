@@ -502,7 +502,9 @@ void AndRuleEngine::CompareLinks( Agent *agent,
              plan.coupling_residual_links.count( (PatternLink)link ), 
              plan.master_boundary_residual_links.count( (PatternLink)link ) );
         ASSERT( link.GetChildX() );
-        
+                             
+        DecidedCompare(link);  
+    
         // Check the link: we will either compare a coupling
         // or recurse to DecidedCompare(). We never DC() after a
         // coupling compare, because couplings are only keyed
@@ -517,14 +519,10 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             CompareCoupling( *master_keys, link, KEY_CONSUMER_6 );
         }
         else
-        {
-            DecidedCompare(link);  
-             
+        {                         
             if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
                 KeyCoupling( my_coupling_keys, link, KEY_PRODUCER_6 );
-        }
-
-        RecordLink( link, KEY_PRODUCER_1 );        
+        }        
     }
 }
 
@@ -534,32 +532,41 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     INDENT("D");
     ASSERT( link.GetChildAgent() ); // Pattern must not be nullptr
     ASSERT( link.GetChildX() ); // Target must not be nullptr
-    Agent * const agent = link.GetChildAgent();
+    
+    if( plan.coupling_residual_links.count( (PatternLink)link ) > 0 ||
+        plan.master_boundary_residual_links.count( (PatternLink)link ) > 0 )
+    {
+        // If we're on a residual, there's nothing more to do
+    }
+    else
+    {
+        Agent * const agent = link.GetChildAgent();
 
-    // Obtain the query state from the conjecture
-    shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
+        // Obtain the query state from the conjecture
+        shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
 
-    // Run the compare implementation to get the links based on the choices
-    TRACE("RunDecidedQuery() with ")(link)("\n");     
-    agent->RunDecidedQuery( *query, link );
-    TRACE("Normal ")(query->GetNormalLinks())("\n")
-         ("Abormal ")(query->GetAbnormalLinks())("\n")
-         ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
+        // Run the compare implementation to get the links based on the choices
+        TRACE("RunDecidedQuery() with ")(link)("\n");     
+        agent->RunDecidedQuery( *query, link );
+        TRACE("Normal ")(query->GetNormalLinks())("\n")
+             ("Abormal ")(query->GetAbnormalLinks())("\n")
+             ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
 #ifdef TEST_PATTERN_QUERY
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    ASSERT( pq->GetNormalLinks() == query->GetNormalLinks() &&
-            pq->GetAbnormalLinks() == query->GetAbnormalLinks() &&
-            pq->GetMultiplicityLinks() == query->GetMultiplicityLinks() &&
-            pq->GetDecisions().size() == query->GetDecisions().size() )
-          ("PatternQuery disagrees with DecidedQuery!!!!\n")
-          ("GetNormalLinks().size() : %d vs %d\n", pq->GetNormalLinks().size(), query->GetNormalLinks().size() )
-          ("GetAbnormalLinks().size() : %d vs %d\n", pq->GetAbnormalLinks().size(), query->GetAbnormalLinks().size() )
-          ("GetMultiplicityLinks().size() : %d vs %d\n", pq->GetMultiplicityLinks().size(), query->GetMultiplicityLinks().size() )
-          ("GetDecisions().size() : %d vs %d\n", pq->GetDecisions().size(), query->GetDecisions().size() )
-          (*agent);
+        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+        ASSERT( pq->GetNormalLinks() == query->GetNormalLinks() &&
+                pq->GetAbnormalLinks() == query->GetAbnormalLinks() &&
+                pq->GetMultiplicityLinks() == query->GetMultiplicityLinks() &&
+                pq->GetDecisions().size() == query->GetDecisions().size() )
+              ("PatternQuery disagrees with DecidedQuery!!!!\n")
+              ("GetNormalLinks().size() : %d vs %d\n", pq->GetNormalLinks().size(), query->GetNormalLinks().size() )
+              ("GetAbnormalLinks().size() : %d vs %d\n", pq->GetAbnormalLinks().size(), query->GetAbnormalLinks().size() )
+              ("GetMultiplicityLinks().size() : %d vs %d\n", pq->GetMultiplicityLinks().size(), query->GetMultiplicityLinks().size() )
+              ("GetDecisions().size() : %d vs %d\n", pq->GetDecisions().size(), query->GetDecisions().size() )
+              (*agent);
 #endif
-                                          
-    CompareLinks( agent, query );
+        CompareLinks( agent, query );
+    }
+    RecordLink( link, KEY_PRODUCER_1 );        
 }
 
 
@@ -816,12 +823,10 @@ void AndRuleEngine::Compare( XLink root_xlink,
             // will remove the decision.    
             DecidedCompare( root_link );       
             my_coupling_keys.clear(); // save memory     
+#else
+            // TODO when looking at CSP solver, see if can get rid
+            RecordLink( root_link, KEY_PRODUCER_3 );          
 #endif
-            basic_solution[plan.root_plink] = root_xlink;
-            // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-            if( root_xlink != XLink::MMAX_Link )
-                KeyCoupling( external_keys, root_link, KEY_PRODUCER_3 );            
-
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
             {            
@@ -896,8 +901,7 @@ void AndRuleEngine::RecordLink( LocatedLink link, KeyProducer place )
     
     // Keying for external use (subordinates, slaves and replace)
     // We don't want residuals (which are unreliable) or MMAX
-    if( (PatternLink)link != plan.root_plink &&
-        plan.master_boundary_residual_links.count( (PatternLink)link ) == 0 &&
+    if( plan.master_boundary_residual_links.count( (PatternLink)link ) == 0 &&
         plan.coupling_residual_links.count( (PatternLink)link ) == 0 && 
         (XLink)link != XLink::MMAX_Link )
         KeyCoupling( external_keys, link, place );        
