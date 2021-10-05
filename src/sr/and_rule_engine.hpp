@@ -65,11 +65,8 @@ public:
         Plan( AndRuleEngine *algo,  
               PatternLink root_plink, 
               const unordered_set<PatternLink> &master_plinks);
-        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
-        void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
-        void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
-        void PopulateSomeThings( PatternLink link,
-                                 const unordered_set<Agent *> &master_agents );
+        void PopulateMasterBoundaryStuff( PatternLink link,
+                                          const unordered_set<Agent *> &master_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
                                                unordered_set<Agent *> *master_agents,
                                                unordered_set<Agent *> *match_any_agents );
@@ -84,6 +81,11 @@ public:
                                    PatternLink link );
         void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
                                        const unordered_set<PatternLink> &surrounding_plinks );
+        // CSP solver stuff
+        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
+        void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
+        void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
+
         string GetTrace() const; // used for debug
         
         AndRuleEngine * const algo;
