@@ -113,7 +113,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 #ifdef USE_SOLVER   
     {
         list< shared_ptr<CSP::Constraint> > constraints_list;
-        CreateMyConstraints(constraints_list);
+        CreateMyFullConstraints(constraints_list);
         CreateMasterCouplingConstraints(constraints_list);
         CreateCSPSolver(constraints_list);
         // Note: constraints_list drops out of scope and discards its 
@@ -369,7 +369,7 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *>
 }
 
 
-void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
+void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     unordered_set<Agent *> check_we_got_the_right_agents;
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent )
@@ -477,7 +477,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 }
 
 
-void AndRuleEngine::GetNextCSPSolution()
+void AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
 {
     TRACE("GetNextCSPSolution()\n");
     SolutionMap csp_solution;
@@ -485,11 +485,13 @@ void AndRuleEngine::GetNextCSPSolution()
     if( !match )
         throw NoSolution();
 
+    // Add the root variable/value, which is FORCED. Not sure why we have
+    // to add this and not any other FIXED variable.
+    csp_solution.insert( root_link );
+
     // Recreate my_coupling_keys
     for( pair< PatternLink, XLink > pxp : csp_solution )
-    {
         RecordLink( LocatedLink(pxp), KEY_PRODUCER_4 );                        
-    }
 }
 
 
@@ -786,7 +788,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
         my_coupling_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
-        GetNextCSPSolution();        
+        GetNextCSPSolution(root_link);        
 #endif
         try
         {
@@ -797,9 +799,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
             // will remove the decision.    
             DecidedCompare( root_link );       
             my_coupling_keys.clear(); // save memory     
-#else
-            // TODO when looking at CSP solver, see if can get rid
-            RecordLink( root_link, KEY_PRODUCER_3 );          
 #endif
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )

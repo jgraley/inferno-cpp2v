@@ -82,7 +82,7 @@ public:
         void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
                                        const unordered_set<PatternLink> &surrounding_plinks );
         // CSP solver stuff
-        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
+        void CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
 
@@ -122,7 +122,7 @@ public:
     
 private:        
     void StartCSPSolver( XLink root_xlink );
-    void GetNextCSPSolution();
+    void GetNextCSPSolution( LocatedLink root_link );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
