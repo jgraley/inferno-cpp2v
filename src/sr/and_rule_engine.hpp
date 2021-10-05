@@ -104,13 +104,12 @@ public:
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         unordered_map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         unordered_set<Agent *> master_boundary_agents;
-        unordered_set<PatternLink> master_boundary_links;
         unordered_set<PatternLink> master_boundary_keyer_links;
         unordered_set<PatternLink> master_boundary_residual_links;
         unordered_set<PatternLink> coupling_residual_links;
         unordered_set<PatternLink> coupling_keyer_links; // only where child X has at least one residual link (i.e. non-trivial)
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
-        unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_master_boundary_agents;
+        unordered_map< Agent *, unordered_set<PatternLink> > parent_residual_links_to_master_boundary_agents;
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;

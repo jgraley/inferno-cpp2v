@@ -25,7 +25,7 @@
 //#define TEST_PATTERN_QUERY
 
 // This now works!
-#define USE_SOLVER
+//#define USE_SOLVER
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
@@ -83,10 +83,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         parent_links_to_my_normal_agents[plink.GetChildAgent()].insert(plink);
     // my_normal_agents should be same set of agents as those reached by my_normal_links (uniquified)
     ASSERT( parent_links_to_my_normal_agents.size() == my_normal_agents.size() );
-    for( PatternLink plink : master_boundary_links )
-        parent_links_to_master_boundary_agents[plink.GetChildAgent()].insert(plink);
-    // master_boundary_agents should be same set of agents as those reached by master_boundary_links (uniquified)
-    ASSERT( parent_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
+    for( PatternLink plink : master_boundary_residual_links )
+        parent_residual_links_to_master_boundary_agents[plink.GetChildAgent()].insert(plink);
+    // master_boundary_agents should be same set of agents as those reached by master_boundary_residual_links (uniquified)
+    ASSERT( parent_residual_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
         
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
@@ -106,10 +106,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     {
         ASSERT( master_boundary_residual_links.size() == 1 && master_boundary_residual_links.count(root_plink) == 1 )
               ("\nmbrl:\n")(master_boundary_residual_links);
-        ASSERT( master_boundary_links.size() == 1 && master_boundary_links.count(root_plink) == 1 )
-              ("\nmbl:\n")(master_boundary_links);
-        ASSERT( parent_links_to_master_boundary_agents.size() == 1 && parent_links_to_master_boundary_agents.count(root_agent) == 1 )
-              ("\nmbl:\n")(master_boundary_links);
+        ASSERT( parent_residual_links_to_master_boundary_agents.size() == 1 && parent_residual_links_to_master_boundary_agents.count(root_agent) == 1 )
+              ("\nmbl:\n")(parent_residual_links_to_master_boundary_agents);
 #ifndef NO_SPECIAL_CASE_TRIVIAL_PROBLEM
         return;  // Early-out on trivial problems
 #endif        
@@ -143,16 +141,13 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
     reached_links.insert(link);
     // ------------ Now unique by plink (weaker) -------------
 
+    Agent *agent = link.GetChildAgent();
+    
     // Note: here, we WILL see root if root is a master agent (i.e. trivial pattern)
-    if( master_agents.count( link.GetChildAgent() ) )
+    if( master_agents.count( agent ) )
         master_boundary_residual_links.insert( link );
 
-    normal_links_ordered.push_back( link );
-    Agent *agent = link.GetChildAgent();
-    TreePtr<Node> agent_pattern = link.GetPattern();
-    
-    if( master_agents.count( agent ) > 0 )
-        master_boundary_links.insert( link );
+    normal_links_ordered.push_back( link );    
 
     if( reached_agents.count(agent) > 0 )    
         return; 
@@ -169,6 +164,7 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
         // variables that permit us to inject master keys into CSP. I'm hoping
         // we only need one per agent. TODO do this some other way, even
         // if that de-abstracts the CSP solver interface a bit.
+        TreePtr<Node> agent_pattern = link.GetPattern();
         master_boundary_keyer_links.insert( PatternLink::CreateDistinct(agent_pattern) ); 
     } 
     else
@@ -1042,7 +1038,7 @@ void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) c
 
 void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const
 {
-    TRACE(*this)(" parent_links_to_master_boundary_agents ")( plan.parent_links_to_master_boundary_agents )("\n");
+    TRACE(*this)(" parent_residual_links_to_master_boundary_agents ")( plan.parent_residual_links_to_master_boundary_agents )("\n");
     TRACE(*this)(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
@@ -1083,8 +1079,8 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                                             plan.coupling_keyer_links,
                                             plan.coupling_residual_links );
 	TRACE("   Exterior (master boundary agents/links):\n");    
-    figure.exterior_agents = agents_lambda( plan.parent_links_to_master_boundary_agents,
-                                            plan.master_boundary_keyer_links,
+    figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_master_boundary_agents,
+                                            plan.master_boundary_keyer_links, // Won't show up as not in p_r_l_t_m_b_a, but could generate invisible nodes and links?
                                             plan.master_boundary_residual_links );       
     if( plan.trivial_problem )
     {
