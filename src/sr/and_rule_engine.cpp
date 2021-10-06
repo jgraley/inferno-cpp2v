@@ -99,15 +99,18 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks );   
     
-    // these two conditions for trivial problem should be equivalent
-    ASSERT( my_normal_agents.empty() == my_normal_links.empty() );     
-    trivial_problem = my_normal_agents.empty(); // Note: now only used in pattern-trace graphs
-    if( trivial_problem ) 
-    {
-        ASSERT( master_boundary_links.size() == 1 && master_boundary_links.count(root_plink) == 1 )
+    // Trivial problem checks   
+    if( my_normal_links.empty() ) 
+    {        
+        ASSERT( my_normal_agents.empty() );
+        // Root link obviously isn't in my_normal_links because that's empty, 
+        // so it needs to be found in master_boundary_links
+        ASSERT( master_boundary_links.count(root_plink) == 1 )
               ("\nmbrl:\n")(master_boundary_links);
-        ASSERT( parent_residual_links_to_master_boundary_agents.size() == 1 && parent_residual_links_to_master_boundary_agents.count(root_agent) == 1 )
-              ("\nmbl:\n")(parent_residual_links_to_master_boundary_agents);      
+    }
+    else
+    {
+        ASSERT( !my_normal_agents.empty() );
     }
 
 #ifdef USE_SOLVER   
@@ -1011,8 +1014,6 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 	Graph::Figure figure;
 	figure.id = GetGraphId();
 	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
-    if( plan.trivial_problem )
-        figure.title += "\\n(trivial)";
     
 	auto agents_lambda = [&](const unordered_map< Agent *, unordered_set<PatternLink> > &parent_links_to_agents,
                              const unordered_set<PatternLink> &keyers,
@@ -1049,12 +1050,6 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
     figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_master_boundary_agents,
                                             plan.master_proxy_keyer_links, // Won't show up as not in p_r_l_t_m_b_a, but could generate invisible nodes and links?
                                             plan.master_boundary_links );       
-    if( plan.trivial_problem )
-    {
-        ASSERT( figure.exterior_agents.size()==1 );
-        ASSERT( figure.exterior_agents.front().incoming_links.size()==1 );
-        ASSERT( figure.exterior_agents.front().incoming_links.front().details.planned_as==Graph::LINK_RESIDUAL );
-    }
         
 	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
     {
