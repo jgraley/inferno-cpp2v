@@ -166,7 +166,6 @@ private:
     // this instance's problem into master instance's problems. Note:
     // couplings are not allowed to specify the MMAX node.
     const CouplingKeysMap *master_keys;
-    CouplingKeysMap my_coupling_keys; 
     CouplingKeysMap external_keys; 
 
     // These are partial solutions, and are mapped against the links

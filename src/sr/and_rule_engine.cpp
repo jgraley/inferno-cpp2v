@@ -533,7 +533,7 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     // NOTE: Probable bug in couplings algo, see #315
     if( plan.coupling_residual_links.count( (PatternLink)link ) > 0 )
     {
-        CompareCoupling( my_coupling_keys, link, KEY_CONSUMER_1 );
+        CompareCoupling( external_keys, link, KEY_CONSUMER_1 );
     }
     else if( plan.master_boundary_links.count( (PatternLink)link ) > 0 )
     {
@@ -566,9 +566,6 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
               (*agent);
 #endif
         CompareLinks( agent, query );
-        
-        if( plan.coupling_keyer_links.count( (PatternLink)link ) > 0 )
-            KeyCoupling( my_coupling_keys, link, KEY_PRODUCER_6 );
     }
     RecordLink( link, KEY_PRODUCER_1 );        
 }
@@ -686,7 +683,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             {
                 Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
                 SolutionMap solution_for_evaluators;
-                CouplingKeysMap provisional_external_keys;
+                CouplingKeysMap provisional_coupling_keys_and_rule;
                 
                 // Try matching the abnormal links (free and evaluator).
                 FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
@@ -703,7 +700,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                         e->Compare( link, &keys_for_subordinates, knowledge );
                         
                         // Replace needs these keys
-                        KeyCoupling( provisional_external_keys, link, KEY_PRODUCER_2 );
+                        KeyCoupling( provisional_coupling_keys_and_rule, link, KEY_PRODUCER_2 );
                     }
                 }                    
                 
@@ -722,7 +719,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                     CompareEvaluatorLinks( agent, &keys_for_subordinates, &solution_for_evaluators );            
             
                 // If we got here, we're done!
-                external_keys = UnionOfSolo( provisional_external_keys, external_keys );                  
+                external_keys = UnionOfSolo( provisional_coupling_keys_and_rule, external_keys );                  
             }
             TRACE("Success after %d tries\n", i);    
             break;
@@ -788,7 +785,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
     {
         basic_solution.clear();
         external_keys.clear();
-        my_coupling_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         GetNextCSPSolution(root_link);        
@@ -801,7 +797,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.    
             DecidedCompare( root_link );       
-            my_coupling_keys.clear(); // save memory     
 #endif
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
