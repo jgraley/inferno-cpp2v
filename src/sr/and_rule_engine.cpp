@@ -572,7 +572,7 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 
 
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
-                                           const CouplingKeysMap *subordinate_keys, 
+                                           const CouplingKeysMap *keys_for_subordinates, 
                                            const SolutionMap *solution ) 
 {
     INDENT("E");
@@ -593,7 +593,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            e->Compare( xlink, subordinate_keys, knowledge );
+            e->Compare( xlink, keys_for_subordinates, knowledge );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -614,7 +614,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 
 
 void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link, 
-                                              const CouplingKeysMap *subordinate_keys ) 
+                                              const CouplingKeysMap *keys_for_subordinates ) 
 {
     INDENT("M");
 
@@ -633,7 +633,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-            e->Compare( xe_link, subordinate_keys, knowledge );
+            e->Compare( xe_link, keys_for_subordinates, knowledge );
         }
     }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
@@ -641,7 +641,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         for( XLink xe_link : xssl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, subordinate_keys, knowledge );
+            e->Compare( xe_link, keys_for_subordinates, knowledge );
         }
     }    
     else
@@ -652,7 +652,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 
 void AndRuleEngine::RegenerationPassAgent( Agent *agent,
-                                           const CouplingKeysMap &subordinate_keys )
+                                           const CouplingKeysMap &keys_for_subordinates )
 {
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
@@ -697,7 +697,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                     if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                     {
                         shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                        e->Compare( link, &subordinate_keys, knowledge );
+                        e->Compare( link, &keys_for_subordinates, knowledge );
                         
                         // Replace needs these keys
                         KeyCoupling( provisional_external_keys, link, KEY_PRODUCER_2 );
@@ -711,12 +711,12 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                         InsertSolo( solution_for_evaluators, link );                
 
                     if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
-                        CompareMultiplicityLinks( link, &subordinate_keys );  
+                        CompareMultiplicityLinks( link, &keys_for_subordinates );  
                 }
 
                 // Try matching the evaluator agents.
                 if( plan.my_evaluators.count( agent ) )
-                    CompareEvaluatorLinks( agent, &subordinate_keys, &solution_for_evaluators );            
+                    CompareEvaluatorLinks( agent, &keys_for_subordinates, &solution_for_evaluators );            
             
                 // If we got here, we're done!
                 external_keys = UnionOfSolo( provisional_external_keys, external_keys );                  
@@ -736,15 +736,15 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 void AndRuleEngine::RegenerationPass()
 {
     INDENT("R");
-    const CouplingKeysMap subordinate_keys = UnionOfSolo( *master_keys, external_keys );   
+    const CouplingKeysMap keys_for_subordinates = UnionOfSolo( *master_keys, external_keys );   
     TRACE("---------------- Regeneration ----------------\n");      
-    //TRACEC("Subordinate keys ")(subordinate_keys)("\n");       
+    //TRACEC("Subordinate keys ")(keys_for_subordinates)("\n");       
     TRACEC("Basic solution ")(basic_solution)("\n");    
 
     for( Agent *agent : plan.my_normal_agents )
     {
         RegenerationPassAgent( agent, 
-                               subordinate_keys );
+                               keys_for_subordinates );
     }
 
     TRACE("Regeneration complete\n");
