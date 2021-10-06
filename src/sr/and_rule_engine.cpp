@@ -678,56 +678,55 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 
         TRACE("Try out query, attempt %d (1-based)\n", i);    
 
-        try
+        try // in here, only have the stuff that could throw a mismatch
         {
-            {
-                Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
-                SolutionMap solution_for_evaluators;
-                
-                // Try matching the abnormal links (free and evaluator).
-                FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-                {
-                    ASSERT( link );
-                    // Actions if evaluator link
-                    if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )                
-                        InsertSolo( solution_for_evaluators, link );                
-                    
-                    // Actions if free link
-                    if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
-                    {
-                        shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                        e->Compare( link, &keys_for_subordinates, knowledge );
-                    }
-                }                    
-                
-                // Try matching the multiplicity links.
-                FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
-                {
-                    if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
-                        InsertSolo( solution_for_evaluators, link );                
-
-                    if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
-                        CompareMultiplicityLinks( link, &keys_for_subordinates );  
-                }
-
-                // Try matching the evaluator agents.
-                if( plan.my_evaluators.count( agent ) )
-                    CompareEvaluatorLinks( agent, &keys_for_subordinates, &solution_for_evaluators );            
+            Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
+            SolutionMap solution_for_evaluators;
             
-                // If we got here, we're done!
-                TRACE("Success after %d tries\n", i);  
+            // Try matching the abnormal links (free and evaluator).
+            FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+            {
+                ASSERT( link );
+                // Actions if evaluator link
+                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )                
+                    InsertSolo( solution_for_evaluators, link );                
                 
-                // Replace needs these keys 
-                FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-                    if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )                        
-                        KeyCoupling( external_keys, link, KEY_PRODUCER_2 );
-            }            
-            break;
+                // Actions if free link
+                if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
+                {
+                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
+                    e->Compare( link, &keys_for_subordinates, knowledge );
+                }
+            }                    
+            
+            // Try matching the multiplicity links.
+            FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
+            {
+                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
+                    InsertSolo( solution_for_evaluators, link );                
+
+                if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
+                    CompareMultiplicityLinks( link, &keys_for_subordinates );  
+            }
+
+            // Try matching the evaluator agents.
+            if( plan.my_evaluators.count( agent ) )
+                CompareEvaluatorLinks( agent, &keys_for_subordinates, &solution_for_evaluators );                    
         }
         catch( const ::Mismatch& mismatch )
         {
             TRACE("Caught Mismatch exception, retrying the lambda\n", i);    
-        }                             
+            continue; // deal with exception by iterating the loop 
+        }     
+                                        
+        // Replace needs these keys 
+        FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+            if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )                        
+                KeyCoupling( external_keys, link, KEY_PRODUCER_2 );
+                
+        // If we got here, we're done!
+        TRACE("Success after %d tries\n", i);  
+        break;
     } 
     agent->ResetNLQConjecture(); // save memory
 }      
