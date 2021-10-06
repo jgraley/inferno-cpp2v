@@ -683,7 +683,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             {
                 Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
                 SolutionMap solution_for_evaluators;
-                //CouplingKeysMap provisional_coupling_keys_and_rule;
+                CouplingKeysMap provisional_external_keys;
                 
                 // Try matching the abnormal links (free and evaluator).
                 FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
@@ -700,7 +700,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                         e->Compare( link, &keys_for_subordinates, knowledge );
                         
                         // Replace needs these keys
-                        KeyCoupling( external_keys, link, KEY_PRODUCER_2 );
+                        KeyCoupling( provisional_external_keys, link, KEY_PRODUCER_2 );
                     }
                 }                    
                 
@@ -719,7 +719,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                     CompareEvaluatorLinks( agent, &keys_for_subordinates, &solution_for_evaluators );            
             
                 // If we got here, we're done!
-                //external_keys = UnionOfSolo( provisional_coupling_keys_and_rule, external_keys );                  
+                external_keys = UnionOfSolo( provisional_external_keys, external_keys );                  
             }
             TRACE("Success after %d tries\n", i);    
             break;
