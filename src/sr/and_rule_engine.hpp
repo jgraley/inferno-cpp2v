@@ -139,7 +139,6 @@ public:
                   const CouplingKeysMap *master_keys,
                   const TheKnowledge *knowledge );
     void Compare( TreePtr<Node> root_xnode );
-    void EnsureChoicesHaveIterators();
 
     const CouplingKeysMap &GetCouplingKeys();
     const void ClearCouplingKeys();

@@ -49,7 +49,6 @@ public:
     
     void Start();
     void FillChoicesWithHardBegin( AgentRecords::const_iterator rit );      
-    void EnsureChoicesHaveIterators();
     
 	bool IncrementAgent( AgentRecords::const_iterator rit, int bc );			                                     
     bool Increment(); // returns true for try again, false for give up		

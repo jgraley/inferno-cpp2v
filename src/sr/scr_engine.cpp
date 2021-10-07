@@ -361,9 +361,6 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     knowledge.Clear();
 #endif
 
-    TRACE("Search successful, now keying replace nodes\n");
-    plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
-
     TRACE("Now replacing\n");
     *p_root_xnode = Replace(master_keys);
     

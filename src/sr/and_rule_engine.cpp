@@ -843,14 +843,6 @@ void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 }
 
 
-void AndRuleEngine::EnsureChoicesHaveIterators()
-{
-#ifndef USE_SOLVER
-    plan.conj->EnsureChoicesHaveIterators();
-#endif
-}
-
-
 const CouplingKeysMap &AndRuleEngine::GetCouplingKeys()
 {
     return external_keys;

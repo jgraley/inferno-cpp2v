@@ -157,7 +157,6 @@ public:
     virtual void Invalidate( int bc ) = 0;
     virtual void SetChoice( int bc, Choice newc ) = 0;
     virtual void PushBackChoice( Choice newc ) = 0;    
-    virtual void EnsureChoicesHaveIterators() = 0;
 };
 
 
@@ -194,7 +193,6 @@ public:
     void Invalidate( int bc );
     void SetChoice( int bc, Choice newc );
     void PushBackChoice( Choice newc );    
-    void EnsureChoicesHaveIterators();
     const Agent *GetBaseAgent() const { return base_agent; }
     string GetTrace() const;    
     

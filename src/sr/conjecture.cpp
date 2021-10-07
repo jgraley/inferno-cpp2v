@@ -114,13 +114,6 @@ void Conjecture::FillChoicesWithHardBegin( AgentRecords::const_iterator rit )
 }
 
 
-void Conjecture::EnsureChoicesHaveIterators()
-{
-    for( auto &p : plan.agent_records )
-        p.second.query->EnsureChoicesHaveIterators();
-}
-
-
 bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
 {    
     AgentRecord record = rit->second;

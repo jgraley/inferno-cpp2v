@@ -208,20 +208,6 @@ void DecidedQuery::PushBackChoice( Choice newc )
 }
 
 
-void DecidedQuery::EnsureChoicesHaveIterators()
-{
-    for( int i=0; i<choices.size(); i++ )
-    {
-        DecidedQueryCommon::Choice &choice = choices[i];
-        if( choice.mode == DecidedQueryCommon::Choice::BEGIN )
-        {        
-            choice.mode = DecidedQueryCommon::Choice::ITER;
-            choice.iter = decisions[i].begin;
-        }
-    }
-}
-
-
 ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
 {
     ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); 
