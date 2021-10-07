@@ -34,6 +34,12 @@ public:
     virtual void SetMasterCouplingKeys( const CouplingKeysMap &keys ) = 0;
 };
 
+class StartsOverlay
+{
+public:
+    virtual void StartKeyForOverlay() = 0;
+};
+
 /// Common implementation for search+replace, compare+replace and slaves
 class SCREngine : public virtual Graphable,
                   public SerialNumber
@@ -91,6 +97,7 @@ private:
         unordered_set<PatternLink> my_plinks;   
         unordered_set<Agent *> my_agents;   
         set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
+        set<StartsOverlay *> my_overlay_starter_engines;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;

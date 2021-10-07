@@ -542,7 +542,7 @@ void AgentCommon::KeyForOverlay( Agent *from )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...
-    ASSERT(GetKey())(*this)(" cannot appear in a replace-only context");
+    //ASSERT(GetKey())(*this)(" cannot appear in a replace-only context");
 }
 
 

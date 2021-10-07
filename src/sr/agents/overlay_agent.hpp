@@ -4,6 +4,7 @@
 #include "agent.hpp"
 #include "common/common.hpp"
 #include "colocated_agent.hpp"
+#include "../scr_engine.hpp" 
 
 namespace SR
 { 
@@ -15,12 +16,14 @@ namespace SR
 /// If the replace pattern under `overlay` contains wildcards, these will 
 /// be overlayed over the pattern under `through`, to the extent that this
 /// is unambiguous and the structures of the two subtrees match.
-class OverlayAgent : public virtual ColocatedAgent
+class OverlayAgent : public virtual ColocatedAgent,
+                     public StartsOverlay
 {  
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
+    virtual void StartKeyForOverlay();
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;
     virtual const TreePtrInterface *GetOverlay() const = 0;    

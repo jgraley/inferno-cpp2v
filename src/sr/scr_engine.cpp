@@ -187,11 +187,14 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
 
     // Determine who our slaves are
     my_agents_needing_engines.clear();
+    my_overlay_starter_engines.clear();
     for( PatternLink plink : my_plinks )
     {
         Agent *a = plink.GetChildAgent();
         if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
             my_agents_needing_engines.insert( ae );
+        if( auto ao = dynamic_cast<StartsOverlay *>(a) )
+            my_overlay_starter_engines.insert( ao );
     }
 }
 
@@ -295,6 +298,9 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys ) const
 
     for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
         ae->SetMasterCouplingKeys( all_keys );
+  
+    for( StartsOverlay *ao : plan.my_overlay_starter_engines )
+        ao->StartKeyForOverlay();
   
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace();

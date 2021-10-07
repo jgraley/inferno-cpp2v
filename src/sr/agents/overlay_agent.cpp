@@ -55,9 +55,8 @@ list<PatternLink> OverlayAgent::GetVisibleChildren( Path v ) const
 }
 
 
-TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+void OverlayAgent::StartKeyForOverlay()
 {
-    INDENT("O");    
     ASSERT( *GetOverlay() );          
     Agent *overlay_agent = AsAgent((TreePtr<Node>)*GetOverlay());
     Agent *through_agent = AsAgent((TreePtr<Node>)*GetThrough());
@@ -65,5 +64,13 @@ TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     // Key as many nodes as possible on the replace side
     TRACE(*this)(" transferring key from ")(*through_agent)(" to ")(*overlay_agent);
     overlay_agent->KeyForOverlay(through_agent);
+}
+
+
+TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+{
+    INDENT("O");    
+
+    Agent *overlay_agent = AsAgent((TreePtr<Node>)*GetOverlay());
     return overlay_agent->BuildReplace();
 }
