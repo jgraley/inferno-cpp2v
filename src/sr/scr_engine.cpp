@@ -266,9 +266,9 @@ void SCREngine::SetStopAfter( vector<int> ssa, int d )
 }
 
 
-void SCREngine::KeyReplaceNodes( const CouplingKeysMap *master_keys ) const
+TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys ) const
 {
-    INDENT("K");   
+    INDENT("R");
         
     CouplingKeysMap and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
     CouplingKeysMap all_keys = UnionOfSolo( *master_keys, 
@@ -295,13 +295,7 @@ void SCREngine::KeyReplaceNodes( const CouplingKeysMap *master_keys ) const
 
     for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
         ae->SetMasterCouplingKeys( all_keys );
-}
-
-
-TreePtr<Node> SCREngine::Replace() const
-{
-    INDENT("R");
-    
+  
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace();
     
@@ -369,10 +363,9 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 
     TRACE("Search successful, now keying replace nodes\n");
     plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
-    KeyReplaceNodes(master_keys);
 
     TRACE("Now replacing\n");
-    *p_root_xnode = Replace();
+    *p_root_xnode = Replace(master_keys);
     
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, plan.my_agents )

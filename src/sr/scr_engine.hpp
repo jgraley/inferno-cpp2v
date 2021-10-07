@@ -102,8 +102,7 @@ public:
                                  const CouplingKeysMap *master_keys );                   
                                             
 private:
-    void KeyReplaceNodes( const CouplingKeysMap *master_keys ) const;
-    TreePtr<Node> Replace() const;
+    TreePtr<Node> Replace( const CouplingKeysMap *master_keys ) const;
 
 public:
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
