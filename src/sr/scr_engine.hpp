@@ -102,7 +102,11 @@ private:
         shared_ptr<AndRuleEngine> and_rule_engine;
     } plan;
 public:
-    void GatherCouplings( CouplingKeysMap *coupling_keys ) const;    
+    // Note: this is const but RepeatingCompareReplace(). Why?
+    // Because we're not calling OUR RepeatingCompareReplace but
+    // the slave_engine's one - and that pointer is not const.
+    void RecurseInto( SCREngine *slave_engine, 
+                      TreePtr<Node> *p_root_xnode ) const;    
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                const CouplingKeysMap *master_keys );
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
