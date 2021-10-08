@@ -109,7 +109,7 @@ public:
                                  const CouplingKeysMap *master_keys );                   
                                             
 private:
-    TreePtr<Node> Replace( const CouplingKeysMap *master_keys ) const;
+    TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
 
 public:
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
@@ -137,6 +137,10 @@ private:
     vector<int> stop_after;
     int depth;    
     TheKnowledge knowledge;    
+    
+    CouplingKeysMap and_rule_keys;
+    CouplingKeysMap all_keys;
+    bool keys_available = false;
 };
 
 };

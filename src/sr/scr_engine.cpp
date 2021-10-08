@@ -269,14 +269,15 @@ void SCREngine::SetStopAfter( vector<int> ssa, int d )
 }
 
 
-TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys ) const
+TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 {
     INDENT("R");
         
-    CouplingKeysMap and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
-    CouplingKeysMap all_keys = UnionOfSolo( *master_keys, 
-                                            plan.and_rule_engine->GetCouplingKeys() );    
-        
+    and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
+    all_keys = UnionOfSolo( *master_keys, 
+                            plan.and_rule_engine->GetCouplingKeys() );    
+    keys_available = true;
+    
     TRACE("My agents coupling status:\n");
     FOREACH( Agent *a, plan.my_agents )
     {
@@ -305,6 +306,10 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys ) const
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace();
     
+    keys_available = false;
+    and_rule_keys.clear();
+    all_keys.clear();
+
     // Need a duplicate here in case we're a slave replacing an identifier
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
