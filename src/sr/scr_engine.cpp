@@ -273,7 +273,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 {
     INDENT("R");
         
-    CouplingKeysMap and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
     {   
         CouplingKeysMap all_keys = UnionOfSolo( *master_keys, 
                                                 plan.and_rule_engine->GetCouplingKeys() );    
@@ -282,7 +281,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
             ae->SetMasterCouplingKeys( all_keys );
     }
     
-    agent_mirror_keys = and_rule_keys;
+    agent_mirror_keys = plan.and_rule_engine->GetCouplingKeys();;
     keys_available = true;
 
     for( StartsOverlay *ao : plan.my_overlay_starter_engines )
