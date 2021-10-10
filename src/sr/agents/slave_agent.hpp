@@ -25,18 +25,18 @@ class SlaveAgent : public virtual ColocatedAgent,
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
-    virtual void KeyForOverlay( Agent *from );
     virtual const TreePtrInterface *GetThrough() const = 0;    
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
     void SetMasterCouplingKeys( const CouplingKeysMap &keys );
+    virtual void KeyForOverlay( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
 	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
 
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
