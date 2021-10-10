@@ -145,7 +145,7 @@ private:
     int depth;    
     TheKnowledge knowledge;    
     
-    mutable CouplingKeysMap agent_mirror_keys;
+    mutable CouplingKeysMap replace_keys;
     bool keys_available = false;
 };
 

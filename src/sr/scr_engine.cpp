@@ -274,14 +274,14 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     INDENT("R");
         
     {   
-        CouplingKeysMap all_keys = UnionOfSolo( *master_keys, 
-                                                plan.and_rule_engine->GetCouplingKeys() );    
+        CouplingKeysMap keys_for_slaves = UnionOfSolo( *master_keys, 
+                                                       plan.and_rule_engine->GetCouplingKeys() );    
 
         for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
-            ae->SetMasterCouplingKeys( all_keys );
+            ae->SetMasterCouplingKeys( keys_for_slaves );
     }
     
-    agent_mirror_keys = plan.and_rule_engine->GetCouplingKeys();;
+    replace_keys = plan.and_rule_engine->GetCouplingKeys();;
     keys_available = true;
 
     for( StartsOverlay *ao : plan.my_overlay_starter_engines )
@@ -291,7 +291,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     TreePtr<Node> rnode = plan.root_agent->BuildReplace();
     
     keys_available = false;
-    agent_mirror_keys.clear();
+    replace_keys.clear();
     
     // Need a duplicate here in case we're a slave replacing an identifier
     // with a non-identifier. Otherwise our subtree would look fine, but 
@@ -536,15 +536,15 @@ void SCREngine::SetAgentMirrorKey( const Agent *agent, CouplingKey key ) const
     
     // Match condition in Agent::SetKey() 
     if( key )
-        InsertSolo( agent_mirror_keys, make_pair(agent, key) );
+        InsertSolo( replace_keys, make_pair(agent, key) );
 }
 
 
 CouplingKey SCREngine::GetAgentMirrorKey( const Agent *agent ) const
 {
     ASSERT( keys_available );
-    if( agent_mirror_keys.count(agent) == 1 )
-        return agent_mirror_keys.at(agent);
+    if( replace_keys.count(agent) == 1 )
+        return replace_keys.at(agent);
     else
         return CouplingKey();
 }
