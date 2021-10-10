@@ -96,6 +96,7 @@ public:
 
     virtual void SetKey( CouplingKey keylink ) = 0;
     virtual CouplingKey GetKey() = 0;      
+    virtual CouplingKey RealGetKey() = 0;      
     virtual PatternLink GetKeyerPatternLink() = 0;
                             
     virtual void Reset() = 0;     
@@ -165,6 +166,7 @@ public:
 public:
     virtual void SetKey( CouplingKey keylink );
     virtual CouplingKey GetKey();                                  
+    virtual CouplingKey RealGetKey();                                  
     virtual PatternLink GetKeyerPatternLink();                                  
     virtual void Reset();    
     virtual void KeyForOverlay( Agent *from );

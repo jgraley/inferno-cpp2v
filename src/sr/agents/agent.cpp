@@ -509,15 +509,25 @@ void AgentCommon::ResetNLQConjecture()
 
 void AgentCommon::SetKey( CouplingKey key )
 {
+    ASSERT( master_scr_engine );
     ASSERT(key);
     if( phase != IN_COMPARE_ONLY )
         ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
-    ASSERT( !coupling_key );
-    coupling_key = key;
+    //ASSERT( !coupling_key );
+    //coupling_key = key;
+    master_scr_engine->SetAgentMirrorKey( this, key );
 }
 
 
 CouplingKey AgentCommon::GetKey()
+{
+    //return coupling_key; 
+    ASSERT( master_scr_engine );
+    return master_scr_engine->GetAgentMirrorKey( this );
+}
+
+
+CouplingKey AgentCommon::RealGetKey()
 {
     return coupling_key; 
 }
@@ -600,10 +610,10 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                                              TreePtr<Node> source_terminus,
                                              TreePtr<Node> dest_terminus ) const
 {
-    INDENT("D");
     ASSERT( source );
     if( source_terminus )
         ASSERT( dest_terminus );
+
      // Under substitution, we should be duplicating a subtree of the input
     // program, which should not contain any special nodes
     ASSERT( !(dynamic_pointer_cast<SpecialBase>(source)) )
