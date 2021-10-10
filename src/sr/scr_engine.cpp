@@ -273,35 +273,18 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 {
     INDENT("R");
         
-    and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
-    all_keys = UnionOfSolo( *master_keys, 
-                            plan.and_rule_engine->GetCouplingKeys() );    
+    CouplingKeysMap and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
+    {   
+        CouplingKeysMap all_keys = UnionOfSolo( *master_keys, 
+                                                plan.and_rule_engine->GetCouplingKeys() );    
 
+        for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
+            ae->SetMasterCouplingKeys( all_keys );
+    }
+    
     agent_mirror_keys = and_rule_keys;
     keys_available = true;
-    
-    /*TRACE("My agents coupling status:\n");
-    FOREACH( Agent *a, plan.my_agents )
-    {
-        TRACEC(*a);
-        bool keyed = ( and_rule_keys.count( a ) > 0 );
-        if( keyed )
-            TRACEC(" is in coupling_keys: ")(and_rule_keys.at( a ));
-        else
-            TRACEC(" is not in coupling_keys");
-        bool self_coupled = agent_mirror_keys.count(a);
-        if( self_coupled )
-            TRACEC(" and is self-coupled: ")(and_rule_keys)("\n");
-        else
-            TRACEC(" and is not self-coupled\n");
-            
-        if( keyed && !self_coupled )
-            InsertSolo( agent_mirror_keys, make_pair(a, and_rule_keys.at(a)) );            
-    }*/
 
-    for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
-        ae->SetMasterCouplingKeys( all_keys );
-  
     for( StartsOverlay *ao : plan.my_overlay_starter_engines )
         ao->StartKeyForOverlay();
   
@@ -309,8 +292,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     TreePtr<Node> rnode = plan.root_agent->BuildReplace();
     
     keys_available = false;
-    and_rule_keys.clear();
-    all_keys.clear();
     agent_mirror_keys.clear();
     
     // Need a duplicate here in case we're a slave replacing an identifier

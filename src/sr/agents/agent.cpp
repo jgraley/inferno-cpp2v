@@ -513,15 +513,12 @@ void AgentCommon::SetKey( CouplingKey key )
     ASSERT(key);
     if( phase != IN_COMPARE_ONLY )
         ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
-    //ASSERT( !coupling_key );
-    //coupling_key = key;
     master_scr_engine->SetAgentMirrorKey( this, key );
 }
 
 
 CouplingKey AgentCommon::GetKey()
 {
-    //return coupling_key; 
     ASSERT( master_scr_engine );
     return master_scr_engine->GetAgentMirrorKey( this );
 }
@@ -538,7 +535,6 @@ PatternLink AgentCommon::GetKeyerPatternLink()
 
 void AgentCommon::Reset()
 {
-    coupling_key = LocatedLink();
 }
 
 
