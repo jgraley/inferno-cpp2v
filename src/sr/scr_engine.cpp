@@ -277,10 +277,10 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     all_keys = UnionOfSolo( *master_keys, 
                             plan.and_rule_engine->GetCouplingKeys() );    
 
-    agent_mirror_keys.clear();
+    agent_mirror_keys = and_rule_keys;
     keys_available = true;
     
-    TRACE("My agents coupling status:\n");
+    /*TRACE("My agents coupling status:\n");
     FOREACH( Agent *a, plan.my_agents )
     {
         TRACEC(*a);
@@ -289,15 +289,15 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
             TRACEC(" is in coupling_keys: ")(and_rule_keys.at( a ));
         else
             TRACEC(" is not in coupling_keys");
-        bool self_coupled = a->GetKey();
+        bool self_coupled = agent_mirror_keys.count(a);
         if( self_coupled )
             TRACEC(" and is self-coupled: ")(and_rule_keys)("\n");
         else
             TRACEC(" and is not self-coupled\n");
             
         if( keyed && !self_coupled )
-            a->SetKey( and_rule_keys.at(a) );            
-    }
+            InsertSolo( agent_mirror_keys, make_pair(a, and_rule_keys.at(a)) );            
+    }*/
 
     for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
         ae->SetMasterCouplingKeys( all_keys );
