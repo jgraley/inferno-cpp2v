@@ -278,7 +278,8 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
                             plan.and_rule_engine->GetCouplingKeys() );    
     agent_mirror_keys.clear();
     FOREACH( Agent *a, plan.my_agents )
-        InsertSolo( agent_mirror_keys, make_pair(a, a->RealGetKey()) );
+        InsertSolo( agent_mirror_keys, make_pair(a, CouplingKey()) );
+
     keys_available = true;
     
     TRACE("My agents coupling status:\n");

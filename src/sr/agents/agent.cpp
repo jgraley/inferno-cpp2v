@@ -527,12 +527,6 @@ CouplingKey AgentCommon::GetKey()
 }
 
 
-CouplingKey AgentCommon::RealGetKey()
-{
-    return coupling_key; 
-}
-
-
 PatternLink AgentCommon::GetKeyerPatternLink()
 {
     ASSERT( master_and_rule_engine )(*this)(" has not been configured by any AndRuleEngine");
