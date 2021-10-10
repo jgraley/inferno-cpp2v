@@ -276,6 +276,9 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
     all_keys = UnionOfSolo( *master_keys, 
                             plan.and_rule_engine->GetCouplingKeys() );    
+    agent_mirror_keys.clear();
+    FOREACH( Agent *a, plan.my_agents )
+        InsertSolo( agent_mirror_keys, make_pair(a, a->GetKey()) );
     keys_available = true;
     
     TRACE("My agents coupling status:\n");
@@ -294,7 +297,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
             TRACEC(" and is not self-coupled\n");
             
         if( keyed && !self_coupled )
-            a->SetKey( and_rule_keys.at(a) );
+            a->SetKey( and_rule_keys.at(a) );            
     }
 
     for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
@@ -309,7 +312,8 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     keys_available = false;
     and_rule_keys.clear();
     all_keys.clear();
-
+    agent_mirror_keys.clear();
+    
     // Need a duplicate here in case we're a slave replacing an identifier
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
@@ -544,4 +548,16 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 	plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
 	for( auto p : plan.my_engines )
 		p.second->GenerateGraphRegions(graph);	
+}
+
+
+void SCREngine::SetAgentMirrorKey( const Agent *agent, CouplingKey key )
+{
+    agent_mirror_keys[agent] = key;
+}
+
+
+CouplingKey SCREngine::GetAgentMirrorKey( const Agent *agent )
+{
+    return agent_mirror_keys[agent];
 }

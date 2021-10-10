@@ -134,6 +134,9 @@ public:
     list<const SCREngine *> GetSCREngines() const;
     void GenerateGraphRegions( Graph &graph ) const;
 
+    void SetAgentMirrorKey( const Agent *agent, CouplingKey key );
+    CouplingKey GetAgentMirrorKey( const Agent *agent );
+    
 private:    
     static int repetitions;
     static bool rep_error;
@@ -144,6 +147,7 @@ private:
     
     CouplingKeysMap and_rule_keys;
     CouplingKeysMap all_keys;
+    CouplingKeysMap agent_mirror_keys;
     bool keys_available = false;
 };
 

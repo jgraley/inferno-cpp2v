@@ -67,7 +67,7 @@ private:
 };
 
 
-typedef map< Agent *, CouplingKey > CouplingKeysMap;
+typedef map< const Agent *, CouplingKey > CouplingKeysMap;
 
 }
 
