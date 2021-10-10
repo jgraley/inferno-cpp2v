@@ -276,10 +276,8 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     and_rule_keys = plan.and_rule_engine->GetCouplingKeys();
     all_keys = UnionOfSolo( *master_keys, 
                             plan.and_rule_engine->GetCouplingKeys() );    
-    agent_mirror_keys.clear();
-    FOREACH( Agent *a, plan.my_agents )
-        InsertSolo( agent_mirror_keys, make_pair(a, CouplingKey()) );
 
+    agent_mirror_keys.clear();
     keys_available = true;
     
     TRACE("My agents coupling status:\n");
@@ -557,13 +555,16 @@ void SCREngine::SetAgentMirrorKey( const Agent *agent, CouplingKey key ) const
     ASSERT( keys_available );
     
     // Match condition in Agent::SetKey() 
-    ASSERT( !agent_mirror_keys.at(agent) );
-    agent_mirror_keys[agent] = key;
+    if( key )
+        InsertSolo( agent_mirror_keys, make_pair(agent, key) );
 }
 
 
 CouplingKey SCREngine::GetAgentMirrorKey( const Agent *agent ) const
 {
     ASSERT( keys_available );
-    return agent_mirror_keys.at(agent);
+    if( agent_mirror_keys.count(agent) == 1 )
+        return agent_mirror_keys.at(agent);
+    else
+        return CouplingKey();
 }
