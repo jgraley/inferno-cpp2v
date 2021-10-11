@@ -29,12 +29,6 @@ void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 }
 
 
-void SlaveAgent::SetMasterCouplingKeys( const CouplingKeysMap &keys )
-{
-	master_keys = keys;
-}
-
-
 void SlaveAgent::KeyForOverlay( Agent *from )
 {
     INDENT("l");

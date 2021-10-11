@@ -27,7 +27,6 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
-    void SetMasterCouplingKeys( const CouplingKeysMap &keys );
     virtual void KeyForOverlay( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
@@ -41,8 +40,6 @@ public:
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
     
-    CouplingKeysMap master_keys;
-
 private:
     bool is_search;
     SCREngine *my_scr_engine;

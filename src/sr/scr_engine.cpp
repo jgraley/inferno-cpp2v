@@ -274,14 +274,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 {
     INDENT("R");
         
-    {   
-        CouplingKeysMap keys_for_slaves = UnionOfSolo( *master_keys, 
-                                                       plan.and_rule_engine->GetCouplingKeys() );    
-
-        for( RequiresSubordinateSCREngine *ae : plan.my_agents_needing_engines )
-            ae->SetMasterCouplingKeys( keys_for_slaves );
-    }
-    
     replace_keys = plan.and_rule_engine->GetCouplingKeys();;
     keys_available = true;
 
