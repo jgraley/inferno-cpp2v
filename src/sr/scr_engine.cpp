@@ -530,7 +530,7 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::SetAgentMirrorKey( const Agent *agent, CouplingKey key ) const
+void SCREngine::SetReplaceKey( const Agent *agent, CouplingKey key ) const
 {
     ASSERT( keys_available );
     
@@ -540,7 +540,7 @@ void SCREngine::SetAgentMirrorKey( const Agent *agent, CouplingKey key ) const
 }
 
 
-CouplingKey SCREngine::GetAgentMirrorKey( const Agent *agent ) const
+CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
 {
     ASSERT( keys_available );
     if( replace_keys.count(agent) == 1 )

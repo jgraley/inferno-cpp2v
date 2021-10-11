@@ -134,8 +134,8 @@ public:
     list<const SCREngine *> GetSCREngines() const;
     void GenerateGraphRegions( Graph &graph ) const;
 
-    void SetAgentMirrorKey( const Agent *agent, CouplingKey key ) const;
-    CouplingKey GetAgentMirrorKey( const Agent *agent ) const;
+    void SetReplaceKey( const Agent *agent, CouplingKey key ) const;
+    CouplingKey GetReplaceKey( const Agent *agent ) const;
     
 private:    
     static int repetitions;

@@ -513,14 +513,14 @@ void AgentCommon::SetKey( CouplingKey key )
     ASSERT(key);
     if( phase != IN_COMPARE_ONLY )
         ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
-    master_scr_engine->SetAgentMirrorKey( this, key );
+    master_scr_engine->SetReplaceKey( this, key );
 }
 
 
 CouplingKey AgentCommon::GetKey()
 {
     ASSERT( master_scr_engine );
-    return master_scr_engine->GetAgentMirrorKey( this );
+    return master_scr_engine->GetReplaceKey( this );
 }
 
 
