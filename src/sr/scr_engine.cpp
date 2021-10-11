@@ -33,13 +33,13 @@ bool SCREngine::rep_error;
 // engines, it's the most masterish one that "owns" it).
 SCREngine::SCREngine( bool is_search_,
                       const CompareReplace *overall_master,
-                      CompareReplace::AgentPhases &agent_phases,
+                      CompareReplace::AgentPhases &in_progress_agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
                       const unordered_set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
     SerialNumber( false ),
-    plan(this, is_search_, overall_master, agent_phases, cp, rp, master_plinks, master),
+    plan(this, is_search_, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {
 }
@@ -48,7 +48,7 @@ SCREngine::SCREngine( bool is_search_,
 SCREngine::Plan::Plan( SCREngine *algo_,
                        bool is_search_,
                        const CompareReplace *overall_master,
-                       CompareReplace::AgentPhases &agent_phases,
+                       CompareReplace::AgentPhases &in_progress_agent_phases,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
                        const unordered_set<PatternLink> &master_plinks_,
@@ -67,24 +67,25 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     InstallRootAgents(cp, rp);
             
-    CategoriseSubs( master_plinks, agent_phases );    
+    CategoriseSubs( master_plinks, in_progress_agent_phases );    
 
     // This recurses SCR engine planning
-    CreateMyEngines( agent_phases );    
+    CreateMyEngines( in_progress_agent_phases );    
 }
 
     
-void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &agent_phases)
+void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &final_agent_phases_)
 {
     INDENT("}");
     TRACE(*this)(" planning part two\n");
+    final_agent_phases = final_agent_phases_;
     
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageTwo(agent_phases);                                      
+        p.second->PlanningStageTwo(final_agent_phases);                                      
 
     // Configure agents on the way out
-    ConfigureAgents(agent_phases);
+    ConfigureAgents();
 }
 
 
@@ -144,7 +145,7 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     
 
 void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
-                                      CompareReplace::AgentPhases &agent_phases )
+                                      CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
@@ -159,14 +160,14 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
     
     for( PatternLink plink : visible_plinks )
     {
-        unsigned int phase = (unsigned int)agent_phases[plink.GetChildAgent()];
+        unsigned int phase = (unsigned int)in_progress_agent_phases[plink.GetChildAgent()];
         if( visible_plinks_compare.count(plink) == 0 )
             phase |= Agent::IN_REPLACE_ONLY;
         else if( visible_plinks_replace.count(plink) == 0 )
             phase |= Agent::IN_COMPARE_ONLY;
         else
             phase |= Agent::IN_COMPARE_AND_REPLACE;
-        agent_phases[plink.GetChildAgent()] = (Agent::Phase)phase;
+        in_progress_agent_phases[plink.GetChildAgent()] = (Agent::Phase)phase;
     }
         
     master_agents.clear();
@@ -210,7 +211,7 @@ void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
 }
 
 
-void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &agent_phases )
+void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Determine which agents our slaves should not configure
     unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
@@ -219,7 +220,7 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &agent_phases
     {
         my_engines[ae] = make_shared<SCREngine>( ae->IsSearch(),
                                                  overall_master_ptr, 
-                                                 agent_phases,
+                                                 in_progress_agent_phases,
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
                                                  surrounding_plinks, 
@@ -229,13 +230,13 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &agent_phases
 }
 
 
-void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_phases)
+void SCREngine::Plan::ConfigureAgents()
 {
     // Give agents pointers to here and our coupling keys
     for( Agent *agent : my_agents )
     {        
         agent->SCRConfigure( algo,
-                             agent_phases.at(agent) );                                                 
+                             final_agent_phases.at(agent) );                                                 
     }
 
 /* Not sure if needed
@@ -243,7 +244,7 @@ void SCREngine::Plan::ConfigureAgents(const CompareReplace::AgentPhases &agent_p
     {
         Agent *agent = plink.GetChildAgent();
         // Replace-only nodes are self-keying
-        if( agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
+        if( in_progress_agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
             agent->AndRuleConfigure( nullptr, PatternLink(), {plink} );
     }    
 */
@@ -534,9 +535,11 @@ void SCREngine::SetReplaceKey( const Agent *agent, CouplingKey key ) const
 {
     ASSERT( keys_available );
     
-    // Match condition in Agent::SetKey() 
-    if( key )
-        InsertSolo( replace_keys, make_pair(agent, key) );
+    ASSERT(key);
+    if( plan.final_agent_phases.at(agent) != IN_COMPARE_ONLY )
+        ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
+
+    InsertSolo( replace_keys, make_pair(agent, key) );
 }
 
 

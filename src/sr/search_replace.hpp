@@ -23,7 +23,7 @@ class CompareReplace : public virtual Graphable,
                        virtual public InPlaceTransformation
 {  
 public:
-    typedef map< Agent *, Agent::Phase > AgentPhases;
+    typedef map<const Agent *, Agent::Phase> AgentPhases;
     
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.

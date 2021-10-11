@@ -47,14 +47,14 @@ class SCREngine : public virtual Graphable,
 public:
     SCREngine( bool is_search,
                const CompareReplace *overall_master,
-               CompareReplace::AgentPhases &agent_phases,
+               CompareReplace::AgentPhases &in_progress_agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
                const unordered_set<PatternLink> &master_plinks = unordered_set<PatternLink>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
-    void PlanningStageTwo( const CompareReplace::AgentPhases &agent_phases )
+    void PlanningStageTwo( const CompareReplace::AgentPhases &in_progress_agent_phases )
     {
-        plan.PlanningStageTwo(agent_phases); 
+        plan.PlanningStageTwo(in_progress_agent_phases); 
     }
     void PlanningStageThree()
     {
@@ -67,22 +67,22 @@ private:
         Plan( SCREngine *algo,
               bool is_search,
               const CompareReplace *overall_master,
-              CompareReplace::AgentPhases &agent_phases,
+              CompareReplace::AgentPhases &in_progress_agent_phases,
               TreePtr<Node> cp,
               TreePtr<Node> rp,
               const unordered_set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
-        void PlanningStageTwo(const CompareReplace::AgentPhases &agent_phases); // Stage one is the constructor
+        void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void PlanningStageThree();
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
-                             CompareReplace::AgentPhases &agent_phases );
+                             CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
                           PatternLink base_plink, 
                           Agent::Path path ) const;
-        void CreateMyEngines( CompareReplace::AgentPhases &agent_phases );
-        void ConfigureAgents(const CompareReplace::AgentPhases &agent_phases);
+        void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
+        void ConfigureAgents();
         string GetTrace() const; // used for debug
         
         SCREngine * const algo;
@@ -100,6 +100,7 @@ private:
         set<StartsOverlay *> my_overlay_starter_engines;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
+        CompareReplace::AgentPhases final_agent_phases;   
     } plan;
 public:
     // Note: this is const but RepeatingCompareReplace(). Why?
