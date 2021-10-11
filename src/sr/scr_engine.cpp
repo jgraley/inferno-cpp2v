@@ -306,15 +306,9 @@ void SCREngine::RecurseInto( SCREngine *slave_engine,
                              TreePtr<Node> *p_root_xnode ) const
 {
     ASSERT( keys_available );
-    CouplingKeysMap coupling_keys;
-    
-	// Get couplings from agents into the supplied map if not there already
-    FOREACH( Agent *a, plan.my_agents )
-        if( a->GetKey() > 0 )
-            coupling_keys.emplace(a, a->GetKey());
     
     // Run the slave engine        
-    slave_engine->RepeatingCompareReplace( p_root_xnode, &coupling_keys );
+    slave_engine->RepeatingCompareReplace( p_root_xnode, &replace_keys );
 }
 
 
