@@ -514,6 +514,12 @@ CouplingKey AgentCommon::GetKey()
 }
 
 
+const SCREngine *AgentCommon::GetMasterSCREngine()
+{
+    return master_scr_engine;
+}      
+
+
 PatternLink AgentCommon::GetKeyerPatternLink()
 {
     ASSERT( master_and_rule_engine )(*this)(" has not been configured by any AndRuleEngine");
@@ -532,7 +538,7 @@ void AgentCommon::KeyForOverlay( Agent *from )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...
-    //ASSERT(GetKey())(*this)(" cannot appear in a replace-only context");
+    //ASSERT(master_scr_engine->GetReplaceKey( this ))(*this)(" cannot appear in a replace-only context");
 }
 
 
@@ -543,11 +549,12 @@ TreePtr<Node> AgentCommon::BuildReplace()
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
-    ASSERT( !GetKey() || GetKey().IsFinal() )(*this)(" keyed with non-final node ")(GetKey())("\n"); 
+    CouplingKey key = master_scr_engine->GetReplaceKey( this );
+    ASSERT( !key || key.IsFinal() )(*this)(" keyed with non-final node ")(key)("\n"); 
     
     TreePtr<Node> dest;
-    if( GetKey() )
-        dest = BuildReplaceImpl(GetKey().GetKeyXNode(KEY_CONSUMER_5));
+    if( key )
+        dest = BuildReplaceImpl(key.GetKeyXNode(KEY_CONSUMER_5));
     else 
         dest = BuildReplaceImpl(nullptr);    
     ASSERT( dest );

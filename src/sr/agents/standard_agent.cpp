@@ -754,7 +754,7 @@ void StandardAgent::KeyForOverlay( Agent *from )
     ASSERT( from_key );
     TRACE(*this)("::KeyForOverlay(")(from_key)(" from ")(*(from))(")\n");
     
-    if( GetKey() )
+    if( master_scr_engine->GetReplaceKey( this ) )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
         
     if( !IsLocalMatch(from) ) 

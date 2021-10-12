@@ -95,6 +95,7 @@ public:
     virtual void ResetNLQConjecture() = 0;    
 
     virtual CouplingKey GetKey() = 0;      
+    virtual const SCREngine *GetMasterSCREngine() = 0;      
     virtual PatternLink GetKeyerPatternLink() = 0;
                             
     virtual void Reset() = 0;     
@@ -163,6 +164,7 @@ public:
      
 public:
     virtual CouplingKey GetKey();                                  
+    virtual const SCREngine *GetMasterSCREngine();      
     virtual PatternLink GetKeyerPatternLink();                                  
     virtual void Reset();    
     virtual void KeyForOverlay( Agent *from );

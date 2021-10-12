@@ -92,7 +92,7 @@ TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keyn
 TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
-    if( !GetKey() )
+    if( !master_scr_engine->GetReplaceKey( this ) )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
@@ -110,7 +110,7 @@ TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode 
 TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
-    if( !GetKey() )
+    if( !master_scr_engine->GetReplaceKey( this ) )
     {
         // Call the soft pattern impl
         string newname = GetNewName();
@@ -287,7 +287,7 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
 	INDENT("%");
-	if( !GetKey() )
+	if( !master_scr_engine->GetReplaceKey( this ) )
 	{
 		ASSERT( container );
 		TreePtr<Node> n = AsAgent( container )->BuildReplace();

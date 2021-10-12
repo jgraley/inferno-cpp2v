@@ -1,5 +1,6 @@
 #include "search_container_agent.hpp"
 #include "../search_replace.hpp" 
+#include "../scr_engine.hpp" 
 #include "../conjecture.hpp" 
 #include "link.hpp"
 #include "the_knowledge.hpp"
@@ -62,7 +63,9 @@ bool SearchContainerAgent::ImplHasNLQ() const
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("#");
-    TreePtr<Node> terminus_keynode = AsAgent(terminus)->GetKey().GetKeyXNode(KEY_CONSUMER_3);
+    ASSERT( master_scr_engine == AsAgent(terminus)->GetMasterSCREngine() );
+    CouplingKey terminus_key = master_scr_engine->GetReplaceKey( AsAgent(terminus) );
+    TreePtr<Node> terminus_keynode = terminus_key.GetKeyXNode(KEY_CONSUMER_3);
     ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
                                                         (", term=")(*(terminus_keynode))("\n");
