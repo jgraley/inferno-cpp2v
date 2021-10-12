@@ -27,8 +27,8 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
-    virtual void KeyForOverlay( Agent *from );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
+    virtual void KeyForOverlay( Agent *under );
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }

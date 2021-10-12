@@ -22,7 +22,7 @@ class OverlayAgent : public virtual ColocatedAgent,
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
     virtual void StartKeyForOverlay();
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;

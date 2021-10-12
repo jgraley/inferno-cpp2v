@@ -71,56 +71,56 @@ string BuildIdentifierAgent::GetNewName()
 
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
     INDENT("%");
-    if( !keynode )
+    if( !under_node )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-        CouplingKey keylink(XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, keylink );
+        under_node = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
+        CouplingKey key(XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
+        master_scr_engine->SetReplaceKey( this, key );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keynode);   
+    return DuplicateSubtree(under_node);   
 }                                                   
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
     INDENT("%");
-    if( !master_scr_engine->GetReplaceKey( this ) )
+    if( !under_node )
     {
         // Call the soft pattern impl 
         string newname = GetNewName();
-        keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-        CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, keylink );
+        under_node = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
+        CouplingKey key( XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
+        master_scr_engine->SetReplaceKey( this, key );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keynode);   
+    return DuplicateSubtree(under_node);   
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
     INDENT("%");
-    if( !master_scr_engine->GetReplaceKey( this ) )
+    if( !under_node )
     {
         // Call the soft pattern impl
         string newname = GetNewName();
-        keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-        CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, keylink );
+        under_node = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
+        CouplingKey key( XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
+        master_scr_engine->SetReplaceKey( this, key );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(keynode);   
+    return DuplicateSubtree(under_node);   
 }                                                   
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -284,10 +284,10 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    
 
-TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
 	INDENT("%");
-	if( !master_scr_engine->GetReplaceKey( this ) )
+	if( !under_node )
 	{
 		ASSERT( container );
 		TreePtr<Node> n = AsAgent( container )->BuildReplace();
@@ -295,13 +295,13 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 		ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 		ASSERT( n_container );
 		int size = n_container->size();
-        keynode = MakePatternPtr<SpecificInteger>(size); // Not sure about using MakePattenPtr here
-        CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-		master_scr_engine->SetReplaceKey( this, keylink );
+        under_node = MakePatternPtr<SpecificInteger>(size); // Not sure about using MakePattenPtr here
+        CouplingKey key( XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
+		master_scr_engine->SetReplaceKey( this, key );
 	}
 	// Note that the keylink could have been set via coupling - but still not
 	// likely to do anything sensible, so explicitly check
-	return DuplicateSubtree(keynode);   
+	return DuplicateSubtree(under_node);   
 }                                                   
 
 

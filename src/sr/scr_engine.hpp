@@ -136,6 +136,7 @@ public:
 
     void SetReplaceKey( const Agent *agent, CouplingKey key ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;
+    void CopyReplaceKey( const Agent *dest_agent, const Agent *src_agent ) const;
     
 private:    
     static int repetitions;

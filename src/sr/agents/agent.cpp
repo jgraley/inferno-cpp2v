@@ -557,10 +557,10 @@ TreePtr<Node> AgentCommon::BuildReplace()
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> keynode )
+TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> under_node )
 {
-    ASSERT(keynode)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(keynode);   
+    ASSERT(under_node)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(under_node);   
 }
 
 

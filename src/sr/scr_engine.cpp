@@ -538,3 +538,11 @@ CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
     else
         return CouplingKey();
 }
+
+
+void SCREngine::CopyReplaceKey( const Agent *dest_agent, const Agent *src_agent ) const
+{
+    ASSERT( keys_available );
+    ASSERT( replace_keys.count(src_agent) == 1 );
+    InsertSolo( replace_keys, make_pair(dest_agent, replace_keys.at(src_agent)) );
+}

@@ -68,22 +68,22 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
     INDENT("*");
-    ASSERT( keynode );
-    ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
-    ASSERT( psc )("Star node ")(*this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");  
+    ASSERT( under_node );
+    ContainerInterface *psc = dynamic_cast<ContainerInterface *>(under_node.get());
+    ASSERT( psc )("Star node ")(*this)(" keyed to ")(*under_node)(" which should implement ContainerInterface");  
     TRACE("Walking container length %d\n", psc->size() );
     
-    if( auto sc = dynamic_cast<SubContainer *>(keynode.get()) )    
+    if( auto sc = dynamic_cast<SubContainer *>(under_node.get()) )    
         TRACE("SubContainer found ")(sc->GetContentsTrace())("\n");
         
     TreePtr<SubContainer> dest;
     ContainerInterface *dest_container;
-    if( dynamic_cast<SequenceInterface *>(keynode.get()) )
+    if( dynamic_cast<SequenceInterface *>(under_node.get()) )
         dest = TreePtr<SubSequence>(new SubSequence);
-    else if( dynamic_cast<CollectionInterface *>(keynode.get()) )
+    else if( dynamic_cast<CollectionInterface *>(under_node.get()) )
         dest = TreePtr<SubCollection>(new SubCollection);
     else
         ASSERT(0)("Please add new kind of Star");

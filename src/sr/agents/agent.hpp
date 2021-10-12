@@ -98,7 +98,7 @@ public:
     virtual PatternLink GetKeyerPatternLink() = 0;
                             
     virtual void Reset() = 0;     
-    virtual void KeyForOverlay( Agent *from ) = 0;
+    virtual void KeyForOverlay( Agent *under ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
@@ -165,9 +165,9 @@ public:
     virtual const SCREngine *GetMasterSCREngine();      
     virtual PatternLink GetKeyerPatternLink();                                  
     virtual void Reset();    
-    virtual void KeyForOverlay( Agent *from );
+    virtual void KeyForOverlay( Agent *under );
     virtual TreePtr<Node> BuildReplace();
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

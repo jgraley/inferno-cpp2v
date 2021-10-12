@@ -153,7 +153,7 @@ private:
                                            
 public:
     virtual void KeyForOverlay( Agent *from );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
 
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr

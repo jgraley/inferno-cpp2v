@@ -60,17 +60,17 @@ bool SearchContainerAgent::ImplHasNLQ() const
 }
 
 
-TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
     INDENT("#");
     CouplingKey terminus_key = master_scr_engine->GetReplaceKey( AsAgent(terminus) );
     TreePtr<Node> terminus_keynode = terminus_key.GetKeyXNode(KEY_CONSUMER_3);
     ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
-    TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
-                                                        (", term=")(*(terminus_keynode))("\n");
+    TRACE( "Stuff node: Duplicating at terminus first: keynode=")
+         (*(terminus))(", term=")(*(terminus_keynode))("\n");
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(keynode, terminus_keynode, term);   
+    return DuplicateSubtree(under_node, terminus_keynode, term);   
 }
 
 
@@ -92,8 +92,6 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
                            { link } } };
     return block;
 }
-
-
 
 //---------------------------------- AnyNode ------------------------------------    
 

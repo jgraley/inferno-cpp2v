@@ -746,81 +746,84 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::KeyForOverlay( Agent *from )
+void StandardAgent::KeyForOverlay( Agent *under )
 {
     INDENT("T");
-    ASSERT( from );
-    CouplingKey from_key = master_scr_engine->GetReplaceKey( from );
-    ASSERT( from_key );
-    TRACE(*this)("::KeyForOverlay(")(from_key)(" from ")(*(from))(")\n");
+    ASSERT( under );
+    TRACE(*this)(".KeyForOverlay(")(*under)(")\n");
     
     if( master_scr_engine->GetReplaceKey( this ) )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
         
-    if( !IsLocalMatch(from) ) 
+    // This is why we call on over, passing in under. The test requires
+    // that under be a non-strict subclass of over. Overlaying a super-class
+    // over a subclass means we simply update the singulars we know about
+    // in over. Under is likely to be an X node and hence final while
+    // over can be StandaedAgent<some intermediate>.
+    if( !IsLocalMatch(under) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    master_scr_engine->SetReplaceKey( this, from_key );
+    master_scr_engine->CopyReplaceKey( this, under );
     
-    // Loop over all the elements of keynode and dest that do not appear in pattern or
-    // appear in pattern but are nullptr TreePtr<>s. Duplicate from keynode into dest.
+    // Loop over all the elements of under and dest that do not appear in pattern or
+    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
     vector< Itemiser::Element * > pattern_memb = Itemise(); 
-    vector< Itemiser::Element * > keyer_memb = Itemise( from ); 
+    vector< Itemiser::Element * > under_memb = Itemise( under ); 
     
-    // Loop over all the members of keynode (which can be a subset of dest)
+    // Loop over all the members of under (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
     for( int i=0; i<pattern_memb.size(); i++ )
     {
         ASSERT( pattern_memb[i] )( "itemise returned null element" );
-        ASSERT( keyer_memb[i] )( "itemise returned null element" );
+        ASSERT( under_memb[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
-
-        if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        // Act only on singular members that are non-null in the pattern (i.e. this) 
+        if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
-            TreePtrInterface *keyer_ptr = dynamic_cast<TreePtrInterface *>(keyer_memb[i]);
-            if( *pattern_ptr )
+            TreePtrInterface *under_sing = dynamic_cast<TreePtrInterface *>(under_memb[i]);
+            if( *pattern_sing )
             {
-                ASSERT(*keyer_ptr)("Cannot key intermediate because correpsonding search node is nullptr");
-                AsAgent((TreePtr<Node>)*pattern_ptr)->KeyForOverlay( AsAgent((TreePtr<Node>)*keyer_ptr) );
+                ASSERT(*under_sing)("Cannot key intermediate because correpsonding search node is nullptr");
+                AsAgent((TreePtr<Node>)*pattern_sing)->KeyForOverlay( AsAgent((TreePtr<Node>)*under_sing) );
             }
         }
     }
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> under_node )  // overlaying if not nullptr
 {
     INDENT("B");
-    if( keynode && IsLocalMatch(keynode.get()) ) 
-        return BuildReplaceOverlay(keynode);
+    if( under_node && IsLocalMatch(under_node.get()) ) 
+        return BuildReplaceOverlay(under_node);
     else
         return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // under substitution if not nullptr
+TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  // overlaying
 {
 	INDENT("O");
-    ASSERT( keynode );
+    ASSERT( under_node );
     
-    ASSERT( IsLocalMatch(keynode.get()) )
+    ASSERT( IsLocalMatch(under_node.get()) )
 	  	  ("pattern=")
 		  (*this)
-		  (" must be a non-strict superclass of keynode=")
-		  (*keynode)
+		  (" must be a non-strict superclass of under_node=")
+		  (*under_node)
 		  (", so that it does not have more members");
     TreePtr<Node> dest;
     
     // Make a new node, we will overlay from pattern, so resulting node will be dirty	
-    // Duplicate the key node since it is at least as specialised    
-    dest = DuplicateNode( keynode, true );
+    // Duplicate the underneath node since it is at least as specialised (=non-strict subclass)
+    dest = DuplicateNode( under_node, true );
 
     ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
 
     // Loop over the elements of pattern and dest, limited to elements
-    // present in pattern, which is a non-strict subclass of keynode and dest.
+    // present in pattern, which is a non-strict subclass of under_node and dest. // Hmmm.... superclass?
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > pattern_memb = Itemise();
@@ -841,13 +844,13 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
             dest_con->clear();
 
             TRACE("Copying container size %d from pattern_con\n", (*pattern_con).size() );
-	        FOREACH( const TreePtrInterface &p, *pattern_con )
+	        FOREACH( const TreePtrInterface &pe, *pattern_con )
 	        {
-		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
-		        TRACE("Got ")(*p)("\n");
-				TreePtr<Node> n = AsAgent((TreePtr<Node>)p)->BuildReplace();
-                ASSERT(n); 
-                if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
+		        ASSERT( pe )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
+		        TRACE("Got ")(*pe)("\n");
+				TreePtr<Node> x = AsAgent((TreePtr<Node>)pe)->BuildReplace();
+                ASSERT(x); 
+                if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(x.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", psc->size() );
                     FOREACH( const TreePtrInterface &pp, *psc )
@@ -855,20 +858,20 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
                 }
                 else 
                 {
-                    TRACE("inserting %s directly\n", TypeInfo(n).name().c_str());
-                    ASSERT( n->IsFinal() )("Got intermediate node ")(*n);
-                    dest_con->insert( n );
+                    TRACE("inserting %s directly\n", TypeInfo(x).name().c_str());
+                    ASSERT( x->IsFinal() )("Got intermediate node ")(*x);
+                    dest_con->insert( x );
                 }
 	        }
 	        present_in_pattern.insert( dest_memb[i] );
         }            
-        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
         	TRACE();
-            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( dest_ptr )( "itemise for target didn't match itemise for pattern");
-            auto pattern_child = (TreePtr<Node>)*pattern_ptr;
-            auto dest_child = (TreePtr<Node>)*dest_ptr;
+            TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( dest_sing )( "itemise for target didn't match itemise for pattern");
+            auto pattern_child = (TreePtr<Node>)*pattern_sing;
+            auto dest_child = (TreePtr<Node>)*dest_sing;
                        
             if( pattern_child )
             {                             
@@ -877,7 +880,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
                 present_in_pattern.insert( dest_memb[i] );
             }
             ASSERT( dest_child->IsFinal() );
-            *dest_ptr = dest_child;
+            *dest_sing = dest_child;
         }
         else
         {
@@ -885,25 +888,25 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
         }        
     }
     
-    // Loop over all the elements of keynode and dest that do not appear in pattern or
-    // appear in pattern but are nullptr TreePtr<>s. Duplicate from keynode into dest.
-    vector< Itemiser::Element * > keynode_memb = keynode->Itemise();
-    dest_memb = keynode->Itemise( dest.get() ); 
+    // Loop over all the elements of under_node and dest that do not appear in pattern or
+    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
+    vector< Itemiser::Element * > under_memb = under_node->Itemise();
+    dest_memb = under_node->Itemise( dest.get() ); 
     
-    TRACE("Copying %d members from keynode=%s dest=%s\n", dest_memb.size(), TypeInfo(keynode).name().c_str(), TypeInfo(dest).name().c_str());
-    // Loop over all the members of keynode (which can be a subset of dest)
+    TRACE("Copying %d members from under_node=%s dest=%s\n", dest_memb.size(), TypeInfo(under_node).name().c_str(), TypeInfo(dest).name().c_str());
+    // Loop over all the members of under_node (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
     {
-        ASSERT( keynode_memb[i] )( "itemise returned null element" );
+        ASSERT( under_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
         if( present_in_pattern.count(dest_memb[i]) > 0 )
             continue; // already did this one in the above loop
 
     	TRACE("Member %d from key\n", i );
-        if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]) )                
+        if( ContainerInterface *under_con = dynamic_cast<ContainerInterface *>(under_memb[i]) )                
         {
             // Note: we get here when a wildcard is coupled that does not have the container
             // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
@@ -911,8 +914,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
             dest_con->clear();
 
-            TRACE("Copying container size %d from key\n", keynode_con->size() );
-	        FOREACH( const TreePtrInterface &p, *keynode_con )
+            TRACE("Copying container size %d from key\n", under_con->size() );
+	        FOREACH( const TreePtrInterface &p, *under_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows nullptr
 		        TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p );
@@ -930,13 +933,13 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
 		        }
 	        }
         }            
-        else if( TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
+        else if( TreePtrInterface *under_sing = dynamic_cast<TreePtrInterface *>(under_memb[i]) )
         {
-            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *keynode_ptr );
-            *dest_ptr = DuplicateSubtree( (TreePtr<Node>)*keynode_ptr );
-            ASSERT( *dest_ptr );
-            ASSERT( (**dest_ptr).IsFinal() );            
+            TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *under_sing );
+            *dest_sing = DuplicateSubtree( (TreePtr<Node>)*under_sing );
+            ASSERT( *dest_sing );
+            ASSERT( (**dest_sing).IsFinal() );            
         }
         else
         {
@@ -985,12 +988,12 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
             dest_con->clear();
 
             TRACE("Copying container size %d\n", pattern_con->size() );
-	        FOREACH( const TreePtrInterface &p, *pattern_con )
+	        FOREACH( const TreePtrInterface &pe, *pattern_con )
 	        {
-		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
-		        TRACE("Got ")(*p)("\n");
-	            TreePtr<Node> n = AsAgent((TreePtr<Node>)p)->BuildReplace();
-		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
+		        ASSERT( pe )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
+		        TRACE("Got ")(*pe)("\n");
+	            TreePtr<Node> x = AsAgent((TreePtr<Node>)pe)->BuildReplace();
+		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(x.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", psc->size() );
 		            FOREACH( const TreePtrInterface &pp, *psc )
@@ -998,19 +1001,19 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
            		}
 		        else
 		        {
-			        TRACE("inserting %s directly\n", TypeInfo(n).name().c_str());
-			        dest_con->insert( n );
+			        TRACE("inserting %s directly\n", TypeInfo(x).name().c_str());
+			        dest_con->insert( x );
 		        }
 	        }
         }            
-        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
             TRACE("Copying single element\n");
-            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*this)(" was nullptr when not overlaying\n");
-            Agent *agent = AsAgent((TreePtr<Node>)*pattern_ptr);  
-            TreePtr<Node> dest_child = agent->BuildReplace();
-            *dest_ptr = dest_child;
+            TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *pattern_sing )("Member %d (", i)(*pattern_sing)(") of ")(*this)(" was nullptr when not overlaying\n");
+            auto pattern_child = (TreePtr<Node>)*pattern_sing;
+            TreePtr<Node> dest_child = AsAgent(pattern_child)->BuildReplace();
+            *dest_sing = dest_child;
         }
         else
         {

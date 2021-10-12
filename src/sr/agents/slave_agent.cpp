@@ -29,18 +29,17 @@ void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 }
 
 
-void SlaveAgent::KeyForOverlay( Agent *from )
+void SlaveAgent::KeyForOverlay( Agent *under )
 {
     INDENT("l");
     // Make slaves "invisible" to Overlay key propagation
-    CouplingKey from_key = master_scr_engine->GetReplaceKey( from );
-    master_scr_engine->SetReplaceKey( this, from_key );
+    master_scr_engine->CopyReplaceKey( this, under );
     
-    AsAgent((TreePtr<Node>)*GetThrough())->KeyForOverlay(from);   
+    AsAgent((TreePtr<Node>)*GetThrough())->KeyForOverlay(under);   
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
+TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> under_node )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   
