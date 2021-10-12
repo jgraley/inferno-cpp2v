@@ -507,13 +507,6 @@ void AgentCommon::ResetNLQConjecture()
 }
 
 
-void AgentCommon::SetKey( CouplingKey key )
-{
-    ASSERT( master_scr_engine );
-    master_scr_engine->SetReplaceKey( this, key );
-}
-
-
 CouplingKey AgentCommon::GetKey()
 {
     ASSERT( master_scr_engine );

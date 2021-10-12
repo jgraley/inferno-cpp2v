@@ -94,7 +94,6 @@ public:
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
-    virtual void SetKey( CouplingKey keylink ) = 0;
     virtual CouplingKey GetKey() = 0;      
     virtual PatternLink GetKeyerPatternLink() = 0;
                             
@@ -163,7 +162,6 @@ public:
     virtual void ResetNLQConjecture();
      
 public:
-    virtual void SetKey( CouplingKey keylink );
     virtual CouplingKey GetKey();                                  
     virtual PatternLink GetKeyerPatternLink();                                  
     virtual void Reset();    

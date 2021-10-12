@@ -80,7 +80,7 @@ TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keyn
         string newname = GetNewName();
         keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
         CouplingKey keylink(XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-        SetKey( keylink );
+        master_scr_engine->SetReplaceKey( this, keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
@@ -98,7 +98,7 @@ TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode 
         string newname = GetNewName();
         keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
         CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-        SetKey( keylink );
+        master_scr_engine->SetReplaceKey( this, keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
@@ -116,7 +116,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode
         string newname = GetNewName();
         keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
         CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-        SetKey( keylink );
+        master_scr_engine->SetReplaceKey( this, keylink );
     }
     // Note that the keylink could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
@@ -297,7 +297,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 		int size = n_container->size();
         keynode = MakePatternPtr<SpecificInteger>(size); // Not sure about using MakePattenPtr here
         CouplingKey keylink( XLink::CreateDistinct( keynode ), KEY_PRODUCER_7 );
-		SetKey( keylink );
+		master_scr_engine->SetReplaceKey( this, keylink );
 	}
 	// Note that the keylink could have been set via coupling - but still not
 	// likely to do anything sensible, so explicitly check

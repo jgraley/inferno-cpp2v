@@ -760,7 +760,7 @@ void StandardAgent::KeyForOverlay( Agent *from )
     if( !IsLocalMatch(from) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    SetKey( from_key );
+    master_scr_engine->SetReplaceKey( this, from_key );
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from keynode into dest.
