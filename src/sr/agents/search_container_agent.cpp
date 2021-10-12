@@ -63,7 +63,6 @@ bool SearchContainerAgent::ImplHasNLQ() const
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("#");
-    ASSERT( master_scr_engine == AsAgent(terminus)->GetMasterSCREngine() );
     CouplingKey terminus_key = master_scr_engine->GetReplaceKey( AsAgent(terminus) );
     TreePtr<Node> terminus_keynode = terminus_key.GetKeyXNode(KEY_CONSUMER_3);
     ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context

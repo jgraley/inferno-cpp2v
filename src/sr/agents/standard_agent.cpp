@@ -750,8 +750,7 @@ void StandardAgent::KeyForOverlay( Agent *from )
 {
     INDENT("T");
     ASSERT( from );
-    //ASSERT( master_scr_engine == AsAgent(terminus)->GetMasterSCREngine() );
-    CouplingKey from_key = from->GetMasterSCREngine()->GetReplaceKey( from );
+    CouplingKey from_key = master_scr_engine->GetReplaceKey( from );
     ASSERT( from_key );
     TRACE(*this)("::KeyForOverlay(")(from_key)(" from ")(*(from))(")\n");
     

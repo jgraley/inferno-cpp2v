@@ -274,7 +274,8 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 {
     INDENT("R");
         
-    replace_keys = plan.and_rule_engine->GetCouplingKeys();
+    replace_keys = UnionOfSolo( *master_keys,
+                                plan.and_rule_engine->GetCouplingKeys() );
     keys_available = true;
 
     for( StartsOverlay *ao : plan.my_overlay_starter_engines )
