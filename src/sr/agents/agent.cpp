@@ -507,13 +507,6 @@ void AgentCommon::ResetNLQConjecture()
 }
 
 
-CouplingKey AgentCommon::GetKey()
-{
-    ASSERT( master_scr_engine );
-    return master_scr_engine->GetReplaceKey( this );
-}
-
-
 const SCREngine *AgentCommon::GetMasterSCREngine()
 {
     return master_scr_engine;

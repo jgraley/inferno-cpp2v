@@ -33,7 +33,10 @@ void SlaveAgent::KeyForOverlay( Agent *from )
 {
     INDENT("l");
     // Make slaves "invisible" to Overlay key propagation
-    master_scr_engine->SetReplaceKey( this, from->GetKey() );
+    //ASSERT( master_scr_engine == AsAgent(terminus)->GetMasterSCREngine() );
+    CouplingKey from_key = from->GetMasterSCREngine()->GetReplaceKey( from );
+    master_scr_engine->SetReplaceKey( this, from_key );
+    
     AsAgent((TreePtr<Node>)*GetThrough())->KeyForOverlay(from);   
 }
 
