@@ -19,7 +19,7 @@ using namespace SR;
 // C++11 fix
 Agent& Agent::operator=(Agent& other)
 {
-    (void)Node::operator=(other);
+    (void)Node::operator=(other); 
     return *this;
 }
 

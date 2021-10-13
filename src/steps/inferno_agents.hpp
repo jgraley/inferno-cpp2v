@@ -7,12 +7,13 @@
 #include "tree/sctree.hpp"
 #include "sr/agents/star_agent.hpp"
 #include "sr/cache.hpp"
+#include "sr/agents/builder_agent.hpp"
 
 using namespace SR;
 // TODO pollutes client namespace
 #define BYPASS_WHEN_IDENTICAL 1
 
-//---------------------------------- BuildIdentifier ------------------------------------    
+//---------------------------------- BuildIdentifierAgent ------------------------------------    
 
 /// Make an identifer based on an existing set, `sources` and a printf
 /// format string, `format`. The new identfier is named using
@@ -28,7 +29,7 @@ using namespace SR;
 /// `BYPASS_WHEN_IDENTICAL` means if all the names of the source nodes are the
 /// same, that name is used. This reduces verbosity and is a good fit when
 /// in some sense you are "merging" objects with identifiers.
-struct BuildIdentifierAgent : public virtual SearchLeafAgent    
+struct BuildIdentifierAgent : public virtual BuilderAgent    
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
@@ -53,9 +54,9 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
     
     BuildInstanceIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
-private:
-    
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
+
+private:    
+    virtual TreePtr<Node> BuildNewSubtree() override;
 };
 
 
@@ -70,8 +71,9 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
     }
     
     BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
+
 private:
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );       
+    virtual TreePtr<Node> BuildNewSubtree() override;
 };
 
 
@@ -87,8 +89,9 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
     
     BuildLabelIdentifierAgent() : BuildIdentifierAgent("UNNAMED") {}
     BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
+
 private:
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );   
+    virtual TreePtr<Node> BuildNewSubtree() override;
 };
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -158,7 +161,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
 };
 
-//---------------------------------- Nested ------------------------------------    
+//---------------------------------- NestedAgent ------------------------------------    
 
 /// Matching for the nested nature of array and struct nodes, both when declaring and 
 /// when accessing arrays. The `terminus` is the node to be found at the end of
@@ -222,7 +225,7 @@ struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
 /// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
-struct BuildContainerSizeAgent : public virtual SearchLeafAgent,
+struct BuildContainerSizeAgent : public virtual BuilderAgent,
                                  Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
@@ -234,7 +237,7 @@ struct BuildContainerSizeAgent : public virtual SearchLeafAgent,
     
     TreePtr<Node> container;
 private:
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
+    virtual TreePtr<Node> BuildNewSubtree() override;
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
 }; 

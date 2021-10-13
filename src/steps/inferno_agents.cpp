@@ -12,7 +12,7 @@ using namespace CPPTree;
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
 Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+                                                          const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
@@ -71,56 +71,23 @@ string BuildIdentifierAgent::GetNewName()
 
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> BuildInstanceIdentifierAgent::BuildNewSubtree()
 {
-    INDENT("%");
-    if( !under_node )
-    {
-        // Call the soft pattern impl 
-        string newname = GetNewName();
-        under_node = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-        CouplingKey key(XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, key );
-    }
-    // Note that the keylink could have been set via coupling - but still not
-    // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(under_node);   
-}                                                   
+    return MakeTreePtr<CPPTree::SpecificInstanceIdentifier>( GetNewName() ); 
+}
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> BuildTypeIdentifierAgent::BuildNewSubtree()
 {
-    INDENT("%");
-    if( !under_node )
-    {
-        // Call the soft pattern impl 
-        string newname = GetNewName();
-        under_node = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-        CouplingKey key( XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, key );
-    }
-    // Note that the keylink could have been set via coupling - but still not
-    // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(under_node);   
+    return MakeTreePtr<CPPTree::SpecificTypeIdentifier>( GetNewName() ); 
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree()
 {
-    INDENT("%");
-    if( !under_node )
-    {
-        // Call the soft pattern impl
-        string newname = GetNewName();
-        under_node = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-        CouplingKey key( XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, key );
-    }
-    // Note that the keylink could have been set via coupling - but still not
-    // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(under_node);   
+    return MakeTreePtr<CPPTree::SpecificLabelIdentifier>( GetNewName() ); 
 }                                                   
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -284,29 +251,20 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    
 
-TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 {
-	INDENT("%");
-	if( !under_node )
-	{
-		ASSERT( container );
-		TreePtr<Node> n = AsAgent( container )->BuildReplace();
-		ASSERT( n );
-		ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
-		ASSERT( n_container );
-		int size = n_container->size();
-        under_node = MakePatternPtr<SpecificInteger>(size); // Not sure about using MakePattenPtr here
-        CouplingKey key( XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
-		master_scr_engine->SetReplaceKey( this, key );
-	}
-	// Note that the keylink could have been set via coupling - but still not
-	// likely to do anything sensible, so explicitly check
-	return DuplicateSubtree(under_node);   
+	ASSERT( container );
+    TreePtr<Node> n = AsAgent( container )->BuildReplace();
+    ASSERT( n );
+	ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
+	ASSERT( n_container );
+	int size = n_container->size();
+    return MakeTreePtr<SpecificInteger>(size); 
 }                                                   
 
 
 Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+                                                             const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 
     Block block;
