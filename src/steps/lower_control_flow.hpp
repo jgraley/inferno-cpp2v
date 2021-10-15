@@ -2,6 +2,7 @@
 #define LOWER_CONTROL_FLOW_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 
@@ -9,7 +10,7 @@ using namespace SR;
 
 /** Detect an uncombable switch and mark it for lowering. This is 
     any switch with fall throughs.  */
-class DetectUncombableSwitch : public SearchReplace
+class DetectUncombableSwitch : public VNTransformation
 {
 public:
     DetectUncombableSwitch();

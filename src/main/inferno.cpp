@@ -247,7 +247,12 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
-        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageOne();
+        if( auto pcr = dynamic_pointer_cast<CompareReplace>(t) )
+            pcr->PlanningStageOne();
+        else if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+            pvnt->PlanningStageOne();
+        else
+            ASSERTFAIL("Unknown transformation");
         if( ShouldIQuit(true) )
             break;
     }
@@ -262,7 +267,12 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
-        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageTwo();
+        if( auto pcr = dynamic_pointer_cast<CompareReplace>(t) )
+            pcr->PlanningStageTwo();
+        else if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+            pvnt->PlanningStageTwo();
+        else
+            ASSERTFAIL("Unknown transformation");
         if( ShouldIQuit(true) )
             break;
     }
@@ -277,7 +287,12 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_THREE, i++).SetAsCurrent();
-        dynamic_pointer_cast<CompareReplace>(t)->PlanningStageThree();
+        if( auto pcr = dynamic_pointer_cast<CompareReplace>(t) )
+            pcr->PlanningStageThree();
+        else if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+            pvnt->PlanningStageThree();
+        else
+            ASSERTFAIL("Unknown transformation");
         if( ShouldIQuit(true) )
             break;
     }
