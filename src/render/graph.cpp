@@ -7,6 +7,7 @@
 
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
+#include "sr/vn_transformation.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/scr_engine.hpp"
 #include "common/trace.hpp"
@@ -280,6 +281,11 @@ void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, Tra
     {
 		reached.clear();
 		PopulateFrom( graphables, cr );
+	}
+    else if( VNTransformation *vnt = dynamic_cast<VNTransformation *>(root) )
+    {
+		reached.clear();
+		PopulateFrom( graphables, vnt );
 	}
 	else
     {

@@ -87,6 +87,7 @@ protected:
         else
             return serial < o.serial;
     }
+    
 public:
     static void *GetLocation( SNType location );
 
@@ -95,6 +96,7 @@ public:
         return make_pair(location, serial); // This is enough for uniqueness
     }
     string GetSerialString() const; 
+    
 private:    
     const bool use_location;
     SNType serial;

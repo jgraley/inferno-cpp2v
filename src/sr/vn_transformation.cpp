@@ -66,3 +66,26 @@ void VNTransformation::operator()( TreePtr<Node> context,
 }                                   
                  
 
+Graphable::Block VNTransformation::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                                      const NonTrivialPreRestrictionFunction &ntprf ) const
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    return top_level_engine->GetGraphBlockInfo( lnf, ntprf );
+}  
+
+
+string VNTransformation::GetGraphId() const
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    return top_level_engine->GetGraphId();
+}  
+
+
+void VNTransformation::GenerateGraphRegions( Graph &graph ) const
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    return top_level_engine->GenerateGraphRegions( graph );
+}  

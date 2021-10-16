@@ -13,7 +13,8 @@ namespace SR
 
 class CompareReplace;
     
-class VNTransformation : public InPlaceTransformation
+class VNTransformation : public InPlaceTransformation,
+                         public virtual Graphable
 {
 public:    
     enum Type
@@ -38,6 +39,11 @@ public:
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
     
+    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual string GetGraphId() const; 
+    void GenerateGraphRegions( Graph &graph ) const;
+
 private:
     shared_ptr<CompareReplace> top_level_engine;
 };    
