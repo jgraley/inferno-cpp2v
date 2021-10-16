@@ -4,6 +4,7 @@ NODE = $(SRC)/node
 HELPERS = $(SRC)/helpers
 TREE = $(SRC)/tree
 SR = $(SRC)/sr
+SR_PTRANS = $(SR)/ptrans
 SR_CSP = $(SR)/csp
 SR_AGENTS = $(SR)/agents
 PARSE = $(SRC)/parse
@@ -20,6 +21,7 @@ HELPERS_MODULES = $(HELPERS)/flatten $(HELPERS)/walk $(HELPERS)/simple_compare $
 TREE_MODULES = $(TREE)/cpptree $(TREE)/validate $(TREE)/scope $(TREE)/misc $(TREE)/typeof $(TREE)/type_db 
 SR_MODULES = $(SR)/equivalence $(SR)/coupling $(SR)/cache $(SR)/link $(SR)/query $(SR)/search_replace $(SR)/scr_engine $(SR)/and_rule_engine $(SR)/conjecture $(SR)/subcontainers 
 SR_MODULES += $(SR)/the_knowledge $(SR)/vn_transformation 
+SR_PTRANS_MODULES = $(SR_PTRANS)/pattern_transformation $(SR_PTRANS)/pattern_transformation_common $(SR_PTRANS)/combine_patterns $(SR_PTRANS)/search_to_compare
 SR_AGENTS_MODULES = $(SR_AGENTS)/agent $(SR_AGENTS)/standard_agent $(SR_AGENTS)/colocated_agent $(SR_AGENTS)/conjunction_agent $(SR_AGENTS)/disjunction_agent $(SR_AGENTS)/negation_agent
 SR_AGENTS_MODULES += $(SR_AGENTS)/search_container_agent $(SR_AGENTS)/green_grass_agent $(SR_AGENTS)/overlay_agent $(SR_AGENTS)/star_agent $(SR_AGENTS)/slave_agent 
 SR_AGENTS_MODULES += $(SR_AGENTS)/transform_of_agent $(SR_AGENTS)/pointer_is_agent $(SR_AGENTS)/builder_agent
@@ -30,7 +32,7 @@ STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(S
 STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out
 MAIN_MODULES = $(MAIN)/inferno
 
-ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(SR_CSP_MODULES) $(SR_AGENTS_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 
+ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(SR_PTRANS_MODULES) $(SR_CSP_MODULES) $(SR_AGENTS_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 
 
 # Include the auto-generated .d files which contain rules for the
 # include dependencies.
@@ -57,6 +59,10 @@ $(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@
 
 $(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
+	mkdir -p $(dir $@)
+	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
+
+$(SR_PTRANS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
 

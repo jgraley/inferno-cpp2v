@@ -5,7 +5,6 @@
 // name and node pattern within input code, and substitute the 
 // Inferno SystemC nodes.
 
-#include "sr/search_replace.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "sr/vn_transformation.hpp"
@@ -37,21 +36,21 @@ public:
 };
 
 
-class DetectSCDynamic : public SearchReplace
+class DetectSCDynamic : public VNTransformation
 {
 public:
     DetectSCDynamic( TreePtr<SCTree::SCDynamicNamedFunction> r_dynamic );
 };
 
 
-class DetectSCStatic : public SearchReplace
+class DetectSCStatic : public VNTransformation
 {
 public:
     DetectSCStatic( TreePtr<SCTree::SCNamedFunction> r_static );
 };
 
 
-class DetectSCDelta : public SearchReplace
+class DetectSCDelta : public VNTransformation
 {
 public:
     DetectSCDelta( TreePtr<SCTree::SCNamedFunction> r_delta );
@@ -63,7 +62,7 @@ public:
  Node does not require declaration. Then replace all calls to 
  the function with the explicit statement node. Bring arguments
  across by name match as per Inferno's MapOperator style. */
-class DetectTerminationFunction : public SearchReplace
+class DetectTerminationFunction : public VNTransformation
 {
 public:
     DetectTerminationFunction( TreePtr<SCTree::TerminationFunction> r_tf );    
@@ -81,7 +80,7 @@ public:
 /// spot SystemC notify() method by its name and replace with inferno node 
 /** Look for myevent.notify() and replace with Notify->myevent. No need to 
     eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotifyImmediate : public SearchReplace  
+class DetectSCNotifyImmediate : public VNTransformation  
 {
 public:
     DetectSCNotifyImmediate();
@@ -91,7 +90,7 @@ public:
 /// spot SystemC notify(SC_ZERO_TIME) method by its name and replace with inferno node 
 /** Look for myevent.notify(SC_ZERO_TIME) and replace with Notify->myevent. No need to 
     eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotifyDelta : public SearchReplace  
+class DetectSCNotifyDelta : public VNTransformation  
 {
 public:
     DetectSCNotifyDelta();

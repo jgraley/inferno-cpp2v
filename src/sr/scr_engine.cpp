@@ -111,22 +111,8 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     
     // If only a search pattern is supplied, make the replace pattern the same
     // so they couple and then an overlay node can split them apart again.
-    if( !rp )
-    {
-        rp = cp;
-    }
 
-    if( rp != cp ) 
-    {
-        // Classic compare and replace with separate replace pattern, we can use
-        // an Overlay node to overwrite the replace pattern at replace time.
-        MakePatternPtr< Overlay<Node> > overlay; 
-        overlay->through = cp;
-        overlay->overlay = rp;
-        cp = rp = overlay; 
-    }
-
-    if( is_search )
+    if( is_search ) // -> SearchToCompare
     {
         // Obtain search and replace semaintics from a compare and replace engine
         // by inserting a stuff node at root

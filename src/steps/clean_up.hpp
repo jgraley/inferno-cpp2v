@@ -23,21 +23,21 @@ public:
 };
    
 /// Find compound statements inside compund statements and flatten
-class CleanupCompoundMulti : public SearchReplace
+class CleanupCompoundMulti : public VNTransformation
 {    
 public:
     CleanupCompoundMulti();
 };
 
 /// Find compound blocks with only a single statement, and flatten
-class CleanupCompoundSingle : public SearchReplace
+class CleanupCompoundSingle : public VNTransformation
 {
 public:
     CleanupCompoundSingle();
 };
 
 /// Get rid of Nops
-class CleanupNop : public SearchReplace
+class CleanupNop : public VNTransformation
 {
 public:
     CleanupNop();
@@ -45,21 +45,21 @@ public:
 
 /** Simplify the case where two lables appear together and are therefore 
     duplicates. Just have one label. */
-class CleanupDuplicateLabels : public SearchReplace
+class CleanupDuplicateLabels : public VNTransformation
 {
 public:
     CleanupDuplicateLabels();
 };
 
 /// Find a goto to a lable just before the label, and remove the goto
-class CleanupIneffectualGoto : public SearchReplace
+class CleanupIneffectualGoto : public VNTransformation
 {
 public:
     CleanupIneffectualGoto();
 };
 
 /// Find a goto to a lable just before the label, and remove the goto
-class CleanupIneffectualLabels : public SearchReplace
+class CleanupIneffectualLabels : public VNTransformation
 {
 public:
     CleanupIneffectualLabels();
@@ -67,21 +67,21 @@ public:
 
 /** Find labels never referenced (ie neither jumped to nor used as a variable) 
     and dispense with them */
-class CleanupUnusedLabels : public SearchReplace
+class CleanupUnusedLabels : public VNTransformation
 {
 public:
     CleanupUnusedLabels();
 };
 
 /** Remove dead code in switch statements */
-class CleanUpDeadCode : public SearchReplace
+class CleanUpDeadCode : public VNTransformation
 {
 public:
     CleanUpDeadCode();
 };
 
 /** turn a compound expression that does not end in an expression into an ordinary compound */
-class ReduceVoidStatementExpression : public SearchReplace
+class ReduceVoidStatementExpression : public VNTransformation
 {
 public:
     ReduceVoidStatementExpression();
@@ -96,7 +96,7 @@ public:
 };
 
 /// Simplify if(x) if(y) z using &&
-class CleanupNestedIf : public SearchReplace
+class CleanupNestedIf : public VNTransformation
 {
 public:
     CleanupNestedIf();

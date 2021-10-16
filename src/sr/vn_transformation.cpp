@@ -1,11 +1,13 @@
 #include "vn_transformation.hpp"
 #include "search_replace.hpp"
 #include "scr_engine.hpp"
+#include "ptrans/combine_patterns.hpp"
+#include "ptrans/search_to_compare.hpp"
 
 using namespace SR;
 
 void VNTransformation::Configure( TransformationType type,
-                                  TreePtr<Node> cp,
+                                  TreePtr<Node> scp,
                                   TreePtr<Node> rp )
 {
     switch( type )
@@ -22,7 +24,7 @@ void VNTransformation::Configure( TransformationType type,
             ASSERTFAIL("Silly");
     }       
     
-    top_level_engine->Configure( cp, rp );
+    top_level_engine->Configure( scp, rp );
 }                                  
 
 
@@ -30,7 +32,8 @@ void VNTransformation::PatternTransformations()
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    // TODO
+    CombinePatterns()(*this);
+    SearchToCompare()(*this);
 }
 
 
@@ -104,3 +107,20 @@ void VNTransformation::GenerateGraphRegions( Graph &graph ) const
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
     return top_level_engine->GenerateGraphRegions( graph );
 }  
+
+
+shared_ptr<CompareReplace> VNTransformation::GetTopLevelEngine() const
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    return top_level_engine;
+}
+
+
+void VNTransformation::SetTopLevelEngine( shared_ptr<CompareReplace> tle )
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( tle )("Bad tle ptr");
+    top_level_engine = tle;
+}
+

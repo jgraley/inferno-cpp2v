@@ -1,7 +1,6 @@
 #ifndef STATE_OUT_HPP
 #define STATE_OUT_HPP
 
-#include "sr/search_replace.hpp"
 #include "sr/vn_transformation.hpp"
 
 namespace Steps {
@@ -13,7 +12,7 @@ using namespace SR;
     program around gotos, and so we need to have a goto in place to re-organise.
     This means we can't then optimise away ineffectual gotos, to do that we would
     need to mark the goto in some way, or just ignore it if preceeded by a wait */
-class GotoAfterWait : public SearchReplace
+class GotoAfterWait : public VNTransformation
 {
 public:
     GotoAfterWait();
@@ -21,7 +20,7 @@ public:
 
 /** conditionasl branch with no else clause gets goto in both 
     clauses - generates new label for this. */
-class NormaliseConditionalGotos : public SearchReplace
+class NormaliseConditionalGotos : public VNTransformation
 {
 public:
     NormaliseConditionalGotos();
@@ -29,21 +28,21 @@ public:
 
 /** conditional branch follwed by goto becomes goto with a conditional (ternary
     op) on the address. */
-class CompactGotos : public SearchReplace
+class CompactGotos : public VNTransformation
 {
 public:
     CompactGotos();
 };
 
 /** Labels not preceeded by a goto get a goto before them */
-class AddGotoBeforeLabel : public SearchReplace
+class AddGotoBeforeLabel : public VNTransformation
 {
 public:
     AddGotoBeforeLabel();
 };
 
 /** Insert a bootstrapping state transition at the top of the function. */
-class EnsureBootstrap : public SearchReplace
+class EnsureBootstrap : public VNTransformation
 {
 public:
     EnsureBootstrap();
@@ -51,7 +50,7 @@ public:
 
 /** Add a variable for the current state as a label variable, and 
     use it for the gotos. */
-class AddStateLabelVar : public SearchReplace
+class AddStateLabelVar : public VNTransformation
 {
 public:
     AddStateLabelVar();
@@ -59,7 +58,7 @@ public:
 
 /** If there is no infinite loop enclosing the whole function body
     (excluding initial assignments), insert one. */
-class EnsureSuperLoop : public SearchReplace
+class EnsureSuperLoop : public VNTransformation
 {
 public:
     EnsureSuperLoop();
@@ -67,7 +66,7 @@ public:
 
 /** If there is an infinite loop with a goto at the top of it, replace any
     identical gotos elsewhere in the loop body with continues */
-class ShareGotos : public SearchReplace
+class ShareGotos : public VNTransformation
 {
 public:
     ShareGotos();
@@ -75,49 +74,49 @@ public:
 
 /** Just move the last part of a switch statement - from the last label (not case) 
     onward out of the switch if there are no breaks */
-class SwitchCleanUp : public SearchReplace
+class SwitchCleanUp : public VNTransformation
 {
 public:
     SwitchCleanUp();
 };
 
 /** Insert break statements whenever there are equivalant gotos */
-class InferBreak : public SearchReplace
+class InferBreak : public VNTransformation
 {
 public:
     InferBreak();
 };
 
 /** fix fallthroughs by duplicating the fallen-into statements */
-class FixFallthrough : public SearchReplace
+class FixFallthrough : public VNTransformation
 {
 public:
     FixFallthrough();
 };
 
 /** Add a flag to the state machine for yields */
-class AddYieldFlag : public SearchReplace
+class AddYieldFlag : public VNTransformation
 {
 public:
     AddYieldFlag();
 };
 
 /** Yield at bottom of superloop if not already yielded */
-class AddInferredYield : public SearchReplace
+class AddInferredYield : public VNTransformation
 {
 public:
     AddInferredYield();
 };
 
 /** Move initial code into superloop, but only on first delta cycle */
-class MoveInitIntoSuperLoop : public SearchReplace
+class MoveInitIntoSuperLoop : public VNTransformation
 {
 public:
     MoveInitIntoSuperLoop();
 };
 
 /** Optimise loops that contain yields by rotating until yield reaches the bottom */
-class LoopRotation : public SearchReplace
+class LoopRotation : public VNTransformation
 {
 public:
     LoopRotation();

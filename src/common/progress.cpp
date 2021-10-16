@@ -95,6 +95,7 @@ Progress Progress::GetCurrentStage()
 
 const map<Progress::Stage, string> Progress::stage_formats =
  { { Progress::BUILDING_STEPS, "B" },
+   { Progress::PATTERN_TRANS,  "X" },  
    { Progress::PLANNING_ONE,   "P" },
    { Progress::PLANNING_TWO,   "Q" },
    { Progress::PLANNING_THREE, "R" },

@@ -57,7 +57,7 @@ AutosToModule::AutosToModule()
     r_var->access = MakePatternPtr<Private>();
     r_var->constancy = MakePatternPtr<NonConst>();
     
-    Configure( s_rec, r_rec );
+    Configure( SEARCH_REPLACE, s_rec, r_rec );
 }
 
 
@@ -94,7 +94,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
-    Configure( s_rec, r_rec );
+    Configure( SEARCH_REPLACE, s_rec, r_rec );
 }
 
 
@@ -125,7 +125,7 @@ DeclsToModule::DeclsToModule()
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
-    Configure( s_rec, r_rec );
+    Configure( SEARCH_REPLACE, s_rec, r_rec );
 }
 
 
@@ -174,7 +174,7 @@ ThreadToMethod::ThreadToMethod()
     ls_wait_dynamic->event = l_event;
     lr_nt_dynamic->event = l_event;
     
-    Configure( s_thread, r_method );
+    Configure( SEARCH_REPLACE, s_thread, r_method );
 }
 
 
@@ -234,5 +234,5 @@ ExplicitiseReturns::ExplicitiseReturns()
     r_flag->identifier = r_flag_id;
     r_flag->initialiser = r_true;
         
-    Configure( s_all, inst );
+    Configure( SEARCH_REPLACE, s_all, inst );
 }

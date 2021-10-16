@@ -1,7 +1,6 @@
 #ifndef FALL_OUT_HPP
 #define FALL_OUT_HPP
 
-#include "sr/search_replace.hpp"
 #include "sr/vn_transformation.hpp"
 
 namespace Steps {
@@ -9,14 +8,14 @@ namespace Steps {
 using namespace SR;
 
 /// Put all the labels in an array indexable by an enum
-class PlaceLabelsInArray : public SearchReplace
+class PlaceLabelsInArray : public VNTransformation
 {
 public:
     PlaceLabelsInArray();
 };
 
 /// Change all types from Labeley to the state enum, and move lmap lookups from && to goto
-class LabelTypeToEnum : public SearchReplace
+class LabelTypeToEnum : public VNTransformation
 {
 public:
     LabelTypeToEnum();
@@ -30,14 +29,14 @@ public:
 };
 
 /// Find c ? a[i] : a[j] and replace with a[ c ? i : j ]
-class SwapSubscriptConditionalOperator : public SearchReplace
+class SwapSubscriptConditionalOperator : public VNTransformation
 {
 public:
     SwapSubscriptConditionalOperator();
 };
 
 /// Insert state variable as an enum
-class AddStateEnumVar : public SearchReplace
+class AddStateEnumVar : public VNTransformation
 {
 public:
     AddStateEnumVar();
@@ -45,13 +44,13 @@ public:
 
 /// Eliminate all but the last goto by placing state bodies under if. Only
 /// act on states that are combable i.e. do not yield
-class ApplyCombGotoPolicy : public SearchReplace
+class ApplyCombGotoPolicy : public VNTransformation
 {
 public:
      ApplyCombGotoPolicy();
 };
 
-class ApplyYieldGotoPolicy : public SearchReplace
+class ApplyYieldGotoPolicy : public VNTransformation
 {
 public:
      ApplyYieldGotoPolicy();
@@ -60,14 +59,14 @@ public:
 /// Deal with a state at the end that is not followed by a goto and which
 /// will therefore end up exiting off the bottom of the function (absent a
 /// return or terminator). Create a conditional goto so that exit can occur.
-class ApplyBottomPolicy : public SearchReplace
+class ApplyBottomPolicy : public VNTransformation
 {
 public:
      ApplyBottomPolicy();
 };
 
 /// Group all labels at the top by placing state bodies under if
-class ApplyLabelPolicy : public SearchReplace
+class ApplyLabelPolicy : public VNTransformation
 {
 public:
      ApplyLabelPolicy();
@@ -76,7 +75,7 @@ public:
 /// Move code above the uppermost label under the label but conditional
 /// on the delta count being zero, i.e. no yields have occurred yet. Only
 /// works if there is already a yield before the first goto 
-class ApplyTopPolicy : public SearchReplace
+class ApplyTopPolicy : public VNTransformation
 {
 public:
      ApplyTopPolicy();
@@ -84,7 +83,7 @@ public:
 
 /// Ensure we always yield before the first goto (since reset does not
 /// comb into non-reset code).
-class EnsureResetYield : public SearchReplace
+class EnsureResetYield : public VNTransformation
 {
 public:
      EnsureResetYield();
@@ -95,26 +94,26 @@ public:
 /// gotos become continues. Parameter chooses whether to handle conditional goto
 /// at the bottom. You always want to run this with false, and again with true
 /// if you want to support exiting the loop.
-class DetectSuperLoop : public SearchReplace
+class DetectSuperLoop : public VNTransformation
 {
 public:
      DetectSuperLoop( bool is_conditional_goto );
 };
 
-class InsertInferredYield : public SearchReplace
+class InsertInferredYield : public VNTransformation
 {
 public:
      InsertInferredYield();
 };
 
 /*
-class RemoveLabelSubscript : public SearchReplace
+class RemoveLabelSubscript : public VNTransformation
 {
 public:
      RemoveLabelSubscript();
 };
 
-class LabelInstanceToEnum : public SearchReplace
+class LabelInstanceToEnum : public VNTransformation
 {
 public:
      LabelInstanceToEnum();

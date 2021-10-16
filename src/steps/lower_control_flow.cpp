@@ -76,7 +76,7 @@ MakeAllForUncombable::MakeAllForUncombable()
     r_ufor->increment = inc;
     r_ufor->body = body;
     
-    Configure( s_all, r_ufor );
+    Configure( SEARCH_REPLACE, s_all, r_ufor );
 }
 
 
@@ -141,7 +141,7 @@ DetectCombableFor::DetectCombableFor()
     r_for->increment = inc;
     r_for->body = body;
     
-    Configure( s_ufor, r_for );
+    Configure( SEARCH_REPLACE, s_ufor, r_for );
 }
 
 
@@ -160,7 +160,7 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
     
     s_not->pattern = sx_ubreak;
         
-    Configure( s_not, r_ubreak );
+    Configure( SEARCH_REPLACE, s_not, r_ubreak );
 }
 
 
@@ -191,7 +191,7 @@ DetectCombableBreak::DetectCombableBreak()
     over->through = s_ubreak;
     over->overlay = r_break;
     
-    Configure( all, swtch );
+    Configure( SEARCH_REPLACE, all, swtch );
 }
 
 
@@ -248,7 +248,7 @@ ForToWhile::ForToWhile()
     r_body->statements = (r_slave, r_cont_label, inc);
     r_cont_label->identifier = r_cont_labelid;
 
-    Configure( MakeCheckUncombable(s_for), r_outer );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_for), r_outer );
 }
 
 WhileToDo::WhileToDo()
@@ -271,7 +271,7 @@ WhileToDo::WhileToDo()
     r_do->condition = cond;
     r_do->body = body;
     
-    Configure( MakeCheckUncombable(s_while), r_if );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_while), r_if );
 }
 
 IfToIfGoto::IfToIfGoto()
@@ -313,7 +313,7 @@ IfToIfGoto::IfToIfGoto()
     r_label1->identifier = r_labelid1;
     r_label2->identifier = r_labelid2;
     
-    Configure( MakeCheckUncombable(s_and), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_and), r_comp );
 }
 
 
@@ -430,7 +430,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     r_decl->initialiser = s_cond;
     r_comp->statements = (r_decl, r_slave3);
     
-    Configure( MakeCheckUncombable(s_switch), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_switch), r_comp );
 }
 
 
@@ -478,7 +478,7 @@ DoToIfGoto::DoToIfGoto()
     r_if->else_body = r_nop;
     r_goto->destination = r_labelid;
         
-    Configure( MakeCheckUncombable(s_do), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_do), r_comp );
 }
 
 BreakToGoto::BreakToGoto()
@@ -510,7 +510,7 @@ BreakToGoto::BreakToGoto()
     r_comp->statements = (breakable, r_label);
     r_label->identifier = r_labelid;
     
-    Configure( MakeCheckUncombable( breakable ), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable( breakable ), r_comp );
 }
 
 
@@ -538,7 +538,7 @@ LogicalAndToIf::LogicalAndToIf()
     r_if->else_body = MakePatternPtr<Nop>();
     r_assign2->operands = (r_temp_id, op2);    
     
-    Configure( MakeCheckUncombable( s_and ), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable( s_and ), r_comp );
 }
 
 
@@ -566,7 +566,7 @@ LogicalOrToIf::LogicalOrToIf()
     r_if->else_body = r_assign2;
     r_assign2->operands = (r_temp_id, op2);    
     
-    Configure( MakeCheckUncombable(s_or), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_or), r_comp );
 }
 
 
@@ -596,7 +596,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     r_assignt->operands = (r_temp_id, op2);    
     r_assignf->operands = (r_temp_id, op3);    
     
-    Configure( MakeCheckUncombable(s_mux), r_comp );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_mux), r_comp );
 }
 
 
@@ -637,5 +637,5 @@ ExtractCallParams::ExtractCallParams()
     r_param->identifier = id;
     r_call->callee = callee;
     
-    Configure( MakeCheckUncombable(s_call), r_ce );
+    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_call), r_ce );
 }

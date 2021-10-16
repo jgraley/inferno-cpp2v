@@ -164,7 +164,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_array->size = MakePatternPtr<Uninitialised>();
     //r_make->operands = ()
     
-    Configure( s_module, slavel );    
+    Configure( SEARCH_REPLACE, s_module, slavel );    
 }
 
 // New better way of propogating lmap through variables. This supercedes LabelVarsToEnum
@@ -236,7 +236,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     apany->terminus = labeley;
     apnot->pattern = lmap;
     
-    Configure( all, slaven );
+    Configure( SEARCH_REPLACE, all, slaven );
 }
 
 /*
@@ -263,7 +263,7 @@ RemoveLabelSubscript::RemoveLabelSubscript()
     
     ms_sub->operands = (lmap_id, m_state_id);    
     MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );       
-    Configure( all, slaven );
+    Configure( SEARCH_REPLACE, all, slaven );
 }
 
 
@@ -310,7 +310,7 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     apany->terminus = labeley;
     apnot->pattern = lmap;
     
-    Configure( all, slavel );
+    Configure( SEARCH_REPLACE, all, slavel );
 }
 */
 
@@ -421,7 +421,7 @@ SwapSubscriptConditionalOperator::SwapSubscriptConditionalOperator()
     r_sub->operands = (array, r_mux);
     r_mux->operands = (cond, index1, index2);
     
-    Configure( s_mux, r_sub );
+    Configure( SEARCH_REPLACE, s_mux, r_sub );
 }
 
 
@@ -465,7 +465,7 @@ AddStateEnumVar::AddStateEnumVar()
     state_var->type = type;    
     state_var->initialiser = MakePatternPtr<Uninitialised>();
 
-    Configure( s_gg, r_slave );
+    Configure( SEARCH_REPLACE, s_gg, r_slave );
 }
 
 
@@ -502,7 +502,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     //r_body_comp->members = ();
     r_body_comp->statements = body;
     
-    Configure(s_comp, r_comp);
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 
@@ -542,7 +542,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     //r_body_comp->members = ();
     r_body_comp->statements = (body1, wait, body2, goto2);
     
-    Configure(s_comp, r_comp);
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 
@@ -584,7 +584,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     r_if2->else_body = MakePatternPtr<Nop>();
     r_not_equal->operands = (state_var_id, state_id);    
     
-    Configure(s_comp, r_comp);
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 
@@ -610,7 +610,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     post->restriction = sx_post;
     sx_post->pattern = sx_post_label;
         
-    Configure(s_comp, r_comp);
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 ApplyTopPolicy::ApplyTopPolicy()
@@ -648,7 +648,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     r_body_comp->statements = (body1, wait, body2, gotoo);
     r_if->else_body = MakePatternPtr<Nop>();
     
-    Configure(s_all, r_comp);
+    Configure( SEARCH_REPLACE, s_all, r_comp );
 }
 
 
@@ -669,7 +669,7 @@ EnsureResetYield::EnsureResetYield()
     sx_not->pattern = sx_any;
     sx_any->patterns = (MakePatternPtr<Goto>(), MakePatternPtr<Label>(), MakePatternPtr<Wait>() );
         
-    Configure(s_comp, r_comp);
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 
@@ -712,7 +712,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     //r_body_comp->members = ();
     r_body_comp->statements = body;
     
-    Configure(inst);
+    Configure( SEARCH_REPLACE, inst );
 }
 
 
@@ -750,7 +750,7 @@ InsertInferredYield::InsertInferredYield()
     r_comp->members = (loop_decls);
     r_comp->statements = (stmts, r_yield);
     
-    Configure( fn );            
+    Configure( SEARCH_REPLACE, fn );            
 }
 
 

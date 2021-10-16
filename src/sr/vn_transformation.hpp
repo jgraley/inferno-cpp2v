@@ -24,7 +24,7 @@ public:
     };
 
     virtual void Configure( TransformationType type,
-                            TreePtr<Node> cp,
+                            TreePtr<Node> scp,
                             TreePtr<Node> rp = TreePtr<Node>() );
     
     void PatternTransformations();
@@ -46,6 +46,10 @@ public:
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual string GetGraphId() const; 
     void GenerateGraphRegions( Graph &graph ) const;
+    
+    // For pattern transformations
+    shared_ptr<CompareReplace> GetTopLevelEngine() const;
+    void SetTopLevelEngine( shared_ptr<CompareReplace> tle );
 
 private:
     shared_ptr<CompareReplace> top_level_engine;

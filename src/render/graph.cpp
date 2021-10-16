@@ -277,11 +277,6 @@ void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, Tra
         FOREACH( shared_ptr<Transformation> t, *tv ) // TODO loop backwards so they come out in the right order in graph
             PopulateFromTransformation( graphables, t.get() );
     }
-    else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
-    {
-		reached.clear();
-		PopulateFrom( graphables, cr );
-	}
     else if( VNTransformation *vnt = dynamic_cast<VNTransformation *>(root) )
     {
 		reached.clear();

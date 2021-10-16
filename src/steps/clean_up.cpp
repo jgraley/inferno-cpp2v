@@ -111,7 +111,7 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     r_comp->statements = ( s_pre, s_body, s_post );
     r_comp->members = ( s_inner_decls, s_outer_decls );
 
-    Configure( s_outer, r_comp );
+    Configure( SEARCH_REPLACE, s_outer, r_comp );
 }
 
 
@@ -141,7 +141,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
 
-    Configure( all );
+    Configure( SEARCH_REPLACE, all );
 }
 
 CleanupNop::CleanupNop() 
@@ -159,7 +159,7 @@ CleanupNop::CleanupNop()
     r_comp->members = decls;
     r_comp->statements = (pre, post);
 
-    Configure( s_comp, r_comp );
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 CleanupDuplicateLabels::CleanupDuplicateLabels()
@@ -215,7 +215,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     r_label1->identifier = r_labelid;
     r_labelid->sources = (s_labelid1, s_labelid2);
     
-    Configure( s_instance, r_instance );
+    Configure( SEARCH_REPLACE, s_instance, r_instance );
 }
 
 CleanupIneffectualLabels::CleanupIneffectualLabels()
@@ -271,7 +271,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     r_goto->destination = r_labelid;
     r_labelid->sources = (s_labelid1, s_labelid2);
     
-    Configure( s_instance, r_instance );
+    Configure( SEARCH_REPLACE, s_instance, r_instance );
 }
 
 CleanupIneffectualGoto::CleanupIneffectualGoto()
@@ -295,7 +295,7 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
     r_comp->statements = (pre, r_label, post);
     r_label->identifier = labelid;
 
-    Configure( s_comp, r_comp );
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 CleanupUnusedLabels::CleanupUnusedLabels()
@@ -348,7 +348,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     r_comp->members = decls;
     r_comp->statements = (pre, post);
     
-    Configure( s_instance, r_instance );
+    Configure( SEARCH_REPLACE, s_instance, r_instance );
 }
 
 
@@ -370,7 +370,7 @@ CleanUpDeadCode::CleanUpDeadCode()
     r_comp->members = decls;
     r_comp->statements = ( pre, s_exit_any, post );
     
-    Configure( s_comp, r_comp );            
+    Configure( SEARCH_REPLACE, s_comp, r_comp );            
 }
 
 
@@ -393,7 +393,7 @@ ReduceVoidStatementExpression::ReduceVoidStatementExpression()
     r_comp->members = (decls);
     r_comp->statements = (stmts, last);
     
-    Configure( s_ce, r_comp );      
+    Configure( SEARCH_REPLACE, s_ce, r_comp );      
 }
 
 
@@ -437,7 +437,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     s_anynode->terminus = id;
     s_nm->pattern = inst;
                         
-    Configure(COMPARE_REPLACE,  s_all, stuff1 );
+    Configure( COMPARE_REPLACE, s_all, stuff1 );
 }
 
 
@@ -461,5 +461,5 @@ CleanupNestedIf::CleanupNestedIf()
     r_if->else_body = r_nop;
     r_and->operands = (outer_cond, inner_cond); // outer first, to be side-effect correct
     
-    Configure( s_outer_if, r_if );
+    Configure( SEARCH_REPLACE, s_outer_if, r_if );
 }

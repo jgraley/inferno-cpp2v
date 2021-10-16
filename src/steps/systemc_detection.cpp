@@ -78,7 +78,7 @@ DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicNamedFunction> r_dynamic )
     eexpr->pattern = MakePatternPtr<Event>();
     r_dynamic->event = eexpr;       
       
-    Configure( s_call, r_dynamic );
+    Configure( SEARCH_REPLACE, s_call, r_dynamic );
 }
 
 
@@ -90,7 +90,7 @@ DetectSCStatic::DetectSCStatic( TreePtr<SCNamedFunction> r_static )
     s_call->callee = s_token;   
     //s_call->operands = ();       
        
-    Configure( s_call, r_static );
+    Configure( SEARCH_REPLACE, s_call, r_static );
 }
 
 
@@ -107,7 +107,7 @@ DetectSCDelta::DetectSCDelta( TreePtr<SCNamedFunction> r_delta )
     s_arg->identifier = s_param_id;
     s_arg->value = s_arg_id;
       
-    Configure( s_call, r_delta );
+    Configure( SEARCH_REPLACE, s_call, r_delta );
 }
 
 
@@ -125,7 +125,7 @@ DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunctio
     s_arg->value = event;
     r_tf->code = event;       
       
-    Configure( s_call, r_tf );
+    Configure( SEARCH_REPLACE, s_call, r_tf );
 }
 
 
@@ -206,7 +206,7 @@ DetectSCNotifyImmediate::DetectSCNotifyImmediate()
 
     r_notify->event = eexpr;
        
-    Configure( s_call, r_notify );
+    Configure( SEARCH_REPLACE, s_call, r_notify );
 }
 
 
@@ -233,7 +233,7 @@ DetectSCNotifyDelta::DetectSCNotifyDelta()
 
     r_notify->event = eexpr;
        
-    Configure( s_call, r_notify );
+    Configure( SEARCH_REPLACE, s_call, r_notify );
 }
 
 

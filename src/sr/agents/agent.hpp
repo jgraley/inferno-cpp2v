@@ -103,6 +103,7 @@ public:
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
                                             TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
+    virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;
 		
 	static Agent *AsAgent( shared_ptr<Node> node );
@@ -129,7 +130,8 @@ public:
                                    PatternLink base_plink_, 
                                    set<PatternLink> coupled_plinks_ );
     virtual void AddResiduals( set<PatternLink> coupled_plinks_ );
-    virtual list<PatternLink> GetVisibleChildren( Path v ) const;
+    virtual list<PatternLink> GetChildren() const override;
+    virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                                

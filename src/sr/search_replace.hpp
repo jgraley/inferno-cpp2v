@@ -75,6 +75,9 @@ public:
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();
+    TreePtr<Node> GetSearchComparePattern();
+    TreePtr<Node> GetReplacePattern();
+    
     TreePtr<Node> *pcontext;   
 private:
 };

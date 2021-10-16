@@ -52,7 +52,7 @@ GotoAfterWait::GotoAfterWait()
     r_goto->destination = r_labelid;
     r_label->identifier = r_labelid;
     
-    Configure( all_over );
+    Configure( SEARCH_REPLACE, all_over );
 }
 /*
 GotoAfterWait::GotoAfterWait()
@@ -76,7 +76,7 @@ GotoAfterWait::GotoAfterWait()
     r_goto->destination = r_labelid;
     r_label->identifier = r_labelid;
     
-    Configure( s_comp, r_comp );
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 */
 
@@ -108,7 +108,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     r_comp->members = ( decls );
     r_comp->statements = ( pre, iif, r_goto, label, post );
     
-    Configure( s_all, r_comp );
+    Configure( SEARCH_REPLACE, s_all, r_comp );
 }
 
 
@@ -135,7 +135,7 @@ CompactGotos::CompactGotos()
     r_comp->statements = ( pre, r_goto, post );
     r_comp->members = ( decls );    
         
-    Configure( s_comp, r_comp );
+    Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
 
 
@@ -165,7 +165,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     r_comp->statements = ( pre, r_goto, label, post );
     r_goto->destination = label_id;
 
-    Configure( s_all, r_comp );
+    Configure( SEARCH_REPLACE, s_all, r_comp );
 }
 
 
@@ -216,7 +216,7 @@ EnsureBootstrap::EnsureBootstrap()
     r_body->members = decls;
     r_body->statements = (pre, r_goto, r_label, stop, post);    
 
-    Configure( fn );
+    Configure( SEARCH_REPLACE, fn );
 }
 
 
@@ -251,7 +251,7 @@ AddStateLabelVar::AddStateLabelVar()
     state_var->type = MakePatternPtr<Labeley>();    
     state_var->initialiser = MakePatternPtr<Uninitialised>();
 
-    Configure( s_comp, r_slave );
+    Configure( SEARCH_REPLACE, s_comp, r_slave );
 }
 
 
@@ -288,7 +288,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     r_loop_body->statements = (first_goto, post);
     r_loop->condition = MakePatternPtr<True>();
 
-    Configure( fn );
+    Configure( SEARCH_REPLACE, fn );
 }
 
 ShareGotos::ShareGotos()
@@ -314,7 +314,7 @@ ShareGotos::ShareGotos()
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
 
-    Configure( loop );
+    Configure( SEARCH_REPLACE, loop );
 }
 
 
@@ -345,7 +345,7 @@ SwitchCleanUp::SwitchCleanUp()
     r_body->members = decls;
     r_body->statements = (main);    
     
-    Configure( s_switch, r_comp );        
+    Configure( SEARCH_REPLACE, s_switch, r_comp );        
 }
 
 
@@ -371,7 +371,7 @@ InferBreak::InferBreak()
     r_comp->members = decls;
     r_comp->statements = (pre, slave, post); 
     
-    Configure( s_comp, r_comp );        
+    Configure( SEARCH_REPLACE, s_comp, r_comp );        
 }
 
 
@@ -394,7 +394,7 @@ FixFallthrough::FixFallthrough()
     cb2->restriction = s_not2;
     s_not2->pattern = MakePatternPtr<Case>();
         
-    Configure( s_comp, r_comp );            
+    Configure( SEARCH_REPLACE, s_comp, r_comp );            
 }
 
 
@@ -468,7 +468,7 @@ AddYieldFlag::AddYieldFlag()
     mr_comp->statements = (m_pre, m_wait, mr_assign, m_post);
     mr_assign->operands = (r_flag_id, MakePatternPtr<True>());
 
-    Configure( fn );            
+    Configure( SEARCH_REPLACE, fn );            
 }
 
 AddInferredYield::AddInferredYield()
@@ -517,7 +517,7 @@ AddInferredYield::AddInferredYield()
     r_if->body = r_yield;
     r_if->else_body = MakePatternPtr<Nop>();
     
-    Configure( fn );            
+    Configure( SEARCH_REPLACE, fn );            
 }
 
 
@@ -559,7 +559,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     r_if_comp->statements = (first_init, inits);//, MakePatternPtr<WaitDelta>());
     r_if->else_body = MakePatternPtr<Nop>();
     
-    Configure( fn );            
+    Configure( SEARCH_REPLACE, fn );            
 }
 
 
@@ -647,7 +647,7 @@ LoopRotation::LoopRotation()
     r_comp->members = (comp_loop_decls);
     r_comp->statements = (comp_loop_pre, loop_bottom, loop_top, loop_body, comp_loop_post);    // rotated version of s_comp_loop
         
-    Configure( fn );            
+    Configure( SEARCH_REPLACE, fn );            
 }
 
 

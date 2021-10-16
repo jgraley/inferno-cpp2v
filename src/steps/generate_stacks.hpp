@@ -8,7 +8,6 @@
 #ifndef GENERATE_STACKS_HPP
 #define GENERATE_STACKS_HPP
 
-#include "sr/search_replace.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
 #include "sr/vn_transformation.hpp"
@@ -18,35 +17,35 @@ namespace Steps {
 using namespace SR;
 
 /** Ensure an actual return statement is present in void-returning functions */
-class ExplicitiseReturn : public SearchReplace
+class ExplicitiseReturn : public VNTransformation
 {
 public:
 	ExplicitiseReturn();
 };
 
 /** Convey return value through a module-level variable */
-class UseTempForReturnValue : public SearchReplace
+class UseTempForReturnValue : public VNTransformation
 {
 public:
 	UseTempForReturnValue();
 };
 
 /** Pass parameters in to functions via class-level temps */
-class ReturnViaTemp : public SearchReplace
+class ReturnViaTemp : public VNTransformation
 {
 public:
     ReturnViaTemp();
 };
 
 /** Add a parameter to non-process functions giving the link address */
-class AddLinkAddress : public SearchReplace
+class AddLinkAddress : public VNTransformation
 {
 public:
     AddLinkAddress();
 };
 
 /** Pass parameters in to functions via class-level temps */
-class ParamsViaTemps : public SearchReplace
+class ParamsViaTemps : public VNTransformation
 {
 public:
     ParamsViaTemps();
@@ -54,7 +53,7 @@ public:
 
 /** Replace automatic variables with stacks based on arrays and 
     maintain the stack pointer correctly, supporting recursion. */
-class GenerateStacks : public SearchReplace
+class GenerateStacks : public VNTransformation
 {
 public:
 	GenerateStacks();
@@ -64,7 +63,7 @@ public:
     this is not inlining, because a function only need be merged
     once for all the call points in the thread. Turn calls and
     return into gotos. */
-class MergeFunctions : public SearchReplace
+class MergeFunctions : public VNTransformation
 {
 public:
 	MergeFunctions();

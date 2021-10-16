@@ -33,7 +33,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( pre, ra, post );
 
-    Configure(sc, rc);
+    Configure( SEARCH_REPLACE,sc, rc);
 }
 	
 	
@@ -51,7 +51,7 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
     rc->members = ( var, decls ); // Instance now in unordered decls part
     rc->statements = ( pre, post );
 
-    Configure(sc, rc);
+    Configure( SEARCH_REPLACE,sc, rc);
 }
 
 
@@ -80,7 +80,7 @@ SplitInstanceDeclarations2::SplitInstanceDeclarations2()
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( ra, stmts );
 
-    Configure(sc, rc);
+    Configure( SEARCH_REPLACE,sc, rc);
 }
 	
 	

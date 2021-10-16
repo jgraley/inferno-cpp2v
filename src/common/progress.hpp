@@ -13,6 +13,7 @@ public:
     {
         INVALID, 
         BUILDING_STEPS,
+        PATTERN_TRANS,
         PLANNING_ONE,
         PLANNING_TWO,
         PLANNING_THREE,

@@ -28,6 +28,7 @@ void CompareReplace::Plan::Configure( TreePtr<Node> cp,
                                       TreePtr<Node> rp )
 {
     //TRACE(algo->GetName())("\n");
+    ASSERT( cp );
     compare_pattern = cp;
     replace_pattern = rp;
 }
@@ -39,6 +40,8 @@ void CompareReplace::Plan::PlanningStageOne()
     // First, add extra root nodes, categorise, create subordinate 
     // SCREngines and recurse into them
     // This allows the phases of the agents to be determined correctly
+    ASSERT( compare_pattern );
+    ASSERT( !is_search );
     scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, compare_pattern, replace_pattern);
 
     list<const SCREngine *> scrs = scr_engine->GetSCREngines();
@@ -89,6 +92,42 @@ void CompareReplace::PlanningStageThree()
 }
 
 
+// Do a search and replace based on patterns stored in our members
+void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
+{
+    INDENT(")");
+    TRACE("Enter S&R instance ")(*this);
+    ASSERT(c==*proot);
+    
+    // If the initial root and context are the same node, then arrange for the context
+    // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
+    // new declarations can be found in slave searches. 
+    //
+    // TODO but does not work for sub-slaves, because the first level slave's proot
+    // is not the same as pcontext. When slave finishes a singe CR, only the locally-created
+    // *proot is updated, not the top level *proot or *pcontext, so the updates do not appear 
+    // in the context until the first level slave completes, the local *proot is copied over
+    // the TL *proot (and hence *pcontext) and the mechanism described here kicks in
+    //  
+    // We could get the
+    // same effect by taking the context as a reference, but leave it like this for now.
+    // If *proot is under context, then we're OK as long as proot points to the actual
+    // tree node - then the walk at context will follow the new *proot pointer and get
+    // into the new subtree.
+    if( c == *proot )
+	    pcontext = proot;
+    else
+	    pcontext = &c;
+    
+    CouplingKeysMap empty;
+    
+    (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty );   
+
+    pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
+    dirty_grass.clear(); // save memory
+}
+
+
 Graphable::Block CompareReplace::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                     const NonTrivialPreRestrictionFunction &ntprf ) const
 {
@@ -123,39 +162,15 @@ SCREngine *CompareReplace::GetRootEngine()
 }
 
 
-// Do a search and replace based on patterns stored in our members
-void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
+TreePtr<Node> CompareReplace::GetSearchComparePattern()
 {
-    INDENT(")");
-    TRACE("Enter S&R instance ")(*this);
-    ASSERT(c==*proot);
-    
-    // If the initial root and context are the same node, then arrange for the context
-    // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
-    // new declarations can be found in slave searches. 
-    //
-    // TODO but does not work for sub-slaves, because the first level slave's proot
-    // is not the same as pcontext. When slave finishes a singe CR, only the locally-created
-    // *proot is updated, not the top level *proot or *pcontext, so the updates do not appear 
-    // in the context until the first level slave completes, the local *proot is copied over
-    // the TL *proot (and hence *pcontext) and the mechanism described here kicks in
-    //  
-    // We could get the
-    // same effect by taking the context as a reference, but leave it like this for now.
-    // If *proot is under context, then we're OK as long as proot points to the actual
-    // tree node - then the walk at context will follow the new *proot pointer and get
-    // into the new subtree.
-    if( c == *proot )
-	    pcontext = proot;
-    else
-	    pcontext = &c;
-    
-    CouplingKeysMap empty;
-    
-    (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty );   
+    return plan.compare_pattern;
+}
 
-    pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
-    dirty_grass.clear(); // save memory
+
+TreePtr<Node> CompareReplace::GetReplacePattern()
+{
+    return plan.replace_pattern;
 }
 
 

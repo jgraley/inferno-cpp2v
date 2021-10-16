@@ -143,17 +143,17 @@ void AgentCommon::AddResiduals( set<PatternLink> coupled_plinks_ )
 }
 
 
-list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
+list<PatternLink> AgentCommon::GetChildren() const
 {
 	// Normally all children should be visible 
     typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
-    auto c = shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
+    auto con = shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
     // Note: a pattern query should be just as good...
     // Incorrect! This gets the replace-side stuff as well; GetPatternQuery()
     // is only for search.
     
     list<PatternLink> plinks;
-    FOREACH( const TreePtrInterface &tpi, *c )
+    FOREACH( const TreePtrInterface &tpi, *con )
     {        
         if( tpi )
             plinks.push_back( PatternLink(this, &tpi) );
@@ -162,6 +162,12 @@ list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 }
 
     
+list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
+{
+    return GetChildren();
+}
+
+
 shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 {
     ASSERT( master_scr_engine ); // check we have been configured

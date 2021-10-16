@@ -50,7 +50,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     r_comp->statements = (pre, r_return);
     r_return->return_value = MakePatternPtr<Uninitialised>();
     
-    Configure( fi );
+    Configure( SEARCH_REPLACE, fi );
 }    
 
 
@@ -89,7 +89,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     r_sub_comp->statements.push_back( r_return );
     r_return->return_value = id;
        
-    Configure( s_return, r_sub_comp );
+    Configure( SEARCH_REPLACE, s_return, r_sub_comp );
 }
 
 
@@ -153,7 +153,7 @@ ReturnViaTemp::ReturnViaTemp()
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (func_id);
     
-    Configure( s_module, slavem );  
+    Configure( SEARCH_REPLACE, s_module, slavem );  
 }
 
 
@@ -256,7 +256,7 @@ AddLinkAddress::AddLinkAddress()
     //r_retaddr->access = MakePatternPtr<Private>();
     //r_retaddr->constancy = MakePatternPtr<NonConst>();
     r_retaddr_id->sources = (l_inst_id);
-    Configure( s_module, slavem );  
+    Configure( SEARCH_REPLACE, s_module, slavem );  
 }
 
 
@@ -324,7 +324,7 @@ ParamsViaTemps::ParamsViaTemps()
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (func_id, param_id);
     
-    Configure( s_module, slavem );  
+    Configure( SEARCH_REPLACE, s_module, slavem );  
 }
 
 
@@ -460,7 +460,7 @@ GenerateStacks::GenerateStacks()
     r_inc->operands = ( r_index_identifier );
     r_top_comp->statements = ( r_inc, top_pre );
 
-    Configure( s_module, r_mid );
+    Configure( SEARCH_REPLACE, s_module, r_mid );
 }
 
 /*
@@ -567,7 +567,7 @@ GenerateStacks::GenerateStacks()
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
 
-    Configure( fi );
+    Configure( SEARCH_REPLACE, fi );
 }
 
 */
@@ -626,7 +626,7 @@ MergeFunctions::MergeFunctions()
     r_label->identifier = r_label_id;
     r_label_id->sources = (func_id);
          
-    Configure( s_module, r_module );
+    Configure( SEARCH_REPLACE, s_module, r_module );
 }
 
 

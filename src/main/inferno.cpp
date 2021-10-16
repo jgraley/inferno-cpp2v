@@ -150,9 +150,7 @@ void GenerateGraphRegions( Graph &graph, shared_ptr<Transformation> t )
 	graph( t.get() );
 	if( ReadArgs::graph_trace )
     {
-		if(  auto cr = dynamic_pointer_cast<CompareReplace>(t) )
-			cr->GenerateGraphRegions(graph);
-		else if(  auto vnt = dynamic_pointer_cast<VNTransformation>(t) )
+		if( auto vnt = dynamic_pointer_cast<VNTransformation>(t) )
 			vnt->GenerateGraphRegions(graph);
         else
             ASSERTFAIL("Don't know how to do a trace-mode graph of this");
@@ -246,6 +244,21 @@ int main( int argc, char *argv[] )
     if( ShouldIQuit() )
         exit(0);    
         
+    // Pattern transformations
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Pattern transforming\n"); 
+    i=0;
+    FOREACH( shared_ptr<Transformation> t, sequence )
+    {
+        Progress(Progress::PATTERN_TRANS, i++).SetAsCurrent();
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+            pvnt->PatternTransformations();
+        else
+            ASSERTFAIL("Unknown transformation");
+        if( ShouldIQuit(true) )
+            break;
+    }        
+        
     // Planning part one
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning part one\n"); 
@@ -253,9 +266,7 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
-        if( auto pcr = dynamic_pointer_cast<CompareReplace>(t) )
-            pcr->PlanningStageOne();
-        else if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
             pvnt->PlanningStageOne();
         else
             ASSERTFAIL("Unknown transformation");
@@ -273,9 +284,7 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
-        if( auto pcr = dynamic_pointer_cast<CompareReplace>(t) )
-            pcr->PlanningStageTwo();
-        else if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
             pvnt->PlanningStageTwo();
         else
             ASSERTFAIL("Unknown transformation");
@@ -293,9 +302,7 @@ int main( int argc, char *argv[] )
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         Progress(Progress::PLANNING_THREE, i++).SetAsCurrent();
-        if( auto pcr = dynamic_pointer_cast<CompareReplace>(t) )
-            pcr->PlanningStageThree();
-        else if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
             pvnt->PlanningStageThree();
         else
             ASSERTFAIL("Unknown transformation");
@@ -404,9 +411,7 @@ void SelfTest()
     GenericsTest();
 }
 
-// TODO Split Compare out of CompareReplace. 
 // TODO Make Filter a functor. 
 // TODO Consider merging Filter into Transformation.
-// TODO Produce base class for builder nodes: TransformTo?
 // TODO Consider multi-terminus Stuff and multi-root (StarStuff)
 
