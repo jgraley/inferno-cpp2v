@@ -10,7 +10,7 @@ using namespace SR;
 
 /** Detect an uncombable switch and mark it for lowering. This is 
     any switch with fall throughs.  */
-class DetectUncombableSwitch : public VNTransformation
+class DetectUncombableSwitch : public SearchReplace
 {
 public:
     DetectUncombableSwitch();
