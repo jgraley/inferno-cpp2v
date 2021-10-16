@@ -8,6 +8,7 @@
 #include "sr/search_replace.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 
@@ -17,7 +18,7 @@ using namespace SR;
 /** We look for the decl and remeove it since the inferno
  Node does not require declaration. Then just switch each appearance
  over to the new node, using a slave */
-class DetectSCType : public CompareReplace  // Note not SearchReplace
+class DetectSCType : public VNTransformation 
 {
 public:
     DetectSCType( TreePtr< SCTree::SCNamedConstruct > lr_scnode );
@@ -29,7 +30,7 @@ public:
  Node does not require declaration. Then replace all class nodes
  that inherit from the suppleid base with the new inferno node and 
  remove the base */
-class DetectSCBase : public CompareReplace  // Note not SearchReplace
+class DetectSCBase : public VNTransformation 
 {
 public:
     DetectSCBase( TreePtr< SCTree::SCNamedRecord > lr_scclass );
@@ -69,7 +70,7 @@ public:
 };
 
 
-class DetectSCProcess : public CompareReplace // Note not SearchReplace
+class DetectSCProcess : public VNTransformation
 {
 public:
     DetectSCProcess( TreePtr< SCTree::Process > lr_scprocess );
@@ -99,7 +100,7 @@ public:
 
 /// Remove constructors in SC modules that are now empty thanks to earlier steps
 /// Must also remove explicit calls to constructor (which would not do anything)
-class RemoveEmptyModuleConstructors : public CompareReplace
+class RemoveEmptyModuleConstructors : public VNTransformation
 {
 public:
     RemoveEmptyModuleConstructors();
@@ -109,7 +110,7 @@ public:
 /// Remove top-level instances that are of type void
 /** isystemc.h declares void variables to satisfy parser. Hoover them all up
     efficiently here. */
-class RemoveVoidInstances : public CompareReplace  // Note not SearchReplace
+class RemoveVoidInstances : public VNTransformation
 {
 public:
     RemoveVoidInstances();

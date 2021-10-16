@@ -9,6 +9,7 @@
 #define GENERATE_IMPLICIT_CASTS_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 

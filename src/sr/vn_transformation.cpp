@@ -4,7 +4,7 @@
 
 using namespace SR;
 
-void VNTransformation::Configure( Type type,
+void VNTransformation::Configure( TransformationType type,
                                   TreePtr<Node> cp,
                                   TreePtr<Node> rp )
 {

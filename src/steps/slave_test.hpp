@@ -6,6 +6,7 @@
 #define SLAVE_TEST_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 

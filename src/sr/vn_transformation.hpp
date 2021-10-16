@@ -17,13 +17,13 @@ class VNTransformation : public InPlaceTransformation,
                          public virtual Graphable
 {
 public:    
-    enum Type
+    enum TransformationType
     {
         SEARCH_REPLACE,
         COMPARE_REPLACE
     };
 
-    virtual void Configure( Type type,
+    virtual void Configure( TransformationType type,
                             TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
     

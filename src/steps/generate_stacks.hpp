@@ -11,6 +11,7 @@
 #include "sr/search_replace.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 

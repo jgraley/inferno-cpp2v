@@ -46,8 +46,7 @@ DetectUncombableSwitch::DetectUncombableSwitch()
     r_uswitch->body = comp;
     r_uswitch->condition = expr;
     
-    //Configure( SEARCH_REPLACE, s_all, r_uswitch );
-    Configure( s_all, r_uswitch );
+    Configure( SEARCH_REPLACE, s_all, r_uswitch );
 }
 
 

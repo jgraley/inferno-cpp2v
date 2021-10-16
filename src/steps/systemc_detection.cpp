@@ -27,7 +27,7 @@ DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
     
     r_scope->members = (decls);          
        
-    Configure( over, r_slave );
+    Configure( COMPARE_REPLACE, over, r_slave );
 }
 
 
@@ -59,7 +59,7 @@ DetectSCBase::DetectSCBase( TreePtr< SCNamedRecord > lr_scclass )
     lr_scclass->members = (l_decls);
     lr_scclass->bases = (l_bases);
        
-    Configure( over, r_slave );
+    Configure( COMPARE_REPLACE, over, r_slave );
 }
 
 
@@ -184,7 +184,7 @@ DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
     l_overtype->through = MakePatternPtr<Callable>();
     l_overtype->overlay = lr_scprocess;
     
-    Configure( over, r_slave );
+    Configure( COMPARE_REPLACE, over, r_slave );
 }
 
 
@@ -282,7 +282,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     lr_comp->members = (l_decls);
     lr_comp->statements = (l_pre, l_post);
             
-    Configure( stuff, r_slave );
+    Configure( COMPARE_REPLACE, stuff, r_slave );
 }
 
 
@@ -305,7 +305,7 @@ RemoveVoidInstances::RemoveVoidInstances()
     
     r_scope->members = (decls);   
        
-    Configure( s_scope, r_scope );
+    Configure( COMPARE_REPLACE, s_scope, r_scope );
 }
 
 

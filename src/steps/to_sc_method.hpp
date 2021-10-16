@@ -2,6 +2,7 @@
 #define TO_SC_METHOD_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 /// Steps namespace contains all of inferno's transformation steps. 
 namespace Steps {

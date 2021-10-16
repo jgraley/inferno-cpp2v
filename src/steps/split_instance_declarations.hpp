@@ -2,6 +2,7 @@
 #define SPLIT_INSTANCE_DECLARATIONS_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 

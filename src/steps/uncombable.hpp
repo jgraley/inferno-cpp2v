@@ -10,6 +10,7 @@
 
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 

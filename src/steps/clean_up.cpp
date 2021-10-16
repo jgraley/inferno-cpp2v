@@ -90,7 +90,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     last->pattern = r_type;
     overlay->overlay = r_temp_id;        
     
-    Configure( root_stuff );
+    Configure( COMPARE_REPLACE, root_stuff );
 }
 
 
@@ -437,7 +437,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     s_anynode->terminus = id;
     s_nm->pattern = inst;
                         
-    Configure( s_all, stuff1 );
+    Configure(COMPARE_REPLACE,  s_all, stuff1 );
 }
 
 

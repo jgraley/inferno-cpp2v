@@ -149,8 +149,14 @@ void GenerateGraphRegions( Graph &graph, shared_ptr<Transformation> t )
 {
 	graph( t.get() );
 	if( ReadArgs::graph_trace )
+    {
 		if(  auto cr = dynamic_pointer_cast<CompareReplace>(t) )
 			cr->GenerateGraphRegions(graph);
+		else if(  auto vnt = dynamic_pointer_cast<VNTransformation>(t) )
+			vnt->GenerateGraphRegions(graph);
+        else
+            ASSERTFAIL("Don't know how to do a trace-mode graph of this");
+    }
 }
 
 

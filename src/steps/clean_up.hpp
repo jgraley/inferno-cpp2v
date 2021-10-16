@@ -9,13 +9,14 @@
 #define CLEAN_UP_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 
 using namespace SR;
 
 /// Find compound statements inside compund statements and flatten
-class CleanupStatementExpression : public CompareReplace
+class CleanupStatementExpression : public VNTransformation
 {    
 public:
     CleanupStatementExpression();
@@ -88,7 +89,7 @@ public:
 
 /** Remove instances not used anywhere - except Callables and instances of InheritanceRecord since
     these might do something useful even when not referenced.*/
-class CleanupUnusedVariables : public CompareReplace
+class CleanupUnusedVariables : public VNTransformation
 {
 public:
     CleanupUnusedVariables();

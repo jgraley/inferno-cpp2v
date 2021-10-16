@@ -2,6 +2,7 @@
 #define FALL_OUT_HPP
 
 #include "sr/search_replace.hpp"
+#include "sr/vn_transformation.hpp"
 
 namespace Steps {
 
@@ -22,7 +23,7 @@ public:
 };
 
 /// Variable-by-variable, change type from Labeley to the state enum, and move lmap lookups though the variable
-class LabelVarsToEnum : public CompareReplace
+class LabelVarsToEnum : public VNTransformation
 {
 public:
     LabelVarsToEnum();

@@ -403,7 +403,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     lmap->constancy = lmap_const;
     lmap_type->element = MakePatternPtr<Labeley>();
         
-    Configure( s_all, slavem );
+    Configure( COMPARE_REPLACE, s_all, slavem );
 }
 
 
