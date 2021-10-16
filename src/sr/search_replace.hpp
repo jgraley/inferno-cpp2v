@@ -55,9 +55,7 @@ public:
     void PlanningStageOne();
     void PlanningStageTwo();
     void PlanningStageThree();
-    
-    static void SetMaxReps( int n, bool e );
-                            
+                                
     using Transformation::operator();
     
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.

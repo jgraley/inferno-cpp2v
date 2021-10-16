@@ -1,5 +1,6 @@
 #include "vn_transformation.hpp"
 #include "search_replace.hpp"
+#include "scr_engine.hpp"
 
 using namespace SR;
 
@@ -55,6 +56,20 @@ void VNTransformation::PlanningStageThree()
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
     top_level_engine->PlanningStageThree();
 }
+
+
+void VNTransformation::SetMaxReps( int n, bool e ) 
+{ 
+    SCREngine::SetMaxReps(n, e); 
+}
+
+
+void VNTransformation::SetStopAfter( vector<int> ssa, int d )
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    top_level_engine->SetStopAfter( ssa, d );
+}  
 
 
 void VNTransformation::operator()( TreePtr<Node> context, 

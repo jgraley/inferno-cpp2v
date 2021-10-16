@@ -327,7 +327,7 @@ int main( int argc, char *argv[] )
         shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
         if( !ReadArgs::trace_quiet )
             fprintf(stderr, "%s at T%d: %s\n", ReadArgs::infile.c_str(), ReadArgs::runonlystep, t->GetName().c_str() ); 
-        CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
+        VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
         (*t)( &program );
     }
     else if( !ShouldIQuit() )
@@ -344,9 +344,9 @@ int main( int argc, char *argv[] )
             Tracer::Enable( ReadArgs::trace && allow ); 
             HitCount::Enable( ReadArgs::trace_hits && allow ); 
             if( allow )
-                CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
+                VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
             else
-                CompareReplace::SetMaxReps( 100, true );
+                VNTransformation::SetMaxReps( 100, true );
             if( allow )
                 t->SetStopAfter(ReadArgs::quitafter_counts, 0);
             (*t)( &program );

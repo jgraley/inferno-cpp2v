@@ -33,6 +33,9 @@ public:
     void PlanningStageTwo();
     void PlanningStageThree();
     
+    static void SetMaxReps( int n, bool e );
+    void SetStopAfter( vector<int> ssa, int d=0 );    
+    
     using Transformation::operator();
     
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
