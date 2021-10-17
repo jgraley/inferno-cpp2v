@@ -28,12 +28,22 @@ void VNTransformation::Configure( TransformationType type,
 }                                  
 
 
+PatternTransformationVector VNTransformation::GetAllPatternTrans()
+{
+    PatternTransformationVector ptv;
+    ptv.push_back( make_shared<CombinePatterns>() );
+    ptv.push_back( make_shared<SearchToCompare>() );
+    return ptv;
+}
+
+
 void VNTransformation::PatternTransformations()
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    CombinePatterns()(*this);
-    SearchToCompare()(*this);
+    PatternTransformationVector ptv = GetAllPatternTrans();
+    
+    ptv(*this);
 }
 
 

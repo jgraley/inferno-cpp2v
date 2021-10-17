@@ -4,6 +4,7 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "helpers/transformation.hpp"
+#include "ptrans/pattern_transformation.hpp"
 
 class Graph;
 
@@ -27,6 +28,7 @@ public:
                             TreePtr<Node> scp,
                             TreePtr<Node> rp = TreePtr<Node>() );
     
+    static PatternTransformationVector GetAllPatternTrans();
     void PatternTransformations();
 
     void PlanningStageOne();
