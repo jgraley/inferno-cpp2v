@@ -40,7 +40,7 @@ public:
 };
 
 /// Common implementation for search+replace, compare+replace and slaves
-class SCREngine : public virtual Graphable,
+class SCREngine : public virtual GraphIdable,
                   public SerialNumber
 {      
 public:
@@ -73,8 +73,6 @@ private:
               const SCREngine *master ); /* if null, you are overall master */ 
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void PlanningStageThree();
-        void InstallRootAgents( TreePtr<Node> cp,
-                                TreePtr<Node> rp );
         void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
                              CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
@@ -126,8 +124,6 @@ public:
     XLink UniquifyDomainExtension( XLink xlink ) const;
     string GetTrace() const; // used for debug
     
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
     virtual string GetGraphId() const;
     
     list<const AndRuleEngine *> GetAndRuleEngines() const;

@@ -243,7 +243,10 @@ int main( int argc, char *argv[] )
     BuildSequence( &sequence );
     if( ShouldIQuit() )
         exit(0);    
-        
+
+    if( !ReadArgs::graph_trace )
+        MaybeGeneratePatternGraphs( &sequence );
+                
     // Pattern transformations
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Pattern transforming\n"); 
@@ -261,7 +264,7 @@ int main( int argc, char *argv[] )
         
     // Planning part one
     if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Planning part one\n"); 
+		fprintf(stderr, "Planning stage one\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -279,7 +282,7 @@ int main( int argc, char *argv[] )
         
     // Planning part two
     if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Planning part two\n"); 
+		fprintf(stderr, "Planning stage two\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -297,7 +300,7 @@ int main( int argc, char *argv[] )
 
     // Planning part three
     if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Planning part three\n"); 
+		fprintf(stderr, "Planning stage three\n"); 
     i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
@@ -312,7 +315,8 @@ int main( int argc, char *argv[] )
        
     // If a pattern graph was requested, generate it now. We need the
     // agents to have been configured (planning stage 2)
-    MaybeGeneratePatternGraphs( &sequence );
+    if( ReadArgs::graph_trace )
+        MaybeGeneratePatternGraphs( &sequence );
 
     if( ShouldIQuit() )
         exit(0);

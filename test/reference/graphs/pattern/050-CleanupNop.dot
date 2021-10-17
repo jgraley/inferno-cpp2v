@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P50-0" [
-    // -------- block CR#P50-0 ----------
+"CR#B-4-41" [
+    // -------- block CR#B-4-41 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> CleanupNop | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-864" [
-    // -------- block #B-2-864 ----------
+"#B-2-882" [
+    // -------- block #B-2-882 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -44,8 +44,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-867" [
-    // -------- block #B-2-867 ----------
+"#B-2-885" [
+    // -------- block #B-2-885 ----------
     shape = "circle"
     fillcolor = "/set28/1"
     label = <*>
@@ -57,8 +57,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-868" [
-    // -------- block #B-2-868 ----------
+"#B-2-886" [
+    // -------- block #B-2-886 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -70,8 +70,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-866" [
-    // -------- block #B-2-866 ----------
+"#B-2-884" [
+    // -------- block #B-2-884 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -81,8 +81,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-869" [
-    // -------- block #B-2-869 ----------
+"#B-2-887" [
+    // -------- block #B-2-887 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -94,8 +94,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-865" [
-    // -------- block #B-2-865 ----------
+"#B-2-883" [
+    // -------- block #B-2-883 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -108,51 +108,48 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P50-0":port0 -> "#B-2-864" [
+"CR#B-4-41":port0 -> "#B-2-882" [
     color = black
     fontcolor = black
 ];
 
-"CR#P50-0":port1 -> "#B-2-865" [
+"CR#B-4-41":port1 -> "#B-2-883" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-864":port0 -> "#B-2-867" [
+"#B-2-882":port0 -> "#B-2-885" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-864":port1 -> "#B-2-868" [
+"#B-2-882":port1 -> "#B-2-886" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-864":port2 -> "#B-2-866" [
+"#B-2-882":port2 -> "#B-2-884" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-864":port3 -> "#B-2-869" [
+"#B-2-882":port3 -> "#B-2-887" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-865":port0 -> "#B-2-867" [
-    style="dashed"
+"#B-2-883":port0 -> "#B-2-885" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-865":port1 -> "#B-2-868" [
-    style="dashed"
+"#B-2-883":port1 -> "#B-2-886" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-865":port2 -> "#B-2-869" [
-    style="dashed"
+"#B-2-883":port2 -> "#B-2-887" [
     color = black
     fontcolor = black
 ];

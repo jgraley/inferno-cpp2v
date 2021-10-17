@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P4-0" [
-    // -------- block CR#P4-0 ----------
+"CR#B-4-1" [
+    // -------- block CR#B-4-1 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> DetectSCStatic | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-39" [
-    // -------- block #B-2-39 ----------
+"#B-2-42" [
+    // -------- block #B-2-42 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -42,8 +42,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-40" [
-    // -------- block #B-2-40 ----------
+"#B-2-43" [
+    // -------- block #B-2-43 ----------
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -54,8 +54,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-38" [
-    // -------- block #B-2-38 ----------
+"#B-2-41" [
+    // -------- block #B-2-41 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,18 +65,18 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P4-0":port0 -> "#B-2-39" [
+"CR#B-4-1":port0 -> "#B-2-42" [
     color = black
     fontcolor = black
 ];
 
-"CR#P4-0":port1 -> "#B-2-38" [
+"CR#B-4-1":port1 -> "#B-2-41" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-39":port1 -> "#B-2-40" [
+"#B-2-42":port1 -> "#B-2-43" [
     color = black
     fontcolor = black
 ];

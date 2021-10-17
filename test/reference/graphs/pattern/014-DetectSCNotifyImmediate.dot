@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P14-0" [
-    // -------- block CR#P14-0 ----------
+"CR#B-4-8" [
+    // -------- block CR#B-4-8 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> DetectSCNotifyImmediate | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-162" [
-    // -------- block #B-2-162 ----------
+"#B-2-168" [
+    // -------- block #B-2-168 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -42,8 +42,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-163" [
-    // -------- block #B-2-163 ----------
+"#B-2-169" [
+    // -------- block #B-2-169 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -55,8 +55,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-167" [
-    // -------- block #B-2-167 ----------
+"#B-2-173" [
+    // -------- block #B-2-173 ----------
     shape = "octagon"
     fillcolor = "/set28/6"
     label = <<I>TypeOf</I>>
@@ -65,8 +65,8 @@ edge [
     penwidth = 0.0
 ];
 
-"#B-2-164" [
-    // -------- block #B-2-164 ----------
+"#B-2-170" [
+    // -------- block #B-2-170 ----------
     shape = "plaintext"
     fillcolor = "/set28/3"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -76,8 +76,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-166" [
-    // -------- block #B-2-166 ----------
+"#B-2-172" [
+    // -------- block #B-2-172 ----------
     shape = "trapezium"
     fillcolor = "/set28/5"
     label = <'notify'>
@@ -89,8 +89,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-165" [
-    // -------- block #B-2-165 ----------
+"#B-2-171" [
+    // -------- block #B-2-171 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -101,39 +101,38 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P14-0":port0 -> "#B-2-162" [
+"CR#B-4-8":port0 -> "#B-2-168" [
     color = black
     fontcolor = black
 ];
 
-"CR#P14-0":port1 -> "#B-2-165" [
+"CR#B-4-8":port1 -> "#B-2-171" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-162":port1 -> "#B-2-163" [
+"#B-2-168":port1 -> "#B-2-169" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-163":port0 -> "#B-2-167" [
+"#B-2-169":port0 -> "#B-2-173" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-163":port1 -> "#B-2-166" [
+"#B-2-169":port1 -> "#B-2-172" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-167" -> "#B-2-164" [
+"#B-2-173" -> "#B-2-170" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-165":port0 -> "#B-2-167" [
-    style="dashed"
+"#B-2-171":port0 -> "#B-2-173" [
     color = black
     fontcolor = black
 ];

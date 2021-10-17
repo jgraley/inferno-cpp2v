@@ -10,7 +10,6 @@
 
 using namespace SR;
 
-
 CompareReplace::CompareReplace( bool is_search ) :
     plan( this, is_search )
 {
@@ -130,17 +129,39 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 Graphable::Block CompareReplace::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                     const NonTrivialPreRestrictionFunction &ntprf ) const
-{
-    // We want our name (via GetName()) but SCREngine's layout
-    Graphable::Block block = plan.scr_engine->GetGraphBlockInfo(lnf, ntprf);
-    block.title = GetName();
-    return block;
+{ 
+    list<SubBlock> sub_blocks;
+    // Actually much simpler in graph trace mode - just show the root node and plink
+    auto compare_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(plan.compare_pattern.get()),
+                                                      list<string>{},
+                                                      list<string>{""},
+                                                      IN_COMPARE_AND_REPLACE,
+                                                      SpecialBase::IsNonTrivialPreRestriction(&plan.compare_pattern) );                                  
+    sub_blocks.push_back( { "search/compare", 
+                            "",
+                            true,
+                            { compare_link } } );
+
+    if( plan.replace_pattern && plan.replace_pattern != plan.compare_pattern )
+    {
+        auto replace_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(plan.replace_pattern.get()),
+                                                     list<string>{},
+                                                     list<string>{""},
+                                                     IN_REPLACE_ONLY,
+                                                     SpecialBase::IsNonTrivialPreRestriction(&plan.replace_pattern) );                                  
+    
+        sub_blocks.push_back( { "replace", 
+                                "",
+                                true,
+                                { replace_link } } );
+    }
+    return { false, GetName(), "", "", CONTROL, sub_blocks };
 }
 
 
 string CompareReplace::GetGraphId() const
 {
-	return "CR"+plan.scr_engine->GetSerialString();
+	return "CR"+GetSerialString();
 }
 
 

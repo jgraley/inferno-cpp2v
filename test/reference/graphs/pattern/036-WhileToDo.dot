@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P36-0" [
-    // -------- block CR#P36-0 ----------
+"CR#B-4-28" [
+    // -------- block CR#B-4-28 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> WhileToDo | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-634" [
-    // -------- block #B-2-634 ----------
+"#B-2-643" [
+    // -------- block #B-2-643 ----------
     shape = "diamond"
     label = <∧>
     style = "filled"
@@ -41,8 +41,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-628" [
-    // -------- block #B-2-628 ----------
+"#B-2-637" [
+    // -------- block #B-2-637 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -54,8 +54,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-629" [
-    // -------- block #B-2-629 ----------
+"#B-2-638" [
+    // -------- block #B-2-638 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -65,8 +65,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-630" [
-    // -------- block #B-2-630 ----------
+"#B-2-639" [
+    // -------- block #B-2-639 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -76,8 +76,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-4-3" [
-    // -------- block #B-4-3 ----------
+"#B-2-644" [
+    // -------- block #B-2-644 ----------
     shape = "square"
     label = <#>
     style = "filled"
@@ -88,8 +88,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-635" [
-    // -------- block #B-2-635 ----------
+"#B-2-645" [
+    // -------- block #B-2-645 ----------
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Uncombable</FONT></TD><TD></TD></TR>
@@ -98,8 +98,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-632" [
-    // -------- block #B-2-632 ----------
+"#B-2-641" [
+    // -------- block #B-2-641 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -112,8 +112,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-633" [
-    // -------- block #B-2-633 ----------
+"#B-2-642" [
+    // -------- block #B-2-642 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -125,8 +125,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-631" [
-    // -------- block #B-2-631 ----------
+"#B-2-640" [
+    // -------- block #B-2-640 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -136,68 +136,63 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P36-0":port0 -> "#B-2-634" [
+"CR#B-4-28":port0 -> "#B-2-643" [
     color = black
     fontcolor = black
 ];
 
-"CR#P36-0":port1 -> "#B-2-632" [
+"CR#B-4-28":port1 -> "#B-2-641" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-634" -> "#B-2-628" [
+"#B-2-643" -> "#B-2-637" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-634" -> "#B-4-3" [
+"#B-2-643" -> "#B-2-644" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-628":port0 -> "#B-2-629" [
+"#B-2-637":port0 -> "#B-2-638" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-628":port1 -> "#B-2-630" [
+"#B-2-637":port1 -> "#B-2-639" [
     color = black
     fontcolor = black
 ];
 
-"#B-4-3" -> "#B-2-635" [
+"#B-2-644" -> "#B-2-645" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-632":port0 -> "#B-2-630" [
-    style="dashed"
+"#B-2-641":port0 -> "#B-2-639" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-632":port1 -> "#B-2-633" [
-    style="dashed"
+"#B-2-641":port1 -> "#B-2-642" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-632":port2 -> "#B-2-631" [
-    style="dashed"
+"#B-2-641":port2 -> "#B-2-640" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-633":port0 -> "#B-2-629" [
-    style="dashed"
+"#B-2-642":port0 -> "#B-2-638" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-633":port1 -> "#B-2-630" [
-    style="dashed"
+"#B-2-642":port1 -> "#B-2-639" [
     color = black
     fontcolor = black
 ];

@@ -18,36 +18,25 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P21-0" [
-    // -------- block CR#P21-0 ----------
+"CR#B-4-13" [
+    // -------- block CR#B-4-13 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> MakeAllBreakUncombable | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-267" [
-    // -------- block #B-2-267 ----------
+"#B-2-273" [
+    // -------- block #B-2-273 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
      <TR><TD>(Break)</TD><TD PORT="port0"></TD></TR>
      <TR><TD>pattern</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-    fontsize = "12"
-];
-
-"#B-2-268" [
-    // -------- block #B-2-268 ----------
-    shape = "plaintext"
-    fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">UncombableBreak</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -64,18 +53,29 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P21-0":port0 -> "#B-2-267" [
+"#B-2-280" [
+    // -------- block #B-2-280 ----------
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">UncombableBreak</FONT></TD><TD></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+    fontsize = "12"
+];
+
+"CR#B-4-13":port0 -> "#B-2-273" [
     color = black
     fontcolor = black
 ];
 
-"CR#P21-0":port1 -> "#B-2-274" [
+"CR#B-4-13":port1 -> "#B-2-280" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-267":port1 -> "#B-2-268" [
+"#B-2-273":port1 -> "#B-2-274" [
     color = black
     fontcolor = black
 ];

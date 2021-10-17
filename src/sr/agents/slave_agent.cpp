@@ -68,10 +68,33 @@ list<PatternLink> SlaveAgent::GetVisibleChildren( Path v ) const
 Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const
 {
-	ASSERT( master_scr_engine )("Agent must before configured before graphing");
+    list<SubBlock> sub_blocks;
+    // Actually much simpler in graph trace mode - just show the root node and plink
+    auto compare_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(search_pattern.get()),
+                                                      list<string>{},
+                                                      list<string>{""},
+                                                      IN_COMPARE_AND_REPLACE,
+                                                      SpecialBase::IsNonTrivialPreRestriction(&search_pattern) );                                  
+    sub_blocks.push_back( { "search/compare", 
+                            "",
+                            true,
+                            { compare_link } } );
 
-    Block block = my_scr_engine->GetGraphBlockInfo(lnf, ntprf);
-    block.title = "Slave";
+    if( replace_pattern && replace_pattern != search_pattern )
+    {
+        auto replace_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(replace_pattern.get()),
+                                                     list<string>{},
+                                                     list<string>{""},
+                                                     IN_REPLACE_ONLY,
+                                                     SpecialBase::IsNonTrivialPreRestriction(&replace_pattern) );                                  
+    
+        sub_blocks.push_back( { "replace",
+                                "",
+                                true,
+                                { replace_link } } );
+    }
+    Block block = { false, "Slave", "", "", CONTROL, sub_blocks };
+   
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
               list<string>{},
               list<string>{PatternLink(this, GetThrough()).GetShortName()},

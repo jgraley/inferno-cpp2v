@@ -51,7 +51,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                 auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                                                           list<string>{},
                                                           list<string>{ lnf( &sp_this, &p ) },
-                                                          Graphable::IS_X_NODE,
+                                                          Graphable::UNDEFINED,
                                                           ntprf ? ntprf(&p) : false );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
@@ -72,7 +72,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                 auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                                                           list<string>{},
                                                           list<string>{ lnf( &sp_this, &p ) },
-                                                          Graphable::IS_X_NODE,
+                                                          Graphable::UNDEFINED,
                                                           ntprf ? ntprf(&p) : false );
                 sub_block.links.push_back( link );
             }
@@ -89,7 +89,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                 auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(ptr->get()),
                                                           list<string>{},
                                                           list<string>{ lnf( &sp_this, ptr ) },
-                                                          Graphable::IS_X_NODE,
+                                                          Graphable::UNDEFINED,
                                                           ntprf ? ntprf(ptr) : false );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );

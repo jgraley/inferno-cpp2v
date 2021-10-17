@@ -184,7 +184,7 @@ protected:
     PatternLink base_plink;
     set<PatternLink> coupled_plinks;
     list<PatternLink> base_and_normal_plinks;
-    Phase phase;
+    Phase phase = UNDEFINED;
     
 private:    
     int num_decisions;

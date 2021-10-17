@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P61-0" [
-    // -------- block CR#P61-0 ----------
+"CR#B-4-52" [
+    // -------- block CR#B-4-52 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> CleanUpDeadCode | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-1022" [
-    // -------- block #B-2-1022 ----------
+"#B-2-1040" [
+    // -------- block #B-2-1040 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -45,8 +45,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1024" [
-    // -------- block #B-2-1024 ----------
+"#B-2-1042" [
+    // -------- block #B-2-1042 ----------
     shape = "circle"
     fillcolor = "/set28/1"
     label = <*>
@@ -58,8 +58,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-1025" [
-    // -------- block #B-2-1025 ----------
+"#B-2-1043" [
+    // -------- block #B-2-1043 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -71,8 +71,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-1029" [
-    // -------- block #B-2-1029 ----------
+"#B-2-1047" [
+    // -------- block #B-2-1047 ----------
     shape = "diamond"
     fillcolor = "/set28/2"
     label = <∨>
@@ -84,8 +84,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-1035" [
-    // -------- block #B-2-1035 ----------
+"#B-2-1053" [
+    // -------- block #B-2-1053 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -95,8 +95,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1034" [
-    // -------- block #B-2-1034 ----------
+"#B-2-1052" [
+    // -------- block #B-2-1052 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -106,8 +106,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1033" [
-    // -------- block #B-2-1033 ----------
+"#B-2-1051" [
+    // -------- block #B-2-1051 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -117,8 +117,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1032" [
-    // -------- block #B-2-1032 ----------
+"#B-2-1050" [
+    // -------- block #B-2-1050 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -128,8 +128,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1027" [
-    // -------- block #B-2-1027 ----------
+"#B-2-1045" [
+    // -------- block #B-2-1045 ----------
     shape = "diamond"
     fillcolor = "/set28/2"
     label = <¬>
@@ -141,8 +141,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-1028" [
-    // -------- block #B-2-1028 ----------
+"#B-2-1046" [
+    // -------- block #B-2-1046 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -154,8 +154,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1038" [
-    // -------- block #B-2-1038 ----------
+"#B-2-1056" [
+    // -------- block #B-2-1056 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -165,8 +165,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1037" [
-    // -------- block #B-2-1037 ----------
+"#B-2-1055" [
+    // -------- block #B-2-1055 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -176,8 +176,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1036" [
-    // -------- block #B-2-1036 ----------
+"#B-2-1054" [
+    // -------- block #B-2-1054 ----------
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -187,8 +187,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-1026" [
-    // -------- block #B-2-1026 ----------
+"#B-2-1044" [
+    // -------- block #B-2-1044 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -200,8 +200,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-1023" [
-    // -------- block #B-2-1023 ----------
+"#B-2-1041" [
+    // -------- block #B-2-1041 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -215,102 +215,98 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P61-0":port0 -> "#B-2-1022" [
+"CR#B-4-52":port0 -> "#B-2-1040" [
     color = black
     fontcolor = black
 ];
 
-"CR#P61-0":port1 -> "#B-2-1023" [
+"CR#B-4-52":port1 -> "#B-2-1041" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-1022":port0 -> "#B-2-1024" [
+"#B-2-1040":port0 -> "#B-2-1042" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1022":port1 -> "#B-2-1025" [
+"#B-2-1040":port1 -> "#B-2-1043" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1022":port2 -> "#B-2-1029" [
+"#B-2-1040":port2 -> "#B-2-1047" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1022":port3 -> "#B-2-1027" [
+"#B-2-1040":port3 -> "#B-2-1045" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1022":port4 -> "#B-2-1026" [
+"#B-2-1040":port4 -> "#B-2-1044" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1029" -> "#B-2-1035" [
+"#B-2-1047" -> "#B-2-1053" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1029" -> "#B-2-1034" [
+"#B-2-1047" -> "#B-2-1052" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1029" -> "#B-2-1033" [
+"#B-2-1047" -> "#B-2-1051" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1029" -> "#B-2-1032" [
+"#B-2-1047" -> "#B-2-1050" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1027" -> "#B-2-1028" [
+"#B-2-1045" -> "#B-2-1046" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1028":port1 -> "#B-2-1038" [
+"#B-2-1046":port1 -> "#B-2-1056" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1028":port1 -> "#B-2-1037" [
+"#B-2-1046":port1 -> "#B-2-1055" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1028":port1 -> "#B-2-1036" [
+"#B-2-1046":port1 -> "#B-2-1054" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1023":port0 -> "#B-2-1024" [
-    style="dashed"
+"#B-2-1041":port0 -> "#B-2-1042" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1023":port1 -> "#B-2-1025" [
-    style="dashed"
+"#B-2-1041":port1 -> "#B-2-1043" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1023":port2 -> "#B-2-1029" [
-    style="dashed"
+"#B-2-1041":port2 -> "#B-2-1047" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1023":port3 -> "#B-2-1026" [
-    style="dashed"
+"#B-2-1041":port3 -> "#B-2-1044" [
     color = black
     fontcolor = black
 ];

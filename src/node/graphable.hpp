@@ -18,6 +18,15 @@ class Node;
 class GraphIdable : public virtual Traceable
 {
 public:    
+    enum Phase
+    {
+        // Really a bitfield
+        UNDEFINED = 0,
+        IN_COMPARE_ONLY = 1,
+        IN_COMPARE_AND_REPLACE = 3,
+        IN_REPLACE_ONLY = 2,
+    };
+
     virtual string GetGraphId() const { return ""; }
 };
 
@@ -28,14 +37,6 @@ public:
     {
         CONTROL,
         NODE    
-    };
-    enum Phase
-    {
-        // Really a bitfield
-        IS_X_NODE = 0,
-        IN_COMPARE_ONLY = 1,
-        IN_COMPARE_AND_REPLACE = 3,
-        IN_REPLACE_ONLY = 2,
     };
     struct Link
     {

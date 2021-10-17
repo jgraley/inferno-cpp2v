@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P22-0" [
-    // -------- block CR#P22-0 ----------
+"CR#B-4-14" [
+    // -------- block CR#B-4-14 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> CleanupCompoundMulti | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-276" [
-    // -------- block #B-2-276 ----------
+"#B-2-282" [
+    // -------- block #B-2-282 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -44,8 +44,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-282" [
-    // -------- block #B-2-282 ----------
+"#B-2-288" [
+    // -------- block #B-2-288 ----------
     shape = "circle"
     fillcolor = "/set28/1"
     label = <*>
@@ -57,8 +57,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-278" [
-    // -------- block #B-2-278 ----------
+"#B-2-284" [
+    // -------- block #B-2-284 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -70,8 +70,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-275" [
-    // -------- block #B-2-275 ----------
+"#B-2-281" [
+    // -------- block #B-2-281 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -83,8 +83,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-281" [
-    // -------- block #B-2-281 ----------
+"#B-2-287" [
+    // -------- block #B-2-287 ----------
     shape = "circle"
     fillcolor = "/set28/1"
     label = <*>
@@ -96,8 +96,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-280" [
-    // -------- block #B-2-280 ----------
+"#B-2-286" [
+    // -------- block #B-2-286 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -109,8 +109,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-279" [
-    // -------- block #B-2-279 ----------
+"#B-2-285" [
+    // -------- block #B-2-285 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -122,8 +122,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-277" [
-    // -------- block #B-2-277 ----------
+"#B-2-283" [
+    // -------- block #B-2-283 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -137,73 +137,68 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P22-0":port0 -> "#B-2-276" [
+"CR#B-4-14":port0 -> "#B-2-282" [
     color = black
     fontcolor = black
 ];
 
-"CR#P22-0":port1 -> "#B-2-277" [
+"CR#B-4-14":port1 -> "#B-2-283" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-276":port0 -> "#B-2-282" [
+"#B-2-282":port0 -> "#B-2-288" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-276":port1 -> "#B-2-278" [
+"#B-2-282":port1 -> "#B-2-284" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-276":port2 -> "#B-2-275" [
+"#B-2-282":port2 -> "#B-2-281" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-276":port3 -> "#B-2-279" [
+"#B-2-282":port3 -> "#B-2-285" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-275":port0 -> "#B-2-281" [
+"#B-2-281":port0 -> "#B-2-287" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-275":port1 -> "#B-2-280" [
+"#B-2-281":port1 -> "#B-2-286" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-277":port0 -> "#B-2-281" [
-    style="dashed"
+"#B-2-283":port0 -> "#B-2-287" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-277":port0 -> "#B-2-282" [
-    style="dashed"
+"#B-2-283":port0 -> "#B-2-288" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-277":port1 -> "#B-2-278" [
-    style="dashed"
+"#B-2-283":port1 -> "#B-2-284" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-277":port2 -> "#B-2-280" [
-    style="dashed"
+"#B-2-283":port2 -> "#B-2-286" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-277":port3 -> "#B-2-279" [
-    style="dashed"
+"#B-2-283":port3 -> "#B-2-285" [
     color = black
     fontcolor = black
 ];

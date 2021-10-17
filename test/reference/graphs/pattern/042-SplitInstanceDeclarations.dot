@@ -18,19 +18,19 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-"CR#P42-0" [
-    // -------- block CR#P42-0 ----------
+"CR#B-4-34" [
+    // -------- block CR#B-4-34 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> SplitInstanceDeclarations | <port0> search | <port1> replace"
+    label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
     fontsize = "12"
     color = black
     fontcolor = black
 ];
 
-"#B-2-748" [
-    // -------- block #B-2-748 ----------
+"#B-2-763" [
+    // -------- block #B-2-763 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -44,8 +44,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-753" [
-    // -------- block #B-2-753 ----------
+"#B-2-768" [
+    // -------- block #B-2-768 ----------
     shape = "circle"
     fillcolor = "/set28/1"
     label = <*>
@@ -57,8 +57,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-754" [
-    // -------- block #B-2-754 ----------
+"#B-2-769" [
+    // -------- block #B-2-769 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -70,8 +70,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-750" [
-    // -------- block #B-2-750 ----------
+"#B-2-765" [
+    // -------- block #B-2-765 ----------
     shape = "record"
     fillcolor = antiquewhite1
     label = "<fixed> Overlay | <port0> (LocalVariable) | <port1> through | <port2> overlay"
@@ -81,8 +81,8 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-749" [
-    // -------- block #B-2-749 ----------
+"#B-2-764" [
+    // -------- block #B-2-764 ----------
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -94,8 +94,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-751" [
-    // -------- block #B-2-751 ----------
+"#B-2-766" [
+    // -------- block #B-2-766 ----------
     shape = "plaintext"
     fillcolor = "/set28/5"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -105,8 +105,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-752" [
-    // -------- block #B-2-752 ----------
+"#B-2-767" [
+    // -------- block #B-2-767 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -116,8 +116,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-757" [
-    // -------- block #B-2-757 ----------
+"#B-2-772" [
+    // -------- block #B-2-772 ----------
     shape = "plaintext"
     fillcolor = "/set28/1"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -128,8 +128,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-758" [
-    // -------- block #B-2-758 ----------
+"#B-2-773" [
+    // -------- block #B-2-773 ----------
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
@@ -138,8 +138,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-755" [
-    // -------- block #B-2-755 ----------
+"#B-2-770" [
+    // -------- block #B-2-770 ----------
     shape = "circle"
     fillcolor = "/set28/2"
     label = <*>
@@ -151,8 +151,8 @@ edge [
     height = 0.4
 ];
 
-"#B-2-756" [
-    // -------- block #B-2-756 ----------
+"#B-2-771" [
+    // -------- block #B-2-771 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -166,8 +166,8 @@ edge [
     fontsize = "12"
 ];
 
-"#B-2-759" [
-    // -------- block #B-2-759 ----------
+"#B-2-774" [
+    // -------- block #B-2-774 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -179,102 +179,94 @@ edge [
     fontsize = "12"
 ];
 
-"CR#P42-0":port0 -> "#B-2-748" [
+"CR#B-4-34":port0 -> "#B-2-763" [
     color = black
     fontcolor = black
 ];
 
-"CR#P42-0":port1 -> "#B-2-756" [
+"CR#B-4-34":port1 -> "#B-2-771" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-748":port0 -> "#B-2-753" [
+"#B-2-763":port0 -> "#B-2-768" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-748":port1 -> "#B-2-754" [
+"#B-2-763":port1 -> "#B-2-769" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-748":port2 -> "#B-2-750" [
+"#B-2-763":port2 -> "#B-2-765" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-748":port3 -> "#B-2-755" [
+"#B-2-763":port3 -> "#B-2-770" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-750":port1 -> "#B-2-749" [
+"#B-2-765":port1 -> "#B-2-764" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-750":port2 -> "#B-2-757" [
+"#B-2-765":port2 -> "#B-2-772" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-749":port0 -> "#B-2-751" [
+"#B-2-764":port0 -> "#B-2-766" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-749":port1 -> "#B-2-752" [
+"#B-2-764":port1 -> "#B-2-767" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-757":port0 -> "#B-2-758" [
-    style="dashed"
+"#B-2-772":port0 -> "#B-2-773" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-756":port0 -> "#B-2-750" [
-    style="dashed"
+"#B-2-771":port0 -> "#B-2-765" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-756":port0 -> "#B-2-753" [
-    style="dashed"
+"#B-2-771":port0 -> "#B-2-768" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-756":port1 -> "#B-2-754" [
-    style="dashed"
+"#B-2-771":port1 -> "#B-2-769" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-756":port2 -> "#B-2-759" [
-    style="dashed"
+"#B-2-771":port2 -> "#B-2-774" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-756":port3 -> "#B-2-755" [
-    style="dashed"
+"#B-2-771":port3 -> "#B-2-770" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-759":port0 -> "#B-2-751" [
-    style="dashed"
+"#B-2-774":port0 -> "#B-2-766" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-759":port1 -> "#B-2-752" [
-    style="dashed"
+"#B-2-774":port1 -> "#B-2-767" [
     color = black
     fontcolor = black
 ];

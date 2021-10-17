@@ -20,7 +20,8 @@ class SCREngine;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
 class CompareReplace : public virtual Graphable,
-                       virtual public InPlaceTransformation
+                       virtual public InPlaceTransformation,
+                       public SerialNumber
 {  
 public:
     typedef map<const Agent *, Agent::Phase> AgentPhases;

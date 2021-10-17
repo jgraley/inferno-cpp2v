@@ -65,7 +65,12 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     overall_master_ptr = overall_master;
     master_ptr = master;
     
-    InstallRootAgents(cp, rp);
+    ASSERT( cp )("Compare pattern must always be provided\n");
+    ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
+    root_pattern = cp; 
+    root_agent = Agent::AsAgent(root_pattern);
+    // For closure under full arrowhead model, we need a link to root
+    root_plink = PatternLink::CreateDistinct( root_pattern );   
             
     CategoriseSubs( master_plinks, in_progress_agent_phases );    
 
@@ -103,32 +108,6 @@ void SCREngine::Plan::PlanningStageThree()
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
 } 
 
-
-void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
-						     		     TreePtr<Node> rp )
-{
-    ASSERT( cp )("Compare pattern must always be provided\n");
-    
-    // If only a search pattern is supplied, make the replace pattern the same
-    // so they couple and then an overlay node can split them apart again.
-
-    if( is_search ) // -> SearchToCompare
-    {
-        // Obtain search and replace semaintics from a compare and replace engine
-        // by inserting a stuff node at root
-        ASSERT( cp==rp );
-        MakePatternPtr< Stuff<Node> > stuff;        
-        stuff->terminus = cp;
-        cp = rp = stuff;   
-    }
-    
-    ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
-    root_pattern = cp; 
-    root_agent = Agent::AsAgent(root_pattern);
-    // For closure under full arrowhead model, we need a link to root
-    root_plink = PatternLink::CreateDistinct( root_pattern );   
-}
-    
 
 void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
                                       CompareReplace::AgentPhases &in_progress_agent_phases )
@@ -397,73 +376,6 @@ string SCREngine::GetTrace() const
 {
     string s = Traceable::GetName() + GetSerialString();
     return s;
-}
-
-
-Graphable::Block SCREngine::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
-{
-    list<SubBlock> sub_blocks;
-    if( ReadArgs::graph_trace )
-    {
-        // Actually much simpler in graph trace mode - just show the root node and plink
-        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(plan.root_pattern.get()),
-                                                  list<string>{},
-                                                  list<string>{plan.root_plink.GetShortName()},
-                                                  IN_COMPARE_AND_REPLACE,
-                                                  SpecialBase::IsNonTrivialPreRestriction(&plan.root_pattern) );                                  
-        sub_blocks.push_back( { GetGraphId(), 
-                                "",
-                                true,
-                                { link } } );
-        return { false, GetName(), "", "", CONTROL, sub_blocks };
-    }
-    
-    // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
-    // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
-    // should error on them?
-    const TreePtrInterface *original_ptr = &plan.root_pattern;
-    if( plan.is_search )
-    {
-        TreePtr< Stuff<Node> > stuff = DynamicTreePtrCast< Stuff<Node> >(*original_ptr);
-        ASSERT( stuff );
-        original_ptr = stuff->GetTerminus();
-    }
-    TreePtr< Overlay<Node> > overlay = DynamicTreePtrCast< Overlay<Node> >(*original_ptr);
-    if( overlay )
-    {        
-        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(overlay->GetThrough()->get()),
-                                                  list<string>{},
-                                                  list<string>{},
-                                                  IN_COMPARE_ONLY,
-                                                  SpecialBase::IsNonTrivialPreRestriction(overlay->GetThrough()) );
-        sub_blocks.push_back( { plan.is_search?"search":"compare", 
-                                "",
-                                false,
-                                { link } } );    
-        link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(overlay->GetOverlay()->get()),
-                                             list<string>{},
-                                             list<string>{},
-                                             IN_REPLACE_ONLY,
-                                             SpecialBase::IsNonTrivialPreRestriction(overlay->GetOverlay()) );
-        sub_blocks.push_back( { "replace", 
-                                "",
-                                false,
-                                { link } } );
-    }
-    else
-    {
-        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(original_ptr->get()),
-                                                  list<string>{},
-                                                  list<string>{},
-                                                  IN_COMPARE_AND_REPLACE,
-                                                  SpecialBase::IsNonTrivialPreRestriction(original_ptr) );
-        sub_blocks.push_back( { plan.is_search?"search_replace":"compare_replace", 
-                                "",
-                                true,
-                                { link } } );
-    }
-    return { false, GetName(), "", "", CONTROL, sub_blocks };
 }
 
 
