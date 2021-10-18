@@ -6,19 +6,22 @@
 
 using namespace SR;
 
-void CombinePatterns::DoPatternTransformation( Info &info )
+void CombinePatterns::DoPatternTransformation( PatternKnowledge &pk )
 {    
-    TreePtr<Node> scp = info.top_level_engine->GetSearchComparePattern();
-	TreePtr<Node> rp = info.top_level_engine->GetReplacePattern();
-    FixupPointers( info, scp, rp );
-    info.top_level_engine->Configure( scp, rp );
+    TreePtr<Node> scp = pk.top_level_engine->GetSearchComparePattern();
+	TreePtr<Node> rp = pk.top_level_engine->GetReplacePattern();
+    FixupPointers( pk, scp, rp );
+    pk.top_level_engine->Configure( scp, rp );
     
-    for( SlaveAgent *sa : info.slaves )
-        FixupPointers( info, sa->search_pattern, sa->replace_pattern );
+    for( PatternLink plink : pk.slave_plinks )
+    {
+        auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent());
+        FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
+    }
 }
 
 
-void CombinePatterns::FixupPointers( Info &info, TreePtr<Node> &scp, TreePtr<Node> &rp )
+void CombinePatterns::FixupPointers( PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
 {
     ASSERT( scp );
     if( !rp )

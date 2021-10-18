@@ -7,34 +7,44 @@ using namespace SR;
 
 void PatternTransformationCommon::operator()( VNTransformation &vnt )
 {
-    Info info;
-    info.vn_transformation = &vnt;
-    info.top_level_engine = vnt.GetTopLevelEngine();
+    PatternKnowledge pk;
+    pk.vn_transformation = &vnt;
+    pk.top_level_engine = vnt.GetTopLevelEngine();
     
-    info.children.clear();
-    if( info.top_level_engine->GetSearchComparePattern() )
-        WalkPattern( info.children, Agent::AsAgent(info.top_level_engine->GetSearchComparePattern()) );
-    if( info.top_level_engine->GetReplacePattern() )
-        WalkPattern( info.children, Agent::AsAgent(info.top_level_engine->GetReplacePattern()) );
+    pk.all_plinks.clear();
+    pk.search_compare_root_pattern = pk.top_level_engine->GetSearchComparePattern();
+    if( pk.search_compare_root_pattern )
+    {
+        pk.search_compare_root_agent = Agent::AsAgent(pk.search_compare_root_pattern);
+        pk.search_compare_root_plink = PatternLink::CreateDistinct( pk.search_compare_root_pattern );
+        WalkPattern( pk.all_plinks, pk.search_compare_root_plink );
+    }    
+    pk.replace_root_pattern = pk.top_level_engine->GetReplacePattern();
+    if( pk.replace_root_pattern )
+    {
+        pk.replace_root_agent = Agent::AsAgent(pk.replace_root_pattern);
+        pk.replace_root_plink = PatternLink::CreateDistinct( pk.replace_root_pattern );
+        WalkPattern( pk.all_plinks, pk.replace_root_plink );
+    }
     
-    info.slaves.clear();
-    for( Agent *a : info.children )
-        if( auto sa = dynamic_cast<SlaveAgent *>(a) )
-            info.slaves.insert( sa );
+    pk.slave_plinks.clear();
+    for( PatternLink plink : pk.all_plinks )
+        if( auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent()) )
+            pk.slave_plinks.insert( plink );
     
-    DoPatternTransformation( info );    
+    DoPatternTransformation( pk );    
     
-    vnt.SetTopLevelEngine(info.top_level_engine); // in case trans changed it
+    vnt.SetTopLevelEngine(pk.top_level_engine); // in case trans changed it
 }
 
 
-void PatternTransformationCommon::WalkPattern( set<Agent *> &children, 
-                                               Agent *agent ) const
+void PatternTransformationCommon::WalkPattern( set<PatternLink> &all_plinks, 
+                                               PatternLink plink ) const
 {
-    children.insert( agent );    
-    list<PatternLink> plinks = agent->GetChildren(); 
-    for( PatternLink plink : plinks )
-        WalkPattern( children, plink.GetChildAgent() );    
+    all_plinks.insert( plink );    
+    list<PatternLink> child_plinks = plink.GetChildAgent()->GetChildren(); 
+    for( PatternLink plink : child_plinks )
+        WalkPattern( all_plinks, plink );    
 }
 
    

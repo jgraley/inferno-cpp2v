@@ -12,8 +12,8 @@ namespace SR
 
 class CombinePatterns : public PatternTransformationCommon
 {
-    virtual void DoPatternTransformation( Info &info ) override;
-    void FixupPointers( Info &info, TreePtr<Node> &scp, TreePtr<Node> &rp );
+    virtual void DoPatternTransformation( PatternKnowledge &pk ) override;
+    void FixupPointers( PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp );
 };    
         
 }

@@ -13,15 +13,18 @@ namespace SR
 {
 
 class CompareReplace;
-    
+
+/**
+ * Vida Nova Transformation    
+ */
 class VNTransformation : public InPlaceTransformation,
                          public virtual Graphable
 {
 public:    
     enum TransformationType
     {
-        SEARCH_REPLACE,
-        COMPARE_REPLACE
+        SEARCH_REPLACE, ///< Search pattern can match anywhere
+        COMPARE_REPLACE ///< Compare pattern must match at root
     };
 
     virtual void Configure( TransformationType type,
