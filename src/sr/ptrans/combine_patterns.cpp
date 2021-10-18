@@ -8,8 +8,8 @@ using namespace SR;
 
 void CombinePatterns::DoPatternTransformation( PatternKnowledge &pk )
 {    
-    TreePtr<Node> scp = pk.top_level_engine->GetSearchComparePattern();
-	TreePtr<Node> rp = pk.top_level_engine->GetReplacePattern();
+    TreePtr<Node> scp = pk.search_compare_root_pattern;
+	TreePtr<Node> rp = pk.replace_root_pattern;
     FixupPointers( pk, scp, rp );
     pk.top_level_engine->Configure( scp, rp );
     

@@ -8,8 +8,8 @@ using namespace SR;
 
 void SearchToCompare::DoPatternTransformation( PatternKnowledge &pk )
 {    
-    TreePtr<Node> scp = pk.top_level_engine->GetSearchComparePattern();
-	TreePtr<Node> rp = pk.top_level_engine->GetReplacePattern();
+    TreePtr<Node> scp = pk.search_compare_root_pattern;
+	TreePtr<Node> rp = pk.replace_root_pattern;
     if( dynamic_pointer_cast<SearchReplace>(pk.top_level_engine) )
         FixupPointers( pk, scp, rp );
     pk.vn_transformation->SetTopLevelEngine( make_shared<CompareReplace>() ); 
@@ -20,7 +20,18 @@ void SearchToCompare::DoPatternTransformation( PatternKnowledge &pk )
     {
         auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent());
         if( sa->IsSearch() )
-            FixupPointers( pk, sa->search_pattern, sa->replace_pattern );         
+        {
+            scp = sa->search_pattern;
+            rp = sa->replace_pattern;
+            FixupPointers( pk, scp, rp );
+
+            //TreePtr<Node> t = sa->GetThrough();
+            //MakePatternPtr< SlaveCompareReplace<Scope> > sa_compare( t, scp, rp );
+            //(sa_compare) sa_compare;
+            
+            sa->search_pattern = scp;
+            sa->replace_pattern = rp;
+        }
     }
 }
 
