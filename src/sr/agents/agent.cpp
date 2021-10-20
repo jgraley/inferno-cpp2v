@@ -649,14 +649,14 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                 dest_con->insert( n );
             }
         }            
-        else if( TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
+        else if( TreePtrInterface *keynode_singular = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
         {
-            //TRACE("Duplicating node ")(*keynode_ptr)("\n");
-            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *keynode_ptr )("source should be non-nullptr");
-            *dest_ptr = DuplicateSubtree( (TreePtr<Node>)*keynode_ptr, source_terminus, dest_terminus );
-            ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
+            //TRACE("Duplicating node ")(*keynode_singular)("\n");
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *keynode_singular )("source should be non-nullptr");
+            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular, source_terminus, dest_terminus );
+            ASSERT( *dest_singular );
+            ASSERT( TreePtr<Node>(*dest_singular)->IsFinal() );            
         }
         else
         {

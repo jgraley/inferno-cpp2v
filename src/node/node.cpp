@@ -78,25 +78,25 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
             }
             block.sub_blocks.push_back( sub_block );
 		}
-		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
+		else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
-			if( *ptr )
+			if( *singular )
 			{
-                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
+                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(singular->GetName()), 
                                                   "",
                                                   false,
                                                   {} };
-                auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(ptr->get()),
+                auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(singular->get()),
                                                           list<string>{},
-                                                          list<string>{ lnf( &sp_this, ptr ) },
+                                                          list<string>{ lnf( &sp_this, singular ) },
                                                           Graphable::UNDEFINED,
-                                                          ntprf ? ntprf(ptr) : false );
+                                                          ntprf ? ntprf(singular) : false );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }
             else if( ReadArgs::graph_trace )
 			{
-                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(ptr->GetName()), 
+                Graphable::SubBlock sub_block = { GetInnermostTemplateParam(singular->GetName()), 
                                                   "NULL",
                                                   false, 
                                                   {} };

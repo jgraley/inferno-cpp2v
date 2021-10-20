@@ -40,9 +40,9 @@ void Validate::operator()( TreePtr<Node> context,
 					FOREACH( const TreePtrInterface &tpi, *con )
 						OnLink( (TreePtr<Node>)x, (TreePtr<Node>)tpi );
 				}
-				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
+				else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(m) )
 				{
-					OnLink( (TreePtr<Node>)x, (TreePtr<Node>)*ptr );
+					OnLink( (TreePtr<Node>)x, (TreePtr<Node>)*singular );
 				}
 			}
 			if( (TreePtr<Node>)x == *proot )

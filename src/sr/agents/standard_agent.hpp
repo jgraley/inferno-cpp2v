@@ -117,7 +117,7 @@ private:
     		                     const Plan::Collection &plan_col ) const;
     void DecidedQuerySingular( DecidedQueryAgentInterface &query,
                                XLink base_xlink,
-                               TreePtrInterface *p_x_sing,
+                               TreePtrInterface *p_x_singular,
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
@@ -132,7 +132,7 @@ private:
                                       const Plan::Collection &plan_col,
                                       const SolutionMap *required_links,
                                       const TheKnowledge *knowledge ) const;
-    void NormalLinkedQuerySingular( TreePtrInterface *p_x_sing,
+    void NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
                                     const Plan::Singular &plan_sing,
                                     const SolutionMap *required_links,
                                     const TheKnowledge *knowledge ) const;

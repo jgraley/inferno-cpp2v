@@ -34,10 +34,10 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
             sequences.emplace_back( Sequence(ii, this, phase, pattern_seq) );
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
             collections.emplace_back( Collection(ii, this, phase, pattern_col) );
-        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(ie) )        
+        else if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(ie) )        
         {
-            if( *pattern_sing ) // only make plans for non-null singular pointers
-                singulars.emplace_back( Singular(ii, this, phase, pattern_sing) );
+            if( *pattern_singular ) // only make plans for non-null singular pointers
+                singulars.emplace_back( Singular(ii, this, phase, pattern_singular) );
         }
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
@@ -217,9 +217,9 @@ void StandardAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
     
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
-        auto p_x_sing = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
-        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-        DecidedQuerySingular( query, base_xlink, p_x_sing, plan_sing );
+        auto p_x_singular = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
+        ASSERT( p_x_singular )( "itemise for x didn't match itemise for pattern");
+        DecidedQuerySingular( query, base_xlink, p_x_singular, plan_sing );
     }
 
     for( const Plan::Collection &plan_col : plan.collections )
@@ -376,11 +376,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 
 void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
                                           XLink base_xlink,
-                                          TreePtrInterface *p_x_sing,
+                                          TreePtrInterface *p_x_singular,
 		                                  const Plan::Singular &plan_sing ) const
 {
     PatternLink sing_plink(this, plan_sing.pattern);
-    XLink sing_xlink(base_xlink.GetChildX(), p_x_sing);
+    XLink sing_xlink(base_xlink.GetChildX(), p_x_singular);
     query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
 }
 
@@ -410,11 +410,11 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
 
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
-        TreePtrInterface *p_x_sing = based ? 
+        TreePtrInterface *p_x_singular = based ? 
                                      dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]) :
                                      nullptr;
-        ASSERT( p_x_sing )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySingular( p_x_sing, plan_sing, required_links, knowledge );
+        ASSERT( p_x_singular )( "itemise for x didn't match itemise for pattern");
+        NormalLinkedQuerySingular( p_x_singular, plan_sing, required_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
@@ -602,14 +602,14 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
 }
 
 
-void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_sing,
+void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
                                                const Plan::Singular &plan_sing,
                                                const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
 {
-    if( p_x_sing )
+    if( p_x_singular )
     {
-        XLink sing_xlink(required_links->at(base_plink).GetChildX(), p_x_sing);        
+        XLink sing_xlink(required_links->at(base_plink).GetChildX(), p_x_singular);        
         if( required_links->count(plan_sing.plink) > 0 ) 
         {
             XLink req_sing_xlink = required_links->at(plan_sing.plink);                
@@ -780,13 +780,13 @@ void StandardAgent::KeyForOverlay( Agent *under )
         
         TRACE("Member %d\n", i );
         // Act only on singular members that are non-null in the pattern (i.e. this) 
-        if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
-            TreePtrInterface *under_sing = dynamic_cast<TreePtrInterface *>(under_memb[i]);
-            if( *pattern_sing )
+            TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_memb[i]);
+            if( *pattern_singular )
             {
-                ASSERT(*under_sing)("Cannot key intermediate because correpsonding search node is nullptr");
-                AsAgent((TreePtr<Node>)*pattern_sing)->KeyForOverlay( AsAgent((TreePtr<Node>)*under_sing) );
+                ASSERT(*under_singular)("Cannot key intermediate because correpsonding search node is nullptr");
+                AsAgent((TreePtr<Node>)*pattern_singular)->KeyForOverlay( AsAgent((TreePtr<Node>)*under_singular) );
             }
         }
     }
@@ -865,13 +865,13 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
 	        }
 	        present_in_pattern.insert( dest_memb[i] );
         }            
-        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
         	TRACE();
-            TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( dest_sing )( "itemise for target didn't match itemise for pattern");
-            auto pattern_child = (TreePtr<Node>)*pattern_sing;
-            auto dest_child = (TreePtr<Node>)*dest_sing;
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+            auto pattern_child = (TreePtr<Node>)*pattern_singular;
+            auto dest_child = (TreePtr<Node>)*dest_singular;
                        
             if( pattern_child )
             {                             
@@ -880,7 +880,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
                 present_in_pattern.insert( dest_memb[i] );
             }
             ASSERT( dest_child->IsFinal() );
-            *dest_sing = dest_child;
+            *dest_singular = dest_child;
         }
         else
         {
@@ -933,13 +933,13 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
 		        }
 	        }
         }            
-        else if( TreePtrInterface *under_sing = dynamic_cast<TreePtrInterface *>(under_memb[i]) )
+        else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_memb[i]) )
         {
-            TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *under_sing );
-            *dest_sing = DuplicateSubtree( (TreePtr<Node>)*under_sing );
-            ASSERT( *dest_sing );
-            ASSERT( (**dest_sing).IsFinal() );            
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *under_singular );
+            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*under_singular );
+            ASSERT( *dest_singular );
+            ASSERT( (**dest_singular).IsFinal() );            
         }
         else
         {
@@ -1006,14 +1006,14 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
 		        }
 	        }
         }            
-        else if( TreePtrInterface *pattern_sing = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
             TRACE("Copying single element\n");
-            TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *pattern_sing )("Member %d (", i)(*pattern_sing)(") of ")(*this)(" was nullptr when not overlaying\n");
-            auto pattern_child = (TreePtr<Node>)*pattern_sing;
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *pattern_singular )("Member %d (", i)(*pattern_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
+            auto pattern_child = (TreePtr<Node>)*pattern_singular;
             TreePtr<Node> dest_child = AsAgent(pattern_child)->BuildReplace();
-            *dest_sing = dest_child;
+            *dest_singular = dest_child;
         }
         else
         {

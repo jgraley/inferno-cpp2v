@@ -55,19 +55,19 @@ CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
             if( cr != EQUAL )
                 return cr;                
         }
-        else if( TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]) )
+        else if( TreePtrInterface *x_singular = dynamic_cast<TreePtrInterface *>(x_memb[i]) )
         {
-            TreePtrInterface *y_ptr = dynamic_cast<TreePtrInterface *>(y_memb[i]);
-            ASSERT( y_ptr );
+            TreePtrInterface *y_singular = dynamic_cast<TreePtrInterface *>(y_memb[i]);
+            ASSERT( y_singular );
             
             // MakeValueArchitype() can generate nodes with NULL pointers (eg in PointerIs)
             // and these get SimpleCompared even though they are not allowed in input trees.
             // In this case, order on the non-null-ness of x and y.
-            if( !(TreePtr<Node>)*x_ptr || !(TreePtr<Node>)*y_ptr )
-                return (int)(!(TreePtr<Node>)*y_ptr) - (int)(!(TreePtr<Node>)*x_ptr);                
+            if( !(TreePtr<Node>)*x_singular || !(TreePtr<Node>)*y_singular )
+                return (int)(!(TreePtr<Node>)*y_singular) - (int)(!(TreePtr<Node>)*x_singular);                
             
             // Both non-null, so we are allowed to recurse
-            CompareResult cr = Compare( (TreePtr<Node>)*x_ptr, (TreePtr<Node>)*y_ptr );
+            CompareResult cr = Compare( (TreePtr<Node>)*x_singular, (TreePtr<Node>)*y_singular );
             if( cr != EQUAL )
                 return cr;                
         }

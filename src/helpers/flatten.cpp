@@ -89,8 +89,8 @@ string FlattenNode_iterator::GetName() const
         s += string("{}.") + cit->GetTrace() + SSPrintf("@%p", cit->get());
 	else if( dynamic_cast<SequenceInterface *>(GetCurrentMember()) )
         s += string("[].") + cit->GetTrace() + SSPrintf("@%p", cit->get());
-    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
-       	s += string(".") + ptr->GetTrace() + SSPrintf("@%p", ptr->get());
+    else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
+       	s += string(".") + singular->GetTrace() + SSPrintf("@%p", singular->get());
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
         
@@ -131,8 +131,8 @@ FlattenNode_iterator::reference FlattenNode_iterator::operator*() const
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
         return *cit;
-    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
-        return *ptr;
+    else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
+        return *singular;
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
@@ -183,8 +183,8 @@ void FlattenNode_iterator::Overwrite( FlattenNode_iterator::pointer v ) const
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
         cit.Overwrite( v );
-    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
-        *ptr = *v;
+    else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
+        *singular = *v;
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }

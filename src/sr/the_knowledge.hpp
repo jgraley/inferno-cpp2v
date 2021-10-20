@@ -70,7 +70,7 @@ private:
                   XLink xlink, 
                   Nugget nugget );
     void AddChildren( SubtreeMode mode, XLink xlink );
-    void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_sing, XLink xlink );
+    void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink );
     void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
     void AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink );
     
