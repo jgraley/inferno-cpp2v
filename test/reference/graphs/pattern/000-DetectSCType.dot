@@ -31,13 +31,14 @@ edge [
 
 "#B-2-1" [
     // -------- block #B-2-1 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> through | <port1> overlay"
+    shape = "triangle"
+    label = <Δ>
     style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
 "#B-2-2" [
@@ -134,12 +135,12 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1":port0 -> "#B-2-2" [
+"#B-2-1" -> "#B-2-2" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1":port1 -> "#B-2-3" [
+"#B-2-1" -> "#B-2-3" [
     style="dashed"
     color = black
     fontcolor = black

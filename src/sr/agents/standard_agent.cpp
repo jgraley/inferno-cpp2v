@@ -1,7 +1,7 @@
 #include "../search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
-#include "overlay_agent.hpp"
+#include "delta_agent.hpp"
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
@@ -824,7 +824,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
 
     // Loop over the elements of pattern and dest, limited to elements
     // present in pattern, which is a non-strict subclass of under_node and dest. // Hmmm.... superclass?
-    // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
+    // Delta or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class

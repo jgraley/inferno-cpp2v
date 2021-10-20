@@ -70,7 +70,7 @@ edge [
 
 "#B-2-1130" [
     // -------- block #B-2-1130 ----------
-    shape = "triangle"
+    shape = "cylinder"
     fillcolor = "/set28/3"
     label = <||||>
     style = "filled"
@@ -105,13 +105,15 @@ edge [
 
 "#B-2-1202" [
     // -------- block #B-2-1202 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Compound) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Compound)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-1199" [
@@ -324,13 +326,15 @@ edge [
 
 "#B-2-1155" [
     // -------- block #B-2-1155 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Enum) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/1"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Enum)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-1156" [
@@ -478,13 +482,15 @@ edge [
 
 "#B-2-1194" [
     // -------- block #B-2-1194 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Expression) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/6"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Expression)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-1191" [
@@ -576,13 +582,15 @@ edge [
 
 "#B-2-1203" [
     // -------- block #B-2-1203 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-1177" [
@@ -636,13 +644,14 @@ edge [
 
 "#B-2-1172" [
     // -------- block #B-2-1172 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> through | <port1> overlay"
+    shape = "triangle"
+    label = <Δ>
     style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
 "#B-2-1167" [
@@ -671,13 +680,14 @@ edge [
 
 "#B-2-1171" [
     // -------- block #B-2-1171 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> through | <port1> overlay"
+    shape = "triangle"
+    label = <Δ>
     style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
 "#B-2-1198" [
@@ -815,7 +825,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1202":port2 -> "#B-2-1200" [
+"#B-2-1202":port1 -> "#B-2-1200" [
     style="dashed"
     color = black
     fontcolor = black
@@ -932,7 +942,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1155":port2 -> "#B-2-1157" [
+"#B-2-1155":port1 -> "#B-2-1157" [
     style="dashed"
     color = black
     fontcolor = black
@@ -1038,7 +1048,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1194":port2 -> "#B-2-1192" [
+"#B-2-1194":port1 -> "#B-2-1192" [
     style="dashed"
     color = black
     fontcolor = black
@@ -1079,7 +1089,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1203":port2 -> "#B-2-1204" [
+"#B-2-1203":port1 -> "#B-2-1204" [
     style="dashed"
     color = black
     fontcolor = black
@@ -1110,12 +1120,12 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1172":port0 -> "#B-2-1167" [
+"#B-2-1172" -> "#B-2-1167" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1172":port1 -> "#B-2-1170" [
+"#B-2-1172" -> "#B-2-1170" [
     style="dashed"
     color = black
     fontcolor = black
@@ -1141,12 +1151,12 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1171":port0 -> "#B-2-1164" [
+"#B-2-1171" -> "#B-2-1164" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1171":port1 -> "#B-2-1198" [
+"#B-2-1171" -> "#B-2-1198" [
     style="dashed"
     color = black
     fontcolor = black

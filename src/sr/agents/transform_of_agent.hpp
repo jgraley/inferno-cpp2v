@@ -4,7 +4,7 @@
 #include "../search_replace.hpp"
 #include "helpers/transformation.hpp"
 #include "agent.hpp"
-#include "overlay_agent.hpp"
+#include "delta_agent.hpp"
 #include "slave_agent.hpp"
 #include "../cache.hpp"
 

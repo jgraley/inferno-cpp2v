@@ -3,7 +3,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "agents/standard_agent.hpp"
-#include "agents/overlay_agent.hpp"
+#include "agents/delta_agent.hpp"
 #include "agents/search_container_agent.hpp"
 #include "common/common.hpp"
 #include "agents/agent.hpp"

@@ -1,7 +1,7 @@
 #include "combine_patterns.hpp"
 #include "vn_transformation.hpp"
 #include "agents/standard_agent.hpp"
-#include "agents/overlay_agent.hpp"
+#include "agents/delta_agent.hpp"
 #include "agents/slave_agent.hpp"
 
 using namespace SR;
@@ -32,8 +32,8 @@ void CombinePatterns::FixupPointers( PatternKnowledge &pk, TreePtr<Node> &scp, T
     if( rp != scp ) // -> CombinePatterns
     {
         // Classic compare and replace with separate replace pattern, we can use
-        // an Overlay node to overwrite the replace pattern at replace time.
-        MakePatternPtr< Overlay<Node> > overlay; 
+        // an Delta node to overwrite the replace pattern at replace time.
+        MakePatternPtr< Delta<Node> > overlay; 
         overlay->through = scp;
         overlay->overlay = rp;
         scp = rp = overlay; 

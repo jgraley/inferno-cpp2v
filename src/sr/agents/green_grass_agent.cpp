@@ -40,7 +40,7 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &l
 	block.bold = true;
     block.title = "GreenGrass";
 	block.symbol = "||||";
-	block.shape = "triangle";
+	block.shape = "cylinder";
     block.block_type = Graphable::NODE;
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>( GetThrough()->get()), 
               list<string>{},

@@ -12,7 +12,7 @@ using namespace Steps;
 
 DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
 {
-    MakePatternPtr< Overlay<Node> > over;
+    MakePatternPtr< Delta<Node> > over;
     MakePatternPtr< Scope > s_scope, r_scope;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< UserType > s_usertype;
@@ -33,7 +33,7 @@ DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
 
 DetectSCBase::DetectSCBase( TreePtr< SCNamedRecord > lr_scclass )
 {
-    MakePatternPtr< Overlay<Node> > over;
+    MakePatternPtr< Delta<Node> > over;
     MakePatternPtr< Scope > s_scope, r_scope;
     MakePatternPtr< Star<Declaration> > decls, l_decls;
     MakePatternPtr< Star<Base> > l_bases;
@@ -131,7 +131,7 @@ DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunctio
 
 DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
 {
-    MakePatternPtr< Overlay<Node> > over;
+    MakePatternPtr< Delta<Node> > over;
     MakePatternPtr< Scope > s_scope, r_scope;
     MakePatternPtr< Star<Declaration> > decls, l_decls, l_cdecls;
     MakePatternPtr< Static > s_instance;
@@ -139,8 +139,8 @@ DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
     MakePatternPtr< Module > l_module;
     MakePatternPtr< Call > ls_pcall;
     MakePatternPtr< MapOperand > ls_arg;            
-    MakePatternPtr< Overlay<Instance> > l_overcons;
-    MakePatternPtr< Overlay<Type> > l_overtype;
+    MakePatternPtr< Delta<Instance> > l_overcons;
+    MakePatternPtr< Delta<Type> > l_overtype;
     MakePatternPtr< Instance > ls_cons, lr_cons, l_process;
     MakePatternPtr< Star<Statement> > l_pre, l_post;
     MakePatternPtr< InstanceIdentifier > ls_id;
@@ -240,7 +240,7 @@ DetectSCNotifyDelta::DetectSCNotifyDelta()
 RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 {
     MakePatternPtr< Stuff<Scope> > stuff;
-    MakePatternPtr< Overlay<Scope> > over;
+    MakePatternPtr< Delta<Scope> > over;
     MakePatternPtr< Star<Declaration> > decls, l_decls;
     MakePatternPtr< Star<Statement> > l_pre, l_post;
     MakePatternPtr< Star<MapOperand> > ls_args;

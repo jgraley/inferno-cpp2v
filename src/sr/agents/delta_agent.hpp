@@ -16,8 +16,8 @@ namespace SR
 /// If the replace pattern under `overlay` contains wildcards, these will 
 /// be overlayed over the pattern under `through`, to the extent that this
 /// is unambiguous and the structures of the two subtrees match.
-class OverlayAgent : public virtual ColocatedAgent,
-                     public StartsOverlay
+class DeltaAgent : public virtual ColocatedAgent,
+                   public StartsOverlay
 {  
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
@@ -33,8 +33,8 @@ private:
 
 
 template<class PRE_RESTRICTION>
-class Overlay : public OverlayAgent, 
-                public Special<PRE_RESTRICTION>
+class Delta : public DeltaAgent, 
+              public Special<PRE_RESTRICTION>
 {
 public:
     SPECIAL_NODE_FUNCTIONS

@@ -9,7 +9,7 @@
 #include "common/hit_count.hpp"
 #include "agents/slave_agent.hpp"
 #include "agents/standard_agent.hpp"
-#include "agents/overlay_agent.hpp"
+#include "agents/delta_agent.hpp"
 #include "agents/search_container_agent.hpp"
 #include "agents/star_agent.hpp"
 #include "common/common.hpp"

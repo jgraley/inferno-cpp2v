@@ -535,7 +535,7 @@ void AgentCommon::Reset()
 
 void AgentCommon::KeyForOverlay( Agent *from )
 {
-    // This function is called on nodes under the "overlay" branch of Overlay nodes.
+    // This function is called on nodes under the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...
     //ASSERT(master_scr_engine->GetReplaceKey( this ))(*this)(" cannot appear in a replace-only context");
 }

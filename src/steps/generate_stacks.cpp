@@ -23,7 +23,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     MakePatternPtr<Compound> s_comp, sx_comp, r_comp;        
     MakePatternPtr< Star<Statement> > pre, sx_pre;
     MakePatternPtr< Star<Declaration> > decls, sx_decls;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr<Return> sx_return, r_return;
     MakePatternPtr< Disjunction<Callable> > s_any;
     MakePatternPtr<Function> s_func;
@@ -117,8 +117,8 @@ ReturnViaTemp::ReturnViaTemp()
     MakePatternPtr<Expression> l_return_value;
     MakePatternPtr<StatementExpression> mr_comp;
     MakePatternPtr< GreenGrass<Call> > ms_gg;
-    MakePatternPtr< Overlay<Type> > overcp;
-    MakePatternPtr< Overlay<Initialiser> > overi;
+    MakePatternPtr< Delta<Type> > overcp;
+    MakePatternPtr< Delta<Initialiser> > overi;
     
     MakePatternPtr< SlaveSearchReplace<Compound> > slavel( r_body, ls_return, lr_comp );
     ls_return->return_value = l_return_value; // note this also pre-restricts away Return<Uninitialised>
@@ -177,7 +177,7 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr< Negation<Declaration> > s_nm, ls_nm;
     MakePatternPtr< GreenGrass<Declaration> > gg;
     MakePatternPtr<Instance> l_inst;
-    MakePatternPtr< Overlay<Compound> > l_over;
+    MakePatternPtr< Delta<Compound> > l_over;
     MakePatternPtr<Compound> ls_comp, lr_comp;
     MakePatternPtr< Star<Declaration> > l_decls;
     MakePatternPtr< Star<Statement> > l_stmts, msx_stmts;
@@ -189,8 +189,8 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr< Conjunction<Statement> > m_all;
     MakePatternPtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
     MakePatternPtr< Negation<Statement> > ms_not;
-    MakePatternPtr< Overlay<Statement> > m_over;
-    MakePatternPtr< Overlay<Function> > l_func_over;
+    MakePatternPtr< Delta<Statement> > m_over;
+    MakePatternPtr< Delta<Function> > l_func_over;
     MakePatternPtr<Function> ls_func, lr_func;
     MakePatternPtr<TypeIdentifier> ident;
     MakePatternPtr<InstanceIdentifier> l_inst_id;
@@ -200,7 +200,7 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr< Conjunction<Statement> > ll_all;
     MakePatternPtr< AnyNode<Statement> > ll_any;
     MakePatternPtr< Negation<Statement> > lls_not;
-    MakePatternPtr< Overlay<Statement> > ll_over;
+    MakePatternPtr< Delta<Statement> > ll_over;
     MakePatternPtr< GreenGrass<Statement> > m_gg, ll_gg;
     MakePatternPtr<MapOperand> mr_operand;
 
@@ -284,7 +284,7 @@ ParamsViaTemps::ParamsViaTemps()
     MakePatternPtr<Assign> mr_assign;
     MakePatternPtr<Expression> m_expr;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("%s_%s");
-    MakePatternPtr< Overlay<Declaration> > over;
+    MakePatternPtr< Delta<Declaration> > over;
     
     ms_call->callee = func_id;
     ms_call->operands = (m_operands, ms_operand);
@@ -353,8 +353,8 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr< Star<Statement> > top_pre;
     MakePatternPtr< Stuff<Initialiser> > stuff;
     MakePatternPtr< Stuff<Compound> > cs_stuff;
-    MakePatternPtr< Overlay<Statement> > overlay;
-    MakePatternPtr< Overlay<Declaration> > over;
+    MakePatternPtr< Delta<Statement> > overlay;
+    MakePatternPtr< Delta<Declaration> > over;
     MakePatternPtr<Automatic> cs_instance, s_instance;
     MakePatternPtr<Field> r_index, r_instance;
     MakePatternPtr<Unsigned> r_index_type;
@@ -480,7 +480,7 @@ GenerateStacks::GenerateStacks()
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
     MakePatternPtr<Instance> fi;
-    MakePatternPtr< Overlay<Initialiser> > oinit;
+    MakePatternPtr< Delta<Initialiser> > oinit;
     MakePatternPtr<Callable> s_func;
     MakePatternPtr< Conjunction<Initialiser> > s_and;
     MakePatternPtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
@@ -488,7 +488,7 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr< Star<Statement> > top_pre;
     MakePatternPtr< Stuff<Statement> > stuff;
     MakePatternPtr< Stuff<Compound> > cs_stuff;
-    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< Delta<Statement> > overlay;
     MakePatternPtr<Automatic> cs_instance, s_instance;
     MakePatternPtr<Static> r_index, r_instance;
     MakePatternPtr<Unsigned> r_index_type;
@@ -582,7 +582,7 @@ MergeFunctions::MergeFunctions()
     MakePatternPtr< Star<Declaration> > members, thread_decls;
     MakePatternPtr< Star<Statement> > thread_stmts;
     MakePatternPtr< Star<Base> > bases;    
-    MakePatternPtr< Overlay<Compound> > thread_over;
+    MakePatternPtr< Delta<Compound> > thread_over;
     MakePatternPtr<Compound> s_thread_comp, r_thread_comp;
     MakePatternPtr<Call> s_call, ls_call;
     MakePatternPtr<InstanceIdentifier> func_id;

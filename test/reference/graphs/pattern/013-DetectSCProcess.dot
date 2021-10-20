@@ -31,13 +31,14 @@ edge [
 
 "#B-2-139" [
     // -------- block #B-2-139 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> through | <port1> overlay"
+    shape = "triangle"
+    label = <Δ>
     style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
 "#B-2-140" [
@@ -139,13 +140,15 @@ edge [
 
 "#B-2-151" [
     // -------- block #B-2-151 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Instance) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/1"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Instance)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-153" [
@@ -343,13 +346,15 @@ edge [
 
 "#B-2-152" [
     // -------- block #B-2-152 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> through | <port1> overlay"
+    shape = "triangle"
+    fillcolor = "/set28/3"
+    label = <Δ>
     style = "filled"
-    fontsize = "12"
-    color = black
-    fontcolor = black
+    fontsize = "20"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
 "#B-2-167" [
@@ -411,12 +416,12 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-139":port0 -> "#B-2-140" [
+"#B-2-139" -> "#B-2-140" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-139":port1 -> "#B-2-141" [
+"#B-2-139" -> "#B-2-141" [
     style="dashed"
     color = black
     fontcolor = black
@@ -482,7 +487,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-151":port2 -> "#B-2-154" [
+"#B-2-151":port1 -> "#B-2-154" [
     style="dashed"
     color = black
     fontcolor = black
@@ -588,12 +593,12 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-152":port0 -> "#B-2-167" [
+"#B-2-152" -> "#B-2-167" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-152":port1 -> "#B-2-138" [
+"#B-2-152" -> "#B-2-138" [
     style="dashed"
     color = black
     fontcolor = black

@@ -32,7 +32,7 @@ void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 void SlaveAgent::KeyForOverlay( Agent *under )
 {
     INDENT("l");
-    // Make slaves "invisible" to Overlay key propagation
+    // Make slaves "invisible" to Delta key propagation
     master_scr_engine->CopyReplaceKey( this, under );
     
     AsAgent((TreePtr<Node>)*GetThrough())->KeyForOverlay(under);   

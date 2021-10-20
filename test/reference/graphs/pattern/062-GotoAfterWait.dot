@@ -31,13 +31,15 @@ edge [
 
 "#B-2-1067" [
     // -------- block #B-2-1067 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-1064" [
@@ -68,13 +70,15 @@ edge [
 
 "#B-2-1066" [
     // -------- block #B-2-1066 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Statement) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/2"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-1062" [
@@ -228,7 +232,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1067":port2 -> "#B-2-1065" [
+"#B-2-1067":port1 -> "#B-2-1065" [
     style="dashed"
     color = black
     fontcolor = black
@@ -254,7 +258,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1066":port2 -> "#B-2-1058" [
+"#B-2-1066":port1 -> "#B-2-1058" [
     style="dashed"
     color = black
     fontcolor = black

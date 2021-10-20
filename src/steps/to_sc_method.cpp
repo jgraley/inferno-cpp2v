@@ -21,7 +21,7 @@ AutosToModule::AutosToModule()
     MakePatternPtr<Callable> ft;
     MakePatternPtr< Stuff<Initialiser> > stuff;
     MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr< Star<Base> > bases;
     MakePatternPtr<Type> type;
     MakePatternPtr<InstanceIdentifier> var_id;
@@ -73,7 +73,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     MakePatternPtr<Thread> ft;
     MakePatternPtr< Stuff<Initialiser> > stuff;
     MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr< Star<Base> > bases;
     MakePatternPtr<Type> type;
     MakePatternPtr<InstanceIdentifier> var_id;
@@ -108,7 +108,7 @@ DeclsToModule::DeclsToModule()
     MakePatternPtr<Thread> ft;
     MakePatternPtr< Stuff<Initialiser> > stuff;
     MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr< Star<Base> > bases;
     
     s_rec->members = (decls, fn);
@@ -183,7 +183,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     MakePatternPtr<Instance> inst;
     MakePatternPtr<Callable> s_callable;
     MakePatternPtr<Compound> s_comp, r_comp, m_comp;
-    MakePatternPtr< Overlay<Compound> > over_comp;
+    MakePatternPtr< Delta<Compound> > over_comp;
     MakePatternPtr< Conjunction<Instance> > s_all;
     MakePatternPtr< Stuff<Instance> > s_stuff;
     MakePatternPtr<Return> s_return, ls_return, m_return;
@@ -199,7 +199,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     MakePatternPtr< Stuff<Statement> > m_stuff;
     MakePatternPtr< Negation<Statement> > ms_affected;
     MakePatternPtr<If> ms_if, mr_if;
-    MakePatternPtr< Overlay<Statement> > m_over;
+    MakePatternPtr< Delta<Statement> > m_over;
     
     m_comp->members = (m_decls);
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);

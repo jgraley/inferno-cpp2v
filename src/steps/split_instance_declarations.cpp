@@ -15,7 +15,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     // decls section of the compound.
     MakePatternPtr<Compound> sc;
     MakePatternPtr<LocalVariable> si;
-    MakePatternPtr< Overlay<LocalVariable> > over;
+    MakePatternPtr< Delta<LocalVariable> > over;
     si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
     MakePatternPtr< Star<Declaration> > decls;
@@ -62,7 +62,7 @@ SplitInstanceDeclarations2::SplitInstanceDeclarations2()
     // decls section of the compound.
     MakePatternPtr<Compound> sc;
     MakePatternPtr<LocalVariable> si;
-    MakePatternPtr< Overlay<LocalVariable> > over;
+    MakePatternPtr< Delta<LocalVariable> > over;
     si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
     MakePatternPtr< Star<Declaration> > decls;

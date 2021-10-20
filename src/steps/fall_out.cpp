@@ -40,7 +40,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
     MakePatternPtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
     MakePatternPtr<Switch> l_switch;     
-    MakePatternPtr< Overlay<Enum> > l_over_enum;     
+    MakePatternPtr< Delta<Enum> > l_over_enum;     
     MakePatternPtr<Enum> ls_enum, lr_enum;     
     MakePatternPtr< Negation<Statement> > xs_rr;
     MakePatternPtr<Static> lr_state_decl;    
@@ -53,7 +53,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< Conjunction<Node> > ll_all;
     MakePatternPtr< Negation<Node> > lls_not1, lls_not2;    
     MakePatternPtr< AnyNode<Node> > ll_any;
-    MakePatternPtr< Overlay<Node> > ll_over, ll_all_over;
+    MakePatternPtr< Delta<Node> > ll_over, ll_all_over;
     MakePatternPtr<Goto> lls_goto;    
     MakePatternPtr<Label> lls_label;    
     MakePatternPtr<Goto> ls_goto;   
@@ -61,7 +61,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<If> lr_if;            
     MakePatternPtr<Equal> lr_equal;
     MakePatternPtr<Loop> l_loop;
-    MakePatternPtr< Overlay<Statement> > l_over;
+    MakePatternPtr< Delta<Statement> > l_over;
     MakePatternPtr< Negation<Statement> > l_not;             
     MakePatternPtr< Stuff<Scope> > m_stuff_func;
     MakePatternPtr<Scope> l_module;
@@ -70,14 +70,14 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<BuildInstanceIdentifierAgent> r_lmap_id("lmap");
     MakePatternPtr<Array> r_array;
     MakePatternPtr<MakeArray> r_make, ls_make, lr_make, lls_make;
-    MakePatternPtr< Overlay<Expression> > l_mover;
+    MakePatternPtr< Delta<Expression> > l_mover;
     MakePatternPtr< Stuff<Statement> > l_stuff;
     MakePatternPtr< Star<Expression> > l_existing;
     MakePatternPtr< Negation<Expression> > l_mnot;
     MakePatternPtr< Subscript > ll_sub;
     MakePatternPtr<Compound> s_comp, r_comp, l_comp;
-    MakePatternPtr< Overlay<Compound> > over_comp;
-    MakePatternPtr< Overlay<Statement> > l_overll;
+    MakePatternPtr< Delta<Compound> > over_comp;
+    MakePatternPtr< Delta<Statement> > l_overll;
     MakePatternPtr< StateLabel > l_state_label;
     MakePatternPtr< Star<Declaration> > comp_membs;
             
@@ -189,8 +189,8 @@ LabelTypeToEnum::LabelTypeToEnum()
     MakePatternPtr< Conjunction<Node> > apall, l_apall;
     MakePatternPtr< Negation<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
-    MakePatternPtr< Overlay<Node> > l_apall_over;
-    MakePatternPtr< Overlay<Type> > l_over;
+    MakePatternPtr< Delta<Node> > l_apall_over;
+    MakePatternPtr< Delta<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
     MakePatternPtr<Goto> ns_goto, nr_goto;
@@ -251,7 +251,7 @@ RemoveLabelSubscript::RemoveLabelSubscript()
     MakePatternPtr< Conjunction<Node> > apall, l_apall;
     MakePatternPtr< Negation<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
-    MakePatternPtr< Overlay<Type> > l_over;
+    MakePatternPtr< Delta<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
     MakePatternPtr<Goto> ns_goto, nr_goto;
@@ -278,7 +278,7 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     MakePatternPtr< Conjunction<Node> > apall, l_apall;
     MakePatternPtr< Negation<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
-    MakePatternPtr< Overlay<Type> > l_over;
+    MakePatternPtr< Delta<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
     MakePatternPtr<Goto> ns_goto, nr_goto;
@@ -327,10 +327,10 @@ LabelVarsToEnum::LabelVarsToEnum()
     MakePatternPtr< Negation<Scope> > sx_not1;
     MakePatternPtr<AssignmentOperator> sx_asop, ms_asop;
     MakePatternPtr< Negation<Statement> > sx_not2, msx_not, msx_not2, msx_not3;
-    MakePatternPtr< Overlay<Type> > over;
+    MakePatternPtr< Delta<Type> > over;
     MakePatternPtr< TransformOf<Expression> > s_index( &TypeOf::instance );
     MakePatternPtr<TypeIdentifier> type; 
-    MakePatternPtr< Overlay<Expression> > l_over, m_over;
+    MakePatternPtr< Delta<Expression> > l_over, m_over;
     MakePatternPtr<Expression> l_index;
     MakePatternPtr< Conjunction<Node> > ms_all;
     MakePatternPtr< AnyNode<Node> > ms_anynode;    
@@ -685,7 +685,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     MakePatternPtr<Expression> cond;
     MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Do> r_do;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     
     MakePatternPtr< SlaveSearchReplace<Statement> > slavell( r_body_comp, MakePatternPtr<Goto>(), MakePatternPtr<Continue>() );    
     
@@ -724,7 +724,7 @@ InsertInferredYield::InsertInferredYield()
     MakePatternPtr<Compound> func_comp, s_comp, sx_comp, r_comp;
     MakePatternPtr< Star<Declaration> > func_decls, loop_decls;
     MakePatternPtr< Star<Statement> >  stmts, sx_pre;    
-    MakePatternPtr< Overlay<Statement> > over;    
+    MakePatternPtr< Delta<Statement> > over;    
     MakePatternPtr<LocalVariable> flag_decl; 
     MakePatternPtr<InstanceIdentifier> flag_id;   
     MakePatternPtr<WaitDelta> r_yield;

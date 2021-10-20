@@ -34,7 +34,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
      // of a SE ending in another nested SE). So we have to ensure we do outermost 
      // first.
     MakePatternPtr< Stuff<Node> > root_stuff;
-    MakePatternPtr< Overlay<Node> > root_overlay;
+    MakePatternPtr< Delta<Node> > root_overlay;
     MakePatternPtr< Negation<Node> > root_not;
     MakePatternPtr< StatementExpression > root_ce;
           
@@ -57,7 +57,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     MakePatternPtr< TransformOf<Expression> > last( &TypeOf::instance );
     MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("result");
     MakePatternPtr<Assign> r_assign;
-    MakePatternPtr< Overlay<Expression> > overlay;
+    MakePatternPtr< Delta<Expression> > overlay;
     MakePatternPtr<Type> r_type;
 
     root_stuff->terminus = root_overlay;
@@ -127,7 +127,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Instance> sx_instance;
     MakePatternPtr< AnyNode<Statement> > node;
-    MakePatternPtr< Overlay<Statement> > over;   
+    MakePatternPtr< Delta<Statement> > over;   
     MakePatternPtr<Compound> s_comp;
     MakePatternPtr< Statement > body;
 
@@ -181,7 +181,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     MakePatternPtr<Instance> s_instance, r_instance;
     MakePatternPtr< Stuff<Compound> > stuff;
-    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< Delta<Statement> > overlay;
     MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr<Label> s_label1, s_label2, r_label1; // keep l1 and elide l2
     MakePatternPtr< Star<Declaration> > decls;
@@ -236,7 +236,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     
     MakePatternPtr<Instance> s_instance, r_instance;
     MakePatternPtr< Stuff<Compound> > stuff;
-    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< Delta<Statement> > overlay;
     MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr<Label> s_label; // keep l1 and elide l2
     MakePatternPtr< Star<Declaration> > decls;
@@ -312,7 +312,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     MakePatternPtr<Instance> s_instance, r_instance;
     MakePatternPtr< Stuff<Compound> > stuff;
     MakePatternPtr< Stuff<Compound> > sx_stuff;
-    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< Delta<Statement> > overlay;
     MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr<Label> s_label; // keep l1 and elide l2
     MakePatternPtr< Star<Declaration> > decls;
@@ -401,7 +401,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
 {
     MakePatternPtr< Conjunction<Scope> > s_all;
     MakePatternPtr<Scope> s_scope, r_scope;
-    MakePatternPtr< Overlay<Scope> > over_scope; 
+    MakePatternPtr< Delta<Scope> > over_scope; 
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr<Instance> inst;
     MakePatternPtr<NestedArrayAgent> nested_array;

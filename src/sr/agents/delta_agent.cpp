@@ -1,4 +1,4 @@
-#include "overlay_agent.hpp" 
+#include "delta_agent.hpp" 
 #include "green_grass_agent.hpp"
 #include "../search_replace.hpp" 
 #include "link.hpp"
@@ -6,40 +6,36 @@
 
 using namespace SR;
 
-shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }
 
-Graphable::Block OverlayAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block DeltaAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
+                                                const NonTrivialPreRestrictionFunction &ntprf ) const
 {
     list<SubBlock> sub_blocks;
-    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
+    auto link_through = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
               list<string>{},
               list<string>{PatternLink(this, GetThrough()).GetShortName()},
               IN_COMPARE_ONLY,
               SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
-    sub_blocks.push_back( { "through", 
-                            "",
-                            false,
-                            { link } } );
-    link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
+    auto link_overlay = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
               list<string>{},
               list<string>{PatternLink(this, GetOverlay()).GetShortName()},
               IN_REPLACE_ONLY,
               SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) );
     sub_blocks.push_back( { "overlay", 
                             "",
-                            false,
-                            { link } } );
-    return { false, GetName(), "", "", CONTROL, sub_blocks };
+                            true,
+                            { link_through, link_overlay } } );
+    return { false, "Delta", "Δ", "triangle", NODE, sub_blocks };
 }
 
 
-list<PatternLink> OverlayAgent::GetVisibleChildren( Path v ) const
+list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
 {	
 	list<PatternLink> plinks;
     switch(v)
@@ -55,7 +51,7 @@ list<PatternLink> OverlayAgent::GetVisibleChildren( Path v ) const
 }
 
 
-void OverlayAgent::StartKeyForOverlay()
+void DeltaAgent::StartKeyForOverlay()
 {
     ASSERT( *GetOverlay() );          
     Agent *overlay_agent = AsAgent((TreePtr<Node>)*GetOverlay()); // over
@@ -67,7 +63,7 @@ void OverlayAgent::StartKeyForOverlay()
 }
 
 
-TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> DeltaAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
 {
     INDENT("O");    
 

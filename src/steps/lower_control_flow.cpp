@@ -178,7 +178,7 @@ DetectCombableBreak::DetectCombableBreak()
     MakePatternPtr<Compound> comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< Overlay<Break> > over;
+    MakePatternPtr< Delta<Break> > over;
     MakePatternPtr<UncombableBreak> s_ubreak;
     MakePatternPtr<CombableBreak> r_break;
     
@@ -219,7 +219,7 @@ ForToWhile::ForToWhile()
     MakePatternPtr<While> r_while;
     MakePatternPtr<Compound> r_outer, r_body;
     MakePatternPtr< Stuff<Statement> > l_stuff;
-    MakePatternPtr< Overlay<Statement> > l_overlay;
+    MakePatternPtr< Delta<Statement> > l_overlay;
     MakePatternPtr< Negation<Statement> > l_s_not;
     MakePatternPtr< Loop > l_s_loop;
     
@@ -453,7 +453,7 @@ DoToIfGoto::DoToIfGoto()
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
     MakePatternPtr<Label> r_label, r_cont_label;
     MakePatternPtr< Stuff<Statement> > l_stuff;
-    MakePatternPtr< Overlay<Statement> > l_overlay;
+    MakePatternPtr< Delta<Statement> > l_overlay;
     MakePatternPtr<Continue> l_s_cont;
     MakePatternPtr< Negation<Statement> > l_s_not;
     MakePatternPtr< Loop > l_s_loop;
@@ -491,7 +491,7 @@ BreakToGoto::BreakToGoto()
     //    blocks, so we won't find a Break that is not for us.
     MakePatternPtr<Breakable> breakable, sx_breakable;
     MakePatternPtr< Stuff<Statement> > stuff;
-    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< Delta<Statement> > overlay;
     MakePatternPtr< Negation<Statement> > sx_not;
     MakePatternPtr<Break> s_break;
     MakePatternPtr<Goto> r_goto;

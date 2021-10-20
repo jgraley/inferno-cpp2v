@@ -44,13 +44,15 @@ edge [
 
 "#B-2-184" [
     // -------- block #B-2-184 ----------
-    shape = "record"
-    fillcolor = antiquewhite1
-    label = "<fixed> Overlay | <port0> (Scope) | <port1> through | <port2> overlay"
-    style = "filled"
+    shape = "plaintext"
+    fillcolor = "/set28/4"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+     <TR><TD>(Scope)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
     fontsize = "12"
-    color = black
-    fontcolor = black
 ];
 
 "#B-2-193" [
@@ -317,7 +319,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-184":port2 -> "#B-2-194" [
+"#B-2-184":port1 -> "#B-2-194" [
     style="dashed"
     color = black
     fontcolor = black

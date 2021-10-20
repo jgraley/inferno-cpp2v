@@ -32,7 +32,7 @@ GotoAfterWait::GotoAfterWait()
     MakePatternPtr< Negation<Statement> > notmatch;
     MakePatternPtr< Conjunction<Statement> > all;
     MakePatternPtr< AnyNode<Statement> > anynode;
-    MakePatternPtr< Overlay<Statement> > over, all_over;
+    MakePatternPtr< Delta<Statement> > over, all_over;
     MakePatternPtr<Goto> sx_goto, r_goto;
     MakePatternPtr<Label> r_label;
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("YIELD");
@@ -183,7 +183,7 @@ EnsureBootstrap::EnsureBootstrap()
 {
     MakePatternPtr<Instance> fn;
     MakePatternPtr<Thread> thread;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr< Negation<Compound> > s_not;    
     MakePatternPtr<Compound> s_body, r_body, sx_body;
@@ -259,7 +259,7 @@ EnsureSuperLoop::EnsureSuperLoop()
 {   
     MakePatternPtr<Instance> fn;
     MakePatternPtr<Thread> thread;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr< Negation<Statement> > sx_not, s_limit;    
     MakePatternPtr< Stuff<Compound> > sx_stuff;
@@ -294,7 +294,7 @@ EnsureSuperLoop::EnsureSuperLoop()
 ShareGotos::ShareGotos()
 {   
     MakePatternPtr<Do> loop;
-    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Delta<Compound> > over;
     MakePatternPtr<Compound> s_body, r_body;
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr< Star<Statement> > pre, post;    
@@ -417,7 +417,7 @@ AddYieldFlag::AddYieldFlag()
     MakePatternPtr<Equal> l_equal;
     MakePatternPtr<LogicalAnd> lr_and;
     MakePatternPtr<LogicalNot> lr_not;
-    MakePatternPtr< Overlay<Compound> > func_over, over;
+    MakePatternPtr< Delta<Compound> > func_over, over;
     MakePatternPtr<Temporary> r_flag_decl;
     MakePatternPtr<Assign> r_flag_init, mr_assign, msx_assign;
     MakePatternPtr<BuildInstanceIdentifierAgent> r_flag_id("yield_flag");
@@ -479,7 +479,7 @@ AddInferredYield::AddInferredYield()
     MakePatternPtr<Compound> func_comp, s_comp, sx_comp, r_comp;
     MakePatternPtr< Star<Declaration> > func_decls;
     MakePatternPtr< Star<Statement> > func_pre, stmts, sx_pre;    
-    MakePatternPtr< Overlay<Statement> > over;    
+    MakePatternPtr< Delta<Statement> > over;    
     MakePatternPtr<LocalVariable> flag_decl; 
     MakePatternPtr<InstanceIdentifier> flag_id;   
     MakePatternPtr<WaitDelta> r_yield;
@@ -532,7 +532,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     MakePatternPtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, r_if_comp;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;
-    MakePatternPtr< Overlay<Compound> > func_over, over;    
+    MakePatternPtr< Delta<Compound> > func_over, over;    
     MakePatternPtr<Statement> first_init;
                     
     fn->type = thread;
@@ -579,7 +579,7 @@ LoopRotation::LoopRotation()
     MakePatternPtr<If> loop_top, loop_bottom, yield, outer_bottom, outer_top;
     MakePatternPtr< Star<If> > loop_body, pre_yield, post_yield;
     MakePatternPtr<Equal> r_equal;
-    MakePatternPtr< Overlay<Compound> > func_over, over;    
+    MakePatternPtr< Delta<Compound> > func_over, over;    
     MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr<Enum> s_enum;
     MakePatternPtr<TypeIdentifier> s_enum_id;

@@ -16,7 +16,7 @@ MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctes
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh
+$(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh resource
 	@mkdir -p test/results/execution
 	@rm -f test/results/execution/$*.
 	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log 
@@ -52,7 +52,7 @@ test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
 	@echo "MINI EXECUTION TESTS PASSED"
 	@spd-say -r -100 -p -100 "the mini execution tests have parssed"
 
-$(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh
+$(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh resource
 	@mkdir -p test/results/rep
 	@rm -f test/results/rep/$*.
 	test/reptest.sh $< -tq 2>&1 > test/results/rep/$*.log 
