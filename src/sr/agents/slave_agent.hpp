@@ -6,6 +6,7 @@
 #include "common/read_args.hpp"
 #include "../scr_engine.hpp" 
 #include "colocated_agent.hpp"
+#include "standard_agent.hpp"
 
 namespace SR
 { 
@@ -36,6 +37,7 @@ public:
 	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual TreePtr<Node> EvolveIntoSlaveCompareReplace() = 0;
 
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
@@ -71,6 +73,8 @@ public:
     {
         return &through;
     }
+    
+    TreePtr<Node> EvolveIntoSlaveCompareReplace() override;
 };
 
 
@@ -95,6 +99,12 @@ public:
         Slave<PRE_RESTRICTION>( t, sp, rp, true ) {}
 };
 
-};
 
+template<class PRE_RESTRICTION>
+TreePtr<Node> Slave<PRE_RESTRICTION>::EvolveIntoSlaveCompareReplace()
+{
+    return MakePatternPtr<SlaveCompareReplace<PRE_RESTRICTION>>( through, search_pattern, replace_pattern );
+}
+
+};
 #endif

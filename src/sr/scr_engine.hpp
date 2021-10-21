@@ -27,7 +27,6 @@ class AndRuleEngine;
 class RequiresSubordinateSCREngine
 {
 public:
-	virtual bool IsSearch() const = 0;
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
     virtual void ConfigureMyEngine( SCREngine *my_engine ) = 0;
@@ -44,8 +43,7 @@ class SCREngine : public virtual GraphIdable,
                   public SerialNumber
 {      
 public:
-    SCREngine( bool is_search,
-               const CompareReplace *overall_master,
+    SCREngine( const CompareReplace *overall_master,
                CompareReplace::AgentPhases &in_progress_agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
@@ -64,7 +62,6 @@ private:
     struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
-              bool is_search,
               const CompareReplace *overall_master,
               CompareReplace::AgentPhases &in_progress_agent_phases,
               TreePtr<Node> cp,
@@ -83,7 +80,6 @@ private:
         string GetTrace() const; // used for debug
         
         SCREngine * const algo;
-        const bool is_search;    
         const CompareReplace *overall_master_ptr;
         TreePtr<Node> root_pattern;
         PatternLink root_plink;

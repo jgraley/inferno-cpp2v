@@ -41,7 +41,7 @@ void CompareReplace::Plan::PlanningStageOne()
     // This allows the phases of the agents to be determined correctly
     ASSERT( compare_pattern );
     ASSERT( !is_search );
-    scr_engine = make_shared<SCREngine>(is_search, algo, agent_phases, compare_pattern, replace_pattern);
+    scr_engine = make_shared<SCREngine>(algo, agent_phases, compare_pattern, replace_pattern);
 
     list<const SCREngine *> scrs = scr_engine->GetSCREngines();
 	TRACE("SCR engines for this step: ")(scrs)("\n");

@@ -93,7 +93,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                 true,
                                 { replace_link } } );
     }
-    Block block = { false, "Slave", "", "", CONTROL, sub_blocks };
+    Block block = { false, GetName(), "", "", CONTROL, sub_blocks };
    
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
               list<string>{},
@@ -106,5 +106,4 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                    { link } } );
     return block;
 }
-
 

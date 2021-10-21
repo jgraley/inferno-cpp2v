@@ -24,13 +24,13 @@ void SearchToCompare::DoPatternTransformation( PatternKnowledge &pk )
             scp = sa->search_pattern;
             rp = sa->replace_pattern;
             FixupPointers( pk, scp, rp );
-
-            //TreePtr<Node> t = sa->GetThrough();
-            //MakePatternPtr< SlaveCompareReplace<Scope> > sa_compare( t, scp, rp );
-            //(sa_compare) sa_compare;
-            
             sa->search_pattern = scp;
             sa->replace_pattern = rp;
+
+            TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();
+            
+            //*(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;
+            
         }
     }
 }

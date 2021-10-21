@@ -31,22 +31,20 @@ bool SCREngine::rep_error;
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
-SCREngine::SCREngine( bool is_search_,
-                      const CompareReplace *overall_master,
+SCREngine::SCREngine( const CompareReplace *overall_master,
                       CompareReplace::AgentPhases &in_progress_agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
                       const unordered_set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
     SerialNumber( false ),
-    plan(this, is_search_, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
+    plan(this, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {
 }
 
     
 SCREngine::Plan::Plan( SCREngine *algo_,
-                       bool is_search_,
                        const CompareReplace *overall_master,
                        CompareReplace::AgentPhases &in_progress_agent_phases,
                        TreePtr<Node> cp,
@@ -54,7 +52,6 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        const unordered_set<PatternLink> &master_plinks_,
                        const SCREngine *master ) :
     algo( algo_ ),
-    is_search( is_search_ ),
     master_ptr( nullptr ),
     master_plinks( master_plinks_ )
 {
@@ -183,8 +180,7 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
             
     for( RequiresSubordinateSCREngine *ae : my_agents_needing_engines )
     {
-        my_engines[ae] = make_shared<SCREngine>( ae->IsSearch(),
-                                                 overall_master_ptr, 
+        my_engines[ae] = make_shared<SCREngine>( overall_master_ptr, 
                                                  in_progress_agent_phases,
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
