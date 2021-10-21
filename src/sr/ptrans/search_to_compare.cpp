@@ -29,8 +29,8 @@ void SearchToCompare::DoPatternTransformation( PatternKnowledge &pk )
 
             TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();
             
-            //*(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;
-            
+            *(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;           
+            // NO! do all the plinks that point to this agent! there can be more than one! 
         }
     }
 }
