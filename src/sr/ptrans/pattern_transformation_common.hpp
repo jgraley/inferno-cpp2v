@@ -15,16 +15,17 @@ class SlaveAgent;
 
 class PatternTransformationCommon : public PatternTransformation
 {
-public:
-    virtual void operator()( VNTransformation &vnt ) override;   
-
-private:    
-    void WalkPattern( set<PatternLink> &all_plinks, 
-                      PatternLink plink ) const;
-    
 protected:
-    struct PatternKnowledge
+    class PatternKnowledge
     {
+    public:
+        PatternKnowledge( VNTransformation &vnt );
+    
+    private:
+        void WalkPattern( set<PatternLink> &all_plinks, 
+                          PatternLink plink ) const;
+                          
+    public:
         VNTransformation *vn_transformation;
         shared_ptr<CompareReplace> top_level_engine;
         TreePtr<Node> search_compare_root_pattern;
@@ -35,9 +36,14 @@ protected:
         PatternLink replace_root_plink;
         set<PatternLink> all_plinks;
         set<PatternLink> slave_plinks;
+        unordered_map< Agent *, unordered_set<PatternLink> > plinks_to_agents;                
     };
+
+public:
+    virtual void operator()( VNTransformation &vnt ) override;   
     
-    virtual void DoPatternTransformation( PatternKnowledge &pk ) = 0;
+protected:    
+    virtual void DoPatternTransformation( const PatternKnowledge &pk ) = 0;
 };
 
 }

@@ -4,42 +4,39 @@
 
 using namespace SR;
 
-
-void PatternTransformationCommon::operator()( VNTransformation &vnt )
+PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNTransformation &vnt )
 {
-    PatternKnowledge pk;
-    pk.vn_transformation = &vnt;
-    pk.top_level_engine = vnt.GetTopLevelEngine();
+    vn_transformation = &vnt;
+    top_level_engine = vnt.GetTopLevelEngine();
     
-    pk.all_plinks.clear();
-    pk.search_compare_root_pattern = pk.top_level_engine->GetSearchComparePattern();
-    if( pk.search_compare_root_pattern )
+    all_plinks.clear();
+    search_compare_root_pattern = top_level_engine->GetSearchComparePattern();
+    if( search_compare_root_pattern )
     {
-        pk.search_compare_root_agent = Agent::AsAgent(pk.search_compare_root_pattern);
-        pk.search_compare_root_plink = PatternLink::CreateDistinct( pk.search_compare_root_pattern );
-        WalkPattern( pk.all_plinks, pk.search_compare_root_plink );
+        search_compare_root_agent = Agent::AsAgent(search_compare_root_pattern);
+        search_compare_root_plink = PatternLink::CreateDistinct( search_compare_root_pattern );
+        WalkPattern( all_plinks, search_compare_root_plink );
     }    
-    pk.replace_root_pattern = pk.top_level_engine->GetReplacePattern();
-    if( pk.replace_root_pattern )
+    replace_root_pattern = top_level_engine->GetReplacePattern();
+    if( replace_root_pattern )
     {
-        pk.replace_root_agent = Agent::AsAgent(pk.replace_root_pattern);
-        pk.replace_root_plink = PatternLink::CreateDistinct( pk.replace_root_pattern );
-        WalkPattern( pk.all_plinks, pk.replace_root_plink );
+        replace_root_agent = Agent::AsAgent(replace_root_pattern);
+        replace_root_plink = PatternLink::CreateDistinct( replace_root_pattern );
+        WalkPattern( all_plinks, replace_root_plink );
     }
     
-    pk.slave_plinks.clear();
-    for( PatternLink plink : pk.all_plinks )
+    slave_plinks.clear();
+    for( PatternLink plink : all_plinks )
         if( auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent()) )
-            pk.slave_plinks.insert( plink );
+            slave_plinks.insert( plink );
     
-    DoPatternTransformation( pk );    
-    
-    vnt.SetTopLevelEngine(pk.top_level_engine); // in case trans changed it
+    for( PatternLink plink : all_plinks )
+        plinks_to_agents[plink.GetChildAgent()].insert(plink);
 }
 
 
-void PatternTransformationCommon::WalkPattern( set<PatternLink> &all_plinks, 
-                                               PatternLink plink ) const
+void PatternTransformationCommon::PatternKnowledge::WalkPattern( set<PatternLink> &all_plinks, 
+                                                                 PatternLink plink ) const
 {
     all_plinks.insert( plink );    
     list<PatternLink> child_plinks = plink.GetChildAgent()->GetChildren(); 
@@ -48,3 +45,11 @@ void PatternTransformationCommon::WalkPattern( set<PatternLink> &all_plinks,
 }
 
    
+void PatternTransformationCommon::operator()( VNTransformation &vnt )
+{
+    const PatternKnowledge pk( vnt );
+    
+    DoPatternTransformation( pk );    
+}
+
+

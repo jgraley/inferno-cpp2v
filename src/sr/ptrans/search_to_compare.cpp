@@ -6,15 +6,15 @@
    
 using namespace SR;
 
-void SearchToCompare::DoPatternTransformation( PatternKnowledge &pk )
+void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
 {    
     TreePtr<Node> scp = pk.search_compare_root_pattern;
 	TreePtr<Node> rp = pk.replace_root_pattern;
     if( dynamic_pointer_cast<SearchReplace>(pk.top_level_engine) )
         FixupPointers( pk, scp, rp );
-    pk.vn_transformation->SetTopLevelEngine( make_shared<CompareReplace>() ); 
-    pk.top_level_engine = pk.vn_transformation->GetTopLevelEngine(); // because it's a new one
-    pk.top_level_engine->Configure( scp, rp );
+    auto new_tle = make_shared<CompareReplace>(); 
+    new_tle->Configure( scp, rp );
+    pk.vn_transformation->SetTopLevelEngine(new_tle); // install the new one
     
     for( PatternLink plink : pk.slave_plinks )    
     {
@@ -36,7 +36,7 @@ void SearchToCompare::DoPatternTransformation( PatternKnowledge &pk )
 }
 
 
-void SearchToCompare::FixupPointers( PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
+void SearchToCompare::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
 {
     ASSERT( scp );
     ASSERT( scp==rp );

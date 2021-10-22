@@ -6,7 +6,7 @@
 
 using namespace SR;
 
-void CombinePatterns::DoPatternTransformation( PatternKnowledge &pk )
+void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
 {    
     TreePtr<Node> scp = pk.search_compare_root_pattern;
 	TreePtr<Node> rp = pk.replace_root_pattern;
@@ -21,7 +21,7 @@ void CombinePatterns::DoPatternTransformation( PatternKnowledge &pk )
 }
 
 
-void CombinePatterns::FixupPointers( PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
+void CombinePatterns::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
 {
     ASSERT( scp );
     if( !rp )
