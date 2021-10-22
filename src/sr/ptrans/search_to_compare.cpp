@@ -19,15 +19,10 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
     for( SlaveAgent *sa : pk.slave_agents )    
     {
         if( sa->IsSearch() )
-        {
-            scp = sa->search_pattern;
-            rp = sa->replace_pattern;
-            FixupPointers( pk, scp, rp );
-            sa->search_pattern = scp;
-            sa->replace_pattern = rp;
+        {                    
+            FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
 
-            TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();
-            
+            TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();            
             for( PatternLink plink : pk.plinks_to_agents.at(sa) )
                 *(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;           
         }
