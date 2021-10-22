@@ -122,6 +122,22 @@ const TreePtrInterface *PatternLink::GetPatternPtr() const
 }
 
 
+void PatternLink::Redirect( const TreePtrInterface &new_parent_pattern )
+{
+#if USE_LIST_FOR_COLLECTION
+    // With this setting, collections as well as sequences are really
+    // lists, and the const cast is safe. In fact the constness of 
+    // associative keys is the only reason for asp_pattern pointing
+    // to const.
+    *const_pointer_cast<TreePtrInterface>(asp_pattern) = new_parent_pattern;
+#else
+#error If associative containers are to be used in nodes, the const \
+cast wont be safe and this function needs to be able to call \
+Overwrite() on the container.
+#endif
+}
+
+
 string PatternLink::GetTrace() const
 {
     string s = GetName();

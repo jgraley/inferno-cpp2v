@@ -24,7 +24,7 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
 
             TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();            
             for( PatternLink plink : pk.plinks_to_agents.at(sa) )
-                *(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;           
+                plink.Redirect(nn);           
         }
     }
 }

@@ -37,6 +37,8 @@ public:
     Agent *GetChildAgent() const;
     TreePtr<Node> GetPattern() const;
     const TreePtrInterface *GetPatternPtr() const;
+    void Redirect( const TreePtrInterface &new_parent_pattern );
+    
     string GetTrace() const; // used for debug
     string GetName() const;
     string GetShortName() const;
