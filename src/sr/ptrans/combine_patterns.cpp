@@ -13,9 +13,8 @@ void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
     FixupPointers( pk, scp, rp );
     pk.top_level_engine->Configure( scp, rp );
     
-    for( PatternLink plink : pk.slave_plinks )
+    for( SlaveAgent *sa : pk.slave_agents )    
     {
-        auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent());
         FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
     }
 }

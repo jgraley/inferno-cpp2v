@@ -35,8 +35,9 @@ protected:
         Agent *replace_root_agent = nullptr;
         PatternLink replace_root_plink;
         set<PatternLink> all_plinks;
-        set<PatternLink> slave_plinks;
+        set<Agent *> all_agents;
         unordered_map< Agent *, unordered_set<PatternLink> > plinks_to_agents;                
+        set<SlaveAgent *> slave_agents;
     };
 
 public:

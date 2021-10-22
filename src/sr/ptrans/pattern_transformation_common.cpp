@@ -25,13 +25,18 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNTransformatio
         WalkPattern( all_plinks, replace_root_plink );
     }
     
-    slave_plinks.clear();
+    all_agents.clear();
+    plinks_to_agents.clear();
     for( PatternLink plink : all_plinks )
-        if( auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent()) )
-            slave_plinks.insert( plink );
-    
-    for( PatternLink plink : all_plinks )
+    {
+        all_agents.insert( plink.GetChildAgent() ); 
         plinks_to_agents[plink.GetChildAgent()].insert(plink);
+    }
+    
+    slave_agents.clear();
+    for( Agent *agent : all_agents )        
+        if( auto sa = dynamic_cast<SlaveAgent *>(agent) )
+            slave_agents.insert( sa );
 }
 
 

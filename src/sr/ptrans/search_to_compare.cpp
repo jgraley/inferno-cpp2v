@@ -16,9 +16,8 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
     new_tle->Configure( scp, rp );
     pk.vn_transformation->SetTopLevelEngine(new_tle); // install the new one
     
-    for( PatternLink plink : pk.slave_plinks )    
+    for( SlaveAgent *sa : pk.slave_agents )    
     {
-        auto sa = dynamic_cast<SlaveAgent *>(plink.GetChildAgent());
         if( sa->IsSearch() )
         {
             scp = sa->search_pattern;
@@ -29,8 +28,8 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
 
             TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();
             
-            *(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;           
-            // NO! do all the plinks that point to this agent! there can be more than one! 
+            for( PatternLink plink : pk.plinks_to_agents.at(sa) )
+                *(const_cast<TreePtrInterface *>(plink.GetPatternPtr())) = nn;           
         }
     }
 }
