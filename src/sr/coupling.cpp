@@ -4,6 +4,8 @@
 
 using namespace SR;
 
+#define FULL_TRACE
+
 CouplingKey::CouplingKey() :
     xlink(XLink()),
     producer(KEY_PRODUCER_U),
@@ -91,19 +93,22 @@ TreePtr<Node> CouplingKey::GetKeyXNode( KeyConsumer consumer ) const
 string CouplingKey::GetTrace() const
 {
     string s;
-    if( producer == KEY_PRODUCER_U )
-        s += "KEY_PRODUCER_U ";                                               
-    else
-        s += SSPrintf("KEY_PRODUCER_%d ", producer);
-    s += producer_pre + " ";
-    /*s += plink.GetTrace();
+#ifdef FULL_TRACE
+    s += plink.GetTrace();
     s += " := ";
     s += xlink.GetTrace();
     s += " ";                                                    
     if( are )
         s += are->GetTrace();
     else if( scre )
-        s += scre->GetTrace();*/
+        s += scre->GetTrace();
+    s += "::";
+#endif
+    if( producer == KEY_PRODUCER_U )
+        s += "KEY_PRODUCER_U ";                                               
+    else
+        s += SSPrintf("KEY_PRODUCER_%d ", producer);
+    s += producer_pre + " ";    
     return s;
 }
 

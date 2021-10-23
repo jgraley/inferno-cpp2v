@@ -51,7 +51,7 @@ list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
 }
 
 
-void DeltaAgent::StartKeyForOverlay()
+void DeltaAgent::StartKeyForOverlay( list< pair<PatternLink, PatternLink> > &overlay_metaprogram )
 {
     ASSERT( *GetOverlay() );          
     PatternLink overlay_plink(this, GetOverlay());
@@ -59,7 +59,7 @@ void DeltaAgent::StartKeyForOverlay()
     
     // Key as many nodes as possible on the replace side. Note: the "keyer link"
     // is always the link coming from traversal of the subtree under GetOverlay()
-    overlay_plink.GetChildAgent()->KeyForOverlay(overlay_plink, through_plink);
+    overlay_plink.GetChildAgent()->KeyForOverlay(overlay_metaprogram, overlay_plink, through_plink);
 }
 
 

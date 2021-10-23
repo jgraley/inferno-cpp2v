@@ -746,16 +746,13 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
+void StandardAgent::KeyForOverlay( list< pair<PatternLink, PatternLink> > &overlay_metaprogram, PatternLink me_plink, PatternLink under_plink )
 {
     INDENT("T");
     ASSERT( me_plink.GetChildAgent() == this );
     ASSERT( under_plink.GetChildAgent() );
     TRACE(*this)(".KeyForOverlay(")(under_plink)(")\n");
     
-    if( master_scr_engine->GetReplaceKey( this ) )
-        return; // Already keyed, no point wasting time keying this (and the subtree under it) again
-        
     // This is why we call on over, passing in under. The test requires
     // that under be a non-strict subclass of over. Overlaying a super-class
     // over a subclass means we simply update the singulars we know about
@@ -764,8 +761,14 @@ void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink
     if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    master_scr_engine->CopyReplaceKey( me_plink, under_plink, KEY_PRODUCER_6 );
-    
+    if( master_scr_engine->GetReplaceKey( this ) )
+    {
+        //FTRACE("Already keyed in ")(*this)(".StandardAgent::KeyForOverlay() ")(master_scr_engine->GetReplaceKey( this ))("\n");
+        return; // Already keyed, no point wasting time keying this (and the subtree under it) again
+    }
+            
+    overlay_metaprogram.push_back( make_pair(me_plink, under_plink) );
+
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
     vector< Itemiser::Element * > my_memb = Itemise(); 
@@ -786,11 +789,11 @@ void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink
             TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_memb[i]);
             if( *my_singular )
             {
-                ASSERT(*under_singular)("Cannot key intermediate because correpsonding search node is nullptr");
+                ASSERT(*under_singular)("Cannot key ")(*my_singular)(" because correpsonding child of ")(*under_plink.GetChildAgent())(" is nullptr");
                 PatternLink my_singular_plink(this, my_singular);
                 PatternLink under_singular_plink(this, under_singular);
                 
-                my_singular_plink.GetChildAgent()->KeyForOverlay( my_singular_plink, under_singular_plink );
+                my_singular_plink.GetChildAgent()->KeyForOverlay( overlay_metaprogram, my_singular_plink, under_singular_plink );
             }
         }
     }
