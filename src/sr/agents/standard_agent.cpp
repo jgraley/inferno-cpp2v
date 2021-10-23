@@ -797,17 +797,19 @@ void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> under_node )  // overlaying if not nullptr
+TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink, 
+                                               TreePtr<Node> under_node )  // overlaying if not nullptr
 {
     INDENT("B");
     if( under_node && IsLocalMatch(under_node.get()) ) 
-        return BuildReplaceOverlay(under_node);
+        return BuildReplaceOverlay( me_plink, under_node );
     else
-        return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
+        return BuildReplaceNormal( me_plink ); // Overwriting pattern over dest, need to make a duplicate 
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  // overlaying
+TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink, 
+                                                  TreePtr<Node> under_node )  // overlaying
 {
 	INDENT("O");
     ASSERT( under_node );
@@ -956,7 +958,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
 }
 
     
-TreePtr<Node> StandardAgent::BuildReplaceNormal() 
+TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink ) 
 {
 	INDENT("N");
  

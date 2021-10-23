@@ -68,7 +68,8 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink, 
+                                           TreePtr<Node> under_node ) 
 {
     INDENT("*");
     ASSERT( under_node );
@@ -101,7 +102,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> under_node )
 
 
 Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+                                               const NonTrivialPreRestrictionFunction &ntprf ) const
 {
 	// The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
 	// filename wildcarding, which is semantically equiviant only when used in a Sequence.

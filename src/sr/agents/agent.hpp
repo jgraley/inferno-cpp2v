@@ -169,7 +169,8 @@ public:
     virtual void Reset();    
     virtual void KeyForOverlay( PatternLink me_plink, PatternLink under_plink );
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
+    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+                                            TreePtr<Node> under_node );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

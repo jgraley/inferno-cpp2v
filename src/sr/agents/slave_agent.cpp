@@ -42,7 +42,8 @@ void SlaveAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> under_node )
+TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink, 
+                                            TreePtr<Node> under_node )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   

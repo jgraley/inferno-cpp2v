@@ -60,7 +60,8 @@ bool SearchContainerAgent::ImplHasNLQ() const
 }
 
 
-TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink, 
+                                                      TreePtr<Node> under_node ) 
 {
     INDENT("#");
     CouplingKey terminus_key = master_scr_engine->GetReplaceKey( AsAgent(terminus) );

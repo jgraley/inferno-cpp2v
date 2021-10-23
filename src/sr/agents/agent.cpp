@@ -553,9 +553,9 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     
     TreePtr<Node> dest;
     if( key )
-        dest = BuildReplaceImpl(key.GetKeyXNode(KEY_CONSUMER_5));
+        dest = BuildReplaceImpl(me_plink, key.GetKeyXNode(KEY_CONSUMER_5));
     else 
-        dest = BuildReplaceImpl(nullptr);    
+        dest = BuildReplaceImpl(me_plink, nullptr);    
     ASSERT( dest );
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
     
@@ -563,7 +563,8 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> under_node )
+TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
+                                             TreePtr<Node> under_node )
 {
     ASSERT(under_node)("Unkeyed search-only agent seen in replace context");
     return DuplicateSubtree(under_node);   

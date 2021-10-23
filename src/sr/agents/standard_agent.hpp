@@ -153,11 +153,13 @@ private:
                                            
 public:
     virtual void KeyForOverlay( PatternLink me_plink, PatternLink under_plink );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
+    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+                                            TreePtr<Node> under_node );
 
 private:	
-	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr
-    TreePtr<Node> BuildReplaceNormal();
+	TreePtr<Node> BuildReplaceOverlay( PatternLink me_plink, 
+                                       TreePtr<Node> keynode ); // under substitution if not nullptr
+    TreePtr<Node> BuildReplaceNormal( PatternLink me_plink );
     
 public:
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,

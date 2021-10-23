@@ -29,7 +29,8 @@ public:
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
     virtual void KeyForOverlay( PatternLink me_plink, PatternLink under_plink );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node );
+    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+                                            TreePtr<Node> under_node );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }

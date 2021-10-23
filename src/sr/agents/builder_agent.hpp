@@ -16,7 +16,8 @@ public:
     virtual TreePtr<Node> BuildNewSubtree() = 0;
 
 private:
-	virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> under_node ) override;  
+	virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+                                            TreePtr<Node> under_node ) override;  
 };
 
 };

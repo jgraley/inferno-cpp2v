@@ -4,7 +4,8 @@
 
 using namespace SR;
 
-TreePtr<Node> BuilderAgent::BuildReplaceImpl( TreePtr<Node> under_node ) 
+TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink, 
+                                              TreePtr<Node> under_node ) 
 {
     INDENT("%");
     if( !under_node )
