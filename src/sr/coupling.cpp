@@ -29,6 +29,20 @@ CouplingKey::CouplingKey( XLink xlink_,
 }
 
 
+CouplingKey::CouplingKey( LocatedLink link_,
+                          KeyProducer producer_,
+                          const class AndRuleEngine *are_,
+                          const class SCREngine *scre_ ) :
+    xlink(link_),
+    producer(producer_),
+    producer_pre( Tracer::GetPrefix() ),
+    plink(link_),
+    are(are_),
+    scre(scre_)
+{
+}
+
+
 CouplingKey::CouplingKey( const CouplingKey &other ) :
     xlink(other.xlink),
     producer(other.producer),

@@ -34,7 +34,7 @@ void SlaveAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
     INDENT("l");
     ASSERT( me_plink.GetChildAgent() == this );
 
-    master_scr_engine->CopyReplaceKey( me_plink, under_plink );
+    master_scr_engine->CopyReplaceKey( me_plink, under_plink, KEY_PRODUCER_6 );
     
     // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());

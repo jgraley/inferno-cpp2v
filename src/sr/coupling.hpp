@@ -43,6 +43,10 @@ public:
                           PatternLink plink_ = PatternLink(),
                           const class AndRuleEngine *are_ = nullptr,
                           const class SCREngine *scre_ = nullptr );
+    explicit CouplingKey( LocatedLink link_,
+                          KeyProducer producer_,
+                          const class AndRuleEngine *are_ = nullptr,
+                          const class SCREngine *scre_ = nullptr );
     CouplingKey( const CouplingKey &other );
     ~CouplingKey();
     XLink &operator =( const XLink &xlink_ );

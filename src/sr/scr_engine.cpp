@@ -394,21 +394,18 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::SetReplaceKey( const Agent *agent, CouplingKey key ) const
+void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
 {
     ASSERT( keys_available );
+    Agent *keyer_agent = keyer_link.GetChildAgent();
+    TreePtr<Node> keyer_x = keyer_link.GetChildX();
     
-    ASSERT(key);
-    if( plan.final_agent_phases.at(agent) != IN_COMPARE_ONLY )
-        ASSERT( key.IsFinal() )(*this)(" trying to key with non-final ")(key)("\n"); 
+    ASSERT(keyer_x);
+    if( plan.final_agent_phases.at(keyer_agent) != IN_COMPARE_ONLY )
+        ASSERT( keyer_x->IsFinal() )(*this)(" trying to key with non-final ")(keyer_x)("\n"); 
 
-    InsertSolo( replace_keys, make_pair(agent, key) );
-}
-
-
-void SCREngine::SetReplaceKey( PatternLink keyer_plink, CouplingKey key ) const
-{
-    SetReplaceKey( keyer_plink.GetChildAgent(), key );
+    CouplingKey key( keyer_link, place, nullptr, this );
+    InsertSolo( replace_keys, make_pair(keyer_agent, key) );
 }
 
 
@@ -422,15 +419,14 @@ CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
 }
 
 
-void SCREngine::CopyReplaceKey( const Agent *keyer_agent, const Agent *src_agent ) const
+void SCREngine::CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, KeyProducer place ) const
 {
     ASSERT( keys_available );
+
+    Agent *keyer_agent = keyer_plink.GetChildAgent();
+    Agent *src_agent = src_plink.GetChildAgent();
     ASSERT( replace_keys.count(src_agent) == 1 );
-    InsertSolo( replace_keys, make_pair(keyer_agent, replace_keys.at(src_agent)) );
-}
-
-
-void SCREngine::CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink ) const
-{
-    CopyReplaceKey( keyer_plink.GetChildAgent(), src_plink.GetChildAgent() );
+    LocatedLink keyer_link( keyer_plink, replace_keys.at(src_agent).GetKeyXLink() );
+    CouplingKey key( keyer_link, place, nullptr, this );
+    InsertSolo( replace_keys, make_pair(keyer_agent, key) );
 }

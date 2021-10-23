@@ -13,8 +13,8 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink,
         // Call the soft pattern impl 
         under_node = BuildNewSubtree();
         
-        CouplingKey key(XLink::CreateDistinct( under_node ), KEY_PRODUCER_7 );
-        master_scr_engine->SetReplaceKey( this, key );
+        LocatedLink link( me_plink, XLink::CreateDistinct( under_node ) );
+        master_scr_engine->SetReplaceKey( link, KEY_PRODUCER_7 );
     }
     
     // Note that the keylink could have been set via coupling - but still not

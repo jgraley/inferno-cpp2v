@@ -906,9 +906,11 @@ void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer
     // restrict the residuals wrt to each other. 
     ASSERT( (XLink)keyer_link != XLink::MMAX_Link );
     
+    ASSERT( plan.coupling_residual_links.count((PatternLink)keyer_link) == 0 );
+    
     // A coupling relates the coupled agent to an X node, not the
     // link into the agent.
-    CouplingKey key( (XLink)keyer_link, place, (PatternLink)keyer_link, this, nullptr );
+    CouplingKey key( keyer_link, place, this, nullptr );
     InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), key ) ); 
 }                                                       
  

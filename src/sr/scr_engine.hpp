@@ -126,11 +126,9 @@ public:
     list<const SCREngine *> GetSCREngines() const;
     void GenerateGraphRegions( Graph &graph ) const;
 
-    void SetReplaceKey( const Agent *agent, CouplingKey key ) const;
-    void SetReplaceKey( PatternLink keyer_plink, CouplingKey key ) const;
+    void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;
-    void CopyReplaceKey( const Agent *keyer_agent, const Agent *src_agent ) const;
-    void CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink ) const;
+    void CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, KeyProducer place ) const;
     
 private:    
     static int repetitions;

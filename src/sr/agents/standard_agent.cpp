@@ -764,7 +764,7 @@ void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink
     if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    master_scr_engine->CopyReplaceKey( me_plink, under_plink );
+    master_scr_engine->CopyReplaceKey( me_plink, under_plink, KEY_PRODUCER_6 );
     
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
