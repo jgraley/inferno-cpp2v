@@ -540,9 +540,10 @@ void AgentCommon::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplace()
+TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 {
     INDENT("B");
+    ASSERT( me_plink.GetChildAgent() == this );
     
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
@@ -559,13 +560,6 @@ TreePtr<Node> AgentCommon::BuildReplace()
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
     
     return dest;
-}
-
-
-TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
-{
-    ASSERT( me_plink.GetChildAgent() == this );
-    return BuildReplace();
 }
 
 

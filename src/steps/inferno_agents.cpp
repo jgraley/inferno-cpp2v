@@ -33,16 +33,17 @@ string BuildIdentifierAgent::GetNewName()
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
     vector<string> vs;
     bool all_same = true;
-    FOREACH( TreePtr<Node> source, sources )
+    FOREACH( TreePtrInterface &source, sources )
     {
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
-        TreePtr<Node> n = AsAgent(source)->BuildReplace();
+        PatternLink source_plink(this, &source);
+        TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildReplace(source_plink);
         TRACE("End SoftMakeIdentifier recurse\n");
-        ASSERT( n );
-        TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( n );
-        ASSERT( si )("BuildIdentifier: ")(*n)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
+        ASSERT( new_identifier );
+        TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
+        ASSERT( si )("BuildIdentifier: ")(*new_identifier)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
         string s = si->GetRender();
         if( !vs.empty() )
             all_same = all_same && (s == vs.back());
@@ -254,11 +255,12 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 {
 	ASSERT( container );
-    TreePtr<Node> n = AsAgent( container )->BuildReplace();
-    ASSERT( n );
-	ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
-	ASSERT( n_container );
-	int size = n_container->size();
+    PatternLink container_plink(this, &container);
+    TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildReplace(container_plink);
+    ASSERT( new_node );
+	ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());
+	ASSERT( new_container );
+	int size = new_container->size();
     return MakeTreePtr<SpecificInteger>(size); 
 }                                                   
 

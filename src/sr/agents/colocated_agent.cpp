@@ -86,7 +86,7 @@ TreePtr<Node> ColocatedAgent::BuildReplaceImpl( TreePtr<Node> under_node )
     auto plinks = pattern_query->GetNormalLinks();
     PatternLink replace_plink = plinks.front();
     ASSERT( replace_plink );          
-    return replace_plink.GetChildAgent()->BuildReplace();
+    return replace_plink.GetChildAgent()->BuildReplace(replace_plink);
 }
 
 

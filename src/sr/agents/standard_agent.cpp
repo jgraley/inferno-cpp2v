@@ -852,7 +852,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
 	        {
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
-				TreePtr<Node> new_elt = AsAgent((TreePtr<Node>)my_elt)->BuildReplace();
+                PatternLink my_elt_plink( this, &my_elt );
+				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(my_elt_plink);
                 ASSERT(new_elt); 
                 if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
                 {
@@ -874,17 +875,16 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
         	TRACE();
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-            auto my_child = (TreePtr<Node>)*my_singular;
-            auto dest_child = (TreePtr<Node>)*dest_singular;
                        
-            if( my_child )
-            {                             
-                dest_child = AsAgent(my_child)->BuildReplace();
-                ASSERT( dest_child );                
+            if( *my_singular )
+            {         
+                PatternLink my_singular_plink( this, my_singular );                    
+                TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(my_singular_plink);
+                ASSERT( new_dest_singular );                
+                ASSERT( new_dest_singular->IsFinal() );
+                *dest_singular = new_dest_singular;
                 present_in_overlay.insert( dest_memb[i] );
             }
-            ASSERT( dest_child->IsFinal() );
-            *dest_singular = dest_child;
         }
         else
         {
@@ -992,21 +992,22 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
             dest_con->clear();
 
             TRACE("Copying container size %d\n", my_con->size() );
-	        FOREACH( const TreePtrInterface &pe, *my_con )
+	        FOREACH( const TreePtrInterface &my_elt, *my_con )
 	        {
-		        ASSERT( pe )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
-		        TRACE("Got ")(*pe)("\n");
-	            TreePtr<Node> x = AsAgent((TreePtr<Node>)pe)->BuildReplace();
-		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(x.get()) )
+		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
+		        TRACE("Got ")(*my_elt)("\n");
+                PatternLink my_elt_plink( this, &my_elt );
+				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(my_elt_plink);
+		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
-			        TRACE("Walking SubContainer length %d\n", psc->size() );
-		            FOREACH( const TreePtrInterface &pp, *psc )
-			            dest_con->insert( pp );  
+			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
+		            FOREACH( const TreePtrInterface &new_sub_elt, *new_sub_con )
+			            dest_con->insert( new_sub_elt );  
            		}
 		        else
 		        {
-			        TRACE("inserting %s directly\n", TypeInfo(x).name().c_str());
-			        dest_con->insert( x );
+			        TRACE("inserting %s directly\n", TypeInfo(new_elt).name().c_str());
+			        dest_con->insert( new_elt );
 		        }
 	        }
         }            
@@ -1015,9 +1016,9 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
             TRACE("Copying single element\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
-            auto my_child = (TreePtr<Node>)*my_singular;
-            TreePtr<Node> dest_child = AsAgent(my_child)->BuildReplace();
-            *dest_singular = dest_child;
+            PatternLink my_singular_plink( this, my_singular );                    
+            TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(my_singular_plink);
+            *dest_singular = new_dest_singular;
         }
         else
         {
