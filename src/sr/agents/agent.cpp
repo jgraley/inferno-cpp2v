@@ -562,6 +562,13 @@ TreePtr<Node> AgentCommon::BuildReplace()
 }
 
 
+TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
+{
+    ASSERT( me_plink.GetChildAgent() == this );
+    return BuildReplace();
+}
+
+
 TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> under_node )
 {
     ASSERT(under_node)("Unkeyed search-only agent seen in replace context");

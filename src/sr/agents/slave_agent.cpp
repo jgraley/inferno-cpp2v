@@ -34,7 +34,7 @@ void SlaveAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
     INDENT("l");
     ASSERT( me_plink.GetChildAgent() == this );
 
-    master_scr_engine->CopyReplaceKey( this, under_plink.GetChildAgent() );
+    master_scr_engine->CopyReplaceKey( me_plink, under_plink );
     
     // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());
@@ -48,7 +48,8 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> under_node )
     ASSERT( *GetThrough() );   
     
     // Continue current replace operation by following the "through" pointer
-    TreePtr<Node> my_through_subtree = AsAgent((TreePtr<Node>)*GetThrough())->BuildReplace();
+    PatternLink through_plink(this, GetThrough());
+    TreePtr<Node> my_through_subtree = through_plink.GetChildAgent()->BuildReplace(through_plink);
     ASSERT( my_through_subtree );
     
     // And then recurse into slaves

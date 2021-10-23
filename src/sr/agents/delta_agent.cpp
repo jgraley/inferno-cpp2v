@@ -57,8 +57,8 @@ void DeltaAgent::StartKeyForOverlay()
     PatternLink overlay_plink(this, GetOverlay());
     PatternLink through_plink(this, GetThrough());
     
-    // Key as many nodes as possible on the replace side
-    TRACE(*this)(" transferring key from ")(through_plink)(" to ")(overlay_plink);
+    // Key as many nodes as possible on the replace side. Note: the "keyer link"
+    // is always the link coming from traversal of the subtree under GetOverlay()
     overlay_plink.GetChildAgent()->KeyForOverlay(overlay_plink, through_plink);
 }
 
@@ -67,6 +67,6 @@ TreePtr<Node> DeltaAgent::BuildReplaceImpl( TreePtr<Node> under_node )
 {
     INDENT("O");    
 
-    Agent *overlay_agent = AsAgent((TreePtr<Node>)*GetOverlay());
-    return overlay_agent->BuildReplace();
+    PatternLink overlay_plink(this, GetOverlay());
+    return overlay_plink.GetChildAgent()->BuildReplace(overlay_plink);
 }

@@ -239,7 +239,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
         ao->StartKeyForOverlay();
   
     // Now replace according to the couplings
-    TreePtr<Node> rnode = plan.root_agent->BuildReplace();
+    TreePtr<Node> rnode = plan.root_agent->BuildReplace(plan.root_plink);
     
     keys_available = false;
     replace_keys.clear();
@@ -406,6 +406,12 @@ void SCREngine::SetReplaceKey( const Agent *agent, CouplingKey key ) const
 }
 
 
+void SCREngine::SetReplaceKey( PatternLink keyer_plink, CouplingKey key ) const
+{
+    SetReplaceKey( keyer_plink.GetChildAgent(), key );
+}
+
+
 CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
 {
     ASSERT( keys_available );
@@ -416,9 +422,15 @@ CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
 }
 
 
-void SCREngine::CopyReplaceKey( const Agent *dest_agent, const Agent *src_agent ) const
+void SCREngine::CopyReplaceKey( const Agent *keyer_agent, const Agent *src_agent ) const
 {
     ASSERT( keys_available );
     ASSERT( replace_keys.count(src_agent) == 1 );
-    InsertSolo( replace_keys, make_pair(dest_agent, replace_keys.at(src_agent)) );
+    InsertSolo( replace_keys, make_pair(keyer_agent, replace_keys.at(src_agent)) );
+}
+
+
+void SCREngine::CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink ) const
+{
+    CopyReplaceKey( keyer_plink.GetChildAgent(), src_plink.GetChildAgent() );
 }

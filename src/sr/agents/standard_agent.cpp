@@ -23,21 +23,21 @@ void StandardAgent::SCRConfigure( const SCREngine *e,
 void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 {
     algo = algo_;
-    const vector< Itemiser::Element * > pattern_memb = algo->Itemise();
+    const vector< Itemiser::Element * > my_memb = algo->Itemise();
     int ii=0;
     ASSERT( sequences.empty() );
     ASSERT( collections.empty() );
     ASSERT( singulars.empty() );
-    FOREACH( Itemiser::Element *ie, pattern_memb )
+    FOREACH( Itemiser::Element *ie, my_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
             sequences.emplace_back( Sequence(ii, this, phase, pattern_seq) );
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )        
             collections.emplace_back( Collection(ii, this, phase, pattern_col) );
-        else if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(ie) )        
+        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(ie) )        
         {
-            if( *pattern_singular ) // only make plans for non-null singular pointers
-                singulars.emplace_back( Singular(ii, this, phase, pattern_singular) );
+            if( *my_singular ) // only make plans for non-null singular pointers
+                singulars.emplace_back( Singular(ii, this, phase, my_singular) );
         }
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
@@ -183,7 +183,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
         }
     }
     
-    const vector< Itemiser::Element * > pattern_memb = Itemise();
+    const vector< Itemiser::Element * > my_memb = Itemise();
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         for( SequenceInterface::iterator pit = plan_seq.pattern->begin(); pit != plan_seq.pattern->end(); ++pit )                 
@@ -764,7 +764,7 @@ void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink
     if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    master_scr_engine->CopyReplaceKey( this, under_plink.GetChildAgent() );
+    master_scr_engine->CopyReplaceKey( me_plink, under_plink );
     
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
@@ -828,60 +828,60 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
 
     // Loop over the elements of pattern and dest, limited to elements
     // present in pattern, which is a non-strict subclass of under_node and dest. // Hmmm.... superclass?
-    // Delta or overwrite pattern over a duplicate of dest. Keep track of 
+    // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
-    vector< Itemiser::Element * > pattern_memb = Itemise();
+    vector< Itemiser::Element * > my_memb = Itemise();
     vector< Itemiser::Element * > dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
-    ASSERT( pattern_memb.size() == dest_memb.size() );
-    set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance 
+    ASSERT( my_memb.size() == dest_memb.size() );
+    set< Itemiser::Element * > present_in_overlay; // Repeatability audit: OK since only checking for existance 
     
     TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(this).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )
     {
     	TRACE("member %d from pattern\n", i );
-        ASSERT( pattern_memb[i] )( "itemise returned null element" );
+        ASSERT( my_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
-        if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
+        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_memb[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
-            ASSERT( dest_con )( "itemise for dest didn't match itemise for pattern_con");
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
             dest_con->clear();
 
-            TRACE("Copying container size %d from pattern_con\n", (*pattern_con).size() );
-	        FOREACH( const TreePtrInterface &pe, *pattern_con )
+            TRACE("Copying container size %d from my_con\n", (*my_con).size() );
+	        FOREACH( const TreePtrInterface &my_elt, *my_con )
 	        {
-		        ASSERT( pe )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
-		        TRACE("Got ")(*pe)("\n");
-				TreePtr<Node> x = AsAgent((TreePtr<Node>)pe)->BuildReplace();
-                ASSERT(x); 
-                if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(x.get()) )
+		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
+		        TRACE("Got ")(*my_elt)("\n");
+				TreePtr<Node> new_elt = AsAgent((TreePtr<Node>)my_elt)->BuildReplace();
+                ASSERT(new_elt); 
+                if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
                 {
-                    TRACE("Walking SubContainer length %d\n", psc->size() );
-                    FOREACH( const TreePtrInterface &pp, *psc )
-                        dest_con->insert( pp );
+                    TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
+                    FOREACH( const TreePtrInterface &new_sub_elt, *new_sub_con )
+                        dest_con->insert( new_sub_elt );
                 }
                 else 
                 {
-                    TRACE("inserting %s directly\n", TypeInfo(x).name().c_str());
-                    ASSERT( x->IsFinal() )("Got intermediate node ")(*x);
-                    dest_con->insert( x );
+                    ASSERT( new_elt->IsFinal() )("Got intermediate node ")(*new_elt);
+                    TRACE("inserting %s directly\n", TypeInfo(new_elt).name().c_str());
+                    dest_con->insert( new_elt );
                 }
 	        }
-	        present_in_pattern.insert( dest_memb[i] );
+	        present_in_overlay.insert( dest_memb[i] );
         }            
-        else if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_memb[i]) )
         {
         	TRACE();
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-            auto pattern_child = (TreePtr<Node>)*pattern_singular;
+            auto my_child = (TreePtr<Node>)*my_singular;
             auto dest_child = (TreePtr<Node>)*dest_singular;
                        
-            if( pattern_child )
+            if( my_child )
             {                             
-                dest_child = AsAgent(pattern_child)->BuildReplace();
+                dest_child = AsAgent(my_child)->BuildReplace();
                 ASSERT( dest_child );                
-                present_in_pattern.insert( dest_memb[i] );
+                present_in_overlay.insert( dest_memb[i] );
             }
             ASSERT( dest_child->IsFinal() );
             *dest_singular = dest_child;
@@ -906,7 +906,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
         ASSERT( under_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( present_in_pattern.count(dest_memb[i]) > 0 )
+        if( present_in_overlay.count(dest_memb[i]) > 0 )
             continue; // already did this one in the above loop
 
     	TRACE("Member %d from key\n", i );
@@ -919,21 +919,21 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> under_node )  //
             dest_con->clear();
 
             TRACE("Copying container size %d from key\n", under_con->size() );
-	        FOREACH( const TreePtrInterface &p, *under_con )
+	        FOREACH( const TreePtrInterface &under_elt, *under_con )
 	        {
-		        ASSERT( p ); // present simplified scheme disallows nullptr
-		        TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p );
-		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
+		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
+		        TreePtr<Node> new_elt = DuplicateSubtree( (TreePtr<Node>)under_elt );
+		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
-			        TRACE("Walking SubContainer length %d\n", sc->size() );
-		            FOREACH( const TreePtrInterface &xx, *sc )
-			            dest_con->insert( xx );
+			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
+		            FOREACH( const TreePtrInterface &new_sub_elt, *new_sub_con )
+			            dest_con->insert( new_sub_elt );
            		}
 		        else
 		        {
-			        TRACE("inserting %s directly\n", TypeInfo(n).name().c_str());
-			        dest_con->insert( n );
-                    ASSERT( n->IsFinal() );
+                    ASSERT( new_elt->IsFinal() );
+			        TRACE("inserting %s directly\n", TypeInfo(new_elt).name().c_str());
+			        dest_con->insert( new_elt );
 		        }
 	        }
         }            
@@ -973,7 +973,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
     // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > pattern_memb = Itemise();
+    vector< Itemiser::Element * > my_memb = Itemise();
     vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
 
     TRACE("Copying %d members pattern=", dest_memb.size())(*this)(" dest=")(*dest)("\n");
@@ -983,18 +983,18 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
     for( int i=0; i<dest_memb.size(); i++ )
     {
     	TRACE("Copying member %d\n", i );
-        ASSERT( pattern_memb[i] )( "itemise returned null element" );
+        ASSERT( my_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
+        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_memb[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
             dest_con->clear();
 
-            TRACE("Copying container size %d\n", pattern_con->size() );
-	        FOREACH( const TreePtrInterface &pe, *pattern_con )
+            TRACE("Copying container size %d\n", my_con->size() );
+	        FOREACH( const TreePtrInterface &pe, *my_con )
 	        {
-		        ASSERT( pe )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was nullptr\n");
+		        ASSERT( pe )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*pe)("\n");
 	            TreePtr<Node> x = AsAgent((TreePtr<Node>)pe)->BuildReplace();
 		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(x.get()) )
@@ -1010,13 +1010,13 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
 		        }
 	        }
         }            
-        else if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_memb[i]) )
         {
             TRACE("Copying single element\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *pattern_singular )("Member %d (", i)(*pattern_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
-            auto pattern_child = (TreePtr<Node>)*pattern_singular;
-            TreePtr<Node> dest_child = AsAgent(pattern_child)->BuildReplace();
+            ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
+            auto my_child = (TreePtr<Node>)*my_singular;
+            TreePtr<Node> dest_child = AsAgent(my_child)->BuildReplace();
             *dest_singular = dest_child;
         }
         else
