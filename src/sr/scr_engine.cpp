@@ -14,10 +14,6 @@
 
 #include <list>
 
-//#define CANNONICALISE
-
-#define BUILD_THE_KNOWLEDGE
-
 #define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
 
 using namespace SR;
@@ -274,11 +270,7 @@ XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
     if( knowledge.domain.count(xlink) > 0 )
         return xlink;
         
-#ifdef ENABLE_UNIQUIFY_DOMAIN_EXTENSION    
-    return knowledge.domain_extension_classes->Uniquify( xlink );
-#else
-    return xlink;
-#endif    
+    return knowledge.domain_extension_classes->Uniquify( xlink ); 
 }
 
 
@@ -287,28 +279,18 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 {
     INDENT(">");
 
-#ifdef CANNONICALISE
-    Cannonicaliser cz;
-    TRACE("Cannonicalise\n");
-    cz( *p_root_xnode, p_root_xnode );
-#endif
-
     // Cannonicalise could change root
     XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
 
     // Global domain of possible xlink values
-#ifdef BUILD_THE_KNOWLEDGE
     knowledge.Build( plan.root_plink, root_xlink );
-#endif
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
     plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );
            
-#ifdef BUILD_THE_KNOWLEDGE
     knowledge.Clear();
-#endif
 
     TRACE("Now replacing\n");
     *p_root_xnode = Replace(master_keys);
