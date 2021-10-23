@@ -29,13 +29,16 @@ void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 }
 
 
-void SlaveAgent::KeyForOverlay( Agent *under )
+void SlaveAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
 {
     INDENT("l");
-    // Make slaves "invisible" to Delta key propagation
-    master_scr_engine->CopyReplaceKey( this, under );
+    ASSERT( me_plink.GetChildAgent() == this );
+
+    master_scr_engine->CopyReplaceKey( this, under_plink.GetChildAgent() );
     
-    AsAgent((TreePtr<Node>)*GetThrough())->KeyForOverlay(under);   
+    // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
+    PatternLink through_plink(this, GetThrough());
+    through_plink.GetChildAgent()->KeyForOverlay(through_plink, under_plink);   
 }
 
 

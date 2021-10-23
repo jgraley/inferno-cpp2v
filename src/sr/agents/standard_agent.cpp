@@ -746,11 +746,12 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::KeyForOverlay( Agent *under )
+void StandardAgent::KeyForOverlay( PatternLink me_plink, PatternLink under_plink )
 {
     INDENT("T");
-    ASSERT( under );
-    TRACE(*this)(".KeyForOverlay(")(*under)(")\n");
+    ASSERT( me_plink.GetChildAgent() == this );
+    ASSERT( under_plink.GetChildAgent() );
+    TRACE(*this)(".KeyForOverlay(")(under_plink)(")\n");
     
     if( master_scr_engine->GetReplaceKey( this ) )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
@@ -760,33 +761,36 @@ void StandardAgent::KeyForOverlay( Agent *under )
     // over a subclass means we simply update the singulars we know about
     // in over. Under is likely to be an X node and hence final while
     // over can be StandaedAgent<some intermediate>.
-    if( !IsLocalMatch(under) ) 
+    if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    master_scr_engine->CopyReplaceKey( this, under );
+    master_scr_engine->CopyReplaceKey( this, under_plink.GetChildAgent() );
     
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
-    vector< Itemiser::Element * > pattern_memb = Itemise(); 
-    vector< Itemiser::Element * > under_memb = Itemise( under ); 
+    vector< Itemiser::Element * > my_memb = Itemise(); 
+    vector< Itemiser::Element * > under_memb = Itemise( under_plink.GetChildAgent() ); 
     
     // Loop over all the members of under (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<pattern_memb.size(); i++ )
+    for( int i=0; i<my_memb.size(); i++ )
     {
-        ASSERT( pattern_memb[i] )( "itemise returned null element" );
+        ASSERT( my_memb[i] )( "itemise returned null element" );
         ASSERT( under_memb[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
         // Act only on singular members that are non-null in the pattern (i.e. this) 
-        if( TreePtrInterface *pattern_singular = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_memb[i]) )
         {
             TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_memb[i]);
-            if( *pattern_singular )
+            if( *my_singular )
             {
                 ASSERT(*under_singular)("Cannot key intermediate because correpsonding search node is nullptr");
-                AsAgent((TreePtr<Node>)*pattern_singular)->KeyForOverlay( AsAgent((TreePtr<Node>)*under_singular) );
+                PatternLink my_singular_plink(this, my_singular);
+                PatternLink under_singular_plink(this, under_singular);
+                
+                my_singular_plink.GetChildAgent()->KeyForOverlay( my_singular_plink, under_singular_plink );
             }
         }
     }

@@ -54,12 +54,12 @@ list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
 void DeltaAgent::StartKeyForOverlay()
 {
     ASSERT( *GetOverlay() );          
-    Agent *overlay_agent = AsAgent((TreePtr<Node>)*GetOverlay()); // over
-    Agent *through_agent = AsAgent((TreePtr<Node>)*GetThrough()); // under
+    PatternLink overlay_plink(this, GetOverlay());
+    PatternLink through_plink(this, GetThrough());
     
     // Key as many nodes as possible on the replace side
-    TRACE(*this)(" transferring key from ")(*through_agent)(" to ")(*overlay_agent);
-    overlay_agent->KeyForOverlay(through_agent);
+    TRACE(*this)(" transferring key from ")(through_plink)(" to ")(overlay_plink);
+    overlay_plink.GetChildAgent()->KeyForOverlay(overlay_plink, through_plink);
 }
 
 
