@@ -35,7 +35,7 @@ public:
 class StartsOverlay
 {
 public:
-    virtual void StartKeyForOverlay(list< pair<PatternLink, PatternLink> > &overlay_metaprogram) = 0;
+    virtual void StartKeyForOverlay(map<PatternLink, PatternLink> &overlay_plinks) = 0;
 };
 
 /// Common implementation for search+replace, compare+replace and slaves
@@ -94,7 +94,7 @@ private:
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
-        mutable list< pair<PatternLink, PatternLink> > overlay_metaprogram; // first = second
+        map<PatternLink, PatternLink> overlay_plinks; 
     } plan;
 public:
     // Note: this is const but RepeatingCompareReplace(). Why?
@@ -130,6 +130,7 @@ public:
     void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;
     void CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, KeyProducer place ) const;
+    bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     
 private:    
     static int repetitions;

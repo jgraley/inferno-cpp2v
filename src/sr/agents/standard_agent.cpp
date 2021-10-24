@@ -746,7 +746,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::KeyForOverlay( list< pair<PatternLink, PatternLink> > &overlay_metaprogram, PatternLink me_plink, PatternLink under_plink )
+void StandardAgent::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, PatternLink me_plink, PatternLink under_plink )
 {
     INDENT("T");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -761,13 +761,10 @@ void StandardAgent::KeyForOverlay( list< pair<PatternLink, PatternLink> > &overl
     if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    if( master_scr_engine->GetReplaceKey( this ) )
-    {
-        //FTRACE("Already keyed in ")(*this)(".StandardAgent::KeyForOverlay() ")(master_scr_engine->GetReplaceKey( this ))("\n");
-        return; // Already keyed, no point wasting time keying this (and the subtree under it) again
-    }
+    if( master_scr_engine->IsKeyedByAndRuleEngine(this) ) 
+        return; // In search pattern and already keyed - we only overlay replace-only nodes
             
-    overlay_metaprogram.push_back( make_pair(me_plink, under_plink) );
+    overlay_plinks[me_plink] = under_plink;
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
@@ -793,7 +790,7 @@ void StandardAgent::KeyForOverlay( list< pair<PatternLink, PatternLink> > &overl
                 PatternLink my_singular_plink(this, my_singular);
                 PatternLink under_singular_plink(this, under_singular);
                 
-                my_singular_plink.GetChildAgent()->KeyForOverlay( overlay_metaprogram, my_singular_plink, under_singular_plink );
+                my_singular_plink.GetChildAgent()->KeyForOverlay( overlay_plinks, my_singular_plink, under_singular_plink );
             }
         }
     }

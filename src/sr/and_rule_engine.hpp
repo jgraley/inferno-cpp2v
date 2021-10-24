@@ -96,7 +96,7 @@ public:
         unordered_set<Agent *> master_agents;
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
-        unordered_set<PatternLink> my_normal_links_unique_by_agent;
+        unordered_set<PatternLink> my_normal_links_unique_by_agent; // = trivial and non-trivial keyers
         unordered_set< Agent *> my_evaluators;   
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
@@ -104,7 +104,8 @@ public:
         unordered_map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         unordered_set<Agent *> master_boundary_agents;
         unordered_set<PatternLink> coupling_residual_links;
-        unordered_set<PatternLink> coupling_keyer_links; // Only where child X has at least one residual link (i.e. non-trivial)
+        unordered_set<PatternLink> coupling_keyer_links_nontrivial; // Only where child X has at least one residual link
+        unordered_set<PatternLink> coupling_keyer_links_all; // All keyers
         unordered_set<PatternLink> master_boundary_links; // These are ALL residuals
         unordered_set<PatternLink> master_proxy_keyer_links; // We invent these for CSP solver; not descendants of root
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
@@ -142,6 +143,7 @@ public:
 
     const CouplingKeysMap &GetCouplingKeys();
     const void ClearCouplingKeys();
+    const unordered_set<Agent *> &GetKeyedAgents() const;
 
 private:    
     void RecordLink( LocatedLink link, KeyProducer place );

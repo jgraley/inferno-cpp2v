@@ -533,7 +533,7 @@ void AgentCommon::Reset()
 }
 
 
-void AgentCommon::KeyForOverlay( list< pair<PatternLink, PatternLink> > &overlay_metaprogram, PatternLink me_plink, PatternLink under_plink )
+void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, PatternLink me_plink, PatternLink under_plink )
 {
     // This function is called on nodes in the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...

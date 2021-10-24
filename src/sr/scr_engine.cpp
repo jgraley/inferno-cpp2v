@@ -15,7 +15,6 @@
 #include <list>
 
 #define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
-#define OVERLAY_METAPROGRAM_DURING_REPLACE
 
 using namespace SR;
 using namespace std;
@@ -101,11 +100,9 @@ void SCREngine::Plan::PlanningStageThree()
     // the agents this and-rule engine sees have been configured.
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
     
-#ifndef OVERLAY_METAPROGRAM_DURING_REPLACE
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
-        ao->StartKeyForOverlay(overlay_metaprogram);    
-#endif
+        ao->StartKeyForOverlay(overlay_plinks);    
 } 
 
 
@@ -243,18 +240,13 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     my_keyer_plinks_measured.clear();
     keys_available = true;
   
-#ifdef OVERLAY_METAPROGRAM_DURING_REPLACE
-    plan.overlay_metaprogram.clear();
-    for( StartsOverlay *ao : plan.my_overlay_starter_engines )
-        ao->StartKeyForOverlay(plan.overlay_metaprogram);    
-#endif  
-  
     // Run the meta-program that copies keys around for overlaying
-    for( pair<PatternLink, PatternLink> &p : plan.overlay_metaprogram )
+    for( pair<const PatternLink, PatternLink> &p : plan.overlay_plinks )
         CopyReplaceKey( p.first, p.second, KEY_PRODUCER_6 );
   
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace(plan.root_plink);
+    
     keys_available = false;
     replace_keys.clear();
     //FTRACE(my_keyer_plinks_measured);
@@ -446,4 +438,11 @@ void SCREngine::CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, 
     CouplingKey key( keyer_link, place, nullptr, this );
     InsertSolo( replace_keys, make_pair(keyer_agent, key) );
     InsertSolo( my_keyer_plinks_measured, (PatternLink)keyer_link );    
+}
+
+
+bool SCREngine::IsKeyedByAndRuleEngine( Agent *agent ) const
+{
+    ASSERT( plan.and_rule_engine );
+    return plan.and_rule_engine->GetKeyedAgents().count( agent );
 }

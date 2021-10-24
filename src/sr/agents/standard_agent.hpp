@@ -152,7 +152,7 @@ private:
                                       const TheKnowledge *knowledge ) const;
                                            
 public:
-    virtual void KeyForOverlay( list< pair<PatternLink, PatternLink> > &overlay_metaprogram, PatternLink me_plink, PatternLink under_plink );
+    virtual void KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, PatternLink me_plink, PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> under_node );
 
