@@ -35,9 +35,7 @@ void SlaveAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plink
 {
     INDENT("l");
     ASSERT( me_plink.GetChildAgent() == this );
-
-    overlay_plinks[me_plink] = under_plink;
-    
+        
     // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());
     through_plink.GetChildAgent()->KeyForOverlay(overlay_plinks, through_plink, under_plink);   

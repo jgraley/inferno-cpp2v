@@ -754,16 +754,6 @@ void StandardAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_pl
     ASSERT( me_plink.GetChildAgent() == this );
     ASSERT( under_plink.GetChildAgent() );
     TRACE(*this)(".KeyForOverlayImpl(")(under_plink)(")\n");
-    
-    // This is why we call on over, passing in under. The test requires
-    // that under be a non-strict subclass of over. Overlaying a super-class
-    // over a subclass means we simply update the singulars we know about
-    // in over. Under is likely to be an X node and hence final while
-    // over can be StandaedAgent<some intermediate>.
-    if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
-        return; // Not compatible with pattern: recursion stops here
-        
-    overlay_plinks[me_plink] = under_plink;
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.

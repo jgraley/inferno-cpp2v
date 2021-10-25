@@ -539,11 +539,24 @@ void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks,
 {
     // This function is called on nodes in the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...
-    FTRACE(*this)("\n");
-    
+      
     if( master_scr_engine->IsKeyedByAndRuleEngine(this) ) 
         return; // In search pattern and already keyed - we only overlay using replace-only nodes
                 
+    // This is why we call on over, passing in under. The test requires
+    // that under be a non-strict subclass of over. Overlaying a super-class
+    // over a subclass means we simply update the singulars we know about
+    // in over. Under is likely to be an X node and hence final while
+    // over can be StandaedAgent<some intermediate>.
+    if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
+        return; // Not compatible with pattern: recursion stops here
+        
+    // Under must be a standard agent
+    if( !dynamic_cast<StandardAgent *>(under_plink.GetChildAgent()) )
+        return;
+        
+    overlay_plinks[me_plink] = under_plink;
+
     KeyForOverlayImpl( overlay_plinks, me_plink, under_plink );
 }
 
