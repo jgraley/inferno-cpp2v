@@ -537,6 +537,7 @@ void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks,
                                  PatternLink me_plink, 
                                  PatternLink under_plink )
 {
+    ASSERT( me_plink.GetChildAgent() == this );
     // This function is called on nodes in the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...
       

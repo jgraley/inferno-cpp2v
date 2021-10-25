@@ -751,7 +751,6 @@ void StandardAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_pl
                                        PatternLink under_plink )
 {
     INDENT("T");
-    ASSERT( me_plink.GetChildAgent() == this );
     ASSERT( under_plink.GetChildAgent() );
     TRACE(*this)(".KeyForOverlayImpl(")(under_plink)(")\n");
 

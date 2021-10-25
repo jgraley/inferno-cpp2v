@@ -32,10 +32,7 @@ void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 void SlaveAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
                                     PatternLink me_plink, 
                                     PatternLink under_plink )
-{
-    INDENT("l");
-    ASSERT( me_plink.GetChildAgent() == this );
-        
+{    
     // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());
     through_plink.GetChildAgent()->KeyForOverlay(overlay_plinks, through_plink, under_plink);   
