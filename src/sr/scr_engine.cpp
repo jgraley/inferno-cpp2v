@@ -92,10 +92,6 @@ void SCREngine::Plan::PlanningStageThree()
     INDENT("}");
     TRACE(*this)(" planning part three\n");
     
-    // Recurse into subordinate SCREngines
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageThree();                                      
-
     // Make and-rule engines on the way out - by now, hopefully all
     // the agents this and-rule engine sees have been configured.
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
@@ -103,6 +99,10 @@ void SCREngine::Plan::PlanningStageThree()
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartKeyForOverlay(overlay_plinks);    
+
+    // Recurse into subordinate SCREngines
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+        p.second->PlanningStageThree();                                      
 } 
 
 

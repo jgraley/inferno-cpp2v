@@ -533,10 +533,26 @@ void AgentCommon::Reset()
 }
 
 
-void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, PatternLink me_plink, PatternLink under_plink )
+void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, 
+                                 PatternLink me_plink, 
+                                 PatternLink under_plink )
 {
     // This function is called on nodes in the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...
+    FTRACE(*this)("\n");
+    
+    if( master_scr_engine->IsKeyedByAndRuleEngine(this) ) 
+        return; // In search pattern and already keyed - we only overlay using replace-only nodes
+                
+    KeyForOverlayImpl( overlay_plinks, me_plink, under_plink );
+}
+
+
+void AgentCommon::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
+                                     PatternLink me_plink, 
+                                     PatternLink under_plink )
+{
+    // An empty function here implies leaf-termination of the overlay process
 }
 
 

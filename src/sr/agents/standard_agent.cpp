@@ -746,12 +746,14 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, PatternLink me_plink, PatternLink under_plink )
+void StandardAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
+                                       PatternLink me_plink, 
+                                       PatternLink under_plink )
 {
     INDENT("T");
     ASSERT( me_plink.GetChildAgent() == this );
     ASSERT( under_plink.GetChildAgent() );
-    TRACE(*this)(".KeyForOverlay(")(under_plink)(")\n");
+    TRACE(*this)(".KeyForOverlayImpl(")(under_plink)(")\n");
     
     // This is why we call on over, passing in under. The test requires
     // that under be a non-strict subclass of over. Overlaying a super-class
@@ -761,9 +763,6 @@ void StandardAgent::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks
     if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    if( master_scr_engine->IsKeyedByAndRuleEngine(this) ) 
-        return; // In search pattern and already keyed - we only overlay replace-only nodes
-            
     overlay_plinks[me_plink] = under_plink;
 
     // Loop over all the elements of under and dest that do not appear in pattern or

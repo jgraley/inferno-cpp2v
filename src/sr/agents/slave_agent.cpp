@@ -29,7 +29,9 @@ void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
 }
 
 
-void SlaveAgent::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, PatternLink me_plink, PatternLink under_plink )
+void SlaveAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
+                                    PatternLink me_plink, 
+                                    PatternLink under_plink )
 {
     INDENT("l");
     ASSERT( me_plink.GetChildAgent() == this );
