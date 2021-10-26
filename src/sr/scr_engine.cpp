@@ -151,9 +151,8 @@ void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_p
     // Determine who our slaves are
     my_agents_needing_engines.clear();
     my_overlay_starter_engines.clear();
-    for( PatternLink plink : my_plinks )
+    for( Agent *a : my_agents )
     {
-        Agent *a = plink.GetChildAgent();
         if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
             my_agents_needing_engines.insert( ae );
         if( auto ao = dynamic_cast<StartsOverlay *>(a) )
