@@ -46,7 +46,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
                        const unordered_set<PatternLink> &master_plinks_,
-                       const SCREngine *master ) :
+                       const SCREngine *master ) : // Note: Is planning stage one
     algo( algo_ ),
     master_ptr( nullptr ),
     master_plinks( master_plinks_ )
@@ -72,40 +72,6 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 }
 
     
-void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &final_agent_phases_)
-{
-    INDENT("}");
-    TRACE(*this)(" planning part two\n");
-    final_agent_phases = final_agent_phases_;
-    
-    // Recurse into subordinate SCREngines
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageTwo(final_agent_phases);                                      
-
-    // Configure agents on the way out
-    ConfigureAgents();
-}
-
-
-void SCREngine::Plan::PlanningStageThree()
-{
-    INDENT("}");
-    TRACE(*this)(" planning part three\n");
-    
-    // Make and-rule engines on the way out - by now, hopefully all
-    // the agents this and-rule engine sees have been configured.
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
-    
-    // Plan the keyers for couplings 
-    for( StartsOverlay *ao : my_overlay_starter_engines )
-        ao->StartKeyForOverlay(overlay_plinks);    
-
-    // Recurse into subordinate SCREngines
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageThree();                                      
-} 
-
-
 void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
                                       CompareReplace::AgentPhases &in_progress_agent_phases )
 {
@@ -190,6 +156,21 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
 }
 
 
+void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &final_agent_phases_)
+{
+    INDENT("}");
+    TRACE(*this)(" planning part two\n");
+    final_agent_phases = final_agent_phases_;
+    
+    // Recurse into subordinate SCREngines
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+        p.second->PlanningStageTwo(final_agent_phases);                                      
+
+    // Configure agents on the way out
+    ConfigureAgents();
+}
+
+
 void SCREngine::Plan::ConfigureAgents()
 {
     // Give agents pointers to here and our coupling keys
@@ -211,22 +192,28 @@ void SCREngine::Plan::ConfigureAgents()
 }
 
 
+void SCREngine::Plan::PlanningStageThree()
+{
+    INDENT("}");
+    TRACE(*this)(" planning part three\n");
+    
+    // Make and-rule engines on the way out - by now, hopefully all
+    // the agents this and-rule engine sees have been configured.
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
+    
+    // Plan the keyers for couplings 
+    for( StartsOverlay *ao : my_overlay_starter_engines )
+        ao->StartKeyForOverlay(overlay_plinks);    
+
+    // Recurse into subordinate SCREngines
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+        p.second->PlanningStageThree();                                      
+} 
+
+
 string SCREngine::Plan::GetTrace() const 
 {
     return algo->GetName() + "::Plan" + algo->GetSerialString();
-}
-
-
-const CompareReplace * SCREngine::GetOverallMaster() const
-{
-    return plan.overall_master_ptr;
-}
-
-
-void SCREngine::SetStopAfter( vector<int> ssa, int d )
-{
-    stop_after = ssa;
-    depth = d;
 }
 
 
@@ -255,28 +242,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     // global X tree would be incorrect (multiple links to non-identifier)
     // and that would break knowledge building. See #217
     return plan.root_agent->DuplicateSubtree(rnode);
-}
-
-
-void SCREngine::RecurseInto( SCREngine *slave_engine, 
-                             TreePtr<Node> *p_root_xnode ) const
-{
-    ASSERT( keys_available );
-    
-    // Run the slave engine        
-    slave_engine->RepeatingCompareReplace( p_root_xnode, &replace_keys );
-}
-
-
-XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
-{
-    // Don't worry about generated nodes that are already in 
-    // the X tree (they had to have been found there after a
-    // search). 
-    if( knowledge.domain.count(xlink) > 0 )
-        return xlink;
-        
-    return knowledge.domain_extension_classes->Uniquify( xlink ); 
 }
 
 
@@ -356,16 +321,17 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
 }
 
 
-string SCREngine::GetTrace() const
+void SCREngine::SetStopAfter( vector<int> ssa, int d )
 {
-    string s = Traceable::GetName() + GetSerialString();
-    return s;
+    stop_after = ssa;
+    depth = d;
 }
 
 
-string SCREngine::GetGraphId() const
-{
-	return "SCR"+GetSerialString();
+void SCREngine::SetMaxReps( int n, bool e ) 
+{ 
+    repetitions = n; 
+    rep_error = e; 
 }
 
 
@@ -397,6 +363,16 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 	plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
 	for( auto p : plan.my_engines )
 		p.second->GenerateGraphRegions(graph);	
+}
+
+
+void SCREngine::RecurseInto( SCREngine *slave_engine, 
+                             TreePtr<Node> *p_root_xnode ) const
+{
+    ASSERT( keys_available );
+    
+    // Run the slave engine        
+    slave_engine->RepeatingCompareReplace( p_root_xnode, &replace_keys );
 }
 
 
@@ -444,4 +420,35 @@ bool SCREngine::IsKeyedByAndRuleEngine( Agent *agent ) const
 {
     ASSERT( plan.and_rule_engine );
     return plan.and_rule_engine->GetKeyedAgents().count( agent );
+}
+
+
+const CompareReplace * SCREngine::GetOverallMaster() const
+{
+    return plan.overall_master_ptr;
+}
+
+
+XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
+{
+    // Don't worry about generated nodes that are already in 
+    // the X tree (they had to have been found there after a
+    // search). 
+    if( knowledge.domain.count(xlink) > 0 )
+        return xlink;
+        
+    return knowledge.domain_extension_classes->Uniquify( xlink ); 
+}
+
+
+string SCREngine::GetTrace() const
+{
+    string s = Traceable::GetName() + GetSerialString();
+    return s;
+}
+
+
+string SCREngine::GetGraphId() const
+{
+	return "SCR"+GetSerialString();
 }

@@ -68,15 +68,15 @@ private:
               TreePtr<Node> rp,
               const unordered_set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
-        void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
-        void PlanningStageThree();
         void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
                              CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
                           PatternLink base_plink, 
                           Agent::Path path ) const;
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
+        void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
+        void PlanningStageThree();
         string GetTrace() const; // used for debug
         
         SCREngine * const algo;
@@ -96,42 +96,39 @@ private:
         CompareReplace::AgentPhases final_agent_phases;   
         map<PatternLink, PatternLink> overlay_plinks; 
     } plan;
-public:
-    // Note: this is const but RepeatingCompareReplace(). Why?
+
+    TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
+
+public: // For top level engine/VN trans
+    void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
+                               const CouplingKeysMap *master_keys );
+    int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
+                                 const CouplingKeysMap *master_keys );                                                                                               
+    virtual void SetStopAfter( vector<int> ssa, int d=0 );
+    static void SetMaxReps( int n, bool e );
+    list<const AndRuleEngine *> GetAndRuleEngines() const;
+    list<const SCREngine *> GetSCREngines() const;
+    void GenerateGraphRegions( Graph &graph ) const;
+    
+public: // For agents
+    // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the slave_engine's one - and that pointer is not const.
     void RecurseInto( SCREngine *slave_engine, 
                       TreePtr<Node> *p_root_xnode ) const;    
-    void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
-                               const CouplingKeysMap *master_keys );
-    int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
-                                 const CouplingKeysMap *master_keys );                   
-                                            
-private:
-    TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
-
-public:
-    static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
-    const CompareReplace * GetOverallMaster() const;
-
-    //friend class StandardAgent;
-    friend class Conjecture;
-
-    virtual void SetStopAfter( vector<int> ssa, int d=0 );
-    XLink UniquifyDomainExtension( XLink xlink ) const;
-    string GetTrace() const; // used for debug
-    
-    virtual string GetGraphId() const;
-    
-    list<const AndRuleEngine *> GetAndRuleEngines() const;
-    list<const SCREngine *> GetSCREngines() const;
-    void GenerateGraphRegions( Graph &graph ) const;
-
     void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;
     void CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, KeyProducer place ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
+    const CompareReplace * GetOverallMaster() const;
+    XLink UniquifyDomainExtension( XLink xlink ) const;
     
+    friend class Conjecture; 
+
+public: // Trace stuff for anyone
+    string GetTrace() const; // used for debug
+    virtual string GetGraphId() const;    
+
 private:    
     static int repetitions;
     static bool rep_error;
