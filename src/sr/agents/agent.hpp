@@ -101,9 +101,7 @@ public:
     virtual void KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks,   
                                 PatternLink me_plink, 
                                 PatternLink under_plink ) = 0;
-    virtual void KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks,   
-                                    PatternLink me_plink, 
-                                    PatternLink under_plink ) = 0;
+
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
