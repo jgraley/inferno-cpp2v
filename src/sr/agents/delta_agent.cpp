@@ -22,6 +22,10 @@ Graphable::Block DeltaAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
               list<string>{PatternLink(this, GetThrough()).GetShortName()},
               IN_COMPARE_ONLY,
               SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
+    sub_blocks.push_back( { "through", 
+                            "",
+                            true,
+                            { link_through } } );
     auto link_overlay = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
               list<string>{},
               list<string>{PatternLink(this, GetOverlay()).GetShortName()},
@@ -30,7 +34,7 @@ Graphable::Block DeltaAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     sub_blocks.push_back( { "overlay", 
                             "",
                             true,
-                            { link_through, link_overlay } } );
+                            { link_overlay } } );
     return { false, "Delta", "Δ", "triangle", NODE, sub_blocks };
 }
 

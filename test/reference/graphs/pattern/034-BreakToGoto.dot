@@ -73,7 +73,8 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
      <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -227,7 +228,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-606":port1 -> "#B-2-609" [
+"#B-2-606":port2 -> "#B-2-609" [
     style="dashed"
     color = black
     fontcolor = black

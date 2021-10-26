@@ -15,6 +15,7 @@
 #include "graph.hpp"
 #include "steps/inferno_agents.hpp"
 #include <inttypes.h>
+#include <algorithm>
 #include "node/graphable.hpp"
 #include "sr/link.hpp"
 #include "sr/agents/standard_agent.hpp" // temporary, I hope
@@ -591,9 +592,10 @@ void Graph::PostProcessBlock( MyBlock &block )
                                        {} } );
     }
     
-    // Can we hide sub-blocks?
-    bool sub_blocks_hideable = ( block.sub_blocks.size() == 0 || 
-                                 (block.sub_blocks.size() == 1 && block.sub_blocks.front().hideable) );
+    // Can we hide sub-blocks?    
+    bool sub_blocks_hideable = all_of( block.sub_blocks.begin(), 
+                                       block.sub_blocks.end(), 
+                                       [](const SubBlock &sb){return sb.hideable;} );
 
     // If not, make sure we're using a shape that allows for sub_blocks
     if( !sub_blocks_hideable && !(block.shape == "invisible" || block.shape == "plaintext" || block.shape == "record") )

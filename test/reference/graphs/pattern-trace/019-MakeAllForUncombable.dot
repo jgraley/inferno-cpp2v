@@ -50,6 +50,18 @@ subgraph "clusterAnd#R19-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    "And#R19-0/#B-2-235" [
+        // -------- block And#R19-0/#B-2-235 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
+         <TR><TD>#B-2-235</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
     "And#R19-0/#B-2-232" [
         // -------- block And#R19-0/#B-2-232 ----------
         shape = "plaintext"
@@ -57,6 +69,20 @@ subgraph "clusterAnd#R19-0" {
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
          <TR><TD>#B-2-232</TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R19-0/#B-2-228" [
+        // -------- block And#R19-0/#B-2-228 ----------
+        shape = "plaintext"
+        fillcolor = "/set28/2"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
+         <TR><TD>(For)</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#B-2-228</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -74,30 +100,6 @@ subgraph "clusterAnd#R19-0" {
         fontsize = "12"
     ];
     
-    "And#R19-0/#X19-8-19" [
-        // -------- block And#R19-0/#X19-8-19 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-         <TR><TD>overlay</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#X19-8-19</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R19-0/#B-2-234" [
-        // -------- block And#R19-0/#B-2-234 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-234</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
     "And#R19-0/#B-2-231" [
         // -------- block And#R19-0/#B-2-231 ----------
         shape = "plaintext"
@@ -109,20 +111,6 @@ subgraph "clusterAnd#R19-0" {
          <TR><TD>Expression</TD><TD PORT="port2"></TD></TR>
          <TR><TD>Statement</TD><TD PORT="port3"></TD></TR>
          <TR><TD>#B-2-231</TD><TD PORT="port4"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-        fontsize = "12"
-    ];
-    
-    "And#R19-0/#B-2-228" [
-        // -------- block And#R19-0/#B-2-228 ----------
-        shape = "plaintext"
-        fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
-         <TR><TD>(For)</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-228</TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -153,13 +141,26 @@ subgraph "clusterAnd#R19-0" {
         fontsize = "12"
     ];
     
-    "And#R19-0/#B-2-235" [
-        // -------- block And#R19-0/#B-2-235 ----------
+    "And#R19-0/#X19-8-19" [
+        // -------- block And#R19-0/#X19-8-19 ----------
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
+         <TR><TD>through</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+         <TR><TD>#X19-8-19</TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+        fontsize = "12"
+    ];
+    
+    "And#R19-0/#B-2-234" [
+        // -------- block And#R19-0/#B-2-234 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT POINT-SIZE="15.0">Statement</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-235</TD><TD PORT="port0"></TD></TR>
+         <TR><TD>#B-2-234</TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
         fontsize = "12"
@@ -182,15 +183,22 @@ subgraph "clusterAnd#R19-0" {
     
 }
 
-"And#R19-0/#X19-12-11":port0 -> "And#R19-0/#X19-8-19" [
-    label = "#2"
+"And#R19-0/#B-2-228":port1 -> "And#R19-0/#B-2-229" [
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R19-0/#X19-8-19":port0 -> "And#R19-0/#B-2-228" [
-    label = "#1"
+"And#R19-0/#B-2-228":port1 -> "And#R19-0/#B-2-231" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R19-0/#X19-12-11":port0 -> "And#R19-0/#X19-8-19" [
+    label = "#2"
     decorate = true
     color = black
     fontcolor = black
@@ -224,23 +232,16 @@ subgraph "clusterAnd#R19-0" {
     fontcolor = black
 ];
 
-"And#R19-0/#B-2-228":port1 -> "And#R19-0/#B-2-229" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R19-0/#B-2-228":port1 -> "And#R19-0/#B-2-231" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 "And#R19-0/#B-2-229":port0 -> "And#R19-0/And#R19-1/#B-2-230" [
     arrowhead="normalnoneodiamond"
     label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R19-0/#X19-8-19":port0 -> "And#R19-0/#B-2-228" [
+    label = "#1"
     decorate = true
     color = black
     fontcolor = black
@@ -276,8 +277,9 @@ subgraph "clusterAnd#R19-0" {
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#X19-8-19</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port0"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>#X19-8-19</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -427,7 +429,7 @@ subgraph "clusterAnd#R19-0" {
     fontcolor = black
 ];
 
-"#X19-8-19":port0 -> "#B-2-236" [
+"#X19-8-19":port1 -> "#B-2-236" [
     style="dashed"
     label = "#1"
     decorate = true

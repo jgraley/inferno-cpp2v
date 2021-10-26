@@ -110,7 +110,8 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
      <TR><TD>(Compound)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -255,7 +256,7 @@ edge [
     // -------- block #B-2-1216 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> Slave | <port0> (Scope) | <port1> through | <port2> search/compare | <port3> replace"
+    label = "<fixed> SlaveCompareReplace | <port0> (Scope) | <port1> through | <port2> search/compare | <port3> replace"
     style = "filled"
     fontsize = "12"
     color = black
@@ -331,7 +332,8 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
      <TR><TD>(Enum)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -487,7 +489,8 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
      <TR><TD>(Expression)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -587,7 +590,8 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
      <TR><TD>(Statement)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -635,7 +639,7 @@ edge [
     // -------- block #B-2-1208 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> Slave | <port0> (Scope) | <port1> through | <port2> search/compare"
+    label = "<fixed> SlaveSearchReplace | <port0> (Scope) | <port1> through | <port2> search/compare"
     style = "filled"
     fontsize = "12"
     color = black
@@ -825,7 +829,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1202":port1 -> "#B-2-1200" [
+"#B-2-1202":port2 -> "#B-2-1200" [
     style="dashed"
     color = black
     fontcolor = black
@@ -942,7 +946,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1155":port1 -> "#B-2-1157" [
+"#B-2-1155":port2 -> "#B-2-1157" [
     style="dashed"
     color = black
     fontcolor = black
@@ -1048,7 +1052,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1194":port1 -> "#B-2-1192" [
+"#B-2-1194":port2 -> "#B-2-1192" [
     style="dashed"
     color = black
     fontcolor = black
@@ -1089,7 +1093,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-1203":port1 -> "#B-2-1204" [
+"#B-2-1203":port2 -> "#B-2-1204" [
     style="dashed"
     color = black
     fontcolor = black

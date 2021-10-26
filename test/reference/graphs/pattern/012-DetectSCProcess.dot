@@ -118,7 +118,7 @@ edge [
     // -------- block #B-2-134 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> Slave | <port0> through | <port1> search/compare"
+    label = "<fixed> SlaveSearchReplace | <port0> through | <port1> search/compare"
     style = "filled"
     fontsize = "12"
     color = black
@@ -145,7 +145,8 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
      <TR><TD>(Instance)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>through</TD><TD PORT="port1"></TD></TR>
+     <TR><TD>overlay</TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
     fontsize = "12"
@@ -487,7 +488,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-2-121":port1 -> "#B-2-124" [
+"#B-2-121":port2 -> "#B-2-124" [
     style="dashed"
     color = black
     fontcolor = black
