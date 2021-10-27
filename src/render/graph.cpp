@@ -30,9 +30,9 @@ using namespace CPPTree;
 // The colours are defined by the nodes themselves and always reflect the node type of a
 // block, if applicable.
 
-#define FS_MIDDLE "12"
-#define FS_LARGE "15"
-#define FS_HUGE "20"
+#define FS_MIDDLE 12
+#define FS_LARGE 15
+#define FS_HUGE 20
 #define FS_TITLE "36"
 
 #define NS_SMALL "0.4"
@@ -514,10 +514,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && pnode )
     {
-        my_block.sub_blocks.push_back( { pnode->GetSerialString(), 
-                                         "", 
-                                         false, 
-                                         {} } );
+        my_block.external_text = pnode->GetSerialString();
     }  
 
     // Make the titles more wieldy by removing template stuff - note:
@@ -623,7 +620,6 @@ string Graph::DoBlock( const MyBlock &block,
 {
 	string s;
     
-    s += "// -------- block " + block.base_id + " ----------\n";
     if( block.shape == "invisible" )
         s += "shape = none\n";
     else
@@ -632,6 +628,11 @@ string Graph::DoBlock( const MyBlock &block,
 		s += "fillcolor = " + region.background_colour + "\n";
 	else if(block.colour != "")
 		s += "fillcolor = \"" + block.colour + "\"\n";
+
+    if( block.external_text != "" )
+        s += "xlabel = \""+ EscapeForGraphviz(block.external_text) + "\"\n";       
+
+    s += SSPrintf("fontsize = \"%d\"\n", FS_MIDDLE);
 
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
     // "Adding HTML labels to record-based shapes (record and Mrecord) is 
@@ -642,13 +643,11 @@ string Graph::DoBlock( const MyBlock &block,
 	{
 		s += "label = " + DoHTMLLabel( block );
 		s += "style = \"rounded,filled\"\n";
-		s += "fontsize = \"" FS_MIDDLE "\"\n";
 	}
 	else if( block.shape == "record" )
     {
         s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
-        s += "fontsize = \"" FS_MIDDLE "\"\n";
         s += "color = " + line_colour + "\n";
         s += "fontcolor = " + font_colour + "\n";
     }
@@ -658,20 +657,29 @@ string Graph::DoBlock( const MyBlock &block,
     }
     else
 	{
+        int fs;
         string lt;
         if( !block.symbol.empty() )
+        {
+            fs = FS_HUGE;            
             lt = EscapeForGraphviz( block.symbol );
+        }
         else if( block.italic_title )        
+        {
+            fs = FS_LARGE;
             lt = "<I>" + EscapeForGraphviz( block.title ) + "</I>";
+        }
         else
-            lt = EscapeForGraphviz( block.title );        // Ignoring sub-block (above check means there will only be one: it
+        {
+            fs = FS_LARGE;           
+            lt = EscapeForGraphviz( block.title );   
+        }
+        lt = SSPrintf("<FONT POINT-SIZE=\"%d\">", fs) + lt + "</FONT>";
+        
+        // Ignoring sub-block (above check means there will only be one: it
         // is assumed that the title is sufficietly informative
-		s += "label = <" + lt + ">\n";// TODO causes errors because links go to targets meant for records
+		s += "label = <" + lt + ">\n";
 		s += "style = \"filled\"\n";
-        if( !block.symbol.empty() )
-            s += "fontsize = \"" FS_HUGE "\"\n";
-        else
-            s += "fontsize = \"" FS_LARGE "\"\n";
         s += "penwidth = 0.0\n";
 
 		if( !block.symbol.empty() )
@@ -682,6 +690,7 @@ string Graph::DoBlock( const MyBlock &block,
 		}
 	}
 	string sc;
+    sc += "// -------- block " + block.base_id + " ----------\n";
     sc += "\""+block.base_id+"\"";
 	sc += " [\n";
     sc += Indent(s);
@@ -711,18 +720,28 @@ string Graph::DoRecordLabel( const MyBlock &block )
 
 string Graph::DoHTMLLabel( const MyBlock &block )
 {
+    int fs;
     string lt;
     if( !block.symbol.empty() )
+    {
+        fs = FS_HUGE;            
         lt = EscapeForGraphviz( block.symbol );
+    }
     else if( block.italic_title )        
+    {
+        fs = FS_LARGE;
         lt = "<I>" + EscapeForGraphviz( block.title ) + "</I>";
+    }
     else
+    {
+        fs = FS_LARGE;
         lt = EscapeForGraphviz( block.title );
-        
-    
+    }
+    lt = SSPrintf("<FONT POINT-SIZE=\"%d\">", fs) + lt + "</FONT>";
+
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
 	s += " <TR>";
-	s += "<TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + lt + "</FONT></TD>";
+	s += "<TD>" + lt + "</TD>";
 	s += "<TD></TD>";
 	s += "</TR>\n";
     
@@ -829,7 +848,7 @@ string Graph::DoHeader(string title)
 	s += "digraph \""+title+"\" {\n"; 
     s += "label = \""+title+"\"\n";
     s += "labelloc = t\n";
-    s += "fontsize = \"" FS_TITLE "\"\n";
+    SSPrintf("fontsize = \"%d\"\n", FS_TITLE);
 	s += "graph [\n";
     s += Indent(sg);
     s += "];\n";
@@ -854,11 +873,12 @@ string Graph::DoFooter()
 
 string Graph::DoRegion(string ss, const RegionAppearance &region)
 {
+    int fs = FS_LARGE;
     string s;
     s += "label = \"" + region.title + "\"\n";
     s += "style = \"filled\"\n";
 	s += "color = " + region.background_colour + "\n";
-    s += "fontsize = \"" FS_LARGE "\"\n";
+    s += SSPrintf("fontsize = \"%d\"\n", fs);
 	s += ss;
  
     string sc;

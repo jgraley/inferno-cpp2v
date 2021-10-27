@@ -183,7 +183,7 @@ XLink QuotientSet::Uniquify( XLink xlink )
     // insert() only acts if element not already in set.
     // Conveniently, it returns an iterator to the matching element
     // regardless of whether x was inserted, so it's always what we
-    // want to return. p.second is true if insertion tooke place, useful 
+    // want to return. p.second is true if insertion took place, useful 
     // for tracing etc.
     pair<Classes::iterator, bool> p = classes.insert( xlink );
     return *p.first;

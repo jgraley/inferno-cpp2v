@@ -84,6 +84,7 @@ private:
         bool specify_ports;
         string base_id;
         bool italic_title;
+        string external_text;        
     };
 
     struct MyLink : Graphable::Link
