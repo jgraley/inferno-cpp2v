@@ -170,6 +170,7 @@ private:
     const RegionAppearance base_region;
 	const string line_colour;
 	const string font_colour;
+    const string backgrounded_font_colour;
     string all_dot;
 };
 

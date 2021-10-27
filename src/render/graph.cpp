@@ -44,7 +44,8 @@ Graph::Graph( string of, string title ) :
     outfile(of),
     base_region( ReadArgs::graph_dark ? "black" : "antiquewhite1" ),
 	line_colour( ReadArgs::graph_dark ? "grey70" : "black" ),
-    font_colour( ReadArgs::graph_dark ? "white" : "black" )
+    font_colour( ReadArgs::graph_dark ? "white" : "black" ),
+    backgrounded_font_colour( "black" )
 {
 	if( !outfile.empty() )
 	{
@@ -633,6 +634,7 @@ string Graph::DoBlock( const MyBlock &block,
         s += "xlabel = \""+ EscapeForGraphviz(block.external_text) + "\"\n";       
 
     s += SSPrintf("fontsize = \"%d\"\n", FS_MIDDLE);
+    s += "fontcolor = " + font_colour + "\n";
 
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
     // "Adding HTML labels to record-based shapes (record and Mrecord) is 
@@ -649,7 +651,6 @@ string Graph::DoBlock( const MyBlock &block,
         s += "label = " + DoRecordLabel( block );
         s += "style = \"filled\"\n";
         s += "color = " + line_colour + "\n";
-        s += "fontcolor = " + font_colour + "\n";
     }
 	else if( block.shape == "invisible" )
     {
@@ -674,7 +675,7 @@ string Graph::DoBlock( const MyBlock &block,
             fs = FS_LARGE;           
             lt = EscapeForGraphviz( block.title );   
         }
-        lt = SSPrintf("<FONT POINT-SIZE=\"%d\">", fs) + lt + "</FONT>";
+        lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", fs, backgrounded_font_colour.c_str()) + lt + "</FONT>";
         
         // Ignoring sub-block (above check means there will only be one: it
         // is assumed that the title is sufficietly informative
@@ -737,7 +738,7 @@ string Graph::DoHTMLLabel( const MyBlock &block )
         fs = FS_LARGE;
         lt = EscapeForGraphviz( block.title );
     }
-    lt = SSPrintf("<FONT POINT-SIZE=\"%d\">", fs) + lt + "</FONT>";
+    lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", fs, backgrounded_font_colour.c_str()) + lt + "</FONT>";
 
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
 	s += " <TR>";
@@ -749,8 +750,12 @@ string Graph::DoHTMLLabel( const MyBlock &block )
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
         s += " <TR>";
-        s += "<TD>" + EscapeForGraphviz(sub_block.item_name) + "</TD>";
-        s += "<TD PORT=\"" + SeqField( porti ) + "\">" + EscapeForGraphviz(sub_block.item_extra) + "</TD>";
+        lt = EscapeForGraphviz(sub_block.item_name);
+        //lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
+        s += "<TD>" + lt + "</TD>";
+        lt = EscapeForGraphviz(sub_block.item_extra);
+        //lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
+        s += "<TD PORT=\"" + SeqField( porti ) + "\">" + lt + "</TD>";
         s += "</TR>\n";
         porti++;
     }
