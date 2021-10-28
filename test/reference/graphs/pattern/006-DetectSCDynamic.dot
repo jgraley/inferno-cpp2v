@@ -1,7 +1,6 @@
 digraph "DetectSCDynamic" {
 label = "DetectSCDynamic"
 labelloc = t
-fontsize = "36"
 graph [
     rankdir = "LR"
     ranksep = 0.3
@@ -18,99 +17,103 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
+// -------- block CR#B-4-3 ----------
 "CR#B-4-3" [
-    // -------- block CR#B-4-3 ----------
     shape = "record"
     fillcolor = antiquewhite1
+    fontsize = "12"
+    fontcolor = black
     label = "<fixed> SearchReplace | <port0> search/compare | <port1> replace"
     style = "filled"
-    fontsize = "12"
     color = black
-    fontcolor = black
 ];
 
+// -------- block #B-2-51 ----------
 "#B-2-51" [
-    // -------- block #B-2-51 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Call</FONT></TD><TD></TD></TR>
-     <TR><TD>MapOperand</TD><TD PORT="port0">{.}</TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Call</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">MapOperand</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port1"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-52 ----------
 "#B-2-52" [
-    // -------- block #B-2-52 ----------
     shape = "plaintext"
     fillcolor = "/set28/8"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">MapOperand</FONT></TD><TD></TD></TR>
-     <TR><TD>InstanceIdentifier</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">MapOperand</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">InstanceIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port1"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-54 ----------
 "#B-2-54" [
-    // -------- block #B-2-54 ----------
     shape = "trapezium"
     fillcolor = "/set28/5"
-    label = <'p1'>
+    fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="15" COLOR="black"><I>'p1'?</I></FONT>>
     style = "filled"
-    fontsize = "20"
     penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
 ];
 
+// -------- block #B-2-55 ----------
 "#B-2-55" [
-    // -------- block #B-2-55 ----------
     shape = "octagon"
     fillcolor = "/set28/6"
-    label = <<I>TypeOf</I>>
+    fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="15" COLOR="black"><I>TypeOf</I></FONT>>
     style = "filled"
-    fontsize = "15"
     penwidth = 0.0
 ];
 
+// -------- block #B-2-56 ----------
 "#B-2-56" [
-    // -------- block #B-2-56 ----------
     shape = "plaintext"
     fillcolor = "/set28/3"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Event</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Event</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-53 ----------
 "#B-2-53" [
-    // -------- block #B-2-53 ----------
     shape = "plaintext"
     fillcolor = "/set28/5"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">'next_trigger'</FONT></TD><TD></TD></TR>
-     <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black"><I>'next_trigger'?</I></FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-50 ----------
 "#B-2-50" [
-    // -------- block #B-2-50 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">NextTriggerDynamic</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">NextTriggerDynamic</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
 "CR#B-4-3":port0 -> "#B-2-51" [

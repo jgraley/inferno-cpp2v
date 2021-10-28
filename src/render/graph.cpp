@@ -751,10 +751,12 @@ string Graph::DoHTMLLabel( const MyBlock &block )
     {
         s += " <TR>";
         lt = EscapeForGraphviz(sub_block.item_name);
-        //lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
+        if( !lt.empty() )
+            lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
         s += "<TD>" + lt + "</TD>";
         lt = EscapeForGraphviz(sub_block.item_extra);
-        //lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
+        if( !lt.empty() )
+            lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
         s += "<TD PORT=\"" + SeqField( porti ) + "\">" + lt + "</TD>";
         s += "</TR>\n";
         porti++;

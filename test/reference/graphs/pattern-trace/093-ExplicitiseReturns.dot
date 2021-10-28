@@ -1,7 +1,6 @@
 digraph "ExplicitiseReturns" {
 label = "ExplicitiseReturns"
 labelloc = t
-fontsize = "36"
 graph [
     rankdir = "LR"
     ranksep = 0.3
@@ -24,65 +23,70 @@ subgraph "clusterAnd#R93-2" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-2/#X93-11-33 ----------
     "And#R93-2/#X93-11-33" [
-        // -------- block And#R93-2/#X93-11-33 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#X93-11-33</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "square"
+        xlabel = "#X93-11-33"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-2/#B-2-1822 ----------
     "And#R93-2/#B-2-1822" [
-        // -------- block And#R93-2/#B-2-1822 ----------
         shape = "plaintext"
+        xlabel = "#B-2-1822"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1822</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Uninitialised</FONT></TD><TD></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-2/#X93-9-32 ----------
     "And#R93-2/#X93-9-32" [
-        // -------- block And#R93-2/#X93-9-32 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-         <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#X93-9-32</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "triangle"
+        xlabel = "#X93-9-32"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-2/#B-2-1808 ----------
     "And#R93-2/#B-2-1808" [
-        // -------- block And#R93-2/#B-2-1808 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
+        xlabel = "#B-2-1808"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
-         <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1808</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Return</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
 }
 
-"And#R93-2/#X93-11-33":port0 -> "And#R93-2/#X93-9-32" [
+"And#R93-2/#X93-11-33" -> "And#R93-2/#X93-9-32" [
     label = "#2"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R93-2/#X93-9-32":port0 -> "And#R93-2/#B-2-1808" [
+"And#R93-2/#X93-9-32" -> "And#R93-2/#B-2-1808" [
     label = "#1"
     decorate = true
     color = black
@@ -104,34 +108,36 @@ subgraph "clusterAnd#R93-5" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-5/#B-2-1827 ----------
     "And#R93-5/#B-2-1827" [
-        // -------- block And#R93-5/#B-2-1827 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
+        xlabel = "#B-2-1827"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
-         <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1">NULL</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port2">NULL</TD></TR>
-         <TR><TD>#B-2-1827</TD><TD PORT="port3"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">If</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">NULL</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">NULL</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
 }
 
+// -------- block And#R93-5/#B-2-1818 ----------
 "And#R93-5/#B-2-1818" [
-    // -------- block And#R93-5/#B-2-1818 ----------
     shape = "plaintext"
     fillcolor = "/set28/5"
+    xlabel = "#B-2-1818"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">'enabled'</FONT></TD><TD></TD></TR>
-     <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1818</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black"><I>'enabled'!</I></FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
 "And#R93-5/#B-2-1827":port0 -> "And#R93-5/#B-2-1818" [
@@ -150,16 +156,19 @@ subgraph "clusterAnd#R93-7" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-7/#B-2-1813 ----------
     "And#R93-7/#B-2-1813" [
-        // -------- block And#R93-7/#B-2-1813 ----------
-        shape = "plaintext"
+        shape = "circle"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1813</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1813"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -172,16 +181,19 @@ subgraph "clusterAnd#R93-6" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-6/#B-2-1811 ----------
     "And#R93-6/#B-2-1811" [
-        // -------- block And#R93-6/#B-2-1811 ----------
-        shape = "plaintext"
+        shape = "circle"
         fillcolor = "/set28/1"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1811</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1811"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -194,16 +206,19 @@ subgraph "clusterAnd#R93-8" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-8/#B-2-1814 ----------
     "And#R93-8/#B-2-1814" [
-        // -------- block And#R93-8/#B-2-1814 ----------
-        shape = "plaintext"
+        shape = "circle"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1814</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1814"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -216,16 +231,19 @@ subgraph "clusterAnd#R93-9" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-9/#B-2-1815 ----------
     "And#R93-9/#B-2-1815" [
-        // -------- block And#R93-9/#B-2-1815 ----------
-        shape = "plaintext"
+        shape = "circle"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1815</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1815"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -238,98 +256,108 @@ subgraph "clusterAnd#R93-1" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-1/#B-2-1809 ----------
     "And#R93-1/#B-2-1809" [
-        // -------- block And#R93-1/#B-2-1809 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
+        xlabel = "#B-2-1809"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
-         <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1809</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Return</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-1/#X93-11-32 ----------
     "And#R93-1/#X93-11-32" [
-        // -------- block And#R93-1/#X93-11-32 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#X93-11-32</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "square"
+        xlabel = "#X93-11-32"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-1/#B-2-1829 ----------
     "And#R93-1/#B-2-1829" [
-        // -------- block And#R93-1/#B-2-1829 ----------
-        shape = "plaintext"
+        shape = "triangle"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-         <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-1829</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1829"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-1/#B-2-1823 ----------
     "And#R93-1/#B-2-1823" [
-        // -------- block And#R93-1/#B-2-1823 ----------
         shape = "plaintext"
+        xlabel = "#B-2-1823"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1823</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Uninitialised</FONT></TD><TD></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-1/#B-2-1803 ----------
     "And#R93-1/#B-2-1803" [
-        // -------- block And#R93-1/#B-2-1803 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
+        xlabel = "#B-2-1803"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port4">[3]</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port5">[4]</TD></TR>
-         <TR><TD>#B-2-1803</TD><TD PORT="port6"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">[1]</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port3"><FONT POINT-SIZE="12" COLOR="black">[2]</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port4"><FONT POINT-SIZE="12" COLOR="black">[3]</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port5"><FONT POINT-SIZE="12" COLOR="black">[4]</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-1/#B-2-1825 ----------
     "And#R93-1/#B-2-1825" [
-        // -------- block And#R93-1/#B-2-1825 ----------
-        shape = "plaintext"
+        shape = "square"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1825</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1825"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-1/#B-2-1826 ----------
     "And#R93-1/#B-2-1826" [
-        // -------- block And#R93-1/#B-2-1826 ----------
-        shape = "plaintext"
+        shape = "diamond"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
-         <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1826</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1826"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">¬</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
     // -------- region And#R93-1/And#R93-5 ----------
@@ -338,10 +366,13 @@ subgraph "clusterAnd#R93-1" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-1/And#R93-5/#B-2-1827 ----------
         "And#R93-1/And#R93-5/#B-2-1827" [
-            // -------- block And#R93-1/And#R93-5/#B-2-1827 ----------
             shape = none
             fillcolor = "/set28/2"
+            xlabel = "#B-2-1827"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -353,10 +384,13 @@ subgraph "clusterAnd#R93-1" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-1/And#R93-6/#B-2-1811 ----------
         "And#R93-1/And#R93-6/#B-2-1811" [
-            // -------- block And#R93-1/And#R93-6/#B-2-1811 ----------
             shape = none
             fillcolor = "/set28/1"
+            xlabel = "#B-2-1811"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -368,10 +402,13 @@ subgraph "clusterAnd#R93-1" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-1/And#R93-7/#B-2-1813 ----------
         "And#R93-1/And#R93-7/#B-2-1813" [
-            // -------- block And#R93-1/And#R93-7/#B-2-1813 ----------
             shape = none
             fillcolor = "/set28/2"
+            xlabel = "#B-2-1813"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -383,10 +420,13 @@ subgraph "clusterAnd#R93-1" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-1/And#R93-8/#B-2-1814 ----------
         "And#R93-1/And#R93-8/#B-2-1814" [
-            // -------- block And#R93-1/And#R93-8/#B-2-1814 ----------
             shape = none
             fillcolor = "/set28/2"
+            xlabel = "#B-2-1814"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -398,10 +438,13 @@ subgraph "clusterAnd#R93-1" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-1/And#R93-9/#B-2-1815 ----------
         "And#R93-1/And#R93-9/#B-2-1815" [
-            // -------- block And#R93-1/And#R93-9/#B-2-1815 ----------
             shape = none
             fillcolor = "/set28/2"
+            xlabel = "#B-2-1815"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -416,14 +459,14 @@ subgraph "clusterAnd#R93-1" {
     fontcolor = black
 ];
 
-"And#R93-1/#X93-11-32":port0 -> "And#R93-1/#B-2-1803" [
+"And#R93-1/#X93-11-32" -> "And#R93-1/#B-2-1803" [
     label = "#2"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R93-1/#B-2-1829":port0 -> "And#R93-1/#B-2-1826" [
+"And#R93-1/#B-2-1829" -> "And#R93-1/#B-2-1826" [
     label = "#0"
     decorate = true
     color = black
@@ -476,14 +519,14 @@ subgraph "clusterAnd#R93-1" {
     fontcolor = black
 ];
 
-"And#R93-1/#B-2-1825":port0 -> "And#R93-1/#B-2-1809" [
+"And#R93-1/#B-2-1825" -> "And#R93-1/#B-2-1809" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R93-1/#B-2-1826":port0 -> "And#R93-1/And#R93-5/#B-2-1827" [
+"And#R93-1/#B-2-1826" -> "And#R93-1/And#R93-5/#B-2-1827" [
     arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true
@@ -499,16 +542,19 @@ subgraph "clusterAnd#R93-3" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-3/#B-2-1810 ----------
     "And#R93-3/#B-2-1810" [
-        // -------- block And#R93-3/#B-2-1810 ----------
-        shape = "plaintext"
+        shape = "circle"
         fillcolor = "/set28/1"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1810</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1810"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -521,16 +567,19 @@ subgraph "clusterAnd#R93-4" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-4/#B-2-1812 ----------
     "And#R93-4/#B-2-1812" [
-        // -------- block And#R93-4/#B-2-1812 ----------
-        shape = "plaintext"
+        shape = "circle"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1812</TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1812"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -543,157 +592,171 @@ subgraph "clusterAnd#R93-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R93-0/#B-2-1821 ----------
     "And#R93-0/#B-2-1821" [
-        // -------- block And#R93-0/#B-2-1821 ----------
         shape = "plaintext"
+        xlabel = "#B-2-1821"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1821</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Uninitialised</FONT></TD><TD></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-0/#X93-2-2023 ----------
     "And#R93-0/#X93-2-2023" [
-        // -------- block And#R93-0/#X93-2-2023 ----------
         shape = "record"
         fillcolor = antiquewhite2
-        label = "<fixed> SlaveCompareReplace | <port0> through | <port1> search/compare | <port2> #X93-2-2023"
-        style = "filled"
+        xlabel = "#X93-2-2023"
         fontsize = "12"
-        color = black
         fontcolor = black
+        label = "<fixed> SlaveCompareReplace | <port0> through | <port1> search/compare"
+        style = "filled"
+        color = black
     ];
     
+    // -------- block And#R93-0/#B-2-1806 ----------
     "And#R93-0/#B-2-1806" [
-        // -------- block And#R93-0/#B-2-1806 ----------
-        shape = "plaintext"
+        shape = "square"
         fillcolor = "/set28/1"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1806</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1806"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-0/#X93-12-83 ----------
     "And#R93-0/#X93-12-83" [
-        // -------- block And#R93-0/#X93-12-83 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-         <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#X93-12-83</TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "square"
+        xlabel = "#X93-12-83"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-0/#X93-2-2024 ----------
     "And#R93-0/#X93-2-2024" [
-        // -------- block And#R93-0/#X93-2-2024 ----------
         shape = "record"
         fillcolor = antiquewhite2
-        label = "<fixed> SlaveCompareReplace | <port0> (Compound) | <port1> through | <port2> search/compare | <port3> #X93-2-2024"
-        style = "filled"
+        xlabel = "#X93-2-2024"
         fontsize = "12"
-        color = black
         fontcolor = black
+        label = "<fixed> SlaveCompareReplace | <port0> (Compound) | <port1> through | <port2> search/compare"
+        style = "filled"
+        color = black
     ];
     
+    // -------- block And#R93-0/#B-2-1799 ----------
     "And#R93-0/#B-2-1799" [
-        // -------- block And#R93-0/#B-2-1799 ----------
         shape = "plaintext"
         fillcolor = "/set28/1"
+        xlabel = "#B-2-1799"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Instance</FONT></TD><TD></TD></TR>
-         <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>InstanceIdentifier</TD><TD PORT="port1">NULL</TD></TR>
-         <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
-         <TR><TD>#B-2-1799</TD><TD PORT="port3"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Instance</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Type</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">InstanceIdentifier</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">NULL</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-0/#B-2-1800 ----------
     "And#R93-0/#B-2-1800" [
-        // -------- block And#R93-0/#B-2-1800 ----------
         shape = "plaintext"
         fillcolor = "/set28/3"
+        xlabel = "#B-2-1800"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Callable</FONT></TD><TD></TD></TR>
-         <TR><TD>#B-2-1800</TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Callable</FONT></TD><TD></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-0/#B-2-1804 ----------
     "And#R93-0/#B-2-1804" [
-        // -------- block And#R93-0/#B-2-1804 ----------
-        shape = "plaintext"
+        shape = "triangle"
         fillcolor = "/set28/2"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-         <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-1804</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        xlabel = "#B-2-1804"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
+    // -------- block And#R93-0/#B-2-1805 ----------
     "And#R93-0/#B-2-1805" [
-        // -------- block And#R93-0/#B-2-1805 ----------
         shape = "plaintext"
         fillcolor = "/set28/1"
+        xlabel = "#B-2-1805"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
-         <TR><TD>(Instance)</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#B-2-1805</TD><TD PORT="port2"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="20" COLOR="black">∧</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">(Instance)</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">patterns</FONT></TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-0/#B-2-1807 ----------
     "And#R93-0/#B-2-1807" [
-        // -------- block And#R93-0/#B-2-1807 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
+        xlabel = "#B-2-1807"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
-         <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>#B-2-1807</TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Return</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-0/#B-2-1801 ----------
     "And#R93-0/#B-2-1801" [
-        // -------- block And#R93-0/#B-2-1801 ----------
         shape = "plaintext"
         fillcolor = "/set28/2"
+        xlabel = "#B-2-1801"
+        fontsize = "12"
+        fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-         <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-         <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-         <TR><TD>#B-2-1801</TD><TD PORT="port2"></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
+         <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-        fontsize = "12"
     ];
     
+    // -------- block And#R93-0/#X93-8-84 ----------
     "And#R93-0/#X93-8-84" [
-        // -------- block And#R93-0/#X93-8-84 ----------
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-         <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-         <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-         <TR><TD>#X93-8-84</TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "triangle"
+        xlabel = "#X93-8-84"
         fontsize = "12"
+        fontcolor = black
+        label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
     // -------- region And#R93-0/And#R93-3 ----------
@@ -702,10 +765,13 @@ subgraph "clusterAnd#R93-0" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-0/And#R93-3/#B-2-1810 ----------
         "And#R93-0/And#R93-3/#B-2-1810" [
-            // -------- block And#R93-0/And#R93-3/#B-2-1810 ----------
             shape = none
             fillcolor = "/set28/1"
+            xlabel = "#B-2-1810"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -717,10 +783,13 @@ subgraph "clusterAnd#R93-0" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
+        // -------- block And#R93-0/And#R93-4/#B-2-1812 ----------
         "And#R93-0/And#R93-4/#B-2-1812" [
-            // -------- block And#R93-0/And#R93-4/#B-2-1812 ----------
             shape = none
             fillcolor = "/set28/2"
+            xlabel = "#B-2-1812"
+            fontsize = "12"
+            fontcolor = black
             style = "invisible"
         ];
         
@@ -735,14 +804,14 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"And#R93-0/#B-2-1806":port0 -> "And#R93-0/#B-2-1807" [
+"And#R93-0/#B-2-1806" -> "And#R93-0/#B-2-1807" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R93-0/#X93-12-83":port0 -> "And#R93-0/#X93-8-84" [
+"And#R93-0/#X93-12-83" -> "And#R93-0/#X93-8-84" [
     label = "#2"
     decorate = true
     color = black
@@ -770,7 +839,7 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"And#R93-0/#B-2-1804":port0 -> "And#R93-0/#B-2-1801" [
+"And#R93-0/#B-2-1804" -> "And#R93-0/#B-2-1801" [
     label = "#0"
     decorate = true
     color = black
@@ -814,7 +883,7 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"And#R93-0/#X93-8-84":port0 -> "And#R93-0/#B-2-1805" [
+"And#R93-0/#X93-8-84" -> "And#R93-0/#B-2-1805" [
     label = "#1"
     decorate = true
     color = black
@@ -823,517 +892,574 @@ subgraph "clusterAnd#R93-0" {
 
 
 // -------------------- transformation figure --------------------
+// -------- block CR#X93-10-93 ----------
 "CR#X93-10-93" [
-    // -------- block CR#X93-10-93 ----------
     shape = "record"
     fillcolor = antiquewhite1
+    fontsize = "12"
+    fontcolor = black
     label = "<fixed> CompareReplace | <port0> search/compare"
     style = "filled"
-    fontsize = "12"
     color = black
-    fontcolor = black
 ];
 
+// -------- block #X93-12-83 ----------
 "#X93-12-83" [
-    // -------- block #X93-12-83 ----------
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-     <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#X93-12-83</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    shape = "square"
+    xlabel = "#X93-12-83"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #X93-8-84 ----------
 "#X93-8-84" [
-    // -------- block #X93-8-84 ----------
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-     <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>#X93-8-84</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    shape = "triangle"
+    xlabel = "#X93-8-84"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1805 ----------
 "#B-2-1805" [
-    // -------- block #B-2-1805 ----------
     shape = "plaintext"
     fillcolor = "/set28/1"
+    xlabel = "#B-2-1805"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">∧</FONT></TD><TD></TD></TR>
-     <TR><TD>(Instance)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>patterns</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>#B-2-1805</TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="20" COLOR="black">∧</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">(Instance)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">patterns</FONT></TD><TD PORT="port1"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1799 ----------
 "#B-2-1799" [
-    // -------- block #B-2-1799 ----------
     shape = "plaintext"
     fillcolor = "/set28/1"
+    xlabel = "#B-2-1799"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Instance</FONT></TD><TD></TD></TR>
-     <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>InstanceIdentifier</TD><TD PORT="port1">NULL</TD></TR>
-     <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
-     <TR><TD>#B-2-1799</TD><TD PORT="port3"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Instance</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">InstanceIdentifier</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">NULL</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1800 ----------
 "#B-2-1800" [
-    // -------- block #B-2-1800 ----------
     shape = "plaintext"
     fillcolor = "/set28/3"
+    xlabel = "#B-2-1800"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Callable</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1800</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Callable</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #X93-2-2024 ----------
 "#X93-2-2024" [
-    // -------- block #X93-2-2024 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> SlaveCompareReplace | <port0> (Compound) | <port1> through | <port2> search/compare | <port3> #X93-2-2024"
-    style = "filled"
+    xlabel = "#X93-2-2024"
     fontsize = "12"
-    color = black
     fontcolor = black
+    label = "<fixed> SlaveCompareReplace | <port0> (Compound) | <port1> through | <port2> search/compare"
+    style = "filled"
+    color = black
 ];
 
+// -------- block #X93-2-2023 ----------
 "#X93-2-2023" [
-    // -------- block #X93-2-2023 ----------
     shape = "record"
     fillcolor = antiquewhite1
-    label = "<fixed> SlaveCompareReplace | <port0> through | <port1> search/compare | <port2> #X93-2-2023"
-    style = "filled"
+    xlabel = "#X93-2-2023"
     fontsize = "12"
-    color = black
     fontcolor = black
+    label = "<fixed> SlaveCompareReplace | <port0> through | <port1> search/compare"
+    style = "filled"
+    color = black
 ];
 
+// -------- block #B-2-1804 ----------
 "#B-2-1804" [
-    // -------- block #B-2-1804 ----------
-    shape = "plaintext"
+    shape = "triangle"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-     <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>#B-2-1804</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1804"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1801 ----------
 "#B-2-1801" [
-    // -------- block #B-2-1801 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1801"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-     <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-     <TR><TD>#B-2-1801</TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1810 ----------
 "#B-2-1810" [
-    // -------- block #B-2-1810 ----------
-    shape = "plaintext"
+    shape = "circle"
     fillcolor = "/set28/1"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1810</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1810"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1812 ----------
 "#B-2-1812" [
-    // -------- block #B-2-1812 ----------
-    shape = "plaintext"
+    shape = "circle"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1812</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1812"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1802 ----------
 "#B-2-1802" [
-    // -------- block #B-2-1802 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1802"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-     <TR><TD>Declaration</TD><TD PORT="port0">{..}</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-     <TR><TD>#B-2-1802</TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{..}</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1816 ----------
 "#B-2-1816" [
-    // -------- block #B-2-1816 ----------
     shape = "plaintext"
     fillcolor = "/set28/1"
+    xlabel = "#B-2-1816"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Temporary</FONT></TD><TD></TD></TR>
-     <TR><TD>Type</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>InstanceIdentifier</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>Initialiser</TD><TD PORT="port2"></TD></TR>
-     <TR><TD>#B-2-1816</TD><TD PORT="port3"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Temporary</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1817 ----------
 "#B-2-1817" [
-    // -------- block #B-2-1817 ----------
     shape = "plaintext"
     fillcolor = "/set28/3"
+    xlabel = "#B-2-1817"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Boolean</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1817</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Boolean</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1818 ----------
 "#B-2-1818" [
-    // -------- block #B-2-1818 ----------
     shape = "plaintext"
     fillcolor = "/set28/5"
+    xlabel = "#B-2-1818"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">'enabled'</FONT></TD><TD></TD></TR>
-     <TR><TD>(InstanceIdentifier)</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1818</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black"><I>'enabled'!</I></FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1820 ----------
 "#B-2-1820" [
-    // -------- block #B-2-1820 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
+    xlabel = "#B-2-1820"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">true</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1820</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">true</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #X93-11-32 ----------
 "#X93-11-32" [
-    // -------- block #X93-11-32 ----------
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-     <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#X93-11-32</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    shape = "square"
+    xlabel = "#X93-11-32"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1803 ----------
 "#B-2-1803" [
-    // -------- block #B-2-1803 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1803"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Compound</FONT></TD><TD></TD></TR>
-     <TR><TD>Declaration</TD><TD PORT="port0">{.}</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1">[0]</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port2">[1]</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port3">[2]</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port4">[3]</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port5">[4]</TD></TR>
-     <TR><TD>#B-2-1803</TD><TD PORT="port6"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">[1]</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port3"><FONT POINT-SIZE="12" COLOR="black">[2]</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port4"><FONT POINT-SIZE="12" COLOR="black">[3]</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port5"><FONT POINT-SIZE="12" COLOR="black">[4]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1811 ----------
 "#B-2-1811" [
-    // -------- block #B-2-1811 ----------
-    shape = "plaintext"
+    shape = "circle"
     fillcolor = "/set28/1"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1811</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1811"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1813 ----------
 "#B-2-1813" [
-    // -------- block #B-2-1813 ----------
-    shape = "plaintext"
+    shape = "circle"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1813</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1813"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1825 ----------
 "#B-2-1825" [
-    // -------- block #B-2-1825 ----------
-    shape = "plaintext"
+    shape = "square"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-     <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1825</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1825"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1809 ----------
 "#B-2-1809" [
-    // -------- block #B-2-1809 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1809"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
-     <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1809</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Return</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1823 ----------
 "#B-2-1823" [
-    // -------- block #B-2-1823 ----------
     shape = "plaintext"
+    xlabel = "#B-2-1823"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1823</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Uninitialised</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1814 ----------
 "#B-2-1814" [
-    // -------- block #B-2-1814 ----------
-    shape = "plaintext"
+    shape = "circle"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1814</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1814"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1829 ----------
 "#B-2-1829" [
-    // -------- block #B-2-1829 ----------
-    shape = "plaintext"
+    shape = "triangle"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-     <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>#B-2-1829</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1829"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1826 ----------
 "#B-2-1826" [
-    // -------- block #B-2-1826 ----------
-    shape = "plaintext"
+    shape = "diamond"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">¬</FONT></TD><TD></TD></TR>
-     <TR><TD>pattern</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1826</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1826"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">¬</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1827 ----------
 "#B-2-1827" [
-    // -------- block #B-2-1827 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1827"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1">NULL</TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port2">NULL</TD></TR>
-     <TR><TD>#B-2-1827</TD><TD PORT="port3"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">If</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">NULL</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">NULL</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1828 ----------
 "#B-2-1828" [
-    // -------- block #B-2-1828 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1828"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">If</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>Statement</TD><TD PORT="port2"></TD></TR>
-     <TR><TD>#B-2-1828</TD><TD PORT="port3"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">If</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1830 ----------
 "#B-2-1830" [
-    // -------- block #B-2-1830 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1830"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Nop</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1830</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Nop</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1815 ----------
 "#B-2-1815" [
-    // -------- block #B-2-1815 ----------
-    shape = "plaintext"
+    shape = "circle"
     fillcolor = "/set28/2"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">*</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1815</TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1815"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #X93-11-33 ----------
 "#X93-11-33" [
-    // -------- block #X93-11-33 ----------
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-     <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#X93-11-33</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    shape = "square"
+    xlabel = "#X93-11-33"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #X93-9-32 ----------
 "#X93-9-32" [
-    // -------- block #X93-9-32 ----------
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Δ</FONT></TD><TD></TD></TR>
-     <TR><TD>through</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>overlay</TD><TD PORT="port1"></TD></TR>
-     <TR><TD>#X93-9-32</TD><TD PORT="port2"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    shape = "triangle"
+    xlabel = "#X93-9-32"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">Δ</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1808 ----------
 "#B-2-1808" [
-    // -------- block #B-2-1808 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1808"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
-     <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1808</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Return</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1822 ----------
 "#B-2-1822" [
-    // -------- block #B-2-1822 ----------
     shape = "plaintext"
+    xlabel = "#B-2-1822"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1822</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Uninitialised</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1824 ----------
 "#B-2-1824" [
-    // -------- block #B-2-1824 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
+    xlabel = "#B-2-1824"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Assign</FONT></TD><TD></TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port0">[0]</TD></TR>
-     <TR><TD>Expression</TD><TD PORT="port1">[1]</TD></TR>
-     <TR><TD>#B-2-1824</TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Assign</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Expression</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[1]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1819 ----------
 "#B-2-1819" [
-    // -------- block #B-2-1819 ----------
     shape = "plaintext"
     fillcolor = "/set28/6"
+    xlabel = "#B-2-1819"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">false</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1819</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">false</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1806 ----------
 "#B-2-1806" [
-    // -------- block #B-2-1806 ----------
-    shape = "plaintext"
+    shape = "square"
     fillcolor = "/set28/1"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">#</FONT></TD><TD></TD></TR>
-     <TR><TD>terminus</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1806</TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
+    xlabel = "#B-2-1806"
     fontsize = "12"
+    fontcolor = black
+    label = <<FONT POINT-SIZE="20" COLOR="black">#</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
 ];
 
+// -------- block #B-2-1807 ----------
 "#B-2-1807" [
-    // -------- block #B-2-1807 ----------
     shape = "plaintext"
     fillcolor = "/set28/2"
+    xlabel = "#B-2-1807"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Return</FONT></TD><TD></TD></TR>
-     <TR><TD>Initialiser</TD><TD PORT="port0"></TD></TR>
-     <TR><TD>#B-2-1807</TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Return</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="12" COLOR="black">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
+// -------- block #B-2-1821 ----------
 "#B-2-1821" [
-    // -------- block #B-2-1821 ----------
     shape = "plaintext"
+    xlabel = "#B-2-1821"
+    fontsize = "12"
+    fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15.0">Uninitialised</FONT></TD><TD></TD></TR>
-     <TR><TD>#B-2-1821</TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Uninitialised</FONT></TD><TD></TD></TR>
     </TABLE>>
     style = "rounded,filled"
-    fontsize = "12"
 ];
 
 "CR#X93-10-93":port0 -> "#X93-12-83" [
@@ -1343,21 +1469,21 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#X93-12-83":port0 -> "#X93-8-84" [
+"#X93-12-83" -> "#X93-8-84" [
     label = "#2"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#X93-8-84":port0 -> "#B-2-1805" [
+"#X93-8-84" -> "#B-2-1805" [
     label = "#1"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#X93-8-84":port1 -> "#B-2-1799" [
+"#X93-8-84" -> "#B-2-1799" [
     style="dashed"
     label = "#2"
     decorate = true
@@ -1421,14 +1547,14 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#B-2-1804":port0 -> "#B-2-1801" [
+"#B-2-1804" -> "#B-2-1801" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#B-2-1804":port1 -> "#B-2-1802" [
+"#B-2-1804" -> "#B-2-1802" [
     style="dashed"
     label = "#0"
     decorate = true
@@ -1498,7 +1624,7 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#X93-11-32":port0 -> "#B-2-1803" [
+"#X93-11-32" -> "#B-2-1803" [
     label = "#2"
     decorate = true
     color = black
@@ -1547,7 +1673,7 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#B-2-1825":port0 -> "#B-2-1809" [
+"#B-2-1825" -> "#B-2-1809" [
     label = "#0"
     decorate = true
     color = black
@@ -1561,14 +1687,14 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#B-2-1829":port0 -> "#B-2-1826" [
+"#B-2-1829" -> "#B-2-1826" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#B-2-1829":port1 -> "#B-2-1828" [
+"#B-2-1829" -> "#B-2-1828" [
     style="dashed"
     label = "#0"
     decorate = true
@@ -1576,7 +1702,7 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#B-2-1826":port0 -> "#B-2-1827" [
+"#B-2-1826" -> "#B-2-1827" [
     label = "#0"
     decorate = true
     color = black
@@ -1614,21 +1740,21 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#X93-11-33":port0 -> "#X93-9-32" [
+"#X93-11-33" -> "#X93-9-32" [
     label = "#2"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#X93-9-32":port0 -> "#B-2-1808" [
+"#X93-9-32" -> "#B-2-1808" [
     label = "#1"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#X93-9-32":port1 -> "#B-2-1824" [
+"#X93-9-32" -> "#B-2-1824" [
     style="dashed"
     label = "#1"
     decorate = true
@@ -1659,7 +1785,7 @@ subgraph "clusterAnd#R93-0" {
     fontcolor = black
 ];
 
-"#B-2-1806":port0 -> "#B-2-1807" [
+"#B-2-1806" -> "#B-2-1807" [
     label = "#0"
     decorate = true
     color = black

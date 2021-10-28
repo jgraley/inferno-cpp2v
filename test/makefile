@@ -67,7 +67,7 @@ test/results/rep.pass : $(CASES:%=test/results/rep/%.pass)
 	@spd-say -r -100 -p -100 "the rep tests have passed"
 
 test/results/graph.pass : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
-	./gen_dev_graphs.sh
+	./gen_dev_graphs.sh --pattern --intermediate
 	diff -r test/reference/graphs/ graphs/ -x '*.svg'
 	@touch $@
 	@echo ------------------------------------------
