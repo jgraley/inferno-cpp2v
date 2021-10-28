@@ -57,4 +57,4 @@ done
 
 ./convert_all_svg.sh -d ${BASE_DIR}
 
-echo Generated graphs into ${BASE_DIR}
+echo Generated graphs into ${BASE_DIR}/

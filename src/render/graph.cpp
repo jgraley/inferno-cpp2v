@@ -636,6 +636,24 @@ string Graph::DoBlock( const MyBlock &block,
     s += SSPrintf("fontsize = \"%d\"\n", FS_MIDDLE);
     s += "fontcolor = " + font_colour + "\n";
 
+    int tfs;
+    string tt;
+    if( !block.symbol.empty() )
+    {
+        tfs = FS_HUGE;            
+        tt = EscapeForGraphviz( block.symbol );
+    }
+    else if( block.italic_title )        
+    {
+        tfs = FS_LARGE;
+        tt = ApplyTagPair(EscapeForGraphviz( block.title ), "I");
+    }
+    else
+    {
+        tfs = FS_LARGE;           
+        tt = EscapeForGraphviz( block.title );   
+    }
+    
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
     // "Adding HTML labels to record-based shapes (record and Mrecord) is 
     // discouraged and may lead to unexpected behavior because of their 
@@ -643,12 +661,12 @@ string Graph::DoBlock( const MyBlock &block,
     // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
 	if( block.shape == "plaintext" )
 	{
-		s += "label = " + DoHTMLLabel( block );
+		s += "label = " + DoExpandedNodeBlockLabel( block, tfs, tt );
 		s += "style = \"rounded,filled\"\n";
 	}
 	else if( block.shape == "record" )
     {
-        s += "label = " + DoRecordLabel( block );
+        s += "label = " + DoControlBlockLabel( block, tfs, tt );
         s += "style = \"filled\"\n";
         s += "color = " + line_colour + "\n";
     }
@@ -657,29 +675,10 @@ string Graph::DoBlock( const MyBlock &block,
         s += "style = \"invisible\"\n";
     }
     else
-	{
-        int fs;
-        string lt;
-        if( !block.symbol.empty() )
-        {
-            fs = FS_HUGE;            
-            lt = EscapeForGraphviz( block.symbol );
-        }
-        else if( block.italic_title )        
-        {
-            fs = FS_LARGE;
-            lt = "<I>" + EscapeForGraphviz( block.title ) + "</I>";
-        }
-        else
-        {
-            fs = FS_LARGE;           
-            lt = EscapeForGraphviz( block.title );   
-        }
-        lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", fs, backgrounded_font_colour.c_str()) + lt + "</FONT>";
-        
+	{          
         // Ignoring sub-block (above check means there will only be one: it
-        // is assumed that the title is sufficietly informative
-		s += "label = <" + lt + ">\n";
+        // is assumed that the title is sufficiently informative
+		s += "label = " + DoNodeBlockLabel( block, tfs, tt ) + "\n";
 		s += "style = \"filled\"\n";
         s += "penwidth = 0.0\n";
 
@@ -702,11 +701,33 @@ string Graph::DoBlock( const MyBlock &block,
 }
 
 
-string Graph::DoRecordLabel( const MyBlock &block )
+string Graph::DoControlBlockLabel( const MyBlock &block, int tfs, string tt )
 {
-    string lt = EscapeForGraphviz( block.symbol.empty() ? block.title : block.symbol );
+#if 0
+    Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", font_colour}};
+    Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", font_colour}};
+
+	string s;
+	string row;
+	row += ApplyTagPair(tt, "TD");
+    s += " " + ApplyTagPair(row, "TR") + "\n";
+
+    int porti=0;
+    for( Graphable::SubBlock sub_block : block.sub_blocks )
+    {
+        string lt = EscapeForGraphviz(sub_block.item_name+sub_block.item_extra);
+        lt = ApplyTagPair(lt, "FONT", subblock_atts);
+        row = ApplyTagPair(lt, "TD", {{"PORT", SeqField( porti )}});
+        s += " " + ApplyTagPair(row, "TR") + "\n";
+        porti++;
+    }
+    
+    string table = ApplyTagPair("\n"+s, "TABLE", {{"BORDER", "0"}, {"CELLBORDER", "1"}, {"CELLSPACING", "0"}});
+	return MakeHTMLForGraphViz(table)+"\n";
+#else
+    tt = EscapeForGraphviz( block.symbol.empty() ? block.title : block.symbol );
     string s;
-    s += "\"<fixed> " + lt;
+    s += "\"<fixed> " + tt;
     int k=0;
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {        
@@ -716,54 +737,46 @@ string Graph::DoRecordLabel( const MyBlock &block )
     }
     s += "\"\n";
     return s;
+#endif
 }
 
 
-string Graph::DoHTMLLabel( const MyBlock &block )
+string Graph::DoNodeBlockLabel( const MyBlock &block, int tfs, string tt )
 {
-    int fs;
-    string lt;
-    if( !block.symbol.empty() )
-    {
-        fs = FS_HUGE;            
-        lt = EscapeForGraphviz( block.symbol );
-    }
-    else if( block.italic_title )        
-    {
-        fs = FS_LARGE;
-        lt = "<I>" + EscapeForGraphviz( block.title ) + "</I>";
-    }
-    else
-    {
-        fs = FS_LARGE;
-        lt = EscapeForGraphviz( block.title );
-    }
-    lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", fs, backgrounded_font_colour.c_str()) + lt + "</FONT>";
+    Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};              
+    tt = ApplyTagPair(tt, "FONT", title_atts);
+    return MakeHTMLForGraphViz(tt);
+}
 
-	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
-	s += " <TR>";
-	s += "<TD>" + lt + "</TD>";
-	s += "<TD></TD>";
-	s += "</TR>\n";
+
+string Graph::DoExpandedNodeBlockLabel( const MyBlock &block, int tfs, string tt )
+{
+    Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", backgrounded_font_colour}};
+    Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};
+
+    tt = ApplyTagPair(tt, "FONT", title_atts);
+
+	string s;
+	string row;
+	row += ApplyTagPair(tt, "TD");
+	row += ApplyTagPair("", "TD");
+    s += " " + ApplyTagPair(row, "TR") + "\n";
     
     int porti=0;
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
-        s += " <TR>";
-        lt = EscapeForGraphviz(sub_block.item_name);
-        if( !lt.empty() )
-            lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
-        s += "<TD>" + lt + "</TD>";
+        string lt = EscapeForGraphviz(sub_block.item_name);
+        lt = ApplyTagPair(lt, "FONT", subblock_atts);
+        row = ApplyTagPair(lt, "TD");
         lt = EscapeForGraphviz(sub_block.item_extra);
-        if( !lt.empty() )
-            lt = SSPrintf("<FONT POINT-SIZE=\"%d\" COLOR=\"%s\">", FS_MIDDLE, backgrounded_font_colour.c_str()) + lt + "</FONT>";
-        s += "<TD PORT=\"" + SeqField( porti ) + "\">" + lt + "</TD>";
-        s += "</TR>\n";
+        lt = ApplyTagPair(lt, "FONT", subblock_atts);
+        row += ApplyTagPair(lt, "TD", {{"PORT", SeqField( porti )}});
+        s += " " + ApplyTagPair(row, "TR") + "\n";
         porti++;
     }
     
-	s += "</TABLE>>\n";
-	return s;
+    string table = ApplyTagPair("\n"+s, "TABLE", {{"BORDER", "0"}, {"CELLBORDER", "0"}, {"CELLSPACING", "0"}});
+	return MakeHTMLForGraphViz(table)+"\n";
 }
 
 
@@ -1025,3 +1038,38 @@ string Graph::Indent(string s)
 
     return sout;
 }
+
+
+string Graph::ApplyTagPair(string text, string tagname, Atts atts)
+{
+    // GraphViz appears to abhor tag pairs with no text in between... sometimes
+    if( tagname=="FONT" && text.empty() )
+        return "";
+        
+    string opening_tag, closing_tag, s;
+    opening_tag = tagname;
+    for( auto p : atts )
+        opening_tag += " " + p.first + "=\"" + p.second + "\"";
+    
+    closing_tag = "/" + tagname;
+    
+    s += MakeTag(opening_tag);
+    s += text;
+    s += MakeTag(closing_tag);
+    return s;
+}
+
+
+string Graph::MakeTag(string tagname)
+{
+    return "<" + tagname + ">";
+}
+
+
+string Graph::MakeHTMLForGraphViz(string html)
+{
+    return "<" + html + ">";
+}
+
+
+

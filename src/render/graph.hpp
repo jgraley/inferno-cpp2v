@@ -142,8 +142,9 @@ private:
                      const RegionAppearance &region );
     string DoBlock( const MyBlock &block,
                     const RegionAppearance &region );
-    string DoRecordLabel( const MyBlock &block );
-    string DoHTMLLabel( const MyBlock &block );
+    string DoControlBlockLabel( const MyBlock &block, int tfs, string tt );
+    string DoNodeBlockLabel( const MyBlock &block, int tfs, string tt );
+    string DoExpandedNodeBlockLabel( const MyBlock &block, int tfs, string tt );
     string DoLinks( const list<MyBlock> &blocks );
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
@@ -161,6 +162,11 @@ private:
     string GetRegionGraphId(const Region *region, const GraphIdable *g);
     string GetRegionGraphId(const Region *region, string id);
     string Indent(string s);
+    
+    typedef list<pair<string, string>> Atts;
+    static string ApplyTagPair(string text, string tagname, Atts atts = {}); 
+    static string MakeTag(string tagname); 
+    static string MakeHTMLForGraphViz(string html); 
 
     const string outfile; // empty means stdout
     FILE *filep;
