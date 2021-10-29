@@ -188,7 +188,7 @@ protected:
     const AndRuleEngine *master_and_rule_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink base_plink;
-    pair<PatternLink, PatternLink> overlay_plink_pair;
+    PatternLink overlay_under_plink;
     set<PatternLink> coupled_plinks;
     list<PatternLink> base_and_normal_plinks;
     Phase phase = UNDEFINED;

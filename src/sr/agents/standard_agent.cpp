@@ -789,9 +789,9 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
 {
     INDENT("B");
 
-    if( overlay_plink_pair.first )
+    if( overlay_under_plink && overlay_under_plink.GetChildAgent() )
     {
-        CouplingKey key = master_scr_engine->GetReplaceKey( overlay_plink_pair.second.GetChildAgent() );
+        CouplingKey key = master_scr_engine->GetReplaceKey( overlay_under_plink.GetChildAgent() );
         TreePtr<Node> under_node = key.GetKeyXNode(KEY_CONSUMER_7);
         ASSERT( under_node );
         ASSERT( IsLocalMatch(under_node.get()) );

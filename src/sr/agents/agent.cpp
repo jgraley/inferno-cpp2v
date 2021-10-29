@@ -555,10 +555,10 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
     if( !dynamic_cast<StandardAgent *>(under_plink.GetChildAgent()) )
         return;
         
-    // Remember the keying action that will be required
-    overlay_plink_pair = make_pair(me_plink, under_plink);
+    // Remember the overlaying action that will be required
+    overlay_under_plink = under_plink;
 
-    // Agent- specific actions
+    // Agent-specific actions
     PlanOverlayImpl( me_plink, under_plink );
 }
 
