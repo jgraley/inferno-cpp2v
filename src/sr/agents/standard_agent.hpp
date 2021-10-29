@@ -155,7 +155,7 @@ public:
     virtual void PlanOverlayImpl(      PatternLink me_plink, 
                                     PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node );
+                                            TreePtr<Node> key_node );
 
 private:	
 	TreePtr<Node> BuildReplaceOverlay( PatternLink me_plink, 

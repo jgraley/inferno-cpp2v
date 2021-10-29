@@ -175,7 +175,7 @@ public:
                                   PatternLink under_plink );
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node );
+                                            TreePtr<Node> key_node );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

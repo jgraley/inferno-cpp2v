@@ -24,7 +24,7 @@ public:
                                       XLink base_xlink ) const;                  
     virtual bool ImplHasNLQ() const;
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node );
+                                            TreePtr<Node> key_node );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const = 0;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};

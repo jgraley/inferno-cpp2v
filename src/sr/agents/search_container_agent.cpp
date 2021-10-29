@@ -61,7 +61,7 @@ bool SearchContainerAgent::ImplHasNLQ() const
 
 
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                                      TreePtr<Node> under_node ) 
+                                                      TreePtr<Node> key_node ) 
 {
     INDENT("#");
     CouplingKey terminus_key = master_scr_engine->GetReplaceKey( AsAgent(terminus) );
@@ -73,7 +73,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
     PatternLink terminus_plink(this, &terminus);
     TreePtr<Node> new_terminus_subtree = terminus_plink.GetChildAgent()->BuildReplace(terminus_plink);
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(under_node, terminus_keynode, new_terminus_subtree);   
+    return DuplicateSubtree(key_node, terminus_keynode, new_terminus_subtree);   
 }
 
 

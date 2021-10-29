@@ -785,20 +785,26 @@ void StandardAgent::PlanOverlayImpl( PatternLink me_plink,
 
 
 TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                               TreePtr<Node> under_node )  // overlaying if not nullptr
+                                               TreePtr<Node> key_node ) 
 {
     INDENT("B");
 
     if( overlay_plink_pair.first )
     {
         CouplingKey key = master_scr_engine->GetReplaceKey( overlay_plink_pair.second.GetChildAgent() );
-        under_node = key.GetKeyXNode(KEY_CONSUMER_7);
-    }
-
-    if( under_node && IsLocalMatch(under_node.get()) ) 
+        TreePtr<Node> under_node = key.GetKeyXNode(KEY_CONSUMER_7);
+        ASSERT( under_node );
+        ASSERT( IsLocalMatch(under_node.get()) );
         return BuildReplaceOverlay( me_plink, under_node );
+    }
+    else if( key_node && IsLocalMatch(key_node.get()) ) 
+    {
+        return BuildReplaceOverlay( me_plink, key_node );
+    }
     else
-        return BuildReplaceNormal( me_plink ); // Overwriting pattern over dest, need to make a duplicate 
+    {
+        return BuildReplaceNormal( me_plink ); 
+    }
 }
 
 

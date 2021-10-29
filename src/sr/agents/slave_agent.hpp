@@ -31,7 +31,7 @@ public:
     virtual void PlanOverlayImpl(      PatternLink me_plink, 
                                     PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node );
+                                            TreePtr<Node> key_node );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }

@@ -594,10 +594,10 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 
 
 TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
-                                             TreePtr<Node> under_node )
+                                             TreePtr<Node> key_node )
 {
-    ASSERT(under_node)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(under_node);   
+    ASSERT(key_node)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(key_node);   
 }
 
 

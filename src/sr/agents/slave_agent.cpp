@@ -39,7 +39,7 @@ void SlaveAgent::PlanOverlayImpl( PatternLink me_plink,
 
 
 TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node )
+                                            TreePtr<Node> key_node )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   

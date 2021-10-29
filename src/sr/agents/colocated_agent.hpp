@@ -28,7 +28,7 @@ public:
                                            const TheKnowledge *knowledge ) const;
                                           
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node );
+                                            TreePtr<Node> key_node );
     virtual void RunColocatedQuery(XLink common_xlink) const;
 };
 

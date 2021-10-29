@@ -68,7 +68,7 @@ void DeltaAgent::StartPlanOverlay()
 
 
 TreePtr<Node> DeltaAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> under_node ) 
+                                            TreePtr<Node> key_node ) 
 {
     INDENT("O");    
 
