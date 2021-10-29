@@ -156,7 +156,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "12"
         fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
         </TABLE>>
@@ -199,7 +199,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "12"
         fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">[1]</FONT></TD></TR>
@@ -216,7 +216,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "15"
         // -------- block And#R69-0/And#R69-1/#B-2-1261 ----------
         "And#R69-0/And#R69-1/#B-2-1261" [
-            shape = none
+            shape = "none"
             fillcolor = "/set28/1"
             xlabel = "#B-2-1261"
             fontsize = "12"
@@ -234,7 +234,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "15"
         // -------- block And#R69-0/And#R69-2/#B-2-1257 ----------
         "And#R69-0/And#R69-2/#B-2-1257" [
-            shape = none
+            shape = "none"
             fillcolor = "/set28/2"
             xlabel = "#B-2-1257"
             fontsize = "12"
@@ -252,7 +252,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "15"
         // -------- block And#R69-0/And#R69-3/#B-2-1258 ----------
         "And#R69-0/And#R69-3/#B-2-1258" [
-            shape = none
+            shape = "none"
             fillcolor = "/set28/2"
             xlabel = "#B-2-1258"
             fontsize = "12"
@@ -270,7 +270,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "15"
         // -------- block And#R69-0/And#R69-4/#B-2-1260 ----------
         "And#R69-0/And#R69-4/#B-2-1260" [
-            shape = none
+            shape = "none"
             fillcolor = "/set28/1"
             xlabel = "#B-2-1260"
             fontsize = "12"
@@ -288,7 +288,7 @@ subgraph "clusterAnd#R69-0" {
         fontsize = "15"
         // -------- block And#R69-0/And#R69-5/#B-2-1259 ----------
         "And#R69-0/And#R69-5/#B-2-1259" [
-            shape = none
+            shape = "none"
             fillcolor = "/set28/2"
             xlabel = "#B-2-1259"
             fontsize = "12"
@@ -365,11 +365,14 @@ subgraph "clusterAnd#R69-0" {
 // -------------------- transformation figure --------------------
 // -------- block CR#X69-10-69 ----------
 "CR#X69-10-69" [
-    shape = "record"
+    shape = "plaintext"
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = black
-    label = "<fixed> CompareReplace | <port0> search/compare"
+    label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">CompareReplace</FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">search/compare</FONT></TD></TR>
+    </TABLE>>
     style = "filled"
     color = black
 ];
@@ -410,7 +413,7 @@ subgraph "clusterAnd#R69-0" {
     fontsize = "12"
     fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">[1]</FONT></TD></TR>
@@ -457,7 +460,7 @@ subgraph "clusterAnd#R69-0" {
     fontsize = "12"
     fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{.}</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
     </TABLE>>
@@ -517,7 +520,7 @@ subgraph "clusterAnd#R69-0" {
     fontsize = "12"
     fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">Compound</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Declaration</FONT></TD><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">{..}</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port1"><FONT POINT-SIZE="12" COLOR="black">[0]</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">Statement</FONT></TD><TD PORT="port2"><FONT POINT-SIZE="12" COLOR="black">[1]</FONT></TD></TR>

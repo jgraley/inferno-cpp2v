@@ -110,6 +110,8 @@ private:
 		string background_colour;
 	};
 
+    typedef list<pair<string, string>> Atts;
+
     void PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root );
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
@@ -142,9 +144,15 @@ private:
                      const RegionAppearance &region );
     string DoBlock( const MyBlock &block,
                     const RegionAppearance &region );
-    string DoControlBlockLabel( const MyBlock &block, int tfs, string tt );
-    string DoNodeBlockLabel( const MyBlock &block, int tfs, string tt );
-    string DoExpandedNodeBlockLabel( const MyBlock &block, int tfs, string tt );
+    string DoNodeBlockLabel( const MyBlock &block, 
+                             Atts title_atts, 
+                             string title );
+    string DoExpandedBlockLabel( const MyBlock &block, 
+                                 Atts title_atts, 
+                                 Atts subblock_atts, 
+                                 Atts table_atts, 
+                                 string title, 
+                                 bool extra_column );
     string DoLinks( const list<MyBlock> &blocks );
     string DoLinks( const MyBlock &block );
     string DoLink( int port_index, 
@@ -163,7 +171,6 @@ private:
     string GetRegionGraphId(const Region *region, string id);
     string Indent(string s);
     
-    typedef list<pair<string, string>> Atts;
     static string ApplyTagPair(string text, string tagname, Atts atts = {}); 
     static string MakeTag(string tagname); 
     static string MakeHTMLForGraphViz(string html); 

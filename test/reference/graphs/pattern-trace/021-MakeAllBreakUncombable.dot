@@ -31,7 +31,7 @@ subgraph "clusterAnd#R21-1" {
         fontsize = "12"
         fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="15" COLOR="black">UncombableBreak</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="15" COLOR="black">UncombableBreak</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -82,7 +82,7 @@ subgraph "clusterAnd#R21-0" {
         fontsize = "12"
         fontcolor = black
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT POINT-SIZE="20" COLOR="black">¬</FONT></TD><TD></TD></TR>
+         <TR><TD><FONT POINT-SIZE="20" COLOR="black">¬</FONT></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">(Break)</FONT></TD><TD PORT="port0"></TD></TR>
          <TR><TD><FONT POINT-SIZE="12" COLOR="black">pattern</FONT></TD><TD PORT="port1"></TD></TR>
         </TABLE>>
@@ -97,7 +97,7 @@ subgraph "clusterAnd#R21-0" {
         fontsize = "15"
         // -------- block And#R21-0/And#R21-1/#B-2-274 ----------
         "And#R21-0/And#R21-1/#B-2-274" [
-            shape = none
+            shape = "none"
             fillcolor = "/set28/2"
             xlabel = "#B-2-274"
             fontsize = "12"
@@ -135,11 +135,14 @@ subgraph "clusterAnd#R21-0" {
 // -------------------- transformation figure --------------------
 // -------- block CR#X21-10-21 ----------
 "CR#X21-10-21" [
-    shape = "record"
+    shape = "plaintext"
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = black
-    label = "<fixed> CompareReplace | <port0> search/compare"
+    label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">CompareReplace</FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT POINT-SIZE="12" COLOR="black">search/compare</FONT></TD></TR>
+    </TABLE>>
     style = "filled"
     color = black
 ];
@@ -180,7 +183,7 @@ subgraph "clusterAnd#R21-0" {
     fontsize = "12"
     fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="20" COLOR="black">¬</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="20" COLOR="black">¬</FONT></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">(Break)</FONT></TD><TD PORT="port0"></TD></TR>
      <TR><TD><FONT POINT-SIZE="12" COLOR="black">pattern</FONT></TD><TD PORT="port1"></TD></TR>
     </TABLE>>
@@ -195,7 +198,7 @@ subgraph "clusterAnd#R21-0" {
     fontsize = "12"
     fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15" COLOR="black">UncombableBreak</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">UncombableBreak</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -208,7 +211,7 @@ subgraph "clusterAnd#R21-0" {
     fontsize = "12"
     fontcolor = black
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT POINT-SIZE="15" COLOR="black">UncombableBreak</FONT></TD><TD></TD></TR>
+     <TR><TD><FONT POINT-SIZE="15" COLOR="black">UncombableBreak</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];

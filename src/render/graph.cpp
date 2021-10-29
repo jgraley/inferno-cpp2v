@@ -622,7 +622,9 @@ string Graph::DoBlock( const MyBlock &block,
 	string s;
     
     if( block.shape == "invisible" )
-        s += "shape = none\n";
+        s += "shape = \"none\"\n";
+    else if( block.shape == "plaintext" || block.shape == "record" )
+        s += "shape = \"plaintext\"\n";
     else
         s += "shape = \"" + block.shape + "\"\n";
 	if( block.colour=="transparent" )
@@ -661,12 +663,18 @@ string Graph::DoBlock( const MyBlock &block,
     // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
 	if( block.shape == "plaintext" )
 	{
-		s += "label = " + DoExpandedNodeBlockLabel( block, tfs, tt );
+        Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};
+        Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", backgrounded_font_colour}};
+        Atts table_atts {{"BORDER", "0"}, {"CELLBORDER", "0"}, {"CELLSPACING", "0"}};
+		s += "label = " + DoExpandedBlockLabel( block, title_atts, subblock_atts, table_atts, tt, true );
 		s += "style = \"rounded,filled\"\n";
 	}
 	else if( block.shape == "record" )
     {
-        s += "label = " + DoControlBlockLabel( block, tfs, tt );
+        Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", font_colour}};
+        Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", font_colour}};
+        Atts table_atts {{"BORDER", "0"}, {"CELLBORDER", "1"}, {"CELLSPACING", "0"}};
+        s += "label = " + DoExpandedBlockLabel( block, title_atts, subblock_atts, table_atts, tt, false );
         s += "style = \"filled\"\n";
         s += "color = " + line_colour + "\n";
     }
@@ -676,9 +684,10 @@ string Graph::DoBlock( const MyBlock &block,
     }
     else
 	{          
+        Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};              
         // Ignoring sub-block (above check means there will only be one: it
         // is assumed that the title is sufficiently informative
-		s += "label = " + DoNodeBlockLabel( block, tfs, tt ) + "\n";
+		s += "label = " + DoNodeBlockLabel( block, title_atts, tt ) + "\n";
 		s += "style = \"filled\"\n";
         s += "penwidth = 0.0\n";
 
@@ -701,81 +710,50 @@ string Graph::DoBlock( const MyBlock &block,
 }
 
 
-string Graph::DoControlBlockLabel( const MyBlock &block, int tfs, string tt )
+string Graph::DoNodeBlockLabel( const MyBlock &block, 
+                                Atts title_atts, 
+                                string title )
 {
-#if 0
-    Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", font_colour}};
-    Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", font_colour}};
-
-	string s;
-	string row;
-	row += ApplyTagPair(tt, "TD");
-    s += " " + ApplyTagPair(row, "TR") + "\n";
-
-    int porti=0;
-    for( Graphable::SubBlock sub_block : block.sub_blocks )
-    {
-        string lt = EscapeForGraphviz(sub_block.item_name+sub_block.item_extra);
-        lt = ApplyTagPair(lt, "FONT", subblock_atts);
-        row = ApplyTagPair(lt, "TD", {{"PORT", SeqField( porti )}});
-        s += " " + ApplyTagPair(row, "TR") + "\n";
-        porti++;
-    }
-    
-    string table = ApplyTagPair("\n"+s, "TABLE", {{"BORDER", "0"}, {"CELLBORDER", "1"}, {"CELLSPACING", "0"}});
-	return MakeHTMLForGraphViz(table)+"\n";
-#else
-    tt = EscapeForGraphviz( block.symbol.empty() ? block.title : block.symbol );
-    string s;
-    s += "\"<fixed> " + tt;
-    int k=0;
-    for( Graphable::SubBlock sub_block : block.sub_blocks )
-    {        
-        string label_text = EscapeForGraphviz(sub_block.item_name + sub_block.item_extra);
-        s += " | <" +  SeqField(k) + "> " + label_text;
-        k++;
-    }
-    s += "\"\n";
-    return s;
-#endif
+    title = ApplyTagPair(title, "FONT", title_atts);
+    return MakeHTMLForGraphViz(title);
 }
 
 
-string Graph::DoNodeBlockLabel( const MyBlock &block, int tfs, string tt )
+string Graph::DoExpandedBlockLabel( const MyBlock &block, 
+                                    Atts title_atts, 
+                                    Atts subblock_atts, 
+                                    Atts table_atts, 
+                                    string title, 
+                                    bool extra_column )
 {
-    Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};              
-    tt = ApplyTagPair(tt, "FONT", title_atts);
-    return MakeHTMLForGraphViz(tt);
-}
-
-
-string Graph::DoExpandedNodeBlockLabel( const MyBlock &block, int tfs, string tt )
-{
-    Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", backgrounded_font_colour}};
-    Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};
-
-    tt = ApplyTagPair(tt, "FONT", title_atts);
+    title = ApplyTagPair(title, "FONT", title_atts);
 
 	string s;
-	string row;
-	row += ApplyTagPair(tt, "TD");
-	row += ApplyTagPair("", "TD");
+	string row = ApplyTagPair(title, "TD");
     s += " " + ApplyTagPair(row, "TR") + "\n";
     
     int porti=0;
     for( Graphable::SubBlock sub_block : block.sub_blocks )
     {
+        Atts port_att {{"PORT", SeqField( porti )}};
         string lt = EscapeForGraphviz(sub_block.item_name);
         lt = ApplyTagPair(lt, "FONT", subblock_atts);
-        row = ApplyTagPair(lt, "TD");
-        lt = EscapeForGraphviz(sub_block.item_extra);
-        lt = ApplyTagPair(lt, "FONT", subblock_atts);
-        row += ApplyTagPair(lt, "TD", {{"PORT", SeqField( porti )}});
+        if( extra_column )
+        {
+            row = ApplyTagPair(lt, "TD");
+            lt = EscapeForGraphviz(sub_block.item_extra);
+            lt = ApplyTagPair(lt, "FONT", subblock_atts);
+            row += ApplyTagPair(lt, "TD", port_att);
+        }
+        else
+        {
+            row = ApplyTagPair(lt, "TD", port_att);
+        }
         s += " " + ApplyTagPair(row, "TR") + "\n";
         porti++;
     }
     
-    string table = ApplyTagPair("\n"+s, "TABLE", {{"BORDER", "0"}, {"CELLBORDER", "0"}, {"CELLSPACING", "0"}});
+    string table = ApplyTagPair("\n"+s, "TABLE", table_atts);
 	return MakeHTMLForGraphViz(table)+"\n";
 }
 
