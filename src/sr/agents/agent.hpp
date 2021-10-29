@@ -94,12 +94,12 @@ public:
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
-    virtual const SCREngine *GetMasterSCREngine() = 0;      
-    virtual PatternLink GetKeyerPatternLink() = 0;
-                            
+    virtual const SCREngine *GetMasterSCREngine() const = 0;      
+    virtual PatternLink GetKeyerPatternLink() const = 0;
+    virtual pair<PatternLink, PatternLink> GetOverlayPatternLinkPair() const = 0;                                  
+
     virtual void Reset() = 0;     
-    virtual void PlanOverlay( map<PatternLink, PatternLink> &overlay_plinks,   
-                              PatternLink me_plink, 
+    virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink ) = 0;
 
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
@@ -167,14 +167,13 @@ public:
     virtual void ResetNLQConjecture();
      
 public:
-    virtual const SCREngine *GetMasterSCREngine();      
-    virtual PatternLink GetKeyerPatternLink();                                  
+    virtual const SCREngine *GetMasterSCREngine() const;      
+    virtual PatternLink GetKeyerPatternLink() const;                                  
+    virtual pair<PatternLink, PatternLink> GetOverlayPatternLinkPair() const;                                  
     virtual void Reset();    
-    virtual void PlanOverlay( map<PatternLink, PatternLink> &overlay_plinks,   
-                              PatternLink me_plink, 
+    virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink );
-    virtual void PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks,   
-                                  PatternLink me_plink, 
+    virtual void PlanOverlayImpl(     PatternLink me_plink, 
                                   PatternLink under_plink );
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
@@ -191,6 +190,7 @@ protected:
     const AndRuleEngine *master_and_rule_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink base_plink;
+    pair<PatternLink, PatternLink> overlay_plink_pair;
     set<PatternLink> coupled_plinks;
     list<PatternLink> base_and_normal_plinks;
     Phase phase = UNDEFINED;

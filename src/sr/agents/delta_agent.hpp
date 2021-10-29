@@ -24,7 +24,7 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> under_node );
-    virtual void StartPlanOverlay(map<PatternLink, PatternLink> &overlay_plinks);
+    virtual void StartPlanOverlay();
     
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;

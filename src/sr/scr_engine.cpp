@@ -203,7 +203,7 @@ void SCREngine::Plan::PlanningStageThree()
     
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
-        ao->StartPlanOverlay(overlay_plinks);    
+        ao->StartPlanOverlay();    
 
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
@@ -227,8 +227,12 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     keys_available = true;
   
     // Run the meta-program that copies keys around for overlaying
-    for( pair<const PatternLink, PatternLink> &p : plan.overlay_plinks )
-        CopyReplaceKey( p.first, p.second, KEY_PRODUCER_6 );
+    for( Agent *agent : plan.my_agents )
+    {
+        auto p = agent->GetOverlayPatternLinkPair();
+        if( p.first )
+            CopyReplaceKey( p.first, p.second, KEY_PRODUCER_6 );
+    }
   
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace(plan.root_plink);

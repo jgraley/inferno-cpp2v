@@ -35,7 +35,7 @@ public:
 class StartsOverlay
 {
 public:
-    virtual void StartPlanOverlay(map<PatternLink, PatternLink> &overlay_plinks) = 0;
+    virtual void StartPlanOverlay() = 0;
 };
 
 /// Common implementation for search+replace, compare+replace and slaves
@@ -94,7 +94,6 @@ private:
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
-        map<PatternLink, PatternLink> overlay_plinks; 
     } plan;
 
     TreePtr<Node> Replace( const CouplingKeysMap *master_keys );

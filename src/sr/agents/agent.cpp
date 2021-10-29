@@ -513,13 +513,13 @@ void AgentCommon::ResetNLQConjecture()
 }
 
 
-const SCREngine *AgentCommon::GetMasterSCREngine()
+const SCREngine *AgentCommon::GetMasterSCREngine() const
 {
     return master_scr_engine;
 }      
 
 
-PatternLink AgentCommon::GetKeyerPatternLink()
+PatternLink AgentCommon::GetKeyerPatternLink() const
 {
     ASSERT( master_and_rule_engine )(*this)(" has not been configured by any AndRuleEngine");
     ASSERT( base_plink )(*this)(" has no base_plink, engine=")(master_and_rule_engine)("\n");
@@ -528,13 +528,22 @@ PatternLink AgentCommon::GetKeyerPatternLink()
 }
 
 
+pair<PatternLink, PatternLink> AgentCommon::GetOverlayPatternLinkPair() const
+{
+    // Note: many of these are expected to be nullptr, meaning no overlay action here
+    // However, agents should at least have been configured
+    ASSERT( master_scr_engine )(*this)(" has not been configured by any AndRuleEngine");
+    
+    return overlay_plink_pair;
+}
+
+
 void AgentCommon::Reset()
 {
 }
 
 
-void AgentCommon::PlanOverlay( map<PatternLink, PatternLink> &overlay_plinks, 
-                               PatternLink me_plink, 
+void AgentCommon::PlanOverlay( PatternLink me_plink, 
                                PatternLink under_plink )
 {
     ASSERT( me_plink.GetChildAgent() == this );
@@ -556,16 +565,15 @@ void AgentCommon::PlanOverlay( map<PatternLink, PatternLink> &overlay_plinks,
     if( !dynamic_cast<StandardAgent *>(under_plink.GetChildAgent()) )
         return;
         
-    // Add the keying action that will be required to the plan
-    overlay_plinks[me_plink] = under_plink;
+    // Remember the keying action that will be required
+    overlay_plink_pair = make_pair(me_plink, under_plink);
 
     // Agent- specific actions
-    PlanOverlayImpl( overlay_plinks, me_plink, under_plink );
+    PlanOverlayImpl( me_plink, under_plink );
 }
 
 
-void AgentCommon::PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
-                                   PatternLink me_plink, 
+void AgentCommon::PlanOverlayImpl( PatternLink me_plink, 
                                    PatternLink under_plink )
 {
     // An empty function here implies leaf-termination of the overlay process

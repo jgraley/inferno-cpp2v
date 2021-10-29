@@ -746,8 +746,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
-                                       PatternLink me_plink, 
+void StandardAgent::PlanOverlayImpl(         PatternLink me_plink, 
                                        PatternLink under_plink )
 {
     INDENT("T");
@@ -778,7 +777,7 @@ void StandardAgent::PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plin
                 PatternLink my_singular_plink(this, my_singular);
                 PatternLink under_singular_plink(this, under_singular);
                 
-                my_singular_plink.GetChildAgent()->PlanOverlay( overlay_plinks, my_singular_plink, under_singular_plink );
+                my_singular_plink.GetChildAgent()->PlanOverlay( my_singular_plink, under_singular_plink );
             }
         }
     }
