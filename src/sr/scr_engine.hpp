@@ -117,7 +117,6 @@ public: // For agents
                       TreePtr<Node> *p_root_xnode ) const;    
     void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;
-    void CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, KeyProducer place ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
     XLink UniquifyDomainExtension( XLink xlink ) const;

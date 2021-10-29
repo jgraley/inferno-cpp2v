@@ -528,16 +528,6 @@ PatternLink AgentCommon::GetKeyerPatternLink() const
 }
 
 
-pair<PatternLink, PatternLink> AgentCommon::GetOverlayPatternLinkPair() const
-{
-    // Note: many of these are expected to be nullptr, meaning no overlay action here
-    // However, agents should at least have been configured
-    ASSERT( master_scr_engine )(*this)(" has not been configured by any AndRuleEngine");
-    
-    return overlay_plink_pair;
-}
-
-
 void AgentCommon::Reset()
 {
 }

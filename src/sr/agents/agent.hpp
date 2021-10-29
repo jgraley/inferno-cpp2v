@@ -96,7 +96,6 @@ public:
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      
     virtual PatternLink GetKeyerPatternLink() const = 0;
-    virtual pair<PatternLink, PatternLink> GetOverlayPatternLinkPair() const = 0;                                  
 
     virtual void Reset() = 0;     
     virtual void PlanOverlay( PatternLink me_plink, 
@@ -169,11 +168,10 @@ public:
 public:
     virtual const SCREngine *GetMasterSCREngine() const;      
     virtual PatternLink GetKeyerPatternLink() const;                                  
-    virtual pair<PatternLink, PatternLink> GetOverlayPatternLinkPair() const;                                  
     virtual void Reset();    
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink );
-    virtual void PlanOverlayImpl(     PatternLink me_plink, 
+    virtual void PlanOverlayImpl( PatternLink me_plink, 
                                   PatternLink under_plink );
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 

@@ -225,15 +225,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
                                 plan.and_rule_engine->GetCouplingKeys() );
     my_keyer_plinks_measured.clear();
     keys_available = true;
-  
-    // Run the meta-program that copies keys around for overlaying
-    for( Agent *agent : plan.my_agents )
-    {
-        auto p = agent->GetOverlayPatternLinkPair();
-        if( p.first )
-            CopyReplaceKey( p.first, p.second, KEY_PRODUCER_6 );
-    }
-  
+
     // Now replace according to the couplings
     TreePtr<Node> rnode = plan.root_agent->BuildReplace(plan.root_plink);
     
@@ -403,20 +395,6 @@ CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
         return replace_keys.at(agent);
     else
         return CouplingKey();
-}
-
-
-void SCREngine::CopyReplaceKey( PatternLink keyer_plink, PatternLink src_plink, KeyProducer place ) const
-{
-    ASSERT( keys_available );
-
-    Agent *keyer_agent = keyer_plink.GetChildAgent();
-    Agent *src_agent = src_plink.GetChildAgent();
-    ASSERT( replace_keys.count(src_agent) == 1 );
-    LocatedLink keyer_link( keyer_plink, replace_keys.at(src_agent).GetKeyXLink() );
-    CouplingKey key( keyer_link, place, nullptr, this );
-    InsertSolo( replace_keys, make_pair(keyer_agent, key) );
-    InsertSolo( my_keyer_plinks_measured, (PatternLink)keyer_link );    
 }
 
 

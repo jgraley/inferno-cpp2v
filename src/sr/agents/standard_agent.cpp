@@ -746,8 +746,8 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::PlanOverlayImpl(         PatternLink me_plink, 
-                                       PatternLink under_plink )
+void StandardAgent::PlanOverlayImpl( PatternLink me_plink, 
+                                     PatternLink under_plink )
 {
     INDENT("T");
     ASSERT( under_plink.GetChildAgent() );
@@ -788,6 +788,13 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
                                                TreePtr<Node> under_node )  // overlaying if not nullptr
 {
     INDENT("B");
+
+    if( overlay_plink_pair.first )
+    {
+        CouplingKey key = master_scr_engine->GetReplaceKey( overlay_plink_pair.second.GetChildAgent() );
+        under_node = key.GetKeyXNode(KEY_CONSUMER_7);
+    }
+
     if( under_node && IsLocalMatch(under_node.get()) ) 
         return BuildReplaceOverlay( me_plink, under_node );
     else
@@ -808,7 +815,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 		  (*under_node)
 		  (", so that it does not have more members");
     TreePtr<Node> dest;
-    
+        
     // Make a new node, we will overlay from pattern, so resulting node will be dirty	
     // Duplicate the underneath node since it is at least as specialised (=non-strict subclass)
     dest = DuplicateNode( under_node, true );
