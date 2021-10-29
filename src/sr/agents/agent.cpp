@@ -533,9 +533,9 @@ void AgentCommon::Reset()
 }
 
 
-void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks, 
-                                 PatternLink me_plink, 
-                                 PatternLink under_plink )
+void AgentCommon::PlanOverlay( map<PatternLink, PatternLink> &overlay_plinks, 
+                               PatternLink me_plink, 
+                               PatternLink under_plink )
 {
     ASSERT( me_plink.GetChildAgent() == this );
     // This function is called on nodes in the "overlay" branch of Delta nodes.
@@ -560,13 +560,13 @@ void AgentCommon::KeyForOverlay( map<PatternLink, PatternLink> &overlay_plinks,
     overlay_plinks[me_plink] = under_plink;
 
     // Agent- specific actions
-    KeyForOverlayImpl( overlay_plinks, me_plink, under_plink );
+    PlanOverlayImpl( overlay_plinks, me_plink, under_plink );
 }
 
 
-void AgentCommon::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
-                                     PatternLink me_plink, 
-                                     PatternLink under_plink )
+void AgentCommon::PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
+                                   PatternLink me_plink, 
+                                   PatternLink under_plink )
 {
     // An empty function here implies leaf-termination of the overlay process
 }

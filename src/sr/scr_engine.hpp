@@ -35,7 +35,7 @@ public:
 class StartsOverlay
 {
 public:
-    virtual void StartKeyForOverlay(map<PatternLink, PatternLink> &overlay_plinks) = 0;
+    virtual void StartPlanOverlay(map<PatternLink, PatternLink> &overlay_plinks) = 0;
 };
 
 /// Common implementation for search+replace, compare+replace and slaves

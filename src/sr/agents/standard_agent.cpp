@@ -746,13 +746,13 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 }
 
 
-void StandardAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
+void StandardAgent::PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
                                        PatternLink me_plink, 
                                        PatternLink under_plink )
 {
     INDENT("T");
     ASSERT( under_plink.GetChildAgent() );
-    TRACE(*this)(".KeyForOverlayImpl(")(under_plink)(")\n");
+    TRACE(*this)(".PlanOverlayImpl(")(under_plink)(")\n");
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
@@ -778,7 +778,7 @@ void StandardAgent::KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_pl
                 PatternLink my_singular_plink(this, my_singular);
                 PatternLink under_singular_plink(this, under_singular);
                 
-                my_singular_plink.GetChildAgent()->KeyForOverlay( overlay_plinks, my_singular_plink, under_singular_plink );
+                my_singular_plink.GetChildAgent()->PlanOverlay( overlay_plinks, my_singular_plink, under_singular_plink );
             }
         }
     }

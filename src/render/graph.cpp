@@ -662,6 +662,23 @@ string Graph::DoBlock( const MyBlock &block,
     // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
     switch( block.block_type )
     {
+    case Graphable::NODE_SHAPED:    
+        title_font_atts["COLOR"] = backgrounded_font_colour;
+        // Ignoring sub-block (above check means there will only be one: it
+        // is assumed that the title is sufficiently informative)
+        s += "shape = \"" + block.shape + "\"\n";
+		s += "label = " + DoNodeBlockLabel( block, title_font_atts, title ) + "\n";
+		s += "style = \"filled\"\n";
+        s += "penwidth = 0.0\n";
+
+		if( !block.symbol.empty() )
+		{
+			s += "fixedsize = true\n";
+			s += "width = " NS_SMALL "\n";
+			s += "height = " NS_SMALL "\n";
+		}
+        break;
+
 	case Graphable::NODE_EXPANDED:
         title_font_atts["COLOR"] = backgrounded_font_colour;
         subblock_font_atts["POINT-SIZE"] = to_string(FS_MIDDLE);
@@ -692,23 +709,6 @@ string Graph::DoBlock( const MyBlock &block,
         s += "style = \"invisible\"\n";
         break;
         
-    case Graphable::NODE_SHAPED:    
-        title_font_atts["COLOR"] = backgrounded_font_colour;
-        // Ignoring sub-block (above check means there will only be one: it
-        // is assumed that the title is sufficiently informative)
-        s += "shape = \"" + block.shape + "\"\n";
-		s += "label = " + DoNodeBlockLabel( block, title_font_atts, title ) + "\n";
-		s += "style = \"filled\"\n";
-        s += "penwidth = 0.0\n";
-
-		if( !block.symbol.empty() )
-		{
-			s += "fixedsize = true\n";
-			s += "width = " NS_SMALL "\n";
-			s += "height = " NS_SMALL "\n";
-		}
-        break;
-
     default: 
         ASSERTFAIL();
 	}

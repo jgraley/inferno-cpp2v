@@ -203,7 +203,7 @@ void SCREngine::Plan::PlanningStageThree()
     
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
-        ao->StartKeyForOverlay(overlay_plinks);    
+        ao->StartPlanOverlay(overlay_plinks);    
 
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )

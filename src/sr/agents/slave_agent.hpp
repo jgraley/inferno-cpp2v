@@ -28,7 +28,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
-    virtual void KeyForOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
+    virtual void PlanOverlayImpl( map<PatternLink, PatternLink> &overlay_plinks, 
                                     PatternLink me_plink, 
                                     PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
