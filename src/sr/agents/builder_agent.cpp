@@ -8,16 +8,21 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink,
                                               TreePtr<Node> key_node ) 
 {
     INDENT("%");
-    if( !key_node )
-    {
-        // Call the soft pattern impl 
-        key_node = BuildNewSubtree();
-        
-        LocatedLink link( me_plink, XLink::CreateDistinct( key_node ) );
-        master_scr_engine->SetReplaceKey( link, KEY_PRODUCER_7 );
-    }
+
+    // Fails because of nodes keyed by master SCREngine - not seen in plan.
+    //ASSERT( master_scr_engine->IsKeyedByAndRuleEngine(this)==!!key_node )
+    //        (*this)(" got planned ")(master_scr_engine->IsKeyedByAndRuleEngine(this))
+    //        (" but key is ")(key_node)("\n");
+
+    // If keyed, we don't act, so revert to base class algo
+    if( key_node )
+        return AgentCommon::BuildReplaceImpl( me_plink, key_node );   
+
+    // Call the soft pattern impl 
+    TreePtr<Node> new_node = BuildNewSubtree();
+      
+    LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
+    master_scr_engine->SetReplaceKey( new_link, KEY_PRODUCER_7 );
     
-    // Note that the keylink could have been set via coupling - but still not
-    // likely to do anything sensible, so explicitly check
-    return DuplicateSubtree(key_node);   
+    return DuplicateSubtree(new_node);   
 }

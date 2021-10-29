@@ -789,20 +789,34 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
 {
     INDENT("B");
 
-    if( overlay_under_plink && overlay_under_plink.GetChildAgent() )
+    if( overlay_under_plink )
     {
-        CouplingKey key = master_scr_engine->GetReplaceKey( overlay_under_plink.GetChildAgent() );
+        // Explicit request for overlay, resulting from use of the Delta agent.
+        // The under pattern node is in a different location from over (=this), 
+        // but overlay planning has set up overlay_under_plink for us.
+        Agent *under_agent = overlay_under_plink.GetChildAgent();
+        ASSERT( under_agent );
+        CouplingKey key = master_scr_engine->GetReplaceKey( under_agent );
         TreePtr<Node> under_node = key.GetKeyXNode(KEY_CONSUMER_7);
         ASSERT( under_node );
+        ASSERT( under_node->IsFinal() ); 
         ASSERT( IsLocalMatch(under_node.get()) );
         return BuildReplaceOverlay( me_plink, under_node );
     }
-    else if( key_node && IsLocalMatch(key_node.get()) ) 
+    else if( key_node ) 
     {
+        // Overlay required due to coupling from compare to replace. 
+        // The under and over pattern nodes are both this. AndRuleEngine 
+        // has keyed this, and due wildcarding, key will be a final node
+        // i.e. possibly a subclass of this node.
+        ASSERT( key_node->IsFinal() ); 
+        ASSERT( IsLocalMatch(key_node.get()) );
         return BuildReplaceOverlay( me_plink, key_node );
     }
     else
     {
+        // Free replace pattern, just duplicate it.
+        ASSERT( me_plink.GetPattern()->IsFinal() ); 
         return BuildReplaceNormal( me_plink ); 
     }
 }
