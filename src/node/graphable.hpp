@@ -36,7 +36,9 @@ public:
     enum BlockType
     {
         CONTROL,
-        NODE    
+        NODE_SHAPED,
+        NODE_EXPANDED,
+        INVISIBLE    
     };
     struct Link
     {
@@ -90,7 +92,7 @@ public:
     virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                      const NonTrivialPreRestrictionFunction &ntprf ) const     
     { 
-        Block g{false, "", "", "", NODE, {}}; 
+        Block g{false, "", "", "", NODE_SHAPED, {}}; 
         return g;
     };
 };

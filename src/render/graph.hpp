@@ -110,7 +110,7 @@ private:
 		string background_colour;
 	};
 
-    typedef list<pair<string, string>> Atts;
+    typedef map<string, string> Atts;
 
     void PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root );
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
@@ -145,11 +145,11 @@ private:
     string DoBlock( const MyBlock &block,
                     const RegionAppearance &region );
     string DoNodeBlockLabel( const MyBlock &block, 
-                             Atts title_atts, 
+                             Atts title_font_atts, 
                              string title );
     string DoExpandedBlockLabel( const MyBlock &block, 
-                                 Atts title_atts, 
-                                 Atts subblock_atts, 
+                                 Atts title_font_atts, 
+                                 Atts subblock_font_atts, 
                                  Atts table_atts, 
                                  string title, 
                                  bool extra_column );
@@ -183,6 +183,7 @@ private:
     const RegionAppearance base_region;
 	const string line_colour;
 	const string font_colour;
+	const string external_font_colour;
     const string backgrounded_font_colour;
     string all_dot;
 };

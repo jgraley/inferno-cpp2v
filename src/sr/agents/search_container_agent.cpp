@@ -83,7 +83,7 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFuncti
     Block block;
 	block.bold = true;
     block.shape = "square";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetTerminus()->get()), 
               list<string>{},
               list<string>{PatternLink(this, &terminus).GetShortName()},

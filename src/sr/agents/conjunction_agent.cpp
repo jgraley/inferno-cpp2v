@@ -34,7 +34,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
     block.title = "Conjunction";
 	block.symbol = string("∧");
 	block.shape = "diamond";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     block.sub_blocks = { { "patterns", 
                            "", 
                            true,

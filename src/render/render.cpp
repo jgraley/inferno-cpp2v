@@ -326,22 +326,22 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
         ++operands_it;
 		s += RenderExpression( *operands_it, false ) + "]";
     }
-#define INFIX(TOK, TEXT, NODE, BASE, CAT) \
-    else if( DynamicTreePtrCast<NODE>(op) ) \
+#define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
+    else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
 	{ \
 		s = RenderExpression( *operands_it, true ); \
 		s += TEXT; \
         ++operands_it; \
 		s += RenderExpression( *operands_it, true ); \
     }
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( DynamicTreePtrCast<NODE>(op) ) \
+#define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
+	else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
 		s = TEXT; \
 		s += RenderExpression( *operands_it, true ); \
     }
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( DynamicTreePtrCast<NODE>(op) ) \
+#define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
+	else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
 		s = RenderExpression( *operands_it, true ); \
 		s += TEXT; \

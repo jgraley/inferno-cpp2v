@@ -35,7 +35,7 @@ Graphable::Block DeltaAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                             "",
                             true,
                             { link_overlay } } );
-    return { false, "Delta", "Δ", "triangle", NODE, sub_blocks };
+    return { false, "Delta", "Δ", "triangle", NODE_SHAPED, sub_blocks };
 }
 
 

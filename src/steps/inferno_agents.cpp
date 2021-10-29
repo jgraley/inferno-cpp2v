@@ -21,7 +21,7 @@ Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFuncti
 	block.bold = true;
 	block.title = "'"+format+"'!"; // text from program code, so use single quotes
 	block.shape = "parallelogram";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     return block;
 }
 
@@ -103,7 +103,7 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo( const LinkNamingFunct
 	block.bold = true;
     block.title = "'" + name + "'?";	
 	block.shape = "trapezium";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     return block;
 }
 
@@ -188,7 +188,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.bold = false;
 	block.title = GetName();
 	block.shape = "plaintext";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_EXPANDED;
     if( terminus )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(terminus.get()),
@@ -271,7 +271,7 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
 	block.bold = false;
 	block.title = GetName();
 	block.shape = "egg";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     if( container )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(container.get()),

@@ -143,7 +143,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
     block.title = "Disjunction";
 	block.symbol = string("∨");
 	block.shape = "diamond";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     block.sub_blocks = { { "patterns", 
                            "", 
                            true,

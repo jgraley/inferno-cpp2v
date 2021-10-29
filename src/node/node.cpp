@@ -33,7 +33,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.title = GetGraphName();     
 	block.bold = false;
 	block.shape = "plaintext";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_EXPANDED;
     TreePtr<Node> sp_this( const_pointer_cast<Node>( shared_from_this() ) );
         
     vector< Itemiser::Element * > members = Itemise();

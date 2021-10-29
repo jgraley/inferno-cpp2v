@@ -111,7 +111,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.title = "Star";
 	block.symbol = "*";
 	block.shape = "circle";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     if( *GetRestriction() )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetRestriction()->get()), 

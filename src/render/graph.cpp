@@ -43,8 +43,9 @@ using namespace CPPTree;
 Graph::Graph( string of, string title ) :
     outfile(of),
     base_region( ReadArgs::graph_dark ? "black" : "antiquewhite1" ),
-	line_colour( ReadArgs::graph_dark ? "grey70" : "black" ),
+	line_colour( ReadArgs::graph_dark ? "grey85" : "black" ),
     font_colour( ReadArgs::graph_dark ? "white" : "black" ),
+    external_font_colour( ReadArgs::graph_dark ? "grey60" : "grey40" ),
     backgrounded_font_colour( "black" )
 {
 	if( !outfile.empty() )
@@ -142,7 +143,7 @@ void Graph::operator()( const Figure &figure )
         
         // Make them all invisible
         for( MyBlock &sub_block : sub_blocks )
-            sub_block.shape = "invisible";
+            sub_block.block_type = Graphable::INVISIBLE;
                             
         // Set the child id correctly on all the links from all the interior nodes to our nodes. 
         // Note: ALL redirections/updates apply to interior nodes, because 
@@ -460,8 +461,7 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
 	MyBlock block;
 	block.title = "";     
 	block.bold = false;
-	block.shape = "invisible";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::INVISIBLE;
     block.prerestriction_name = "";
     block.colour = "";
     block.specify_ports = false;
@@ -525,11 +525,12 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
 	case Graphable::CONTROL:
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
-        my_block.shape = "record";
         my_block.colour = "transparent";
         break;
 
-    case Graphable::NODE:
+    case Graphable::NODE_SHAPED:
+    case Graphable::NODE_EXPANDED:
+    case Graphable::INVISIBLE:
         my_block.title = GetInnermostTemplateParam(my_block.title);
         // See #258: "block colour shall be dictated by the node type only"
         my_block.colour = pnode->GetColour();
@@ -596,11 +597,12 @@ void Graph::PostProcessBlock( MyBlock &block )
                                        [](const SubBlock &sb){return sb.hideable;} );
 
     // If not, make sure we're using a shape that allows for sub_blocks
-    if( !sub_blocks_hideable && !(block.shape == "invisible" || block.shape == "plaintext" || block.shape == "record") )
-        block.shape = "plaintext";      
+    if( block.block_type == Graphable::NODE_SHAPED && !sub_blocks_hideable )
+        block.block_type = Graphable::NODE_EXPANDED;
     
     // These kinds of blocks require port names to be to be specified so links can tell them apart
-    block.specify_ports = (block.shape=="record" || block.shape=="plaintext");              
+    block.specify_ports = (block.block_type == Graphable::CONTROL || 
+                           block.block_type == Graphable::NODE_EXPANDED);              
 }
 
 
@@ -619,14 +621,9 @@ string Graph::DoBlocks( const list<MyBlock> &blocks,
 string Graph::DoBlock( const MyBlock &block, 
                        const RegionAppearance &region )
 {
+    Atts title_font_atts, subblock_font_atts, table_atts;
+
 	string s;
-    
-    if( block.shape == "invisible" )
-        s += "shape = \"none\"\n";
-    else if( block.shape == "plaintext" || block.shape == "record" )
-        s += "shape = \"plaintext\"\n";
-    else
-        s += "shape = \"" + block.shape + "\"\n";
 	if( block.colour=="transparent" )
 		s += "fillcolor = " + region.background_colour + "\n";
 	else if(block.colour != "")
@@ -635,25 +632,27 @@ string Graph::DoBlock( const MyBlock &block,
     if( block.external_text != "" )
         s += "xlabel = \""+ EscapeForGraphviz(block.external_text) + "\"\n";       
 
+    // These settings are overridden in all the HTML blocks, and so
+    // only apply to the font used for external abels
     s += SSPrintf("fontsize = \"%d\"\n", FS_MIDDLE);
-    s += "fontcolor = " + font_colour + "\n";
+    s += "fontcolor = " + external_font_colour + "\n";
 
     int tfs;
-    string tt;
+    string title;
     if( !block.symbol.empty() )
     {
-        tfs = FS_HUGE;            
-        tt = EscapeForGraphviz( block.symbol );
+        title_font_atts["POINT-SIZE"] = to_string(FS_HUGE);
+        title = EscapeForGraphviz( block.symbol );
     }
     else if( block.italic_title )        
     {
-        tfs = FS_LARGE;
-        tt = ApplyTagPair(EscapeForGraphviz( block.title ), "I");
+        title_font_atts["POINT-SIZE"] = to_string(FS_LARGE);
+        title = ApplyTagPair(EscapeForGraphviz( block.title ), "I");
     }
     else
     {
-        tfs = FS_LARGE;           
-        tt = EscapeForGraphviz( block.title );   
+        title_font_atts["POINT-SIZE"] = to_string(FS_LARGE);
+        title = EscapeForGraphviz( block.title );   
     }
     
     // shape=plaintext triggers HTML label generation. From Graphviz docs:
@@ -661,33 +660,44 @@ string Graph::DoBlock( const MyBlock &block,
     // discouraged and may lead to unexpected behavior because of their 
     // conflicting label schemas and overlapping functionality."
     // https://www.youtube.com/watch?v=Tv1kRqzg0AQ
-	if( block.shape == "plaintext" )
-	{
-        Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};
-        Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", backgrounded_font_colour}};
-        Atts table_atts {{"BORDER", "0"}, {"CELLBORDER", "0"}, {"CELLSPACING", "0"}};
-		s += "label = " + DoExpandedBlockLabel( block, title_atts, subblock_atts, table_atts, tt, true );
-		s += "style = \"rounded,filled\"\n";
-	}
-	else if( block.shape == "record" )
+    switch( block.block_type )
     {
-        Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", font_colour}};
-        Atts subblock_atts {{"POINT-SIZE", to_string(FS_MIDDLE)}, {"COLOR", font_colour}};
-        Atts table_atts {{"BORDER", "0"}, {"CELLBORDER", "1"}, {"CELLSPACING", "0"}};
-        s += "label = " + DoExpandedBlockLabel( block, title_atts, subblock_atts, table_atts, tt, false );
+	case Graphable::NODE_EXPANDED:
+        title_font_atts["COLOR"] = backgrounded_font_colour;
+        subblock_font_atts["POINT-SIZE"] = to_string(FS_MIDDLE);
+        subblock_font_atts["COLOR"] = backgrounded_font_colour;
+        table_atts["BORDER"] = "0";
+        table_atts["CELLBORDER"] = "0";
+        table_atts["CELLSPACING"] = "0";
+        s += "shape = \"plaintext\"\n";
+		s += "label = " + DoExpandedBlockLabel( block, title_font_atts, subblock_font_atts, table_atts, title, true );
+		s += "style = \"rounded,filled\"\n";
+        break;
+	
+	case Graphable::CONTROL:
+        title_font_atts["COLOR"] = font_colour;
+        subblock_font_atts["POINT-SIZE"] = to_string(FS_MIDDLE);
+        subblock_font_atts["COLOR"] = font_colour;
+        table_atts["BORDER"] = "0";
+        table_atts["CELLBORDER"] = "1";
+        table_atts["CELLSPACING"] = "0";
+        s += "shape = \"plaintext\"\n";
+        s += "label = " + DoExpandedBlockLabel( block, title_font_atts, subblock_font_atts, table_atts, title, false );
         s += "style = \"filled\"\n";
         s += "color = " + line_colour + "\n";
-    }
-	else if( block.shape == "invisible" )
-    {
+        break;
+    
+	case Graphable::INVISIBLE:    
+        s += "shape = \"none\"\n";
         s += "style = \"invisible\"\n";
-    }
-    else
-	{          
-        Atts title_atts {{"POINT-SIZE", to_string(tfs)}, {"COLOR", backgrounded_font_colour}};              
+        break;
+        
+    case Graphable::NODE_SHAPED:    
+        title_font_atts["COLOR"] = backgrounded_font_colour;
         // Ignoring sub-block (above check means there will only be one: it
-        // is assumed that the title is sufficiently informative
-		s += "label = " + DoNodeBlockLabel( block, title_atts, tt ) + "\n";
+        // is assumed that the title is sufficiently informative)
+        s += "shape = \"" + block.shape + "\"\n";
+		s += "label = " + DoNodeBlockLabel( block, title_font_atts, title ) + "\n";
 		s += "style = \"filled\"\n";
         s += "penwidth = 0.0\n";
 
@@ -697,6 +707,10 @@ string Graph::DoBlock( const MyBlock &block,
 			s += "width = " NS_SMALL "\n";
 			s += "height = " NS_SMALL "\n";
 		}
+        break;
+
+    default: 
+        ASSERTFAIL();
 	}
 	string sc;
     sc += "// -------- block " + block.base_id + " ----------\n";
@@ -711,22 +725,22 @@ string Graph::DoBlock( const MyBlock &block,
 
 
 string Graph::DoNodeBlockLabel( const MyBlock &block, 
-                                Atts title_atts, 
+                                Atts title_font_atts, 
                                 string title )
 {
-    title = ApplyTagPair(title, "FONT", title_atts);
+    title = ApplyTagPair(title, "FONT", title_font_atts);
     return MakeHTMLForGraphViz(title);
 }
 
 
 string Graph::DoExpandedBlockLabel( const MyBlock &block, 
-                                    Atts title_atts, 
-                                    Atts subblock_atts, 
+                                    Atts title_font_atts, 
+                                    Atts subblock_font_atts, 
                                     Atts table_atts, 
                                     string title, 
                                     bool extra_column )
 {
-    title = ApplyTagPair(title, "FONT", title_atts);
+    title = ApplyTagPair(title, "FONT", title_font_atts);
 
 	string s;
 	string row = ApplyTagPair(title, "TD");
@@ -737,12 +751,12 @@ string Graph::DoExpandedBlockLabel( const MyBlock &block,
     {
         Atts port_att {{"PORT", SeqField( porti )}};
         string lt = EscapeForGraphviz(sub_block.item_name);
-        lt = ApplyTagPair(lt, "FONT", subblock_atts);
+        lt = ApplyTagPair(lt, "FONT", subblock_font_atts);
         if( extra_column )
         {
             row = ApplyTagPair(lt, "TD");
             lt = EscapeForGraphviz(sub_block.item_extra);
-            lt = ApplyTagPair(lt, "FONT", subblock_atts);
+            lt = ApplyTagPair(lt, "FONT", subblock_font_atts);
             row += ApplyTagPair(lt, "TD", port_att);
         }
         else

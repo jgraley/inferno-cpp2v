@@ -72,7 +72,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &ln
 	block.bold = true;
 	block.title = "PointerIs"; 
 	block.shape = "house";
-    block.block_type = Graphable::NODE;
+    block.block_type = Graphable::NODE_SHAPED;
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetPointer()->get()),
               list<string>{},
               list<string>{PatternLink(this, GetPointer()).GetShortName()},
