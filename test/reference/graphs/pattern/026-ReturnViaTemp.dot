@@ -4,9 +4,9 @@ labelloc = t
 graph [
     rankdir = "LR"
     ranksep = 0.3
-    bgcolor = black
-    color = grey85
-    fontcolor = white
+    bgcolor = antiquewhite1
+    color = black
+    fontcolor = black
     fontname = "Arial"
 ];
 node [
@@ -19,24 +19,24 @@ edge [
 // -------------------- transformation figure --------------------
 // -------- block CR#B-4-18 ----------
 "CR#B-4-18" [
-    fillcolor = black
+    fillcolor = antiquewhite1
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-     <TR><TD><FONT COLOR="white" POINT-SIZE="15">SearchReplace</FONT></TD></TR>
-     <TR><TD PORT="port0"><FONT COLOR="white" POINT-SIZE="12">search/compare</FONT></TD></TR>
-     <TR><TD PORT="port1"><FONT COLOR="white" POINT-SIZE="12">replace</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">SearchReplace</FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">replace</FONT></TD></TR>
     </TABLE>>
     style = "filled"
-    color = grey85
+    color = black
 ];
 
 // -------- block #B-2-342 ----------
 "#B-2-342" [
     fillcolor = "/set28/4"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Scope</FONT></TD></TR>
@@ -49,7 +49,7 @@ edge [
 "#B-2-345" [
     fillcolor = "/set28/1"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -63,7 +63,7 @@ edge [
 "#B-2-344" [
     fillcolor = "/set28/1"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Instance</FONT></TD></TR>
@@ -78,7 +78,7 @@ edge [
 "#B-2-347" [
     fillcolor = "/set28/3"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Function</FONT></TD></TR>
@@ -92,7 +92,7 @@ edge [
 "#B-2-357" [
     fillcolor = "/set28/1"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="20">*</FONT></TD></TR>
@@ -105,7 +105,7 @@ edge [
 "#B-2-369" [
     fillcolor = "/set28/3"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "triangle"
     label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
     style = "filled"
@@ -119,7 +119,7 @@ edge [
 "#B-2-348" [
     fillcolor = "/set28/3"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "diamond"
     label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
     style = "filled"
@@ -133,7 +133,7 @@ edge [
 "#B-2-349" [
     fillcolor = "/set28/3"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
@@ -145,7 +145,7 @@ edge [
 "#B-2-374" [
     fillcolor = "/set28/3"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
@@ -157,7 +157,7 @@ edge [
 "#B-2-355" [
     fillcolor = "/set28/5"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
@@ -168,7 +168,7 @@ edge [
 // -------- block #B-2-370 ----------
 "#B-2-370" [
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "triangle"
     label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
     style = "filled"
@@ -182,7 +182,7 @@ edge [
 "#B-2-350" [
     fillcolor = "/set28/2"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
@@ -196,7 +196,7 @@ edge [
 "#B-2-354" [
     fillcolor = "/set28/1"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -210,7 +210,7 @@ edge [
 "#B-2-353" [
     fillcolor = "/set28/2"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -222,26 +222,26 @@ edge [
 
 // -------- block #B-2-371 ----------
 "#B-2-371" [
-    fillcolor = black
+    fillcolor = antiquewhite1
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-     <TR><TD><FONT COLOR="white" POINT-SIZE="15"><I>SlaveSearchReplace</I></FONT></TD></TR>
-     <TR><TD PORT="port0"><FONT COLOR="white" POINT-SIZE="12">(Compound)</FONT></TD></TR>
-     <TR><TD PORT="port1"><FONT COLOR="white" POINT-SIZE="12">through</FONT></TD></TR>
-     <TR><TD PORT="port2"><FONT COLOR="white" POINT-SIZE="12">search/compare</FONT></TD></TR>
-     <TR><TD PORT="port3"><FONT COLOR="white" POINT-SIZE="12">replace</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>SlaveSearchReplace</I></FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">(Compound)</FONT></TD></TR>
+     <TR><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">through</FONT></TD></TR>
+     <TR><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD PORT="port3"><FONT COLOR="black" POINT-SIZE="12">replace</FONT></TD></TR>
     </TABLE>>
     style = "filled"
-    color = grey85
+    color = black
 ];
 
 // -------- block #B-2-351 ----------
 "#B-2-351" [
     fillcolor = "/set28/2"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
@@ -255,7 +255,7 @@ edge [
 "#B-2-364" [
     fillcolor = "/set28/2"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Return</FONT></TD></TR>
@@ -268,7 +268,7 @@ edge [
 "#B-2-366" [
     fillcolor = "/set28/6"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Expression</FONT></TD></TR>
@@ -280,7 +280,7 @@ edge [
 "#B-2-352" [
     fillcolor = "/set28/2"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
@@ -295,7 +295,7 @@ edge [
 "#B-2-362" [
     fillcolor = "/set28/6"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
@@ -309,7 +309,7 @@ edge [
 "#B-2-363" [
     fillcolor = "/set28/5"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_return'!</I></FONT></TD></TR>
@@ -322,7 +322,7 @@ edge [
 "#B-2-365" [
     fillcolor = "/set28/2"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Return</FONT></TD></TR>
@@ -334,7 +334,7 @@ edge [
 // -------- block #B-2-372 ----------
 "#B-2-372" [
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
@@ -344,26 +344,26 @@ edge [
 
 // -------- block #B-2-373 ----------
 "#B-2-373" [
-    fillcolor = black
+    fillcolor = antiquewhite1
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-     <TR><TD><FONT COLOR="white" POINT-SIZE="15"><I>SlaveSearchReplace</I></FONT></TD></TR>
-     <TR><TD PORT="port0"><FONT COLOR="white" POINT-SIZE="12">(Scope)</FONT></TD></TR>
-     <TR><TD PORT="port1"><FONT COLOR="white" POINT-SIZE="12">through</FONT></TD></TR>
-     <TR><TD PORT="port2"><FONT COLOR="white" POINT-SIZE="12">search/compare</FONT></TD></TR>
-     <TR><TD PORT="port3"><FONT COLOR="white" POINT-SIZE="12">replace</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>SlaveSearchReplace</I></FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">(Scope)</FONT></TD></TR>
+     <TR><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">through</FONT></TD></TR>
+     <TR><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD PORT="port3"><FONT COLOR="black" POINT-SIZE="12">replace</FONT></TD></TR>
     </TABLE>>
     style = "filled"
-    color = grey85
+    color = black
 ];
 
 // -------- block #B-2-343 ----------
 "#B-2-343" [
     fillcolor = "/set28/4"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Scope</FONT></TD></TR>
@@ -376,7 +376,7 @@ edge [
 "#B-2-360" [
     fillcolor = "/set28/1"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Temporary</FONT></TD></TR>
@@ -390,7 +390,7 @@ edge [
 // -------- block #B-2-375 ----------
 "#B-2-375" [
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
@@ -402,7 +402,7 @@ edge [
 "#B-2-368" [
     fillcolor = "/set28/6"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="20">||||</FONT></TD></TR>
@@ -416,7 +416,7 @@ edge [
 "#B-2-358" [
     fillcolor = "/set28/6"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Call</FONT></TD></TR>
@@ -430,7 +430,7 @@ edge [
 "#B-2-359" [
     fillcolor = "/set28/8"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -444,7 +444,7 @@ edge [
 "#B-2-367" [
     fillcolor = "/set28/6"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">StatementExpression</FONT></TD></TR>
@@ -456,213 +456,213 @@ edge [
 ];
 
 "CR#B-4-18":port0 -> "#B-2-342" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "CR#B-4-18":port1 -> "#B-2-373" [
     style="dashed"
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-342":port0 -> "#B-2-345" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-342":port0 -> "#B-2-344" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-344":port0 -> "#B-2-347" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-344":port1 -> "#B-2-355" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-344":port2 -> "#B-2-370" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-347":port0 -> "#B-2-357" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-347":port1 -> "#B-2-369" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-369" -> "#B-2-348" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-369" -> "#B-2-374" [
     style="dashed"
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-348" -> "#B-2-349" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-370" -> "#B-2-350" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-370" -> "#B-2-371" [
     style="dashed"
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-350":port0 -> "#B-2-354" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-350":port1 -> "#B-2-353" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-371":port1 -> "#B-2-351" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-371":port2 -> "#B-2-364" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-371":port3 -> "#B-2-352" [
     style="dashed"
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-351":port0 -> "#B-2-354" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-351":port1 -> "#B-2-353" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-364":port0 -> "#B-2-366" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-352":port1 -> "#B-2-362" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-352":port2 -> "#B-2-365" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-362":port0 -> "#B-2-363" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-362":port1 -> "#B-2-366" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-365":port0 -> "#B-2-372" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-373":port1 -> "#B-2-343" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-373":port2 -> "#B-2-368" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-373":port3 -> "#B-2-367" [
     style="dashed"
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-343":port0 -> "#B-2-345" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-343":port0 -> "#B-2-344" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-343":port0 -> "#B-2-360" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-360":port0 -> "#B-2-348" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-360":port1 -> "#B-2-363" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-360":port2 -> "#B-2-375" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-368":port1 -> "#B-2-358" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-358":port0 -> "#B-2-359" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-358":port1 -> "#B-2-355" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-367":port1 -> "#B-2-358" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-367":port2 -> "#B-2-363" [
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 

@@ -4,9 +4,9 @@ labelloc = t
 graph [
     rankdir = "LR"
     ranksep = 0.3
-    bgcolor = black
-    color = grey85
-    fontcolor = white
+    bgcolor = antiquewhite1
+    color = black
+    fontcolor = black
     fontname = "Arial"
 ];
 node [
@@ -21,28 +21,14 @@ edge [
 subgraph "clusterAnd#R4-0" {
     label = "SCR#P4-0 / And#R4-0"
     style = "filled"
-    color = gray15
+    color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R4-0/#X4-12-1 ----------
-    "And#R4-0/#X4-12-1" [
-        xlabel = "#X4-12-1"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R4-0/#B-2-42 ----------
     "And#R4-0/#B-2-42" [
         fillcolor = "/set28/6"
         xlabel = "#B-2-42"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT COLOR="black" POINT-SIZE="15">Call</FONT></TD></TR>
@@ -56,7 +42,7 @@ subgraph "clusterAnd#R4-0" {
     "And#R4-0/#X4-8-4" [
         xlabel = "#X4-8-4"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "triangle"
         label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
         style = "filled"
@@ -71,7 +57,7 @@ subgraph "clusterAnd#R4-0" {
         fillcolor = "/set28/5"
         xlabel = "#B-2-43"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'wait'?</I></FONT></TD></TR>
@@ -80,50 +66,64 @@ subgraph "clusterAnd#R4-0" {
         style = "rounded,filled"
     ];
     
+    // -------- block And#R4-0/#X4-12-1 ----------
+    "And#R4-0/#X4-12-1" [
+        xlabel = "#X4-12-1"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
 }
-
-"And#R4-0/#X4-12-1" -> "And#R4-0/#X4-8-4" [
-    label = "#2"
-    decorate = true
-    color = grey85
-    fontcolor = white
-];
 
 "And#R4-0/#B-2-42":port1 -> "And#R4-0/#B-2-43" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R4-0/#X4-8-4" -> "And#R4-0/#B-2-42" [
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
+];
+
+"And#R4-0/#X4-12-1" -> "And#R4-0/#X4-8-4" [
+    label = "#2"
+    decorate = true
+    color = black
+    fontcolor = black
 ];
 
 
 // -------------------- transformation figure --------------------
 // -------- block CR#X4-10-4 ----------
 "CR#X4-10-4" [
-    fillcolor = black
+    fillcolor = antiquewhite1
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-     <TR><TD><FONT COLOR="white" POINT-SIZE="15">CompareReplace</FONT></TD></TR>
-     <TR><TD PORT="port0"><FONT COLOR="white" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">CompareReplace</FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
     </TABLE>>
     style = "filled"
-    color = grey85
+    color = black
 ];
 
 // -------- block #X4-12-1 ----------
 "#X4-12-1" [
     xlabel = "#X4-12-1"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "square"
     label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
     style = "filled"
@@ -137,7 +137,7 @@ subgraph "clusterAnd#R4-0" {
 "#X4-8-4" [
     xlabel = "#X4-8-4"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "triangle"
     label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
     style = "filled"
@@ -152,7 +152,7 @@ subgraph "clusterAnd#R4-0" {
     fillcolor = "/set28/6"
     xlabel = "#B-2-42"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Call</FONT></TD></TR>
@@ -167,7 +167,7 @@ subgraph "clusterAnd#R4-0" {
     fillcolor = "/set28/5"
     xlabel = "#B-2-43"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'wait'?</I></FONT></TD></TR>
@@ -181,7 +181,7 @@ subgraph "clusterAnd#R4-0" {
     fillcolor = "/set28/2"
     xlabel = "#B-2-41"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">WaitStatic</FONT></TD></TR>
@@ -192,37 +192,37 @@ subgraph "clusterAnd#R4-0" {
 "CR#X4-10-4":port0 -> "#X4-12-1" [
     label = ""
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#X4-12-1" -> "#X4-8-4" [
     label = "#2"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#X4-8-4" -> "#B-2-42" [
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#X4-8-4" -> "#B-2-41" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-42":port1 -> "#B-2-43" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 

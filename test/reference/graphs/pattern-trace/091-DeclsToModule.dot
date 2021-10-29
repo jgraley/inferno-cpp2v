@@ -4,9 +4,9 @@ labelloc = t
 graph [
     rankdir = "LR"
     ranksep = 0.3
-    bgcolor = black
-    color = grey85
-    fontcolor = white
+    bgcolor = antiquewhite1
+    color = black
+    fontcolor = black
     fontname = "Arial"
 ];
 node [
@@ -21,14 +21,14 @@ edge [
 subgraph "clusterAnd#R91-2" {
     label = "And#R91-2"
     style = "filled"
-    color = gray15
+    color = antiquewhite2
     fontsize = "15"
     // -------- block And#R91-2/#B-2-1765 ----------
     "And#R91-2/#B-2-1765" [
         fillcolor = "/set28/2"
         xlabel = "#B-2-1765"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "circle"
         label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
         style = "filled"
@@ -46,14 +46,14 @@ subgraph "clusterAnd#R91-2" {
 subgraph "clusterAnd#R91-1" {
     label = "And#R91-1"
     style = "filled"
-    color = gray15
+    color = antiquewhite2
     fontsize = "15"
     // -------- block And#R91-1/#B-2-1764 ----------
     "And#R91-1/#B-2-1764" [
         fillcolor = "/set28/1"
         xlabel = "#B-2-1764"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "circle"
         label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
         style = "filled"
@@ -71,14 +71,14 @@ subgraph "clusterAnd#R91-1" {
 subgraph "clusterAnd#R91-3" {
     label = "And#R91-3"
     style = "filled"
-    color = gray15
+    color = antiquewhite2
     fontsize = "15"
     // -------- block And#R91-3/#B-2-1763 ----------
     "And#R91-3/#B-2-1763" [
         fillcolor = "/set28/1"
         xlabel = "#B-2-1763"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "circle"
         label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
         style = "filled"
@@ -96,14 +96,57 @@ subgraph "clusterAnd#R91-3" {
 subgraph "clusterAnd#R91-0" {
     label = "SCR#P91-0 / And#R91-0"
     style = "filled"
-    color = gray15
+    color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R91-0/#X91-12-81 ----------
+    "And#R91-0/#X91-12-81" [
+        xlabel = "#X91-12-81"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R91-0/#B-2-1761 ----------
+    "And#R91-0/#B-2-1761" [
+        fillcolor = "/set28/4"
+        xlabel = "#B-2-1761"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Scope</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{..}</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R91-0/#B-2-1770 ----------
+    "And#R91-0/#B-2-1770" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-1770"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{..}</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
     // -------- block And#R91-0/#B-2-1772 ----------
     "And#R91-0/#B-2-1772" [
         fillcolor = "/set28/2"
         xlabel = "#B-2-1772"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT COLOR="black" POINT-SIZE="20">Δ</FONT></TD></TR>
@@ -114,25 +157,11 @@ subgraph "clusterAnd#R91-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R91-0/#B-2-1761 ----------
-    "And#R91-0/#B-2-1761" [
-        fillcolor = "/set28/4"
-        xlabel = "#B-2-1761"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Scope</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{..}</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
     // -------- block And#R91-0/#B-2-1769 ----------
     "And#R91-0/#B-2-1769" [
         xlabel = "#B-2-1769"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "square"
         label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
         style = "filled"
@@ -140,76 +169,6 @@ subgraph "clusterAnd#R91-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
-    ];
-    
-    // -------- block And#R91-0/#B-2-1767 ----------
-    "And#R91-0/#B-2-1767" [
-        fillcolor = "/set28/1"
-        xlabel = "#B-2-1767"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">UserType</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">TypeIdentifier</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
-    // -------- block And#R91-0/#X91-8-82 ----------
-    "And#R91-0/#X91-8-82" [
-        xlabel = "#X91-8-82"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "triangle"
-        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
-    // -------- block And#R91-0/#X91-12-81 ----------
-    "And#R91-0/#X91-12-81" [
-        xlabel = "#X91-12-81"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
-    // -------- block And#R91-0/#B-2-1770 ----------
-    "And#R91-0/#B-2-1770" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-1770"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{..}</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
-    // -------- block And#R91-0/#B-2-1768 ----------
-    "And#R91-0/#B-2-1768" [
-        fillcolor = "/set28/3"
-        xlabel = "#B-2-1768"
-        fontsize = "12"
-        fontcolor = grey60
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Thread</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
     ];
     
     // -------- block And#R91-0/#B-2-1766 ----------
@@ -217,7 +176,7 @@ subgraph "clusterAnd#R91-0" {
         fillcolor = "/set28/1"
         xlabel = "#B-2-1766"
         fontsize = "12"
-        fontcolor = grey60
+        fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
          <TR><TD><FONT COLOR="black" POINT-SIZE="15">Field</FONT></TD></TR>
@@ -231,18 +190,59 @@ subgraph "clusterAnd#R91-0" {
         style = "rounded,filled"
     ];
     
+    // -------- block And#R91-0/#X91-8-82 ----------
+    "And#R91-0/#X91-8-82" [
+        xlabel = "#X91-8-82"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "triangle"
+        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R91-0/#B-2-1767 ----------
+    "And#R91-0/#B-2-1767" [
+        fillcolor = "/set28/1"
+        xlabel = "#B-2-1767"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">UserType</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">TypeIdentifier</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R91-0/#B-2-1768 ----------
+    "And#R91-0/#B-2-1768" [
+        fillcolor = "/set28/3"
+        xlabel = "#B-2-1768"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Thread</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
     // -------- region And#R91-0/And#R91-1 ----------
     subgraph "clusterAnd#R91-0/And#R91-1" {
         label = "And#R91-1"
         style = "filled"
-        color = gray25
+        color = antiquewhite3
         fontsize = "15"
         // -------- block And#R91-0/And#R91-1/#B-2-1764 ----------
         "And#R91-0/And#R91-1/#B-2-1764" [
             fillcolor = "/set28/1"
             xlabel = "#B-2-1764"
             fontsize = "12"
-            fontcolor = grey60
+            fontcolor = grey40
             shape = "none"
             style = "invisible"
         ];
@@ -253,14 +253,14 @@ subgraph "clusterAnd#R91-0" {
     subgraph "clusterAnd#R91-0/And#R91-2" {
         label = "And#R91-2"
         style = "filled"
-        color = gray25
+        color = antiquewhite3
         fontsize = "15"
         // -------- block And#R91-0/And#R91-2/#B-2-1765 ----------
         "And#R91-0/And#R91-2/#B-2-1765" [
             fillcolor = "/set28/2"
             xlabel = "#B-2-1765"
             fontsize = "12"
-            fontcolor = grey60
+            fontcolor = grey40
             shape = "none"
             style = "invisible"
         ];
@@ -271,14 +271,14 @@ subgraph "clusterAnd#R91-0" {
     subgraph "clusterAnd#R91-0/And#R91-3" {
         label = "And#R91-3"
         style = "filled"
-        color = gray25
+        color = antiquewhite3
         fontsize = "15"
         // -------- block And#R91-0/And#R91-3/#B-2-1763 ----------
         "And#R91-0/And#R91-3/#B-2-1763" [
             fillcolor = "/set28/1"
             xlabel = "#B-2-1763"
             fontsize = "12"
-            fontcolor = grey60
+            fontcolor = grey40
             shape = "none"
             style = "invisible"
         ];
@@ -287,107 +287,107 @@ subgraph "clusterAnd#R91-0" {
     
 }
 
-"And#R91-0/#B-2-1772":port1 -> "And#R91-0/#B-2-1770" [
-    label = "#0"
+"And#R91-0/#X91-12-81" -> "And#R91-0/#X91-8-82" [
+    label = "#2"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1761":port0 -> "And#R91-0/And#R91-3/#B-2-1763" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1761":port0 -> "And#R91-0/#B-2-1766" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
-];
-
-"And#R91-0/#B-2-1769" -> "And#R91-0/#B-2-1772" [
-    label = "#0"
-    decorate = true
-    color = grey85
-    fontcolor = white
-];
-
-"And#R91-0/#X91-8-82" -> "And#R91-0/#B-2-1761" [
-    label = "#1"
-    decorate = true
-    color = grey85
-    fontcolor = white
-];
-
-"And#R91-0/#X91-12-81" -> "And#R91-0/#X91-8-82" [
-    label = "#2"
-    decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1770":port0 -> "And#R91-0/And#R91-1/#B-2-1764" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1770":port0 -> "And#R91-0/#B-2-1767" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1770":port1 -> "And#R91-0/And#R91-2/#B-2-1765" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
+];
+
+"And#R91-0/#B-2-1772":port1 -> "And#R91-0/#B-2-1770" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R91-0/#B-2-1769" -> "And#R91-0/#B-2-1772" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1766":port0 -> "And#R91-0/#B-2-1768" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "And#R91-0/#B-2-1766":port2 -> "And#R91-0/#B-2-1769" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
+];
+
+"And#R91-0/#X91-8-82" -> "And#R91-0/#B-2-1761" [
+    label = "#1"
+    decorate = true
+    color = black
+    fontcolor = black
 ];
 
 
 // -------------------- transformation figure --------------------
 // -------- block CR#X91-10-91 ----------
 "CR#X91-10-91" [
-    fillcolor = black
+    fillcolor = antiquewhite1
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-     <TR><TD><FONT COLOR="white" POINT-SIZE="15">CompareReplace</FONT></TD></TR>
-     <TR><TD PORT="port0"><FONT COLOR="white" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">CompareReplace</FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
     </TABLE>>
     style = "filled"
-    color = grey85
+    color = black
 ];
 
 // -------- block #X91-12-81 ----------
 "#X91-12-81" [
     xlabel = "#X91-12-81"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "square"
     label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
     style = "filled"
@@ -401,7 +401,7 @@ subgraph "clusterAnd#R91-0" {
 "#X91-8-82" [
     xlabel = "#X91-8-82"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "triangle"
     label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
     style = "filled"
@@ -416,7 +416,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/4"
     xlabel = "#B-2-1761"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Scope</FONT></TD></TR>
@@ -430,7 +430,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/1"
     xlabel = "#B-2-1763"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -445,7 +445,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/1"
     xlabel = "#B-2-1766"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Field</FONT></TD></TR>
@@ -464,7 +464,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/3"
     xlabel = "#B-2-1768"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Thread</FONT></TD></TR>
@@ -476,7 +476,7 @@ subgraph "clusterAnd#R91-0" {
 "#B-2-1769" [
     xlabel = "#B-2-1769"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "square"
     label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
     style = "filled"
@@ -491,7 +491,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/2"
     xlabel = "#B-2-1772"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="20">Δ</FONT></TD></TR>
@@ -507,7 +507,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/2"
     xlabel = "#B-2-1770"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
@@ -522,7 +522,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/1"
     xlabel = "#B-2-1764"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -537,7 +537,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/1"
     xlabel = "#B-2-1767"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">UserType</FONT></TD></TR>
@@ -551,7 +551,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/2"
     xlabel = "#B-2-1765"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "circle"
     label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
     style = "filled"
@@ -566,7 +566,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/2"
     xlabel = "#B-2-1771"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
@@ -581,7 +581,7 @@ subgraph "clusterAnd#R91-0" {
     fillcolor = "/set28/4"
     xlabel = "#B-2-1762"
     fontsize = "12"
-    fontcolor = grey60
+    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Scope</FONT></TD></TR>
@@ -593,141 +593,141 @@ subgraph "clusterAnd#R91-0" {
 "CR#X91-10-91":port0 -> "#X91-12-81" [
     label = ""
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#X91-12-81" -> "#X91-8-82" [
     label = "#2"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#X91-8-82" -> "#B-2-1761" [
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#X91-8-82" -> "#B-2-1762" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1761":port0 -> "#B-2-1763" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1761":port0 -> "#B-2-1766" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1766":port0 -> "#B-2-1768" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1766":port2 -> "#B-2-1769" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1769" -> "#B-2-1772" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1772":port1 -> "#B-2-1770" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1772":port2 -> "#B-2-1771" [
     style="dashed"
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1770":port0 -> "#B-2-1764" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1770":port0 -> "#B-2-1767" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1770":port1 -> "#B-2-1765" [
     label = "#0"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1771":port0 -> "#B-2-1764" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1771":port1 -> "#B-2-1765" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1762":port0 -> "#B-2-1763" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1762":port0 -> "#B-2-1766" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 "#B-2-1762":port0 -> "#B-2-1767" [
     style="dashed"
     label = "#1"
     decorate = true
-    color = grey85
-    fontcolor = white
+    color = black
+    fontcolor = black
 ];
 
 
