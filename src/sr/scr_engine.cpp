@@ -52,7 +52,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     master_plinks( master_plinks_ )
 {
     INDENT("}");
-    TRACE(*this)(" planning part one\n");
+    TRACE(*this)(" planning stage one\n");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
     //TRACE("Entering SCREngine::Configure on ")(*this)("\n");
     overall_master_ptr = overall_master;
@@ -65,15 +65,15 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     // For closure under full arrowhead model, we need a link to root
     root_plink = PatternLink::CreateDistinct( root_pattern );   
             
-    CategoriseSubs( master_plinks, in_progress_agent_phases );    
+    CategoriseAgents( master_plinks, in_progress_agent_phases );    
 
-    // This recurses SCR engine planning
+    // This recurses SCR engine planning stage 1
     CreateMyEngines( in_progress_agent_phases );    
 }
 
     
-void SCREngine::Plan::CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
-                                      CompareReplace::AgentPhases &in_progress_agent_phases )
+void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master_plinks, 
+                                        CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
@@ -159,7 +159,7 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
 void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &final_agent_phases_)
 {
     INDENT("}");
-    TRACE(*this)(" planning part two\n");
+    TRACE(*this)(" planning stage two\n");
     final_agent_phases = final_agent_phases_;
     
     // Recurse into subordinate SCREngines
@@ -195,20 +195,30 @@ void SCREngine::Plan::ConfigureAgents()
 void SCREngine::Plan::PlanningStageThree()
 {
     INDENT("}");
-    TRACE(*this)(" planning part three\n");
+    // Stage three mirrors the sequence of events taken at run time i.e.
+    // COMPARE, REPLACE, RECURSE, RECURSE
+    TRACE(*this)(" planning stage three\n");
     
-    // Make and-rule engines on the way out - by now, hopefully all
-    // the agents this and-rule engine sees have been configured.
+    // COMPARE
+    // All agents this AndRuleEngine see must have been configured 
     and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
     
-    // Plan the keyers for couplings 
-    for( StartsOverlay *ao : my_overlay_starter_engines )
-        ao->StartPlanOverlay();    
-
+    // REPLACE
+    PlanReplace();
+    
+    // RECURSE RECURSE
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningStageThree();                                      
 } 
+
+
+void SCREngine::Plan::PlanReplace()
+{
+    // Plan the keyers for couplings 
+    for( StartsOverlay *ao : my_overlay_starter_engines )
+        ao->StartPlanOverlay();        
+}
 
 
 string SCREngine::Plan::GetTrace() const 

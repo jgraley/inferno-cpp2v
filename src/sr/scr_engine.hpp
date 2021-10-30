@@ -68,8 +68,8 @@ private:
               TreePtr<Node> rp,
               const unordered_set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
-        void CategoriseSubs( const unordered_set<PatternLink> &master_plinks, 
-                             CompareReplace::AgentPhases &in_progress_agent_phases );
+        void CategoriseAgents( const unordered_set<PatternLink> &master_plinks, 
+                               CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
                           PatternLink base_plink, 
                           Agent::Path path ) const;
@@ -77,6 +77,7 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree();
+        void PlanReplace();
         string GetTrace() const; // used for debug
         
         SCREngine * const algo;
