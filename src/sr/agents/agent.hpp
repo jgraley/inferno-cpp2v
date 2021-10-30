@@ -100,6 +100,8 @@ public:
     virtual void Reset() = 0;     
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink ) = 0;
+    virtual bool PlanReplaceKeying( PatternLink me_plink, 
+                                    unordered_set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
@@ -173,6 +175,8 @@ public:
                               PatternLink under_plink );
     virtual void PlanOverlayImpl( PatternLink me_plink, 
                                   PatternLink under_plink );
+    virtual bool PlanReplaceKeying( PatternLink me_plink, 
+                                    unordered_set<PatternLink> keyer_plinks );                                  
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );

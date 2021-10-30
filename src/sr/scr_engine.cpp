@@ -78,20 +78,21 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
     // compare and replace sets separately.
-    unordered_set<PatternLink> visible_plinks_compare, visible_plinks_replace;
-    WalkVisible( visible_plinks_compare, root_plink, Agent::COMPARE_PATH );
-    WalkVisible( visible_plinks_replace, root_plink, Agent::REPLACE_PATH );
+    unordered_set<PatternLink> visible_compare_plinks, visible_replace_plinks;
+    list<PatternLink> visible_replace_plinks_ordered;
+    WalkVisible( visible_compare_plinks, nullptr, root_plink, Agent::COMPARE_PATH );
+    WalkVisible( visible_replace_plinks, &visible_replace_plinks_ordered, root_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though slave "through", 
     // not into the slave's pattern)
-    unordered_set<PatternLink> visible_plinks = UnionOf( visible_plinks_compare, visible_plinks_replace );
+    unordered_set<PatternLink> visible_plinks = UnionOf( visible_compare_plinks, visible_replace_plinks );
     
     for( PatternLink plink : visible_plinks )
     {
         unsigned int phase = (unsigned int)in_progress_agent_phases[plink.GetChildAgent()];
-        if( visible_plinks_compare.count(plink) == 0 )
+        if( visible_compare_plinks.count(plink) == 0 )
             phase |= Agent::IN_REPLACE_ONLY;
-        else if( visible_plinks_replace.count(plink) == 0 )
+        else if( visible_replace_plinks.count(plink) == 0 )
             phase |= Agent::IN_COMPARE_ONLY;
         else
             phase |= Agent::IN_COMPARE_AND_REPLACE;
@@ -110,6 +111,11 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
         if( master_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks.insert( plink );
 
+    // Need the replace plinks in the same order that BuildReplace() walks the tree
+    for( PatternLink plink : visible_replace_plinks_ordered )
+        if( master_plinks.count(plink) == 0 ) // exclude by plink
+            my_replace_plinks_ordered.push_back( plink );
+
     my_agents.clear();
     for( PatternLink plink : my_plinks )
         my_agents.insert( plink.GetChildAgent() );
@@ -127,14 +133,20 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
 }
 
 
-void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible, 
+void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
+                                   list<PatternLink> *visible_ordered, // optional
                                    PatternLink base_plink, 
                                    Agent::Path path ) const
 {
     visible.insert( base_plink );    
+    if( visible_ordered )
+        visible_ordered->push_back( base_plink );
+    
+    // Gee, I sure hope recovers children in the same order as BuildReplaceImpl()    
     list<PatternLink> plinks = base_plink.GetChildAgent()->GetVisibleChildren(path); 
+    
     for( PatternLink plink : plinks )
-        WalkVisible( visible, plink, path );    
+        WalkVisible( visible, visible_ordered, plink, path );    
 }
 
 
@@ -192,12 +204,14 @@ void SCREngine::Plan::ConfigureAgents()
 }
 
 
-void SCREngine::Plan::PlanningStageThree()
-{
+void SCREngine::Plan::PlanningStageThree(unordered_set<PatternLink> master_keyers)
+{    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
     // COMPARE, REPLACE, RECURSE, RECURSE
     TRACE(*this)(" planning stage three\n");
+ 
+    all_keyer_plinks = master_keyers;
     
     // COMPARE
     PlanCompare();
@@ -208,7 +222,7 @@ void SCREngine::Plan::PlanningStageThree()
     // RECURSE RECURSE
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageThree();                                      
+        p.second->PlanningStageThree(all_keyer_plinks);                                      
 } 
 
 
@@ -227,9 +241,9 @@ void SCREngine::Plan::PlanReplace()
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
         
-   /* for( PatternLink plink : my_plinks )
-        if( plink.GetChildAgent()->IsReplaceKeyer(plink) )
-            all_keyer_plinks.insert( plink );*/
+    for( PatternLink plink : my_replace_plinks_ordered )
+        if( plink.GetChildAgent()->PlanReplaceKeying(plink, all_keyer_plinks) )
+            all_keyer_plinks.insert( plink );
 }
 
 
@@ -424,6 +438,24 @@ bool SCREngine::IsKeyedByAndRuleEngine( Agent *agent ) const
 {
     ASSERT( plan.and_rule_engine );
     return plan.and_rule_engine->GetKeyedAgents().count( agent );
+}
+
+
+bool SCREngine::IsKeyed( PatternLink plink ) const
+{
+    return plan.all_keyer_plinks.count(plink)==1;
+}
+
+
+bool SCREngine::IsKeyed( Agent *agent ) const
+{
+    for( PatternLink keyer_plink : plan.all_keyer_plinks )
+    {
+        Agent *keyer_agent = keyer_plink.GetChildAgent();
+        if( keyer_agent == agent )
+            return true; 
+    }
+    return false;
 }
 
 

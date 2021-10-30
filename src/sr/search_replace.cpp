@@ -59,7 +59,7 @@ void CompareReplace::Plan::PlanningStageTwo()
 void CompareReplace::Plan::PlanningStageThree()
 {
     // Third, create subordinate AndRuleEngines
-    scr_engine->PlanningStageThree();
+    scr_engine->PlanningStageThree( {} );
     
     list<const AndRuleEngine *> ares = scr_engine->GetAndRuleEngines();
 	TRACE("And-rule engines for this step: ")(ares)("\n");

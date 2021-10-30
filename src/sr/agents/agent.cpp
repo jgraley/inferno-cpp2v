@@ -570,11 +570,18 @@ void AgentCommon::PlanOverlayImpl( PatternLink me_plink,
 }
 
 
+bool AgentCommon::PlanReplaceKeying( PatternLink me_plink, 
+                                     unordered_set<PatternLink> keyer_plinks )
+{
+    return false;
+}
+                                  
+
 TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 {
     INDENT("B");
     ASSERT( me_plink.GetChildAgent() == this );
-    
+
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");

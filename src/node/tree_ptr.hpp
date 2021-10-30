@@ -59,7 +59,10 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     virtual TreePtr<Node> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetTrace() const
     {
-        return string("&") + operator*().GetTrace();
+        if( operator bool() )           
+            return string("&") + operator*().GetTrace();
+        else 
+            return string("NULL");
     }  
 };
 

@@ -53,9 +53,9 @@ public:
     {
         plan.PlanningStageTwo(in_progress_agent_phases); 
     }
-    void PlanningStageThree()
+    void PlanningStageThree(unordered_set<PatternLink> master_keyers)
     {
-        plan.PlanningStageThree(); 
+        plan.PlanningStageThree(master_keyers); 
     }
                     
 private:
@@ -71,12 +71,13 @@ private:
         void CategoriseAgents( const unordered_set<PatternLink> &master_plinks, 
                                CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
+                          list<PatternLink> *visible_ordered,
                           PatternLink base_plink, 
                           Agent::Path path ) const;
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
-        void PlanningStageThree();
+        void PlanningStageThree(unordered_set<PatternLink> master_keyers);
         void PlanCompare();
         void PlanReplace();
         string GetTrace() const; // used for debug
@@ -97,6 +98,7 @@ private:
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
+        list<PatternLink> my_replace_plinks_ordered;
     } plan;
 
     TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
@@ -121,6 +123,8 @@ public: // For agents
     void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
+    bool IsKeyed( PatternLink plink ) const; 
+    bool IsKeyed( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
     XLink UniquifyDomainExtension( XLink xlink ) const;
     

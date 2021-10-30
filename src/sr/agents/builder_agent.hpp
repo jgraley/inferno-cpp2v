@@ -13,11 +13,15 @@ public:
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuilderAgent() {}
 
+    virtual bool PlanReplaceKeying( PatternLink me_plink, 
+                                    unordered_set<PatternLink> keyer_plinks ); 
+                                 
     virtual TreePtr<Node> BuildNewSubtree() = 0;
 
 private:
 	virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node ) override;  
+    PatternLink keyer_plink;
 };
 
 };
