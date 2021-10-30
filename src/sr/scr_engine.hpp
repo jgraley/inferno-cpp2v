@@ -77,6 +77,7 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree();
+        void PlanCompare();
         void PlanReplace();
         string GetTrace() const; // used for debug
         
@@ -91,6 +92,7 @@ private:
         unordered_set<PatternLink> my_plinks;   
         unordered_set<Agent *> my_agents;   
         set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
+        unordered_set<PatternLink> all_keyer_plinks;   
         set<StartsOverlay *> my_overlay_starter_engines;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;

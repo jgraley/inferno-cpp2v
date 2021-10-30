@@ -200,8 +200,7 @@ void SCREngine::Plan::PlanningStageThree()
     TRACE(*this)(" planning stage three\n");
     
     // COMPARE
-    // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
+    PlanCompare();
     
     // REPLACE
     PlanReplace();
@@ -213,11 +212,24 @@ void SCREngine::Plan::PlanningStageThree()
 } 
 
 
+void SCREngine::Plan::PlanCompare()
+{
+    // All agents this AndRuleEngine see must have been configured 
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
+    
+    all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
+                                    and_rule_engine->GetKeyerPatternLinks() );
+}
+
 void SCREngine::Plan::PlanReplace()
 {
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
+        
+   /* for( PatternLink plink : my_plinks )
+        if( plink.GetChildAgent()->IsReplaceKeyer(plink) )
+            all_keyer_plinks.insert( plink );*/
 }
 
 

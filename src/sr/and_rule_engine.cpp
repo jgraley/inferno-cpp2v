@@ -858,6 +858,12 @@ const unordered_set<Agent *> &AndRuleEngine::GetKeyedAgents() const
 }
 
 
+const unordered_set<PatternLink> &AndRuleEngine::GetKeyerPatternLinks() const
+{
+    return plan.coupling_keyer_links_all; 
+}
+
+
 void AndRuleEngine::RecordLink( LocatedLink link, KeyProducer place )
 {
     // All go into the basic solution which is enough to

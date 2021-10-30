@@ -96,7 +96,7 @@ public:
         unordered_set<Agent *> master_agents;
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
-        unordered_set<PatternLink> my_normal_links_unique_by_agent; // = trivial and non-trivial keyers
+        unordered_set<PatternLink> my_normal_links_unique_by_agent;
         unordered_set< Agent *> my_evaluators;   
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
@@ -144,6 +144,7 @@ public:
     const CouplingKeysMap &GetCouplingKeys();
     const void ClearCouplingKeys();
     const unordered_set<Agent *> &GetKeyedAgents() const;
+    const unordered_set<PatternLink> &GetKeyerPatternLinks() const;
 
 private:    
     void RecordLink( LocatedLink link, KeyProducer place );
