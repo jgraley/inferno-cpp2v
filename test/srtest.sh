@@ -56,8 +56,6 @@ ires=$?
 
 ./convert_all_svg.sh -d $outdir
 
-exit 0
-
 dres=0
 for file in $(find $outdir -type f | sort); do 
     if [[ $(diff --brief $file ${file/#$outdir/$refdir}) ]]; then  
