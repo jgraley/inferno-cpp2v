@@ -163,7 +163,6 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
                                                  ae->GetReplacePattern(),
                                                  surrounding_plinks, 
                                                  algo );       
-        ae->ConfigureMyEngine( &*my_engines.at(ae) );
     }        
 }
 
@@ -398,10 +397,13 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::RecurseInto( SCREngine *slave_engine, 
+void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
                              TreePtr<Node> *p_root_xnode ) const
 {
     ASSERT( keys_available );
+    
+    shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
+    ASSERT( slave_engine );
     
     // Run the slave engine        
     slave_engine->RepeatingCompareReplace( p_root_xnode, &replace_keys );

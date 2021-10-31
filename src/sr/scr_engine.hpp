@@ -29,7 +29,6 @@ class RequiresSubordinateSCREngine
 public:
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
-    virtual void ConfigureMyEngine( SCREngine *my_engine ) = 0;
 };
 
 class StartsOverlay
@@ -118,7 +117,7 @@ public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the slave_engine's one - and that pointer is not const.
-    void RecurseInto( SCREngine *slave_engine, 
+    void RecurseInto( RequiresSubordinateSCREngine *slave_agent, 
                       TreePtr<Node> *p_root_xnode ) const;    
     void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
     CouplingKey GetReplaceKey( const Agent *agent ) const;

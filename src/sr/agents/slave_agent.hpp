@@ -27,13 +27,11 @@ public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual const TreePtrInterface *GetThrough() const = 0;    
-    virtual void ConfigureMyEngine( SCREngine *my_scr_engine );
-    virtual void PlanOverlayImpl(      PatternLink me_plink, 
-                                    PatternLink under_plink );
+    virtual void PlanOverlayImpl( PatternLink me_plink, 
+                                  PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
-	virtual SCREngine *GetSCREngine() const { return my_scr_engine; }
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
 	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
@@ -46,7 +44,6 @@ public:
     
 private:
     bool is_search;
-    SCREngine *my_scr_engine;
 };
 
 

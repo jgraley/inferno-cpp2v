@@ -8,7 +8,6 @@ using namespace SR;
 
 SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
     is_search( is_search_ ),
-    my_scr_engine( nullptr ),
     search_pattern( sp ),
     replace_pattern( rp )
 {
@@ -20,12 +19,6 @@ shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
-}
-
-
-void SlaveAgent::ConfigureMyEngine( SCREngine *my_scr_engine_ )
-{
-    my_scr_engine = my_scr_engine_;
 }
 
 
@@ -50,7 +43,7 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink,
     ASSERT( my_through_subtree );
     
     // And then recurse into slaves
-    master_scr_engine->RecurseInto( my_scr_engine, &my_through_subtree );   
+    master_scr_engine->RecurseInto( this, &my_through_subtree );   
     ASSERT( my_through_subtree );
     
     return my_through_subtree;
