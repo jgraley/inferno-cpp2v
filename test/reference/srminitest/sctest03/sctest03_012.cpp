@@ -1,1 +1,0 @@
-../../srtest/sctest03/sctest03_012.cpp

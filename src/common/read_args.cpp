@@ -59,7 +59,7 @@ void ReadArgs::Usage()
 	                "            Note: t enables trace details in graph; k enables dark colour-scheme.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
-                    "-f          Output all intermediates. <outfile> is path/basename.\n"
+                    "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
                     "-x          Enable new feature. Meaning varies.\n"
                     "\n"
     		        "One of -i, -s, -th, -gp, -gd required; all others are optional.\n",
@@ -191,6 +191,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         else if( option=='f' )
         {
             output_all = true;
+            graph_trace = true;
         }
         else if( option=='x' )
         {

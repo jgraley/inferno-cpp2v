@@ -44,7 +44,7 @@ test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
-	test/srtest.sh $< test/reference/srtest -tq
+	test/srtest.sh $< test/reference/sr -tq
 	@touch test/results/sr/$*.pass
 	
 test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)

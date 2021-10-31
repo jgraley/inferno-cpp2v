@@ -371,9 +371,8 @@ int main( int argc, char *argv[] )
             {
                 Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", i) );
                 r( &program );     
-                // TODO prove that the graph renderer does not modify the tree before enabling
-                //Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", i) );
-                //g( &program );    
+                Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", i), ReadArgs::outfile+SSPrintf(" after T%03d-%s", i, t->GetName().c_str()) );
+                g( &program );    
             }
                 
             if( ShouldIQuit(true) )

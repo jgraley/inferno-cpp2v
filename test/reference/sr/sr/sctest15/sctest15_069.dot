@@ -1,0 +1,1857 @@
+digraph "test/results/sr/sctest15/sctest15 after T069-CleanupCompoundMulti" {
+label = "test/results/sr/sctest15/sctest15 after T069-CleanupCompoundMulti"
+labelloc = t
+graph [
+    rankdir = "LR"
+    ranksep = 0.3
+    bgcolor = antiquewhite1
+    color = black
+    fontcolor = black
+    fontname = "Arial"
+];
+node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
+];
+
+// -------------------- node figure --------------------
+// -------- block #T69-9-6192 ----------
+"#T69-9-6192" [
+    fillcolor = "/set28/4"
+    xlabel = "#T69-9-6192"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Program</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{..}</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6193 ----------
+"#T69-9-6193" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6193"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Module</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">TypeIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">{.....}</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Base</FONT></TD><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-4-2162 ----------
+"#I-4-2162" [
+    fillcolor = "/set28/5"
+    xlabel = "#I-4-2162"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'TopLevel'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6194 ----------
+"#T69-9-6194" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6194"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Temporary</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6195 ----------
+"#T69-9-6195" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6195"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Unsigned</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Integer</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6196 ----------
+"#T69-9-6196" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6196"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">32U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T27-4-2849 ----------
+"#T27-4-2849" [
+    fillcolor = "/set28/5"
+    xlabel = "#T27-4-2849"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'HelperU_link'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6197 ----------
+"#T69-9-6197" [
+    xlabel = "#T69-9-6197"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6198 ----------
+"#T69-9-6198" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6198"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Temporary</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6199 ----------
+"#T69-9-6199" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6199"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Unsigned</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Integer</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6200 ----------
+"#T69-9-6200" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6200"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">32U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T28-4-2864 ----------
+"#T28-4-2864" [
+    fillcolor = "/set28/5"
+    xlabel = "#T28-4-2864"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'HelperU_link'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6201 ----------
+"#T69-9-6201" [
+    xlabel = "#T69-9-6201"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6202 ----------
+"#T69-9-6202" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6202"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Field</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Virtuality</FONT></TD><TD PORT="port3"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">AccessSpec</FONT></TD><TD PORT="port4"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port5"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6203 ----------
+"#T69-9-6203" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6203"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Unsigned</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Integer</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6204 ----------
+"#T69-9-6204" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6204"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">32U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T27-4-2847 ----------
+"#T27-4-2847" [
+    fillcolor = "/set28/5"
+    xlabel = "#T27-4-2847"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'link'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6205 ----------
+"#T69-9-6205" [
+    xlabel = "#T69-9-6205"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6206 ----------
+"#T69-9-6206" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6206"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonVirtual</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6207 ----------
+"#T69-9-6207" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6207"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Private</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6208 ----------
+"#T69-9-6208" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6208"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonConst</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6209 ----------
+"#T69-9-6209" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6209"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Enum</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">TypeIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">{..}</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T67-4-3395 ----------
+"#T67-4-3395" [
+    fillcolor = "/set28/5"
+    xlabel = "#T67-4-3395"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'UStates'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6210 ----------
+"#T69-9-6210" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6210"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Static</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T67-4-3396 ----------
+"#T67-4-3396" [
+    fillcolor = "/set28/5"
+    xlabel = "#T67-4-3396"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'U_STATE_LINK'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6211 ----------
+"#T69-9-6211" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6211"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">0U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6212 ----------
+"#T69-9-6212" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6212"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Const</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6213 ----------
+"#T69-9-6213" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6213"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Static</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T67-4-3398 ----------
+"#T67-4-3398" [
+    fillcolor = "/set28/5"
+    xlabel = "#T67-4-3398"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'U_STATE_ENTER_HelperU'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6214 ----------
+"#T69-9-6214" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6214"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">1U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6215 ----------
+"#T69-9-6215" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6215"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Const</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6216 ----------
+"#T69-9-6216" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6216"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Field</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Virtuality</FONT></TD><TD PORT="port3"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">AccessSpec</FONT></TD><TD PORT="port4"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port5"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6217 ----------
+"#T69-9-6217" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6217"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Thread</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-4-2184 ----------
+"#I-4-2184" [
+    fillcolor = "/set28/5"
+    xlabel = "#I-4-2184"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'U'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6218 ----------
+"#T69-9-6218" [
+    fillcolor = "/set28/2"
+    xlabel = "#T69-9-6218"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{...}</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port3"><FONT COLOR="black" POINT-SIZE="12">[2]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port4"><FONT COLOR="black" POINT-SIZE="12">[3]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port5"><FONT COLOR="black" POINT-SIZE="12">[4]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port6"><FONT COLOR="black" POINT-SIZE="12">[5]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port7"><FONT COLOR="black" POINT-SIZE="12">[6]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port8"><FONT COLOR="black" POINT-SIZE="12">[7]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port9"><FONT COLOR="black" POINT-SIZE="12">[8]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port10"><FONT COLOR="black" POINT-SIZE="12">[9]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port11"><FONT COLOR="black" POINT-SIZE="12">[10]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port12"><FONT COLOR="black" POINT-SIZE="12">[11]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port13"><FONT COLOR="black" POINT-SIZE="12">[12]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6219 ----------
+"#T69-9-6219" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6219"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Automatic</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6220 ----------
+"#T69-9-6220" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6220"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Unsigned</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Integer</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6221 ----------
+"#T69-9-6221" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6221"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">32U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T66-4-3380 ----------
+"#T66-4-3380" [
+    fillcolor = "/set28/5"
+    xlabel = "#T66-4-3380"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'state'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6222 ----------
+"#T69-9-6222" [
+    xlabel = "#T69-9-6222"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6223 ----------
+"#T69-9-6223" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6223"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">TempReturnAddress</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6224 ----------
+"#T69-9-6224" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6224"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Unsigned</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Integer</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6225 ----------
+"#T69-9-6225" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6225"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">32U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T27-4-2848 ----------
+"#T27-4-2848" [
+    fillcolor = "/set28/5"
+    xlabel = "#T27-4-2848"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'temp_link'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6226 ----------
+"#T69-9-6226" [
+    xlabel = "#T69-9-6226"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6227 ----------
+"#T69-9-6227" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6227"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Static</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6228 ----------
+"#T69-9-6228" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6228"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Array</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6229 ----------
+"#T69-9-6229" [
+    fillcolor = "/set28/3"
+    xlabel = "#T69-9-6229"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Unsigned</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Integer</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6230 ----------
+"#T69-9-6230" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6230"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">32U</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6231 ----------
+"#T69-9-6231" [
+    xlabel = "#T69-9-6231"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T67-4-3394 ----------
+"#T67-4-3394" [
+    fillcolor = "/set28/5"
+    xlabel = "#T67-4-3394"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'lmap'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6232 ----------
+"#T69-9-6232" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6232"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">MakeArray</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T27-4-2850 ----------
+"#T27-4-2850" [
+    fillcolor = "/set28/5"
+    xlabel = "#T27-4-2850"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'LINK'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T33-4-2928 ----------
+"#T33-4-2928" [
+    fillcolor = "/set28/5"
+    xlabel = "#T33-4-2928"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'ENTER_HelperU'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6233 ----------
+"#T69-9-6233" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6233"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Const</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6234 ----------
+"#T69-9-6234" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6234"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6235 ----------
+"#T69-9-6235" [
+    fillcolor = "/set28/2"
+    xlabel = "#T69-9-6235"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">WaitDelta</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6236 ----------
+"#T69-9-6236" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6236"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6237 ----------
+"#T69-9-6237" [
+    fillcolor = "/set28/2"
+    xlabel = "#T69-9-6237"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6238 ----------
+"#T69-9-6238" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6238"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subscript</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6239 ----------
+"#T69-9-6239" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6239"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">StateLabel</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">LabelIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6240 ----------
+"#T69-9-6240" [
+    fillcolor = "/set28/2"
+    xlabel = "#T69-9-6240"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Return</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6241 ----------
+"#T69-9-6241" [
+    xlabel = "#T69-9-6241"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6242 ----------
+"#T69-9-6242" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6242"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6243 ----------
+"#T69-9-6243" [
+    fillcolor = "/set28/2"
+    xlabel = "#T69-9-6243"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6244 ----------
+"#T69-9-6244" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6244"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subscript</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6245 ----------
+"#T69-9-6245" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6245"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">StateLabel</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">LabelIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6246 ----------
+"#T69-9-6246" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6246"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6247 ----------
+"#T69-9-6247" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6247"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6248 ----------
+"#T69-9-6248" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6248"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Assign</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6249 ----------
+"#T69-9-6249" [
+    fillcolor = "/set28/2"
+    xlabel = "#T69-9-6249"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6250 ----------
+"#T69-9-6250" [
+    fillcolor = "/set28/6"
+    xlabel = "#T69-9-6250"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subscript</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6251 ----------
+"#T69-9-6251" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6251"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonVirtual</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6252 ----------
+"#T69-9-6252" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6252"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Public</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6253 ----------
+"#T69-9-6253" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6253"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonConst</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6254 ----------
+"#T69-9-6254" [
+    fillcolor = "/set28/1"
+    xlabel = "#T69-9-6254"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Static</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-4-2208 ----------
+"#I-4-2208" [
+    fillcolor = "/set28/5"
+    xlabel = "#I-4-2208"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'top_level'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6255 ----------
+"#T69-9-6255" [
+    xlabel = "#T69-9-6255"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #T69-9-6256 ----------
+"#T69-9-6256" [
+    fillcolor = "/set28/7"
+    xlabel = "#T69-9-6256"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonConst</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+"#T69-9-6192":port0 -> "#T69-9-6193" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6192":port0 -> "#T69-9-6254" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6193":port0 -> "#I-4-2162" [
+    label = "#107"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6193":port1 -> "#T69-9-6194" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6193":port1 -> "#T69-9-6198" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6193":port1 -> "#T69-9-6202" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6193":port1 -> "#T69-9-6209" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6193":port1 -> "#T69-9-6216" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6194":port0 -> "#T69-9-6195" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6194":port1 -> "#T27-4-2849" [
+    label = "#41"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6194":port2 -> "#T69-9-6197" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6195":port0 -> "#T69-9-6196" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6198":port0 -> "#T69-9-6199" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6198":port1 -> "#T28-4-2864" [
+    label = "#64"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6198":port2 -> "#T69-9-6201" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6199":port0 -> "#T69-9-6200" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6202":port0 -> "#T69-9-6203" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6202":port1 -> "#T27-4-2847" [
+    label = "#133"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6202":port2 -> "#T69-9-6205" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6202":port3 -> "#T69-9-6206" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6202":port4 -> "#T69-9-6207" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6202":port5 -> "#T69-9-6208" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6203":port0 -> "#T69-9-6204" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6209":port0 -> "#T67-4-3395" [
+    label = "#66"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6209":port1 -> "#T69-9-6210" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6209":port1 -> "#T69-9-6213" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6210":port0 -> "#T67-4-3395" [
+    label = "#67"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6210":port1 -> "#T67-4-3396" [
+    label = "#72"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6210":port2 -> "#T69-9-6211" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6210":port3 -> "#T69-9-6212" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6213":port0 -> "#T67-4-3395" [
+    label = "#68"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6213":port1 -> "#T67-4-3398" [
+    label = "#81"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6213":port2 -> "#T69-9-6214" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6213":port3 -> "#T69-9-6215" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6216":port0 -> "#T69-9-6217" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6216":port1 -> "#I-4-2184" [
+    label = "#70"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6216":port2 -> "#T69-9-6218" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6216":port3 -> "#T69-9-6251" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6216":port4 -> "#T69-9-6252" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6216":port5 -> "#T69-9-6253" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port0 -> "#T69-9-6219" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port0 -> "#T69-9-6223" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port0 -> "#T69-9-6227" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port1 -> "#T69-9-6234" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port2 -> "#T69-9-6235" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port3 -> "#T69-9-6236" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port4 -> "#T69-9-6237" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port5 -> "#T69-9-6239" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port6 -> "#T69-9-6240" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port7 -> "#T69-9-6242" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port8 -> "#T69-9-6243" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port9 -> "#T69-9-6245" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port10 -> "#T69-9-6246" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port11 -> "#T69-9-6247" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port12 -> "#T69-9-6248" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6218":port13 -> "#T69-9-6249" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6219":port0 -> "#T69-9-6220" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6219":port1 -> "#T66-4-3380" [
+    label = "#197"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6219":port2 -> "#T69-9-6222" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6220":port0 -> "#T69-9-6221" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6223":port0 -> "#T69-9-6224" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6223":port1 -> "#T27-4-2848" [
+    label = "#137"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6223":port2 -> "#T69-9-6226" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6224":port0 -> "#T69-9-6225" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6227":port0 -> "#T69-9-6228" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6227":port1 -> "#T67-4-3394" [
+    label = "#78"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6227":port2 -> "#T69-9-6232" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6227":port3 -> "#T69-9-6233" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6228":port0 -> "#T69-9-6229" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6228":port1 -> "#T69-9-6231" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6229":port0 -> "#T69-9-6230" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6232":port0 -> "#T27-4-2850" [
+    label = "#93"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6232":port1 -> "#T33-4-2928" [
+    label = "#92"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6234":port0 -> "#T28-4-2864" [
+    label = "#126"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6234":port1 -> "#T67-4-3396" [
+    label = "#73"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6236":port0 -> "#T66-4-3380" [
+    label = "#198"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6236":port1 -> "#T67-4-3398" [
+    label = "#82"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6237":port0 -> "#T69-9-6238" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6238":port0 -> "#T67-4-3394" [
+    label = "#79"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6238":port1 -> "#T66-4-3380" [
+    label = "#199"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6239":port0 -> "#T27-4-2850" [
+    label = "#94"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6239":port1 -> "#T67-4-3396" [
+    label = "#74"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6240":port0 -> "#T69-9-6241" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6242":port0 -> "#T66-4-3380" [
+    label = "#200"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6242":port1 -> "#T67-4-3398" [
+    label = "#83"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6243":port0 -> "#T69-9-6244" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6244":port0 -> "#T67-4-3394" [
+    label = "#80"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6244":port1 -> "#T66-4-3380" [
+    label = "#201"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6245":port0 -> "#T33-4-2928" [
+    label = "#93"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6245":port1 -> "#T67-4-3398" [
+    label = "#84"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6246":port0 -> "#T27-4-2847" [
+    label = "#134"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6246":port1 -> "#T28-4-2864" [
+    label = "#127"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6247":port0 -> "#T27-4-2848" [
+    label = "#138"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6247":port1 -> "#T27-4-2847" [
+    label = "#135"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6248":port0 -> "#T66-4-3380" [
+    label = "#202"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6248":port1 -> "#T27-4-2848" [
+    label = "#139"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6249":port0 -> "#T69-9-6250" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6250":port0 -> "#T67-4-3394" [
+    label = "#81"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6250":port1 -> "#T66-4-3380" [
+    label = "#203"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6254":port0 -> "#I-4-2162" [
+    label = "#108"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6254":port1 -> "#I-4-2208" [
+    label = "#39"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6254":port2 -> "#T69-9-6255" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#T69-9-6254":port3 -> "#T69-9-6256" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+
+}
