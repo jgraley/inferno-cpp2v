@@ -137,5 +137,5 @@ void CouplingKey::Dump( KeyConsumer consumer ) const
     RemoveCommonPrefix( pp, cp );
     s += " " + pp + "->"+ cp;
     
-    printf("%s\n", s.c_str());
+    //printf("%s\n", s.c_str());
 }

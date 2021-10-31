@@ -112,6 +112,7 @@ minitest : test/results/mini.pass
 # Run the search and replace tests (requires reference outputs to be in in test/reference/srtest/)
 #
 srtest : test/results/sr.pass
+minisrtest : test/results/minisr.pass
 	
 #
 # Run the repeatbility tests (requires reference trace logs to be in in test/reference/reptest/)

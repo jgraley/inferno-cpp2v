@@ -50,6 +50,10 @@ public:
         typedef int IndexType;
         typedef OrderedDomain::const_iterator OrderedIt;
         Cadence cadence;
+        // Note that the parent is unique because:
+        // - nugget is relative to a link, not a node,
+        // - multiple parents only allowed at leaf, and parent is 
+        //   (at least) one level back from that.
         XLink parent_xlink = XLink();
         XLink last_descendant_xlink = XLink();
         ContainerInterface *container = nullptr;

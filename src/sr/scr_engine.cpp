@@ -16,6 +16,8 @@
 
 #define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
 
+//#define RUN_SLAVES_LATER
+
 using namespace SR;
 using namespace std;
 
@@ -252,6 +254,44 @@ string SCREngine::Plan::GetTrace() const
 }
 
 
+void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x )
+{   
+#ifdef RUN_SLAVES_LATER
+    shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
+    ASSERT( slave_engine );
+   
+    // Recall the base node of the subtree under through (after master replace)
+    TreePtr<Node> through_subtree = slave_though_subtrees.at(slave_agent);   
+    ASSERT( through_subtree );
+    
+    // Run the slaves engine on this subtree
+    TreePtr<Node> new_subtree = through_subtree;
+    slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys );
+
+    // Special case when slave is at root of my SCR region: switch the whole tree
+    if( through_subtree == *p_root_x )
+    {
+        *p_root_x = new_subtree;
+        return;
+    }
+
+    // Search for links to the though subtree and stich in the new one
+    Walk e( *p_root_x ); 
+    for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
+    {
+        if( *wit == through_subtree ) // found the though subtree
+        {            
+            // Get the pointer that points to the though subtree
+            const TreePtrInterface *px = wit.GetNodePointerInParent();    
+            // Update it to point to the new subtree
+            if( px ) // ps is NULL at root 
+                *const_cast<TreePtrInterface *>(px) = new_subtree;
+        }
+    }
+#endif    
+}
+
+
 TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 {
     INDENT("R");
@@ -259,11 +299,15 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     replace_keys = UnionOfSolo( *master_keys,
                                 plan.and_rule_engine->GetCouplingKeys() );
     my_keyer_plinks_measured.clear();
+    slave_though_subtrees.clear();
     keys_available = true;
 
     // Now replace according to the couplings
-    TreePtr<Node> rnode = plan.root_agent->BuildReplace(plan.root_plink);
+    TreePtr<Node> new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
     
+    for( RequiresSubordinateSCREngine *slave_agent : plan.my_agents_needing_engines )
+        RunSlave(slave_agent, &new_root_x);
+  
     keys_available = false;
     replace_keys.clear();
     //FTRACE(my_keyer_plinks_measured);
@@ -272,7 +316,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
     // and that would break knowledge building. See #217
-    return plan.root_agent->DuplicateSubtree(rnode);
+    return plan.root_agent->DuplicateSubtree(new_root_x);
 }
 
 
@@ -297,7 +341,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TRACE("Now replacing\n");
     *p_root_xnode = Replace(master_keys);
     
-    // Clear out all the replace keys (the ones inside the agents) now that replace is done
+    // Clear out anything cached in agents now that replace is done
     FOREACH( Agent *a, plan.my_agents )
         a->Reset();
     plan.and_rule_engine->ClearCouplingKeys(); // save memory
@@ -398,15 +442,22 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 
 
 void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
-                             TreePtr<Node> *p_root_xnode ) const
+                             TreePtr<Node> *p_slave_through_subtree ) const
 {
     ASSERT( keys_available );
     
+#ifdef RUN_SLAVES_LATER
+    // p_root_xnode cannot be stored: it points to a local of our caller
+    TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 
+    
+    InsertSolo( slave_though_subtrees, make_pair( slave_agent, slave_through_subtree ) );
+#else    
     shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
     ASSERT( slave_engine );
     
     // Run the slave engine        
-    slave_engine->RepeatingCompareReplace( p_root_xnode, &replace_keys );
+    slave_engine->RepeatingCompareReplace( p_slave_through_subtree, &replace_keys );
+#endif
 }
 
 

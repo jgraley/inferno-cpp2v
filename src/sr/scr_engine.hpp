@@ -100,6 +100,7 @@ private:
         list<PatternLink> my_replace_plinks_ordered;
     } plan;
 
+    void RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x );
     TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
 
 public: // For top level engine/VN trans
@@ -144,6 +145,7 @@ private:
     mutable CouplingKeysMap replace_keys;
     mutable unordered_set<PatternLink> my_keyer_plinks_measured;   
     bool keys_available = false;    
+    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_though_subtrees;
 };
 
 };

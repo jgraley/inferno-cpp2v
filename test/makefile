@@ -13,6 +13,9 @@ SRCASES = pointeris $(CASES)
 
 MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15 sctest03
 
+MINISRCASES = pointeris $(MINICASES) 
+
+
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
@@ -30,6 +33,14 @@ test/results/execution.pass : $(CASES:%=test/results/execution/%.pass)
 	@echo "EXECUTION TESTS PASSED"
 	@spd-say -r -100 -p -100 "the execution tests have parssed"
 
+test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
+	@touch $@
+	@echo ------------------------------------------
+	@echo -n "Tests Run: "
+	@date
+	@echo "MINI EXECUTION TESTS PASSED"
+	@spd-say -r -100 -p -100 "the mini execution tests have parssed"
+
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
@@ -44,13 +55,13 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@echo "SR TESTS PASSED"
 	@spd-say -r -100 -p -100 "the search and replace tests have parssed"
 
-test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
+test/results/minisr.pass : $(MINISRCASES:%=test/results/sr/%.pass)
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
-	@echo "MINI EXECUTION TESTS PASSED"
-	@spd-say -r -100 -p -100 "the mini execution tests have parssed"
+	@echo "MINI SR TESTS PASSED"
+	@spd-say -r -100 -p -100 "the mini search and replace tests have parssed"
 
 $(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh resource
 	@mkdir -p test/results/rep
