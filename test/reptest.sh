@@ -13,7 +13,7 @@
 #
 
 inferno=./inferno.exe
-resfile=test/results.csv
+resfile=test/summary.csv
 
 if test $# -eq 0
 then
@@ -28,9 +28,11 @@ iargs=$*
 fb=`basename $infile`
 fbnx=`basename $infile .cpp` # only removes .cpp extension
 
-mkdir -p test/results/
-logfile=test/results/$fbnx.trace_log
-reflogfile=test/reference/reptest/$fbnx.trace_log
+outdir=test/results/rep
+
+mkdir -p $outdir
+logfile=$outdir/$fbnx.trace_log
+reflogfile=test/reference/rep/$fbnx.trace_log
 outbase=$outdir/$fbnx
 
 echo

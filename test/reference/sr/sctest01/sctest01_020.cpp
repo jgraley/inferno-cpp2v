@@ -48,7 +48,6 @@ wait(  ::id_0::id_1 );
 wait(  ::id_0::id_1 );
  ::id_3+=(3);
 (( ::id_4. ::id_11::id_5). ::id_7::id_6).notify(SC_ZERO_TIME);
-return ;
 }
 
 void id_7::id_9()
@@ -61,12 +60,10 @@ wait(  ::id_7::id_6 );
 (( ::id_4. ::id_11::id_10). ::id_0::id_1).notify(SC_ZERO_TIME);
 wait(  ::id_7::id_6 );
 cease(  ::id_3 );
-return ;
 }
 
 void id_11::id_12()
 {
  ::id_3=(1);
 ( ::id_11::id_5. ::id_7::id_8).notify(SC_ZERO_TIME);
-return ;
 }

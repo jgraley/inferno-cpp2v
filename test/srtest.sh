@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #
 # srtest.sh
@@ -14,7 +14,7 @@
 #
 
 inferno=./inferno.exe
-resfile=test/results.csv
+resfile=test/summary.csv
 
 if test $# -eq 0
 then
@@ -37,6 +37,7 @@ refdir=$refbase/$fbnx
 outbase=$outdir/$fbnx
 
 mkdir -p $outdir
+rm -rf $outdir/*
 
 echo
 echo -------------- $fb ----------------

@@ -580,11 +580,19 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 	{
 		if( TreePtr<Call> o = DynamicTreePtrCast< Call >(s) )
 		{
-			if( TypeOf::instance.IsConstructorCall( program, o ) )
-			{
-				inits.push_back(s);
-				continue;
-			}
+            try
+            {
+                if( TypeOf::instance.IsConstructorCall( program, o ) )
+                {
+                    inits.push_back(s);
+                    continue;
+                }
+            }
+            catch( ::Mismatch )
+            {
+                remainder.push_back(MakeTreePtr<SpecificString>("ERROR: cannot analyse call"));
+                continue;
+            }
 		}
 		remainder.push_back(s);
 	}

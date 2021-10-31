@@ -15,7 +15,7 @@
 #
 
 inferno=./inferno.exe
-resfile=test/results.csv
+resfile=test/summary.csv
 
 if test $# -eq 0
 then
@@ -28,8 +28,10 @@ infile=$1
 shift
 iargs=$*
 fb=`basename $infile`
-outdir=test/results
+outdir=test/results/execution
 outfile=$outdir/$fb
+
+mkdir -p $outdir
 
 echo
 echo -------------- $fb ----------------
@@ -66,7 +68,7 @@ l1res=$?
 if test $l1res -eq 0
 then
  echo Run input...
- test/results/"$fb"_in.exe
+ $outdir/"$fb"_in.exe
  r1res=$?
 fi
 

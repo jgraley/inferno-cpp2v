@@ -1,14 +1,14 @@
 #include "isystemc.h"
 
 class id_0;
-class id_12;
-class id_22;
+class id_14;
+class id_27;
 class id_0 : public sc_module
 {
 public:
 SC_CTOR( id_0 )
 {
-SC_METHOD(id_5);
+SC_THREAD(id_5);
 }
 enum id_1
 {
@@ -17,112 +17,99 @@ id_3 = 1U,
 };
 sc_event id_4;
 void id_5();
-private:
-unsigned int id_7;
 };
-class id_12 : public sc_module
+class id_14 : public sc_module
 {
 public:
-SC_CTOR( id_12 )
+SC_CTOR( id_14 )
 {
-SC_METHOD(id_18);
+SC_THREAD(id_20);
 }
-enum id_13
+enum id_15
 {
-id_14 = 0U,
-id_15 = 1U,
-id_16 = 2U,
+id_16 = 0U,
+id_17 = 1U,
+id_18 = 2U,
 };
-sc_event id_11;
-sc_event id_17;
-void id_18();
-private:
-unsigned int id_20;
+sc_event id_13;
+sc_event id_19;
+void id_20();
 };
-class id_22 : public sc_module
+class id_27 : public sc_module
 {
 public:
-SC_CTOR( id_22 ) :
-id_21("id_21"),
-id_10("id_10")
+SC_CTOR( id_27 ) :
+id_26("id_26"),
+id_12("id_12")
 {
-SC_THREAD(id_24);
+SC_THREAD(id_29);
 }
-enum id_23
+enum id_28
 {
 };
-void id_24();
- ::id_0 id_21;
- ::id_12 id_10;
+void id_29();
+ ::id_0 id_26;
+ ::id_14 id_12;
 };
-id_22 id_9("id_9");
-int id_8;
+id_27 id_11("id_11");
+int id_10;
 
 void id_0::id_5()
 {
-/*temp*/ bool id_6 = true;
-if( (sc_delta_count())==(0U) )
+static const unsigned int (id_6[]) = { &&id_7, &&id_8 };
+auto unsigned int id_9;
+wait(  ::id_0::id_4 );
+id_9= ::id_0::id_2;
+id_7:;
+if(  ::id_0::id_2==id_9 )
 {
-next_trigger(  ::id_0::id_4 );
- ::id_0::id_7= ::id_0::id_2;
-id_6=(false);
+ ::id_10+=(2);
+(( ::id_11. ::id_27::id_12). ::id_14::id_13).notify(SC_ZERO_TIME);
+wait(  ::id_0::id_4 );
+id_9= ::id_0::id_3;
+goto *(id_6[id_9]);
 }
-if( id_6&&( ::id_0::id_2== ::id_0::id_7) )
-{
- ::id_8+=(2);
-(( ::id_9. ::id_22::id_10). ::id_12::id_11).notify(SC_ZERO_TIME);
-next_trigger(  ::id_0::id_4 );
- ::id_0::id_7= ::id_0::id_3;
-id_6=(false);
-}
-if( id_6&&( ::id_0::id_3== ::id_0::id_7) )
-{
- ::id_8+=(3);
-(( ::id_9. ::id_22::id_10). ::id_12::id_11).notify(SC_ZERO_TIME);
-id_6=(false);
-}
-if( id_6 )
-next_trigger(SC_ZERO_TIME);
+goto *(id_6[id_9]);
+id_8:;
+ ::id_10+=(3);
+(( ::id_11. ::id_27::id_12). ::id_14::id_13).notify(SC_ZERO_TIME);
+return ;
 }
 
-void id_12::id_18()
+void id_14::id_20()
 {
-/*temp*/ bool id_19 = true;
-if( (sc_delta_count())==(0U) )
+static const unsigned int (id_21[]) = { &&id_22, &&id_23, &&id_24 };
+auto unsigned int id_25;
+wait(  ::id_14::id_19 );
+id_25= ::id_14::id_16;
+id_22:;
+if(  ::id_14::id_16==id_25 )
 {
-next_trigger(  ::id_12::id_17 );
- ::id_12::id_20= ::id_12::id_14;
-id_19=(false);
+ ::id_10*=(5);
+(( ::id_11. ::id_27::id_26). ::id_0::id_4).notify(SC_ZERO_TIME);
+wait(  ::id_14::id_13 );
+id_25= ::id_14::id_17;
+goto *(id_21[id_25]);
 }
-if( id_19&&( ::id_12::id_14== ::id_12::id_20) )
+id_23:;
+if(  ::id_14::id_17==id_25 )
 {
- ::id_8*=(5);
-(( ::id_9. ::id_22::id_21). ::id_0::id_4).notify(SC_ZERO_TIME);
-next_trigger(  ::id_12::id_11 );
- ::id_12::id_20= ::id_12::id_15;
-id_19=(false);
+ ::id_10*=(5);
+(( ::id_11. ::id_27::id_26). ::id_0::id_4).notify(SC_ZERO_TIME);
+wait(  ::id_14::id_13 );
+id_25= ::id_14::id_18;
+goto *(id_21[id_25]);
 }
-if( id_19&&( ::id_12::id_15== ::id_12::id_20) )
-{
- ::id_8*=(5);
-(( ::id_9. ::id_22::id_21). ::id_0::id_4).notify(SC_ZERO_TIME);
-next_trigger(  ::id_12::id_11 );
- ::id_12::id_20= ::id_12::id_16;
-id_19=(false);
-}
-if( id_19&&( ::id_12::id_16== ::id_12::id_20) )
-{
-cease(  ::id_8 );
-id_19=(false);
-}
-if( id_19 )
-next_trigger(SC_ZERO_TIME);
+goto *(id_21[id_25]);
+id_24:;
+cease(  ::id_10 );
+return ;
 }
 
-void id_22::id_24()
+void id_27::id_29()
 {
-/*temp*/ bool id_25 = true;
- ::id_8=(1);
-( ::id_22::id_10. ::id_12::id_17).notify(SC_ZERO_TIME);
-id_25=(false);
+static const unsigned int (id_30[]) = {  };
+ ::id_10=(1);
+( ::id_27::id_12. ::id_14::id_19).notify(SC_ZERO_TIME);
+return ;
 }

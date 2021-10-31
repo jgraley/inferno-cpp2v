@@ -1,8 +1,8 @@
 #include "isystemc.h"
 
 class id_0;
-class id_10;
-class id_18;
+class id_7;
+class id_11;
 class id_0 : public sc_module
 {
 public:
@@ -13,87 +13,60 @@ SC_THREAD(id_2);
 sc_event id_1;
 void id_2();
 };
-class id_10 : public sc_module
+class id_7 : public sc_module
 {
 public:
-SC_CTOR( id_10 )
+SC_CTOR( id_7 )
+{
+SC_THREAD(id_9);
+}
+sc_event id_6;
+sc_event id_8;
+void id_9();
+};
+class id_11 : public sc_module
+{
+public:
+SC_CTOR( id_11 ) :
+id_10("id_10"),
+id_5("id_5")
 {
 SC_THREAD(id_12);
 }
-sc_event id_11;
-sc_event id_8;
 void id_12();
+ ::id_0 id_10;
+ ::id_7 id_5;
 };
-class id_18 : public sc_module
-{
-public:
-SC_CTOR( id_18 ) :
-id_15("id_15"),
-id_7("id_7")
-{
-SC_THREAD(id_19);
-}
-void id_19();
- ::id_0 id_15;
- ::id_10 id_7;
-};
-id_18 id_6("id_6");
-int id_5;
+id_11 id_4("id_4");
+int id_3;
 
 void id_0::id_2()
 {
-auto void *id_3;
 wait(  ::id_0::id_1 );
-{
-id_3=(&&id_4);
-goto *(id_3);
-}
-id_4:;
- ::id_5+=(2);
-(( ::id_6. ::id_18::id_7). ::id_10::id_8).notify(SC_ZERO_TIME);
+ ::id_3+=(2);
+(( ::id_4. ::id_11::id_5). ::id_7::id_6).notify(SC_ZERO_TIME);
 wait(  ::id_0::id_1 );
-{
-id_3=(&&id_9);
-goto *(id_3);
-}
-id_9:;
- ::id_5+=(3);
-(( ::id_6. ::id_18::id_7). ::id_10::id_8).notify(SC_ZERO_TIME);
+ ::id_3+=(3);
+(( ::id_4. ::id_11::id_5). ::id_7::id_6).notify(SC_ZERO_TIME);
 return ;
 }
 
-void id_10::id_12()
+void id_7::id_9()
 {
-auto void *id_13;
-wait(  ::id_10::id_11 );
-{
-id_13=(&&id_14);
-goto *(id_13);
-}
-id_14:;
- ::id_5*=(5);
-(( ::id_6. ::id_18::id_15). ::id_0::id_1).notify(SC_ZERO_TIME);
-wait(  ::id_10::id_8 );
-{
-id_13=(&&id_16);
-goto *(id_13);
-}
-id_16:;
- ::id_5*=(5);
-(( ::id_6. ::id_18::id_15). ::id_0::id_1).notify(SC_ZERO_TIME);
-wait(  ::id_10::id_8 );
-{
-id_13=(&&id_17);
-goto *(id_13);
-}
-id_17:;
-cease(  ::id_5 );
+wait(  ::id_7::id_8 );
+ ::id_3*=(5);
+(( ::id_4. ::id_11::id_10). ::id_0::id_1).notify(SC_ZERO_TIME);
+wait(  ::id_7::id_6 );
+ ::id_3*=(5);
+(( ::id_4. ::id_11::id_10). ::id_0::id_1).notify(SC_ZERO_TIME);
+wait(  ::id_7::id_6 );
+cease(  ::id_3 );
 return ;
 }
 
-void id_18::id_19()
+void id_11::id_12()
 {
- ::id_5=(1);
-( ::id_18::id_7. ::id_10::id_11).notify(SC_ZERO_TIME);
+ ::id_3=(1);
+( ::id_11::id_5. ::id_7::id_8).notify(SC_ZERO_TIME);
 return ;
 }
