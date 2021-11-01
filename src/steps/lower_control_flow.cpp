@@ -207,11 +207,6 @@ ForToWhile::ForToWhile()
     //
     // Avoid matching continues that don't belong to use by using a recurse 
     // restriction, like in BreakToGoto.
-    //
-    // We have to use the GreenGrass hack to prevent the slave spinning 
-    // forever. The continue in the slave search pattern has a GreenGrass
-    // node under it indicating that it must be from the input program and
-    // not one we just inserted on an earlier iteration.
     
     MakePatternPtr<For> s_for;
     MakePatternPtr<Statement> forbody, inc, init;

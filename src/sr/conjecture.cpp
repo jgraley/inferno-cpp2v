@@ -173,7 +173,6 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
     AgentRecord record = rit->second;
     auto query = record.query;
     auto pq = record.pq;
-    TRACE("Record at %p\n", &(rit->second));
     bool ok = false;
 
     if( !pq->GetDecisions().empty() )

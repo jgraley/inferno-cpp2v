@@ -20,6 +20,7 @@ bool ReadArgs::graph_dark = false;
 bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
+bool ReadArgs::trace_no_stack = false;
 string ReadArgs::hits_format;
 bool ReadArgs::selftest = false;
 int ReadArgs::runonlystep = 0; 
@@ -32,7 +33,8 @@ bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::new_feature = false;
+bool ReadArgs::new_coupling_planning = false;
+bool ReadArgs::new_slave_sequence = false;
 
 void ReadArgs::Usage()
 {
@@ -45,6 +47,7 @@ void ReadArgs::Usage()
                     "-th<fmt>    Dump hit counts at the end of execution based on <fmt>.\n"
                     "            Note: use -th? for help on <fmt>.\n"
                     "-tq         No output to console.\n"
+                    "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
@@ -106,16 +109,27 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         {
             char trace_option = argv[curarg][2];
             if( trace_option=='\0' )
+            {
                 trace = true;
+            }
             else if( trace_option=='h' )
             {                
                 trace_hits = true;
                 hits_format = GetArg(2);
             }
             else if( trace_option=='q' )
+            {
                 trace_quiet = true;
+            }
+            else if( trace_option=='s' )
+            {
+                trace = true;
+                trace_no_stack = true;
+            }
             else
+            {
                 Usage();
+            }
         }
         else if( option=='g' )
         {
@@ -195,7 +209,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='x' )
         {
-            new_feature = true;
+            new_slave_sequence = true;
         }
         else 
         {

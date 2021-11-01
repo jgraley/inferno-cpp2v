@@ -307,7 +307,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
         agent->AndRuleConfigure( algo, keyer_plink, residual_plinks );
     }
 
-    if( ReadArgs::new_feature )
+    if( ReadArgs::new_coupling_planning )
     {
         for( PatternLink residual_plink : master_boundary_links )
         {
@@ -897,7 +897,7 @@ void AndRuleEngine::CompareCoupling( const CouplingKeysMap &keys, const LocatedL
     // plus one residual) and then this old solver could use those and 
     // not need to make partial queries)
     SolutionMap required_links;
-    if( ReadArgs::new_feature )
+    if( ReadArgs::new_coupling_planning )
     {
         PatternLink keyer_plink = agent->GetKeyerPatternLink();
         required_links[keyer_plink] = keyer_xlink;

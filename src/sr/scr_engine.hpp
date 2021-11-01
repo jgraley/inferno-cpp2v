@@ -70,7 +70,7 @@ private:
         void CategoriseAgents( const unordered_set<PatternLink> &master_plinks, 
                                CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( unordered_set<PatternLink> &visible, 
-                          list<PatternLink> *visible_ordered,
+                          list<PatternLink> *visible_postorder,
                           PatternLink base_plink, 
                           Agent::Path path ) const;
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
@@ -97,7 +97,7 @@ private:
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
-        list<PatternLink> my_replace_plinks_ordered;
+        list<PatternLink> my_replace_plinks_postorder;
     } plan;
 
     void RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x );

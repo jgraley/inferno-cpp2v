@@ -57,12 +57,12 @@ ires=$?
 ./convert_all_svg.sh -d $outdir
 
 dres=0
-for file in $(find $outdir -type f | sort); do 
+for file in $(find $outdir -type f -name '*.cpp' | sort); do 
     if [[ $(diff --brief $file ${file/#$outdir/$refdir}) ]]; then  
         printf "\n" 
         echo "${file/#$outdir\//} differs from reference (stopping here):"
         set -x
-        diff --color ${file/#$outdir/$refdir} $file
+        diff --color ${file/#$outdir/$refdir} $file || :
         set +x
         printf "\n" 
         dres=1
@@ -89,7 +89,7 @@ exit $return_code
 # bcompare test/reference/sr/ test/results/sr/
 
 # For 3-way use eg
-# bcompare test/reference/srtest/pointeris/pointeris_034.cpp test/results/pointeris/pointeris_034.cpp test/reference/srtest/pointeris/pointeris_033.cpp
+# bcompare test/reference/sr/pointeris/pointeris_034.cpp test/results/sr/pointeris/pointeris_034.cpp test/reference/sr/pointeris/pointeris_033.cpp
 
 # To update the references
 # cp -r test/results/sr test/reference/

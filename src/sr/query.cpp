@@ -335,7 +335,7 @@ string DecidedQueryCommon::Range::GetTrace() const
 {
     string s;
     s += "Range(";
-    s += SSPrintf("container=%p", container.get()) + ", ";
+    s += SSPrintf("container={%d}", container->size()) + ", ";
             
     if( container )
         s += "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) + ", ";

@@ -1,6 +1,7 @@
 #include "trace.hpp"
 
 #include "progress.hpp"
+#include "read_args.hpp"
 
 #include <boost/assert.hpp>
 #include <stdarg.h>
@@ -54,7 +55,7 @@ string Trace(const exception &e)
 
 string Trace(const void *p)
 {
-    return SSPrintf("(void *)%p", p);
+    return SSPrintf("(void *)%s", p?"NONNULL":"NULL");
 }
 
 
@@ -247,7 +248,8 @@ void Tracer::Descend::Indent()
 void Tracer::PrintPrefix()
 {
     clog << Progress::GetCurrent().GetPrefix(4) << " ";
-    Descend::Indent();
+    if( !ReadArgs::trace_no_stack )
+        Descend::Indent();
 }
 
 

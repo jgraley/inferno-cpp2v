@@ -86,11 +86,11 @@ string FlattenNode_iterator::GetName() const
     if (IsAtEnd())
     	s += string("end()");
     else if( dynamic_cast<CollectionInterface *>(GetCurrentMember()) )
-        s += string("{}.") + cit->GetTrace() + SSPrintf("@%p", cit->get());
+        s += string("{}.") + cit->GetTrace();
 	else if( dynamic_cast<SequenceInterface *>(GetCurrentMember()) )
-        s += string("[].") + cit->GetTrace() + SSPrintf("@%p", cit->get());
+        s += string("[].") + cit->GetTrace();
     else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
-       	s += string(".") + singular->GetTrace() + SSPrintf("@%p", singular->get());
+       	s += string(".") + singular->GetTrace();
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
         

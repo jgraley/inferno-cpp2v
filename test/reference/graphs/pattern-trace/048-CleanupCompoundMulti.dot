@@ -180,20 +180,6 @@ subgraph "clusterAnd#R48-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R48-0/#X48-8-46 ----------
-    "And#R48-0/#X48-8-46" [
-        xlabel = "#X48-8-46"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "triangle"
-        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R48-0/#X48-12-39 ----------
     "And#R48-0/#X48-12-39" [
         xlabel = "#X48-12-39"
@@ -201,6 +187,20 @@ subgraph "clusterAnd#R48-0" {
         fontcolor = grey40
         shape = "square"
         label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R48-0/#X48-8-46 ----------
+    "And#R48-0/#X48-8-46" [
+        xlabel = "#X48-8-46"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "triangle"
+        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
         style = "filled"
         penwidth = 0.0
         fixedsize = true
@@ -347,15 +347,15 @@ subgraph "clusterAnd#R48-0" {
     fontcolor = black
 ];
 
-"And#R48-0/#X48-8-46" -> "And#R48-0/#B-2-868" [
-    label = "#1"
+"And#R48-0/#X48-12-39" -> "And#R48-0/#X48-8-46" [
+    label = "#2"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R48-0/#X48-12-39" -> "And#R48-0/#X48-8-46" [
-    label = "#2"
+"And#R48-0/#X48-8-46" -> "And#R48-0/#B-2-868" [
+    label = "#1"
     decorate = true
     color = black
     fontcolor = black

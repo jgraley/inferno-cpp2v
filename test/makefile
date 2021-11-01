@@ -22,7 +22,7 @@ test/autotestd : autotestd.cpp
 $(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh resource
 	@mkdir -p test/results/execution
 	@rm -f test/results/execution/$*.
-	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log 
+	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log
 	touch test/results/execution/$*.pass
 		
 test/results/execution.pass : $(CASES:%=test/results/execution/%.pass)

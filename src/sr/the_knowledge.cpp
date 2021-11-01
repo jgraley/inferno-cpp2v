@@ -221,7 +221,7 @@ string TheKnowledge::Nugget::GetTrace() const
         s += ", parent_xlink=" + Trace(parent_xlink);
     if( cont )
     {
-        s += SSPrintf(", container=%p(%d)", container, container->size());
+        s += SSPrintf(", container=(%d)", container->size());
         s += "@" + (iterator==container->end() ? string("END") : Trace(*iterator));
     }
     if( idx )

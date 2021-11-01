@@ -275,7 +275,7 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links, multiset<
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
 
-    if( ReadArgs::new_feature )
+    if( ReadArgs::new_coupling_planning )
     {
         multiset<XLink> my_candidate_links;    
         my_candidate_links.insert( required_links->at(base_plink) ); // insert base xlink (keyer)

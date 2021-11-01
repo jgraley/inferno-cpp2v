@@ -27,7 +27,8 @@ public:
     ReadArgs( int argc, char *argv[] );
     static bool trace;
     static bool trace_hits;    
-    static bool trace_quiet;    
+    static bool trace_quiet;   
+    static bool trace_no_stack; 
     static std::string hits_format;
     static bool quitafter;
     static Progress quitafter_progress;
@@ -40,7 +41,9 @@ public:
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
-    static bool new_feature;
+    static bool new_coupling_planning;
+    static bool new_slave_sequence;
+    
 private:
     void ParseQuitAfter(std::string arg);
     int curarg;

@@ -81,9 +81,9 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
     // compare and replace sets separately.
     unordered_set<PatternLink> visible_compare_plinks, visible_replace_plinks;
-    list<PatternLink> visible_replace_plinks_ordered;
+    list<PatternLink> visible_replace_plinks_postorder;
     WalkVisible( visible_compare_plinks, nullptr, root_plink, Agent::COMPARE_PATH );
-    WalkVisible( visible_replace_plinks, &visible_replace_plinks_ordered, root_plink, Agent::REPLACE_PATH );
+    WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, root_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though slave "through", 
     // not into the slave's pattern)
@@ -114,9 +114,13 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
             my_plinks.insert( plink );
 
     // Need the replace plinks in the same order that BuildReplace() walks the tree
-    for( PatternLink plink : visible_replace_plinks_ordered )
+    TRACE("Making ordered replace plinks\n");
+    for( PatternLink plink : visible_replace_plinks_postorder )
         if( master_plinks.count(plink) == 0 ) // exclude by plink
-            my_replace_plinks_ordered.push_back( plink );
+        {
+            TRACEC(plink)("\n");
+            my_replace_plinks_postorder.push_back( plink );
+        }
 
     my_agents.clear();
     for( PatternLink plink : my_plinks )
@@ -136,19 +140,20 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
 
 
 void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
-                                   list<PatternLink> *visible_ordered, // optional
+                                   list<PatternLink> *visible_postorder, // optional
                                    PatternLink base_plink, 
                                    Agent::Path path ) const
 {
     visible.insert( base_plink );    
-    if( visible_ordered )
-        visible_ordered->push_back( base_plink );
     
     // Gee, I sure hope recovers children in the same order as BuildReplaceImpl()    
     list<PatternLink> plinks = base_plink.GetChildAgent()->GetVisibleChildren(path); 
     
     for( PatternLink plink : plinks )
-        WalkVisible( visible, visible_ordered, plink, path );    
+        WalkVisible( visible, visible_postorder, plink, path );    
+
+    if( visible_postorder )
+        visible_postorder->push_back( base_plink );
 }
 
 
@@ -242,7 +247,7 @@ void SCREngine::Plan::PlanReplace()
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
         
-    for( PatternLink plink : my_replace_plinks_ordered )
+    for( PatternLink plink : my_replace_plinks_postorder )
         if( plink.GetChildAgent()->PlanReplaceKeying(plink, all_keyer_plinks) )
             all_keyer_plinks.insert( plink );
 }
@@ -255,8 +260,7 @@ string SCREngine::Plan::GetTrace() const
 
 
 void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x )
-{   
-#ifdef RUN_SLAVES_LATER
+{         
     shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
     ASSERT( slave_engine );
    
@@ -271,11 +275,13 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
     // Special case when slave is at root of my SCR region: switch the whole tree
     if( through_subtree == *p_root_x )
     {
+        FTRACE(*this)(" implanting at root: ")(new_subtree)(" over ")(*p_root_x)("\n");
         *p_root_x = new_subtree;
         return;
     }
 
-    // Search for links to the though subtree and stich in the new one
+    // Search for links to the though subtree and stitch in the new one
+    int hits = 0;
     Walk e( *p_root_x ); 
     for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
     {
@@ -285,10 +291,14 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
             const TreePtrInterface *px = wit.GetNodePointerInParent();    
             // Update it to point to the new subtree
             if( px ) // ps is NULL at root 
+            {
+                FTRACE(*this)(" implanting at non-root: ")(new_subtree)(" over ")(*const_cast<TreePtrInterface *>(px))("\n");
                 *const_cast<TreePtrInterface *>(px) = new_subtree;
+                hits++;
+            }
         }
     }
-#endif    
+    ASSERT( hits==1 )("Trying to implant ")(new_subtree)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
 }
 
 
@@ -303,11 +313,24 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     keys_available = true;
 
     // Now replace according to the couplings
-    TreePtr<Node> new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
+    TRACE(*this)(" now replacing, root agent=")(plan.root_agent)("\n");
+    TreePtr<Node> new_root_x;
+    {Tracer::RAIIEnable silencer( false );new_root_x = plan.root_agent->BuildReplace(plan.root_plink);}
+    TRACE(*this)(" replace done\n");
     
-    for( RequiresSubordinateSCREngine *slave_agent : plan.my_agents_needing_engines )
-        RunSlave(slave_agent, &new_root_x);
-  
+    if( ReadArgs::new_slave_sequence )
+    {
+        for( PatternLink plink : plan.my_replace_plinks_postorder )
+        {
+            if( auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
+            {
+                TRACE(*this)(" running slave ")(*(Agent *)slave_agent)(" root x=")(new_root_x)("\n");
+                RunSlave(slave_agent, &new_root_x);
+            }
+        }        
+    }
+    TRACE(*this)(" slaves done\n");
+    
     keys_available = false;
     replace_keys.clear();
     //FTRACE(my_keyer_plinks_measured);
@@ -316,7 +339,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
     // and that would break knowledge building. See #217
-    return plan.root_agent->DuplicateSubtree(new_root_x);
+    {Tracer::RAIIEnable silencer( false );return plan.root_agent->DuplicateSubtree(new_root_x);}
 }
 
 
@@ -334,11 +357,10 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );
+    {Tracer::RAIIEnable silencer( false );plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );}
            
     knowledge.Clear();
 
-    TRACE("Now replacing\n");
     *p_root_xnode = Replace(master_keys);
     
     // Clear out anything cached in agents now that replace is done
@@ -356,7 +378,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                         const CouplingKeysMap *master_keys )
 {
     INDENT("}");
-    TRACE("begin RCR\n");
+    TRACE(*this)(" begin RCR\n");
         
     ASSERT( plan.root_pattern )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
@@ -376,7 +398,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
         {
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
-            TRACE("OK\n");
+            TRACE(*this)(" OK\n");
             return i; // when the compare fails, we're done
         }
         if( stop )
@@ -445,19 +467,23 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
                              TreePtr<Node> *p_slave_through_subtree ) const
 {
     ASSERT( keys_available );
+    Tracer::RAIIEnable silencer( true );    
     
-#ifdef RUN_SLAVES_LATER
-    // p_root_xnode cannot be stored: it points to a local of our caller
-    TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 
-    
-    InsertSolo( slave_though_subtrees, make_pair( slave_agent, slave_through_subtree ) );
-#else    
-    shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
-    ASSERT( slave_engine );
-    
-    // Run the slave engine        
-    slave_engine->RepeatingCompareReplace( p_slave_through_subtree, &replace_keys );
-#endif
+    if( ReadArgs::new_slave_sequence )
+    {
+        // p_root_xnode cannot be stored: it points to a local of our caller
+        TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 
+        
+        InsertSolo( slave_though_subtrees, make_pair( slave_agent, slave_through_subtree ) );
+    }
+    else    
+    {
+        shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
+        ASSERT( slave_engine );
+        
+        // Run the slave engine        
+        slave_engine->RepeatingCompareReplace( p_slave_through_subtree, &replace_keys );
+    }
 }
 
 

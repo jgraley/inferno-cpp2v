@@ -117,3 +117,9 @@ string Node::GetGraphId() const
 {
     return GetSerialString();
 } 
+
+
+string Node::GetTrace() const
+{
+    return Traceable::GetName() + GetSerialString();
+}

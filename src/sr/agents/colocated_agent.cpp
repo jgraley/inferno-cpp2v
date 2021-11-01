@@ -7,9 +7,7 @@ using namespace SR;
 
 void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                           XLink base_xlink ) const
-{ 
-    INDENT("∧");
-    
+{     
     if( base_xlink != XLink::MMAX_Link )
     {
         if( !IsLocalMatch( base_xlink.GetChildX().get() ) ) 
