@@ -100,6 +100,7 @@ private:
         list<PatternLink> my_replace_plinks_postorder;
     } plan;
 
+    void PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
     void RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x );
     TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
 

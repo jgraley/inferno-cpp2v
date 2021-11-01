@@ -258,6 +258,24 @@ string SCREngine::Plan::GetTrace() const
     return algo->GetName() + "::Plan" + algo->GetSerialString();
 }
 
+    
+void SCREngine::PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
+{
+    // Fix up for remaining slaves if required.
+    for( auto &p : slave_though_subtrees ) // ref important - we're modifying!
+    {
+        TRACEC(*this)(" trying fixup of ")(through_subtree)(": ")(*(Agent *)p.first)(", ")(p.second)("\n");
+        if( p.second = through_subtree )
+        {
+            TRACEC(*this)(" fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
+            p.second = new_subtree;
+        }
+    }
+    
+    if( plan.master_ptr ) // recurse down to overall master
+        plan.master_ptr->PostSlaveFixup( through_subtree, new_subtree );
+}
+
 
 void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x )
 {         
@@ -265,40 +283,46 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
     ASSERT( slave_engine );
    
     // Recall the base node of the subtree under through (after master replace)
-    TreePtr<Node> through_subtree = slave_though_subtrees.at(slave_agent);   
+    TreePtr<Node> through_subtree = slave_though_subtrees.at(slave_agent);
+    slave_though_subtrees.erase(slave_agent); // not needed any more
     ASSERT( through_subtree );
     
     // Run the slaves engine on this subtree
     TreePtr<Node> new_subtree = through_subtree;
-    slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys );
-
+    int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys );
+    if( !hits )
+        return;
+        
     // Special case when slave is at root of my SCR region: switch the whole tree
     if( through_subtree == *p_root_x )
     {
-        FTRACE(*this)(" implanting at root: ")(new_subtree)(" over ")(*p_root_x)("\n");
+        TRACE(*this)(" implanting at root: ")(new_subtree)(" over ")(*p_root_x)("\n");
         *p_root_x = new_subtree;
-        return;
     }
-
-    // Search for links to the though subtree and stitch in the new one
-    int hits = 0;
-    Walk e( *p_root_x ); 
-    for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
+    else
     {
-        if( *wit == through_subtree ) // found the though subtree
-        {            
-            // Get the pointer that points to the though subtree
-            const TreePtrInterface *px = wit.GetNodePointerInParent();    
-            // Update it to point to the new subtree
-            if( px ) // ps is NULL at root 
-            {
-                FTRACE(*this)(" implanting at non-root: ")(new_subtree)(" over ")(*const_cast<TreePtrInterface *>(px))("\n");
-                *const_cast<TreePtrInterface *>(px) = new_subtree;
-                hits++;
+        // Search for links to the though subtree and stitch in the new one
+        int hits = 0;
+        Walk e( *p_root_x ); 
+        for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
+        {
+            if( *wit == through_subtree ) // found the though subtree
+            {            
+                // Get the pointer that points to the though subtree
+                const TreePtrInterface *px = wit.GetNodePointerInParent();    
+                // Update it to point to the new subtree
+                if( px ) // ps is NULL at root 
+                {
+                    TRACE(*this)(" implanting at non-root: ")(new_subtree)(" over ")(*const_cast<TreePtrInterface *>(px))("\n");
+                    *const_cast<TreePtrInterface *>(px) = new_subtree;
+                    hits++;
+                }
             }
         }
+        ASSERT( hits==1 )("Trying to implant ")(new_subtree)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
     }
-    ASSERT( hits==1 )("Trying to implant ")(new_subtree)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
+    
+    PostSlaveFixup( through_subtree, new_subtree );
 }
 
 
@@ -354,10 +378,11 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // Global domain of possible xlink values
     knowledge.Build( plan.root_plink, root_xlink );
 
-    TRACE("Begin search\n");
+    TRACE(*this)(" begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
     {Tracer::RAIIEnable silencer( false );plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );}
+    TRACE(*this)(" search got a match\n");
            
     knowledge.Clear();
 
@@ -398,18 +423,18 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
         {
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
-            TRACE(*this)(" OK\n");
+            TRACE(*this)(" mismatched; stopping\n");
             return i; // when the compare fails, we're done
         }
         if( stop )
         {
-            TRACE("Stopping after hit %d\n", stop_after[depth]);
+            TRACE(*this)(" stopping as requested after hit %d\n", stop_after[depth]);
             TRACE("OK\n");
             return i;
         }    
     }
     
-    TRACE("Over %d reps\n", repetitions); 
+    TRACE(*this)(" over the limit of %d reps\n", repetitions); 
     ASSERT(!rep_error)
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
@@ -467,7 +492,7 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
                              TreePtr<Node> *p_slave_through_subtree ) const
 {
     ASSERT( keys_available );
-    Tracer::RAIIEnable silencer( true );    
+    //Tracer::RAIIEnable silencer( true );    
     
     if( ReadArgs::new_slave_sequence )
     {
