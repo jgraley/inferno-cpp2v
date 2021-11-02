@@ -142,6 +142,8 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
         }
     }
+
+    sequence->push_back( shared_ptr<Transformation>( new SlaveTest2 ) ); 
 }
 
 

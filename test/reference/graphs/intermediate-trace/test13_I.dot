@@ -18,10 +18,10 @@ edge [
 
 
 // -------------------- node figure --------------------
-// -------- block #I-2-2029 ----------
-"#I-2-2029" [
+// -------- block #I-2-2037 ----------
+"#I-2-2037" [
     fillcolor = "/set28/4"
-    xlabel = "#I-2-2029"
+    xlabel = "#I-2-2037"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -32,10 +32,10 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2033 ----------
-"#I-2-2033" [
+// -------- block #I-2-2041 ----------
+"#I-2-2041" [
     fillcolor = "/set28/1"
-    xlabel = "#I-2-2033"
+    xlabel = "#I-2-2041"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -45,104 +45,6 @@ edge [
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2035 ----------
-"#I-2-2035" [
-    fillcolor = "/set28/3"
-    xlabel = "#I-2-2035"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Function</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port1"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2036 ----------
-"#I-2-2036" [
-    fillcolor = "/set28/3"
-    xlabel = "#I-2-2036"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2034 ----------
-"#I-2-2034" [
-    fillcolor = "/set28/5"
-    xlabel = "#I-2-2034"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'bfunc'</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2037 ----------
-"#I-2-2037" [
-    xlabel = "#I-2-2037"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2032 ----------
-"#I-2-2032" [
-    fillcolor = "/set28/7"
-    xlabel = "#I-2-2032"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonConst</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2040 ----------
-"#I-2-2040" [
-    fillcolor = "/set28/1"
-    xlabel = "#I-2-2040"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Static</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #I-2-2042 ----------
-"#I-2-2042" [
-    fillcolor = "/set28/3"
-    xlabel = "#I-2-2042"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Function</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port1"></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -155,43 +57,55 @@ edge [
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Function</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-2-2044 ----------
+"#I-2-2044" [
+    fillcolor = "/set28/3"
+    xlabel = "#I-2-2044"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2041 ----------
-"#I-2-2041" [
+// -------- block #I-2-2042 ----------
+"#I-2-2042" [
     fillcolor = "/set28/5"
-    xlabel = "#I-2-2041"
+    xlabel = "#I-2-2042"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'afunc'</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'bfunc'</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2046 ----------
-"#I-2-2046" [
-    fillcolor = "/set28/2"
-    xlabel = "#I-2-2046"
+// -------- block #I-2-2045 ----------
+"#I-2-2045" [
+    xlabel = "#I-2-2045"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uninitialised</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2039 ----------
-"#I-2-2039" [
+// -------- block #I-2-2040 ----------
+"#I-2-2040" [
     fillcolor = "/set28/7"
-    xlabel = "#I-2-2039"
+    xlabel = "#I-2-2040"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -201,10 +115,10 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2049 ----------
-"#I-2-2049" [
+// -------- block #I-2-2048 ----------
+"#I-2-2048" [
     fillcolor = "/set28/1"
-    xlabel = "#I-2-2049"
+    xlabel = "#I-2-2048"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -218,10 +132,10 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2051 ----------
-"#I-2-2051" [
+// -------- block #I-2-2050 ----------
+"#I-2-2050" [
     fillcolor = "/set28/3"
-    xlabel = "#I-2-2051"
+    xlabel = "#I-2-2050"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -233,10 +147,10 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2052 ----------
-"#I-2-2052" [
+// -------- block #I-2-2051 ----------
+"#I-2-2051" [
     fillcolor = "/set28/3"
-    xlabel = "#I-2-2052"
+    xlabel = "#I-2-2051"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -246,23 +160,23 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2050 ----------
-"#I-2-2050" [
+// -------- block #I-2-2049 ----------
+"#I-2-2049" [
     fillcolor = "/set28/5"
-    xlabel = "#I-2-2050"
+    xlabel = "#I-2-2049"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'bfunc'</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'afunc'</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2055 ----------
-"#I-2-2055" [
+// -------- block #I-2-2054 ----------
+"#I-2-2054" [
     fillcolor = "/set28/2"
-    xlabel = "#I-2-2055"
+    xlabel = "#I-2-2054"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -274,10 +188,10 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #I-2-2048 ----------
-"#I-2-2048" [
+// -------- block #I-2-2047 ----------
+"#I-2-2047" [
     fillcolor = "/set28/7"
-    xlabel = "#I-2-2048"
+    xlabel = "#I-2-2047"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -287,140 +201,226 @@ edge [
     style = "rounded,filled"
 ];
 
-"#I-2-2029":port0 -> "#I-2-2033" [
+// -------- block #I-2-2057 ----------
+"#I-2-2057" [
+    fillcolor = "/set28/1"
+    xlabel = "#I-2-2057"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Static</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port1"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port2"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Constancy</FONT></TD><TD PORT="port3"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-2-2059 ----------
+"#I-2-2059" [
+    fillcolor = "/set28/3"
+    xlabel = "#I-2-2059"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Function</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port1"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-2-2060 ----------
+"#I-2-2060" [
+    fillcolor = "/set28/3"
+    xlabel = "#I-2-2060"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-2-2058 ----------
+"#I-2-2058" [
+    fillcolor = "/set28/5"
+    xlabel = "#I-2-2058"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">'bfunc'</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-2-2063 ----------
+"#I-2-2063" [
+    fillcolor = "/set28/2"
+    xlabel = "#I-2-2063"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #I-2-2056 ----------
+"#I-2-2056" [
+    fillcolor = "/set28/7"
+    xlabel = "#I-2-2056"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">NonConst</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+"#I-2-2037":port0 -> "#I-2-2041" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2029":port0 -> "#I-2-2040" [
+"#I-2-2037":port0 -> "#I-2-2048" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2029":port0 -> "#I-2-2049" [
+"#I-2-2037":port0 -> "#I-2-2057" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2033":port0 -> "#I-2-2035" [
+"#I-2-2041":port0 -> "#I-2-2043" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2033":port1 -> "#I-2-2034" [
+"#I-2-2041":port1 -> "#I-2-2042" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2033":port2 -> "#I-2-2037" [
+"#I-2-2041":port2 -> "#I-2-2045" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2033":port3 -> "#I-2-2032" [
+"#I-2-2041":port3 -> "#I-2-2040" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2035":port1 -> "#I-2-2036" [
+"#I-2-2043":port1 -> "#I-2-2044" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2040":port0 -> "#I-2-2042" [
+"#I-2-2048":port0 -> "#I-2-2050" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2040":port1 -> "#I-2-2041" [
+"#I-2-2048":port1 -> "#I-2-2049" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2040":port2 -> "#I-2-2046" [
+"#I-2-2048":port2 -> "#I-2-2054" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2040":port3 -> "#I-2-2039" [
+"#I-2-2048":port3 -> "#I-2-2047" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2042":port1 -> "#I-2-2043" [
+"#I-2-2050":port1 -> "#I-2-2051" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2046":port1 -> "#I-2-2034" [
+"#I-2-2054":port1 -> "#I-2-2042" [
     label = "#1"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2049":port0 -> "#I-2-2051" [
+"#I-2-2057":port0 -> "#I-2-2059" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2049":port1 -> "#I-2-2050" [
+"#I-2-2057":port1 -> "#I-2-2058" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2049":port2 -> "#I-2-2055" [
+"#I-2-2057":port2 -> "#I-2-2063" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2049":port3 -> "#I-2-2048" [
+"#I-2-2057":port3 -> "#I-2-2056" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2051":port1 -> "#I-2-2052" [
+"#I-2-2059":port1 -> "#I-2-2060" [
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#I-2-2055":port1 -> "#I-2-2041" [
+"#I-2-2063":port1 -> "#I-2-2049" [
     label = "#1"
     decorate = true
     color = black

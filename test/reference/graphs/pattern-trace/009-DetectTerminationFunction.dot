@@ -67,6 +67,33 @@ subgraph "clusterAnd#R9-0" {
         style = "rounded,filled"
     ];
     
+    // -------- block And#R9-0/#B-2-70 ----------
+    "And#R9-0/#B-2-70" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-2-70"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'exit'?</I></FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R9-0/#B-2-67 ----------
+    "And#R9-0/#B-2-67" [
+        fillcolor = "/set28/6"
+        xlabel = "#B-2-67"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Expression</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
     // -------- block And#R9-0/#B-2-71 ----------
     "And#R9-0/#B-2-71" [
         fillcolor = "/set28/5"
@@ -91,33 +118,6 @@ subgraph "clusterAnd#R9-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
-    ];
-    
-    // -------- block And#R9-0/#B-2-67 ----------
-    "And#R9-0/#B-2-67" [
-        fillcolor = "/set28/6"
-        xlabel = "#B-2-67"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Expression</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
-    // -------- block And#R9-0/#B-2-70 ----------
-    "And#R9-0/#B-2-70" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-2-70"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'exit'?</I></FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
     ];
     
 }

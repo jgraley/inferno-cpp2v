@@ -55,6 +55,6 @@ do
     ./inferno.exe -i test/examples/${CASE}.cpp -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}_${PROGRESS}.dot
 done
 
-./convert_all_svg.sh -d ${BASE_DIR}
+./convert_all_dot.sh -d ${BASE_DIR}
 
 echo Generated graphs into ${BASE_DIR}/

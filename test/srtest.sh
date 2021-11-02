@@ -54,7 +54,7 @@ echo "$command"
 time $command
 ires=$?
 
-./convert_all_svg.sh -d $outdir
+./convert_all_dot.sh -d $outdir
 
 dres=0
 for file in $(find $outdir -type f -name '*.cpp' | sort); do 

@@ -286,6 +286,19 @@ subgraph "clusterAnd#R25-0" {
         style = "rounded,filled"
     ];
     
+    // -------- block And#R25-0/#B-2-337 ----------
+    "And#R25-0/#B-2-337" [
+        fillcolor = "/set28/3"
+        xlabel = "#B-2-337"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subroutine</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
     // -------- block And#R25-0/#B-2-329 ----------
     "And#R25-0/#B-2-329" [
         fillcolor = "/set28/2"
@@ -332,19 +345,18 @@ subgraph "clusterAnd#R25-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R25-0/#B-2-332 ----------
-    "And#R25-0/#B-2-332" [
-        fillcolor = "/set28/3"
-        xlabel = "#B-2-332"
+    // -------- block And#R25-0/#X25-12-17 ----------
+    "And#R25-0/#X25-12-17" [
+        xlabel = "#X25-12-17"
         fontsize = "12"
         fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="20">∨</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(Callable)</FONT></TD><TD PORT="port0"></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">patterns</FONT></TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
     // -------- block And#R25-0/#B-2-333 ----------
@@ -377,31 +389,19 @@ subgraph "clusterAnd#R25-0" {
         height = 0.4
     ];
     
-    // -------- block And#R25-0/#B-2-337 ----------
-    "And#R25-0/#B-2-337" [
+    // -------- block And#R25-0/#B-2-332 ----------
+    "And#R25-0/#B-2-332" [
         fillcolor = "/set28/3"
-        xlabel = "#B-2-337"
+        xlabel = "#B-2-332"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subroutine</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="20">∨</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(Callable)</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">patterns</FONT></TD><TD PORT="port1"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
-    ];
-    
-    // -------- block And#R25-0/#X25-12-17 ----------
-    "And#R25-0/#X25-12-17" [
-        xlabel = "#X25-12-17"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
     ];
     
     // -------- block And#R25-0/#B-2-340 ----------
@@ -564,22 +564,8 @@ subgraph "clusterAnd#R25-0" {
     fontcolor = black
 ];
 
-"And#R25-0/#B-2-332":port1 -> "And#R25-0/#B-2-333" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R25-0/#B-2-332":port1 -> "And#R25-0/#B-2-334" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R25-0/#B-2-332":port1 -> "And#R25-0/#B-2-337" [
-    label = "#0"
+"And#R25-0/#X25-12-17" -> "And#R25-0/#B-2-321" [
+    label = "#3"
     decorate = true
     color = black
     fontcolor = black
@@ -614,8 +600,22 @@ subgraph "clusterAnd#R25-0" {
     fontcolor = black
 ];
 
-"And#R25-0/#X25-12-17" -> "And#R25-0/#B-2-321" [
-    label = "#3"
+"And#R25-0/#B-2-332":port1 -> "And#R25-0/#B-2-333" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R25-0/#B-2-332":port1 -> "And#R25-0/#B-2-334" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R25-0/#B-2-332":port1 -> "And#R25-0/#B-2-337" [
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black

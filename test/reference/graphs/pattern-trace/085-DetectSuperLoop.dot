@@ -239,19 +239,6 @@ subgraph "clusterAnd#R85-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R85-0/#B-2-1610 ----------
-    "And#R85-0/#B-2-1610" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-1610"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Nop</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
     // -------- block And#R85-0/#B-2-1592 ----------
     "And#R85-0/#B-2-1592" [
         fillcolor = "/set28/1"
@@ -296,6 +283,19 @@ subgraph "clusterAnd#R85-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
+    ];
+    
+    // -------- block And#R85-0/#B-2-1610 ----------
+    "And#R85-0/#B-2-1610" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-1610"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Nop</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
     ];
     
     // -------- block And#R85-0/#B-2-1608 ----------
@@ -752,10 +752,10 @@ subgraph "clusterAnd#R85-0" {
     style = "rounded,filled"
 ];
 
-// -------- block #X85-2-2018 ----------
-"#X85-2-2018" [
+// -------- block #X85-2-2026 ----------
+"#X85-2-2026" [
     fillcolor = antiquewhite1
-    xlabel = "#X85-2-2018"
+    xlabel = "#X85-2-2026"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -960,7 +960,7 @@ subgraph "clusterAnd#R85-0" {
     fontcolor = black
 ];
 
-"#B-2-1603":port0 -> "#X85-2-2018" [
+"#B-2-1603":port0 -> "#X85-2-2026" [
     style="dashed"
     label = "#0"
     decorate = true
@@ -976,7 +976,7 @@ subgraph "clusterAnd#R85-0" {
     fontcolor = black
 ];
 
-"#X85-2-2018":port0 -> "#B-2-1595" [
+"#X85-2-2026":port0 -> "#B-2-1595" [
     style="dashed"
     label = "#1"
     decorate = true
@@ -984,7 +984,7 @@ subgraph "clusterAnd#R85-0" {
     fontcolor = black
 ];
 
-"#X85-2-2018":port1 -> "#X85-11-27" [
+"#X85-2-2026":port1 -> "#X85-11-27" [
     label = ""
     decorate = true
     color = black

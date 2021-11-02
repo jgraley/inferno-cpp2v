@@ -17,6 +17,12 @@ public:
 	SlaveTest();
 };
 
+class SlaveTest2 : public VNTransformation
+{
+public:
+	SlaveTest2();
+};
+
 }; // end namespace
 
 #endif

@@ -59,15 +59,8 @@
 <text text-anchor="middle" x="221.5" y="-48.3" font-family="Arial" font-size="14.00" fill="#000000">#1</text>
 <polyline fill="none" stroke="#000000" points="230,-44.5 213,-44.5 220.4981,-44.5 "/>
 </g>
-<!-- And#R56&#45;0/#X56&#45;12&#45;47 -->
-<g id="node3" class="node">
-<title>And#R56&#45;0/#X56&#45;12&#45;47</title>
-<polygon fill="#d3d3d3" stroke="#000000" stroke-width="0" points="138,-278 109,-278 109,-249 138,-249 138,-278"/>
-<text text-anchor="start" x="117.5" y="-258.5" font-family="Arial" font-size="20.00" fill="#000000">#</text>
-<text text-anchor="middle" x="77" y="-239.4" font-family="Arial" font-size="12.00" fill="#666666">#X56&#45;12&#45;47</text>
-</g>
 <!-- And#R56&#45;0/#B&#45;2&#45;970 -->
-<g id="node9" class="node">
+<g id="node3" class="node">
 <title>And#R56&#45;0/#B&#45;2&#45;970</title>
 <path fill="#fc8d62" stroke="transparent" d="M464,-297.5C464,-297.5 402,-297.5 402,-297.5 396,-297.5 390,-291.5 390,-285.5 390,-285.5 390,-241.5 390,-241.5 390,-235.5 396,-229.5 402,-229.5 402,-229.5 464,-229.5 464,-229.5 470,-229.5 476,-235.5 476,-241.5 476,-241.5 476,-285.5 476,-285.5 476,-291.5 470,-297.5 464,-297.5"/>
 <text text-anchor="start" x="423" y="-275.5" font-family="Arial" font-size="20.00" fill="#000000">∧</text>
@@ -75,13 +68,35 @@
 <text text-anchor="start" x="409.5" y="-238.9" font-family="Arial" font-size="12.00" fill="#000000">patterns</text>
 <text text-anchor="middle" x="365" y="-219.9" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;970</text>
 </g>
-<!-- And#R56&#45;0/#X56&#45;12&#45;47&#45;&gt;And#R56&#45;0/#B&#45;2&#45;970 -->
+<!-- And#R56&#45;0/#B&#45;2&#45;973 -->
+<g id="node7" class="node">
+<title>And#R56&#45;0/#B&#45;2&#45;973</title>
+<polygon fill="#fc8d62" stroke="#000000" stroke-width="0" points="671,-224 642,-224 642,-195 671,-195 671,-224"/>
+<text text-anchor="start" x="639" y="-204.5" font-family="Arial" font-size="20.00" fill="#000000">#=1</text>
+<text text-anchor="middle" x="617" y="-185.4" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;973</text>
+</g>
+<!-- And#R56&#45;0/#B&#45;2&#45;970&#45;&gt;And#R56&#45;0/#B&#45;2&#45;973 -->
 <g id="edge2" class="edge">
-<title>And#R56&#45;0/#X56&#45;12&#45;47&#45;&gt;And#R56&#45;0/#B&#45;2&#45;970</title>
-<path fill="none" stroke="#000000" d="M138.0127,-263.5C180.5575,-263.5 306.5479,-263.5 379.3771,-263.5"/>
-<polygon fill="#000000" stroke="#000000" points="379.7204,-267.0001 389.7204,-263.5 379.7204,-260.0001 379.7204,-267.0001"/>
-<text text-anchor="middle" x="296" y="-267.3" font-family="Arial" font-size="14.00" fill="#000000">#2</text>
-<polyline fill="none" stroke="#000000" points="304.5,-263.5 287.5,-263.5 295.8858,-263.5 "/>
+<title>And#R56&#45;0/#B&#45;2&#45;970:port1&#45;&gt;And#R56&#45;0/#B&#45;2&#45;973</title>
+<path fill="none" stroke="#000000" d="M466,-233.5C466,-167.3684 580.406,-189.3216 631.8988,-202.5517"/>
+<polygon fill="#000000" stroke="#000000" points="631.3041,-206.0152 641.8681,-205.2076 633.1062,-199.2512 631.3041,-206.0152"/>
+<text text-anchor="middle" x="529.5" y="-193.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
+<polyline fill="none" stroke="#000000" points="538,-189.5 521,-189.5 529.2293,-188.2788 "/>
+</g>
+<!-- And#R56&#45;0/#B&#45;2&#45;971 -->
+<g id="node9" class="node">
+<title>And#R56&#45;0/#B&#45;2&#45;971</title>
+<polygon fill="#fc8d62" stroke="#000000" stroke-width="0" points="656.5,-296 642,-281.5 656.5,-267 671,-281.5 656.5,-296"/>
+<text text-anchor="start" x="650" y="-276.5" font-family="Arial" font-size="20.00" fill="#000000">¬</text>
+<text text-anchor="middle" x="617" y="-257.4" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;971</text>
+</g>
+<!-- And#R56&#45;0/#B&#45;2&#45;970&#45;&gt;And#R56&#45;0/#B&#45;2&#45;971 -->
+<g id="edge3" class="edge">
+<title>And#R56&#45;0/#B&#45;2&#45;970:port1&#45;&gt;And#R56&#45;0/#B&#45;2&#45;971</title>
+<path fill="none" stroke="#000000" d="M468,-241.5C530.186,-241.5 601.4474,-262.5891 635.8186,-274.1415"/>
+<polygon fill="#000000" stroke="#000000" points="635.0289,-277.5713 645.6236,-277.5184 637.3083,-270.9528 635.0289,-277.5713"/>
+<text text-anchor="middle" x="529.5" y="-254.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
+<polyline fill="none" stroke="#000000" points="538,-250.5 521,-250.5 531.2621,-247.3538 "/>
 </g>
 <!-- And#R56&#45;0/#B&#45;2&#45;975 -->
 <g id="node4" class="node">
@@ -95,22 +110,37 @@
 <text text-anchor="middle" x="1161" y="-155.4" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;975</text>
 </g>
 <!-- And#R56&#45;0/#B&#45;2&#45;976 -->
-<g id="node7" class="node">
+<g id="node8" class="node">
 <title>And#R56&#45;0/#B&#45;2&#45;976</title>
 <path fill="#fc8d62" stroke="transparent" d="M1437,-197.5C1437,-197.5 1371,-197.5 1371,-197.5 1365,-197.5 1359,-191.5 1359,-185.5 1359,-185.5 1359,-173.5 1359,-173.5 1359,-167.5 1365,-161.5 1371,-161.5 1371,-161.5 1437,-161.5 1437,-161.5 1443,-161.5 1449,-167.5 1449,-173.5 1449,-173.5 1449,-185.5 1449,-185.5 1449,-191.5 1443,-197.5 1437,-197.5"/>
 <text text-anchor="start" x="1369" y="-175.5" font-family="Arial" font-size="15.00" fill="#000000">Statement</text>
 <text text-anchor="middle" x="1334" y="-151.9" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;976</text>
 </g>
 <!-- And#R56&#45;0/#B&#45;2&#45;975&#45;&gt;And#R56&#45;0/#B&#45;2&#45;976 -->
-<g id="edge3" class="edge">
+<g id="edge4" class="edge">
 <title>And#R56&#45;0/#B&#45;2&#45;975:port1&#45;&gt;And#R56&#45;0/#B&#45;2&#45;976</title>
 <path fill="none" stroke="#000000" d="M1288,-176.5C1307.8088,-176.5 1329.514,-176.9426 1348.7365,-177.4878"/>
 <polygon fill="#000000" stroke="#000000" points="1348.7345,-180.9892 1358.8346,-177.7897 1348.9437,-173.9923 1348.7345,-180.9892"/>
 <text text-anchor="middle" x="1327.5" y="-181.3" font-family="Arial" font-size="14.00" fill="#000000">#1</text>
 <polyline fill="none" stroke="#000000" points="1336,-177.5 1319,-177.5 1327.7325,-176.9656 "/>
 </g>
-<!-- And#R56&#45;0/#B&#45;2&#45;974 -->
+<!-- And#R56&#45;0/#X56&#45;12&#45;47 -->
 <g id="node5" class="node">
+<title>And#R56&#45;0/#X56&#45;12&#45;47</title>
+<polygon fill="#d3d3d3" stroke="#000000" stroke-width="0" points="138,-278 109,-278 109,-249 138,-249 138,-278"/>
+<text text-anchor="start" x="117.5" y="-258.5" font-family="Arial" font-size="20.00" fill="#000000">#</text>
+<text text-anchor="middle" x="77" y="-239.4" font-family="Arial" font-size="12.00" fill="#666666">#X56&#45;12&#45;47</text>
+</g>
+<!-- And#R56&#45;0/#X56&#45;12&#45;47&#45;&gt;And#R56&#45;0/#B&#45;2&#45;970 -->
+<g id="edge5" class="edge">
+<title>And#R56&#45;0/#X56&#45;12&#45;47&#45;&gt;And#R56&#45;0/#B&#45;2&#45;970</title>
+<path fill="none" stroke="#000000" d="M138.0127,-263.5C180.5575,-263.5 306.5479,-263.5 379.3771,-263.5"/>
+<polygon fill="#000000" stroke="#000000" points="379.7204,-267.0001 389.7204,-263.5 379.7204,-260.0001 379.7204,-267.0001"/>
+<text text-anchor="middle" x="296" y="-267.3" font-family="Arial" font-size="14.00" fill="#000000">#2</text>
+<polyline fill="none" stroke="#000000" points="304.5,-263.5 287.5,-263.5 295.8858,-263.5 "/>
+</g>
+<!-- And#R56&#45;0/#B&#45;2&#45;974 -->
+<g id="node6" class="node">
 <title>And#R56&#45;0/#B&#45;2&#45;974</title>
 <path fill="#fc8d62" stroke="transparent" d="M1051.5,-247C1051.5,-247 989.5,-247 989.5,-247 983.5,-247 977.5,-241 977.5,-235 977.5,-235 977.5,-174 977.5,-174 977.5,-168 983.5,-162 989.5,-162 989.5,-162 1051.5,-162 1051.5,-162 1057.5,-162 1063.5,-168 1063.5,-174 1063.5,-174 1063.5,-235 1063.5,-235 1063.5,-241 1057.5,-247 1051.5,-247"/>
 <text text-anchor="start" x="1011.5" y="-224.5" font-family="Arial" font-size="20.00" fill="#000000">Δ</text>
@@ -120,41 +150,27 @@
 <text text-anchor="middle" x="952.5" y="-152.4" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;974</text>
 </g>
 <!-- And#R56&#45;0/#B&#45;2&#45;974&#45;&gt;And#R56&#45;0/#B&#45;2&#45;975 -->
-<g id="edge4" class="edge">
+<g id="edge6" class="edge">
 <title>And#R56&#45;0/#B&#45;2&#45;974:port1&#45;&gt;And#R56&#45;0/#B&#45;2&#45;975</title>
 <path fill="none" stroke="#000000" d="M1055.5,-190.5C1095.3844,-190.5 1140.0674,-191.9028 1175.5839,-193.3517"/>
 <polygon fill="#000000" stroke="#000000" points="1175.6824,-196.8589 1185.8202,-193.7809 1175.9757,-189.865 1175.6824,-196.8589"/>
 <text text-anchor="middle" x="1154.5" y="-197.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
 <polyline fill="none" stroke="#000000" points="1163,-193.5 1146,-193.5 1155.1816,-192.5667 "/>
 </g>
-<!-- And#R56&#45;0/#B&#45;2&#45;973 -->
-<g id="node6" class="node">
-<title>And#R56&#45;0/#B&#45;2&#45;973</title>
-<polygon fill="#fc8d62" stroke="#000000" stroke-width="0" points="671,-224 642,-224 642,-195 671,-195 671,-224"/>
-<text text-anchor="start" x="639" y="-204.5" font-family="Arial" font-size="20.00" fill="#000000">#=1</text>
-<text text-anchor="middle" x="617" y="-185.4" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;973</text>
-</g>
 <!-- And#R56&#45;0/#B&#45;2&#45;973&#45;&gt;And#R56&#45;0/#B&#45;2&#45;974 -->
-<g id="edge5" class="edge">
+<g id="edge7" class="edge">
 <title>And#R56&#45;0/#B&#45;2&#45;973&#45;&gt;And#R56&#45;0/#B&#45;2&#45;974</title>
 <path fill="none" stroke="#000000" d="M671.2201,-209.2978C720.6321,-208.6191 882.2298,-206.3993 967.1955,-205.2322"/>
 <polygon fill="#000000" stroke="#000000" points="967.4624,-208.729 977.4133,-205.0918 967.3662,-201.7296 967.4624,-208.729"/>
 <text text-anchor="middle" x="824" y="-212.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
 <polyline fill="none" stroke="#000000" points="832.5,-208.5 815.5,-208.5 824.0931,-207.1979 "/>
 </g>
-<!-- And#R56&#45;0/#B&#45;2&#45;971 -->
-<g id="node8" class="node">
-<title>And#R56&#45;0/#B&#45;2&#45;971</title>
-<polygon fill="#fc8d62" stroke="#000000" stroke-width="0" points="656.5,-296 642,-281.5 656.5,-267 671,-281.5 656.5,-296"/>
-<text text-anchor="start" x="650" y="-276.5" font-family="Arial" font-size="20.00" fill="#000000">¬</text>
-<text text-anchor="middle" x="617" y="-257.4" font-family="Arial" font-size="12.00" fill="#666666">#B&#45;2&#45;971</text>
-</g>
 <!-- And#R56&#45;0/And#R56&#45;1/#B&#45;2&#45;972 -->
 <g id="node10" class="node">
 <title>And#R56&#45;0/And#R56&#45;1/#B&#45;2&#45;972</title>
 </g>
 <!-- And#R56&#45;0/#B&#45;2&#45;971&#45;&gt;And#R56&#45;0/And#R56&#45;1/#B&#45;2&#45;972 -->
-<g id="edge6" class="edge">
+<g id="edge8" class="edge">
 <title>And#R56&#45;0/#B&#45;2&#45;971&#45;&gt;And#R56&#45;0/And#R56&#45;1/#B&#45;2&#45;972</title>
 <path fill="none" stroke="#000000" d="M671.2201,-281.5809C708.8236,-281.7875 811.3997,-282.3511 895.7276,-282.8144"/>
 <polygon fill="#000000" stroke="#000000" points="912.9132,-286.4089 922.9322,-282.9639 912.9516,-279.409 912.9132,-286.4089"/>
@@ -162,22 +178,6 @@
 <polygon fill="none" stroke="#000000" points="895.9327,-282.8155 901.9546,-278.8485 907.9325,-282.8814 901.9106,-286.8484 895.9327,-282.8155"/>
 <text text-anchor="middle" x="824" y="-287.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
 <polyline fill="none" stroke="#000000" points="832.5,-283.5 815.5,-283.5 824.1606,-282.4212 "/>
-</g>
-<!-- And#R56&#45;0/#B&#45;2&#45;970&#45;&gt;And#R56&#45;0/#B&#45;2&#45;973 -->
-<g id="edge7" class="edge">
-<title>And#R56&#45;0/#B&#45;2&#45;970:port1&#45;&gt;And#R56&#45;0/#B&#45;2&#45;973</title>
-<path fill="none" stroke="#000000" d="M466,-233.5C466,-167.3684 580.406,-189.3216 631.8988,-202.5517"/>
-<polygon fill="#000000" stroke="#000000" points="631.3041,-206.0152 641.8681,-205.2076 633.1062,-199.2512 631.3041,-206.0152"/>
-<text text-anchor="middle" x="529.5" y="-193.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
-<polyline fill="none" stroke="#000000" points="538,-189.5 521,-189.5 529.2293,-188.2788 "/>
-</g>
-<!-- And#R56&#45;0/#B&#45;2&#45;970&#45;&gt;And#R56&#45;0/#B&#45;2&#45;971 -->
-<g id="edge8" class="edge">
-<title>And#R56&#45;0/#B&#45;2&#45;970:port1&#45;&gt;And#R56&#45;0/#B&#45;2&#45;971</title>
-<path fill="none" stroke="#000000" d="M468,-241.5C530.186,-241.5 601.4474,-262.5891 635.8186,-274.1415"/>
-<polygon fill="#000000" stroke="#000000" points="635.0289,-277.5713 645.6236,-277.5184 637.3083,-270.9528 635.0289,-277.5713"/>
-<text text-anchor="middle" x="529.5" y="-254.3" font-family="Arial" font-size="14.00" fill="#000000">#0</text>
-<polyline fill="none" stroke="#000000" points="538,-250.5 521,-250.5 531.2621,-247.3538 "/>
 </g>
 <!-- CR#X56&#45;10&#45;56 -->
 <g id="node11" class="node">
