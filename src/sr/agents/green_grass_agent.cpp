@@ -30,8 +30,7 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
-Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
 	// The GreenGrass node appears as a triangle containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
@@ -42,11 +41,12 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo( const LinkNamingFunction &l
 	block.symbol = "||||";
 	block.shape = "cylinder";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>( GetThrough()->get()), 
               list<string>{},
-              list<string>{PatternLink(this, GetThrough()).GetShortName()},
+              list<string>{},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
+              GetThrough() );
     block.sub_blocks = { { "through", 
                            "", 
                            true,

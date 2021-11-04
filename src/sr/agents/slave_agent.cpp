@@ -59,8 +59,7 @@ list<PatternLink> SlaveAgent::GetVisibleChildren( Path v ) const
 }
 
 
-Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block SlaveAgent::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;
     // Actually much simpler in graph trace mode - just show the root node and plink
@@ -68,7 +67,7 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                       list<string>{},
                                                       list<string>{""},
                                                       IN_COMPARE_AND_REPLACE,
-                                                      SpecialBase::IsNonTrivialPreRestriction(&search_pattern) );                                  
+                                                      &search_pattern );                                  
     sub_blocks.push_back( { "search/compare", 
                             "",
                             true,
@@ -80,24 +79,24 @@ Graphable::Block SlaveAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                      list<string>{},
                                                      list<string>{""},
                                                      IN_REPLACE_ONLY,
-                                                     SpecialBase::IsNonTrivialPreRestriction(&replace_pattern) );                                  
+                                                     &replace_pattern );                                  
     
         sub_blocks.push_back( { "replace",
                                 "",
                                 true,
                                 { replace_link } } );
     }
-    Block block = { false, GetName(), "", "", CONTROL, sub_blocks };
    
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
               list<string>{},
-              list<string>{PatternLink(this, GetThrough()).GetShortName()},
+              list<string>{},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
-    block.sub_blocks.push_front( { "through", 
-                                   "",
-                                   true,
-                                   { link } } );
+              GetThrough() );
+    sub_blocks.push_front( { "through", 
+                             "",
+                             true,
+                             { link } } );
+    Block block = { false, GetName(), "", "", CONTROL, GetPatternPtr(), sub_blocks };
     return block;
 }
 

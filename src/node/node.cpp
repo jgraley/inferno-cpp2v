@@ -26,8 +26,7 @@ void GenericsTest()
 }
 
 
-Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                          const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block Node::GetGraphBlockInfo() const
 {    
 	Graphable::Block block;
 	block.title = GetGraphName();     
@@ -35,6 +34,7 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.shape = "plaintext";
     block.block_type = Graphable::NODE_EXPANDED;
     TreePtr<Node> sp_this( const_pointer_cast<Node>( shared_from_this() ) );
+    block.node = sp_this;
         
     vector< Itemiser::Element * > members = Itemise();
 	for( int i=0; i<members.size(); i++ )
@@ -50,9 +50,9 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                   {} };                                                  
                 auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                                                           list<string>{},
-                                                          list<string>{ lnf( &sp_this, &p ) },
+                                                          list<string>{},
                                                           Graphable::UNDEFINED,
-                                                          ntprf ? ntprf(&p) : false );
+                                                          &p );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
 			}
@@ -71,9 +71,9 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
             {
                 auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                                                           list<string>{},
-                                                          list<string>{ lnf( &sp_this, &p ) },
+                                                          list<string>{},
                                                           Graphable::UNDEFINED,
-                                                          ntprf ? ntprf(&p) : false );
+                                                          &p );
                 sub_block.links.push_back( link );
             }
             block.sub_blocks.push_back( sub_block );
@@ -88,9 +88,9 @@ Graphable::Block Node::GetGraphBlockInfo( const LinkNamingFunction &lnf,
                                                   {} };
                 auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(singular->get()),
                                                           list<string>{},
-                                                          list<string>{ lnf( &sp_this, singular ) },
+                                                          list<string>{},
                                                           Graphable::UNDEFINED,
-                                                          ntprf ? ntprf(singular) : false );
+                                                          singular );
                 sub_block.links.push_back( link );
                 block.sub_blocks.push_back( sub_block );
    		    }

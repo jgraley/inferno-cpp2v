@@ -163,8 +163,7 @@ private:
     TreePtr<Node> BuildReplaceNormal( PatternLink me_plink );
     
 public:
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
 
 private:
     Plan plan; // can't be const because children added after construct

@@ -1,0 +1,81 @@
+JSG really good overview, from https://cstheory.stackexchange.com/questions/29406/constraint-satisfaction-problem-csp-vs-satisfiability-modulo-theory-smt-wi 
+
+
+
+Does someone dare to attempt to clarify what's the relation of these fields of study or perhaps even give a more concrete answer at the level of problems? Like which includes which assuming some widely accepted formulations. If I got this correctly, when you go from SAT to SMT you're basically entering the field of CSP; vice-versa, if you limit CSP to booleans you're basically talking of SAT and maybe a few related problems like #SAT. I think this much is clear (e.g. cf Kolaitis and Vardi's chapter "A Logical Approach to Constraint Satisfaction" in Finite Model Theory and Its Applications by Grädel et al.), but what's less clear to me is when are the constraints "modulo a theory" and when aren't they? Does SMT always imply the theory uses only equality and inequality constraints are always in the broader field of CSP? As far as I can tell, you can often introduce slack variables, so the distinction [if it exists] is less than obvious.
+
+The relatively recent "Satisfiability handbook" (IOP Press 2009) gathers both SMT and CSP problems under its broad "satisfiability" umbrella, but given the way it is structured (chapters written by various authors) doesn't really help me with figuring out this.
+
+I would hope the terminology gets less confusing when you talk of constraint programming, which (by analogy with the term ''mathematical programming'') I hope involves minimizing/maximizing some objective function. The Wikipedia article on constraint programming is alas so vague that I can't really say if this framing happens though. What I can gather from Essentials of Constraint Programming by Frühwirth and Abdennadher (p. 56) is that a "constraint solver" usually provides more than just a satisfiability checker, with simplification etc. being important in practice.
+
+Although this is hardly an actual CS-theory research question, I don't expect good answers to this one on the undergraduate CS.SE site given what I saw at https://cs.stackexchange.com/questions/14946/distinguish-decision-procedure-vs-smt-solver-vs-theorem-prover-vs-constraint-sol (which contains a lot of words but not what I would consider a real answer, alas).
+soft-question
+sat
+terminology
+Share
+Cite
+Improve this question
+Follow
+edited Apr 13 '17 at 12:48
+CommunityBot
+1
+asked Feb 7 '15 at 7:56
+Fizz
+47144 silver badges99 bronze badges
+
+    add to this ASP. SMT/ ASP relatively recent developments. the previously separate fields are blending. see eg Hybrid Automated Reasoning Tools: from Black-box to Clear-box Integration / Balduccini, Lierler as rough recent survey. – 
+    vzn
+    Feb 8 '15 at 17:50
+
+Add a comment
+1 Answer
+51
+
+SAT, CP, SMT, (much of) ASP all deal with the same set of combinatorial optimisation problems. However, they come at these problems from different angles and with different toolboxes. These differences are largely in how each approach structures information about the exploration of the search space. My working analogy is that SAT is machine code, while the others are higher level languages.
+
+Based on my thesis work on the structural theory of CSPs, I have come to believe that the notion of "clause structure" is essential in unifying all these paradigms and in understanding how they differ. Each clause of a SAT instance represents a forbidden partial assignment; a clause like 𝑥1∨𝑥2⎯⎯⎯⎯⎯⎯∨𝑥3
+forbids the partial assignment {(𝑥1,0),(𝑥2,1),(𝑥3,0)} that simultaneously sets 𝑥1 and 𝑥3 to false and 𝑥2 to true. The clause structure of a combinatorial optimisation problem is its representation as a SAT instance, using some suitable encoding. However, the clause structure includes all the forbidden partial assignments, not just the ones given at the start. The clause structure is therefore usually too large to manipulate directly: typically it has at least exponential size in the number of variables, and may be infinite. Hence, the clause structure has to be approximated with a limited amount of space. SAT/CP/SMT/ASP maintain and update a more-or-less implicit representation of an underlying clause structure. This is possible because if one partial assignment is known to be in the clause structure, then this implies that many other clauses are also present. For instance, the SAT clause above also forbids any partial assignment that contains it as a subset, so clauses like 𝑥1∨𝑥2⎯⎯⎯⎯⎯⎯∨𝑥3∨𝑥4 and 𝑥1∨𝑥2⎯⎯⎯⎯⎯⎯∨𝑥3∨𝑥4⎯⎯⎯⎯⎯⎯∨𝑥5
+
+are all in the clause structure of that instance.
+
+An approximation of the clause structure is kept to narrow down the set of solutions, and to help determine whether this set is empty. During search some partial assignments may turn out not to be contained in any solution (even if they individually satisfy each of the constraints in the instance). These are known as nogoods, a term introduced by ("Mr GNU") Stallman and Sussman. A nogood clause is therefore in the clause structure and can be included in an approximation of the clause structure, as a compact representation of many clauses that can be pruned from the search for solutions. Adding nogoods to the approximate clause structure retains all the solutions, but better approximates those solutions. So the approximate clause structure usually changes as search progresses. Further, the way the problem is modelled in one of the combinatorial optimisation approaches affects the clause structure, often quite significantly. For instance, propositional variables can represent intervals such as 𝑥≤5
+or points such as 𝑥=5
+
+. Hence there isn't a single general clause structure but one associated with each choice of representation, depending on what the singletons (literals) of the clause structure represent.
+
+Constraint programming (CP) was traditionally an AI discipline, with a focus on scheduling, timetabling, and combinatorial problems, and therefore has a central role for variables that can take more than just two values (but usually only finitely many). CP has emphasised efficient search and, motivated by the traditional applications, has given a central role to the all-different (injectivity) constraint, but has also developed efficient propagators for many other kinds of constraints. The formal definitions of CP have been around since at least Montanari's 1974 paper Networks of constraints, with precursors going back even earlier. This weight of history may have contributed to CP lagging behind other approaches in raw performance over the last decade. CP classically maintains an approximation of the complement of the clause structure, via a set of active domains for the variables. The aim is to eliminate values from the active domains, exploring the clause structure by trying to assign candidate values to variables and backtracking when necessary.
+
+Satisfiability modulo theories (SMT) came out of the verification community. Each theory in an SMT solver forms an implicit representation of potentially infinitely many SAT clauses. The theories used with SMT and the constraints used in CP reflect their different historical applications. Most of the theories SMT considers have to do with integer-indexed arrays, real closed fields, linear orders, and suchlike; these arise from static analysis of programs (in computer aided verification) or when formalising mathematical proofs (in automated reasoning). In contrast, in timetabling and scheduling the injectivity constraint is central, and although the standard SMTLIB language has had an injectivity constraint since its inception in 2003 (via the distinct symbol), until 2010 SMT solvers only implemented distinct via a naive algorithm. At that stage the matching technique from the standard CP propagator for all-different was ported across, to great effect when applied to large lists of variables; see An Alldifferent constraint solver in SMT by Banković and Marić, SMT 2010. Moreover, most CP propagators are designed for problems with finite domains, whereas standard SMT theories deal with infinite domains (integers, and more recently reals) out of the box. SMT uses a SAT instance as the approximation of the clause structure, extracting nogood clauses from the theories as appropriate. A nice overview is Satisfiability Modulo Theories: Introduction and Applications by De Moura and Bjørner, doi:10.1145/1995376.1995394.
+
+Answer set programming (ASP) came out of logic programming. Due to its focus on solving the more general problem of finding a stable model, and also because it allows universal as well as existential quantification, ASP was for many years not competitive with CP or SMT.
+
+Formally, SAT is CSP on Boolean domains, but the focus in SAT on clause learning, good heuristics for conflict detection, and fast ways to backtrack are quite different to the traditional CSP focus on propagators, establishing consistency, and heuristics for variable ordering. SAT is usually extremely efficient, but for many problems huge effort is required to first express the problem as a SAT instance. Using a higher level paradigm like CP can allow a more natural expression of the problem, and then either the CP instance can be translated into SAT by hand, or a tool can take care of the translation. A nice overview of the nuts and bolts of SAT is On Modern Clause-Learning Satisfiability Solvers by Pipatsrisawat and Darwiche, doi:10.1007/s10817-009-9156-3.
+
+Now let's move on from generalities to present day specifics.
+
+Over the last decade some people in CP have started to focus on lazy clause generation (LCG). This is essentially a way to bolt CP propagators together using more flexible SMT-like techniques rather than the rather rigid active domains abstraction. This is useful because there is a long history of published CP propagators to efficiently represent and solve many kinds of problems. (Of course, a similar effect would be achieved by concerted effort to implement new theories for SMT solvers.) LCG has performance that is often competitive with SMT, and for some problems it may be superior. A quick overview is Stuckey's CPAIOR 2010 paper Lazy Clause Generation: Combining the power of SAT and CP (and MIP?) solving, doi:10.1007/978-3-642-13520-0_3. It is also worth reading the position paper of Garcia de la Banda, Stuckey, Van Hentenryck and Wallace, which paints a CP-centric vision of The Future of Optimization Technology, doi:10.1007/s10601-013-9149-z.
+
+As far as I can tell, much of the focus of recent SMT research seems to have shifted to applications in formal methods and formalised mathematics. An example is reconstructing proofs found by SMT solvers inside proof systems such as Isabelle/HOL, by building Isabelle/HOL tactics to reflect inference rules in SMT proof traces; see Fast LCF-Style Proof Reconstruction for Z3 by Böhmer and Weber at ITP 2010.
+
+The top ASP solvers have over the last few years been developed to become competitive with CP, SMT and SAT-only solvers. I'm only vaguely familiar with the implementation details that have allowed solvers such as clasp to be competitive so cannot really compare these with SMT and CP, but clasp explicitly advertises its focus on learning nogoods.
+
+Cutting across the traditional boundaries between these formalisms is translation from more abstract problem representations into lower level efficiently implementable formalisms. Several of the top ASP and CP solvers now explicitly translate their input into a SAT instance, which is then solved using an off-the-shelf SAT solver. In CP, the Savile Row constraint modelling assistant uses compiler design techniques to translate problems expressed in the medium level language Essence' into a lower level formalism, suitable for input to CP solvers such as Minion or MiniZinc. Savile Row originally worked with a CP representation as the low-level formalism but introduced SAT as a target in version 1.6.2. Moreover, the even higher-level language Essence can now be automatically translated into Essence' by the Conjure tool. At the same time, low level SAT-only solvers like Lingeling continue to be refined each year, most recently by alternating clause learning and in-processing phases; see the brief overview What's Hot in the SAT and ASP Competitions by Heule and Schaub in AAAI 2015.
+
+The analogy with the history of programming languages therefore seems appropriate. SAT is becoming a kind of "machine code", targeting a low-level model of exploration of the clauses in the clause structure. The abstract paradigms are becoming more like higher level computer languages, with their own distinct methodologies and applications they are good at addressing. Finally, the increasingly dense collection of links between these different layers is starting to resemble the compiler optimisation ecosystem.
+Share
+Cite
+Improve this answer
+Follow
+edited Aug 8 '17 at 6:44
+answered Feb 9 '15 at 16:04
+András Salamon
+18.5k33 gold badges5959 silver badges142142 bronze badges
+
+    Tks for this very useful answer. – 
+    Xavier Labouze
+    Jul 21 '15 at 13:12
+    2
+    Note: in the FOCS/STOC community a narrower definition of CSP is used. These CSPs are of the form CSP(L), "all CSP instances that can be expressed using a fixed set L of constraint relations". The all-different constraint doesn't fit into this framework, nor do problems that have tree-like structure. – 
+    András Salamon
+    Jul 21 '15 at 16:08
+

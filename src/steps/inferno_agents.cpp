@@ -11,8 +11,7 @@ using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
-Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                          const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
@@ -22,6 +21,7 @@ Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo( const LinkNamingFuncti
 	block.title = "'"+format+"'!"; // text from program code, so use single quotes
 	block.shape = "parallelogram";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     return block;
 }
 
@@ -92,8 +92,7 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree()
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
-Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 {
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.
@@ -104,6 +103,7 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo( const LinkNamingFunct
     block.title = "'" + name + "'?";	
 	block.shape = "trapezium";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     return block;
 }
 
@@ -181,21 +181,21 @@ map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink base_xlink ) const
 }    
 
 
-Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block NestedAgent::GetGraphBlockInfo() const
 {
     Block block;
 	block.bold = false;
 	block.title = GetName();
 	block.shape = "plaintext";
     block.block_type = Graphable::NODE_EXPANDED;
+    block.node = GetPatternPtr();
     if( terminus )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(terminus.get()),
                   list<string>{},
-                  list<string>{PatternLink(this, &terminus).GetShortName()},
+                  list<string>{},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&terminus) );
+                  &terminus );
         block.sub_blocks.push_back( { "terminus", 
                                       "", 
                                       false,
@@ -205,9 +205,9 @@ Graphable::Block NestedAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(depth.get()),
                   list<string>{},
-                  list<string>{PatternLink(this, &depth).GetShortName()},
+                  list<string>{},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&depth) );
+                  &depth );
         block.sub_blocks.push_back( { "depth", 
                                       "", 
                                       false,
@@ -263,8 +263,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 }                                                   
 
 
-Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                             const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo() const
 {
 
     Block block;
@@ -272,13 +271,14 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo( const LinkNamingFun
 	block.title = GetName();
 	block.shape = "egg";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     if( container )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(container.get()),
                   list<string>{},
                   list<string>{},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&container) );
+                  &container );
         block.sub_blocks.push_back( { "container", 
                                       "", 
                                       false,

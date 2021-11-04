@@ -29,8 +29,7 @@ public:
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const {};
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     virtual const TreePtrInterface *GetTerminus() const
@@ -52,8 +51,7 @@ class AnyNodeAgent : public SearchContainerAgent
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;                                             
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
 };
 
 
@@ -95,8 +93,7 @@ public:
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };

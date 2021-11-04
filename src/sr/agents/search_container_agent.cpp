@@ -77,18 +77,18 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
 }
 
 
-Graphable::Block SearchContainerAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
 {
     Block block;
 	block.bold = true;
     block.shape = "square";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetTerminus()->get()), 
               list<string>{},
-              list<string>{PatternLink(this, &terminus).GetShortName()},
+              list<string>{},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetTerminus()) );
+              GetTerminus() );
     block.sub_blocks = { { "terminus", 
                            "", 
                            true,
@@ -135,12 +135,11 @@ void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
 }                                                                                        
 
 
-Graphable::Block AnyNodeAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 {
 	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
 	// right of the circle. 1 implies the tendancy to match exactly one thing. See #256.
-    Block block = SearchContainerAgent::GetGraphBlockInfo(lnf, ntprf);
+    Block block = SearchContainerAgent::GetGraphBlockInfo();
     block.title = "AnyNode";
 	block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
@@ -261,22 +260,21 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
-Graphable::Block StuffAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block StuffAgent::GetGraphBlockInfo() const
 {
 	// The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
 	// right of the circle. # is chosen (as is the name Stuff) for its similarity to * because
 	// the nodes are both able to wildcard multiple nodes in the input tree.
-    Block block = SearchContainerAgent::GetGraphBlockInfo(lnf, ntprf);
+    Block block = SearchContainerAgent::GetGraphBlockInfo();
 	block.title = "Stuff"; 
 	block.symbol = "#"; 
     if( recurse_restriction )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(recurse_restriction.get()), 
                   list<string>{},
-                  list<string>{PatternLink(this, &recurse_restriction).GetShortName()},
+                  list<string>{},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&recurse_restriction) );
+                  &recurse_restriction );
         block.sub_blocks.push_back( { "recurse_restriction", 
                                       "", 
                                       false,

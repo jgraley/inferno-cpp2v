@@ -94,12 +94,11 @@ void VNTransformation::operator()( TreePtr<Node> context,
 }                                   
                  
 
-Graphable::Block VNTransformation::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                      const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block VNTransformation::GetGraphBlockInfo() const
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    return top_level_engine->GetGraphBlockInfo( lnf, ntprf );
+    return top_level_engine->GetGraphBlockInfo();
 }  
 
 

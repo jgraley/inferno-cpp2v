@@ -64,8 +64,7 @@ map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink base_xlink ) con
 }
 
 
-Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                    const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
 {
 	// The PointerIs node appears as a slightly flattened pentagon.
     Block block;
@@ -73,11 +72,12 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo( const LinkNamingFunction &ln
 	block.title = "PointerIs"; 
 	block.shape = "house";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetPointer()->get()),
               list<string>{},
-              list<string>{PatternLink(this, GetPointer()).GetShortName()},
+              list<string>{},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(GetPointer()) );
+              GetPointer() );
     block.sub_blocks = { { "pointer", 
                            "", 
                            true,

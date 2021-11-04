@@ -26,8 +26,7 @@ public:
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                
                                                                          
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
     
 private:
     virtual CollectionInterface &GetPatterns() const = 0;

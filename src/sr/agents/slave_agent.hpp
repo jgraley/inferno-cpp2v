@@ -35,8 +35,7 @@ public:
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
 	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
     virtual TreePtr<Node> EvolveIntoSlaveCompareReplace() = 0;
 
     TreePtr<Node> search_pattern;

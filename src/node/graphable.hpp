@@ -46,17 +46,21 @@ public:
               list<string> labels_,
               list<string> trace_labels_,
               Phase phase_,
-              bool is_nontrivial_prerestriction_ ) :
+              const TreePtrInterface *pptr_ ) :
             child( child_ ),
             labels( labels_ ),
             trace_labels( trace_labels_ ),
             phase( phase_ ),
-            is_nontrivial_prerestriction( is_nontrivial_prerestriction_ )
+            pptr( pptr_ )
         {
         }
                
         Link( const Link &other ) : 
-            Link( other.child, other.labels, other.trace_labels, other.phase, other.is_nontrivial_prerestriction )
+            Link( other.child, 
+                  other.labels, 
+                  other.trace_labels, 
+                  other.phase, 
+                  other.pptr )
         {
         }
                
@@ -66,7 +70,7 @@ public:
         list<string> labels;
         list<string> trace_labels;
         Phase phase;
-        bool is_nontrivial_prerestriction;
+        const TreePtrInterface *pptr;
     };
     struct SubBlock
     {
@@ -82,6 +86,7 @@ public:
         string symbol;
         string shape;
         BlockType block_type;
+        shared_ptr<const Node> node;
         list<SubBlock> sub_blocks;
     };
     
@@ -89,10 +94,9 @@ public:
                                   const TreePtrInterface *ppattern )> LinkNamingFunction;
     typedef std::function<bool( const TreePtrInterface *ppattern )> NonTrivialPreRestrictionFunction;
                                   
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const     
+    virtual Block GetGraphBlockInfo() const     
     { 
-        Block g{false, "", "", "", NODE_SHAPED, {}}; 
+        Block g{false, "", "", "", NODE_SHAPED, nullptr, {}}; 
         return g;
     };
 };

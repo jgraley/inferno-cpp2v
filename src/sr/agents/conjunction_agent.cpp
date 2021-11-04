@@ -20,8 +20,7 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
-Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
 {
 	// The Conjunction node appears as a diamond with a ∧ character inside it. The affected subtrees are 
 	// on the right.
@@ -35,6 +34,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
 	block.symbol = string("∧");
 	block.shape = "diamond";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     block.sub_blocks = { { "patterns", 
                            "", 
                            true,
@@ -43,9 +43,9 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo( const LinkNamingFunction &
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                   list<string>{},
-                  list<string>{PatternLink(this, &p).GetShortName()},
+                  list<string>{},
                   phase,
-                  SpecialBase::IsNonTrivialPreRestriction(&p) );
+                  &p );
         block.sub_blocks.front().links.push_back( link );
     }
     return block;

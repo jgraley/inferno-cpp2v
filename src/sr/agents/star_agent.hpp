@@ -36,8 +36,7 @@ public:
                                            const TheKnowledge *knowledge ) const;                                                                                          
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
 

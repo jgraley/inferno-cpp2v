@@ -13,29 +13,28 @@ shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
     return pq;
 }
 
-Graphable::Block DeltaAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block DeltaAgent::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;
     auto link_through = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
               list<string>{},
-              list<string>{PatternLink(this, GetThrough()).GetShortName()},
+              list<string>{},
               IN_COMPARE_ONLY,
-              SpecialBase::IsNonTrivialPreRestriction(GetThrough()) );
+              GetThrough() );
     sub_blocks.push_back( { "through", 
                             "",
                             true,
                             { link_through } } );
     auto link_overlay = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
               list<string>{},
-              list<string>{PatternLink(this, GetOverlay()).GetShortName()},
+              list<string>{},
               IN_REPLACE_ONLY,
-              SpecialBase::IsNonTrivialPreRestriction(GetOverlay()) );
+              GetOverlay() );
     sub_blocks.push_back( { "overlay", 
                             "",
                             true,
                             { link_overlay } } );
-    return { false, "Delta", "Δ", "triangle", NODE_SHAPED, sub_blocks };
+    return { false, "Delta", "Δ", "triangle", NODE_SHAPED, GetPatternPtr(), sub_blocks };
 }
 
 

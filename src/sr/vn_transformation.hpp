@@ -47,8 +47,7 @@ public:
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
     
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 
     void GenerateGraphRegions( Graph &graph ) const;
     

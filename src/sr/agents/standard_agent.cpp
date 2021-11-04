@@ -1045,11 +1045,10 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
 }
 
 
-Graphable::Block StandardAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                   const NonTrivialPreRestrictionFunction &ntprf) const
+Graphable::Block StandardAgent::GetGraphBlockInfo() const
 {
 	// Inject a non-trivial pre-restriction detector
-	Block block = Node::GetGraphBlockInfo( lnf, my_ntprf );
+	Block block = Node::GetGraphBlockInfo();
 
 	// Overwrite link phase depending on the phase we're in
     for( Graphable::SubBlock &sub_block : block.sub_blocks ) 

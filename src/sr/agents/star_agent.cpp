@@ -101,8 +101,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink,
 }
 
 
-Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                               const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block StarAgent::GetGraphBlockInfo() const
 {
 	// The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
 	// filename wildcarding, which is semantically equiviant only when used in a Sequence.
@@ -112,13 +111,14 @@ Graphable::Block StarAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
 	block.symbol = "*";
 	block.shape = "circle";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     if( *GetRestriction() )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetRestriction()->get()), 
                                                   list<string>{},
-                                                  list<string>{PatternLink(this, GetRestriction()).GetShortName()},
+                                                  list<string>{},
                                                   phase,
-                                                  SpecialBase::IsNonTrivialPreRestriction(GetRestriction()) );
+                                                  GetRestriction() );
         block.sub_blocks.push_back( { "restriction", 
                                       "", 
                                       false,

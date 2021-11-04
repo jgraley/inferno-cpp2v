@@ -33,8 +33,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -107,8 +106,7 @@ private:
 struct IdentifierByNameAgent : public virtual SearchLeafAgent 
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;
 
@@ -175,8 +173,7 @@ struct NestedAgent : public virtual TeleportAgent
     virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;                
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;      
@@ -238,8 +235,7 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent,
     TreePtr<Node> container;
 private:
     virtual TreePtr<Node> BuildNewSubtree() override;
-    virtual Block GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const;
+    virtual Block GetGraphBlockInfo() const;
 }; 
 
 #endif

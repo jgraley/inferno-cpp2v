@@ -127,16 +127,14 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 }
 
 
-Graphable::Block CompareReplace::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                                    const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block CompareReplace::GetGraphBlockInfo() const
 { 
     list<SubBlock> sub_blocks;
-    // Actually much simpler in graph trace mode - just show the root node and plink
     auto compare_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(plan.compare_pattern.get()),
                                                       list<string>{},
                                                       list<string>{""},
                                                       IN_COMPARE_AND_REPLACE,
-                                                      SpecialBase::IsNonTrivialPreRestriction(&plan.compare_pattern) );                                  
+                                                      &plan.compare_pattern );                                  
     sub_blocks.push_back( { "search/compare", 
                             "",
                             true,
@@ -148,14 +146,14 @@ Graphable::Block CompareReplace::GetGraphBlockInfo( const LinkNamingFunction &ln
                                                      list<string>{},
                                                      list<string>{""},
                                                      IN_REPLACE_ONLY,
-                                                     SpecialBase::IsNonTrivialPreRestriction(&plan.replace_pattern) );                                  
+                                                     &plan.replace_pattern );                                  
     
         sub_blocks.push_back( { "replace", 
                                 "",
                                 true,
                                 { replace_link } } );
     }
-    return { false, GetName(), "", "", CONTROL, sub_blocks };
+    return { false, GetName(), "", "", CONTROL, nullptr, sub_blocks };
 }
 
 

@@ -34,8 +34,7 @@ map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink base_xlink ) c
 }
 
 
-Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &lnf,
-                                     const NonTrivialPreRestrictionFunction &ntprf ) const
+Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
 {
     Block block;
 	// The TransformOf node appears as a slightly flattened octagon, with the name of the specified 
@@ -44,11 +43,12 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo( const LinkNamingFunction &
 	block.title = transformation->GetName();
 	block.shape = "octagon";
     block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(pattern.get()),
               list<string>{},
-              list<string>{PatternLink(this, &pattern).GetShortName()},
+              list<string>{},
               phase,
-              SpecialBase::IsNonTrivialPreRestriction(&pattern) );
+              &pattern );
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,

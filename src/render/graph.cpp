@@ -297,7 +297,7 @@ void Graph::PopulateFrom( list<const Graphable *> &graphables, const Graphable *
 	ASSERT(g);
     graphables.push_back(g);
 
-    Graphable::Block block = g->GetGraphBlockInfo(my_lnf, nullptr);	        
+    Graphable::Block block = g->GetGraphBlockInfo();	        
     PopulateFromSubBlocks( graphables, block );
 }
 
@@ -343,7 +343,7 @@ shared_ptr<Graph::MyLink> Graph::FindLink( list<MyBlock> &blocks_to_act_on,
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
                 if( link_to_act_on->child == target_child_g )
                 {
-                    ASSERT( link_to_act_on->trace_labels.size()==1 ); // brittle
+                    ASSERT( link_to_act_on->trace_labels.size()>=1 ); // very brittle TODO use pptr? #375
                     if( link_to_act_on->trace_labels.front() == target_trace_label )
                     {
                         return my_link_to_act_on;
@@ -396,7 +396,7 @@ list<Graph::MyBlock> Graph::GetBlocks( list<const Graphable *> graphables,
 Graph::MyBlock Graph::GetBlock( const Graphable *g,
                                 const Region *region )
 {
-    Graphable::Block gblock = g->GetGraphBlockInfo(my_lnf, nullptr);       
+    Graphable::Block gblock = g->GetGraphBlockInfo();       
     MyBlock block = PreProcessBlock( gblock, g, region );
     return block;
 }
@@ -478,12 +478,10 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
                                                   list<string>{},
                                                   list<string>{get<1>(link_info)},
                                                   get<2>(link_info),
-                                                  false );
+                                                  nullptr );
         auto my_link = make_shared<MyLink>( link,
                                             GetRegionGraphId(region, get<0>(link_info)),
                                             LINK_NORMAL );
-        //link.trace_labels.push_back( lnf( ... ) ); TODO
-        //link.is_nontrivial_prerestriction = ntprf ? ntprf(&p) : false;
         sub_block.links.push_back( my_link );
     }
     block.sub_blocks.push_back( sub_block );
@@ -552,11 +550,16 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                                                 GetRegionGraphId(region, link->child), 
                                                 LINK_NORMAL );		
             
-            // Detect pre-restrictions and add to link labels
-            if( link->is_nontrivial_prerestriction )
+            // Detect pre-restrictions
+            if( link->pptr )
             {
-                block_ids_show_prerestriction.insert( my_link->child_id );
+                if( SpecialBase::IsNonTrivialPreRestriction( link->pptr ) )
+                    block_ids_show_prerestriction.insert( my_link->child_id );
             }
+            
+            // Auto-determination of link trace string
+            if( link->pptr && my_block.node )            
+                my_link->trace_labels.push_back( PatternLink( my_block.node, link->pptr ).GetShortName() );        
             
             link = my_link;
         }
