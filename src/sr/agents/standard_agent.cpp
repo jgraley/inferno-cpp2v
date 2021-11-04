@@ -1057,10 +1057,3 @@ Graphable::Block StandardAgent::GetGraphBlockInfo() const
 
 	return block;
 }
-
-
-const StandardAgent::NonTrivialPreRestrictionFunction StandardAgent::my_ntprf = []( const TreePtrInterface *ppattern )
-{
-	return SpecialBase::IsNonTrivialPreRestriction( ppattern );
-};		
-

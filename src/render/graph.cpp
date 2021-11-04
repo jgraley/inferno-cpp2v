@@ -1016,13 +1016,6 @@ string Graph::GetRegionGraphId(const Region *region, string id)
 }
 
 
-const Graph::LinkNamingFunction Graph::my_lnf = []( const TreePtr<Node> *parent_pattern,
-										   		    const TreePtrInterface *ppattern )
-{
-	return PatternLink( *parent_pattern, ppattern ).GetShortName();
-};		
-
-
 string Graph::Indent(string s)
 {
     stringstream ss(s);

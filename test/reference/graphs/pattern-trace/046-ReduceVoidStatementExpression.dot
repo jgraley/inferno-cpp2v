@@ -182,20 +182,6 @@ subgraph "clusterAnd#R46-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R46-0/#X46-8-45 ----------
-    "And#R46-0/#X46-8-45" [
-        xlabel = "#X46-8-45"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "triangle"
-        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R46-0/#B-2-834 ----------
     "And#R46-0/#B-2-834" [
         fillcolor = "/set28/2"
@@ -204,6 +190,20 @@ subgraph "clusterAnd#R46-0" {
         fontcolor = grey40
         shape = "diamond"
         label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R46-0/#X46-8-45 ----------
+    "And#R46-0/#X46-8-45" [
+        xlabel = "#X46-8-45"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "triangle"
+        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
         style = "filled"
         penwidth = 0.0
         fixedsize = true
@@ -304,16 +304,16 @@ subgraph "clusterAnd#R46-0" {
     fontcolor = black
 ];
 
-"And#R46-0/#X46-8-45" -> "And#R46-0/#B-2-831" [
-    label = "#1"
+"And#R46-0/#B-2-834" -> "And#R46-0/And#R46-1/#B-2-835" [
+    arrowhead="normalnoneodiamond"
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R46-0/#B-2-834" -> "And#R46-0/And#R46-1/#B-2-835" [
-    arrowhead="normalnoneodiamond"
-    label = "#0"
+"And#R46-0/#X46-8-45" -> "And#R46-0/#B-2-831" [
+    label = "#1"
     decorate = true
     color = black
     fontcolor = black

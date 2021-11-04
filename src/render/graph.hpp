@@ -179,7 +179,6 @@ private:
     FILE *filep;
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
-    static const LinkNamingFunction my_lnf;
     const RegionAppearance base_region;
 	const string line_colour;
 	const string font_colour;

@@ -199,16 +199,29 @@ subgraph "clusterAnd#R102-0" {
         height = 0.4
     ];
     
-    // -------- block And#R102-0/#B-2-1985 ----------
-    "And#R102-0/#B-2-1985" [
+    // -------- block And#R102-0/#B-2-1984 ----------
+    "And#R102-0/#B-2-1984" [
         fillcolor = "/set28/2"
-        xlabel = "#B-2-1985"
+        xlabel = "#B-2-1984"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Return</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R102-0/#B-2-1986 ----------
+    "And#R102-0/#B-2-1986" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-1986"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Continue</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -228,6 +241,19 @@ subgraph "clusterAnd#R102-0" {
         height = 0.4
     ];
     
+    // -------- block And#R102-0/#B-2-1987 ----------
+    "And#R102-0/#B-2-1987" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-1987"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Break</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
     // -------- block And#R102-0/#X102-8-93 ----------
     "And#R102-0/#X102-8-93" [
         xlabel = "#X102-8-93"
@@ -240,19 +266,6 @@ subgraph "clusterAnd#R102-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
-    ];
-    
-    // -------- block And#R102-0/#B-2-1987 ----------
-    "And#R102-0/#B-2-1987" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-1987"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Break</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
     ];
     
     // -------- block And#R102-0/#B-2-1979 ----------
@@ -288,29 +301,16 @@ subgraph "clusterAnd#R102-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R102-0/#B-2-1984 ----------
-    "And#R102-0/#B-2-1984" [
+    // -------- block And#R102-0/#B-2-1985 ----------
+    "And#R102-0/#B-2-1985" [
         fillcolor = "/set28/2"
-        xlabel = "#B-2-1984"
+        xlabel = "#B-2-1985"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
-    // -------- block And#R102-0/#B-2-1986 ----------
-    "And#R102-0/#B-2-1986" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-1986"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Continue</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Return</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];

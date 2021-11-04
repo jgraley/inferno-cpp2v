@@ -89,11 +89,7 @@ public:
         shared_ptr<const Node> node;
         list<SubBlock> sub_blocks;
     };
-    
-    typedef std::function<string( const TreePtr<Node> *parent_pattern,
-                                  const TreePtrInterface *ppattern )> LinkNamingFunction;
-    typedef std::function<bool( const TreePtrInterface *ppattern )> NonTrivialPreRestrictionFunction;
-                                  
+                                      
     virtual Block GetGraphBlockInfo() const     
     { 
         Block g{false, "", "", "", NODE_SHAPED, nullptr, {}}; 
