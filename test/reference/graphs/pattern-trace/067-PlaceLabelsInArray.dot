@@ -1045,10 +1045,12 @@ subgraph "clusterAnd#R67-1" {
     xlabel = "#B-2-1140"
     fontsize = "12"
     fontcolor = grey40
-    shape = "parallelogram"
-    label = <<FONT COLOR="black" POINT-SIZE="15"><I>'%sStates'!</I></FONT>>
-    style = "filled"
-    penwidth = 0.0
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%sStates'!</I></FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
 ];
 
 "And#R67-1/#B-2-1156":port0 -> "And#R67-1/#B-2-1140" [
@@ -1202,6 +1204,13 @@ subgraph "clusterAnd#R67-1" {
 
 "And#R67-1/#B-2-1187":port2 -> "And#R67-1/#B-2-1194" [
     label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R67-1/#B-2-1140":port0 -> "And#R67-1/#B-2-1133" [
+    label = "#1"
     decorate = true
     color = black
     fontcolor = black
@@ -1921,6 +1930,7 @@ subgraph "clusterAnd#R67-0" {
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%sStates'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(TypeIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -2055,6 +2065,21 @@ subgraph "clusterAnd#R67-0" {
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_STATE_%s'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-2-1164 ----------
+"#B-2-1164" [
+    fillcolor = "/set28/5"
+    xlabel = "#B-2-1164"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">LabelIdentifier</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -2212,19 +2237,6 @@ subgraph "clusterAnd#R67-0" {
     fixedsize = true
     width = 0.4
     height = 0.4
-];
-
-// -------- block #B-2-1164 ----------
-"#B-2-1164" [
-    fillcolor = "/set28/5"
-    xlabel = "#B-2-1164"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">LabelIdentifier</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
 ];
 
 // -------- block #B-2-1192 ----------
@@ -2741,6 +2753,13 @@ subgraph "clusterAnd#R67-0" {
     fontcolor = black
 ];
 
+"#B-2-1140":port1 -> "#B-2-1133" [
+    label = "#1"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 "#X67-9-22" -> "#B-2-1184" [
     label = "#2"
     decorate = true
@@ -2855,6 +2874,22 @@ subgraph "clusterAnd#R67-0" {
 ];
 
 "#B-2-1159":port3 -> "#B-2-1215" [
+    style="dashed"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1160":port1 -> "#B-2-1133" [
+    style="dashed"
+    label = "#2"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#B-2-1160":port2 -> "#B-2-1164" [
     style="dashed"
     label = "#0"
     decorate = true

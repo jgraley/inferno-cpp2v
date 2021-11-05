@@ -22,6 +22,7 @@ Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 	block.shape = "parallelogram";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
+    block.sub_blocks = Node::GetSubblocks(&sources, phase);
     return block;
 }
 

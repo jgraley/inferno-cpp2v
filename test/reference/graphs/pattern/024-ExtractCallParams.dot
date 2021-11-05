@@ -237,6 +237,7 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'temp_%s'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -391,6 +392,11 @@ edge [
 ];
 
 "#B-2-304":port2 -> "#B-2-317" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-303":port1 -> "#B-2-313" [
     color = black
     fontcolor = black
 ];

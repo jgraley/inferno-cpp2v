@@ -474,10 +474,12 @@ edge [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
-    shape = "parallelogram"
-    label = <<FONT COLOR="black" POINT-SIZE="15"><I>'%s_link'!</I></FONT>>
-    style = "filled"
-    penwidth = 0.0
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_link'!</I></FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
 ];
 
 // -------- block #B-2-434 ----------
@@ -828,6 +830,11 @@ edge [
 ];
 
 "#B-2-380":port2 -> "#B-2-434" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-381":port0 -> "#B-2-411" [
     color = black
     fontcolor = black
 ];

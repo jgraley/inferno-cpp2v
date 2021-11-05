@@ -301,6 +301,7 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_stack_index'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -708,6 +709,7 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_stack'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -959,6 +961,11 @@ edge [
     fontcolor = black
 ];
 
+"#B-2-539":port1 -> "#B-2-557" [
+    color = black
+    fontcolor = black
+];
+
 "#B-2-541":port1 -> "#B-2-536" [
     color = black
     fontcolor = black
@@ -1143,6 +1150,11 @@ edge [
 ];
 
 "#B-2-537":port1 -> "#B-2-539" [
+    color = black
+    fontcolor = black
+];
+
+"#B-2-540":port1 -> "#B-2-534" [
     color = black
     fontcolor = black
 ];

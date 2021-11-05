@@ -1379,6 +1379,7 @@ subgraph "clusterAnd#R32-0" {
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_stack_index'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -1886,6 +1887,7 @@ subgraph "clusterAnd#R32-0" {
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'%s_stack'!</I></FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Identifier</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -2216,6 +2218,14 @@ subgraph "clusterAnd#R32-0" {
     fontcolor = black
 ];
 
+"#B-2-539":port1 -> "#B-2-557" [
+    style="dashed"
+    label = "#2"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 "#X32-11-13" -> "#X32-9-11" [
     label = "#2"
     decorate = true
@@ -2533,6 +2543,14 @@ subgraph "clusterAnd#R32-0" {
 ];
 
 "#B-2-537":port1 -> "#B-2-539" [
+    style="dashed"
+    label = "#2"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#B-2-540":port1 -> "#B-2-534" [
     style="dashed"
     label = "#2"
     decorate = true
