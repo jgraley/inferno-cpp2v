@@ -19,9 +19,9 @@ resfile=test/summary.csv
 
 if test $# -eq 0
 then
- echo Usage: $0 \<input program\> [\<arguments for inferno\>]
- echo from inferno-cpp2v/trunk/
- exit 1
+    echo "Usage: $0 <input program> [<arguments for inferno>]"
+    echo "Run from inferno-cpp2v/"
+    exit 1
 fi
 
 infile=$1

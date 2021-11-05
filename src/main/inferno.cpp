@@ -143,7 +143,7 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
         }
     }
 
-    sequence->push_back( shared_ptr<Transformation>( new SlaveTest2 ) ); 
+    //sequence->push_back( shared_ptr<Transformation>( new SlaveTest2 ) ); 
 }
 
 

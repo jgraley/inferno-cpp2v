@@ -18,11 +18,17 @@ resfile=test/summary.csv
 
 if test $# -eq 0
 then
-    echo Usage: $0 \<input program\> [\<arguments for inferno\>]
-    echo from inferno-cpp2v/trunk/
+    echo "Usage: $0 [-k] <input program> <reference base> [<arguments for inferno>]"
+    echo "-k to keep going after a fail"
+    echo "Run from inferno-cpp2v/"
     exit 1
 fi
 
+keep_going=0
+if [ $1 == "-k" ]; then
+    keep_going=1
+    shift
+fi
 infile=$1
 shift
 refbase=$1
@@ -66,12 +72,13 @@ for file in $(find $outdir -type f -name '*.cpp' | sort); do
         set +x
         printf "\n" 
         dres=1
-        break
+        if [ $keep_going -eq 0 ]; then
+            break
+        fi
     fi
 done
 
-if [ $dres -eq 0 ] && [ $ires -eq 0 ]
-then
+if [ $dres -eq 0 ] && [ $ires -eq 0 ]; then
     echo "$infile PASSED"
     return_code=0
 fi

@@ -10,11 +10,12 @@ CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
 # Use pointeris (very quick to test) as "canary"
 SRCASES = pointeris $(CASES) 
-
 MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15 sctest03
-
 MINISRCASES = pointeris $(MINICASES) 
 
+# You have to edit this file because the tests depend on it, so a retest will be forced
+SRARGS=
+IARGS=-tq
 
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
@@ -22,7 +23,7 @@ test/autotestd : autotestd.cpp
 $(CASES:%=test/results/execution/%.pass) : test/results/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh resource
 	@mkdir -p test/results/execution
 	@rm -f test/results/execution/$*.
-	test/test.sh $< -tq 2>&1 > test/results/execution/$*.log
+	test/test.sh $< ${IARGS} 2>&1 > test/results/execution/$*.log
 	touch test/results/execution/$*.pass
 		
 test/results/execution.pass : $(CASES:%=test/results/execution/%.pass)
@@ -44,7 +45,7 @@ test/results/mini.pass : $(MINICASES:%=test/results/execution/%.pass)
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
-	test/srtest.sh $< test/reference/sr -tq
+	test/srtest.sh ${SRARGS} $< test/reference/sr ${IARGS}
 	@touch test/results/sr/$*.pass
 	
 test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
