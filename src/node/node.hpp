@@ -32,6 +32,10 @@ struct NodeBases : Magic,
 {
 };
 
+class SequenceInterface;
+class CollectionInterface;
+class TreePtrInterface;
+
 // Base class for all tree nodes and nodes in search/replace
 // patterns etc. Convention is to use "struct" for derived
 // node classes so that everything is public (inferno tree nodes
@@ -66,6 +70,16 @@ struct Node : NodeBases,
     }
     
     virtual Graphable::Block GetGraphBlockInfo() const override;
+    
+    // It's nice to share. So we try to make these available to other 
+    // graphables, such as agents
+    static list<Graphable::SubBlock> GetSubblocks( const SequenceInterface *seq, 
+                                                   Phase phase=Graphable::UNDEFINED );
+    static list<Graphable::SubBlock> GetSubblocks( const CollectionInterface *col, 
+                                                   Phase phase=Graphable::UNDEFINED );
+    static list<Graphable::SubBlock> GetSubblocks( const TreePtrInterface *singular, 
+                                                   Phase phase=Graphable::UNDEFINED );
+                                                   
     virtual string GetGraphId() const override;    
     virtual string GetTrace() const override;
 };
