@@ -851,7 +851,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     ASSERT( my_memb.size() == dest_memb.size() );
     set< Itemiser::Element * > present_in_overlay; // Repeatability audit: OK since only checking for existance 
     
-    TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(this).name().c_str(), TypeInfo(dest).name().c_str());
+    TRACE("Copying %d members from pattern=", dest_memb.size())(*this)(" dest=")(*dest)("\n");
     for( int i=0; i<dest_memb.size(); i++ )
     {
     	TRACE("member %d from pattern\n", i );
@@ -880,7 +880,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
                 else 
                 {
                     ASSERT( new_elt->IsFinal() )("Got intermediate node ")(*new_elt);
-                    TRACE("inserting %s directly\n", TypeInfo(new_elt).name().c_str());
+                    TRACE("inserting ")(*new_elt)(" directly\n");
                     dest_con->insert( new_elt );
                 }
 	        }
@@ -912,8 +912,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
     vector< Itemiser::Element * > under_memb = under_node->Itemise();
     dest_memb = under_node->Itemise( dest.get() ); 
-    
-    TRACE("Copying %d members from under_node=%s dest=%s\n", dest_memb.size(), TypeInfo(under_node).name().c_str(), TypeInfo(dest).name().c_str());
+
+    TRACE("Copying %d members from under_node=", dest_memb.size())(*under_node)(" dest=")(*dest)("\n");
     // Loop over all the members of under_node (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -948,7 +948,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 		        else
 		        {
                     ASSERT( new_elt->IsFinal() );
-			        TRACE("inserting %s directly\n", TypeInfo(new_elt).name().c_str());
+			        TRACE("inserting ")(*new_elt)(" directly\n");
 			        dest_con->insert( new_elt );
 		        }
 	        }
@@ -1022,7 +1022,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
            		}
 		        else
 		        {
-			        TRACE("inserting %s directly\n", TypeInfo(new_elt).name().c_str());
+			        TRACE("inserting ")(*new_elt)(" directly\n");
 			        dest_con->insert( new_elt );
 		        }
 	        }
