@@ -96,7 +96,7 @@ inline void InfernoAbort()
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
 {
     Tracer::MaybePrintEndl();
-    Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n\n", expr );
+    Tracer( file, line, "", function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n\n", expr );
     InfernoAbort();
 }
 
@@ -104,7 +104,7 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
 void boost::assertion_failed_msg(char const * expr, char const * msg, char const * function, char const * file, long line)
 {
     Tracer::MaybePrintEndl();
-    Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n%s\n", expr, msg );
+    Tracer( file, line, "", function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n%s\n", expr, msg );
     InfernoAbort();
 }
 
@@ -128,9 +128,10 @@ NewtonsCradle &NewtonsCradle::operator()(const char *fmt, ...)
 
 ////////////////////////// Tracer //////////////////////////
 
-Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *cond ) :
+Tracer::Tracer( const char *f, int l, string in, const char *fu, Flags fl, char const *cond ) :
     file( f ),
     line( l ),
+    instance( in ),
     function( fu ),
     flags( fl )
 {
@@ -147,7 +148,7 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *cond
 
 
 Tracer::Tracer( Flags fl, char const *c ) :
-    Tracer( "", 0, "", fl, c )
+    Tracer( "", 0, "", "", fl, c )
 {
 }
 
@@ -255,10 +256,13 @@ void Tracer::PrintPrefix()
 
 void Tracer::MaybePrintBanner()
 {
-    if( require_banner && (file != "" || line != 0 || function != "") )
+    if( require_banner && (file != "" || line != 0 || instance != "" || function != "") )
     {
+        string indot;
+        if( instance != "" && instance.substr(instance. size()-2) != "::" )
+            indot = instance+".";
         PrintPrefix();
-        clog << SSPrintf("----%s:%d in %s()", file, line, function) << endl;
+        clog << SSPrintf("----%s:%d in %s%s()", file, line, indot, function) << endl;
         require_banner = false;
     }    
 }

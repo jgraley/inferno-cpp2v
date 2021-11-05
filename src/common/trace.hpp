@@ -205,7 +205,7 @@ public:
         DISABLE = 2, // Do nothing
         ABORT = 4    // Crash out in destructor
     };
-    Tracer( const char *f, int l, const char *fu, Flags fl=(Flags)0, const char *cond=0 );
+    Tracer( const char *f, int l, string in, const char *fu, Flags fl=(Flags)0, const char *cond=0 );
     Tracer( Flags fl=(Flags)0, const char *c=0 );
     ~Tracer();
     virtual Tracer &operator()();
@@ -252,6 +252,7 @@ private:
 
     const char * const file;
     const int line;
+    string instance;
     const char * const function;
     Flags flags;
     static bool require_endl;
@@ -296,17 +297,17 @@ private:
 
 // Plain tracing...
 #define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
-#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
-#define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
+#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION )
+#define FTRACE Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
 #define TRACEC if(!Tracer::IsEnabled()) {} else Tracer()
 #define FTRACEC Tracer(Tracer::FORCE)
 
 // Asserts and such...
-#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
-#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
 #define STACK_BASE 0x7f0000000000ULL
 #define ON_STACK(POINTER) (((uint64_t)(POINTER) & STACK_BASE) == STACK_BASE)
@@ -316,4 +317,3 @@ private:
 #define TRACE_TO(DEST) if(!Tracer::IsEnabled()) {} else (TraceTo(DEST))
 #define FTRACE_TO(DEST) (TraceTo(DEST))
 #endif
-
