@@ -170,8 +170,8 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
 		if( g )
 		{
 			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
-			ASSERT( v )("OOStd inferred dynamic cast has failed: from ")(*g)
-			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
+			ASSERTS( v )("OOStd inferred dynamic cast has failed: from ")(*g)
+			            (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
 			return TreePtr<VALUE_TYPE>(v);
 		}
 		else

@@ -41,10 +41,11 @@ public:
 	virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
 
-    struct Plan
+    struct Plan : public virtual Traceable
     {
         void ConstructPlan( StandardAgent *algo, Phase phase );
-        
+        string GetTrace() const; // used for debug
+
         struct Item
         {
             Item( int ii ) : 

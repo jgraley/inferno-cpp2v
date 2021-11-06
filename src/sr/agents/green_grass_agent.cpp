@@ -23,10 +23,10 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
     if( master_scr_engine->GetOverallMaster()->dirty_grass.find( common_xlink.GetChildX() ) != 
         master_scr_engine->GetOverallMaster()->dirty_grass.end() ) // TODO .count() > 0
     {
-        TRACE(*this)(" says ")(common_xlink)(" is dirty grass so rejecting\n");
+        TRACE(" says ")(common_xlink)(" is dirty grass so rejecting\n");
         throw Mismatch();            
     }
-    TRACE(*this)(" says ")(common_xlink)(" is green grass\n");
+    TRACE(" says ")(common_xlink)(" is green grass\n");
 }
 
 

@@ -51,7 +51,7 @@ PatternLink PatternLink::FromWalkIterator( const Walk::iterator &wit, PatternLin
 {
     TreePtr<Node> parent_pattern = wit.GetParent(generations);
     const TreePtrInterface *pparent = wit.GetNodePointerInParent(generations);
-    ASSERT( root || (parent_pattern && pparent) );
+    ASSERTS( root || (parent_pattern && pparent) );
     return parent_pattern ? PatternLink( parent_pattern, pparent ) : root;    
 }
 
@@ -212,7 +212,7 @@ XLink XLink::FromWalkIterator( const Walk::iterator &wit, XLink root, int genera
 {
     TreePtr<Node> parent_x = wit.GetParent(generations);
     const TreePtrInterface *px = wit.GetNodePointerInParent(generations);
-    ASSERT( root || (parent_x && px) );
+    ASSERTS( root || (parent_x && px) );
     return parent_x ? XLink( parent_x, px, WHODAT() ) : root;    
 }
 

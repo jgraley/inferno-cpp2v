@@ -87,14 +87,17 @@ private:
     {
     };
     
-    const struct Plan
+    const struct Plan : public virtual Traceable
     {
-        explicit Plan( SR::PatternLink keyer_plink, 
+        explicit Plan( SystemicConstraint *algo,
+                       SR::PatternLink keyer_plink, 
                        set<SR::PatternLink> residual_plinks,             
                        Action action,          
                        VariableQueryLambda vql );
         void RunVariableQueries( VariableQueryLambda vql );
-                                 
+        string GetTrace() const; // used for debug
+
+        SystemicConstraint * const algo;
         const SR::PatternLink keyer_plink;
         const set<SR::PatternLink> residual_plinks;
         const Action action;

@@ -66,6 +66,12 @@ void CompareReplace::Plan::PlanningStageThree()
 }                                      
 
 
+string CompareReplace::Plan::GetTrace() const 
+{
+    return algo->GetName() + ".plan" + algo->GetSerialString();
+}
+
+    
 void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {

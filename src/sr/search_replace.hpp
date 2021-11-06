@@ -31,7 +31,7 @@ public:
     CompareReplace( bool is_search=false );
                     
 private:
-    struct Plan 
+    struct Plan : public virtual Traceable
     {          
         Plan( CompareReplace *algo, 
               bool is_search );
@@ -40,6 +40,7 @@ private:
         void PlanningStageOne();
         void PlanningStageTwo();
         void PlanningStageThree();
+        string GetTrace() const; // used for debug
 
         TreePtr<Node> compare_pattern;
         TreePtr<Node> replace_pattern;

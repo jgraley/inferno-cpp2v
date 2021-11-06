@@ -171,6 +171,9 @@ string Trace(const unordered_multimap<TK, TV> &m)
     return Join( elts, "{", CONTAINER_SEP, "}" );
 }
 
+
+string GetTrace();
+
 ////////////////////////// NewtonsCradle //////////////////////////
 
 /// Interface for objects that can be repeat-called using eg ob(a)(b)(c)...
@@ -297,17 +300,21 @@ private:
 
 // Plain tracing...
 #define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
-#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION )
-#define FTRACE Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
+#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION )
+#define FTRACE Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
+#define TRACES if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION )
+#define FTRACES Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
 #define TRACEC if(!Tracer::IsEnabled()) {} else Tracer()
 #define FTRACEC Tracer(Tracer::FORCE)
 
 // Asserts and such...
-#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERTS(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
-#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+#define ASSERTFAILS(MESSAGE) do { Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
 #define STACK_BASE 0x7f0000000000ULL
 #define ON_STACK(POINTER) (((uint64_t)(POINTER) & STACK_BASE) == STACK_BASE)

@@ -128,10 +128,10 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
     {
         const TreePtrInterface *pe = &*pit; 
         PatternLink plink(plan->algo, &*pit);
-		ASSERT( pe );
+		ASSERTS( pe );
         if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
-            ASSERT( !p_star )("Only one star allowed in collections when in compare pattern");
+            ASSERTS( !p_star )("Only one star allowed in collections when in compare pattern");
             
             p_star = pe;
             star_plink = plink;
@@ -148,8 +148,14 @@ StandardAgent::Plan::Singular::Singular( int ii, Plan *plan, Phase phase, TreePt
     Item(ii),
     pattern(pattern_)
 {
-    ASSERT( pattern );
+    ASSERTS( pattern );
     plink = PatternLink(plan->algo, pattern);
+}
+
+
+string StandardAgent::Plan::GetTrace() const 
+{
+    return algo->GetName() + ".plan" + algo->GetSerialString();
 }
 
 
@@ -751,7 +757,7 @@ void StandardAgent::PlanOverlayImpl( PatternLink me_plink,
 {
     INDENT("T");
     ASSERT( under_plink.GetChildAgent() );
-    TRACE(*this)(".PlanOverlayImpl(")(under_plink)(")\n");
+    TRACE(".PlanOverlayImpl(")(under_plink)(")\n");
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
@@ -829,8 +835,6 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     ASSERT( under_node );
     
     ASSERT( IsLocalMatch(under_node.get()) )
-	  	  ("pattern=")
-		  (*this)
 		  (" must be a non-strict superclass of under_node=")
 		  (*under_node)
 		  (", so that it does not have more members");
@@ -840,7 +844,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     // Duplicate the underneath node since it is at least as specialised (=non-strict subclass)
     dest = DuplicateNode( under_node, true );
 
-    ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
+    ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
     // Loop over the elements of pattern and dest, limited to elements
     // present in pattern, which is a non-strict subclass of under_node and dest. // Hmmm.... superclass?

@@ -455,7 +455,7 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
 
 string AndRuleEngine::Plan::GetTrace() const
 {
-    return algo->GetName() + "::Plan" + algo->GetSerialString();
+    return algo->GetName() + ".plan" + algo->GetSerialString();
 }
 
 
@@ -1004,8 +1004,8 @@ void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) c
 
 void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const
 {
-    TRACE(*this)(" parent_residual_links_to_master_boundary_agents ")( plan.parent_residual_links_to_master_boundary_agents )("\n");
-    TRACE(*this)(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
+    TRACE(" parent_residual_links_to_master_boundary_agents ")( plan.parent_residual_links_to_master_boundary_agents )("\n");
+    TRACE(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
 	figure.id = GetGraphId();
@@ -1071,7 +1071,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
     subordinates_lambda( plan.my_evaluator_abnormal_engines, Graph::LINK_EVALUATOR );
 	TRACE("   Subordinates (my multiplicity engines):\n");    
     subordinates_lambda( plan.my_multiplicity_engines, Graph::LINK_MULTIPLICITY );
-	TRACE("Ready to render ")(*this)("\n");
+	TRACE("Ready to render\n");
 	graph(figure);
 }
 

@@ -107,7 +107,7 @@ public:
 private:
 	string infile;
 
-	class InfernoAction: public clang::Action
+	class InfernoAction: public clang::Action, public Traceable
 	{
 	public:
 		InfernoAction(TreePtr<Node> context, TreePtr<Scope> root_scope,

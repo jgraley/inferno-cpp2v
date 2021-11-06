@@ -41,12 +41,15 @@ public:
 private:
     typedef set<shared_ptr<Constraint>> ConstraintSet;
 
-    const struct Plan
+    const struct Plan : public virtual Traceable
     {
-        Plan( const list< shared_ptr<Constraint> > &constraints, 
+        Plan( SimpleSolver *algo,
+              const list< shared_ptr<Constraint> > &constraints, 
               const list<VariableId> *variables = nullptr );
         void DeduceVariables( const list<VariableId> *variables );
+        string GetTrace() const; // used for debug
     
+        SimpleSolver * const algo;
         list<VariableId> variables;
         list< shared_ptr<Constraint> > constraints;
 

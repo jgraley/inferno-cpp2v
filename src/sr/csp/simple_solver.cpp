@@ -15,8 +15,10 @@ using namespace CSP;
 #define TAKE_HINTS
 #define DYNAMIC_START_VALUE
 
-SimpleSolver::Plan::Plan( const list< shared_ptr<Constraint> > &constraints_, 
+SimpleSolver::Plan::Plan( SimpleSolver *algo_,
+                          const list< shared_ptr<Constraint> > &constraints_, 
                           const list<VariableId> *variables_ ) :
+    algo( algo_ ), 
     constraints(constraints_)
 {
     DeduceVariables(variables_);
@@ -62,9 +64,15 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
 }
 
 
+string SimpleSolver::Plan::GetTrace() const 
+{
+    return algo->GetName() + ".plan";
+}
+
+
 SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
                             const list<VariableId> *variables_ ) :
-    plan( constraints_, variables_ ),
+    plan( this, constraints_, variables_ ),
     holder(nullptr),
     my_index( next_index++ )
 {

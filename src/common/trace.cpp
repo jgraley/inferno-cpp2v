@@ -64,6 +64,12 @@ string Trace(const Progress &progress)
     return progress.GetPrefix();
 }
 
+
+string GetTrace()
+{
+    return "::";
+}
+
 ////////////////////////// Misc free functions //////////////////////////
 
 #ifdef __GLIBC__
@@ -262,7 +268,7 @@ void Tracer::MaybePrintBanner()
         if( instance != "" && instance.substr(instance. size()-2) != "::" )
             indot = instance+".";
         PrintPrefix();
-        clog << SSPrintf("----%s:%d in %s%s()", file, line, indot, function) << endl;
+        clog << SSPrintf("----%s:%d in %s%s()", file, line, indot.c_str(), function) << endl;
         require_banner = false;
     }    
 }

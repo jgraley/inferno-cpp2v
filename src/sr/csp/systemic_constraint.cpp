@@ -6,10 +6,12 @@
 
 using namespace CSP;
 
-SystemicConstraint::Plan::Plan( SR::PatternLink keyer_plink_, 
+SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
+                                SR::PatternLink keyer_plink_, 
                                 set<SR::PatternLink> residual_plinks_,
                                 Action action_,
                                 VariableQueryLambda vql ) :
+    algo( algo_ ),
     keyer_plink( keyer_plink_ ),
     residual_plinks( residual_plinks_ ),
     action( action_ ),
@@ -27,7 +29,7 @@ SystemicConstraint::SystemicConstraint( SR::PatternLink keyer_plink,
                                         set<SR::PatternLink> residual_plinks,
                                         Action action,
                                         VariableQueryLambda vql ) :
-    plan( keyer_plink, residual_plinks, action, vql )
+    plan( this, keyer_plink, residual_plinks, action, vql )
 {
 }
 
@@ -53,6 +55,12 @@ void SystemicConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
                                                      child_plink, 
                                                      vql(child_plink) } );      
     }
+}
+
+
+string SystemicConstraint::Plan::GetTrace() const 
+{
+    return algo->GetName() + ".plan";
 }
 
 

@@ -54,9 +54,8 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     master_plinks( master_plinks_ )
 {
     INDENT("}");
-    TRACE(*this)(" planning stage one\n");
-    ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
-    //TRACE("Entering SCREngine::Configure on ")(*this)("\n");
+    TRACE("Planning stage one\n");
+    ASSERT(!master_ptr)("Calling configure on already-configured");
     overall_master_ptr = overall_master;
     master_ptr = master;
     
@@ -177,7 +176,7 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
 void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &final_agent_phases_)
 {
     INDENT("}");
-    TRACE(*this)(" planning stage two\n");
+    TRACE("Planning stage two\n");
     final_agent_phases = final_agent_phases_;
     
     // Recurse into subordinate SCREngines
@@ -215,7 +214,7 @@ void SCREngine::Plan::PlanningStageThree(unordered_set<PatternLink> master_keyer
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
     // COMPARE, REPLACE, RECURSE, RECURSE
-    TRACE(*this)(" planning stage three\n");
+    TRACE("Planning stage three\n");
  
     all_keyer_plinks = master_keyers;
     
@@ -255,7 +254,7 @@ void SCREngine::Plan::PlanReplace()
 
 string SCREngine::Plan::GetTrace() const 
 {
-    return algo->GetName() + "::Plan" + algo->GetSerialString();
+    return algo->GetName() + ".plan" + algo->GetSerialString();
 }
 
     
@@ -264,10 +263,10 @@ void SCREngine::PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new
     // Fix up for remaining slaves if required.
     for( auto &p : slave_though_subtrees ) // ref important - we're modifying!
     {
-        TRACEC(*this)(" trying fixup of ")(through_subtree)(": ")(*(Agent *)p.first)(", ")(p.second)("\n");
+        TRACEC("Trying fixup of ")(through_subtree)(": ")(*(Agent *)p.first)(", ")(p.second)("\n");
         if( p.second = through_subtree )
         {
-            TRACEC(*this)(" fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
+            TRACEC("Fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
             p.second = new_subtree;
         }
     }
@@ -296,7 +295,7 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
     // Special case when slave is at root of my SCR region: switch the whole tree
     if( through_subtree == *p_root_x )
     {
-        TRACE(*this)(" implanting at root: ")(new_subtree)(" over ")(*p_root_x)("\n");
+        TRACE("Implanting at root: ")(new_subtree)(" over ")(*p_root_x)("\n");
         *p_root_x = new_subtree;
     }
     else
@@ -313,7 +312,7 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
                 // Update it to point to the new subtree
                 if( px ) // ps is NULL at root 
                 {
-                    TRACE(*this)(" implanting at non-root: ")(new_subtree)(" over ")(*const_cast<TreePtrInterface *>(px))("\n");
+                    TRACE("Implanting at non-root: ")(new_subtree)(" over ")(*const_cast<TreePtrInterface *>(px))("\n");
                     *const_cast<TreePtrInterface *>(px) = new_subtree;
                     hits++;
                 }
@@ -337,10 +336,10 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     keys_available = true;
 
     // Now replace according to the couplings
-    TRACE(*this)(" now replacing, root agent=")(plan.root_agent)("\n");
+    TRACE("Now replacing, root agent=")(plan.root_agent)("\n");
     TreePtr<Node> new_root_x;
     {Tracer::RAIIEnable silencer( false );new_root_x = plan.root_agent->BuildReplace(plan.root_plink);}
-    TRACE(*this)(" replace done\n");
+    TRACE("Replace done\n");
     
     if( ReadArgs::new_slave_sequence )
     {
@@ -348,12 +347,12 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
         {
             if( auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
             {
-                TRACE(*this)(" running slave ")(*(Agent *)slave_agent)(" root x=")(new_root_x)("\n");
+                TRACE("Running slave ")(*(Agent *)slave_agent)(" root x=")(new_root_x)("\n");
                 RunSlave(slave_agent, &new_root_x);
             }
         }        
     }
-    TRACE(*this)(" slaves done\n");
+    TRACE("Slaves done\n");
     
     keys_available = false;
     replace_keys.clear();
@@ -378,11 +377,11 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // Global domain of possible xlink values
     knowledge.Build( plan.root_plink, root_xlink );
 
-    TRACE(*this)(" begin search\n");
+    TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
     {Tracer::RAIIEnable silencer( false );plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );}
-    TRACE(*this)(" search got a match\n");
+    TRACE("Search got a match\n");
            
     knowledge.Clear();
 
@@ -403,7 +402,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                         const CouplingKeysMap *master_keys )
 {
     INDENT("}");
-    TRACE(*this)(" begin RCR\n");
+    TRACE("Begin RCR\n");
         
     ASSERT( plan.root_pattern )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
@@ -423,18 +422,18 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
         {
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
-            TRACE(*this)(" mismatched; stopping\n");
+            TRACE("Mismatched; stopping\n");
             return i; // when the compare fails, we're done
         }
         if( stop )
         {
-            TRACE(*this)(" stopping as requested after hit %d\n", stop_after[depth]);
-            TRACE("OK\n");
+            TRACE("Stopping as requested after hit %d\n", stop_after[depth]);
+            TRACEC("OK\n");
             return i;
         }    
     }
     
-    TRACE(*this)(" over the limit of %d reps\n", repetitions); 
+    TRACE("Over the limit of %d reps\n", repetitions); 
     ASSERT(!rep_error)
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
@@ -520,7 +519,7 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
     
     ASSERT(keyer_x);
     if( plan.final_agent_phases.at(keyer_agent) != IN_COMPARE_ONLY )
-        ASSERT( keyer_x->IsFinal() )(*this)(" trying to key with non-final ")(keyer_x)("\n"); 
+        ASSERT( keyer_x->IsFinal() )("Trying to key with non-final ")(keyer_x)("\n"); 
 
     CouplingKey key( keyer_link, place, nullptr, this );
     InsertSolo( replace_keys, make_pair(keyer_agent, key) );

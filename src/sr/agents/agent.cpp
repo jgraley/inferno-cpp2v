@@ -27,14 +27,14 @@ Agent& Agent::operator=(Agent& other)
 Agent *Agent::AsAgent( shared_ptr<Node> node )
 {
     Agent *agent = TryAsAgent(node);
-    ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
+    ASSERTS( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
 }
 
 
 Agent *Agent::TryAsAgent( shared_ptr<Node> node )
 {
-    ASSERT( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
+    ASSERTS( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
     return dynamic_cast<Agent *>(node.get());
 }
 
@@ -42,14 +42,14 @@ Agent *Agent::TryAsAgent( shared_ptr<Node> node )
 const Agent *Agent::AsAgentConst( shared_ptr<const Node> node )
 {
     const Agent *agent = TryAsAgentConst(node);
-    ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
+    ASSERTS( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
 }
 
 
 const Agent *Agent::TryAsAgentConst( shared_ptr<const Node> node )
 {
-    ASSERT( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
+    ASSERTS( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
     return dynamic_cast<const Agent *>(node.get());
 }
 
