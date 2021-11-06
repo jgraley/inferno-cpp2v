@@ -213,7 +213,7 @@ void SCREngine::Plan::PlanningStageThree(unordered_set<PatternLink> master_keyer
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
-    // COMPARE, REPLACE, RECURSE, RECURSE
+    // COMPARE, REPLACE, RECURSE, RECURSE (this is LATER slave S/R)
     TRACE("Planning stage three\n");
  
     all_keyer_plinks = master_keyers;
