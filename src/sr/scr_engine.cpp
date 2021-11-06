@@ -348,15 +348,12 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
     TRACE("Replace done\n");
     
-    if( ReadArgs::new_slave_sequence )
+    for( PatternLink plink : plan.my_replace_plinks_postorder )
     {
-        for( PatternLink plink : plan.my_replace_plinks_postorder )
+        if( auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
         {
-            if( auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
-            {
-                TRACE("Running slave ")(*(Agent *)slave_agent)(" root x=")(new_root_x)("\n");
-                RunSlave(slave_agent, &new_root_x);
-            }
+            TRACE("Running slave ")(*(Agent *)slave_agent)(" root x=")(new_root_x)("\n");
+            RunSlave(slave_agent, &new_root_x);
         }        
     }
     TRACE("Slaves done\n");
@@ -500,21 +497,10 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
     ASSERT( keys_available );
     //Tracer::RAIIEnable silencer( true );    
     
-    if( ReadArgs::new_slave_sequence )
-    {
-        // p_root_xnode cannot be stored: it points to a local of our caller
-        TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 
-        
-        InsertSolo( slave_though_subtrees, make_pair( slave_agent, slave_through_subtree ) );
-    }
-    else    
-    {
-        shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
-        ASSERT( slave_engine );
-        
-        // Run the slave engine        
-        slave_engine->RepeatingCompareReplace( p_slave_through_subtree, &replace_keys );
-    }
+    // p_root_xnode cannot be stored: it points to a local of our caller
+    TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 
+    
+    InsertSolo( slave_though_subtrees, make_pair( slave_agent, slave_through_subtree ) );
 }
 
 

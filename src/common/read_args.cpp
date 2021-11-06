@@ -34,7 +34,6 @@ bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
 bool ReadArgs::new_coupling_planning = false;
-bool ReadArgs::new_slave_sequence = false;
 
 void ReadArgs::Usage()
 {
@@ -209,7 +208,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='x' )
         {
-            new_slave_sequence = true;
+            new_coupling_planning = true;
         }
         else 
         {

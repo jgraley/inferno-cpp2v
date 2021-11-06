@@ -42,7 +42,6 @@ public:
     static bool documentation_graphs;
     static bool output_all;
     static bool new_coupling_planning;
-    static bool new_slave_sequence;
     
 private:
     void ParseQuitAfter(std::string arg);
