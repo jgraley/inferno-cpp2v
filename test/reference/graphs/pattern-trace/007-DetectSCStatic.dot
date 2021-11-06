@@ -52,20 +52,6 @@ subgraph "clusterAnd#R7-0" {
         height = 0.4
     ];
     
-    // -------- block And#R7-0/#X7-12-4 ----------
-    "And#R7-0/#X7-12-4" [
-        xlabel = "#X7-12-4"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R7-0/#B-2-59 ----------
     "And#R7-0/#B-2-59" [
         fillcolor = "/set28/5"
@@ -78,6 +64,20 @@ subgraph "clusterAnd#R7-0" {
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
+    ];
+    
+    // -------- block And#R7-0/#X7-12-4 ----------
+    "And#R7-0/#X7-12-4" [
+        xlabel = "#X7-12-4"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }

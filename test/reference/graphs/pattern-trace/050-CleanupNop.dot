@@ -98,19 +98,6 @@ subgraph "clusterAnd#R50-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R50-0/#B-2-884 ----------
-    "And#R50-0/#B-2-884" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-884"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Nop</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
     // -------- block And#R50-0/#X50-12-41 ----------
     "And#R50-0/#X50-12-41" [
         xlabel = "#X50-12-41"
@@ -137,6 +124,19 @@ subgraph "clusterAnd#R50-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
+    ];
+    
+    // -------- block And#R50-0/#B-2-884 ----------
+    "And#R50-0/#B-2-884" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-884"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Nop</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
     ];
     
     // -------- block And#R50-0/#B-2-882 ----------
