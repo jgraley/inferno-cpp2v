@@ -24,7 +24,7 @@ class Conjecture;
 class SpecialBase;
 class AndRuleEngine;
 
-class RequiresSubordinateSCREngine
+class RequiresSubordinateSCREngine : public virtual Graphable
 {
 public:
 	virtual TreePtr<Node> GetSearchPattern() const = 0;

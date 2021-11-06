@@ -14,8 +14,8 @@ MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctes
 MINISRCASES = pointeris $(MINICASES) 
 
 # You have to edit this file because the tests depend on it, so a retest will be forced
-SRARGS=
-IARGS=-tq
+SRARGS=-k
+IARGS=-tq -x
 
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd

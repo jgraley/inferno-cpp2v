@@ -260,11 +260,13 @@ string SCREngine::Plan::GetTrace() const
     
 void SCREngine::PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
 {
+    INDENT("F");
+    
     // Fix up for remaining slaves if required.
     for( auto &p : slave_though_subtrees ) // ref important - we're modifying!
     {
-        TRACEC("Trying fixup of ")(through_subtree)(": ")(*(Agent *)p.first)(", ")(p.second)("\n");
-        if( p.second = through_subtree )
+        TRACE("Trying fixup of ")(through_subtree)(": ")(p.first)(", ")(p.second)("\n");
+        if( p.second == through_subtree )
         {
             TRACEC("Fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
             p.second = new_subtree;
@@ -281,6 +283,10 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
     shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
     ASSERT( slave_engine );
    
+    TRACE("Going to run slave on ")(*slave_engine)
+         (" agent ")(slave_agent)
+         (" and slave_though_subtrees are\n")(slave_though_subtrees)("\n");
+   
     // Recall the base node of the subtree under through (after master replace)
     TreePtr<Node> through_subtree = slave_though_subtrees.at(slave_agent);
     slave_though_subtrees.erase(slave_agent); // not needed any more
@@ -292,10 +298,11 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
     if( !hits )
         return;
         
+    TRACE("Slave ")(slave_engine)(" succeeded, need to implant new subtree ")(new_subtree)("\n");
     // Special case when slave is at root of my SCR region: switch the whole tree
     if( through_subtree == *p_root_x )
     {
-        TRACE("Implanting at root: ")(new_subtree)(" over ")(*p_root_x)("\n");
+        TRACEC("Implanting at root over ")(*p_root_x)("\n");
         *p_root_x = new_subtree;
     }
     else
@@ -312,7 +319,7 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
                 // Update it to point to the new subtree
                 if( px ) // ps is NULL at root 
                 {
-                    TRACE("Implanting at non-root: ")(new_subtree)(" over ")(*const_cast<TreePtrInterface *>(px))("\n");
+                    TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(px))("\n");
                     *const_cast<TreePtrInterface *>(px) = new_subtree;
                     hits++;
                 }
@@ -320,7 +327,7 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
         }
         ASSERT( hits==1 )("Trying to implant ")(new_subtree)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
     }
-    
+
     PostSlaveFixup( through_subtree, new_subtree );
 }
 
@@ -338,7 +345,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     // Now replace according to the couplings
     TRACE("Now replacing, root agent=")(plan.root_agent)("\n");
     TreePtr<Node> new_root_x;
-    {Tracer::RAIIEnable silencer( false );new_root_x = plan.root_agent->BuildReplace(plan.root_plink);}
+    new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
     TRACE("Replace done\n");
     
     if( ReadArgs::new_slave_sequence )
@@ -380,7 +387,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    {Tracer::RAIIEnable silencer( false );plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );}
+    plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );
     TRACE("Search got a match\n");
            
     knowledge.Clear();
