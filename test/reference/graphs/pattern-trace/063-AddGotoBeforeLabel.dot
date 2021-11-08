@@ -322,36 +322,6 @@ subgraph "clusterAnd#R63-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R63-0/#B-2-1087 ----------
-    "And#R63-0/#B-2-1087" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-1087"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="20">∧</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(Compound)</FONT></TD><TD PORT="port0"></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">patterns</FONT></TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
-    // -------- block And#R63-0/#B-2-1088 ----------
-    "And#R63-0/#B-2-1088" [
-        fillcolor = "/set28/2"
-        xlabel = "#B-2-1088"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "diamond"
-        label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R63-0/#B-2-1085 ----------
     "And#R63-0/#B-2-1085" [
         fillcolor = "/set28/1"
@@ -378,6 +348,21 @@ subgraph "clusterAnd#R63-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
+    ];
+    
+    // -------- block And#R63-0/#B-2-1087 ----------
+    "And#R63-0/#B-2-1087" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-1087"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="20">∧</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(Compound)</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">patterns</FONT></TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
     ];
     
     // -------- block And#R63-0/#B-2-1086 ----------
@@ -417,6 +402,21 @@ subgraph "clusterAnd#R63-0" {
         fontcolor = grey40
         shape = "triangle"
         label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R63-0/#B-2-1088 ----------
+    "And#R63-0/#B-2-1088" [
+        fillcolor = "/set28/2"
+        xlabel = "#B-2-1088"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "diamond"
+        label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
         style = "filled"
         penwidth = 0.0
         fixedsize = true
@@ -498,28 +498,6 @@ subgraph "clusterAnd#R63-0" {
     
 }
 
-"And#R63-0/#B-2-1087":port1 -> "And#R63-0/#B-2-1074" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R63-0/#B-2-1087":port1 -> "And#R63-0/#B-2-1088" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R63-0/#B-2-1088" -> "And#R63-0/And#R63-1/#B-2-1076" [
-    arrowhead="normalnoneodiamond"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
 "And#R63-0/#B-2-1085":port0 -> "And#R63-0/#B-2-1086" [
     label = "#0"
     decorate = true
@@ -529,6 +507,20 @@ subgraph "clusterAnd#R63-0" {
 
 "And#R63-0/#X63-12-54" -> "And#R63-0/#X63-8-58" [
     label = "#2"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R63-0/#B-2-1087":port1 -> "And#R63-0/#B-2-1074" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R63-0/#B-2-1087":port1 -> "And#R63-0/#B-2-1088" [
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black
@@ -567,6 +559,14 @@ subgraph "clusterAnd#R63-0" {
 
 "And#R63-0/#X63-8-58" -> "And#R63-0/#B-2-1087" [
     label = "#1"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R63-0/#B-2-1088" -> "And#R63-0/And#R63-1/#B-2-1076" [
+    arrowhead="normalnoneodiamond"
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black

@@ -22,8 +22,19 @@
 using namespace Steps;
 
 void SelfTest();
-    // Build a vector of transformations, in the order that we will run them
-    // (ordered by hand for now, until the auto sequencer is ready)
+
+struct StepPlan
+{
+    shared_ptr<Transformation> tx;
+    int step_index;
+    bool allow_trace;
+    bool allow_hits;
+    bool allow_reps;
+};
+
+
+// Build a vector of transformations, in the order that we will run them
+// (ordered by hand for now, until the auto sequencer is ready)
 void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 {
     ASSERT( sequence );
@@ -160,57 +171,63 @@ void GenerateGraphRegions( Graph &graph, shared_ptr<Transformation> t )
 }
 
 
-void MaybeGeneratePatternGraphs( vector< shared_ptr<Transformation> > *sequence )
+void MaybeGeneratePatternGraphs( const vector<StepPlan> &steps_plan )
 {
     if( !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1 )
     {
         if( ReadArgs::pattern_graph_name.back()=='/' )
         {
             string dir = ReadArgs::pattern_graph_name;
-            int index = 0;
-            for( shared_ptr<Transformation> t : *sequence )
+            for( const StepPlan &sp : steps_plan )
             {
-				Progress(Progress::RENDERING, index).SetAsCurrent();
-                string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), index, t->GetName().c_str());                                                       
-                Graph g( filepath, t->GetName() );
-                GenerateGraphRegions( g, t );
-                index++;
+				Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
+                string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), sp.step_index, sp.tx->GetName().c_str());                                                       
+                Graph g( filepath, sp.tx->GetName() );
+                GenerateGraphRegions( g, sp.tx );
             }
         }
         else
         {
-            if( !ReadArgs::pattern_graph_name.empty() )
+            StepPlan my_sp;
+            if( ReadArgs::pattern_graph_name.empty() )
             {
-                ReadArgs::pattern_graph_index = 0;
-                for( shared_ptr<Transformation> t : *sequence )
-                {
-                    if( t->GetName() == ReadArgs::pattern_graph_name )
+                ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
+                ASSERT( ReadArgs::pattern_graph_index < steps_plan.size() )("There are only %d steps at present\n", steps_plan.size() );
+                my_sp = steps_plan[ReadArgs::pattern_graph_index];
+            }
+            else
+            {
+                for( const StepPlan &sp : steps_plan )
+                {                    
+                    if( ReadArgs::pattern_graph_name.empty() ?
+                        sp.step_index == ReadArgs::pattern_graph_index :
+                        sp.tx->GetName() == ReadArgs::pattern_graph_name )
+                    {
+                        my_sp = sp;
                         break;
-                    ReadArgs::pattern_graph_index++;
+                    }
                 }
-                if( ReadArgs::pattern_graph_index == sequence->size() )
+                if( !my_sp.tx ) // not found?
                 {
-                    fprintf(stderr, "Cannot find step named %s. Known step names:\n", ReadArgs::pattern_graph_name.c_str() );  
-                    for( shared_ptr<Transformation> t : *sequence )
-                        fprintf(stderr, "%s\n", t->GetName().c_str() );
+                    fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
+                    for( const StepPlan &sp : steps_plan )
+                        fprintf(stderr, "%03d-%s\n", sp.step_index, sp.tx->GetName().c_str() );
                     ASSERT(false);
                 }
             }
-			Progress(Progress::RENDERING, ReadArgs::pattern_graph_index).SetAsCurrent();
-            ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-            ASSERT( ReadArgs::pattern_graph_index < sequence->size() )("There are only %d steps at present\n", sequence->size() );
-            Graph g( ReadArgs::outfile, sequence->at(ReadArgs::pattern_graph_index)->GetName() );
-            GenerateGraphRegions( g, sequence->at(ReadArgs::pattern_graph_index) );
+			Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();
+            Graph g( ReadArgs::outfile, my_sp.tx->GetName() );
+            GenerateGraphRegions( g, my_sp.tx );
         }
     }        
 }
 
 
-bool ShouldIQuit( bool on_step = false )
+bool ShouldIQuit()
 {
     if( ReadArgs::quitafter )
     {
-        if( ReadArgs::quitafter_progress==(on_step ? Progress::GetCurrent() : Progress::GetCurrentStage()) )
+        if( ReadArgs::quitafter_progress.GetStage()==Progress::GetCurrentStage().GetStage() )
         {
             //FTRACE("Stopping after ")(ReadArgs::quitafter_progress)("\n");
             return true;
@@ -246,37 +263,51 @@ int main( int argc, char *argv[] )
     if( ShouldIQuit() )
         exit(0);    
 
+    // Start a steps plan
+    vector<StepPlan> steps_plan;
+    for( int i=0; i<sequence.size(); i++ )
+        steps_plan.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true } );        
+    
+    // If we're to run only one step, restrict all stepped stages
+    if( ReadArgs::runonlyenable )
+        steps_plan = { steps_plan[ReadArgs::runonlystep] };
+
+    // If we're to quit after a particular step, restrict all stepped stages
+    if( ReadArgs::quitafter )
+    {
+        if( ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
+            steps_plan.resize(ReadArgs::quitafter_progress.GetStep() + 1);
+        for( int i=0; i<steps_plan.size()-1; i++ )
+            steps_plan[i].allow_trace = steps_plan[i].allow_hits = steps_plan[i].allow_reps = false;
+    }
+
     if( !ReadArgs::graph_trace )
-        MaybeGeneratePatternGraphs( &sequence );
+        MaybeGeneratePatternGraphs( steps_plan );
                 
     // Pattern transformations
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Pattern transforming\n"); 
-    i=0;
-    FOREACH( shared_ptr<Transformation> t, sequence )
+    for( const StepPlan &sp : steps_plan )
     {
-        Progress(Progress::PATTERN_TRANS, i++).SetAsCurrent();
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        Progress(Progress::PATTERN_TRANS, sp.step_index).SetAsCurrent();
+        Tracer::Enable( sp.allow_trace ); 
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
             pvnt->PatternTransformations();
         else
             ASSERTFAIL("Unknown transformation");
-        if( ShouldIQuit(true) )
-            break;
     }        
         
     // Planning part one
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning stage one\n"); 
-    i=0;
-    FOREACH( shared_ptr<Transformation> t, sequence )
+    for( const StepPlan &sp : steps_plan )
     {
-        Progress(Progress::PLANNING_ONE, i++).SetAsCurrent();
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        Progress(Progress::PLANNING_ONE, sp.step_index).SetAsCurrent();
+        Tracer::Enable( sp.allow_trace ); 
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
             pvnt->PlanningStageOne();
         else
             ASSERTFAIL("Unknown transformation");
-        if( ShouldIQuit(true) )
-            break;
     }
 
     if( ShouldIQuit() )
@@ -285,16 +316,14 @@ int main( int argc, char *argv[] )
     // Planning part two
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning stage two\n"); 
-    i=0;
-    FOREACH( shared_ptr<Transformation> t, sequence )
+    for( const StepPlan &sp : steps_plan )
     {
-        Progress(Progress::PLANNING_TWO, i++).SetAsCurrent();
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        Progress(Progress::PLANNING_TWO, sp.step_index).SetAsCurrent();
+        Tracer::Enable( sp.allow_trace ); 
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
             pvnt->PlanningStageTwo();
         else
             ASSERTFAIL("Unknown transformation");
-        if( ShouldIQuit(true) )
-            break;
     }
            
     if( ShouldIQuit() )
@@ -303,22 +332,20 @@ int main( int argc, char *argv[] )
     // Planning part three
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning stage three\n"); 
-    i=0;
-    FOREACH( shared_ptr<Transformation> t, sequence )
+    for( const StepPlan &sp : steps_plan )
     {
-        Progress(Progress::PLANNING_THREE, i++).SetAsCurrent();
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(t) )
+        Progress(Progress::PLANNING_THREE, sp.step_index).SetAsCurrent();
+        Tracer::Enable( sp.allow_trace ); 
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
             pvnt->PlanningStageThree();
         else
             ASSERTFAIL("Unknown transformation");
-        if( ShouldIQuit(true) )
-            break;
     }
        
     // If a pattern graph was requested, generate it now. We need the
     // agents to have been configured (planning stage 2)
     if( ReadArgs::graph_trace )
-        MaybeGeneratePatternGraphs( &sequence );
+        MaybeGeneratePatternGraphs( steps_plan );
 
     if( ShouldIQuit() )
         exit(0);
@@ -329,6 +356,7 @@ int main( int argc, char *argv[] )
     
     // Parse the input program
     Progress(Progress::PARSING).SetAsCurrent();   
+    Tracer::Enable( ReadArgs::trace );
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Parsing input %s\n", ReadArgs::infile.c_str()); 
     TreePtr<Node> program = TreePtr<Node>();
@@ -338,48 +366,33 @@ int main( int argc, char *argv[] )
         p( program, &program );
     }
             
-    if( ReadArgs::runonlyenable )
-    {
-        // Apply only the transformation requested
-        Progress(Progress::TRANSFORMING, ReadArgs::runonlystep).SetAsCurrent();
-        
-        shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
-        if( !ReadArgs::trace_quiet )
-            fprintf(stderr, "%s at T%d: %s\n", ReadArgs::infile.c_str(), ReadArgs::runonlystep, t->GetName().c_str() ); 
-        VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
-        (*t)( &program );
-    }
-    else if( !ShouldIQuit() )
+    if( !ShouldIQuit() ) // Now input has been parsed, we always want to render even if quitting early.
     {
         // Apply the transformation steps in order, but quit early if requested to
-        i=0;
-        FOREACH( shared_ptr<Transformation> t, sequence )
+        for( const StepPlan &sp : steps_plan )
         {
-            Progress(Progress::TRANSFORMING, i).SetAsCurrent();
+            Progress(Progress::TRANSFORMING, sp.step_index).SetAsCurrent();
                        
             bool allow = !ReadArgs::quitafter || ReadArgs::quitafter_progress==Progress::GetCurrent();
             if( !ReadArgs::trace_quiet )
-                fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
-            Tracer::Enable( ReadArgs::trace && allow ); 
-            HitCount::Enable( ReadArgs::trace_hits && allow ); 
-            if( allow )
+                fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, sp.tx->GetName().c_str() ); 
+            Tracer::Enable( sp.allow_trace ); 
+            HitCount::Enable( sp.allow_hits ); 
+            if( sp.allow_reps )
                 VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
             else
                 VNTransformation::SetMaxReps( 100, true );
             if( allow )
-                t->SetStopAfter(ReadArgs::quitafter_counts, 0);
-            (*t)( &program );
+                sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
+            (*sp.tx)( &program );
             if( ReadArgs::output_all )
             {
-                Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", i) );
+                Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
                 r( &program );     
-                Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", i), ReadArgs::outfile+SSPrintf(" after T%03d-%s", i, t->GetName().c_str()) );
+                Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
+                         ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, sp.tx->GetName().c_str()) );
                 g( &program );    
-            }
-                
-            if( ShouldIQuit(true) )
-                break;            
-            i++;
+            }           
         }
     }
         
