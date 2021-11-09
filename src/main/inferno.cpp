@@ -211,8 +211,31 @@ Inferno::Plan::Plan()
         if( ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
             steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
         for( int i=0; i<steps.size()-1; i++ )
-            steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = false;
+            steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;
     }
+}
+
+
+void Inferno::RunSteppyStage( Plan::Stage stage )
+{
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "%s\n", stage.text.c_str()); 
+    for( const Plan::Step &sp : plan.steps )
+    {
+        Progress(stage.progress_stage, sp.step_index).SetAsCurrent();
+        Tracer::Enable( stage.allow_trace && sp.allow_trace ); 
+        HitCount::Enable( stage.allow_hits && sp.allow_hits ); 
+        if( stage.allow_reps && sp.allow_reps )
+            VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
+        else
+            VNTransformation::SetMaxReps( 100, true );
+        if( stage.allow_stop && sp.allow_stop )
+            sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
+        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
+            stage.step_function(pvnt, sp);
+        else
+            ASSERTFAIL("Unknown transformation");
+    }        
 }
 
     
@@ -274,62 +297,45 @@ void Inferno::Run()
         MaybeGeneratePatternGraphs();
                 
     // Pattern transformations
-    if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Pattern transforming\n"); 
-    for( const Plan::Step &sp : plan.steps )
+    RunSteppyStage( {Progress::PATTERN_TRANS, true, false, false, false,
+                    "Pattern transforming", 
+                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
     {
-        Progress(Progress::PATTERN_TRANS, sp.step_index).SetAsCurrent();
-        Tracer::Enable( sp.allow_trace ); 
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
-            pvnt->PatternTransformations();
-        else
-            ASSERTFAIL("Unknown transformation");
-    }        
+        pvnt->PatternTransformations();
+    } });     
         
+    if( ShouldIQuit() )
+        return;
+
     // Planning part one
-    if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Planning stage one\n"); 
-    for( const Plan::Step &sp : plan.steps )
+    RunSteppyStage( {Progress::PLANNING_ONE, true, false, false, false,
+                    "Planning stage one", 
+                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
     {
-        Progress(Progress::PLANNING_ONE, sp.step_index).SetAsCurrent();
-        Tracer::Enable( sp.allow_trace ); 
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
-            pvnt->PlanningStageOne();
-        else
-            ASSERTFAIL("Unknown transformation");
-    }
+        pvnt->PlanningStageOne();
+    } });     
 
     if( ShouldIQuit() )
         return;
         
     // Planning part two
-    if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Planning stage two\n"); 
-    for( const Plan::Step &sp : plan.steps )
+    RunSteppyStage( {Progress::PLANNING_TWO, true, false, false, false,
+                    "Planning stage two", 
+                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
     {
-        Progress(Progress::PLANNING_TWO, sp.step_index).SetAsCurrent();
-        Tracer::Enable( sp.allow_trace ); 
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
-            pvnt->PlanningStageTwo();
-        else
-            ASSERTFAIL("Unknown transformation");
-    }
+        pvnt->PlanningStageTwo();
+    } });    
            
     if( ShouldIQuit() )
         return;
 
     // Planning part three
-    if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Planning stage three\n"); 
-    for( const Plan::Step &sp : plan.steps )
+    RunSteppyStage( {Progress::PLANNING_THREE, true, false, false, false,
+                    "Planning stage three", 
+                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
     {
-        Progress(Progress::PLANNING_THREE, sp.step_index).SetAsCurrent();
-        Tracer::Enable( sp.allow_trace ); 
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
-            pvnt->PlanningStageThree();
-        else
-            ASSERTFAIL("Unknown transformation");
-    }
+        pvnt->PlanningStageThree();
+    } });    
        
     // If a pattern graph was requested, generate it now. We need the
     // agents to have been configured (planning stage 2)
@@ -357,23 +363,13 @@ void Inferno::Run()
             
     if( !ShouldIQuit() ) // Now input has been parsed, we always want to render even if quitting early.
     {
-        // Apply the transformation steps in order, but quit early if requested to
-        for( const Plan::Step &sp : plan.steps )
-        {
-            Progress(Progress::TRANSFORMING, sp.step_index).SetAsCurrent();
-                       
-            bool allow = !ReadArgs::quitafter || ReadArgs::quitafter_progress==Progress::GetCurrent();
+        RunSteppyStage( {Progress::TRANSFORMING, true, true, true, true,
+                        "Transforming", 
+                        [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
+        {                      
             if( !ReadArgs::trace_quiet )
                 fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, sp.tx->GetName().c_str() ); 
-            Tracer::Enable( sp.allow_trace ); 
-            HitCount::Enable( sp.allow_hits ); 
-            if( sp.allow_reps )
-                VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
-            else
-                VNTransformation::SetMaxReps( 100, true );
-            if( allow )
-                sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
-            (*sp.tx)( &program );
+            (*pvnt)( &program );
             if( ReadArgs::output_all )
             {
                 Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
@@ -382,7 +378,7 @@ void Inferno::Run()
                          ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, sp.tx->GetName().c_str()) );
                 g( &program );    
             }           
-        }
+        } });
     }
         
     // Output either C source code or a graph, as requested
