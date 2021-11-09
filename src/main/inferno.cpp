@@ -195,23 +195,23 @@ Inferno::Plan::Plan()
 		fprintf(stderr, "Building patterns\n"); 
     BuildSequence( &sequence );
     if( ShouldIQuit() )
-        exit(0);    
+        return;    
 
     // Start a steps plan
     for( int i=0; i<sequence.size(); i++ )
-        steps_plan.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true } );        
+        steps.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true } );        
     
     // If we're to run only one step, restrict all stepped stages
     if( ReadArgs::runonlyenable )
-        steps_plan = { steps_plan[ReadArgs::runonlystep] };
+        steps = { steps[ReadArgs::runonlystep] };
 
     // If we're to quit after a particular step, restrict all stepped stages
     if( ReadArgs::quitafter )
     {
         if( ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
-            steps_plan.resize(ReadArgs::quitafter_progress.GetStep() + 1);
-        for( int i=0; i<steps_plan.size()-1; i++ )
-            steps_plan[i].allow_trace = steps_plan[i].allow_hits = steps_plan[i].allow_reps = false;
+            steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
+        for( int i=0; i<steps.size()-1; i++ )
+            steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = false;
     }
 }
 
@@ -223,7 +223,7 @@ void Inferno::MaybeGeneratePatternGraphs()
         if( ReadArgs::pattern_graph_name.back()=='/' )
         {
             string dir = ReadArgs::pattern_graph_name;
-            for( const StepPlan &sp : plan.steps_plan )
+            for( const Plan::Step &sp : plan.steps )
             {
 				Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
                 string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), sp.step_index, sp.tx->GetName().c_str());                                                       
@@ -233,16 +233,16 @@ void Inferno::MaybeGeneratePatternGraphs()
         }
         else
         {
-            StepPlan my_sp;
+            Plan::Step my_sp;
             if( ReadArgs::pattern_graph_name.empty() )
             {
                 ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-                ASSERT( ReadArgs::pattern_graph_index < plan.steps_plan.size() )("There are only %d steps at present\n", plan.steps_plan.size() );
-                my_sp = plan.steps_plan[ReadArgs::pattern_graph_index];
+                ASSERT( ReadArgs::pattern_graph_index < plan.steps.size() )("There are only %d steps at present\n", plan.steps.size() );
+                my_sp = plan.steps[ReadArgs::pattern_graph_index];
             }
             else
             {
-                for( const StepPlan &sp : plan.steps_plan )
+                for( const Plan::Step &sp : plan.steps )
                 {                    
                     if( ReadArgs::pattern_graph_name.empty() ?
                         sp.step_index == ReadArgs::pattern_graph_index :
@@ -255,7 +255,7 @@ void Inferno::MaybeGeneratePatternGraphs()
                 if( !my_sp.tx ) // not found?
                 {
                     fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
-                    for( const StepPlan &sp : plan.steps_plan )
+                    for( const Plan::Step &sp : plan.steps )
                         fprintf(stderr, "%03d-%s\n", sp.step_index, sp.tx->GetName().c_str() );
                     ASSERT(false);
                 }
@@ -276,7 +276,7 @@ void Inferno::Run()
     // Pattern transformations
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Pattern transforming\n"); 
-    for( const StepPlan &sp : plan.steps_plan )
+    for( const Plan::Step &sp : plan.steps )
     {
         Progress(Progress::PATTERN_TRANS, sp.step_index).SetAsCurrent();
         Tracer::Enable( sp.allow_trace ); 
@@ -289,7 +289,7 @@ void Inferno::Run()
     // Planning part one
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning stage one\n"); 
-    for( const StepPlan &sp : plan.steps_plan )
+    for( const Plan::Step &sp : plan.steps )
     {
         Progress(Progress::PLANNING_ONE, sp.step_index).SetAsCurrent();
         Tracer::Enable( sp.allow_trace ); 
@@ -300,12 +300,12 @@ void Inferno::Run()
     }
 
     if( ShouldIQuit() )
-        exit(0);
+        return;
         
     // Planning part two
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning stage two\n"); 
-    for( const StepPlan &sp : plan.steps_plan )
+    for( const Plan::Step &sp : plan.steps )
     {
         Progress(Progress::PLANNING_TWO, sp.step_index).SetAsCurrent();
         Tracer::Enable( sp.allow_trace ); 
@@ -316,12 +316,12 @@ void Inferno::Run()
     }
            
     if( ShouldIQuit() )
-        exit(0);
+        return;
 
     // Planning part three
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Planning stage three\n"); 
-    for( const StepPlan &sp : plan.steps_plan )
+    for( const Plan::Step &sp : plan.steps )
     {
         Progress(Progress::PLANNING_THREE, sp.step_index).SetAsCurrent();
         Tracer::Enable( sp.allow_trace ); 
@@ -337,7 +337,7 @@ void Inferno::Run()
         MaybeGeneratePatternGraphs();
 
     if( ShouldIQuit() )
-        exit(0);
+        return;
 
     // If there was no input program then there's nothing more to do
     if( ReadArgs::infile.empty() )
@@ -358,7 +358,7 @@ void Inferno::Run()
     if( !ShouldIQuit() ) // Now input has been parsed, we always want to render even if quitting early.
     {
         // Apply the transformation steps in order, but quit early if requested to
-        for( const StepPlan &sp : plan.steps_plan )
+        for( const Plan::Step &sp : plan.steps )
         {
             Progress(Progress::TRANSFORMING, sp.step_index).SetAsCurrent();
                        

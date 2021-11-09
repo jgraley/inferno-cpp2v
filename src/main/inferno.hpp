@@ -8,21 +8,21 @@
 
 class Inferno
 {
-    struct StepPlan
-    {
-        shared_ptr<Transformation> tx;
-        int step_index;
-        bool allow_trace;
-        bool allow_hits;
-        bool allow_reps;
-    };
-
     const class Plan
     {
     public:
+        struct Step
+        {
+            shared_ptr<Transformation> tx;
+            int step_index;
+            bool allow_trace;
+            bool allow_hits;
+            bool allow_reps;
+        };
+
         Plan();
 
-        vector<StepPlan> steps_plan;
+        vector<Step> steps;
     } plan;
     
 public:    
