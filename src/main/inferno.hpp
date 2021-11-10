@@ -32,7 +32,8 @@ class Inferno
             bool allow_stop;
             //bool try_generate_pattern_graphs;
             string text;
-            function<void(shared_ptr<SR::VNTransformation>, const Plan::Step &sp)> step_function;
+            function<void(shared_ptr<SR::VNTransformation>, const Plan::Step &)> step_function;
+            function<void()> stage_function;
         };
 
         Plan();
@@ -43,10 +44,14 @@ class Inferno
 public:    
     Inferno();
 
-    void RunSteppyStage( Plan::Stage stage );
+    void RunStage( Plan::Stage stage );
                          
-    void MaybeGeneratePatternGraphs();
+    void GeneratePatternGraphs();
+    void RunTransformationStep(shared_ptr<SR::VNTransformation> pvnt, const Plan::Step &sp);
     void Run();
+    
+private:
+    TreePtr<Node> program;
 };
 
 #endif

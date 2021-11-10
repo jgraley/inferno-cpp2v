@@ -21,6 +21,13 @@ public:
         TRANSFORMING,
         RENDERING
     };
+    
+    enum Steppiness
+    {
+        STEPPY,
+        NON_STEPPY
+    };
+    
     static constexpr int NO_STEP = -1;
     
     Progress( Stage stage=INVALID, int step=NO_STEP );
@@ -28,6 +35,7 @@ public:
     string GetPrefix( int width=0 ) const;
     int GetStep() const;
     Stage GetStage() const;
+    Steppiness GetSteppiness() const;
     bool IsValid() const;
     void SetAsCurrent() const;
     static const Progress &GetCurrent();
@@ -51,8 +59,13 @@ public:
 private:    
     Stage stage;
     int step;
+    struct StageInfoBlock
+    {
+        string code;
+        Steppiness steppiness;
+    };
 
-    static const map<Stage, string> stage_formats;
+    static const map<Stage, StageInfoBlock> stage_info;
     static Progress current;
 };
 

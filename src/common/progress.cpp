@@ -13,25 +13,28 @@ Progress::Progress( Stage stage_, int step_ ) :
 
 Progress::Progress( string s )
 {    
-    for( auto p : Progress::stage_formats )
+    for( auto p : Progress::stage_info )
     {
         stage = p.first;
-        string stage_code = p.second;
+        string stage_code = p.second.code;
         if( s.substr(0, stage_code.size()) != stage_code)
             continue;
             
-        if( s.size() == stage_code.size() )
+        switch( p.second.steppiness )
         {
+        case NON_STEPPY:
+            if( s.size() != stage_code.size() )
+                break;            
             step = NO_STEP;
             return; // success: no step        
+        
+        case STEPPY:        
+            string ss = s.substr(stage_code.size());                
+            step = atoi(ss.c_str());
+            if( step==0 && ss != "0" )
+                break; // error - invalid            
+            return; // done - got a step
         }
-            
-        string ss = s.substr(stage_code.size());                
-        step = atoi(ss.c_str());
-        if( step==0 && ss != "0" )
-            break; // error - invalid
-            
-        return; // done - got a step
     }
     
     // Didn't find stage
@@ -45,15 +48,24 @@ string Progress::GetPrefix(int width) const
     if( stage==INVALID )
         return string( width, ' '); // defensive
         
-    string stage_code = stage_formats.at(stage);
+    string stage_code = stage_info.at(stage).code;
     int width_after_stage_code = max((string::size_type)0, width-stage_code.size());
     
-    if( width==0 )
-        return stage_code + (step!=NO_STEP ? to_string(step) : string());        
-    else if( step!=NO_STEP )
-        return stage_code + SSPrintf( "%0"+to_string(width_after_stage_code)+"d", step );
-    else
-        return stage_code + string( width_after_stage_code, ' ');
+    switch( stage_info.at(stage).steppiness )
+    {
+    case NON_STEPPY:
+        if( width==0 )
+            return stage_code;
+        else
+            return stage_code + string( width_after_stage_code, ' ');
+    
+    case STEPPY:        
+         if( width==0 )
+             return stage_code + to_string(step);   
+         else
+             return stage_code + SSPrintf( "%0"+to_string(width_after_stage_code)+"d", step );
+    }
+    return ""; // Can't ASSERT here    
 }
 
 
@@ -66,6 +78,12 @@ int Progress::GetStep() const
 Progress::Stage Progress::GetStage() const
 {
     return stage;
+}
+
+
+Progress::Steppiness Progress::GetSteppiness() const
+{
+    return stage_info.at(stage).steppiness;
 }
 
 
@@ -93,14 +111,14 @@ Progress Progress::GetCurrentStage()
 }
 
 
-const map<Progress::Stage, string> Progress::stage_formats =
- { { Progress::BUILDING_STEPS, "B" },
-   { Progress::PATTERN_TRANS,  "X" },  
-   { Progress::PLANNING_ONE,   "P" },
-   { Progress::PLANNING_TWO,   "Q" },
-   { Progress::PLANNING_THREE, "R" },
-   { Progress::PARSING,        "I" }, 
-   { Progress::TRANSFORMING,   "T" },
-   { Progress::RENDERING,      "O" } };
+const map<Progress::Stage, Progress::StageInfoBlock> Progress::stage_info =
+ { { Progress::BUILDING_STEPS, {"B", STEPPY} },
+   { Progress::PATTERN_TRANS,  {"X", STEPPY} },  
+   { Progress::PLANNING_ONE,   {"P", STEPPY} },
+   { Progress::PLANNING_TWO,   {"Q", STEPPY} },
+   { Progress::PLANNING_THREE, {"R", STEPPY} },
+   { Progress::PARSING,        {"I", NON_STEPPY} }, 
+   { Progress::TRANSFORMING,   {"T", STEPPY} },
+   { Progress::RENDERING,      {"O", NON_STEPPY} } };
 
 Progress Progress::current;

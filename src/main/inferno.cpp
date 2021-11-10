@@ -216,131 +216,165 @@ Inferno::Plan::Plan()
 }
 
 
-void Inferno::RunSteppyStage( Plan::Stage stage )
+void Inferno::RunStage( Plan::Stage stage )
 {
     if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "%s\n", stage.text.c_str()); 
-    for( const Plan::Step &sp : plan.steps )
+		fprintf(stderr, "%s\n", stage.text.c_str());     
+    
+    switch( Progress(stage.progress_stage).GetSteppiness() )
     {
-        Progress(stage.progress_stage, sp.step_index).SetAsCurrent();
-        Tracer::Enable( stage.allow_trace && sp.allow_trace ); 
-        HitCount::Enable( stage.allow_hits && sp.allow_hits ); 
-        if( stage.allow_reps && sp.allow_reps )
-            VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
-        else
-            VNTransformation::SetMaxReps( 100, true );
-        if( stage.allow_stop && sp.allow_stop )
-            sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
-        if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
-            stage.step_function(pvnt, sp);
-        else
-            ASSERTFAIL("Unknown transformation");
-    }        
+    case Progress::NON_STEPPY:
+        Progress(stage.progress_stage).SetAsCurrent();
+        Tracer::Enable( stage.allow_trace ); 
+        HitCount::Enable( stage.allow_hits ); 
+        stage.stage_function();
+        break;
+    
+    case Progress::STEPPY:        
+        for( const Plan::Step &sp : plan.steps )
+        {
+            Progress(stage.progress_stage, sp.step_index).SetAsCurrent();
+            Tracer::Enable( stage.allow_trace && sp.allow_trace ); 
+            HitCount::Enable( stage.allow_hits && sp.allow_hits ); 
+            if( stage.allow_reps && sp.allow_reps )
+                VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
+            else
+                VNTransformation::SetMaxReps( 100, true );
+            if( stage.allow_stop && sp.allow_stop )
+                sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
+            if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
+                stage.step_function(pvnt, sp);
+            else
+                ASSERTFAIL("Unknown transformation");
+        }        
+        break;
+    }
+
 }
 
     
-void Inferno::MaybeGeneratePatternGraphs()
+void Inferno::GeneratePatternGraphs()
 {
-    if( !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1 )
+    if( ReadArgs::pattern_graph_name.back()=='/' )
     {
-        if( ReadArgs::pattern_graph_name.back()=='/' )
+        string dir = ReadArgs::pattern_graph_name;
+        for( const Plan::Step &sp : plan.steps )
         {
-            string dir = ReadArgs::pattern_graph_name;
-            for( const Plan::Step &sp : plan.steps )
-            {
-				Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
-                string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), sp.step_index, sp.tx->GetName().c_str());                                                       
-                Graph g( filepath, sp.tx->GetName() );
-                GenerateGraphRegions( g, sp.tx );
-            }
+            Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
+            string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), sp.step_index, sp.tx->GetName().c_str());                                                       
+            Graph g( filepath, sp.tx->GetName() );
+            GenerateGraphRegions( g, sp.tx );
+        }
+    }
+    else
+    {
+        Plan::Step my_sp;
+        if( ReadArgs::pattern_graph_name.empty() )
+        {
+            ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
+            ASSERT( ReadArgs::pattern_graph_index < plan.steps.size() )("There are only %d steps at present\n", plan.steps.size() );
+            my_sp = plan.steps[ReadArgs::pattern_graph_index];
         }
         else
         {
-            Plan::Step my_sp;
-            if( ReadArgs::pattern_graph_name.empty() )
-            {
-                ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-                ASSERT( ReadArgs::pattern_graph_index < plan.steps.size() )("There are only %d steps at present\n", plan.steps.size() );
-                my_sp = plan.steps[ReadArgs::pattern_graph_index];
-            }
-            else
-            {
-                for( const Plan::Step &sp : plan.steps )
-                {                    
-                    if( ReadArgs::pattern_graph_name.empty() ?
-                        sp.step_index == ReadArgs::pattern_graph_index :
-                        sp.tx->GetName() == ReadArgs::pattern_graph_name )
-                    {
-                        my_sp = sp;
-                        break;
-                    }
-                }
-                if( !my_sp.tx ) // not found?
+            for( const Plan::Step &sp : plan.steps )
+            {                    
+                if( ReadArgs::pattern_graph_name.empty() ?
+                    sp.step_index == ReadArgs::pattern_graph_index :
+                    sp.tx->GetName() == ReadArgs::pattern_graph_name )
                 {
-                    fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
-                    for( const Plan::Step &sp : plan.steps )
-                        fprintf(stderr, "%03d-%s\n", sp.step_index, sp.tx->GetName().c_str() );
-                    ASSERT(false);
+                    my_sp = sp;
+                    break;
                 }
             }
-			Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();
-            Graph g( ReadArgs::outfile, my_sp.tx->GetName() );
-            GenerateGraphRegions( g, my_sp.tx );
+            if( !my_sp.tx ) // not found?
+            {
+                fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
+                for( const Plan::Step &sp : plan.steps )
+                    fprintf(stderr, "%03d-%s\n", sp.step_index, sp.tx->GetName().c_str() );
+                ASSERT(false);
+            }
         }
-    }        
+        Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();
+        Graph g( ReadArgs::outfile, my_sp.tx->GetName() );
+        GenerateGraphRegions( g, my_sp.tx );
+    }       
+}
+
+
+void Inferno::RunTransformationStep(shared_ptr<SR::VNTransformation> pvnt, const Plan::Step &sp)
+{
+    if( !ReadArgs::trace_quiet )
+        fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, sp.tx->GetName().c_str() ); 
+    (*pvnt)( &program );
+    if( ReadArgs::output_all )
+    {
+        Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
+        r( &program );     
+        Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
+                 ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, sp.tx->GetName().c_str()) );
+        g( &program );    
+    }           
 }
 
 
 void Inferno::Run()
 {    
-    if( !ReadArgs::graph_trace )
-        MaybeGeneratePatternGraphs();
+    bool generate_pattern_graphs = !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1;
+    
+    // Pattern graphs
+    if( generate_pattern_graphs && !ReadArgs::graph_trace )
+        RunStage( { Progress::RENDERING, 
+                  false, false, false, false,
+                  "Rendering pattern graphs",
+                  nullptr,  
+                  [&](){ GeneratePatternGraphs(); } } );    
                 
     // Pattern transformations
-    RunSteppyStage( {Progress::PATTERN_TRANS, true, false, false, false,
-                    "Pattern transforming", 
-                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
-    {
-        pvnt->PatternTransformations();
-    } });     
+    RunStage( { Progress::PATTERN_TRANS, 
+                true, false, false, false,
+                "Pattern transforming", 
+                [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PatternTransformations(); }, 
+                nullptr } );     
         
     if( ShouldIQuit() )
         return;
 
     // Planning part one
-    RunSteppyStage( {Progress::PLANNING_ONE, true, false, false, false,
-                    "Planning stage one", 
-                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
-    {
-        pvnt->PlanningStageOne();
-    } });     
+    RunStage( { Progress::PLANNING_ONE, 
+                true, false, false, false,
+                "Planning stage one", 
+                [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageOne(); }, 
+                nullptr } );     
 
     if( ShouldIQuit() )
         return;
         
     // Planning part two
-    RunSteppyStage( {Progress::PLANNING_TWO, true, false, false, false,
-                    "Planning stage two", 
-                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
-    {
-        pvnt->PlanningStageTwo();
-    } });    
+    RunStage( { Progress::PLANNING_TWO, 
+                true, false, false, false,
+                "Planning stage two", 
+                [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageTwo(); }, 
+                nullptr } );    
            
     if( ShouldIQuit() )
         return;
 
     // Planning part three
-    RunSteppyStage( {Progress::PLANNING_THREE, true, false, false, false,
-                    "Planning stage three", 
-                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
-    {
-        pvnt->PlanningStageThree();
-    } });    
+    RunStage( { Progress::PLANNING_THREE, 
+                true, false, false, false,
+                "Planning stage three", 
+                [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageThree(); }, 
+                nullptr } );    
        
-    // If a pattern graph was requested, generate it now. We need the
+    // If a pattern trace graph was requested, generate it now. We need the
     // agents to have been configured (planning stage 2)
-    if( ReadArgs::graph_trace )
-        MaybeGeneratePatternGraphs();
+    if( generate_pattern_graphs && ReadArgs::graph_trace )
+        RunStage( { Progress::RENDERING, 
+                  false, false, false, false,
+                  "Rendering pattern graphs",
+                  nullptr,  
+                  [&](){ GeneratePatternGraphs(); } } );        
 
     if( ShouldIQuit() )
         return;
@@ -350,58 +384,44 @@ void Inferno::Run()
         return;
     
     // Parse the input program
-    Progress(Progress::PARSING).SetAsCurrent();   
-    Tracer::Enable( ReadArgs::trace );
-    if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Parsing input %s\n", ReadArgs::infile.c_str()); 
-    TreePtr<Node> program = TreePtr<Node>();
-    {
-        //Tracer::RAIIEnable silencer( false ); // make parse be quiet
-        Parse p(ReadArgs::infile);
-        p( program, &program );
-    }
-            
+    RunStage( { Progress::PARSING, 
+                ReadArgs::trace, false, false, false,
+                SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
+                nullptr, 
+                [&](){ Parse(ReadArgs::infile)( program, &program ); } } );   
+    
     if( !ShouldIQuit() ) // Now input has been parsed, we always want to render even if quitting early.
     {
-        RunSteppyStage( {Progress::TRANSFORMING, true, true, true, true,
-                        "Transforming", 
-                        [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp)
-        {                      
-            if( !ReadArgs::trace_quiet )
-                fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, sp.tx->GetName().c_str() ); 
-            (*pvnt)( &program );
-            if( ReadArgs::output_all )
-            {
-                Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
-                r( &program );     
-                Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
-                         ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, sp.tx->GetName().c_str()) );
-                g( &program );    
-            }           
-        } });
+        RunStage( { Progress::TRANSFORMING, 
+                    true, true, true, true,
+                    "Transforming", 
+                    [&](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ RunTransformationStep(pvnt, sp); }, 
+                    nullptr } );        
     }
         
     // Output either C source code or a graph, as requested
-    Tracer::Enable( ReadArgs::trace );
-    HitCount::Enable( ReadArgs::trace_hits );
-    Progress(Progress::RENDERING).SetAsCurrent();
     if( ReadArgs::trace_hits )
-        HitCount::instance.Dump();    
+    {
+        RunStage( { Progress::RENDERING, 
+                    false, false, false, false,
+                    "Dumping hit counts", 
+                    nullptr, 
+                    [&](){ HitCount::instance.Dump(); } } );
+    }
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
     {
-        if( !ReadArgs::trace_quiet )
-			fprintf(stderr, "Rendering to graph\n"); 
-        Tracer::RAIIEnable silencer( false ); // make grapher be quiet
-        Graph g( ReadArgs::outfile, ReadArgs::outfile );
-        g( &program );    
-    }
+        RunStage( { Progress::RENDERING, 
+                    false, ReadArgs::trace_hits, false, false,
+                    "Rendering output to graph", 
+                    nullptr, 
+                    [&](){ Graph( ReadArgs::outfile, ReadArgs::outfile )( &program ); } } );
+    } 
     else if( !ReadArgs::output_all )   
     {
-        if( !ReadArgs::trace_quiet )
-			fprintf(stderr, "Rendering to code\n"); 
-        Tracer::RAIIEnable silencer( false ); // make render be quiet
-        Render r( ReadArgs::outfile );
-        r( &program );     
+        RunStage( { Progress::RENDERING, 
+                    false, ReadArgs::trace_hits, false, false,
+                    "Rendering output to code", 
+                    nullptr, [&](){ Render( ReadArgs::outfile )( &program ); } } );
     }
             
     return;

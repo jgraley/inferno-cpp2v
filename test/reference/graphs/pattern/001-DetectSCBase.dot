@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-3-1 ----------
-"CR#B-3-1" [
+// -------- block CR#B-1-3-1 ----------
+"CR#B-1-3-1" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-2-9 ----------
-"#B-2-9" [
+// -------- block #B-1-2-9 ----------
+"#B-1-2-9" [
     fontsize = "12"
     fontcolor = grey40
     shape = "triangle"
@@ -45,8 +45,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-2-10 ----------
-"#B-2-10" [
+// -------- block #B-1-2-10 ----------
+"#B-1-2-10" [
     fillcolor = "/set28/4"
     fontsize = "12"
     fontcolor = grey40
@@ -58,8 +58,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-12 ----------
-"#B-2-12" [
+// -------- block #B-1-2-12 ----------
+"#B-1-2-12" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -72,8 +72,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-2-15 ----------
-"#B-2-15" [
+// -------- block #B-1-2-15 ----------
+"#B-1-2-15" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -85,8 +85,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-19 ----------
-"#B-2-19" [
+// -------- block #B-1-2-19 ----------
+"#B-1-2-19" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -96,8 +96,8 @@ edge [
     penwidth = 0.0
 ];
 
-// -------- block #B-2-11 ----------
-"#B-2-11" [
+// -------- block #B-1-2-11 ----------
+"#B-1-2-11" [
     fillcolor = "/set28/4"
     fontsize = "12"
     fontcolor = grey40
@@ -109,8 +109,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-20 ----------
-"#B-2-20" [
+// -------- block #B-1-2-20 ----------
+"#B-1-2-20" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -125,8 +125,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-2-16 ----------
-"#B-2-16" [
+// -------- block #B-1-2-16 ----------
+"#B-1-2-16" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -140,8 +140,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-18 ----------
-"#B-2-18" [
+// -------- block #B-1-2-18 ----------
+"#B-1-2-18" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -152,8 +152,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-13 ----------
-"#B-2-13" [
+// -------- block #B-1-2-13 ----------
+"#B-1-2-13" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -166,8 +166,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-2-14 ----------
-"#B-2-14" [
+// -------- block #B-1-2-14 ----------
+"#B-1-2-14" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -180,8 +180,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-2-17 ----------
-"#B-2-17" [
+// -------- block #B-1-2-17 ----------
+"#B-1-2-17" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -193,8 +193,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-8 ----------
-"#B-2-8" [
+// -------- block #B-1-2-8 ----------
+"#B-1-2-8" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -208,100 +208,100 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-3-1":port0 -> "#B-2-9" [
+"CR#B-1-3-1":port0 -> "#B-1-2-9" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-3-1":port1 -> "#B-2-20" [
+"CR#B-1-3-1":port1 -> "#B-1-2-20" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-9" -> "#B-2-10" [
+"#B-1-2-9" -> "#B-1-2-10" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-9" -> "#B-2-11" [
+"#B-1-2-9" -> "#B-1-2-11" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-10":port0 -> "#B-2-12" [
+"#B-1-2-10":port0 -> "#B-1-2-12" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-10":port0 -> "#B-2-15" [
+"#B-1-2-10":port0 -> "#B-1-2-15" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-15":port0 -> "#B-2-19" [
+"#B-1-2-15":port0 -> "#B-1-2-19" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-11":port0 -> "#B-2-12" [
+"#B-1-2-11":port0 -> "#B-1-2-12" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-20":port0 -> "#B-2-9" [
+"#B-1-2-20":port0 -> "#B-1-2-9" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-20":port1 -> "#B-2-16" [
+"#B-1-2-20":port1 -> "#B-1-2-16" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-20":port2 -> "#B-2-8" [
+"#B-1-2-20":port2 -> "#B-1-2-8" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-16":port0 -> "#B-2-18" [
+"#B-1-2-16":port0 -> "#B-1-2-18" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-16":port1 -> "#B-2-13" [
+"#B-1-2-16":port1 -> "#B-1-2-13" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-16":port2 -> "#B-2-14" [
+"#B-1-2-16":port2 -> "#B-1-2-14" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-16":port2 -> "#B-2-17" [
+"#B-1-2-16":port2 -> "#B-1-2-17" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-17":port0 -> "#B-2-19" [
+"#B-1-2-17":port0 -> "#B-1-2-19" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-8":port0 -> "#B-2-18" [
+"#B-1-2-8":port0 -> "#B-1-2-18" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-8":port1 -> "#B-2-13" [
+"#B-1-2-8":port1 -> "#B-1-2-13" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-8":port2 -> "#B-2-14" [
+"#B-1-2-8":port2 -> "#B-1-2-14" [
     color = black
     fontcolor = black
 ];
