@@ -30,17 +30,17 @@ class Inferno
             bool allow_hits;
             bool allow_reps;
             bool allow_stop;
-            //bool try_generate_pattern_graphs;
             string text;
             function<void(shared_ptr<SR::VNTransformation>, const Plan::Step &)> step_function;
             function<void()> stage_function;
         };
 
         Plan(Inferno *algo_);
-        
+        bool ShouldIQuitAfter(Stage stage);
+
         Inferno *algo;
         vector<Step> steps;      
-        vector<Stage> stages;  
+        list<Stage> stages;  
     } plan;
     
 public:    

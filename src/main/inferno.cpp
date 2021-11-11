@@ -163,20 +163,6 @@ void GenerateGraphRegions( Graph &graph, shared_ptr<Transformation> t )
             ASSERTFAIL("Don't know how to do a trace-mode graph of this");
     }
 }
-
-
-bool ShouldIQuit()
-{
-    if( ReadArgs::quitafter )
-    {
-        if( ReadArgs::quitafter_progress.GetStage()==Progress::GetCurrentStage().GetStage() )
-        {
-            //FTRACE("Stopping after ")(ReadArgs::quitafter_progress)("\n");
-            return true;
-        }
-    }
-    return false;
-}
    
    
 Inferno::Inferno() :
@@ -188,6 +174,11 @@ Inferno::Inferno() :
 Inferno::Plan::Plan(Inferno *algo_) :
     algo( algo_ )
 {
+    // --------------------------- Build Steps ---------------------------
+    Stage stage_build_steps( 
+        { Progress::BUILDING_STEPS }
+    );
+
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
 
     // Build the sequence of steps
@@ -195,9 +186,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Building patterns\n"); 
     BuildSequence( &sequence );
-    if( ShouldIQuit() )
+    if( ShouldIQuitAfter(stage_build_steps) )
         return;    
 
+    // ------------------------ Form steps plan -------------------------
     // Start a steps plan
     for( int i=0; i<sequence.size(); i++ )
         steps.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true } );        
@@ -215,111 +207,141 @@ Inferno::Plan::Plan(Inferno *algo_) :
             steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;
     }
 
-    stages.clear();
-    bool generate_pattern_graphs = !ReadArgs::pattern_graph_name.empty() || ReadArgs::pattern_graph_index != -1;
-    
-    // Pattern graphs
-    if( generate_pattern_graphs && !ReadArgs::graph_trace )
-        stages.push_back( { Progress::RENDERING, 
-                            false, false, false, false,
-                            "Rendering pattern graphs",
-                            nullptr,  
-                            [this](){ algo->GeneratePatternGraphs(); } } );    
-                
+    // ------------------------ Create stages -------------------------
+    // Output a pattern graph
+    Stage stage_pattern_graphs( 
+        { Progress::RENDERING, 
+          false, false, false, false,
+          "Rendering pattern graphs",
+          nullptr,  
+          [this](){ algo->GeneratePatternGraphs(); } } 
+    );
+               
     // Pattern transformations
-    stages.push_back( { Progress::PATTERN_TRANS, 
-                        true, false, false, false,
-                        "Pattern transforming", 
-                        [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PatternTransformations(); }, 
-                        nullptr } );     
+    list<Stage> stages_pattern_transformation( { 
+        { Progress::PATTERN_TRANS, 
+          true, false, false, false,
+          "Pattern transforming", 
+          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PatternTransformations(); }, 
+          nullptr } 
+    } ); 
+
+    // Planning
+    vector<Stage> stages_planning( {
+        { Progress::PLANNING_ONE, 
+          true, false, false, false,
+          "Planning stage one", 
+          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageOne(); }, 
+          nullptr },
+        { Progress::PLANNING_TWO, 
+          true, false, false, false,
+          "Planning stage two", 
+          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageTwo(); }, 
+          nullptr },
+        { Progress::PLANNING_THREE, 
+          true, false, false, false,
+          "Planning stage three", 
+          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageThree(); }, 
+          nullptr }    
+    } );         
         
-    if( ShouldIQuit() )
-        return;
-
-    // Planning part one
-    stages.push_back( { Progress::PLANNING_ONE, 
-                        true, false, false, false,
-                        "Planning stage one", 
-                        [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageOne(); }, 
-                        nullptr } );     
-
-    if( ShouldIQuit() )
-        return;
+    // Parse input C++ code
+    Stage stage_parse(
+        { Progress::PARSING, 
+          ReadArgs::trace, false, false, false,
+          SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
+          nullptr, 
+          [this](){ Parse(ReadArgs::infile)( algo->program, &algo->program ); } }
+    );
         
-    // Planning part two
-    stages.push_back( { Progress::PLANNING_TWO, 
-                        true, false, false, false,
-                        "Planning stage two", 
-                        [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageTwo(); }, 
-                        nullptr } );    
-           
-    if( ShouldIQuit() )
+    // Code transformation
+    Stage stage_transform(
+        { Progress::TRANSFORMING, 
+          true, true, true, true,
+          "Transforming", 
+          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ algo->RunTransformationStep(pvnt, sp); }, 
+          nullptr }
+    );
+        
+    // Dump the hit counts
+    Stage stage_dump_hits(
+        { Progress::RENDERING, 
+          false, false, false, false,
+          "Dumping hit counts", 
+          nullptr, 
+          [this](){ HitCount::instance.Dump(); } }
+    );
+    
+    // Output an intermediate/output graph
+    Stage stage_intermediate_graph(
+        { Progress::RENDERING, 
+          false, ReadArgs::trace_hits, false, false,
+          "Rendering output to graph", 
+          nullptr, 
+          [this](){ Graph( ReadArgs::outfile, ReadArgs::outfile )( &algo->program ); } }
+    );
+    
+    // Output C++ source code
+    Stage stage_render_code(
+        { Progress::RENDERING, 
+          false, ReadArgs::trace_hits, false, false,
+          "Rendering output to code", 
+          nullptr, [&](){ Render( ReadArgs::outfile )( &algo->program ); } }
+    );
+        
+    // ------------------------ Form stages plan -------------------------
+    stages.clear();
+    bool generate_pattern_graphs = !ReadArgs::pattern_graph_name.empty() || 
+                                   ReadArgs::pattern_graph_index != -1;
+    if( generate_pattern_graphs && !ReadArgs::graph_trace )
+        stages.push_back( stage_pattern_graphs );    
+                
+    stages = stages + stages_pattern_transformation;     
+        
+    if( ShouldIQuitAfter(stages_pattern_transformation.back()) )
         return;
 
-    // Planning part three
-    stages.push_back( { Progress::PLANNING_THREE, 
-                        true, false, false, false,
-                        "Planning stage three", 
-                        [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageThree(); }, 
-                        nullptr } );    
-       
+    stages.push_back( stages_planning[0] );     
+    if( ShouldIQuitAfter(stages_planning[0]) )
+        return;
+
+    stages.push_back( stages_planning[1] );     
+    if( ShouldIQuitAfter(stages_planning[1]) )
+        return;
+    
+    stages.push_back( stages_planning[2] );     
+      
     // If a pattern trace graph was requested, generate it now. We need the
     // agents to have been configured (planning stage 2)
     if( generate_pattern_graphs && ReadArgs::graph_trace )
-        stages.push_back( { Progress::RENDERING, 
-                            false, false, false, false,
-                            "Rendering pattern graphs",
-                            nullptr,  
-                            [this](){ algo->GeneratePatternGraphs(); } } );        
+        stages.push_back( stage_pattern_graphs );        
 
-    if( ShouldIQuit() )
+    if( ShouldIQuitAfter(stages_planning[2]) )
         return;
 
     // If there was no input program then there's nothing more to do
     if( ReadArgs::infile.empty() )
         return;
     
-    // Parse the input program
-    stages.push_back( { Progress::PARSING, 
-                        ReadArgs::trace, false, false, false,
-                        SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
-                        nullptr, 
-                        [this](){ Parse(ReadArgs::infile)( algo->program, &algo->program ); } } );   
+    stages.push_back( stage_parse );   
     
-    if( !ShouldIQuit() ) // Now input has been parsed, we always want to render even if quitting early.
-    {
-        stages.push_back( { Progress::TRANSFORMING, 
-                            true, true, true, true,
-                            "Transforming", 
-                            [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ algo->RunTransformationStep(pvnt, sp); }, 
-                            nullptr } );        
-    }
+    // Now input has been parsed, we always want to render even if quitting early.
+    if( !ShouldIQuitAfter(stage_transform) ) 
+        stages.push_back( stage_transform );        
         
-    // Output either C source code or a graph, as requested
     if( ReadArgs::trace_hits )
-    {
-        stages.push_back( { Progress::RENDERING, 
-                            false, false, false, false,
-                            "Dumping hit counts", 
-                            nullptr, 
-                            [this](){ HitCount::instance.Dump(); } } );
-    }
+        stages.push_back( stage_dump_hits );
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
-    {
-        stages.push_back( { Progress::RENDERING, 
-                            false, ReadArgs::trace_hits, false, false,
-                            "Rendering output to graph", 
-                            nullptr, 
-                            [this](){ Graph( ReadArgs::outfile, ReadArgs::outfile )( &algo->program ); } } );
-    } 
+        stages.push_back( stage_intermediate_graph );
     else if( !ReadArgs::output_all )   
-    {
-        stages.push_back( { Progress::RENDERING, 
-                            false, ReadArgs::trace_hits, false, false,
-                            "Rendering output to code", 
-                            nullptr, [&](){ Render( ReadArgs::outfile )( &algo->program ); } } );
-    }
-            
+        stages.push_back( stage_render_code );          
+}
+
+
+bool Inferno::Plan::ShouldIQuitAfter(Stage stage)
+{
+    return ReadArgs::quitafter && 
+           ReadArgs::quitafter_progress.GetStage()==stage.progress_stage;
 }
 
 
