@@ -36,9 +36,11 @@ class Inferno
             function<void()> stage_function;
         };
 
-        Plan();
-
-        vector<Step> steps;
+        Plan(Inferno *algo_);
+        
+        Inferno *algo;
+        vector<Step> steps;      
+        vector<Stage> stages;  
     } plan;
     
 public:    
