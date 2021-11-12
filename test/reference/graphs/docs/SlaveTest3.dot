@@ -1,0 +1,182 @@
+digraph "SlaveTest3" {
+label = "SlaveTest3"
+labelloc = t
+graph [
+    rankdir = "LR"
+    ranksep = 0.3
+    bgcolor = antiquewhite1
+    color = black
+    fontcolor = black
+    fontname = "Arial"
+];
+node [
+    fontname = "Arial"
+];
+edge [
+    fontname = "Arial"
+];
+
+// -------------------- transformation figure --------------------
+// -------- block CR#B-1-4-1 ----------
+"CR#B-1-4-1" [
+    fillcolor = antiquewhite1
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">CompareReplace</FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
+    </TABLE>>
+    style = "filled"
+    color = black
+];
+
+// -------- block #B-1-2-16 ----------
+"#B-1-2-16" [
+    fillcolor = antiquewhite1
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>SlaveCompareReplace</I></FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">through</FONT></TD></TR>
+     <TR><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">replace</FONT></TD></TR>
+    </TABLE>>
+    style = "filled"
+    color = black
+];
+
+// -------- block #B-1-2-15 ----------
+"#B-1-2-15" [
+    fillcolor = "/set19/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Whatever</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Node</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1-2-20 ----------
+"#B-1-2-20" [
+    fillcolor = antiquewhite1
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>SlaveCompareReplace</I></FONT></TD></TR>
+     <TR><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">through</FONT></TD></TR>
+     <TR><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">search/compare</FONT></TD></TR>
+     <TR><TD PORT="port2"><FONT COLOR="black" POINT-SIZE="12">replace</FONT></TD></TR>
+    </TABLE>>
+    style = "filled"
+    color = black
+];
+
+// -------- block #B-1-2-19 ----------
+"#B-1-2-19" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1-2-17 ----------
+"#B-1-2-17" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1-2-18 ----------
+"#B-1-2-18" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1-2-13 ----------
+"#B-1-2-13" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1-2-14 ----------
+"#B-1-2-14" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+"CR#B-1-4-1":port0 -> "#B-1-2-16" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-16":port0 -> "#B-1-2-15" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-16":port1 -> "#B-1-2-13" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-16":port2 -> "#B-1-2-14" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-15":port0 -> "#B-1-2-20" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-20":port0 -> "#B-1-2-19" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-20":port1 -> "#B-1-2-17" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1-2-20":port2 -> "#B-1-2-18" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+
+}
