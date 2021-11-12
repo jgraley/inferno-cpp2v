@@ -47,7 +47,7 @@ void ReadArgs::Usage()
                     "            Note: use -th? for help on <fmt>.\n"
                     "-tq         No output to console.\n"
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
-    		        "-s          Run self-tests.\n"
+    		        "-s          Run self-tests and quit.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, master match 2, first slave match 3\n"    

@@ -75,7 +75,7 @@ fi
 echo Transform... 
 # Always do self-test
 #gdb -ex run --args $inferno -s -ap -i$infile -o$outfile $iargs
-time $inferno -s -ap -i$infile -o$outfile $iargs
+time $inferno -ap -i$infile -o$outfile $iargs
 ires=$?
 
 if test $ires -eq 0

@@ -46,7 +46,7 @@ dres=1000
 return_code=1 
 echo Transform... 
 # Always do self-test
-time $inferno -s -t -i$infile $iargs > $logfile 2>&1 
+time $inferno -t -i$infile $iargs > $logfile 2>&1 
 ires=$?
 
 if test $ires -eq 0

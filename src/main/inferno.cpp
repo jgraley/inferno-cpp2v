@@ -467,11 +467,17 @@ int main( int argc, char *argv[] )
 
     // Do self-tests (unit tests) if requested
     if( ReadArgs::selftest )
+    {
         SelfTest();
+        return EXIT_SUCCESS;
+    }
     
     // Build documentation graphs if requested
     if( ReadArgs::documentation_graphs )
+    {
         GenerateDocumentationGraphs();
+        return EXIT_SUCCESS;
+    }
 
     Inferno inferno;
     inferno.Run();
