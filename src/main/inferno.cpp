@@ -208,6 +208,24 @@ Inferno::Plan::Plan(Inferno *algo_) :
     }
 
     // ------------------------ Create stages -------------------------
+              
+    // Parse input X
+    Stage stage_parse_X(
+        { Progress::PARSING, 
+          ReadArgs::trace, false, false, false,
+          SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
+          nullptr, 
+          [this](){ Parse(ReadArgs::infile)( algo->program, &algo->program ); } }
+    );
+    
+    // Render output X
+    Stage stage_render_X(
+        { Progress::RENDERING, 
+          false, ReadArgs::trace_hits, false, false,
+          "Rendering output to code", 
+          nullptr, [&](){ Render( ReadArgs::outfile )( &algo->program ); } }
+    );
+
     // Output a pattern graph
     Stage stage_pattern_graphs( 
         { Progress::RENDERING, 
@@ -216,15 +234,33 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr,  
           [this](){ algo->GeneratePatternGraphs(); } } 
     );
-               
+    
+    // Output an intermediate/output graph
+    Stage stage_X_graph(
+        { Progress::RENDERING, 
+          false, ReadArgs::trace_hits, false, false,
+          "Rendering output to graph", 
+          nullptr, 
+          [this](){ Graph( ReadArgs::outfile, ReadArgs::outfile )( &algo->program ); } }
+    );
+    
+    // Dump the hit counts
+    Stage stage_dump_hits(
+        { Progress::RENDERING, 
+          false, false, false, false,
+          "Dumping hit counts", 
+          nullptr, 
+          [this](){ HitCount::instance.Dump(); } }
+    );
+            
     // Pattern transformations
-    list<Stage> stages_pattern_transformation( { 
+    Stage stage_pattern_transformation( 
         { Progress::PATTERN_TRANS, 
           true, false, false, false,
           "Pattern transforming", 
           [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PatternTransformations(); }, 
           nullptr } 
-    } ); 
+    ); 
 
     // Planning
     vector<Stage> stages_planning( {
@@ -244,61 +280,26 @@ Inferno::Plan::Plan(Inferno *algo_) :
           [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageThree(); }, 
           nullptr }    
     } );         
-        
-    // Parse input C++ code
-    Stage stage_parse(
-        { Progress::PARSING, 
-          ReadArgs::trace, false, false, false,
-          SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
-          nullptr, 
-          [this](){ Parse(ReadArgs::infile)( algo->program, &algo->program ); } }
-    );
-        
-    // Code transformation
-    Stage stage_transform(
+                
+    // X transformation
+    Stage stage_transform_X(
         { Progress::TRANSFORMING, 
           true, true, true, true,
           "Transforming", 
           [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ algo->RunTransformationStep(pvnt, sp); }, 
           nullptr }
     );
-        
-    // Dump the hit counts
-    Stage stage_dump_hits(
-        { Progress::RENDERING, 
-          false, false, false, false,
-          "Dumping hit counts", 
-          nullptr, 
-          [this](){ HitCount::instance.Dump(); } }
-    );
-    
-    // Output an intermediate/output graph
-    Stage stage_intermediate_graph(
-        { Progress::RENDERING, 
-          false, ReadArgs::trace_hits, false, false,
-          "Rendering output to graph", 
-          nullptr, 
-          [this](){ Graph( ReadArgs::outfile, ReadArgs::outfile )( &algo->program ); } }
-    );
-    
-    // Output C++ source code
-    Stage stage_render_code(
-        { Progress::RENDERING, 
-          false, ReadArgs::trace_hits, false, false,
-          "Rendering output to code", 
-          nullptr, [&](){ Render( ReadArgs::outfile )( &algo->program ); } }
-    );
-        
+            
     // ------------------------ Form stages plan -------------------------
     stages.clear();
     bool generate_pattern_graphs = !ReadArgs::pattern_graph_name.empty() || 
                                    ReadArgs::pattern_graph_index != -1;
+                                   
     if( generate_pattern_graphs && !ReadArgs::graph_trace )
         stages.push_back( stage_pattern_graphs );    
                 
-    stages = stages + stages_pattern_transformation;     
-        
-    if( ShouldIQuitAfter(stages_pattern_transformation.back()) )
+    stages.push_back( stage_pattern_transformation );         
+    if( ShouldIQuitAfter(stage_pattern_transformation) )
         return;
 
     stages.push_back( stages_planning[0] );     
@@ -309,13 +310,11 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( ShouldIQuitAfter(stages_planning[1]) )
         return;
     
-    stages.push_back( stages_planning[2] );     
-      
+    stages.push_back( stages_planning[2] );           
     // If a pattern trace graph was requested, generate it now. We need the
     // agents to have been configured (planning stage 2)
     if( generate_pattern_graphs && ReadArgs::graph_trace )
         stages.push_back( stage_pattern_graphs );        
-
     if( ShouldIQuitAfter(stages_planning[2]) )
         return;
 
@@ -323,18 +322,21 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( ReadArgs::infile.empty() )
         return;
     
-    stages.push_back( stage_parse );   
+    stages.push_back( stage_parse_X );   
+    if( ShouldIQuitAfter(stage_parse_X) ) 
+        goto FINAL_RENDER; // Now input has been parsed, we always want to render even if quitting early.    
     
-    // Now input has been parsed, we always want to render even if quitting early.
-    if( !ShouldIQuitAfter(stage_parse) ) 
-        stages.push_back( stage_transform );        
+    stages.push_back( stage_transform_X );        
+    if( ShouldIQuitAfter(stage_transform_X) ) 
+        goto FINAL_RENDER;
         
+    FINAL_RENDER:
     if( ReadArgs::trace_hits )
         stages.push_back( stage_dump_hits );
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
-        stages.push_back( stage_intermediate_graph );
+        stages.push_back( stage_X_graph );
     else if( !ReadArgs::output_all )   
-        stages.push_back( stage_render_code );          
+        stages.push_back( stage_render_X );          
 }
 
 
