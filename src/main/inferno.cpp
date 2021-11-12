@@ -29,7 +29,7 @@ void SelfTest();
 
 // Build a vector of transformations, in the order that we will run them
 // (ordered by hand for now, until the auto sequencer is ready)
-void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
+void BuildDefaultSequence( vector< shared_ptr<Transformation> > *sequence )
 {
     ASSERT( sequence );
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
@@ -147,8 +147,15 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
         }
     }
+}
 
-    //sequence->push_back( shared_ptr<Transformation>( new SlaveTest2 ) ); 
+
+void BuildDocSequence( vector< shared_ptr<Transformation> > *sequence )
+{
+    ASSERT( sequence );
+    sequence->push_back( shared_ptr<Transformation>( new SlaveTest ) );
+    sequence->push_back( shared_ptr<Transformation>( new SlaveTest2 ) );
+    sequence->push_back( shared_ptr<Transformation>( new SlaveTest3 ) );
 }
 
 
@@ -174,22 +181,24 @@ Inferno::Inferno() :
 Inferno::Plan::Plan(Inferno *algo_) :
     algo( algo_ )
 {
-    // --------------------------- Build Steps ---------------------------
+    // ------------------------ Form steps plan -------------------------
     Stage stage_build_steps( 
         { Progress::BUILDING_STEPS }
     );
 
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
 
-    // Build the sequence of steps
     vector< shared_ptr<Transformation> > sequence;
+    // Build the sequence of steps
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Building patterns\n"); 
-    BuildSequence( &sequence );
+    if( ReadArgs::documentation_graphs )
+        BuildDocSequence( &sequence );
+    else
+        BuildDefaultSequence( &sequence );
     if( ShouldIQuitAfter(stage_build_steps) )
         return;    
 
-    // ------------------------ Form steps plan -------------------------
     // Start a steps plan
     for( int i=0; i<sequence.size(); i++ )
         steps.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true } );        
@@ -315,7 +324,9 @@ Inferno::Plan::Plan(Inferno *algo_) :
     // agents to have been configured (planning stage 2)
     if( generate_pattern_graphs && ReadArgs::graph_trace )
         stages.push_back( stage_pattern_graphs );        
-    if( ShouldIQuitAfter(stages_planning[2]) )
+    if( ShouldIQuitAfter(stages_planning[2]) || 
+        ReadArgs::documentation_graphs || 
+        generate_pattern_graphs)
         return;
 
     stages.push_back( stage_parse_X );   
@@ -387,7 +398,10 @@ void Inferno::GeneratePatternGraphs()
         for( const Plan::Step &sp : plan.steps )
         {
             Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
-            string filepath = SSPrintf("%s%03d-%s.dot", dir.c_str(), sp.step_index, sp.tx->GetName().c_str());                                                       
+            string ss;
+            if( !ReadArgs::documentation_graphs )
+                ss = SSPrintf("%03d-", sp.step_index);
+            string filepath = dir + ss + sp.tx->GetName() + ".dot";                                                       
             Graph g( filepath, sp.tx->GetName() );
             GenerateGraphRegions( g, sp.tx );
         }
@@ -417,7 +431,11 @@ void Inferno::GeneratePatternGraphs()
             {
                 fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
                 for( const Plan::Step &sp : plan.steps )
-                    fprintf(stderr, "%03d-%s\n", sp.step_index, sp.tx->GetName().c_str() );
+                {
+                    string ss = SSPrintf("%03d-", sp.step_index);
+                    string msg = ss+sp.tx->GetName();
+                    fprintf( stderr, "%szn", msg.c_str() );
+                }
                 ASSERT(false);
             }
         }
@@ -467,13 +485,6 @@ int main( int argc, char *argv[] )
         return EXIT_SUCCESS;
     }
     
-    // Build documentation graphs if requested
-    if( ReadArgs::documentation_graphs )
-    {
-        GenerateDocumentationGraphs();
-        return EXIT_SUCCESS;
-    }
-
     Inferno inferno;
     inferno.Run();
     return EXIT_SUCCESS;

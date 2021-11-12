@@ -161,6 +161,12 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             else if( graph_option=='d' )
             {
                 documentation_graphs = true;
+                string s = GetArg(ai);
+                int v = strtoul( s.c_str(), nullptr, 10 );
+                if( v==0 && s!="0" ) // Did strtoul fail?
+                    pattern_graph_name = s;
+                else
+                    pattern_graph_index = v;
             }
             else
             {

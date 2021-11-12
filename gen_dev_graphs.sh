@@ -12,6 +12,10 @@ while [[ $# -gt 0 ]]; do
       PATTERN=1
       shift # past argument
       ;;
+    -d|--docs)
+      DOCS=1
+      shift # past argument
+      ;;
     -i|--intermediate)
       INTERMEDIATE=1
       shift # past argument
@@ -32,6 +36,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 rm -rf ${BASE_DIR}/*/*
+
+if [ "$DOCS" = "1" ]; then
+    mkdir -p ${BASE_DIR}/docs/
+    ./inferno.exe -g${COLOUR}d ${BASE_DIR}/docs/
+    mkdir -p ${BASE_DIR}/docs-trace/
+    ./inferno.exe -gt${COLOUR}d ${BASE_DIR}/docs-trace/
+fi
 
 if [ "$PATTERN" = "1" ]; then
     mkdir -p ${BASE_DIR}/pattern/

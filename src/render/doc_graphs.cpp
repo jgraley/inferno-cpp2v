@@ -27,9 +27,3 @@ static void OutputSR( TreePtr<Node> root, int major, int minor, string subsectio
     string name = SSPrintf( "srdoc_%d_%d%s_%s\n", major, minor, subsection.c_str(), tag.c_str() );
     Output(root, name); 
 }
-
-void GenerateDocumentationGraphs()
-{
-    MakeTreePtr<If> i;
-    Output(i, "if"); 
-}
