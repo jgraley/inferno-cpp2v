@@ -23,20 +23,6 @@ subgraph "clusterAnd#R9-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R9-0/#B-1-2-70 ----------
-    "And#R9-0/#B-1-2-70" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-1-2-70"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'exit'?</I></FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
     // -------- block And#R9-0/#B-1-2-67 ----------
     "And#R9-0/#B-1-2-67" [
         fillcolor = "/set28/6"
@@ -79,18 +65,6 @@ subgraph "clusterAnd#R9-0" {
         height = 0.4
     ];
     
-    // -------- block And#R9-0/#B-1-2-71 ----------
-    "And#R9-0/#B-1-2-71" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-1-2-71"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "trapezium"
-        label = <<FONT COLOR="black" POINT-SIZE="15"><I>'p1'?</I></FONT>>
-        style = "filled"
-        penwidth = 0.0
-    ];
-    
     // -------- block And#R9-0/#B-1-2-69 ----------
     "And#R9-0/#B-1-2-69" [
         fillcolor = "/set28/8"
@@ -102,6 +76,20 @@ subgraph "clusterAnd#R9-0" {
          <TR><TD><FONT COLOR="black" POINT-SIZE="15">MapOperand</FONT></TD></TR>
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R9-0/#B-1-2-70 ----------
+    "And#R9-0/#B-1-2-70" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-1-2-70"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'exit'?</I></FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -118,6 +106,18 @@ subgraph "clusterAnd#R9-0" {
         fixedsize = true
         width = 0.4
         height = 0.4
+    ];
+    
+    // -------- block And#R9-0/#B-1-2-71 ----------
+    "And#R9-0/#B-1-2-71" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-1-2-71"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "trapezium"
+        label = <<FONT COLOR="black" POINT-SIZE="15"><I>'p1'?</I></FONT>>
+        style = "filled"
+        penwidth = 0.0
     ];
     
 }

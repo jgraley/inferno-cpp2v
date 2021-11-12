@@ -326,7 +326,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     stages.push_back( stage_parse );   
     
     // Now input has been parsed, we always want to render even if quitting early.
-    if( !ShouldIQuitAfter(stage_transform) ) 
+    if( !ShouldIQuitAfter(stage_parse) ) 
         stages.push_back( stage_transform );        
         
     if( ReadArgs::trace_hits )

@@ -37,19 +37,16 @@ subgraph "clusterAnd#R8-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R8-0/#B-1-2-61 ----------
-    "And#R8-0/#B-1-2-61" [
-        fillcolor = "/set28/6"
-        xlabel = "#B-1-2-61"
+    // -------- block And#R8-0/#B-1-2-64 ----------
+    "And#R8-0/#B-1-2-64" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-1-2-64"
         fontsize = "12"
         fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Call</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">MapOperand</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{.}</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "trapezium"
+        label = <<FONT COLOR="black" POINT-SIZE="15"><I>'p1'?</I></FONT>>
+        style = "filled"
+        penwidth = 0.0
     ];
     
     // -------- block And#R8-0/#B-1-2-65 ----------
@@ -64,6 +61,20 @@ subgraph "clusterAnd#R8-0" {
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
+    ];
+    
+    // -------- block And#R8-0/#X8-8-8 ----------
+    "And#R8-0/#X8-8-8" [
+        xlabel = "#X8-8-8"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "triangle"
+        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
     // -------- block And#R8-0/#B-1-2-62 ----------
@@ -95,43 +106,25 @@ subgraph "clusterAnd#R8-0" {
         height = 0.4
     ];
     
-    // -------- block And#R8-0/#X8-8-8 ----------
-    "And#R8-0/#X8-8-8" [
-        xlabel = "#X8-8-8"
+    // -------- block And#R8-0/#B-1-2-61 ----------
+    "And#R8-0/#B-1-2-61" [
+        fillcolor = "/set28/6"
+        xlabel = "#B-1-2-61"
         fontsize = "12"
         fontcolor = grey40
-        shape = "triangle"
-        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
-    // -------- block And#R8-0/#B-1-2-64 ----------
-    "And#R8-0/#B-1-2-64" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-1-2-64"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "trapezium"
-        label = <<FONT COLOR="black" POINT-SIZE="15"><I>'p1'?</I></FONT>>
-        style = "filled"
-        penwidth = 0.0
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Call</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">MapOperand</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{.}</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
     ];
     
 }
 
-"And#R8-0/#B-1-2-61":port0 -> "And#R8-0/#B-1-2-62" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R8-0/#B-1-2-61":port1 -> "And#R8-0/#B-1-2-63" [
-    label = "#0"
+"And#R8-0/#X8-8-8" -> "And#R8-0/#B-1-2-61" [
+    label = "#1"
     decorate = true
     color = black
     fontcolor = black
@@ -158,8 +151,15 @@ subgraph "clusterAnd#R8-0" {
     fontcolor = black
 ];
 
-"And#R8-0/#X8-8-8" -> "And#R8-0/#B-1-2-61" [
-    label = "#1"
+"And#R8-0/#B-1-2-61":port0 -> "And#R8-0/#B-1-2-62" [
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R8-0/#B-1-2-61":port1 -> "And#R8-0/#B-1-2-63" [
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black
