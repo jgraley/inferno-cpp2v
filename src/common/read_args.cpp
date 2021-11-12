@@ -62,9 +62,7 @@ void ReadArgs::Usage()
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
-                    "-x          Enable new feature. Meaning varies.\n"
-                    "\n"
-    		        "One of -i, -s, -th, -gp, -gd required; all others are optional.\n",
+                    "-x          Enable new feature. Meaning varies.\n",
     		        exename.c_str() );
     exit(1);
 }
@@ -215,15 +213,6 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             Usage();
         }
     }    
-    
-    // infile or selftest is always required
-    if( infile.empty() && 
-        !selftest && 
-        pattern_graph_index==-1 && 
-        pattern_graph_name=="" && 
-        !(trace_hits && hits_format==string("?") ) &&
-        !documentation_graphs )
-        Usage();
 }
 
 // quitafter syntax

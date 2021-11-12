@@ -47,6 +47,8 @@ public:
 	Parse(string i) :
 		infile(i)
 	{
+        if( infile=="" )
+            ASSERTFAIL("No input file provided; use -h for help");
 	}
 
 	void operator()(TreePtr<Node> context, TreePtr<Node> *proot)
@@ -83,8 +85,8 @@ public:
 		headers.SetSearchPaths( dirs, 0, false ); // make the directory in dirs be a system directory
 
 		clang::Preprocessor pp(diags, opts, *ptarget, sm, headers);
-		pp.setPredefines("#define __INFERNO__ 1\n");
-
+		pp.setPredefines("#define __INFERNO__ 1\n");            
+            
 		const clang::FileEntry *file = fm.getFile(infile);
 		if (file)
 			sm.createMainFileID(file, clang::SourceLocation());

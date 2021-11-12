@@ -318,10 +318,6 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( ShouldIQuitAfter(stages_planning[2]) )
         return;
 
-    // If there was no input program then there's nothing more to do
-    if( ReadArgs::infile.empty() )
-        return;
-    
     stages.push_back( stage_parse_X );   
     if( ShouldIQuitAfter(stage_parse_X) ) 
         goto FINAL_RENDER; // Now input has been parsed, we always want to render even if quitting early.    
@@ -380,7 +376,6 @@ void Inferno::RunStage( Plan::Stage stage )
         }        
         break;
     }
-
 }
 
     
