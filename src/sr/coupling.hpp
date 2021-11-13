@@ -17,7 +17,8 @@ enum KeyProducer
     KEY_PRODUCER_4,
     KEY_PRODUCER_5,
     KEY_PRODUCER_6,
-    KEY_PRODUCER_7
+    KEY_PRODUCER_7,
+    KEY_PRODUCER_8
 };
 
 

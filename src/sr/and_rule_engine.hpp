@@ -127,30 +127,40 @@ private:
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
     void CompareEvaluatorLinks( Agent *agent, 
-                                const CouplingKeysMap *combined_keys, 
-                                const SolutionMap *after_pass_keys );
+                                const CouplingKeysMap *keys_for_subordinates, 
+                                const SolutionMap *solution_for_subordinates, 
+                                const SolutionMap *solution_for_evaluators );
     void CompareMultiplicityLinks( LocatedLink link, 
-                                   const CouplingKeysMap *combined_keys ); 
+                                   const CouplingKeysMap *keys_for_subordinates,
+                                   const SolutionMap *solution_for_subordinates ); 
     void RegenerationPassAgent( Agent *agent,
-                                const CouplingKeysMap &subordinate_keys );
+                                const CouplingKeysMap &keys_for_subordinates,
+                                const SolutionMap &solution_for_subordinates );
     void RegenerationPass();
     
 public:
     void Compare( XLink root_xlink,
                   const CouplingKeysMap *master_keys,
+                  const SolutionMap *master_solution,
                   const TheKnowledge *knowledge );
     void Compare( TreePtr<Node> root_xnode );
 
     const CouplingKeysMap &GetCouplingKeys();
-    const void ClearCouplingKeys();
+    void ClearCouplingKeys();
+    const SolutionMap &GetSolution();
+    void ClearSolution();
     const unordered_set<Agent *> &GetKeyedAgents() const;
     const unordered_set<PatternLink> &GetKeyerPatternLinks() const;
 
 private:    
     void RecordLink( LocatedLink link, KeyProducer place );
-    void CompareCoupling( const CouplingKeysMap &keys, const LocatedLink &residual_link, KeyConsumer consumer );
-    void KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyProducer place );
-    void AssertNewCoupling( const CouplingKeysMap &old, Agent *new_agent, XLink new_xlink, Agent *parent_agent );
+    void KeyCoupling( CouplingKeysMap &keys, 
+                      const LocatedLink &keyer_link, 
+                      KeyProducer place );
+    void AssertNewCoupling( const CouplingKeysMap &old, 
+                            Agent *new_agent, 
+                            XLink new_xlink, 
+                            Agent *parent_agent );
 
 public:
     string GetTrace() const; // used for debug
@@ -168,6 +178,7 @@ private:
     // this instance's problem into master instance's problems. Note:
     // couplings are not allowed to specify the MMAX node.
     const CouplingKeysMap *master_keys;
+    const SolutionMap *master_solution;
     CouplingKeysMap external_keys; 
 
     // These are partial solutions, and are mapped against the links

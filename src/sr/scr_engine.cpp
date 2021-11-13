@@ -304,7 +304,7 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     
     // Run the slave's engine on this subtree
     TreePtr<Node> new_subtree = through_subtree;
-    int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys );
+    int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys, &replace_solution );
     if( !hits )
         return;
         
@@ -342,12 +342,16 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
 }
 
 
-TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
+TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys,
+                                  const SolutionMap *master_solution )
 {
     INDENT("R");
         
     replace_keys = UnionOfSolo( *master_keys,
                                 plan.and_rule_engine->GetCouplingKeys() );
+    replace_solution = UnionOfSolo( *master_solution,
+                                    plan.and_rule_engine->GetSolution() );
+    
     slave_though_subtrees.clear();
     keys_available = true;
 
@@ -366,6 +370,7 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     
     keys_available = false;
     replace_keys.clear();
+    replace_solution.clear();
     
     // Need a duplicate here in case we're a slave replacing an identifier
     // with a non-identifier. Otherwise our subtree would look fine, but 
@@ -376,7 +381,8 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
 
 
 void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
-                                      const CouplingKeysMap *master_keys ) 
+                                      const CouplingKeysMap *master_keys,
+                                      const SolutionMap *master_solution ) 
 {
     INDENT(">");
 
@@ -389,12 +395,12 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    plan.and_rule_engine->Compare( root_xlink, master_keys, &knowledge );
+    plan.and_rule_engine->Compare( root_xlink, master_keys, master_solution, &knowledge );
     TRACE("Search got a match\n");
            
     knowledge.Clear();
 
-    *p_root_xnode = Replace(master_keys);
+    *p_root_xnode = Replace(master_keys, master_solution);
     
     // Clear out anything cached in agents now that replace is done
     FOREACH( Agent *a, plan.my_agents )
@@ -408,7 +414,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
-                                        const CouplingKeysMap *master_keys )
+                                        const CouplingKeysMap *master_keys,
+                                        const SolutionMap *master_solution )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
@@ -425,7 +432,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
-            SingleCompareReplace( p_root_xnode, master_keys );
+            SingleCompareReplace( p_root_xnode, master_keys, master_solution );
         }
         catch( ::Mismatch )
         {
@@ -512,6 +519,8 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
 void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
 {
     ASSERT( keys_available );
+    InsertSolo( replace_solution, make_pair((PatternLink)keyer_link, (XLink)keyer_link) );
+
     Agent *keyer_agent = keyer_link.GetChildAgent();
     TreePtr<Node> keyer_x = keyer_link.GetChildX();
     
@@ -526,9 +535,25 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
 
 CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
 {
+    //FTRACE("replace_keys=\n")(replace_keys)("\n");
+    //FTRACE("replace_solution=\n")(replace_solution)("\n");
     ASSERT( keys_available );
     if( replace_keys.count(agent) == 1 )
         return replace_keys.at(agent);
+    else
+        return CouplingKey();
+}
+
+
+CouplingKey SCREngine::GetReplaceKey( PatternLink plink ) const
+{
+    ASSERT( keys_available );
+    if( replace_solution.count(plink) == 1 )
+        return CouplingKey( replace_solution.at(plink),
+                            KEY_PRODUCER_8,
+                            plink,
+                            nullptr,
+                            this );
     else
         return CouplingKey();
 }

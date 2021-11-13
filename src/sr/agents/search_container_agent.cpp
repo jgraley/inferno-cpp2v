@@ -64,7 +64,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
                                                       TreePtr<Node> key_node ) 
 {
     INDENT("#");
-    CouplingKey terminus_key = master_scr_engine->GetReplaceKey( AsAgent(terminus) );
+    CouplingKey terminus_key = master_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
     TreePtr<Node> terminus_keynode = terminus_key.GetKeyXNode(KEY_CONSUMER_3);
     ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")

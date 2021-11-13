@@ -83,7 +83,7 @@ public:
                                        const TheKnowledge *knowledge ) const = 0;
 
     /// Test an agent given given partial map of locations of keyer and residuals.  
-    virtual void RunCouplingQuery( const SolutionMap *required_links, multiset<XLink> candidate_links ) = 0;                                       
+    virtual void RunCouplingQuery( const SolutionMap *required_links ) = 0;                                       
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
@@ -151,7 +151,7 @@ public:
     virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const;
                                        
-    virtual void RunCouplingQuery( const SolutionMap *required_links, multiset<XLink> candidate_links );                                       
+    virtual void RunCouplingQuery( const SolutionMap *required_links );                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *required_links,

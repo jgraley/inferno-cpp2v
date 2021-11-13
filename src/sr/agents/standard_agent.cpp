@@ -802,7 +802,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // but overlay planning has set up overlay_under_plink for us.
         Agent *under_agent = overlay_under_plink.GetChildAgent();
         ASSERT( under_agent );
-        CouplingKey key = master_scr_engine->GetReplaceKey( under_agent );
+        CouplingKey key = master_scr_engine->GetReplaceKey( overlay_under_plink );
         TreePtr<Node> under_node = key.GetKeyXNode(KEY_CONSUMER_7);
         ASSERT( under_node );
         ASSERT( under_node->IsFinal() ); 

@@ -157,40 +157,20 @@ void SystemicConstraint::Test( Assignments frees_map )
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
     SR::SolutionMap required_links;
-    multiset<SR::XLink> coupling_links;
     list<Value>::const_iterator forceit = forces.begin();
     for( const VariableRecord &var : plan.all_variables )
     {
-        Value v;
         switch( var.flags.freedom )
         {
         case Freedom::FORCED:
-            v = forces_map.at(var.id);
+            required_links[var.id] = forces_map.at(var.id);
             break;
         
         case Freedom::FREE:
-            if( frees_map.count(var.id)==0 )
-                continue; // value not supplied
-            v = frees_map.at(var.id);
+            if( frees_map.count(var.id)!=0 )
+                required_links[var.id] = frees_map.at(var.id);
             break;
-        }
-        
-        switch( var.kind )
-        {
-        case Kind::KEYER:
-            coupling_links.insert(v);
-            required_links[var.id] = v;     
-            break;
-        
-        case Kind::RESIDUAL:
-            coupling_links.insert(v);
-            required_links[var.id] = v;     
-            break;
-            
-        case Kind::CHILD:
-            required_links[var.id] = v;     
-            break;
-        }
+        }        
     }    
     //required_links = UnionOfSolo(forces_map, frees_map);
     
@@ -200,7 +180,7 @@ void SystemicConstraint::Test( Assignments frees_map )
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {
             // First check any coupling at this pattern node
-            plan.agent->RunCouplingQuery( &required_links, coupling_links );
+            plan.agent->RunCouplingQuery( &required_links );
         }
                       
         if( plan.action==Action::FULL && required_links.size() > 0 )

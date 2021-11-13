@@ -268,7 +268,7 @@ void AgentCommon::RunNormalLinkedQuery( const SolutionMap *required_links,
 }                                            
 
 
-void AgentCommon::RunCouplingQuery( const SolutionMap *required_links, multiset<XLink> candidate_links )
+void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
 {    
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
@@ -283,23 +283,17 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links, multiset<
     for( PatternLink coupled_plink : coupled_plinks )
         if( required_links->count(coupled_plink) ) // could be partial query
             my_candidate_links.insert( required_links->at(coupled_plink) ); // insert coupled x links if required (residuals)
-
-    ASSERT( candidate_links.size() == my_candidate_links.size() )(*this)
-          ("\ncandidate_links:\n")(candidate_links)
-          ("\nmy_candidate_links:\n")(my_candidate_links)
-          ("\nrequired_links:\n")(required_links)
-          ("\ncoupled_plinks:\n")(coupled_plinks)("\n");
-    
+            
     // Note: having combined keyer and residuals into a single multimap,
     // we proceed with a symmetrical algorithm.
 
     // We will always accept MMAX links, so ignore them
-    candidate_links.erase(XLink::MMAX_Link);
+    my_candidate_links.erase(XLink::MMAX_Link);
 
     // Check remaining links against each other. EquivalenceRelation is
     // transitive, so it's enough just to daisy-chain the checks.
     XLink previous_link;
-    for( XLink current_link : candidate_links )
+    for( XLink current_link : my_candidate_links )
     {
         if( previous_link )
         {
@@ -586,6 +580,8 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     CouplingKey key = master_scr_engine->GetReplaceKey( this );
+    //CouplingKey key2 = master_scr_engine->GetReplaceKey( me_plink );
+    //ASSERT( key==key2 )("me_plink=")(me_plink)("\nold key ")(key)(" != new key ")(key2);
     ASSERT( !key || key.IsFinal() )(*this)(" keyed with non-final node ")(key)("\n"); 
     
     TreePtr<Node> dest;
