@@ -93,18 +93,18 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
 }
 
 
-void AgentCommon::AndRuleConfigure( const AndRuleEngine *e,
-                                    PatternLink base_plink_, 
-                                    set<PatternLink> coupled_plinks_ )
+void AgentCommon::ConfigureCoupling( const Traceable *e,
+                                     PatternLink base_plink_, 
+                                     set<PatternLink> coupled_plinks_ )
 {  
     ASSERT(e);
     // Enforcing rule #149 - breaking that rule will cause the same root node to appear in
     // more than one subordinate and-rule engine, so that it will get configured more than once.
     // Also see #316
-    ASSERT(!master_and_rule_engine)("Detected repeat configuration of ")(*this)
+    ASSERT(!coupling_master_engine)("Detected repeat coupling configuration of ")(*this)
                                    ("\nCould be result of coupling abnormal links - not allowed :(");
-    ASSERT(master_scr_engine)("Must call SCRConfigure() before AndRuleConfigure()");
-    master_and_rule_engine = e;
+    ASSERT(master_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
+    coupling_master_engine = e;
                                            
     if( base_plink_ )
     {
@@ -521,8 +521,8 @@ const SCREngine *AgentCommon::GetMasterSCREngine() const
 
 PatternLink AgentCommon::GetKeyerPatternLink() const
 {
-    ASSERT( master_and_rule_engine )(*this)(" has not been configured by any AndRuleEngine");
-    ASSERT( base_plink )(*this)(" has no base_plink, engine=")(master_and_rule_engine)("\n");
+    ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
+    ASSERT( base_plink )(*this)(" has no base_plink, engine=")(coupling_master_engine)("\n");
     
     return base_plink;
 }
@@ -570,7 +570,7 @@ void AgentCommon::PlanOverlayImpl( PatternLink me_plink,
 }
 
 
-bool AgentCommon::PlanReplaceKeying( PatternLink me_plink, 
+bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink, 
                                      unordered_set<PatternLink> keyer_plinks )
 {
     return false;

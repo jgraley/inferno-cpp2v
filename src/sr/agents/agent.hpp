@@ -61,9 +61,9 @@ public:
     Agent& operator=(Agent& other);
 	virtual void SCRConfigure( const SCREngine *e,
                                Phase phase ) = 0;
-    virtual void AndRuleConfigure( const AndRuleEngine *e,
-                                   PatternLink base_plink_, 
-                                   set<PatternLink> coupled_plinks_ ) = 0;
+    virtual void ConfigureCoupling( const Traceable *e,
+                                    PatternLink base_plink_, 
+                                    set<PatternLink> coupled_plinks_ ) = 0;
     virtual void AddResiduals( set<PatternLink> coupled_plinks_ ) = 0;
                                    
     /// List the Agents reached via links during search
@@ -100,7 +100,7 @@ public:
     virtual void Reset() = 0;     
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink ) = 0;
-    virtual bool PlanReplaceKeying( PatternLink me_plink, 
+    virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     unordered_set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
@@ -130,9 +130,9 @@ public:
     AgentCommon();
     virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
-    virtual void AndRuleConfigure( const AndRuleEngine *e,
-                                   PatternLink base_plink_, 
-                                   set<PatternLink> coupled_plinks_ );
+    virtual void ConfigureCoupling( const Traceable *e,
+                                    PatternLink base_plink_, 
+                                    set<PatternLink> coupled_plinks_ );
     virtual void AddResiduals( set<PatternLink> coupled_plinks_ );
     virtual list<PatternLink> GetChildren() const override;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
@@ -175,7 +175,7 @@ public:
                               PatternLink under_plink );
     virtual void PlanOverlayImpl( PatternLink me_plink, 
                                   PatternLink under_plink );
-    virtual bool PlanReplaceKeying( PatternLink me_plink, 
+    virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     unordered_set<PatternLink> keyer_plinks );                                  
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
@@ -189,7 +189,7 @@ public:
 
 protected:                                  
     const SCREngine *master_scr_engine = nullptr;    
-    const AndRuleEngine *master_and_rule_engine = nullptr;    
+    const Traceable *coupling_master_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink base_plink;
     PatternLink overlay_under_plink;

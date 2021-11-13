@@ -13,7 +13,7 @@ public:
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuilderAgent() {}
 
-    virtual bool PlanReplaceKeying( PatternLink me_plink, 
+    virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     unordered_set<PatternLink> keyer_plinks ); 
                                  
     virtual TreePtr<Node> BuildNewSubtree() = 0;

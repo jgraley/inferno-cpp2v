@@ -119,6 +119,8 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
         {
             TRACEC(plink)("\n");
             my_replace_plinks_postorder.push_back( plink );
+            if( dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
+                my_subordinate_plinks_postorder.push_back(plink);
         }
 
     my_agents.clear();
@@ -126,14 +128,11 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
         my_agents.insert( plink.GetChildAgent() );
 
     // Determine who our slaves are
-    my_agents_needing_engines.clear();
     my_overlay_starter_engines.clear();
     for( Agent *a : my_agents )
     {
-        if( auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(a) )
-            my_agents_needing_engines.insert( ae );
         if( auto ao = dynamic_cast<StartsOverlay *>(a) )
-            my_overlay_starter_engines.insert( ao );
+            InsertSolo(my_overlay_starter_engines, ao);
     }
 }
 
@@ -161,8 +160,10 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
     // Determine which agents our slaves should not configure
     unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
             
-    for( RequiresSubordinateSCREngine *ae : my_agents_needing_engines )
+    for( PatternLink plink : my_subordinate_plinks_postorder )
     {
+        auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent());
+        ASSERT( ae );    
         my_engines[ae] = make_shared<SCREngine>( overall_master_ptr, 
                                                  in_progress_agent_phases,
                                                  ae->GetSearchPattern(),
@@ -203,13 +204,13 @@ void SCREngine::Plan::ConfigureAgents()
         Agent *agent = plink.GetChildAgent();
         // Replace-only nodes are self-keying
         if( in_progress_agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
-            agent->AndRuleConfigure( nullptr, PatternLink(), {plink} );
+            agent->ConfigureCoupling( algo, PatternLink(), {plink} );
     }    
 */
 }
 
 
-void SCREngine::Plan::PlanningStageThree(unordered_set<PatternLink> master_keyers)
+ void SCREngine::Plan::PlanningStageThree(unordered_set<PatternLink> master_keyers)
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
@@ -247,8 +248,8 @@ void SCREngine::Plan::PlanReplace()
         ao->StartPlanOverlay();        
         
     for( PatternLink plink : my_replace_plinks_postorder )
-        if( plink.GetChildAgent()->PlanReplaceKeying(plink, all_keyer_plinks) )
-            all_keyer_plinks.insert( plink );
+        if( plink.GetChildAgent()->ReplaceKeyerQuery(plink, all_keyer_plinks) )
+            InsertSolo( all_keyer_plinks, plink );
 }
 
 
@@ -278,8 +279,11 @@ void SCREngine::PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new
 }
 
 
-void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x )
+void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
 {         
+    INDENT("L");
+    auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_slave.GetChildAgent());
+    ASSERT( slave_agent );    
     shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
     ASSERT( slave_engine );
    
@@ -292,7 +296,7 @@ void SCREngine::RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Nod
     slave_though_subtrees.erase(slave_agent); // not needed any more
     ASSERT( through_subtree );
     
-    // Run the slaves engine on this subtree
+    // Run the slave's engine on this subtree
     TreePtr<Node> new_subtree = through_subtree;
     int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys );
     if( !hits )
@@ -338,7 +342,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
         
     replace_keys = UnionOfSolo( *master_keys,
                                 plan.and_rule_engine->GetCouplingKeys() );
-    my_keyer_plinks_measured.clear();
     slave_though_subtrees.clear();
     keys_available = true;
 
@@ -348,19 +351,15 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys )
     new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
     TRACE("Replace done\n");
     
-    for( PatternLink plink : plan.my_replace_plinks_postorder )
+    for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
     {
-        if( auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
-        {
-            TRACE("Running slave ")(*(Agent *)slave_agent)(" root x=")(new_root_x)("\n");
-            RunSlave(slave_agent, &new_root_x);
-        }        
+        TRACE("Running slave ")(plink_to_slave)(" root x=")(new_root_x)("\n");
+        RunSlave(plink_to_slave, &new_root_x);       
     }
     TRACE("Slaves done\n");
     
     keys_available = false;
     replace_keys.clear();
-    //FTRACE(my_keyer_plinks_measured);
     
     // Need a duplicate here in case we're a slave replacing an identifier
     // with a non-identifier. Otherwise our subtree would look fine, but 
@@ -516,7 +515,6 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
 
     CouplingKey key( keyer_link, place, nullptr, this );
     InsertSolo( replace_keys, make_pair(keyer_agent, key) );
-    InsertSolo( my_keyer_plinks_measured, (PatternLink)keyer_link );
 }
 
 

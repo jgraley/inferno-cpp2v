@@ -31,7 +31,7 @@ public:
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
 };
 
-class StartsOverlay
+class StartsOverlay : public virtual Graphable
 {
 public:
     virtual void StartPlanOverlay() = 0;
@@ -91,17 +91,17 @@ private:
         unordered_set<Agent *> master_agents;
         unordered_set<PatternLink> my_plinks;   
         unordered_set<Agent *> my_agents;   
-        set<RequiresSubordinateSCREngine *> my_agents_needing_engines;   
         unordered_set<PatternLink> all_keyer_plinks;   
         set<StartsOverlay *> my_overlay_starter_engines;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
         list<PatternLink> my_replace_plinks_postorder;
+        list<PatternLink> my_subordinate_plinks_postorder;
     } plan;
 
     void PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
-    void RunSlave( RequiresSubordinateSCREngine *slave_agent, TreePtr<Node> *p_root_x );
+    void RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x );
     TreePtr<Node> Replace( const CouplingKeysMap *master_keys );
 
 public: // For top level engine/VN trans
@@ -144,7 +144,6 @@ private:
     TheKnowledge knowledge;    
     
     mutable CouplingKeysMap replace_keys;
-    mutable unordered_set<PatternLink> my_keyer_plinks_measured;   
     bool keys_available = false;    
     mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_though_subtrees;
 };

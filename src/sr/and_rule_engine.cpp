@@ -304,7 +304,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
           */  
-        agent->AndRuleConfigure( algo, keyer_plink, residual_plinks );
+        agent->ConfigureCoupling( algo, keyer_plink, residual_plinks );
     }
 
     if( ReadArgs::new_coupling_planning )

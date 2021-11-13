@@ -4,7 +4,7 @@
 
 using namespace SR;
 
-bool BuilderAgent::PlanReplaceKeying( PatternLink me_plink, 
+bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink, 
                                       unordered_set<PatternLink> keyer_plinks )
 {
     ASSERT( me_plink.GetChildAgent() == this );
