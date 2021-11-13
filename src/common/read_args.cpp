@@ -33,7 +33,7 @@ bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::new_coupling_planning = false;
+bool ReadArgs::new_feature = false;
 
 void ReadArgs::Usage()
 {
@@ -212,7 +212,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='x' )
         {
-            new_coupling_planning = true;
+            new_feature = true;
         }
         else 
         {

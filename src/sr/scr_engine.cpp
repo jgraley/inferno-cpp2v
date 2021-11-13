@@ -248,8 +248,14 @@ void SCREngine::Plan::PlanReplace()
         ao->StartPlanOverlay();        
         
     for( PatternLink plink : my_replace_plinks_postorder )
-        if( plink.GetChildAgent()->ReplaceKeyerQuery(plink, all_keyer_plinks) )
+    {
+        Agent *agent = plink.GetChildAgent();
+        if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) )
+        {
             InsertSolo( all_keyer_plinks, plink );
+            agent->ConfigureCoupling( algo, plink, {} );
+        }
+    }
 }
 
 

@@ -41,7 +41,7 @@ public:
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
-    static bool new_coupling_planning;
+    static bool new_feature;
     
 private:
     void ParseQuitAfter(std::string arg);

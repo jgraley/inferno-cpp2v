@@ -275,20 +275,20 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links, multiset<
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
 
-    if( ReadArgs::new_coupling_planning )
-    {
-        multiset<XLink> my_candidate_links;    
-        my_candidate_links.insert( required_links->at(base_plink) ); // insert base xlink (keyer)
-        for( PatternLink coupled_plink : coupled_plinks )
-            if( required_links->count(coupled_plink) ) // could be partial query
-                my_candidate_links.insert( required_links->at(coupled_plink) ); // insert coupled x links if required (residuals)
+    // New coupling planning
+    // Try to derive the old input (candidate_links) from the new (plan
+    // plus required_links) and do a cross-check.
+    multiset<XLink> my_candidate_links;    
+    my_candidate_links.insert( required_links->at(base_plink) ); // insert base xlink (keyer)
+    for( PatternLink coupled_plink : coupled_plinks )
+        if( required_links->count(coupled_plink) ) // could be partial query
+            my_candidate_links.insert( required_links->at(coupled_plink) ); // insert coupled x links if required (residuals)
 
-        ASSERT( candidate_links.size() == my_candidate_links.size() )(*this)
-              ("\ncandidate_links:\n")(candidate_links)
-              ("\nmy_candidate_links:\n")(my_candidate_links)
-              ("\nrequired_links:\n")(required_links)
-              ("\ncoupled_plinks:\n")(coupled_plinks)("\n");
-    }
+    ASSERT( candidate_links.size() == my_candidate_links.size() )(*this)
+          ("\ncandidate_links:\n")(candidate_links)
+          ("\nmy_candidate_links:\n")(my_candidate_links)
+          ("\nrequired_links:\n")(required_links)
+          ("\ncoupled_plinks:\n")(coupled_plinks)("\n");
     
     // Note: having combined keyer and residuals into a single multimap,
     // we proceed with a symmetrical algorithm.

@@ -163,16 +163,17 @@ subgraph "clusterAnd#R88-0" {
         height = 0.4
     ];
     
-    // -------- block And#R88-0/#B-1-2-1710 ----------
-    "And#R88-0/#B-1-2-1710" [
+    // -------- block And#R88-0/#B-1-2-1698 ----------
+    "And#R88-0/#B-1-2-1698" [
         fillcolor = "/set28/2"
-        xlabel = "#B-1-2-1710"
+        xlabel = "#B-1-2-1698"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Loop</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{.}</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -206,17 +207,16 @@ subgraph "clusterAnd#R88-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R88-0/#B-1-2-1698 ----------
-    "And#R88-0/#B-1-2-1698" [
+    // -------- block And#R88-0/#B-1-2-1710 ----------
+    "And#R88-0/#B-1-2-1710" [
         fillcolor = "/set28/2"
-        xlabel = "#B-1-2-1698"
+        xlabel = "#B-1-2-1710"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{.}</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Loop</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -327,7 +327,15 @@ subgraph "clusterAnd#R88-0" {
     fontcolor = black
 ];
 
-"And#R88-0/#B-1-2-1710":port0 -> "And#R88-0/#B-1-2-1706" [
+"And#R88-0/#B-1-2-1698":port0 -> "And#R88-0/And#R88-4/#B-1-2-1702" [
+    arrowhead="normalnoneodot"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R88-0/#B-1-2-1698":port1 -> "And#R88-0/#B-1-2-1710" [
     label = "#0"
     decorate = true
     color = black
@@ -355,15 +363,7 @@ subgraph "clusterAnd#R88-0" {
     fontcolor = black
 ];
 
-"And#R88-0/#B-1-2-1698":port0 -> "And#R88-0/And#R88-4/#B-1-2-1702" [
-    arrowhead="normalnoneodot"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R88-0/#B-1-2-1698":port1 -> "And#R88-0/#B-1-2-1710" [
+"And#R88-0/#B-1-2-1710":port0 -> "And#R88-0/#B-1-2-1706" [
     label = "#0"
     decorate = true
     color = black
