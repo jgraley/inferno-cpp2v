@@ -154,13 +154,6 @@ public:
 
 private:    
     void RecordLink( LocatedLink link, KeyProducer place );
-    void KeyCoupling( CouplingKeysMap &keys, 
-                      const LocatedLink &keyer_link, 
-                      KeyProducer place );
-    void AssertNewCoupling( const CouplingKeysMap &old, 
-                            Agent *new_agent, 
-                            XLink new_xlink, 
-                            Agent *parent_agent );
 
 public:
     string GetTrace() const; // used for debug

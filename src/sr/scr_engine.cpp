@@ -519,29 +519,7 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
 void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
 {
     ASSERT( keys_available );
-    InsertSolo( replace_solution, make_pair((PatternLink)keyer_link, (XLink)keyer_link) );
-
-    Agent *keyer_agent = keyer_link.GetChildAgent();
-    TreePtr<Node> keyer_x = keyer_link.GetChildX();
-    
-    ASSERT(keyer_x);
-    if( plan.final_agent_phases.at(keyer_agent) != IN_COMPARE_ONLY )
-        ASSERT( keyer_x->IsFinal() )("Trying to key with non-final ")(keyer_x)("\n"); 
-
-    CouplingKey key( keyer_link, place, nullptr, this );
-    InsertSolo( replace_keys, make_pair(keyer_agent, key) );
-}
-
-
-CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
-{
-    FTRACE("replace_keys=\n")(replace_keys)("\n");
-    FTRACE("replace_solution=\n")(replace_solution)("\n");
-    ASSERT( keys_available );
-    if( replace_keys.count(agent) == 1 )
-        return replace_keys.at(agent);
-    else
-        return CouplingKey();
+    InsertSolo( replace_solution, keyer_link );
 }
 
 

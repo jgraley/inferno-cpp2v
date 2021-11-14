@@ -125,7 +125,6 @@ public: // For agents
     void RecurseInto( RequiresSubordinateSCREngine *slave_agent, 
                       TreePtr<Node> *p_root_xnode ) const;    
     void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
-    CouplingKey GetReplaceKey( const Agent *agent ) const;
     CouplingKey GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     bool IsKeyed( PatternLink plink ) const; 

@@ -579,13 +579,8 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
-    CouplingKey key = master_scr_engine->GetReplaceKey( this );
-    if( key )
-        ASSERT(base_plink)("me_plink=")(me_plink)(" base_plink=")(base_plink);
-    CouplingKey key2 = master_scr_engine->GetReplaceKey( base_plink );
-    ASSERT( key==key2 )
-          ("me_plink=")(me_plink)(" base_plink=")(base_plink)
-          ("\nold key ")(key)(" != new key ")(key2);
+
+    CouplingKey key = master_scr_engine->GetReplaceKey( base_plink );
     ASSERT( !key || key.IsFinal() )(*this)(" keyed with non-final node ")(key)("\n"); 
     
     TreePtr<Node> dest;

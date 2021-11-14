@@ -482,7 +482,7 @@ void AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
 
     // Recreate my_coupling_keys
     for( pair< PatternLink, XLink > pxp : csp_solution )
-        RecordLink( LocatedLink(pxp), KEY_PRODUCER_4 );                        
+        InsertSolo( basic_solution, pxp );                        
 }
 
 
@@ -518,7 +518,7 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     ASSERT( link.GetChildAgent() ); // Pattern must not be nullptr
     ASSERT( link.GetChildX() ); // Target must not be nullptr
      
-    RecordLink( link, KEY_PRODUCER_1 );        
+    InsertSolo( basic_solution, link );        
     SolutionMap combined_solution = UnionOfSolo( *master_solution,
                                                  basic_solution );
     Agent * const agent = link.GetChildAgent();
@@ -711,11 +711,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                                         
         // Replace needs these keys 
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-        {
             InsertSolo( basic_solution, link );                
-            if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )                        
-                KeyCoupling( external_keys, link, KEY_PRODUCER_2 );
-        }
                 
         // If we got here, we're done!
         TRACE("Success after %d tries\n", i);  
@@ -881,68 +877,7 @@ void AndRuleEngine::RecordLink( LocatedLink link, KeyProducer place )
 {
     // All go into the basic solution which is enough to
     // regenerate a full solution.
-    InsertSolo( basic_solution, link );                
-    
-    // Keying for external use (subordinates, slaves and replace)
-    // We don't want residuals (which are unreliable) or MMAX
-    if( plan.coupling_keyer_links_all.count( (PatternLink)link ) == 1 &&
-        (XLink)link != XLink::MMAX_Link )
-        KeyCoupling( external_keys, link, place );        
-}
-
-
-void AndRuleEngine::KeyCoupling( CouplingKeysMap &keys, const LocatedLink &keyer_link, KeyProducer place )
-{
-    // A coupling keyed to Magic-Match-Anything-X would not be able to 
-    // restrict the residuals wrt to each other. 
-    ASSERT( (XLink)keyer_link != XLink::MMAX_Link );
-    
-    ASSERT( plan.coupling_residual_links.count((PatternLink)keyer_link) == 0 );
-    
-    // A coupling relates the coupled agent to an X node, not the
-    // link into the agent.
-    CouplingKey key( keyer_link, place, this, nullptr );
-    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), key ) ); 
-}                                                       
- 
-
-void AndRuleEngine::AssertNewCoupling( const CouplingKeysMap &extracted, Agent *new_agent, XLink new_xlink, Agent *parent_agent )
-{
-    TreePtr<Node> new_xnode = new_xlink.GetChildX();
-    ASSERT( extracted.count(new_agent) == 1 );
-    CouplingKey extracted_key = extracted.at(new_agent);
-    XLink extracted_xlink = extracted_key.GetKeyXLink(KEY_CONSUMER_2);
-    TreePtr<Node> extracted_xnode = extracted_xlink.GetChildX();
-    
-    if( TreePtr<SubContainer>::DynamicCast(new_xnode) )
-    {                    
-        EquivalenceRelation equivalence_relation;
-        CompareResult cr = equivalence_relation.Compare( extracted_xlink, new_xlink );
-        if( cr != EQUAL )
-        {
-            FTRACE("New x node ")(new_xnode)(" mismatches extracted x ")(extracted_key)
-                  (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
-            if( TreePtr<SubSequence>::DynamicCast(new_xnode) && TreePtr<SubSequence>::DynamicCast(extracted_xnode))
-                FTRACEC("SubSequence\n");
-            else if( TreePtr<SubSequenceRange>::DynamicCast(new_xnode) && TreePtr<SubSequenceRange>::DynamicCast(extracted_xnode))
-                FTRACEC("SubSequenceRange\n");
-            else if( TreePtr<SubCollection>::DynamicCast(new_xnode) && TreePtr<SubCollection>::DynamicCast(extracted_xnode))
-                FTRACEC("SubCollections\n");
-            else
-                FTRACEC("Container types don't match\n");
-            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(extracted_xnode.get());
-            FOREACH( const TreePtrInterface &node, *xc )
-                FTRACEC("ext: ")( node )("\n");
-            xc = dynamic_cast<ContainerInterface *>(new_xnode.get());
-            FOREACH( const TreePtrInterface &node, *xc )
-                FTRACEC("new: ")( node )("\n");
-            ASSERTFAIL("AssertNewCoupling() failure");                                                
-        }
-    }
-    else
-    {
-        ASSERT( extracted_xnode == new_xnode );
-    }
+    InsertSolo( basic_solution, link );                     
 }
 
 
