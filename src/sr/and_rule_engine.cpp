@@ -711,8 +711,11 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                                         
         // Replace needs these keys 
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+        {
+            InsertSolo( basic_solution, link );                
             if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )                        
                 KeyCoupling( external_keys, link, KEY_PRODUCER_2 );
+        }
                 
         // If we got here, we're done!
         TRACE("Success after %d tries\n", i);  

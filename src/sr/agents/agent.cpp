@@ -580,8 +580,12 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     CouplingKey key = master_scr_engine->GetReplaceKey( this );
-    //CouplingKey key2 = master_scr_engine->GetReplaceKey( me_plink );
-    //ASSERT( key==key2 )("me_plink=")(me_plink)("\nold key ")(key)(" != new key ")(key2);
+    if( key )
+        ASSERT(base_plink)("me_plink=")(me_plink)(" base_plink=")(base_plink);
+    CouplingKey key2 = master_scr_engine->GetReplaceKey( base_plink );
+    ASSERT( key==key2 )
+          ("me_plink=")(me_plink)(" base_plink=")(base_plink)
+          ("\nold key ")(key)(" != new key ")(key2);
     ASSERT( !key || key.IsFinal() )(*this)(" keyed with non-final node ")(key)("\n"); 
     
     TreePtr<Node> dest;
@@ -705,6 +709,10 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 string AgentCommon::GetTrace() const
 {
     string s = Traceable::GetName() + GetSerialString();
+/* Adds clutter to trace for little benefit and is wrong
+   because the trace id for a node should describe the node itself
+   and not surrounding context - that's what trace pattern graphs 
+   are for.    
     switch( phase )
     {
     case IN_COMPARE_ONLY:
@@ -716,7 +724,7 @@ string AgentCommon::GetTrace() const
     case IN_REPLACE_ONLY:
         s += "/R";
         break;
-    }
+    }*/
     return s;
 }
 

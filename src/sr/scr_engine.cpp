@@ -535,8 +535,8 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
 
 CouplingKey SCREngine::GetReplaceKey( const Agent *agent ) const
 {
-    //FTRACE("replace_keys=\n")(replace_keys)("\n");
-    //FTRACE("replace_solution=\n")(replace_solution)("\n");
+    FTRACE("replace_keys=\n")(replace_keys)("\n");
+    FTRACE("replace_solution=\n")(replace_solution)("\n");
     ASSERT( keys_available );
     if( replace_keys.count(agent) == 1 )
         return replace_keys.at(agent);
