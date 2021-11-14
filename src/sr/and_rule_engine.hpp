@@ -127,26 +127,20 @@ private:
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
     void CompareEvaluatorLinks( Agent *agent, 
-                                const CouplingKeysMap *keys_for_subordinates, 
                                 const SolutionMap *solution_for_subordinates, 
                                 const SolutionMap *solution_for_evaluators );
     void CompareMultiplicityLinks( LocatedLink link, 
-                                   const CouplingKeysMap *keys_for_subordinates,
                                    const SolutionMap *solution_for_subordinates ); 
     void RegenerationPassAgent( Agent *agent,
-                                const CouplingKeysMap &keys_for_subordinates,
                                 const SolutionMap &solution_for_subordinates );
     void RegenerationPass();
     
 public:
     void Compare( XLink root_xlink,
-                  const CouplingKeysMap *master_keys,
                   const SolutionMap *master_solution,
                   const TheKnowledge *knowledge );
     void Compare( TreePtr<Node> root_xnode );
 
-    const CouplingKeysMap &GetCouplingKeys();
-    void ClearCouplingKeys();
     const SolutionMap &GetSolution();
     void ClearSolution();
     const unordered_set<Agent *> &GetKeyedAgents() const;
@@ -170,9 +164,7 @@ private:
     // the agent is the keyer. This is well-defined and avoids merging
     // this instance's problem into master instance's problems. Note:
     // couplings are not allowed to specify the MMAX node.
-    const CouplingKeysMap *master_keys;
     const SolutionMap *master_solution;
-    CouplingKeysMap external_keys; 
 
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify

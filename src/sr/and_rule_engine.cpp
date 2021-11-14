@@ -459,7 +459,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     for( PatternLink link : plan.master_proxy_keyer_links )
     {
         // distinct OK because this only runs once per solve
-        TreePtr<Node> keynode = master_keys->at(link.GetChildAgent()).GetKeyXNode(KEY_CONSUMER_4);
+        TreePtr<Node> keynode = master_solution->at(link).GetChildX();
         master_and_root_links[link] = XLink::CreateDistinct(keynode);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
@@ -559,7 +559,6 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 
 
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
-                                           const CouplingKeysMap *keys_for_subordinates, 
                                            const SolutionMap *solution_for_subordinates, 
                                            const SolutionMap *solution_for_evaluators ) 
 {
@@ -581,7 +580,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            e->Compare( xlink, keys_for_subordinates, solution_for_subordinates, knowledge );
+            e->Compare( xlink, solution_for_subordinates, knowledge );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -602,7 +601,6 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 
 
 void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link, 
-                                              const CouplingKeysMap *keys_for_subordinates,
                                               const SolutionMap *solution_for_subordinates ) 
 {
     INDENT("M");
@@ -622,7 +620,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-            e->Compare( xe_link, keys_for_subordinates, solution_for_subordinates, knowledge );
+            e->Compare( xe_link, solution_for_subordinates, knowledge );
         }
     }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
@@ -630,7 +628,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         for( XLink xe_link : xssl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, keys_for_subordinates, solution_for_subordinates, knowledge );
+            e->Compare( xe_link, solution_for_subordinates, knowledge );
         }
     }    
     else
@@ -641,7 +639,6 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 
 void AndRuleEngine::RegenerationPassAgent( Agent *agent,
-                                           const CouplingKeysMap &keys_for_subordinates,
                                            const SolutionMap &solution_for_subordinates )
 {
     // Get a list of the links we must supply to the agent for regeneration
@@ -685,7 +682,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    e->Compare( link, &keys_for_subordinates, &solution_for_subordinates, knowledge );
+                    e->Compare( link, &solution_for_subordinates, knowledge );
                 }
             }                    
             
@@ -696,12 +693,12 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                     InsertSolo( solution_for_evaluators, link );                
 
                 if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
-                    CompareMultiplicityLinks( link, &keys_for_subordinates, &solution_for_subordinates );  
+                    CompareMultiplicityLinks( link, &solution_for_subordinates );  
             }
 
             // Try matching the evaluator agents.
             if( plan.my_evaluators.count( agent ) )
-                CompareEvaluatorLinks( agent, &keys_for_subordinates, &solution_for_subordinates, &solution_for_evaluators );                    
+                CompareEvaluatorLinks( agent, &solution_for_subordinates, &solution_for_evaluators );                    
         }
         catch( const ::Mismatch& mismatch )
         {
@@ -724,7 +721,6 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 void AndRuleEngine::RegenerationPass()
 {
     INDENT("R");
-    const CouplingKeysMap keys_for_subordinates = UnionOfSolo( *master_keys, external_keys );   
     const SolutionMap solution_for_subordinates = UnionOfSolo( *master_solution, basic_solution );   
     TRACE("---------------- Regeneration ----------------\n");      
     //TRACEC("Subordinate keys ")(keys_for_subordinates)("\n");       
@@ -733,7 +729,6 @@ void AndRuleEngine::RegenerationPass()
     for( Agent *agent : plan.my_normal_agents )
     {
         RegenerationPassAgent( agent, 
-                               keys_for_subordinates,
                                solution_for_subordinates );
     }
 
@@ -743,7 +738,6 @@ void AndRuleEngine::RegenerationPass()
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( XLink root_xlink,
-                             const CouplingKeysMap *master_keys_,
                              const SolutionMap *master_solution_,
                              const TheKnowledge *knowledge_ )
 {
@@ -751,7 +745,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
     ASSERT( root_xlink );
     used = true;
          
-    master_keys = master_keys_;    
     master_solution = master_solution_;    
     knowledge = knowledge_;
     
@@ -776,7 +769,6 @@ void AndRuleEngine::Compare( XLink root_xlink,
     while(1)
     {
         basic_solution.clear();
-        external_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         GetNextCSPSolution(root_link);        
@@ -828,23 +820,10 @@ void AndRuleEngine::Compare( XLink root_xlink,
 // no master keys.
 void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
-    CouplingKeysMap empty_master_keys;
     SolutionMap empty_solution;
     TheKnowledge empty_knowledge;
     XLink root_xlink = XLink::CreateDistinct(root_xnode);
-    Compare( root_xlink, &empty_master_keys, &empty_solution, &empty_knowledge );
-}
-
-
-const CouplingKeysMap &AndRuleEngine::GetCouplingKeys()
-{
-    return external_keys;
-}
-
-
-void AndRuleEngine::ClearCouplingKeys()
-{
-    external_keys.clear();
+    Compare( root_xlink, &empty_solution, &empty_knowledge );
 }
 
 

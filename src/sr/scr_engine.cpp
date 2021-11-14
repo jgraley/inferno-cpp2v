@@ -347,8 +347,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys,
 {
     INDENT("R");
         
-    replace_keys = UnionOfSolo( *master_keys,
-                                plan.and_rule_engine->GetCouplingKeys() );
     replace_solution = UnionOfSolo( *master_solution,
                                     plan.and_rule_engine->GetSolution() );
     
@@ -395,7 +393,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    plan.and_rule_engine->Compare( root_xlink, master_keys, master_solution, &knowledge );
+    plan.and_rule_engine->Compare( root_xlink, master_solution, &knowledge );
     TRACE("Search got a match\n");
            
     knowledge.Clear();
@@ -405,7 +403,6 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // Clear out anything cached in agents now that replace is done
     FOREACH( Agent *a, plan.my_agents )
         a->Reset();
-    plan.and_rule_engine->ClearCouplingKeys(); // save memory
 }
 
 
