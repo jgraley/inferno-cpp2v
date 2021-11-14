@@ -293,39 +293,6 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
                 throw CouplingMismatch();               
         }
     }     
-    return;
-
-
-
-    // New coupling planning
-    // Try to derive the old input (candidate_links) from the new (plan
-    // plus required_links) and do a cross-check.
-    multiset<XLink> my_candidate_links;    
-    my_candidate_links.insert( required_links->at(base_plink) ); // insert base xlink (keyer)
-    for( PatternLink coupled_plink : coupled_plinks )
-        if( required_links->count(coupled_plink) ) // could be partial query
-            my_candidate_links.insert( required_links->at(coupled_plink) ); // insert coupled x links if required (residuals)
-            
-    // Note: having combined keyer and residuals into a single multimap,
-    // we proceed with a symmetrical algorithm.
-
-    // We will always accept MMAX links, so ignore them
-    my_candidate_links.erase(XLink::MMAX_Link);
-
-    // Check remaining links against each other. EquivalenceRelation is
-    // transitive, so it's enough just to daisy-chain the checks.
-    XLink previous_link;
-    for( XLink current_link : my_candidate_links )
-    {
-        if( previous_link )
-        {
-            CompareResult cr = equivalence_relation.Compare( previous_link, 
-                                                             current_link );
-            if( cr != EQUAL )
-                throw CouplingMismatch();               
-        }
-        previous_link = current_link;
-    }     
 }
 
 
