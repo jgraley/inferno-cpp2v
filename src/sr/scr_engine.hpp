@@ -102,15 +102,12 @@ private:
 
     void PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
     void RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x );
-    TreePtr<Node> Replace( const CouplingKeysMap *master_keys,
-                           const SolutionMap *master_solution );
+    TreePtr<Node> Replace( const SolutionMap *master_solution );
 
 public: // For top level engine/VN trans
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
-                               const CouplingKeysMap *master_keys,
                                const SolutionMap *master_solution );
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
-                                 const CouplingKeysMap *master_keys,
                                  const SolutionMap *master_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
@@ -146,7 +143,6 @@ private:
     int depth;    
     TheKnowledge knowledge;    
     
-    mutable CouplingKeysMap replace_keys;
     mutable SolutionMap replace_solution;
     bool keys_available = false;    
     mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_though_subtrees;

@@ -124,10 +124,8 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     else
 	    pcontext = &c;
     
-    CouplingKeysMap empty;
-    SolutionMap empty_solution;
-    
-    (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty, &empty_solution );   
+    SolutionMap empty_solution;    
+    (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty_solution );   
 
     pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
     dirty_grass.clear(); // save memory

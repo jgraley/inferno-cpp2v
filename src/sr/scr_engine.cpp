@@ -304,7 +304,7 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     
     // Run the slave's engine on this subtree
     TreePtr<Node> new_subtree = through_subtree;
-    int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_keys, &replace_solution );
+    int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_solution );
     if( !hits )
         return;
         
@@ -342,8 +342,7 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
 }
 
 
-TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys,
-                                  const SolutionMap *master_solution )
+TreePtr<Node> SCREngine::Replace( const SolutionMap *master_solution )
 {
     INDENT("R");
         
@@ -367,7 +366,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys,
     TRACE("Slaves done\n");
     
     keys_available = false;
-    replace_keys.clear();
     replace_solution.clear();
     
     // Need a duplicate here in case we're a slave replacing an identifier
@@ -379,7 +377,6 @@ TreePtr<Node> SCREngine::Replace( const CouplingKeysMap *master_keys,
 
 
 void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
-                                      const CouplingKeysMap *master_keys,
                                       const SolutionMap *master_solution ) 
 {
     INDENT(">");
@@ -398,7 +395,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
            
     knowledge.Clear();
 
-    *p_root_xnode = Replace(master_keys, master_solution);
+    *p_root_xnode = Replace(master_solution);
     
     // Clear out anything cached in agents now that replace is done
     FOREACH( Agent *a, plan.my_agents )
@@ -411,7 +408,6 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
-                                        const CouplingKeysMap *master_keys,
                                         const SolutionMap *master_solution )
 {
     INDENT("}");
@@ -429,7 +425,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
-            SingleCompareReplace( p_root_xnode, master_keys, master_solution );
+            SingleCompareReplace( p_root_xnode, master_solution );
         }
         catch( ::Mismatch )
         {
