@@ -273,6 +273,29 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
+    XLink keyer = required_links->at(base_plink);
+    
+    // Rule #384 means we can skip a coupling when keyer is MMAX
+    if( keyer == XLink::MMAX_Link )
+        return; 
+        
+    for( PatternLink residual_plink : coupled_plinks )
+    {
+        if( required_links->count(residual_plink) )
+        {
+            XLink residual = required_links->at(residual_plink);
+            if( residual == XLink::MMAX_Link )
+                continue;
+            
+            CompareResult cr = equivalence_relation.Compare( keyer, 
+                                                             residual );
+            if( cr != EQUAL )
+                throw CouplingMismatch();               
+        }
+    }     
+    return;
+
+
 
     // New coupling planning
     // Try to derive the old input (candidate_links) from the new (plan
