@@ -9,7 +9,6 @@
 #include "agents/agent.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
-#include "coupling.hpp"
 #include "equivalence.hpp"
 
 #include <list>
@@ -509,24 +508,20 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
 }
 
 
-void SCREngine::SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const
+void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
     ASSERT( keys_available );
     InsertSolo( replace_solution, keyer_link );
 }
 
 
-CouplingKey SCREngine::GetReplaceKey( PatternLink plink ) const
+TreePtr<Node> SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( keys_available );
     if( replace_solution.count(plink) == 1 )
-        return CouplingKey( replace_solution.at(plink),
-                            KEY_PRODUCER_8,
-                            plink,
-                            nullptr,
-                            this );
+        return replace_solution.at(plink).GetChildX();
     else
-        return CouplingKey();
+        return TreePtr<Node>();
 }
 
 

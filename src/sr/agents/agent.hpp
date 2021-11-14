@@ -16,7 +16,6 @@
 #include <boost/type_traits.hpp>
 #include <functional>
 #include "node/graphable.hpp"
-#include "../coupling.hpp"
 
 #define HINTS_IN_EXCEPTIONS
 

@@ -3,7 +3,6 @@
 #include "agent.hpp"
 #include "../scr_engine.hpp"
 #include "link.hpp"
-#include "coupling.hpp"
 #include "standard_agent.hpp"
 
 using namespace SR;

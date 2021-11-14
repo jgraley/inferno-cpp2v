@@ -121,8 +121,8 @@ public: // For agents
     // the slave_engine's one - and that pointer is not const.
     void RecurseInto( RequiresSubordinateSCREngine *slave_agent, 
                       TreePtr<Node> *p_root_xnode ) const;    
-    void SetReplaceKey( LocatedLink keyer_link, KeyProducer place ) const;
-    CouplingKey GetReplaceKey( PatternLink plink ) const;
+    void SetReplaceKey( LocatedLink keyer_link ) const;
+    TreePtr<Node> GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     bool IsKeyed( PatternLink plink ) const; 
     bool IsKeyed( Agent *agent ) const; 

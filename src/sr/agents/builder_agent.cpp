@@ -1,5 +1,4 @@
 #include "builder_agent.hpp"
-#include "coupling.hpp"
 #include "scr_engine.hpp"
 
 using namespace SR;
@@ -33,7 +32,7 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink,
         TreePtr<Node> new_node = BuildNewSubtree();
           
         LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
-        master_scr_engine->SetReplaceKey( new_link, KEY_PRODUCER_7 );
+        master_scr_engine->SetReplaceKey( new_link );
         
         return DuplicateSubtree(new_node);   
     }

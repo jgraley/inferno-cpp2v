@@ -4,7 +4,6 @@
 #include "../conjecture.hpp" 
 #include "link.hpp"
 #include "the_knowledge.hpp"
-#include "coupling.hpp"
 
 using namespace SR;
 
@@ -64,8 +63,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
                                                       TreePtr<Node> key_node ) 
 {
     INDENT("#");
-    CouplingKey terminus_key = master_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
-    TreePtr<Node> terminus_keynode = terminus_key.GetKeyXNode(KEY_CONSUMER_3);
+    TreePtr<Node> terminus_keynode = master_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
     ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")
          (*(terminus))(", term=")(*(terminus_keynode))("\n");

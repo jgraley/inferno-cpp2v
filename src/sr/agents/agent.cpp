@@ -5,7 +5,6 @@
 #include "scr_engine.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
-#include "coupling.hpp"
 // Temporary
 #include "tree/cpptree.hpp"
 #include "transform_of_agent.hpp"
@@ -580,14 +579,11 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
 
-    CouplingKey key = master_scr_engine->GetReplaceKey( base_plink );
-    ASSERT( !key || key.IsFinal() )(*this)(" keyed with non-final node ")(key)("\n"); 
+    TreePtr<Node> keynode = master_scr_engine->GetReplaceKey( base_plink );
+    ASSERT( !keynode || keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
     
-    TreePtr<Node> dest;
-    if( key )
-        dest = BuildReplaceImpl(me_plink, key.GetKeyXNode(KEY_CONSUMER_5));
-    else 
-        dest = BuildReplaceImpl(me_plink, nullptr);    
+    TreePtr<Node> dest = BuildReplaceImpl(me_plink, keynode);
+   
     ASSERT( dest );
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
     

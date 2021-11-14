@@ -11,7 +11,6 @@
 
 #include "query.hpp"
 #include "link.hpp"
-#include "coupling.hpp"
 #include "the_knowledge.hpp"
 
 #include <set>
@@ -145,9 +144,6 @@ public:
     void ClearSolution();
     const unordered_set<Agent *> &GetKeyedAgents() const;
     const unordered_set<PatternLink> &GetKeyerPatternLinks() const;
-
-private:    
-    void RecordLink( LocatedLink link, KeyProducer place );
 
 public:
     string GetTrace() const; // used for debug

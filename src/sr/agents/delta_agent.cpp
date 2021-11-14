@@ -2,7 +2,6 @@
 #include "green_grass_agent.hpp"
 #include "../search_replace.hpp" 
 #include "link.hpp"
-#include "coupling.hpp"
 
 using namespace SR;
 
