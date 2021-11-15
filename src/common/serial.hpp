@@ -103,11 +103,16 @@ private:
     SNType location;
     Progress progress;
 
-    static SNType master_location_serial;
-    static map<void *, SNType> location_serial;
-    static map<SNType, void *> location_readback;
-    static map<SNType, SNType> master_serial_by_location;
-    static map<int, SNType> master_serial_by_step;
+    static struct Cache
+    {
+        ~Cache();
+
+        SNType master_location_serial = 1;
+        map<void *, SNType> location_serial;
+        map<SNType, void *> location_readback;
+        map<SNType, SNType> master_serial_by_location;
+        map<int, SNType> master_serial_by_step;
+    } cache;
 };
 
 

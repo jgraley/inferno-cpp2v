@@ -55,7 +55,10 @@ string Trace(const exception &e)
 
 string Trace(const void *p)
 {
-    return SSPrintf("(void *)%s", p?"NONNULL":"NULL");
+    if( p )
+        return SSPrintf("%p", p);
+    else
+        return "NULL";
 }
 
 

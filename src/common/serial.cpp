@@ -79,35 +79,35 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
         void *lp = __builtin_return_address(1); 
         
         // See if we know about this location
-        if( location_serial.count(lp) == 0 )
+        if( cache.location_serial.count(lp) == 0 )
         {        
             // We don't know about this location, so produce a new location 
             // serial number and start the construction count 
-            location = master_location_serial;
-            master_location_serial++;
+            location = cache.master_location_serial;
+            cache.master_location_serial++;
             
-            location_serial[lp] = location;
-            location_readback[location] = lp;
+            cache.location_serial[lp] = location;
+            cache.location_readback[location] = lp;
 
-            master_serial_by_location[location] = 0;
+            cache.master_serial_by_location[location] = 0;
         }
         else
         {
-            location = location_serial.at(lp);
+            location = cache.location_serial.at(lp);
         }
         
-        serial = master_serial_by_location.at(location);
+        serial = cache.master_serial_by_location.at(location);
         
         // produce a new construction serial number
-        master_serial_by_location[location]++;
+        cache.master_serial_by_location[location]++;
     }
     else
     {
         location = 0;
-        serial = master_serial_by_step[progress.GetStep()];
+        serial = cache.master_serial_by_step[progress.GetStep()];
         
         // produce a new construction serial number
-        master_serial_by_step[progress.GetStep()]++;
+        cache.master_serial_by_step[progress.GetStep()]++;
     }
         
 }    
@@ -115,7 +115,7 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
 
 void *SerialNumber::GetLocation( SNType location )
 {
-    return location_readback.at(location);
+    return cache.location_readback.at(location);
 }
 
 
@@ -128,12 +128,13 @@ string SerialNumber::GetSerialString() const
         return SSPrintf("#%s-%lu", pp.c_str(), serial);    
 }
 
+SerialNumber::Cache::~Cache()
+{
+    //FTRACE(location_readback)("\n");   
+}
 
-SerialNumber::SNType SerialNumber::master_location_serial = 1;
-map<void *, SerialNumber::SNType> SerialNumber::location_serial;
-map<SerialNumber::SNType, void *> SerialNumber::location_readback;
-map<SerialNumber::SNType, SerialNumber::SNType> SerialNumber::master_serial_by_location;
-map<int, SerialNumber::SNType> SerialNumber::master_serial_by_step;
+
+SerialNumber::Cache SerialNumber::cache;
 
 //////////////////////////// SatelliteSerial ///////////////////////////////
 
