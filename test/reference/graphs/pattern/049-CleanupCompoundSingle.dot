@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-1-4-40 ----------
-"CR#B-1-4-40" [
+// -------- block CR#B-4-40 ----------
+"CR#B-4-40" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -31,8 +31,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-1-2-875 ----------
-"#B-1-2-875" [
+// -------- block #B-2-875 ----------
+"#B-2-875" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -45,8 +45,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1-2-878 ----------
-"#B-1-2-878" [
+// -------- block #B-2-878 ----------
+"#B-2-878" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -59,8 +59,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-1-2-879 ----------
-"#B-1-2-879" [
+// -------- block #B-2-879 ----------
+"#B-2-879" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -74,8 +74,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1-2-880 ----------
-"#B-1-2-880" [
+// -------- block #B-2-880 ----------
+"#B-2-880" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -88,8 +88,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1-2-881 ----------
-"#B-1-2-881" [
+// -------- block #B-2-881 ----------
+"#B-2-881" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -100,8 +100,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1-2-876 ----------
-"#B-1-2-876" [
+// -------- block #B-2-876 ----------
+"#B-2-876" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -114,8 +114,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-1-2-877 ----------
-"#B-1-2-877" [
+// -------- block #B-2-877 ----------
+"#B-2-877" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -127,48 +127,48 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-1-4-40":port0 -> "#B-1-2-875" [
+"CR#B-4-40":port0 -> "#B-2-875" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-875":port1 -> "#B-1-2-878" [
+"#B-2-875":port1 -> "#B-2-878" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-875":port1 -> "#B-1-2-876" [
+"#B-2-875":port1 -> "#B-2-876" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-878" -> "#B-1-2-879" [
+"#B-2-878" -> "#B-2-879" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-879":port1 -> "#B-1-2-880" [
+"#B-2-879":port1 -> "#B-2-880" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-879":port2 -> "#B-1-2-881" [
+"#B-2-879":port2 -> "#B-2-881" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-880":port1 -> "#B-1-2-881" [
+"#B-2-880":port1 -> "#B-2-881" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-876" -> "#B-1-2-877" [
+"#B-2-876" -> "#B-2-877" [
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-877":port0 -> "#B-1-2-880" [
+"#B-2-877":port0 -> "#B-2-880" [
     color = black
     fontcolor = black
 ];

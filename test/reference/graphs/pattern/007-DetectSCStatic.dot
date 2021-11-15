@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-1-4-4 ----------
-"CR#B-1-4-4" [
+// -------- block CR#B-4-4 ----------
+"CR#B-4-4" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-1-2-58 ----------
-"#B-1-2-58" [
+// -------- block #B-2-58 ----------
+"#B-2-58" [
     fillcolor = "/set28/6"
     fontsize = "12"
     fontcolor = grey40
@@ -46,8 +46,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1-2-59 ----------
-"#B-1-2-59" [
+// -------- block #B-2-59 ----------
+"#B-2-59" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -59,8 +59,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1-2-57 ----------
-"#B-1-2-57" [
+// -------- block #B-2-57 ----------
+"#B-2-57" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -71,18 +71,18 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-1-4-4":port0 -> "#B-1-2-58" [
+"CR#B-4-4":port0 -> "#B-2-58" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-1-4-4":port1 -> "#B-1-2-57" [
+"CR#B-4-4":port1 -> "#B-2-57" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-1-2-58":port1 -> "#B-1-2-59" [
+"#B-2-58":port1 -> "#B-2-59" [
     color = black
     fontcolor = black
 ];

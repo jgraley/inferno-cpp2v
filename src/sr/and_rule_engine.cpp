@@ -211,6 +211,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
 void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
                                            unordered_set<Agent *> senior_agents ) 
 {
+    // See rule #384
     // Scan the senior region. We wish to break off at Disjunction nodes. Senior is the
     // region up to and including a Disjunction; junior is the region under each of its
     // links.
