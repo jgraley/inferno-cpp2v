@@ -662,7 +662,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 
         try // in here, only have the stuff that could throw a mismatch
         {
-            Tracer::RAIIEnable silencer( false );   // Shush, I'm trying to debug the NLQs
+            Tracer::RAIIDisable silencer();   // Shush, I'm trying to debug the NLQs
             SolutionMap solution_for_evaluators;
             
             // Try matching the abnormal links (free and evaluator).

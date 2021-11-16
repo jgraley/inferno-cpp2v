@@ -175,7 +175,7 @@ void SystemicConstraint::Test( Assignments frees_map )
     //required_links = UnionOfSolo(forces_map, frees_map);
     
     {
-        Tracer::RAIIEnable silencer( false ); // make queries be quiet
+        Tracer::RAIIDisable silencer(); // make queries be quiet
 
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {

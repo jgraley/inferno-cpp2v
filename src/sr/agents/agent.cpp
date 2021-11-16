@@ -389,7 +389,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     {
         try
         {
-            Tracer::RAIIEnable silencer( false ); // make ref algo be quiet            
+            Tracer::RAIIDisable silencer(); // make ref algo be quiet            
             (void)StartRegenerationQuery( required_links, knowledge, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
@@ -406,7 +406,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     // FastStartNormalLinkedQuery() didn't throw
     try
     {
-        Tracer::RAIIEnable silencer( false ); // make ref algo be quiet             
+        Tracer::RAIIDisable silencer(); // make ref algo be quiet             
         ref_lambda = StartRegenerationQuery( required_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
@@ -435,7 +435,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
             try 
             { 
                 {
-                    Tracer::RAIIEnable silencer( false ); // make ref algo be quiet            
+                    Tracer::RAIIDisable silencer(); // make ref algo be quiet            
                     ref_query = ref_lambda(); 
                 }
                 TRACE("Ref lambda hit #%d\n", (*ref_hits))
@@ -457,7 +457,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
         try
         {
             {
-                Tracer::RAIIEnable silencer( false ); // make ref algo be quiet             
+                Tracer::RAIIDisable silencer(); // make ref algo be quiet             
                 ref_query = ref_lambda(); 
             }
             TRACE("Ref lambda hit #%d\n", (*ref_hits))

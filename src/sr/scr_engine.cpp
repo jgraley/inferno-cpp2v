@@ -371,7 +371,7 @@ TreePtr<Node> SCREngine::Replace( const SolutionMap *master_solution )
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
     // and that would break knowledge building. See #217
-    {Tracer::RAIIEnable silencer( false );return plan.root_agent->DuplicateSubtree(new_root_x);}
+    {Tracer::RAIIDisable silencer();return plan.root_agent->DuplicateSubtree(new_root_x);}
 }
 
 
@@ -499,7 +499,7 @@ void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
                              TreePtr<Node> *p_slave_through_subtree ) const
 {
     ASSERT( keys_available );
-    //Tracer::RAIIEnable silencer( true );    
+    //Tracer::RAIIDisable silencer( false );    // bring back trace again
     
     // p_root_xnode cannot be stored: it points to a local of our caller
     TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 

@@ -175,7 +175,7 @@ Tracer::~Tracer()
 
 Tracer &Tracer::operator()()
 {
-    if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
+    if( (flags & DISABLE) || !(IsEnabled() || (flags & FORCE)) )
         return *this;
  
     MaybePrintEndl();
@@ -187,7 +187,7 @@ Tracer &Tracer::operator()()
 
 Tracer &Tracer::operator()(const string &s)
 {    
-    if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
+    if( (flags & DISABLE) || !(IsEnabled() || (flags & FORCE)) )
         return *this;
 
     if( !require_endl ) 
@@ -279,6 +279,7 @@ void Tracer::MaybePrintBanner()
 bool Tracer::require_endl = false;
 bool Tracer::require_banner = true;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
+bool Tracer::disable = false;
 string Tracer::Descend::pre;
 string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
 

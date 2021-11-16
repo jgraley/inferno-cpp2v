@@ -215,7 +215,7 @@ public:
     virtual Tracer &operator()(const string &s); 
 
     static void Enable( bool e ); ///< enable/disable tracing, only for top level function to call, overridden by flags
-    inline static bool IsEnabled() { return enable; }
+    inline static bool IsEnabled() { return enable && !disable; }
     static string GetPrefix() { return Descend::pre; }
     
     class Descend
@@ -231,20 +231,22 @@ public:
         friend class Tracer;
     };
 
-    class RAIIEnable
+    class RAIIDisable
     {
     public:
-    	inline RAIIEnable( bool enable_ ) : 
-    	    old_enable(enable) 
+        // To undo the effect (i.e. go back to the standard setting),
+        // create one and pass in false
+    	inline RAIIDisable( bool disable_ = true ) : 
+    	    old_disable(disable) 
     	{ 
-            enable = enable_; 
+            disable = disable_; 
         } 
-    	inline ~RAIIEnable() 
+    	inline ~RAIIDisable() 
     	{ 
-            enable = old_enable; 
+            disable = old_disable; 
         } 
     private:
-        const bool old_enable;
+        const bool old_disable;
     };
 
     static void MaybePrintEndl();
@@ -261,6 +263,7 @@ private:
     static bool require_endl;
     static bool require_banner;
     static bool enable;
+    static bool disable;
 };
 
 ////////////////////////// TraceTo //////////////////////////
