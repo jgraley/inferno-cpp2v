@@ -33,7 +33,7 @@ bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::new_feature = false;
+bool ReadArgs::use_csp_solver = false;
 
 void ReadArgs::Usage()
 {
@@ -62,7 +62,7 @@ void ReadArgs::Usage()
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
-                    "-x          Enable new feature. Meaning varies.\n",
+                    "-uc         Use CSP solver.\n",
     		        exename.c_str() );
     exit(1);
 }
@@ -210,9 +210,13 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             output_all = true;
             graph_trace = true;
         }
-        else if( option=='x' )
+        else if( option=='u' )
         {
-            new_feature = true;
+            char use_option = argv[curarg][2];
+            if( use_option=='c' )
+                use_csp_solver = true;
+            else
+                Usage();
         }
         else 
         {

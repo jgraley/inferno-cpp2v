@@ -41,7 +41,7 @@ public:
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
-    static bool new_feature;
+    static bool use_csp_solver;
     
 private:
     void ParseQuitAfter(std::string arg);

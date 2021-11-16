@@ -22,9 +22,6 @@
 #include <list>
 
 //#define TEST_PATTERN_QUERY
-
-// This now works! ish...
-//#define USE_SOLVER
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
@@ -115,18 +112,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( !my_normal_agents.empty() );
     }
 
-#ifdef USE_SOLVER   
-    {
-        list< shared_ptr<CSP::Constraint> > constraints_list;
-        CreateMyFullConstraints(constraints_list);
-        CreateMasterCouplingConstraints(constraints_list);
-        CreateCSPSolver(constraints_list);
-        // Note: constraints_list drops out of scope and discards its 
-        // references; only constraints held onto by solver will remain.
-    }
-#else
-    conj = make_shared<Conjecture>(my_normal_agents, root_agent);
-#endif                      
+    // For CSP solver only...
+    list< shared_ptr<CSP::Constraint> > constraints_list;
+    CreateMyFullConstraints(constraints_list);
+    CreateMasterCouplingConstraints(constraints_list);
+    CreateCSPSolver(constraints_list);
+    // Note: constraints_list drops out of scope and discards its 
+    // references; only constraints held onto by solver will remain.
+
+    // For old solver only...
+    conj = make_shared<Conjecture>(my_normal_agents, root_agent);                      
 }
 
 
@@ -757,11 +752,10 @@ void AndRuleEngine::Compare( XLink root_xlink,
         ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
                      
-#ifdef USE_SOLVER
-    StartCSPSolver( root_xlink );
-#else
-    plan.conj->Start();
-#endif
+    if( ReadArgs::use_csp_solver )
+        StartCSPSolver( root_xlink );
+    else
+        plan.conj->Start();
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -769,19 +763,21 @@ void AndRuleEngine::Compare( XLink root_xlink,
     while(1)
     {
         basic_solution.clear();
-#ifdef USE_SOLVER        
         // Get a solution from the solver
-        GetNextCSPSolution(root_link);        
-#endif
+        if( ReadArgs::use_csp_solver )        
+            GetNextCSPSolution(root_link);        
+
         try
         {
-#ifndef USE_SOLVER
-            // Try out the current conjecture. This will call RegisterDecision() once for each decision;
-            // RegisterDecision() will return the current choice for that decision, if absent it will
-            // add the decision and choose the first choice, if the decision reaches the end it
-            // will remove the decision.    
-            DecidedCompare( root_link );       
-#endif
+            if( !ReadArgs::use_csp_solver )
+            {
+                // Try out the current conjecture. This will call RegisterDecision() once for each decision;
+                // RegisterDecision() will return the current choice for that decision, if absent it will
+                // add the decision and choose the first choice, if the decision reaches the end it
+                // will remove the decision.    
+                DecidedCompare( root_link );       
+            }
+
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
             {            
@@ -791,26 +787,29 @@ void AndRuleEngine::Compare( XLink root_xlink,
         }
         catch( const ::Mismatch& e )
         {                
-#ifdef USE_SOLVER
-            TRACE(e)(" after recursion, trying next solution\n");
-            continue; // Get another solution from the solver
-#else
-            TRACE(e)(" after recursion, trying increment conjecture\n");
-            if( plan.conj->Increment() )
-                continue; // Conjecture would like us to try again with new choices
-                
-            plan.conj->Reset();
-            // We didn't match and we've run out of choices, so we're done.              
-            throw NoSolution();
-#endif            
+            if( ReadArgs::use_csp_solver )
+            {
+                TRACE(e)(" after recursion, trying next solution\n");
+                continue; // Get another solution from the solver
+            }
+            else
+            {
+                TRACE(e)(" after recursion, trying increment conjecture\n");
+                if( plan.conj->Increment() )
+                    continue; // Conjecture would like us to try again with new choices
+                    
+                plan.conj->Reset();
+                // We didn't match and we've run out of choices, so we're done.              
+                throw NoSolution();
+            }
         }
         // We got a match so we're done. 
         TRACE("AndRuleEngine hit\n");
         break; // Success
     }
-#ifndef USE_SOLVER
-    plan.conj->Reset();
-#endif
+    
+    if( !ReadArgs::use_csp_solver )
+        plan.conj->Reset();
     
     // By now, we succeeded and slave_keys is the right set of keys
 }
