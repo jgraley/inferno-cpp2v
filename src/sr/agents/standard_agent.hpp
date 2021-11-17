@@ -203,8 +203,15 @@ public:
         // Want to get rid of the StandardAgentWrapper<...> around the name. The main
         // GetName() works via RTTI so no amount of casting of "this" will stop the full
         // final node's name being returned. So we have to actually make a temp in the
-        // node type and use that.
-        return string("StandardAgent<") + NODE_TYPE().GetTypeName() + string(">");        
+        // node type and use that. No, don't make a temp, it makes the serial numbers 
+        // change depeding on when tracing is enabled. Just fiddle about with the string.
+        string real_typename = Node::GetTypeName();        
+        const string expected_prefix = "StandardAgentWrapper";
+        const string desired_prefix = "StandardAgent";
+        if( real_typename.rfind(expected_prefix, 0) == 0 )
+            return desired_prefix + real_typename.substr(expected_prefix.length());
+        else
+            return real_typename; // hopefully contains something informative
     }
 
     shared_ptr<const Node> GetPatternPtr() const

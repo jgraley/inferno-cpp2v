@@ -67,7 +67,7 @@ public:
     typedef uint64_t SNType;
     
 protected:
-    SerialNumber( bool use_location = true,
+    SerialNumber( bool use_location = false,
                   const SerialNumber *serial_to_use = nullptr );
     inline SerialNumber( const SerialNumber &other ) :
         SerialNumber() // Identity semantics: ignore "other"

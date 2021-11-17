@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-4-0 ----------
-"CR#B-4-0" [
+// -------- block CR#B-15 ----------
+"CR#B-15" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-2-12 ----------
-"#B-2-12" [
+// -------- block #B-14 ----------
+"#B-14" [
     fillcolor = "/set19/1"
     fontsize = "12"
     fontcolor = grey40
@@ -44,8 +44,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-10 ----------
-"#B-2-10" [
+// -------- block #B-12 ----------
+"#B-12" [
     fillcolor = "/set19/3"
     fontsize = "12"
     fontcolor = grey40
@@ -58,8 +58,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-11 ----------
-"#B-2-11" [
+// -------- block #B-13 ----------
+"#B-13" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -74,8 +74,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-2-7 ----------
-"#B-2-7" [
+// -------- block #B-9 ----------
+"#B-9" [
     fillcolor = "/set19/1"
     fontsize = "12"
     fontcolor = grey40
@@ -86,8 +86,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-8 ----------
-"#B-2-8" [
+// -------- block #B-10 ----------
+"#B-10" [
     fillcolor = "/set19/1"
     fontsize = "12"
     fontcolor = grey40
@@ -98,8 +98,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-9 ----------
-"#B-2-9" [
+// -------- block #B-11 ----------
+"#B-11" [
     fillcolor = "/set19/1"
     fontsize = "12"
     fontcolor = grey40
@@ -110,38 +110,38 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-4-0":port0 -> "#B-2-12" [
+"CR#B-15":port0 -> "#B-14" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-4-0":port1 -> "#B-2-10" [
+"CR#B-15":port1 -> "#B-12" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-10":port0 -> "#B-2-11" [
+"#B-12":port0 -> "#B-13" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-10":port1 -> "#B-2-9" [
+"#B-12":port1 -> "#B-11" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-11":port0 -> "#B-2-7" [
+"#B-13":port0 -> "#B-9" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-11":port1 -> "#B-2-8" [
+"#B-13":port1 -> "#B-10" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-11":port2 -> "#B-2-9" [
+"#B-13":port2 -> "#B-11" [
     style="dashed"
     color = black
     fontcolor = black

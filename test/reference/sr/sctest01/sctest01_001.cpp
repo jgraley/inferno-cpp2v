@@ -1,110 +1,108 @@
-#include "isystemc.h"
-
+class id_17;
+class id_30;
+class id_6;
 class id_0;
-class id_16;
-class id_24;
-class id_28;
-class id_0 : public sc_module
+class id_18;
+class id_26;
+class id_17
+{
+};
+class id_30
+{
+};
+class id_6
+{
+void (id_16)(auto void id_11);
+};
+class id_0 : public id_17
 {
 public:
-SC_CTOR( id_0 )
-{
-}
-sc_event id_1;
-id_0(auto char (*id_2));
-void (id_5)();
+id_0(auto char (*id_1));
+ ::id_6 id_7;
+void (id_4)();
 };
-class id_16 : public sc_module
+class id_18 : public id_17
 {
 public:
-SC_CTOR( id_16 )
-{
-}
-sc_event id_14;
-sc_event id_17;
-id_16(auto char (*id_18));
-void (id_20)();
+id_18(auto char (*id_19));
+ ::id_6 id_15;
+ ::id_6 id_22;
+void (id_21)();
 };
-class id_24 : public sc_module
+class id_26 : public id_17
 {
 public:
-SC_CTOR( id_24 ) :
-id_21("id_21"),
-id_13("id_13")
-{
-}
-id_24(auto char (*id_25));
- ::id_0 id_21;
- ::id_16 id_13;
-void (id_27)();
+id_26(auto char (*id_27));
+ ::id_0 id_23;
+ ::id_18 id_14;
+void (id_29)();
 };
-class id_28
-{
-};
-id_24 id_12("id_12");
-void id_11;
-int id_9;
-void (id_8)(void id_7);
-void (id_30)(void id_29);
-void (id_6)(void id_4);
+id_26 id_13;
+void id_12;
+int id_10;
+void (id_9)(void id_8);
 void (id_32)(void id_31);
+void (id_5)(void id_3);
 void (id_34)(void id_33);
-void (id_23)(void id_22);
-void (id_37)(void id_35, void id_36);
+void (id_36)(void id_35);
+void (id_25)(void id_24);
+void (id_39)(void id_37, void id_38);
 
-id_0::id_0(char (*id_2))
+void (id_6::id_16)(void id_11);
+
+id_0::id_0(char (*id_1))
 {
- ::id_6( ::id_0::id_5);
+ ::id_5( ::id_0::id_4);
 }
 
-void (id_0::id_5)()
+void (id_0::id_4)()
 {
- ::id_8( ::id_0::id_1);
- ::id_9+=(2);
-"ERROR: cannot analyse call";
- ::id_8( ::id_0::id_1);
- ::id_9+=(3);
-"ERROR: cannot analyse call";
+ ::id_9( ::id_0::id_7);
+ ::id_10+=(2);
+((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
+ ::id_9( ::id_0::id_7);
+ ::id_10+=(3);
+((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
 }
 
-id_16::id_16(char (*id_18))
+id_18::id_18(char (*id_19))
 {
- ::id_6( ::id_16::id_20);
+ ::id_5( ::id_18::id_21);
 }
 
-void (id_16::id_20)()
+void (id_18::id_21)()
 {
- ::id_8( ::id_16::id_17);
- ::id_9*=(5);
-"ERROR: cannot analyse call";
- ::id_8( ::id_16::id_14);
- ::id_9*=(5);
-"ERROR: cannot analyse call";
- ::id_8( ::id_16::id_14);
- ::id_23( ::id_9);
+ ::id_9( ::id_18::id_22);
+ ::id_10*=(5);
+((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
+ ::id_9( ::id_18::id_15);
+ ::id_10*=(5);
+((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
+ ::id_9( ::id_18::id_15);
+ ::id_25( ::id_10);
 }
 
-id_24::id_24(char (*id_25)) : id_21("add_inst"), id_13("mul_inst")
+id_26::id_26(char (*id_27)) : id_23("add_inst"), id_14("mul_inst")
 {
- ::id_6( ::id_24::id_27);
+ ::id_5( ::id_26::id_29);
 }
 
-void (id_24::id_27)()
+void (id_26::id_29)()
 {
- ::id_9=(1);
-"ERROR: cannot analyse call";
+ ::id_10=(1);
+(( ::id_26::id_14. ::id_18::id_22). ::id_6::id_16)( ::id_12);
 }
 
-void (id_8)(void id_7);
-
-void (id_30)(void id_29);
-
-void (id_6)(void id_4);
+void (id_9)(void id_8);
 
 void (id_32)(void id_31);
 
+void (id_5)(void id_3);
+
 void (id_34)(void id_33);
 
-void (id_23)(void id_22);
+void (id_36)(void id_35);
 
-void (id_37)(void id_35, void id_36);
+void (id_25)(void id_24);
+
+void (id_39)(void id_37, void id_38);

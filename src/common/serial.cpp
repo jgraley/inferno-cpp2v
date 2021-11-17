@@ -5,6 +5,7 @@
 
 #include <cxxabi.h>
 #include <stdio.h>
+#include <iostream>
 
 //////////////////////////// LeakCheck ///////////////////////////////
 
@@ -70,6 +71,8 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
         // location and serial but not progress.
         serial = serial_to_use->serial;
         location = serial_to_use->location;
+        //printf("%p %p %s (reused)\n", __builtin_return_address(2), __builtin_return_address(2), GetSerialString().c_str());
+        //std::cout << std::flush;
         return;
     }
     
@@ -108,6 +111,9 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
         
         // produce a new construction serial number
         cache.master_serial_by_step[progress.GetStep()]++;
+        
+        //printf("%p %p %s\n", __builtin_return_address(2), __builtin_return_address(3), GetSerialString().c_str());
+        //std::cout << std::flush;
     }
         
 }    

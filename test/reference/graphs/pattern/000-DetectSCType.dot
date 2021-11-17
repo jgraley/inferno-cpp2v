@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-3-0 ----------
-"CR#B-3-0" [
+// -------- block CR#B-9 ----------
+"CR#B-9" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-2-1 ----------
-"#B-2-1" [
+// -------- block #B-2 ----------
+"#B-2" [
     fontsize = "12"
     fontcolor = grey40
     shape = "triangle"
@@ -45,8 +45,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-2-2 ----------
-"#B-2-2" [
+// -------- block #B-3 ----------
+"#B-3" [
     fillcolor = "/set28/4"
     fontsize = "12"
     fontcolor = grey40
@@ -58,8 +58,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-4 ----------
-"#B-2-4" [
+// -------- block #B-5 ----------
+"#B-5" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -72,8 +72,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-2-5 ----------
-"#B-2-5" [
+// -------- block #B-6 ----------
+"#B-6" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -85,8 +85,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-6 ----------
-"#B-2-6" [
+// -------- block #B-7 ----------
+"#B-7" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -98,8 +98,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-3 ----------
-"#B-2-3" [
+// -------- block #B-4 ----------
+"#B-4" [
     fillcolor = "/set28/4"
     fontsize = "12"
     fontcolor = grey40
@@ -111,8 +111,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2-7 ----------
-"#B-2-7" [
+// -------- block #B-8 ----------
+"#B-8" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -127,8 +127,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-2-0 ----------
-"#B-2-0" [
+// -------- block #B-1 ----------
+"#B-1" [
     fillcolor = "/set28/3"
     fontsize = "12"
     fontcolor = grey40
@@ -139,59 +139,59 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-3-0":port0 -> "#B-2-1" [
+"CR#B-9":port0 -> "#B-2" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-3-0":port1 -> "#B-2-7" [
+"CR#B-9":port1 -> "#B-8" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-1" -> "#B-2-2" [
+"#B-2" -> "#B-3" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-1" -> "#B-2-3" [
+"#B-2" -> "#B-4" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-2-2":port0 -> "#B-2-4" [
+"#B-3":port0 -> "#B-5" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-2":port0 -> "#B-2-5" [
+"#B-3":port0 -> "#B-6" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-5":port0 -> "#B-2-6" [
+"#B-6":port0 -> "#B-7" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-3":port0 -> "#B-2-4" [
+"#B-4":port0 -> "#B-5" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-7":port0 -> "#B-2-1" [
+"#B-8":port0 -> "#B-2" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-7":port1 -> "#B-2-6" [
+"#B-8":port1 -> "#B-7" [
     color = black
     fontcolor = black
 ];
 
-"#B-2-7":port2 -> "#B-2-0" [
+"#B-8":port2 -> "#B-1" [
     style="dashed"
     color = black
     fontcolor = black

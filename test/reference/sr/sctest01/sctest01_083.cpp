@@ -1,126 +1,108 @@
-#include "isystemc.h"
-
+class id_17;
+class id_30;
+class id_6;
 class id_0;
-class id_13;
-class id_24;
-class id_0 : public sc_module
+class id_18;
+class id_26;
+class id_17
+{
+};
+class id_30
+{
+};
+class id_6
+{
+void (id_16)(auto void id_11);
+};
+class id_0 : public id_17
 {
 public:
-SC_CTOR( id_0 )
-{
-SC_THREAD(id_5);
-}
-enum id_1
-{
-id_2 = 0U,
-id_3 = 1U,
+id_0(auto char (*id_1));
+ ::id_6 id_7;
+void (id_4)();
 };
-sc_event id_4;
-void id_5();
-};
-class id_13 : public sc_module
+class id_18 : public id_17
 {
 public:
-SC_CTOR( id_13 )
-{
-SC_THREAD(id_19);
-}
-enum id_14
-{
-id_15 = 0U,
-id_16 = 1U,
-id_17 = 2U,
+id_18(auto char (*id_19));
+ ::id_6 id_15;
+ ::id_6 id_22;
+void (id_21)();
 };
-sc_event id_12;
-sc_event id_18;
-void id_19();
-};
-class id_24 : public sc_module
+class id_26 : public id_17
 {
 public:
-SC_CTOR( id_24 ) :
-id_23("id_23"),
-id_11("id_11")
-{
-SC_THREAD(id_26);
-}
-enum id_25
-{
-};
-void id_26();
+id_26(auto char (*id_27));
  ::id_0 id_23;
- ::id_13 id_11;
+ ::id_18 id_14;
+void (id_29)();
 };
-id_24 id_10("id_10");
-int id_9;
+id_26 id_13;
+void id_12;
+int id_10;
+void (id_9)(void id_8);
+void (id_32)(void id_31);
+void (id_5)(void id_3);
+void (id_34)(void id_33);
+void (id_36)(void id_35);
+void (id_25)(void id_24);
+void (id_39)(void id_37, void id_38);
 
-void id_0::id_5()
+void (id_6::id_16)(void id_11);
+
+id_0::id_0(char (*id_1))
 {
-static const unsigned int (id_6[]) = { &&id_7, &&id_7 };
-auto unsigned int id_8;
-id_7:;
-if( (sc_delta_count())==(0U) )
-{
-wait(  ::id_0::id_4 );
-id_8= ::id_0::id_2;
-goto *(id_6[id_8]);
-}
-if(  ::id_0::id_2==id_8 )
-{
- ::id_9+=(2);
-(( ::id_10. ::id_24::id_11). ::id_13::id_12).notify(SC_ZERO_TIME);
-wait(  ::id_0::id_4 );
-id_8= ::id_0::id_3;
-goto *(id_6[id_8]);
-}
-if(  ::id_0::id_3==id_8 )
-{
- ::id_9+=(3);
-(( ::id_10. ::id_24::id_11). ::id_13::id_12).notify(SC_ZERO_TIME);
-return ;
-}
-goto *(id_6[id_8]);
+ ::id_5( ::id_0::id_4);
 }
 
-void id_13::id_19()
+void (id_0::id_4)()
 {
-static const unsigned int (id_20[]) = { &&id_21, &&id_21, &&id_21 };
-auto unsigned int id_22;
-id_21:;
-if( (sc_delta_count())==(0U) )
-{
-wait(  ::id_13::id_18 );
-id_22= ::id_13::id_15;
-goto *(id_20[id_22]);
-}
-if(  ::id_13::id_15==id_22 )
-{
- ::id_9*=(5);
-(( ::id_10. ::id_24::id_23). ::id_0::id_4).notify(SC_ZERO_TIME);
-wait(  ::id_13::id_12 );
-id_22= ::id_13::id_16;
-goto *(id_20[id_22]);
-}
-if(  ::id_13::id_16==id_22 )
-{
- ::id_9*=(5);
-(( ::id_10. ::id_24::id_23). ::id_0::id_4).notify(SC_ZERO_TIME);
-wait(  ::id_13::id_12 );
-id_22= ::id_13::id_17;
-goto *(id_20[id_22]);
-}
-if(  ::id_13::id_17==id_22 )
-{
-cease(  ::id_9 );
-return ;
-}
-goto *(id_20[id_22]);
+ ::id_9( ::id_0::id_7);
+ ::id_10+=(2);
+((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
+ ::id_9( ::id_0::id_7);
+ ::id_10+=(3);
+((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
 }
 
-void id_24::id_26()
+id_18::id_18(char (*id_19))
 {
-static const unsigned int (id_27[]) = {  };
- ::id_9=(1);
-( ::id_24::id_11. ::id_13::id_18).notify(SC_ZERO_TIME);
-return ;
+ ::id_5( ::id_18::id_21);
 }
+
+void (id_18::id_21)()
+{
+ ::id_9( ::id_18::id_22);
+ ::id_10*=(5);
+((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
+ ::id_9( ::id_18::id_15);
+ ::id_10*=(5);
+((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
+ ::id_9( ::id_18::id_15);
+ ::id_25( ::id_10);
+}
+
+id_26::id_26(char (*id_27)) : id_23("add_inst"), id_14("mul_inst")
+{
+ ::id_5( ::id_26::id_29);
+}
+
+void (id_26::id_29)()
+{
+ ::id_10=(1);
+(( ::id_26::id_14. ::id_18::id_22). ::id_6::id_16)( ::id_12);
+}
+
+void (id_9)(void id_8);
+
+void (id_32)(void id_31);
+
+void (id_5)(void id_3);
+
+void (id_34)(void id_33);
+
+void (id_36)(void id_35);
+
+void (id_25)(void id_24);
+
+void (id_39)(void id_37, void id_38);

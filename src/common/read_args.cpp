@@ -35,8 +35,9 @@ bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
 bool ReadArgs::use_csp_solver = false;
 
-void ReadArgs::Usage()
+void ReadArgs::Usage(string msg)
 {
+    fprintf(stderr, "%s\n", msg.c_str());
     fprintf(stderr, "Usage:\n"
     		        "%s <options> \n"
     		        "\n"
@@ -78,7 +79,7 @@ string ReadArgs::GetArg( int al )
     {
         curarg++;
         if(curarg >= argc)
-            Usage();
+            Usage("Missing argument");
         return string( argv[curarg] );
     }    
 }
@@ -90,8 +91,11 @@ ReadArgs::ReadArgs( int ac, char *av[] )
 	exename = argv[0];
     for( curarg=1; curarg<argc; curarg++ )
     {
-    	if( argv[curarg][0] != '-' || ((string)(argv[curarg])).size()<2 )
-    		Usage();
+    	if( argv[curarg][0] != '-' )
+            Usage("Expecting \"-\"");
+            
+        if( ((string)(argv[curarg])).size()<2 )
+    		Usage("Missing option letter");
 
         char option = argv[curarg][1];
         
@@ -126,7 +130,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             }
             else
             {
-                Usage();
+                Usage("Unknown argument after -t");
             }
         }
         else if( option=='g' )
@@ -171,7 +175,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             }
             else
             {
-                Usage();
+                Usage("Unknown argument after -g");
             }
         }
         else if( option=='r' )
@@ -182,7 +186,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             else if( reps_option=='n' )
                 rep_error = false;
             else
-                Usage();
+                Usage("Unknown argument after -r");
             repetitions = strtoul( GetArg(2).c_str(), nullptr, 10 );
         }
         else if( option=='s' )
@@ -195,7 +199,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             if( assert_option=='p' )
                 assert_pedigree = true;
             else
-                Usage();
+                Usage("Unknown argument after -a");
         }
         else if( option=='q' )
         {
@@ -217,11 +221,11 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             if( use_option=='c' )
                 use_csp_solver = true;
             else
-                Usage();
+                Usage("Unknown argument after -u");
         }
         else 
         {
-            Usage();
+            Usage("Unknown option");
         }
     }    
 }
