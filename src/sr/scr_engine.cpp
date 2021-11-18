@@ -34,7 +34,7 @@ SCREngine::SCREngine( const CompareReplace *overall_master,
                       TreePtr<Node> rp,
                       const unordered_set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
-    SerialNumber( false ),
+    SerialNumber(),
     plan(this, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {

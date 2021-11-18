@@ -60,8 +60,7 @@ map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
 
 //////////////////////////// SerialNumber ///////////////////////////////
 
-SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_use ) :
-    use_location( use_location_ )
+SerialNumber::SerialNumber( const SerialNumber *serial_to_use )
 {    
     progress = Progress::GetCurrent();
     
@@ -70,68 +69,26 @@ SerialNumber::SerialNumber( bool use_location_, const SerialNumber *serial_to_us
         // Serial number supplied to constructor (explicitly), take
         // location and serial but not progress.
         serial = serial_to_use->serial;
-        location = serial_to_use->location;
         //printf("%p %p %s (reused)\n", __builtin_return_address(2), __builtin_return_address(2), GetSerialString().c_str());
         //std::cout << std::flush;
         return;
     }
     
-    if( use_location )
-    {
-        // Get the point in the code where we were constructed 
-        void *lp = __builtin_return_address(1); 
-        
-        // See if we know about this location
-        if( cache.location_serial.count(lp) == 0 )
-        {        
-            // We don't know about this location, so produce a new location 
-            // serial number and start the construction count 
-            location = cache.master_location_serial;
-            cache.master_location_serial++;
-            
-            cache.location_serial[lp] = location;
-            cache.location_readback[location] = lp;
-
-            cache.master_serial_by_location[location] = 0;
-        }
-        else
-        {
-            location = cache.location_serial.at(lp);
-        }
-        
-        serial = cache.master_serial_by_location.at(location);
-        
-        // produce a new construction serial number
-        cache.master_serial_by_location[location]++;
-    }
-    else
-    {
-        location = 0;
-        serial = cache.master_serial_by_step[progress.GetStep()];
-        
-        // produce a new construction serial number
-        cache.master_serial_by_step[progress.GetStep()]++;
-        
-        //printf("%p %p %s\n", __builtin_return_address(2), __builtin_return_address(3), GetSerialString().c_str());
-        //std::cout << std::flush;
-    }
+    serial = cache.master_serial_by_step[progress.GetStep()];
+    
+    // produce a new construction serial number
+    cache.master_serial_by_step[progress.GetStep()]++;
+    
+    //printf("%p %p %s\n", __builtin_return_address(2), __builtin_return_address(3), GetSerialString().c_str());
+    //std::cout << std::flush;
         
 }    
-
-
-void *SerialNumber::GetLocation( SNType location )
-{
-    return cache.location_readback.at(location);
-}
 
 
 string SerialNumber::GetSerialString() const
 {
     string pp = progress.GetPrefix();
-    if( use_location )
-        return SSPrintf("#%s-%lu-%lu", pp.c_str(), location, serial);
-    else
-        return SSPrintf("#%s-%lu", pp.c_str(), serial);    
+    return SSPrintf("#%s-%lu", pp.c_str(), serial);    
 }
 
 SerialNumber::Cache::~Cache()
@@ -183,11 +140,6 @@ string SatelliteSerial::GetSerialString() const
 SatelliteSerial::SerialByMotherSerial SatelliteSerial::serial_by_child_node;    
 
 //////////////////////////// free functions ///////////////////////////////
-
-void *GetLocation(SerialNumber::SNType location) // for GCC
-{
-    return SerialNumber::GetLocation(location);
-}
 
 void DumpCounts( int min = 0 ) // for GCC
 {

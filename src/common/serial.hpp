@@ -67,8 +67,7 @@ public:
     typedef uint64_t SNType;
     
 protected:
-    SerialNumber( bool use_location = false,
-                  const SerialNumber *serial_to_use = nullptr );
+    SerialNumber( const SerialNumber *serial_to_use = nullptr );
     inline SerialNumber( const SerialNumber &other ) :
         SerialNumber() // Identity semantics: ignore "other"
     {      
@@ -82,35 +81,25 @@ protected:
     {
         if( progress != o.progress )
             return progress < o.progress;
-        else if( location < o.location )
-            return location < o.location;
         else
             return serial < o.serial;
     }
     
 public:
-    static void *GetLocation( SNType location );
-
     inline pair<SNType, SNType> GetSerialNumber() const 
     {
-        return make_pair(location, serial); // This is enough for uniqueness
+        return make_pair(0, serial); // This is enough for uniqueness
     }
     string GetSerialString() const; 
     
 private:    
-    const bool use_location;
     SNType serial;
-    SNType location;
     Progress progress;
 
     static struct Cache
     {
         ~Cache();
 
-        SNType master_location_serial = 1;
-        map<void *, SNType> location_serial;
-        map<SNType, void *> location_readback;
-        map<SNType, SNType> master_serial_by_location;
         map<int, SNType> master_serial_by_step;
     } cache;
 };
