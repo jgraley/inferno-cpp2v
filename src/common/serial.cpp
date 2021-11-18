@@ -62,16 +62,11 @@ map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
 
 SerialNumber::SerialNumber()
 {    
-    progress = Progress::GetCurrent();
-    
+    progress = Progress::GetCurrent();    
     serial = cache.master_serial_by_progress[progress];
     
     // produce a new construction serial number
-    cache.master_serial_by_progress[progress]++;
-    
-    //printf("%p %p %s\n", __builtin_return_address(2), __builtin_return_address(3), GetSerialString().c_str());
-    //std::cout << std::flush;
-        
+    cache.master_serial_by_progress[progress]++;      
 }    
 
 
@@ -80,6 +75,7 @@ string SerialNumber::GetSerialString() const
     string pp = progress.GetPrefix();
     return SSPrintf("#%s-%lu", pp.c_str(), serial);    
 }
+
 
 SerialNumber::Cache::~Cache()
 {
