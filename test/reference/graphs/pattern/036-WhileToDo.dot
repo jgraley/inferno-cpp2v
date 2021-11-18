@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-683 ----------
-"CR#B-683" [
+// -------- block CR#B-682 ----------
+"CR#B-682" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-680 ----------
-"#B-680" [
+// -------- block #B-679 ----------
+"#B-679" [
     fontsize = "12"
     fontcolor = grey40
     shape = "diamond"
@@ -45,8 +45,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-674 ----------
-"#B-674" [
+// -------- block #B-673 ----------
+"#B-673" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -59,8 +59,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-675 ----------
-"#B-675" [
+// -------- block #B-674 ----------
+"#B-674" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -71,8 +71,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-676 ----------
-"#B-676" [
+// -------- block #B-675 ----------
+"#B-675" [
     fillcolor = "/set28/6"
     fontsize = "12"
     fontcolor = grey40
@@ -83,8 +83,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-681 ----------
-"#B-681" [
+// -------- block #B-680 ----------
+"#B-680" [
     fontsize = "12"
     fontcolor = grey40
     shape = "square"
@@ -96,8 +96,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-682 ----------
-"#B-682" [
+// -------- block #B-681 ----------
+"#B-681" [
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -107,8 +107,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-678 ----------
-"#B-678" [
+// -------- block #B-677 ----------
+"#B-677" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -122,8 +122,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-679 ----------
-"#B-679" [
+// -------- block #B-678 ----------
+"#B-678" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -136,8 +136,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-677 ----------
-"#B-677" [
+// -------- block #B-676 ----------
+"#B-676" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -148,18 +148,33 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-683":port0 -> "#B-680" [
+"CR#B-682":port0 -> "#B-679" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-683":port1 -> "#B-678" [
+"CR#B-682":port1 -> "#B-677" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-680" -> "#B-674" [
+"#B-679" -> "#B-673" [
+    color = black
+    fontcolor = black
+];
+
+"#B-679" -> "#B-680" [
+    color = black
+    fontcolor = black
+];
+
+"#B-673":port0 -> "#B-674" [
+    color = black
+    fontcolor = black
+];
+
+"#B-673":port1 -> "#B-675" [
     color = black
     fontcolor = black
 ];
@@ -169,42 +184,27 @@ edge [
     fontcolor = black
 ];
 
-"#B-674":port0 -> "#B-675" [
+"#B-677":port0 -> "#B-675" [
     color = black
     fontcolor = black
 ];
 
-"#B-674":port1 -> "#B-676" [
+"#B-677":port1 -> "#B-678" [
     color = black
     fontcolor = black
 ];
 
-"#B-681" -> "#B-682" [
+"#B-677":port2 -> "#B-676" [
     color = black
     fontcolor = black
 ];
 
-"#B-678":port0 -> "#B-676" [
+"#B-678":port0 -> "#B-674" [
     color = black
     fontcolor = black
 ];
 
-"#B-678":port1 -> "#B-679" [
-    color = black
-    fontcolor = black
-];
-
-"#B-678":port2 -> "#B-677" [
-    color = black
-    fontcolor = black
-];
-
-"#B-679":port0 -> "#B-675" [
-    color = black
-    fontcolor = black
-];
-
-"#B-679":port1 -> "#B-676" [
+"#B-678":port1 -> "#B-675" [
     color = black
     fontcolor = black
 ];

@@ -74,10 +74,10 @@ SerialNumber::SerialNumber( const SerialNumber *serial_to_use )
         return;
     }
     
-    serial = cache.master_serial_by_step[progress.GetStep()];
+    serial = cache.master_serial_by_progress[progress];
     
     // produce a new construction serial number
-    cache.master_serial_by_step[progress.GetStep()]++;
+    cache.master_serial_by_progress[progress]++;
     
     //printf("%p %p %s\n", __builtin_return_address(2), __builtin_return_address(3), GetSerialString().c_str());
     //std::cout << std::flush;

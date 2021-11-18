@@ -100,7 +100,7 @@ private:
     {
         ~Cache();
 
-        map<int, SNType> master_serial_by_step;
+        map<Progress, SNType> master_serial_by_progress;
     } cache;
 };
 

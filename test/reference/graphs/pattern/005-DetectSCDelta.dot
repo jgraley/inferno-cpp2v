@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-56 ----------
-"CR#B-56" [
+// -------- block CR#B-55 ----------
+"CR#B-55" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-51 ----------
-"#B-51" [
+// -------- block #B-50 ----------
+"#B-50" [
     fillcolor = "/set28/6"
     fontsize = "12"
     fontcolor = grey40
@@ -46,8 +46,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-52 ----------
-"#B-52" [
+// -------- block #B-51 ----------
+"#B-51" [
     fillcolor = "/set28/8"
     fontsize = "12"
     fontcolor = grey40
@@ -60,8 +60,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-54 ----------
-"#B-54" [
+// -------- block #B-53 ----------
+"#B-53" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -71,8 +71,8 @@ edge [
     penwidth = 0.0
 ];
 
-// -------- block #B-55 ----------
-"#B-55" [
+// -------- block #B-54 ----------
+"#B-54" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -84,8 +84,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-53 ----------
-"#B-53" [
+// -------- block #B-52 ----------
+"#B-52" [
     fillcolor = "/set28/5"
     fontsize = "12"
     fontcolor = grey40
@@ -97,8 +97,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-50 ----------
-"#B-50" [
+// -------- block #B-49 ----------
+"#B-49" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -109,33 +109,33 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-56":port0 -> "#B-51" [
+"CR#B-55":port0 -> "#B-50" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-56":port1 -> "#B-50" [
+"CR#B-55":port1 -> "#B-49" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-51":port0 -> "#B-52" [
+"#B-50":port0 -> "#B-51" [
     color = black
     fontcolor = black
 ];
 
-"#B-51":port1 -> "#B-53" [
+"#B-50":port1 -> "#B-52" [
     color = black
     fontcolor = black
 ];
 
-"#B-52":port0 -> "#B-54" [
+"#B-51":port0 -> "#B-53" [
     color = black
     fontcolor = black
 ];
 
-"#B-52":port1 -> "#B-55" [
+"#B-51":port1 -> "#B-54" [
     color = black
     fontcolor = black
 ];

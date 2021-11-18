@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-1476 ----------
-"CR#B-1476" [
+// -------- block CR#B-1475 ----------
+"CR#B-1475" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-1451 ----------
-"#B-1451" [
+// -------- block #B-1450 ----------
+"#B-1450" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -53,8 +53,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1454 ----------
-"#B-1454" [
+// -------- block #B-1453 ----------
+"#B-1453" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -65,6 +65,121 @@ edge [
     fixedsize = true
     width = 0.4
     height = 0.4
+];
+
+// -------- block #B-1454 ----------
+"#B-1454" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="20">*</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">restriction</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1466 ----------
+"#B-1466" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "diamond"
+    label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-1460 ----------
+"#B-1460" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1458 ----------
+"#B-1458" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1461 ----------
+"#B-1461" [
+    fillcolor = "/set28/6"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subscript</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1462 ----------
+"#B-1462" [
+    fillcolor = "/set28/5"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1463 ----------
+"#B-1463" [
+    fillcolor = "/set28/5"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1465 ----------
+"#B-1465" [
+    fillcolor = "/set28/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">StateLabel</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1464 ----------
+"#B-1464" [
+    fillcolor = "/set28/5"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
 ];
 
 // -------- block #B-1455 ----------
@@ -94,90 +209,25 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-1461 ----------
-"#B-1461" [
+// -------- block #B-1472 ----------
+"#B-1472" [
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uncombable</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-1471 ----------
+"#B-1471" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1459 ----------
-"#B-1459" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Goto</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1462 ----------
-"#B-1462" [
-    fillcolor = "/set28/6"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Subscript</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[1]</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1463 ----------
-"#B-1463" [
-    fillcolor = "/set28/5"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1464 ----------
-"#B-1464" [
-    fillcolor = "/set28/5"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1466 ----------
-"#B-1466" [
-    fillcolor = "/set28/1"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">StateLabel</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1465 ----------
-"#B-1465" [
-    fillcolor = "/set28/5"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Wait</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -220,58 +270,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1472 ----------
-"#B-1472" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Wait</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1457 ----------
-"#B-1457" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="20">*</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">restriction</FONT></TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1469 ----------
-"#B-1469" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "diamond"
-    label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
-    style = "filled"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-1474 ----------
-"#B-1474" [
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Uncombable</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-1460 ----------
-"#B-1460" [
+// -------- block #B-1459 ----------
+"#B-1459" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -283,8 +283,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1458 ----------
-"#B-1458" [
+// -------- block #B-1457 ----------
+"#B-1457" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -297,8 +297,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-1452 ----------
-"#B-1452" [
+// -------- block #B-1451 ----------
+"#B-1451" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -315,8 +315,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1470 ----------
-"#B-1470" [
+// -------- block #B-1469 ----------
+"#B-1469" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -330,8 +330,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1471 ----------
-"#B-1471" [
+// -------- block #B-1470 ----------
+"#B-1470" [
     fillcolor = "/set28/6"
     fontsize = "12"
     fontcolor = grey40
@@ -343,8 +343,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1453 ----------
-"#B-1453" [
+// -------- block #B-1452 ----------
+"#B-1452" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -360,8 +360,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-1475 ----------
-"#B-1475" [
+// -------- block #B-1474 ----------
+"#B-1474" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -372,58 +372,88 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-1476":port0 -> "#B-1451" [
+"CR#B-1475":port0 -> "#B-1450" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-1476":port1 -> "#B-1452" [
+"CR#B-1475":port1 -> "#B-1451" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port0 -> "#B-1454" [
+"#B-1450":port0 -> "#B-1453" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port1 -> "#B-1455" [
+"#B-1450":port1 -> "#B-1454" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port2 -> "#B-1459" [
+"#B-1450":port2 -> "#B-1458" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port3 -> "#B-1466" [
+"#B-1450":port3 -> "#B-1465" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port4 -> "#B-1456" [
+"#B-1450":port4 -> "#B-1455" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port5 -> "#B-1472" [
+"#B-1450":port5 -> "#B-1471" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port6 -> "#B-1457" [
+"#B-1450":port6 -> "#B-1456" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port7 -> "#B-1460" [
+"#B-1450":port7 -> "#B-1459" [
     color = black
     fontcolor = black
 ];
 
-"#B-1451":port8 -> "#B-1458" [
+"#B-1450":port8 -> "#B-1457" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1454":port0 -> "#B-1466" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1466" -> "#B-1460" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1458":port0 -> "#B-1461" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1461":port0 -> "#B-1462" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1461":port1 -> "#B-1463" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1465":port0 -> "#B-1464" [
     color = black
     fontcolor = black
 ];
@@ -433,27 +463,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-1467" -> "#B-1461" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1459":port0 -> "#B-1462" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1462":port0 -> "#B-1463" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1462":port1 -> "#B-1464" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1466":port0 -> "#B-1465" [
+"#B-1467" -> "#B-1472" [
     color = black
     fontcolor = black
 ];
@@ -468,22 +478,62 @@ edge [
     fontcolor = black
 ];
 
-"#B-1457":port0 -> "#B-1469" [
+"#B-1459":port0 -> "#B-1461" [
     color = black
     fontcolor = black
 ];
 
-"#B-1469" -> "#B-1474" [
+"#B-1451":port0 -> "#B-1453" [
     color = black
     fontcolor = black
 ];
 
-"#B-1460":port0 -> "#B-1462" [
+"#B-1451":port1 -> "#B-1454" [
     color = black
     fontcolor = black
 ];
 
-"#B-1452":port0 -> "#B-1454" [
+"#B-1451":port2 -> "#B-1465" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1451":port3 -> "#B-1469" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1451":port4 -> "#B-1459" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1451":port5 -> "#B-1457" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1469":port0 -> "#B-1470" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1469":port1 -> "#B-1452" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1469":port2 -> "#B-1474" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1470":port0 -> "#B-1463" [
+    color = black
+    fontcolor = black
+];
+
+"#B-1470":port0 -> "#B-1464" [
     color = black
     fontcolor = black
 ];
@@ -493,67 +543,17 @@ edge [
     fontcolor = black
 ];
 
-"#B-1452":port2 -> "#B-1466" [
+"#B-1452":port2 -> "#B-1471" [
     color = black
     fontcolor = black
 ];
 
-"#B-1452":port3 -> "#B-1470" [
+"#B-1452":port3 -> "#B-1456" [
     color = black
     fontcolor = black
 ];
 
-"#B-1452":port4 -> "#B-1460" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1452":port5 -> "#B-1458" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1470":port0 -> "#B-1471" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1470":port1 -> "#B-1453" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1470":port2 -> "#B-1475" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1471":port0 -> "#B-1464" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1471":port0 -> "#B-1465" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1453":port1 -> "#B-1456" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1453":port2 -> "#B-1472" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1453":port3 -> "#B-1457" [
-    color = black
-    fontcolor = black
-];
-
-"#B-1453":port4 -> "#B-1460" [
+"#B-1452":port4 -> "#B-1459" [
     color = black
     fontcolor = black
 ];

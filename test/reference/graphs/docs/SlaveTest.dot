@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-8 ----------
-"CR#B-8" [
+// -------- block CR#B-7 ----------
+"CR#B-7" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-1 ----------
-"#B-1" [
+// -------- block #B-0 ----------
+"#B-0" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -45,8 +45,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-2 ----------
-"#B-2" [
+// -------- block #B-1 ----------
+"#B-1" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -57,8 +57,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-3 ----------
-"#B-3" [
+// -------- block #B-2 ----------
+"#B-2" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -71,8 +71,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-7 ----------
-"#B-7" [
+// -------- block #B-6 ----------
+"#B-6" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -87,6 +87,18 @@ edge [
     color = black
 ];
 
+// -------- block #B-3 ----------
+"#B-3" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Statement</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
 // -------- block #B-4 ----------
 "#B-4" [
     fillcolor = "/set28/2"
@@ -94,7 +106,7 @@ edge [
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Statement</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Continue</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -106,55 +118,43 @@ edge [
     fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Continue</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-6 ----------
-"#B-6" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Break</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
 
-"CR#B-8":port0 -> "#B-1" [
+"CR#B-7":port0 -> "#B-0" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-8":port1 -> "#B-3" [
+"CR#B-7":port1 -> "#B-2" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-1":port0 -> "#B-2" [
+"#B-0":port0 -> "#B-1" [
     color = black
     fontcolor = black
 ];
 
-"#B-3":port1 -> "#B-7" [
+"#B-2":port1 -> "#B-6" [
     color = black
     fontcolor = black
 ];
 
-"#B-7":port0 -> "#B-4" [
+"#B-6":port0 -> "#B-3" [
     color = black
     fontcolor = black
 ];
 
-"#B-7":port1 -> "#B-5" [
+"#B-6":port1 -> "#B-4" [
     color = black
     fontcolor = black
 ];
 
-"#B-7":port2 -> "#B-6" [
+"#B-6":port2 -> "#B-5" [
     style="dashed"
     color = black
     fontcolor = black

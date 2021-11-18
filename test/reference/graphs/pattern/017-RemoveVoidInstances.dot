@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-233 ----------
-"CR#B-233" [
+// -------- block CR#B-232 ----------
+"CR#B-232" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-223 ----------
-"#B-223" [
+// -------- block #B-222 ----------
+"#B-222" [
     fillcolor = "/set28/4"
     fontsize = "12"
     fontcolor = grey40
@@ -45,8 +45,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-225 ----------
-"#B-225" [
+// -------- block #B-224 ----------
+"#B-224" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -59,8 +59,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-226 ----------
-"#B-226" [
+// -------- block #B-225 ----------
+"#B-225" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -72,8 +72,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-227 ----------
-"#B-227" [
+// -------- block #B-226 ----------
+"#B-226" [
     fillcolor = "/set28/3"
     fontsize = "12"
     fontcolor = grey40
@@ -86,8 +86,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-228 ----------
-"#B-228" [
+// -------- block #B-227 ----------
+"#B-227" [
     fillcolor = "/set28/3"
     fontsize = "12"
     fontcolor = grey40
@@ -99,8 +99,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-229 ----------
-"#B-229" [
+// -------- block #B-228 ----------
+"#B-228" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -112,8 +112,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-230 ----------
-"#B-230" [
+// -------- block #B-229 ----------
+"#B-229" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -121,18 +121,6 @@ edge [
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Instance</FONT></TD></TR>
      <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-232 ----------
-"#B-232" [
-    fillcolor = "/set28/3"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
     </TABLE>>
     style = "rounded,filled"
 ];
@@ -149,8 +137,20 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-224 ----------
-"#B-224" [
+// -------- block #B-230 ----------
+"#B-230" [
+    fillcolor = "/set28/3"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Void</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-223 ----------
+"#B-223" [
     fillcolor = "/set28/4"
     fontsize = "12"
     fontcolor = grey40
@@ -162,58 +162,58 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-233":port0 -> "#B-223" [
+"CR#B-232":port0 -> "#B-222" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-233":port1 -> "#B-224" [
+"CR#B-232":port1 -> "#B-223" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-223":port0 -> "#B-225" [
+"#B-222":port0 -> "#B-224" [
     color = black
     fontcolor = black
 ];
 
-"#B-223":port0 -> "#B-226" [
+"#B-222":port0 -> "#B-225" [
     color = black
     fontcolor = black
 ];
 
-"#B-226":port0 -> "#B-227" [
+"#B-225":port0 -> "#B-226" [
     color = black
     fontcolor = black
 ];
 
-"#B-227" -> "#B-228" [
+"#B-226" -> "#B-227" [
     color = black
     fontcolor = black
 ];
 
-"#B-227" -> "#B-231" [
+"#B-226" -> "#B-230" [
     color = black
     fontcolor = black
 ];
 
-"#B-228":port0 -> "#B-229" [
+"#B-227":port0 -> "#B-228" [
     color = black
     fontcolor = black
 ];
 
-"#B-228":port0 -> "#B-230" [
+"#B-227":port0 -> "#B-229" [
     color = black
     fontcolor = black
 ];
 
-"#B-230":port0 -> "#B-232" [
+"#B-229":port0 -> "#B-231" [
     color = black
     fontcolor = black
 ];
 
-"#B-224":port0 -> "#B-225" [
+"#B-223":port0 -> "#B-224" [
     color = black
     fontcolor = black
 ];
