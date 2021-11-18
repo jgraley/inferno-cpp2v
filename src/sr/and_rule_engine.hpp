@@ -54,8 +54,7 @@ public:
     };
     
     AndRuleEngine( PatternLink root_plink, 
-                   const unordered_set<PatternLink> &master_plinks,
-                   const SerialNumber *serial_to_use = nullptr );
+                   const unordered_set<PatternLink> &master_plinks );
     
     ~AndRuleEngine();
     

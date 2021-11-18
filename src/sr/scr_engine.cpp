@@ -34,7 +34,6 @@ SCREngine::SCREngine( const CompareReplace *overall_master,
                       TreePtr<Node> rp,
                       const unordered_set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
-    SerialNumber(),
     plan(this, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {
@@ -234,7 +233,7 @@ void SCREngine::Plan::ConfigureAgents()
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, algo);
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks);
     
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
                                     and_rule_engine->GetKeyerPatternLinks() );

@@ -16,15 +16,15 @@ edge [
     fontname = "Arial"
 ];
 
-// -------------------- figure And#R49-0 --------------------
-// -------- region And#R49-0 ----------
-subgraph "clusterAnd#R49-0" {
-    label = "And#R49-0"
+// -------------------- figure And#R49-1 --------------------
+// -------- region And#R49-1 ----------
+subgraph "clusterAnd#R49-1" {
+    label = "And#R49-1"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R49-0/#B-926 ----------
-    "And#R49-0/#B-926" [
+    // -------- block And#R49-1/#B-926 ----------
+    "And#R49-1/#B-926" [
         fillcolor = "/set28/1"
         xlabel = "#B-926"
         fontsize = "12"
@@ -41,8 +41,8 @@ subgraph "clusterAnd#R49-0" {
     
 }
 
-// -------- block And#R49-0/#B-929 ----------
-"And#R49-0/#B-929" [
+// -------- block And#R49-1/#B-929 ----------
+"And#R49-1/#B-929" [
     fillcolor = "/set28/2"
     xlabel = "#B-929"
     fontsize = "12"
@@ -56,7 +56,7 @@ subgraph "clusterAnd#R49-0" {
     style = "rounded,filled"
 ];
 
-"And#R49-0/#B-926":port2 -> "And#R49-0/#B-929" [
+"And#R49-1/#B-926":port2 -> "And#R49-1/#B-929" [
     arrowhead="normalnonetee"
     label = "#1"
     decorate = true
@@ -175,14 +175,14 @@ subgraph "clusterAnd#R49-0" {
         style = "rounded,filled"
     ];
     
-    // -------- region And#R49-0/And#R49-0 ----------
-    subgraph "clusterAnd#R49-0/And#R49-0" {
-        label = "And#R49-0"
+    // -------- region And#R49-0/And#R49-1 ----------
+    subgraph "clusterAnd#R49-0/And#R49-1" {
+        label = "And#R49-1"
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        // -------- block And#R49-0/And#R49-0/#B-926 ----------
-        "And#R49-0/And#R49-0/#B-926" [
+        // -------- block And#R49-0/And#R49-1/#B-926 ----------
+        "And#R49-0/And#R49-1/#B-926" [
             fillcolor = "/set28/1"
             xlabel = "#B-926"
             fontsize = "12"
@@ -223,7 +223,7 @@ subgraph "clusterAnd#R49-0" {
     fontcolor = black
 ];
 
-"And#R49-0/#B-925" -> "And#R49-0/And#R49-0/#B-926" [
+"And#R49-0/#B-925" -> "And#R49-0/And#R49-1/#B-926" [
     arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true

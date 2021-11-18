@@ -16,15 +16,15 @@ edge [
     fontname = "Arial"
 ];
 
-// -------------------- figure And#R2-1 --------------------
-// -------- region And#R2-1 ----------
-subgraph "clusterAnd#R2-1" {
-    label = "SCR#P2-1 / And#R2-1"
+// -------------------- figure And#R2-2 --------------------
+// -------- region And#R2-2 ----------
+subgraph "clusterAnd#R2-2" {
+    label = "SCR#P2-1 / And#R2-2"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R2-1/#B-19 ----------
-    "And#R2-1/#B-19" [
+    // -------- block And#R2-2/#B-19 ----------
+    "And#R2-2/#B-19" [
         fillcolor = "/set19/1"
         xlabel = "#B-19"
         fontsize = "12"
@@ -36,8 +36,8 @@ subgraph "clusterAnd#R2-1" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R2-1/#X2-3 ----------
-    "And#R2-1/#X2-3" [
+    // -------- block And#R2-2/#X2-3 ----------
+    "And#R2-2/#X2-3" [
         xlabel = "#X2-3"
         fontsize = "12"
         fontcolor = grey40
@@ -52,7 +52,7 @@ subgraph "clusterAnd#R2-1" {
     
 }
 
-"And#R2-1/#X2-3" -> "And#R2-1/#B-19" [
+"And#R2-2/#X2-3" -> "And#R2-2/#B-19" [
     label = "#1"
     decorate = true
     color = black
@@ -60,15 +60,15 @@ subgraph "clusterAnd#R2-1" {
 ];
 
 
-// -------------------- figure And#R2-2 --------------------
-// -------- region And#R2-2 ----------
-subgraph "clusterAnd#R2-2" {
-    label = "SCR#P2-2 / And#R2-2"
+// -------------------- figure And#R2-1 --------------------
+// -------- region And#R2-1 ----------
+subgraph "clusterAnd#R2-1" {
+    label = "SCR#P2-2 / And#R2-1"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R2-2/#B-15 ----------
-    "And#R2-2/#B-15" [
+    // -------- block And#R2-1/#B-15 ----------
+    "And#R2-1/#B-15" [
         fillcolor = "/set19/1"
         xlabel = "#B-15"
         fontsize = "12"
@@ -80,8 +80,8 @@ subgraph "clusterAnd#R2-2" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R2-2/#X2-2 ----------
-    "And#R2-2/#X2-2" [
+    // -------- block And#R2-1/#X2-2 ----------
+    "And#R2-1/#X2-2" [
         xlabel = "#X2-2"
         fontsize = "12"
         fontcolor = grey40
@@ -96,7 +96,7 @@ subgraph "clusterAnd#R2-2" {
     
 }
 
-"And#R2-2/#X2-2" -> "And#R2-2/#B-15" [
+"And#R2-1/#X2-2" -> "And#R2-1/#B-15" [
     label = "#1"
     decorate = true
     color = black

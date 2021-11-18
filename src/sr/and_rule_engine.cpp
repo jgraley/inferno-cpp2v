@@ -30,9 +30,7 @@
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
-                              const unordered_set<PatternLink> &master_plinks,
-                              const SerialNumber *serial_to_use ) :
-    SerialNumber( serial_to_use ),
+                              const unordered_set<PatternLink> &master_plinks ) :
     plan( this, root_plink, master_plinks )
 {
 }    

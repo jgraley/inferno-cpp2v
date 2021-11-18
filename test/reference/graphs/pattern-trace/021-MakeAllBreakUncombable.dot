@@ -16,15 +16,15 @@ edge [
     fontname = "Arial"
 ];
 
-// -------------------- figure And#R21-0 --------------------
-// -------- region And#R21-0 ----------
-subgraph "clusterAnd#R21-0" {
-    label = "And#R21-0"
+// -------------------- figure And#R21-1 --------------------
+// -------- region And#R21-1 ----------
+subgraph "clusterAnd#R21-1" {
+    label = "And#R21-1"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R21-0/#B-295 ----------
-    "And#R21-0/#B-295" [
+    // -------- block And#R21-1/#B-295 ----------
+    "And#R21-1/#B-295" [
         fillcolor = "/set28/2"
         xlabel = "#B-295"
         fontsize = "12"
@@ -89,14 +89,14 @@ subgraph "clusterAnd#R21-0" {
         height = 0.4
     ];
     
-    // -------- region And#R21-0/And#R21-0 ----------
-    subgraph "clusterAnd#R21-0/And#R21-0" {
-        label = "And#R21-0"
+    // -------- region And#R21-0/And#R21-1 ----------
+    subgraph "clusterAnd#R21-0/And#R21-1" {
+        label = "And#R21-1"
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        // -------- block And#R21-0/And#R21-0/#B-295 ----------
-        "And#R21-0/And#R21-0/#B-295" [
+        // -------- block And#R21-0/And#R21-1/#B-295 ----------
+        "And#R21-0/And#R21-1/#B-295" [
             fillcolor = "/set28/2"
             xlabel = "#B-295"
             fontsize = "12"
@@ -116,7 +116,7 @@ subgraph "clusterAnd#R21-0" {
     fontcolor = black
 ];
 
-"And#R21-0/#B-294":port1 -> "And#R21-0/And#R21-0/#B-295" [
+"And#R21-0/#B-294":port1 -> "And#R21-0/And#R21-1/#B-295" [
     arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true

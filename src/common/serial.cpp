@@ -60,19 +60,9 @@ map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
 
 //////////////////////////// SerialNumber ///////////////////////////////
 
-SerialNumber::SerialNumber( const SerialNumber *serial_to_use )
+SerialNumber::SerialNumber()
 {    
     progress = Progress::GetCurrent();
-    
-    if( serial_to_use )
-    {
-        // Serial number supplied to constructor (explicitly), take
-        // location and serial but not progress.
-        serial = serial_to_use->serial;
-        //printf("%p %p %s (reused)\n", __builtin_return_address(2), __builtin_return_address(2), GetSerialString().c_str());
-        //std::cout << std::flush;
-        return;
-    }
     
     serial = cache.master_serial_by_progress[progress];
     
