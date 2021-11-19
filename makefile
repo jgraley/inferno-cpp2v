@@ -103,28 +103,6 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 	cd docs/web && ./publish.sh
 
 #
-# Run the main Inferno tests
-#
-test : test/results/execution.pass
-minitest : test/results/mini.pass
-
-#
-# Run the search and replace tests (requires reference outputs to be in in test/reference/srtest/)
-#
-srtest : test/results/sr.pass
-minisrtest : test/results/minisr.pass
-	
-#
-# Run the repeatbility tests (requires reference trace logs to be in in test/reference/reptest/)
-#
-reptest : test/results/rep.pass
-	
-#
-# Run the graph tests
-#
-graphtest : test/results/graph.pass
-	
-#
 # Cleaning up
 #
 clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean
@@ -138,5 +116,5 @@ iclean : makefile
 # Subordinate makefiles included last so they don't hijack the makefile default goal
 #
 include src/makefile
-include test/makefile
 include resource/makefile
+include test/makefile

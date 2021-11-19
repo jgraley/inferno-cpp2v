@@ -18,28 +18,24 @@ resfile=test/summary.csv
 
 if test $# -eq 0
 then
-    echo "Usage: $0 [-k] <input program> <reference base> [<arguments for inferno>]"
-    echo "-k to keep going after a fail"
+    echo "Usage: $0 <input program> <reference path> <output path> [<arguments for inferno>]"
     echo "Run from inferno-cpp2v/"
     exit 1
 fi
 
-keep_going=0
-if [ $1 == "-k" ]; then
-    keep_going=1
-    shift
-fi
 infile=$1
 shift
-refbase=$1
+refpath=$1
+shift
+outpath=$1
 shift
 iargs=$*
 fb=`basename $infile`
 fbnx=`basename $infile .cpp` # only removes .cpp extension
 
 rm -f test/results/$fbnx/*
-outdir=test/results/sr/$fbnx
-refdir=$refbase/$fbnx
+outdir=$outpath/$fbnx
+refdir=$refpath/$fbnx
 outbase=$outdir/$fbnx
 
 mkdir -p $outdir
@@ -66,15 +62,13 @@ dres=0
 for file in $(find $outdir -type f -name '*.cpp' | sort); do 
     if [[ $(diff --brief $file ${file/#$outdir/$refdir}) ]]; then  
         printf "\n" 
-        echo "${file/#$outdir\//} differs from reference (stopping here):"
+        echo "${file/#$outdir\//} output differs from reference (stopping here):"
         set -x
         diff --color ${file/#$outdir/$refdir} $file || :
         set +x
         printf "\n" 
         dres=1
-        if [ $keep_going -eq 0 ]; then
-            break
-        fi
+        break
     fi
 done
 
@@ -98,5 +92,5 @@ exit $return_code
 # For 3-way use eg
 # bcompare test/reference/sr/pointeris/pointeris_034.cpp test/results/sr/pointeris/pointeris_034.cpp test/reference/sr/pointeris/pointeris_033.cpp
 
-# To update the references
+# To update the references (assuming you want to update from no args run, which you normally should)
 # cp -r test/results/sr test/reference/

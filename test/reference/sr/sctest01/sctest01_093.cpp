@@ -1,108 +1,143 @@
-class id_17;
-class id_30;
-class id_6;
+#include "isystemc.h"
+
 class id_0;
-class id_18;
-class id_26;
-class id_17
-{
-};
-class id_30
-{
-};
-class id_6
-{
-void (id_16)(auto void id_11);
-};
-class id_0 : public id_17
+class id_12;
+class id_22;
+class id_0 : public sc_module
 {
 public:
-id_0(auto char (*id_1));
- ::id_6 id_7;
-void (id_4)();
+SC_CTOR( id_0 )
+{
+SC_METHOD(id_5);
+}
+enum id_1
+{
+id_2 = 0U,
+id_3 = 1U,
 };
-class id_18 : public id_17
+sc_event id_4;
+void id_5();
+private:
+unsigned int id_7;
+};
+class id_12 : public sc_module
 {
 public:
-id_18(auto char (*id_19));
- ::id_6 id_15;
- ::id_6 id_22;
-void (id_21)();
+SC_CTOR( id_12 )
+{
+SC_METHOD(id_18);
+}
+enum id_13
+{
+id_14 = 0U,
+id_15 = 1U,
+id_16 = 2U,
 };
-class id_26 : public id_17
+sc_event id_11;
+sc_event id_17;
+void id_18();
+private:
+unsigned int id_20;
+};
+class id_22 : public sc_module
 {
 public:
-id_26(auto char (*id_27));
- ::id_0 id_23;
- ::id_18 id_14;
-void (id_29)();
+SC_CTOR( id_22 ) :
+id_21("id_21"),
+id_10("id_10")
+{
+SC_THREAD(id_24);
+}
+enum id_23
+{
 };
-id_26 id_13;
-void id_12;
-int id_10;
-void (id_9)(void id_8);
-void (id_32)(void id_31);
-void (id_5)(void id_3);
-void (id_34)(void id_33);
-void (id_36)(void id_35);
-void (id_25)(void id_24);
-void (id_39)(void id_37, void id_38);
+void id_24();
+ ::id_0 id_21;
+ ::id_12 id_10;
+};
+id_22 id_9("id_9");
+int id_8;
 
-void (id_6::id_16)(void id_11);
-
-id_0::id_0(char (*id_1))
+void id_0::id_5()
 {
- ::id_5( ::id_0::id_4);
+/*temp*/ bool id_6 = true;
+if( (sc_delta_count())==(0U) )
+{
+next_trigger(  ::id_0::id_4 );
+ ::id_0::id_7= ::id_0::id_2;
+id_6=(false);
+}
+if( id_6 )
+{
+if(  ::id_0::id_2== ::id_0::id_7 )
+{
+ ::id_8+=(2);
+(( ::id_9. ::id_22::id_10). ::id_12::id_11).notify(SC_ZERO_TIME);
+next_trigger(  ::id_0::id_4 );
+ ::id_0::id_7= ::id_0::id_3;
+id_6=(false);
+}
+}
+if( id_6 )
+{
+if(  ::id_0::id_3== ::id_0::id_7 )
+{
+ ::id_8+=(3);
+(( ::id_9. ::id_22::id_10). ::id_12::id_11).notify(SC_ZERO_TIME);
+id_6=(false);
+}
+}
+if( id_6 )
+next_trigger(SC_ZERO_TIME);
 }
 
-void (id_0::id_4)()
+void id_12::id_18()
 {
- ::id_9( ::id_0::id_7);
- ::id_10+=(2);
-((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_0::id_7);
- ::id_10+=(3);
-((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
+/*temp*/ bool id_19 = true;
+if( (sc_delta_count())==(0U) )
+{
+next_trigger(  ::id_12::id_17 );
+ ::id_12::id_20= ::id_12::id_14;
+id_19=(false);
+}
+if( id_19 )
+{
+if(  ::id_12::id_14== ::id_12::id_20 )
+{
+ ::id_8*=(5);
+(( ::id_9. ::id_22::id_21). ::id_0::id_4).notify(SC_ZERO_TIME);
+next_trigger(  ::id_12::id_11 );
+ ::id_12::id_20= ::id_12::id_15;
+id_19=(false);
+}
+}
+if( id_19 )
+{
+if(  ::id_12::id_15== ::id_12::id_20 )
+{
+ ::id_8*=(5);
+(( ::id_9. ::id_22::id_21). ::id_0::id_4).notify(SC_ZERO_TIME);
+next_trigger(  ::id_12::id_11 );
+ ::id_12::id_20= ::id_12::id_16;
+id_19=(false);
+}
+}
+if( id_19 )
+{
+if(  ::id_12::id_16== ::id_12::id_20 )
+{
+cease(  ::id_8 );
+id_19=(false);
+}
+}
+if( id_19 )
+next_trigger(SC_ZERO_TIME);
 }
 
-id_18::id_18(char (*id_19))
+void id_22::id_24()
 {
- ::id_5( ::id_18::id_21);
+/*temp*/ bool id_25 = true;
+ ::id_8=(1);
+( ::id_22::id_10. ::id_12::id_17).notify(SC_ZERO_TIME);
+id_25=(false);
 }
-
-void (id_18::id_21)()
-{
- ::id_9( ::id_18::id_22);
- ::id_10*=(5);
-((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_18::id_15);
- ::id_10*=(5);
-((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_18::id_15);
- ::id_25( ::id_10);
-}
-
-id_26::id_26(char (*id_27)) : id_23("add_inst"), id_14("mul_inst")
-{
- ::id_5( ::id_26::id_29);
-}
-
-void (id_26::id_29)()
-{
- ::id_10=(1);
-(( ::id_26::id_14. ::id_18::id_22). ::id_6::id_16)( ::id_12);
-}
-
-void (id_9)(void id_8);
-
-void (id_32)(void id_31);
-
-void (id_5)(void id_3);
-
-void (id_34)(void id_33);
-
-void (id_36)(void id_35);
-
-void (id_25)(void id_24);
-
-void (id_39)(void id_37, void id_38);

@@ -1,108 +1,82 @@
-class id_17;
-class id_30;
-class id_6;
+#include "isystemc.h"
+
 class id_0;
-class id_18;
-class id_26;
-class id_17
-{
-};
-class id_30
-{
-};
-class id_6
-{
-void (id_16)(auto void id_11);
-};
-class id_0 : public id_17
+class id_9;
+class id_16;
+class id_0 : public sc_module
 {
 public:
-id_0(auto char (*id_1));
- ::id_6 id_7;
-void (id_4)();
+SC_CTOR( id_0 )
+{
+SC_THREAD(id_2);
+}
+sc_event id_1;
+void id_2();
 };
-class id_18 : public id_17
+class id_9 : public sc_module
 {
 public:
-id_18(auto char (*id_19));
- ::id_6 id_15;
- ::id_6 id_22;
-void (id_21)();
+SC_CTOR( id_9 )
+{
+SC_THREAD(id_11);
+}
+sc_event id_10;
+sc_event id_7;
+void id_11();
 };
-class id_26 : public id_17
+class id_16 : public sc_module
 {
 public:
-id_26(auto char (*id_27));
- ::id_0 id_23;
- ::id_18 id_14;
-void (id_29)();
+SC_CTOR( id_16 ) :
+id_13("id_13"),
+id_6("id_6")
+{
+SC_THREAD(id_17);
+}
+void id_17();
+ ::id_0 id_13;
+ ::id_9 id_6;
 };
-id_26 id_13;
-void id_12;
-int id_10;
-void (id_9)(void id_8);
-void (id_32)(void id_31);
-void (id_5)(void id_3);
-void (id_34)(void id_33);
-void (id_36)(void id_35);
-void (id_25)(void id_24);
-void (id_39)(void id_37, void id_38);
+id_16 id_5("id_5");
+int id_4;
 
-void (id_6::id_16)(void id_11);
-
-id_0::id_0(char (*id_1))
+void id_0::id_2()
 {
- ::id_5( ::id_0::id_4);
+wait(  ::id_0::id_1 );
+goto id_3;
+id_3:;
+ ::id_4+=(2);
+(( ::id_5. ::id_16::id_6). ::id_9::id_7).notify(SC_ZERO_TIME);
+wait(  ::id_0::id_1 );
+goto id_8;
+id_8:;
+ ::id_4+=(3);
+(( ::id_5. ::id_16::id_6). ::id_9::id_7).notify(SC_ZERO_TIME);
+return ;
 }
 
-void (id_0::id_4)()
+void id_9::id_11()
 {
- ::id_9( ::id_0::id_7);
- ::id_10+=(2);
-((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_0::id_7);
- ::id_10+=(3);
-((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
+wait(  ::id_9::id_10 );
+goto id_12;
+id_12:;
+ ::id_4*=(5);
+(( ::id_5. ::id_16::id_13). ::id_0::id_1).notify(SC_ZERO_TIME);
+wait(  ::id_9::id_7 );
+goto id_14;
+id_14:;
+ ::id_4*=(5);
+(( ::id_5. ::id_16::id_13). ::id_0::id_1).notify(SC_ZERO_TIME);
+wait(  ::id_9::id_7 );
+goto id_15;
+id_15:;
+cease(  ::id_4 );
+return ;
 }
 
-id_18::id_18(char (*id_19))
+void id_16::id_17()
 {
- ::id_5( ::id_18::id_21);
+ ::id_4=(1);
+( ::id_16::id_6. ::id_9::id_10).notify(SC_ZERO_TIME);
+return ;
 }
-
-void (id_18::id_21)()
-{
- ::id_9( ::id_18::id_22);
- ::id_10*=(5);
-((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_18::id_15);
- ::id_10*=(5);
-((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_18::id_15);
- ::id_25( ::id_10);
-}
-
-id_26::id_26(char (*id_27)) : id_23("add_inst"), id_14("mul_inst")
-{
- ::id_5( ::id_26::id_29);
-}
-
-void (id_26::id_29)()
-{
- ::id_10=(1);
-(( ::id_26::id_14. ::id_18::id_22). ::id_6::id_16)( ::id_12);
-}
-
-void (id_9)(void id_8);
-
-void (id_32)(void id_31);
-
-void (id_5)(void id_3);
-
-void (id_34)(void id_33);
-
-void (id_36)(void id_35);
-
-void (id_25)(void id_24);
-
-void (id_39)(void id_37, void id_38);

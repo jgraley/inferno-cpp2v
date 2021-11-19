@@ -1,4 +1,8 @@
-resource : resource/lib/sc_glue.o resource/script/compile.sh resource/script/link.sh
+.PHONY: resource
+
+RESOURCE_ARTEFACTS=resource/lib/sc_glue.o resource/script/compile.sh resource/script/link.sh
+
+resource : ${RESOURCE_ARTEFACTS}
 
 resource/lib/sc_glue.o : resource/src/sc_glue.cpp makefile.common
 	mkdir -p resource/lib

@@ -19,19 +19,20 @@ resfile=test/summary.csv
 
 if test $# -eq 0
 then
-    echo "Usage: $0 <input program> [<arguments for inferno>]"
+    echo "Usage: $0 <input program> <output path> [<arguments for inferno>]"
     echo "Run from inferno-cpp2v/"
     exit 1
 fi
 
 infile=$1
 shift
+outpath=$1
+shift
 iargs=$*
 fb=`basename $infile`
-outdir=test/results/execution
-outfile=$outdir/$fb
+outfile=$outpath/$fb
 
-mkdir -p $outdir
+mkdir -p $outpath
 
 echo
 echo -------------- $fb ----------------
@@ -53,7 +54,7 @@ cmpres=1000
 return_code=1 
  
 echo Compile input...
-resource/script/compile.sh $infile $outdir/"$fb"_in.o
+resource/script/compile.sh $infile $outpath/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
@@ -63,12 +64,12 @@ then
 fi
 
 echo Link input...
-resource/script/link.sh $outdir/"$fb"_in.o $outdir/"$fb"_in.exe
+resource/script/link.sh $outpath/"$fb"_in.o $outpath/"$fb"_in.exe
 l1res=$?
 if test $l1res -eq 0
 then
  echo Run input...
- $outdir/"$fb"_in.exe
+ $outpath/"$fb"_in.exe
  r1res=$?
 fi
 
@@ -81,19 +82,19 @@ ires=$?
 if test $ires -eq 0
 then
  echo Compile output...
- resource/script/compile.sh $outfile $outdir/"$fb"_out.o
+ resource/script/compile.sh $outfile $outpath/"$fb"_out.o
  c2res=$?
  if test $c2res -eq 0
  then
   if test $l1res -eq 0
   then
    echo Link output...
-   resource/script/link.sh $outdir/"$fb"_out.o $outdir/"$fb"_out.exe
+   resource/script/link.sh $outpath/"$fb"_out.o $outpath/"$fb"_out.exe
    l2res=$?
    if test $l2res -eq 0
    then
     echo Run output...
-    $outdir/"$fb"_out.exe
+    $outpath/"$fb"_out.exe
     r2res=$?
     echo From inferno $r2res
     echo Expected $r1res
