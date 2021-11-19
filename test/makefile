@@ -29,6 +29,8 @@ REFERENCE_PATH=test/reference
 DEFAULT_I_ARG="-tq"
 IARG="${DEFAULT_I_ARG} ${I}"
 
+# Looking for the "Keep going" thing? Do it by passing -k directly to make.
+
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
