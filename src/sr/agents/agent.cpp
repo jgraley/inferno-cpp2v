@@ -273,6 +273,10 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
+    
+    // Without keyer, don't bother to check anything
+    if( required_links->count(base_plink) == 0 )
+        return;
     XLink keyer = required_links->at(base_plink);
     
     // Rule #384 means we can skip a coupling when keyer is MMAX

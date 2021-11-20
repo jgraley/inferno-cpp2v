@@ -100,18 +100,25 @@ void SimpleSolver::Run( ReportageObserver *holder_,
     
     // Do a test with all constraints but no assignments (=free variables), so forced variables 
     // will be tested. From here on we can test only constraints affected by changed assignments.
+    TRACE("testing\n");
     auto t = Test( assignments, plan.constraint_set );
+    TRACE("tested\n");
     
     if( !get<0>(t) )
+    {
+        TRACE("Simple solver mismatched on forced variables only\n");
         return; // We failed with no assignments, so we cannot match - no solutions will be reported
+    }
     
     if( plan.variables.empty() )
     {
+        TRACE("Simple solver matched on forced variables and no frees\n");  
         // No free vars, so we've got a solution
         holder->ReportSolution( assignments );
     }
     else
     {                
+        TRACE("Simple solver matched on forced variables; solving for frees\n");  
         Solve( plan.variables.begin() );    
     }
 
@@ -306,10 +313,13 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
         
         try
         {
+            TRACE("test constraint ")(c)("\n");
             c->Test(assigns); 
+            TRACE("returned\n");
         }
         catch( const ::Mismatch &e )
         {            
+            TRACE("threw ")(e)("\n");
 #ifdef HINTS_IN_EXCEPTIONS   
             if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
                 hints.push_back( pae->hint );

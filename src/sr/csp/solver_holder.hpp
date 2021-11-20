@@ -64,6 +64,7 @@ private:
     void ReportSolution( const Solution &solution );
 #ifdef COROUTINE_HOLDER
     void ReapSource();
+    void MaybeRethrow();
 #endif
     const shared_ptr<Solver> solver;
 
@@ -72,6 +73,7 @@ private:
     typedef boost::coroutines2::coroutine<Solution> Coroutine;
     Coroutine::push_type *sink = nullptr;
     Coroutine::pull_type *source = nullptr;
+    exception_ptr solver_exception;
 #else
     list<Solution> solutions_queue;    
 #endif    

@@ -6,6 +6,50 @@
 
 using namespace CSP;
 
+SystemicConstraint::VariableRecord::VariableRecord( Kind kind_,
+                                                    VariableId id_,
+                                                    VariableFlags flags_ ) :
+    kind( kind_ ),
+    id( id_ ),
+    flags( flags_ )
+{
+}
+
+
+string SystemicConstraint::VariableRecord::GetTrace() const
+{
+    string skind;
+    switch( kind )
+    {
+    case SystemicConstraint::Kind::KEYER:
+        skind = "KEYER";
+        break;
+    
+    case SystemicConstraint::Kind::RESIDUAL:
+        skind = "RESIDUAL";
+        break;
+        
+    case SystemicConstraint::Kind::CHILD:
+        skind = "CHILD";
+        break;
+    }
+
+    string sfreedom;
+    switch( flags.freedom )
+    {
+    case SystemicConstraint::Freedom::FREE:
+        sfreedom = "FREE";
+        break;
+        
+    case SystemicConstraint::Freedom::FORCED:
+        sfreedom = "FORCED";
+        break;
+    }
+        
+    return skind+":"+id.GetTrace()+"("+sfreedom+")";
+}
+
+
 SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
                                 SR::PatternLink keyer_plink_, 
                                 set<SR::PatternLink> residual_plinks_,
@@ -118,7 +162,7 @@ void SystemicConstraint::TraceProblem() const
     TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.all_variables.size(), GetFreeDegree());
     for( auto var : plan.all_variables )
     {
-        TRACEC(Trace(var))("\n");
+        TRACEC(var)("\n");
     }    
 }
 
@@ -138,13 +182,13 @@ void SystemicConstraint::Start( const Assignments &forces_map_,
         case Freedom::FREE:
             ASSERT( forces_map.count( var.id ) == 0 )
                   (*this)("\n")
-                  (Trace(var))(" should not be in forces: ")(forces_map)("\n");
+                  (var)(" should not be in forces: ")(forces_map)("\n");
             break;
             
         case Freedom::FORCED:
             ASSERT( forces_map.count( var.id ) == 1 )
                   (*this)("\n")
-                  (Trace(var))(" missing from forces: ")(forces_map)("\n"); 
+                  (var)(" missing from forces: ")(forces_map)("\n"); 
             forces.push_back( forces_map.at( var.id ) );            
             break;
         }
@@ -154,6 +198,10 @@ void SystemicConstraint::Start( const Assignments &forces_map_,
 
 void SystemicConstraint::Test( Assignments frees_map )
 {   
+    INDENT("T");
+    TRACE("Free assignments:\n")
+         (frees_map)("\n");
+
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
     SR::SolutionMap required_links;
@@ -163,6 +211,8 @@ void SystemicConstraint::Test( Assignments frees_map )
         switch( var.flags.freedom )
         {
         case Freedom::FORCED:
+            ASSERT( forces_map.count(var.id)==1 )
+                  ("FORCED ")(var)(" not found in ")(forces_map);
             required_links[var.id] = forces_map.at(var.id);
             break;
         
@@ -173,18 +223,23 @@ void SystemicConstraint::Test( Assignments frees_map )
         }        
     }    
     //required_links = UnionOfSolo(forces_map, frees_map);
-    
+
+    TRACE("Now ready to query the agent, with these required links:\n")
+         (required_links)("\n");
+
     {
-        Tracer::RAIIDisable silencer(); // make queries be quiet
+        //Tracer::RAIIDisable silencer(); // make queries be quiet
 
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {
             // First check any coupling at this pattern node
+            TRACE("Coupling query\n");
             plan.agent->RunCouplingQuery( &required_links );
         }
                       
         if( plan.action==Action::FULL && required_links.size() > 0 )
         {
+            TRACE("Normal linked query\n");
             // Use a normal-linked query on our underlying agent.
             // We only need one match to know that required_links_list are good, 
             // i.e. to run once without throuwing a mismatch. Don't need
@@ -217,38 +272,3 @@ string SystemicConstraint::GetTrace() const
     s += ")";
     return s;
 }      
-
-
-string Trace( const SystemicConstraint::VariableRecord &var )
-{
-    string skind;
-    switch( var.kind )
-    {
-    case SystemicConstraint::Kind::KEYER:
-        skind = "KEYER";
-        break;
-    
-    case SystemicConstraint::Kind::RESIDUAL:
-        skind = "RESIDUAL";
-        break;
-        
-    case SystemicConstraint::Kind::CHILD:
-        skind = "CHILD";
-        break;
-    }
-
-    string sfreedom;
-    switch( var.flags.freedom )
-    {
-    case SystemicConstraint::Freedom::FREE:
-        sfreedom = "FREE";
-        break;
-        
-    case SystemicConstraint::Freedom::FORCED:
-        sfreedom = "FORCED";
-        break;
-    }
-        
-    return skind+":"+var.id.GetTrace()+"("+sfreedom+")";
-}
-

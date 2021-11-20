@@ -32,10 +32,19 @@ void SolverHolder::Start( const Assignments &forces,
     auto lambda = [&](Coroutine::push_type& sink_)
     {
         sink = &sink_;
-        solver->Run( this, forces, knowledge);
+        try
+        {
+            solver->Run( this, forces, knowledge);
+        }
+        catch(const exception& e)
+        {
+            solver_exception = current_exception();
+            (*sink)( {} );
+        }
         sink = nullptr;
     };
-    source = new Coroutine::pull_type(lambda);        
+    source = new Coroutine::pull_type(lambda);    
+    MaybeRethrow();
 #else
     solutions_queue.clear();
     solver->Run( this, forces, knowledge);
@@ -52,6 +61,7 @@ bool SolverHolder::GetNextSolution( Solution *solution )
         return false;
     *solution = source->get();
     (*source)();
+    MaybeRethrow();
     return true;
 #else
     if( solutions_queue.empty() )
@@ -76,6 +86,7 @@ void SolverHolder::ReportSolution( const Solution &solution )
 }
 
 
+#ifdef COROUTINE_HOLDER
 void SolverHolder::ReapSource()
 {
     if( source && !*source )
@@ -85,3 +96,14 @@ void SolverHolder::ReapSource()
     }
 }
 
+
+void SolverHolder::MaybeRethrow()
+{
+    if( solver_exception )
+    {
+        exception_ptr t = solver_exception;
+        solver_exception = nullptr;
+        rethrow_exception(t);
+    }
+}
+#endif

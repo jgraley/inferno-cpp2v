@@ -42,8 +42,13 @@ public:
         CHILD
     };
     
-    struct VariableRecord
+    struct VariableRecord : Traceable
     {
+        VariableRecord( Kind kind_,
+                        VariableId id_,
+                        VariableFlags flags_ );
+        string GetTrace() const;
+
         Kind kind;
         VariableId id;
         VariableFlags flags;
@@ -114,7 +119,5 @@ private:
 };
 
 };
-
-string Trace( const CSP::SystemicConstraint::VariableRecord &var );
 
 #endif
