@@ -54,7 +54,8 @@ public:
     };
     
     AndRuleEngine( PatternLink root_plink, 
-                   const unordered_set<PatternLink> &master_plinks );
+                   const unordered_set<PatternLink> &master_plinks,
+                   const unordered_set<PatternLink> &master_keyer_plinks );
     
     ~AndRuleEngine();
     
@@ -62,7 +63,8 @@ public:
     {
         Plan( AndRuleEngine *algo,  
               PatternLink root_plink, 
-              const unordered_set<PatternLink> &master_plinks);
+              const unordered_set<PatternLink> &master_plinks,
+              const unordered_set<PatternLink> &master_keyer_plinks );
         void PopulateMasterBoundaryStuff( PatternLink link,
                                           const unordered_set<Agent *> &master_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
@@ -78,7 +80,8 @@ public:
                                    unordered_set<PatternLink> *my_normal_links,
                                    PatternLink link );
         void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
-                                       const unordered_set<PatternLink> &surrounding_plinks );
+                                       const unordered_set<PatternLink> &surrounding_plinks, 
+                                       const unordered_set<PatternLink> &surrounding_keyer_plinks );
         // CSP solver stuff
         void CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
@@ -91,6 +94,7 @@ public:
         const TreePtr<Node> root_pattern;
         Agent * const root_agent;
         const unordered_set<PatternLink> master_plinks;
+        const unordered_set<PatternLink> master_keyer_plinks;
         unordered_set<Agent *> master_agents;
         unordered_set<Agent *> my_normal_agents;   
         unordered_set<PatternLink> my_normal_links;
@@ -104,8 +108,8 @@ public:
         unordered_set<PatternLink> coupling_residual_links;
         unordered_set<PatternLink> coupling_keyer_links_nontrivial; // Only where child X has at least one residual link
         unordered_set<PatternLink> coupling_keyer_links_all; // All keyers
-        unordered_set<PatternLink> master_boundary_links; // These are ALL residuals
-        unordered_set<PatternLink> master_proxy_keyer_links; // We invent these for CSP solver; not descendants of root
+        unordered_set<PatternLink> my_master_boundary_links; // These are ALL residuals
+        unordered_set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
         unordered_map< Agent *, unordered_set<PatternLink> > parent_residual_links_to_master_boundary_agents;
 

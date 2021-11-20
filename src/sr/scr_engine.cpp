@@ -233,7 +233,7 @@ void SCREngine::Plan::ConfigureAgents()
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks);
+    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, all_keyer_plinks);
     
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
                                     and_rule_engine->GetKeyerPatternLinks() );
