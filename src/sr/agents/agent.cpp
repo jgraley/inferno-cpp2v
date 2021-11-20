@@ -101,7 +101,9 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     // more than one subordinate and-rule engine, so that it will get configured more than once.
     // Also see #316
     ASSERT(!coupling_master_engine)("Detected repeat coupling configuration of ")(*this)
-                                   ("\nCould be result of coupling abnormal links - not allowed :(");
+                                   ("\nCould be result of coupling abnormal links - not allowed :(\n")
+                                   (coupling_master_engine)(" with keyer ")(base_plink)("\n")
+                                   (e)(" with keyer ")(base_plink_);                                   
     ASSERT(master_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
     coupling_master_engine = e;
                                            

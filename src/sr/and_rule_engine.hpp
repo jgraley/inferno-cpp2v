@@ -146,7 +146,7 @@ public:
     const SolutionMap &GetSolution();
     void ClearSolution();
     const unordered_set<Agent *> &GetKeyedAgents() const;
-    const unordered_set<PatternLink> &GetKeyerPatternLinks() const;
+    const unordered_set<PatternLink> GetKeyerPatternLinks() const;
 
 public:
     string GetTrace() const; // used for debug

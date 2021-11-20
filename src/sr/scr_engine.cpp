@@ -195,16 +195,6 @@ void SCREngine::Plan::ConfigureAgents()
         agent->SCRConfigure( algo,
                              final_agent_phases.at(agent) );                                                 
     }
-
-/* Not sure if needed
-    for( PatternLink plink : my_plinks )
-    {
-        Agent *agent = plink.GetChildAgent();
-        // Replace-only nodes are self-keying
-        if( in_progress_agent_phases.at(plink.GetChildAgent()) == Agent::IN_REPLACE_ONLY )
-            agent->ConfigureCoupling( algo, PatternLink(), {plink} );
-    }    
-*/
 }
 
 
@@ -239,19 +229,27 @@ void SCREngine::Plan::PlanCompare()
                                     and_rule_engine->GetKeyerPatternLinks() );
 }
 
+
 void SCREngine::Plan::PlanReplace()
 {
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
         
+    set<Agent *> all_keyed_agents;
+    for( PatternLink plink : all_keyer_plinks )
+        all_keyed_agents.insert( plink.GetChildAgent() );
+        
     for( PatternLink plink : my_replace_plinks_postorder )
     {
         Agent *agent = plink.GetChildAgent();
-        if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) )
+        if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) ) // works for old solver, but leaves loose couplings in CSP solver see #387
+        //if( all_keyer_plinks.count(plink) == 0 )  // No worky, because different links to the same agent differ
+        //if( all_keyed_agents.count(agent)==0 )
         {
             InsertSolo( all_keyer_plinks, plink );
             agent->ConfigureCoupling( algo, plink, {} );
+            all_keyed_agents.insert(agent);
         }
     }
 }

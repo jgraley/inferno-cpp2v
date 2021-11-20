@@ -52,9 +52,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     root_pattern( root_plink.GetPattern() ),
     root_agent( root_plink.GetChildAgent() ),
     master_plinks( master_plinks_ )
-{
-    TRACE(algo->GetTrace())(" planning\n");
+{    
     INDENT("P");
+    TRACE(algo->GetTrace())(" planning\n");
+
+    TRACE("Master plinks: ")(master_plinks)("\n");
     
     master_agents.clear();
     for( PatternLink plink : master_plinks )
@@ -100,7 +102,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );   
     
     master_boundary_keyer_links.clear();
-    for( PatternLink plink : master_plinks )
+    for( PatternLink plink : master_keyer_plinks_ )
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
     TRACE("master_boundary_keyer_links ")(master_boundary_keyer_links)("\n");
@@ -279,6 +281,7 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 
 void AndRuleEngine::Plan::ConfigureAgents()
 {
+    TRACE("Configuring these ")(coupling_keyer_links_all)("\n");
     for( PatternLink keyer_plink : coupling_keyer_links_all )
     {
         ASSERT( keyer_plink );
@@ -847,9 +850,16 @@ const unordered_set<Agent *> &AndRuleEngine::GetKeyedAgents() const
 }
 
 
-const unordered_set<PatternLink> &AndRuleEngine::GetKeyerPatternLinks() const
+const unordered_set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
 {
-    return plan.coupling_keyer_links_all; 
+    unordered_set<PatternLink> keyer_plinks_incl_subs;
+    //keyer_plinks_incl_subs = plan.coupling_keyer_links_all; 
+    
+    list<const AndRuleEngine *> subs = GetAndRuleEngines();
+    for( const AndRuleEngine *e : subs )
+        keyer_plinks_incl_subs = UnionOfSolo( keyer_plinks_incl_subs, e->plan.coupling_keyer_links_all );
+        
+    return keyer_plinks_incl_subs;
 }
 
 
