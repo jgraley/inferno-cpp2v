@@ -415,9 +415,15 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
                                 "Thank you for taking the time to read this message.\n");
     
+    if( depth < stop_after.size() && stop_after[depth]==0 )
+    {
+        TRACE("Stopping as requested before trying\n");
+        return 0;
+    }    
+
     for(int i=0; i<repetitions; i++) 
     {
-        bool stop = depth < stop_after.size() && stop_after[depth]==i;
+        bool stop = depth < stop_after.size() && stop_after[depth]==i+1;
         if( stop )
             for( const pair< RequiresSubordinateSCREngine * const, shared_ptr<SCREngine> > &p : plan.my_engines )
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
@@ -430,16 +436,15 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
             TRACE("Mismatched; stopping\n");
-            return i; // when the compare fails, we're done
+            return i+1; // when the compare fails, we're done
         }
         if( stop )
         {
             TRACE("Stopping as requested after hit %d\n", stop_after[depth]);
-            TRACEC("OK\n");
-            return i;
+            return i+1;
         }    
     }
-    
+    TRACE("Stop after ")(stop_after)(" depth=")(depth)("\n");
     TRACE("Over the limit of %d reps\n", repetitions); 
     ASSERT(!rep_error)
           ("Still getting matches after %d repetitions, may be repeating forever.\n"

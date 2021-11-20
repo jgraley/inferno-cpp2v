@@ -9,10 +9,10 @@ CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 #CASES += sctest04 sctest05 sctest01 sctest03
 #CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
 
-# Use pointeris (very quick to test) as "canary"
-SRCASES = pointeris ${CASES} 
+# Use pointeris (very quick to test) as "canary" even more so "small"
+SRCASES = small pointeris ${CASES} 
 MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15 sctest03
-MINISRCASES = pointeris ${MINICASES} 
+MINISRCASES = small pointeris ${MINICASES} 
 
 # Arguments to inferno executable:
 # Args supplied via eg I=-uc will be squished together and appended to the

@@ -313,13 +313,13 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
         
         try
         {
-            TRACE("test constraint ")(c)("\n");
+            //TRACE("test constraint ")(c)("\n");
             c->Test(assigns); 
-            TRACE("returned\n");
+            //TRACE("returned\n");
         }
         catch( const ::Mismatch &e )
         {            
-            TRACE("threw ")(e)("\n");
+            //TRACE("threw ")(e)("\n");
 #ifdef HINTS_IN_EXCEPTIONS   
             if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
                 hints.push_back( pae->hint );

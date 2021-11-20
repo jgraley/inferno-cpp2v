@@ -40,12 +40,12 @@ void (id_25)();
 id_22 id_10("id_10");
 void id_9;
 int id_7;
+void (id_6)(void id_4);
 void (id_27)(void id_26);
 void (id_29)(void id_28);
 void (id_31)(void id_30);
-void (id_21)(void id_20);
 void (id_33)(void id_32);
-void (id_6)(void id_4);
+void (id_21)(void id_20);
 void (id_36)(void id_34, void id_35);
 
 id_0::id_0(char (*id_2))
@@ -91,16 +91,16 @@ void (id_22::id_25)()
 "ERROR: cannot analyse call";
 }
 
+void (id_6)(void id_4);
+
 void (id_27)(void id_26);
 
 void (id_29)(void id_28);
 
 void (id_31)(void id_30);
 
-void (id_21)(void id_20);
-
 void (id_33)(void id_32);
 
-void (id_6)(void id_4);
+void (id_21)(void id_20);
 
 void (id_36)(void id_34, void id_35);

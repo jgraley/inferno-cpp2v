@@ -41,10 +41,10 @@ id_20 id_10("id_10");
 void id_9;
 int id_7;
 void (id_25)(void id_24);
+void (id_6)(void id_4);
 void (id_27)(void id_26);
 void (id_29)(void id_28);
 void (id_31)(void id_30);
-void (id_6)(void id_4);
 void (id_33)(void id_32);
 void (id_36)(void id_34, void id_35);
 
@@ -93,13 +93,13 @@ void (id_20::id_23)()
 
 void (id_25)(void id_24);
 
+void (id_6)(void id_4);
+
 void (id_27)(void id_26);
 
 void (id_29)(void id_28);
 
 void (id_31)(void id_30);
-
-void (id_6)(void id_4);
 
 void (id_33)(void id_32);
 

@@ -52,7 +52,7 @@ void ReadArgs::Usage(string msg)
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, master match 2, first slave match 3\n"    
-                    "               Note: all zero-based, so 0 means \"after first\"\n"
+                    "               Note: step is zero-based; counts are 1-based\n"
                     "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
                     "               Note: if quitting after parse or later, output is attempted.\n"     
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    

@@ -100,9 +100,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );   
     
     master_boundary_keyer_links.clear();
-    for( PatternLink plink : master_keyer_plinks )
+    for( PatternLink plink : master_plinks )
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
+    TRACE("master_boundary_keyer_links ")(master_boundary_keyer_links)("\n");
     
     // Trivial problem checks   
     if( my_normal_links.empty() ) 

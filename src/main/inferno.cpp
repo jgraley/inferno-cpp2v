@@ -201,7 +201,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
 
     // Start a steps plan
     for( int i=0; i<sequence.size(); i++ )
-        steps.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true } );        
+        steps.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true, false } );        
     
     // If we're to run only one step, restrict all stepped stages
     if( ReadArgs::runonlyenable )
@@ -211,9 +211,18 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( ReadArgs::quitafter )
     {
         if( ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
+        {
             steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
+            steps.back().allow_stop = true;
+        }
         for( int i=0; i<steps.size()-1; i++ )
             steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;
+        for( int i=0; i<steps.size(); i++ )
+            TRACE("Step %03d ALLOWS: trace=", i)
+                 (steps[i].allow_trace)(" hits=")
+                 (steps[i].allow_hits)(" reps=")
+                 (steps[i].allow_reps)(" stop=")
+                 (steps[i].allow_stop)("\n");
     }
 
     // ------------------------ Create stages -------------------------

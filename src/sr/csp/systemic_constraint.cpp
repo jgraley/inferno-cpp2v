@@ -199,8 +199,8 @@ void SystemicConstraint::Start( const Assignments &forces_map_,
 void SystemicConstraint::Test( Assignments frees_map )
 {   
     INDENT("T");
-    TRACE("Free assignments:\n")
-         (frees_map)("\n");
+    //TRACE("Free assignments:\n")
+    //     (frees_map)("\n");
 
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
@@ -224,22 +224,22 @@ void SystemicConstraint::Test( Assignments frees_map )
     }    
     //required_links = UnionOfSolo(forces_map, frees_map);
 
-    TRACE("Now ready to query the agent, with these required links:\n")
-         (required_links)("\n");
+    //TRACE("Now ready to query the agent, with these required links:\n")
+    //     (required_links)("\n");
 
     {
-        //Tracer::RAIIDisable silencer(); // make queries be quiet
+        Tracer::RAIIDisable silencer(); // make queries be quiet
 
         if( plan.action==Action::FULL || plan.action==Action::COUPLING )
         {
             // First check any coupling at this pattern node
-            TRACE("Coupling query\n");
+            //TRACE("Coupling query\n");
             plan.agent->RunCouplingQuery( &required_links );
         }
                       
         if( plan.action==Action::FULL && required_links.size() > 0 )
         {
-            TRACE("Normal linked query\n");
+            //TRACE("Normal linked query\n");
             // Use a normal-linked query on our underlying agent.
             // We only need one match to know that required_links_list are good, 
             // i.e. to run once without throuwing a mismatch. Don't need
