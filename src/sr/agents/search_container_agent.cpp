@@ -117,7 +117,7 @@ void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
     SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
@@ -128,7 +128,7 @@ void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
     const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
     if( !nugget.parent_xlink )
         throw NoParentMismatch();                    
-    if( nugget.parent_xlink != required_links->at(base_plink) )      
+    if( nugget.parent_xlink != required_links->at(keyer_plink) )      
         throw TerminusMismatch();     
 }                                                                                        
 
@@ -200,13 +200,13 @@ void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_plink)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
     if( required_links->count(terminus_plink) > 0 )
     {        
         // Get nugget for base - base is first descendant (inclusive) in depth-first ordering
-        XLink base_xlink = required_links->at(base_plink);
+        XLink base_xlink = required_links->at(keyer_plink);
         const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(base_xlink) );
         
         // Get nugget for last descendant of base
@@ -235,7 +235,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     if( !recurse_restriction )
         return;
 
-    XLink base_xlink = required_links->at(base_plink);
+    XLink base_xlink = required_links->at(keyer_plink);
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
     PatternLink terminus_plink(this, &terminus);

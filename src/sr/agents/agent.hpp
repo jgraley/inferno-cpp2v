@@ -61,9 +61,9 @@ public:
 	virtual void SCRConfigure( const SCREngine *e,
                                Phase phase ) = 0;
     virtual void ConfigureCoupling( const Traceable *e,
-                                    PatternLink base_plink_, 
-                                    set<PatternLink> coupled_plinks_ ) = 0;
-    virtual void AddResiduals( set<PatternLink> coupled_plinks_ ) = 0;
+                                    PatternLink keyer_plink_, 
+                                    set<PatternLink> residual_plinks_ ) = 0;
+    virtual void AddResiduals( set<PatternLink> residual_plinks_ ) = 0;
                                    
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -77,7 +77,7 @@ public:
 
     /// Test an Agent given partial map of locations of base and normal links. 
     virtual bool ImplHasNLQ() const = 0;                                              
-    virtual bool NLQRequiresBase() const = 0;                                              
+    virtual bool NLQRequiresKeyer() const = 0;                                              
     virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const = 0;
 
@@ -130,9 +130,9 @@ public:
     virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
     virtual void ConfigureCoupling( const Traceable *e,
-                                    PatternLink base_plink_, 
-                                    set<PatternLink> coupled_plinks_ );
-    virtual void AddResiduals( set<PatternLink> coupled_plinks_ );
+                                    PatternLink keyer_plink_, 
+                                    set<PatternLink> residual_plinks_ );
+    virtual void AddResiduals( set<PatternLink> residual_plinks_ );
     virtual list<PatternLink> GetChildren() const override;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
@@ -142,7 +142,7 @@ public:
                                   XLink base_xlink ) const;       
                                                                            
     virtual bool ImplHasNLQ() const;
-    virtual bool NLQRequiresBase() const;
+    virtual bool NLQRequiresKeyer() const;
     void NLQFromDQ( const SolutionMap *required_links,
                     const TheKnowledge *knowledge ) const;                                              
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
@@ -190,9 +190,9 @@ protected:
     const SCREngine *master_scr_engine = nullptr;    
     const Traceable *coupling_master_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
-    PatternLink base_plink;
+    PatternLink keyer_plink;
     PatternLink overlay_under_plink;
-    set<PatternLink> coupled_plinks;
+    set<PatternLink> residual_plinks;
     list<PatternLink> base_and_normal_plinks;
     Phase phase = UNDEFINED;
     

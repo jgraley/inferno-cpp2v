@@ -93,8 +93,8 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
 
 
 void AgentCommon::ConfigureCoupling( const Traceable *e,
-                                     PatternLink base_plink_, 
-                                     set<PatternLink> coupled_plinks_ )
+                                     PatternLink keyer_plink_, 
+                                     set<PatternLink> residual_plinks_ )
 {  
     ASSERT(e);
     // Enforcing rule #149 - breaking that rule will cause the same root node to appear in
@@ -102,44 +102,44 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     // Also see #316
     ASSERT(!coupling_master_engine)("Detected repeat coupling configuration of ")(*this)
                                    ("\nCould be result of coupling abnormal links - not allowed :(\n")
-                                   (coupling_master_engine)(" with keyer ")(base_plink)("\n")
-                                   (e)(" with keyer ")(base_plink_);                                   
+                                   (coupling_master_engine)(" with keyer ")(keyer_plink)("\n")
+                                   (e)(" with keyer ")(keyer_plink_);                                   
     ASSERT(master_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
     coupling_master_engine = e;
                                            
-    if( base_plink_ )
+    if( keyer_plink_ )
     {
-        ASSERT( base_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
-        base_plink = base_plink_;
+        ASSERT( keyer_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
+        keyer_plink = keyer_plink_;
     }
     
-    for( PatternLink plink : coupled_plinks_ )
+    for( PatternLink plink : residual_plinks_ )
     {
         ASSERT( plink );
         ASSERT( plink.GetChildAgent() == this )("Parent link supplied for different agent");
-        InsertSolo( coupled_plinks, plink );
+        InsertSolo( residual_plinks, plink );
     }
 
     // It works with a set, but if we lose this ordering hints from 
     // Colocated agent NLQs become less useful and CSP solver slows right
     // down.
-    if( phase != IN_REPLACE_ONLY && base_plink )
+    if( phase != IN_REPLACE_ONLY && keyer_plink )
     {
         base_and_normal_plinks.clear();
-        base_and_normal_plinks.push_back( base_plink );
+        base_and_normal_plinks.push_back( keyer_plink );
         for( PatternLink plink : pattern_query->GetNormalLinks() )
             base_and_normal_plinks.push_back( plink );
     }
 }
                                 
 
-void AgentCommon::AddResiduals( set<PatternLink> coupled_plinks_ )
+void AgentCommon::AddResiduals( set<PatternLink> residual_plinks_ )
 {
-    for( PatternLink plink : coupled_plinks_ )
+    for( PatternLink plink : residual_plinks_ )
     {
         ASSERT( plink );
         ASSERT( plink.GetChildAgent() == this )("Parent link supplied for different agent");
-        InsertSolo( coupled_plinks, plink );
+        InsertSolo( residual_plinks, plink );
     }
 }
 
@@ -202,7 +202,7 @@ bool AgentCommon::ImplHasNLQ() const
 }
 
     
-bool AgentCommon::NLQRequiresBase() const
+bool AgentCommon::NLQRequiresKeyer() const
 {
     return true;
 }                                         
@@ -218,14 +218,14 @@ void AgentCommon::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
 void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
                              const TheKnowledge *knowledge ) const
 {    
-    TRACE("common DNLQ: ")(*this)(" at ")(base_plink)("\n");
+    TRACE("common DNLQ: ")(*this)(" at ")(keyer_plink)("\n");
     
     // Can't do baseless query using DQ
-    ASSERT( NLQRequiresBase() ); // Agent shouldn't advertise
-    ASSERT( required_links->count(base_plink) ); // Solver shouldn't try
+    ASSERT( NLQRequiresKeyer() ); // Agent shouldn't advertise
+    ASSERT( required_links->count(keyer_plink) ); // Solver shouldn't try
     
     auto query = CreateDecidedQuery();
-    RunDecidedQueryImpl( *query, required_links->at(base_plink) );
+    RunDecidedQueryImpl( *query, required_links->at(keyer_plink) );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
@@ -277,15 +277,15 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
     // HOWEVER: it is now possible for agents to override this policy.
     
     // Without keyer, don't bother to check anything
-    if( required_links->count(base_plink) == 0 )
+    if( required_links->count(keyer_plink) == 0 )
         return;
-    XLink keyer = required_links->at(base_plink);
+    XLink keyer = required_links->at(keyer_plink);
     
     // Rule #384 means we can skip a coupling when keyer is MMAX
     if( keyer == XLink::MMAX_Link )
         return; 
         
-    for( PatternLink residual_plink : coupled_plinks )
+    for( PatternLink residual_plink : residual_plinks )
     {
         if( required_links->count(residual_plink) )
         {
@@ -318,7 +318,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset(); 
 
-    XLink base_xlink = required_links->at(base_plink);
+    XLink base_xlink = required_links->at(keyer_plink);
     if( base_xlink != XLink::MMAX_Link )
         this->RunRegenerationQueryImpl( query, required_links, knowledge );
 }                             
@@ -511,9 +511,9 @@ const SCREngine *AgentCommon::GetMasterSCREngine() const
 PatternLink AgentCommon::GetKeyerPatternLink() const
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
-    ASSERT( base_plink )(*this)(" has no base_plink, engine=")(coupling_master_engine)("\n");
+    ASSERT( keyer_plink )(*this)(" has no keyer_plink, engine=")(coupling_master_engine)("\n");
     
-    return base_plink;
+    return keyer_plink;
 }
 
 
@@ -575,7 +575,7 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
 
-    TreePtr<Node> keynode = master_scr_engine->GetReplaceKey( base_plink );
+    TreePtr<Node> keynode = master_scr_engine->GetReplaceKey( keyer_plink );
     ASSERT( !keynode || keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
     
     TreePtr<Node> dest = BuildReplaceImpl(me_plink, keynode);
@@ -745,8 +745,8 @@ void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_lin
                                                  const TheKnowledge *knowledge ) const
 {
     XLink base_xlink;
-    if( required_links->count(base_plink) > 0 )
-        base_xlink = required_links->at(base_plink);
+    if( required_links->count(keyer_plink) > 0 )
+        base_xlink = required_links->at(keyer_plink);
 
     // Baseless or MMAX query strategy: hand-rolled
     if( !base_xlink || base_xlink == XLink::MMAX_Link )
@@ -797,11 +797,11 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *required_l
                                                    const TheKnowledge *knowledge ) const
 {
     // Baseless query strategy: don't check pre-restriction
-    bool based = (required_links->count(base_plink) == 1);
+    bool based = (required_links->count(keyer_plink) == 1);
     if( based )
     { 
         // Check pre-restriction
-        if( !IsLocalMatch( required_links->at(base_plink).GetChildX().get() ) )
+        if( !IsLocalMatch( required_links->at(keyer_plink).GetChildX().get() ) )
             throw PreRestrictionMismatch();
     }
     

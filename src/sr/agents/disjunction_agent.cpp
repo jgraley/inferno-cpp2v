@@ -66,7 +66,7 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
     
-bool DisjunctionAgent::NLQRequiresBase() const
+bool DisjunctionAgent::NLQRequiresKeyer() const
 {
     return false;
 }                                         
@@ -78,8 +78,8 @@ void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_lin
     // Baseless query strategy: hand-rolled
     INDENT("∨");
     XLink base_xlink;
-    if( required_links->count(base_plink) > 0 )
-        base_xlink = required_links->at(base_plink);
+    if( required_links->count(keyer_plink) > 0 )
+        base_xlink = required_links->at(keyer_plink);
     
     ASSERT( base_xlink != XLink::MMAX_Link ); // DefaultMMAXAgent should have taken care of this case
        

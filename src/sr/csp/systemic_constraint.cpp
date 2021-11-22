@@ -143,8 +143,8 @@ list<VariableId> SystemicConstraint::GetRequiredVariables() const
              
         switch( var.kind )
         {
-        case Kind::KEYER: // KEYER is used as base
-            if( plan.agent->NLQRequiresBase() )
+        case Kind::KEYER: 
+            if( plan.agent->NLQRequiresKeyer() )
                 required_free_vars.push_back( var.id );
             break;
         case Kind::RESIDUAL:

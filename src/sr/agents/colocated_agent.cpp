@@ -26,7 +26,7 @@ bool ColocatedAgent::ImplHasNLQ() const
 }
 
     
-bool ColocatedAgent::NLQRequiresBase() const
+bool ColocatedAgent::NLQRequiresKeyer() const
 {
     return false;
 }                                         

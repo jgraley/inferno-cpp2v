@@ -21,7 +21,6 @@ public:
 private:
 	virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node ) override;  
-    PatternLink keyer_plink;
 };
 
 };
