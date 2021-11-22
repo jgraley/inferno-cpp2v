@@ -150,8 +150,8 @@ Tracer::Tracer( const char *f, int l, string in, const char *fu, Flags fl, char 
         MaybePrintEndl();
         clog << endl;
         PrintPrefix();
-        clog << SSPrintf( "----ASSERTION FAILED: %s", cond ) << endl;
         MaybePrintBanner();
+        clog << SSPrintf( "---- ASSERTION FAILED: %s", cond ) << endl;
     }
 }
 
@@ -222,6 +222,8 @@ void Tracer::MaybePrintEndl()
 Tracer::Descend::Descend( string s ) : 
     os(pre.size()) 
 { 
+    ASSERT( s.length()>=1 );
+    ASSERT( !isspace(s[0]) );
     pre += s; 
     Tracer::MaybePrintEndl(); 
 } 
@@ -275,7 +277,7 @@ void Tracer::MaybePrintBanner()
         if( instance != "" && instance.substr(instance. size()-2) != "::" )
             indot = instance+".";
         PrintPrefix();
-        clog << SSPrintf("----%s:%d in %s%s()", file, line, indot.c_str(), function) << endl;
+        clog << SSPrintf("---- %s:%d in %s%s()", file, line, indot.c_str(), function) << endl;
         require_banner = false;
     }    
 }
