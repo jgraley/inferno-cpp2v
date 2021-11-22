@@ -243,23 +243,27 @@ Tracer::Descend::~Descend()
 }
 
 
-void Tracer::Descend::Indent()
+void Tracer::Descend::Indent(string sprogress)
 {
     // Detect cases where the indent level dropped and then went up again, without
     // any actual traces at the lower indent level. Just do a blank trace that leaves
     // a visible gap (the "<" was confusing; gap suffices). 
     if( leftmost_pre.size() < last_traced_pre.size() && leftmost_pre.size() < pre.size() )
-        clog << leftmost_pre << endl;
+        clog << sprogress << leftmost_pre << endl;
+
+    clog << sprogress << pre.c_str() << " ";
+
     last_traced_pre = leftmost_pre = pre;
-    clog << pre.c_str() << " ";
 }
 
 
 void Tracer::PrintPrefix()
 {
-    clog << Progress::GetCurrent().GetPrefix(4) << " ";
-    if( !ReadArgs::trace_no_stack )
-        Descend::Indent();
+    string sprogress = Progress::GetCurrent().GetPrefix(4) + " ";
+    if( ReadArgs::trace_no_stack )
+        clog << sprogress;
+    else
+        Descend::Indent( sprogress );
 }
 
 

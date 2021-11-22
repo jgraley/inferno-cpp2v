@@ -223,7 +223,7 @@ public:
     public:
     	Descend( string s="." );
     	~Descend();
-    	static void Indent();
+    	static void Indent(string sprogress);
     private:
         static string pre;
         static string last_traced_pre, leftmost_pre;
