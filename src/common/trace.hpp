@@ -72,6 +72,38 @@ string Trace(const pair<TF, TS> &p)
 }
 
 
+// Worker for Trace( tuple<> )
+template<typename TUPLE, size_t INDEX>
+struct TraceTupleWorker
+{
+    // Recurse, decrementing index, but then populate list on the unwind
+    static void Execute(list<string> &elts, TUPLE const & t)
+    {
+        TraceTupleWorker<TUPLE, INDEX-1>::Execute(elts, t);
+        elts.push_back( Trace(get<INDEX-1>(t)) );
+    }
+};
+
+
+// Worker for Trace( tuple<> )
+template<typename TUPLE>
+struct TraceTupleWorker<TUPLE, 0>
+{
+    // Template specialisation terminates the re4cursion at index==0
+    static void Execute(list<string> &elts, TUPLE const & t) {};
+};
+
+
+template< class... TYPES >
+string Trace(tuple<TYPES...> const & t)
+{
+    typedef tuple<TYPES...> TUPLE;
+    list<string> elts;
+    TraceTupleWorker<TUPLE, tuple_size<TUPLE>::value>::Execute(elts, t);
+    return Join( elts, "[", CONTAINER_SEP, "]" );
+}
+
+
 template<typename T>
 string Trace(const vector<T> &l) 
 {

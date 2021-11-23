@@ -130,7 +130,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // references; only constraints held onto by solver will remain.
 
     // For old solver only...
-    conj = make_shared<Conjecture>(my_normal_agents, root_agent);                      
+    conj = make_shared<Conjecture>(my_normal_agents, root_agent);   
+    
+    Dump();
 }
 
 
@@ -440,6 +442,15 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
     }
     auto salg = make_shared<CSP::SimpleSolver>(constraints_list, &free_normal_links_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
+}
+
+
+void AndRuleEngine::Plan::Dump()
+{
+    FTRACE( make_tuple(
+        parent_residual_links_to_master_boundary_agents,
+        normal_links_ordered 
+    ) )("\n");
 }
 
 

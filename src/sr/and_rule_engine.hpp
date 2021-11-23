@@ -87,6 +87,8 @@ public:
         void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
 
+        void Dump();
+
         string GetTrace() const; // used for debug
         
         AndRuleEngine * const algo;
