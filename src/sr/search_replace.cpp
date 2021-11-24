@@ -60,9 +60,16 @@ void CompareReplace::Plan::PlanningStageThree()
 {
     // Third, create subordinate AndRuleEngines
     scr_engine->PlanningStageThree( {} );
-    
-    list<const AndRuleEngine *> ares = scr_engine->GetAndRuleEngines();
-	TRACE("And-rule engines for this step: ")(ares)("\n");
+        
+    map<const Agent *, string> agent_plans;
+    for( auto p : agent_phases )
+    {
+        const Agent *agent = p.first;
+        agent_plans[agent] = agent->GetPlanAsString();
+    }    
+
+    TRACE("=============================================== ")
+         (*this)(":\n")(agent_plans)("\n");
 }                                      
 
 

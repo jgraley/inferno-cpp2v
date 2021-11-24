@@ -115,6 +115,7 @@ public:
 	static const Agent *TryAsAgentConst( shared_ptr<const Node> node );
     // Note the constness: thou shalt not try to mutate the agent via this function
     virtual shared_ptr<const Node> GetPatternPtr() const = 0;
+    virtual string GetPlanAsString() const = 0;
 };
 
 
@@ -191,8 +192,8 @@ protected:
     const Traceable *coupling_master_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink keyer_plink;
-    PatternLink overlay_under_plink;
     set<PatternLink> residual_plinks;
+    PatternLink overlay_under_plink;
     list<PatternLink> base_and_normal_plinks;
     Phase phase = UNDEFINED;
     
@@ -202,6 +203,7 @@ private:
     shared_ptr<Conjecture> nlq_conjecture;
 
     virtual string GetGraphId() const;
+    virtual string GetPlanAsString() const override;
 };
 
 

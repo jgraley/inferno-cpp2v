@@ -447,10 +447,57 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
 
 void AndRuleEngine::Plan::Dump()
 {
-    FTRACE( make_tuple(
-        parent_residual_links_to_master_boundary_agents,
-        normal_links_ordered 
-    ) )("\n");
+    map<string, string> plan_as_strings = 
+    {
+        { "root_plink", 
+          Trace(root_plink) },
+        { "root_pattern", 
+          Trace(root_pattern) },
+        { "root_agent", 
+          Trace(root_agent) },
+        { "master_plinks", 
+          Trace(master_plinks) },
+        { "master_keyer_plinks", 
+          Trace(master_keyer_plinks) },
+        { "master_agents", 
+          Trace(master_agents) },
+        { "my_normal_agents", 
+          Trace(my_normal_agents) },
+        { "my_normal_links", 
+          Trace(my_normal_links) },
+        { "my_normal_links_unique_by_agent", 
+          Trace(my_normal_links_unique_by_agent) },
+        { "my_evaluators", 
+          Trace(my_evaluators) },
+        { "my_free_abnormal_engines", 
+          Trace(my_free_abnormal_engines) },
+        { "my_evaluator_abnormal_engines", 
+          Trace(my_evaluator_abnormal_engines) },
+        { "my_multiplicity_engines", 
+          Trace(my_multiplicity_engines) },
+        { "my_constraints", 
+          Trace(my_constraints) },
+        { "master_boundary_agents", 
+          Trace(master_boundary_agents) },
+        { "coupling_residual_links", 
+          Trace(coupling_residual_links) },
+        { "coupling_keyer_links_nontrivial", 
+          Trace(coupling_keyer_links_nontrivial) },
+        { "coupling_keyer_links_all", 
+          Trace(coupling_keyer_links_all) },
+        { "my_master_boundary_links", 
+          Trace(my_master_boundary_links) },
+        { "master_boundary_keyer_links", 
+          Trace(master_boundary_keyer_links) },
+        { "parent_links_to_my_normal_agents", 
+          Trace(parent_links_to_my_normal_agents) },
+        { "parent_residual_links_to_master_boundary_agents",
+          Trace(parent_residual_links_to_master_boundary_agents) },
+        { "normal_links_ordered", 
+          Trace(normal_links_ordered) }
+    };
+    TRACE("=============================================== ")
+         (*this)(":\n")(plan_as_strings)("\n");
 }
 
 

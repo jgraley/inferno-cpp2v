@@ -216,7 +216,9 @@ void SCREngine::Plan::ConfigureAgents()
     // RECURSE RECURSE
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageThree(all_keyer_plinks);                                      
+        p.second->PlanningStageThree(all_keyer_plinks);    
+        
+    Dump();
 } 
 
 
@@ -252,6 +254,48 @@ void SCREngine::Plan::PlanReplace()
             all_keyed_agents.insert(agent);
         }
     }
+}
+
+
+void SCREngine::Plan::Dump()
+{
+    map<string, string> plan_as_strings = 
+    {
+        { "overall_master_ptr", 
+          Trace(overall_master_ptr) },
+        { "root_pattern", 
+          Trace(root_pattern) },
+        { "root_plink", 
+          Trace(root_plink) },
+        { "root_agent", 
+          Trace(root_agent) },
+        { "master_ptr", 
+          Trace(master_ptr) },
+        { "master_plinks", 
+          Trace(master_plinks) },
+        { "master_agents", 
+          Trace(master_agents) },
+        { "my_plinks", 
+          Trace(my_plinks) },
+        { "my_agents", 
+          Trace(my_agents) },
+        { "all_keyer_plinks", 
+          Trace(all_keyer_plinks) },
+        { "my_overlay_starter_engines", 
+          Trace(my_overlay_starter_engines) },
+        { "my_engines", 
+          Trace(my_engines) },
+        { "and_rule_engine", 
+          Trace(and_rule_engine) },
+        { "final_agent_phases", 
+          Trace(final_agent_phases) },
+        { "my_replace_plinks_postorder", 
+          Trace(my_replace_plinks_postorder) },
+        { "my_subordinate_plinks_postorder", 
+          Trace(my_subordinate_plinks_postorder) }
+    };
+    TRACE("=============================================== ")
+         (*this)(":\n")(plan_as_strings)("\n");
 }
 
 

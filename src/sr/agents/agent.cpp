@@ -721,6 +721,30 @@ string AgentCommon::GetGraphId() const
 	return GetSerialString();
 }
 
+
+string AgentCommon::GetPlanAsString() const
+{
+    map<string, string> plan_as_strings = 
+    {
+        { "master_scr_engine", 
+          Trace(master_scr_engine) },
+        { "coupling_master_engine", 
+          Trace(coupling_master_engine) },
+        //{ "pattern_query", 
+        //  Trace(pattern_query) }, // TODO should be traceable?
+        { "keyer_plink", 
+          Trace(keyer_plink) },
+        { "residual_plinks", 
+          Trace(residual_plinks) },
+        { "overlay_under_plink", 
+          Trace(overlay_under_plink) },
+        { "base_and_normal_plinks", 
+          Trace(base_and_normal_plinks) }
+    };
+    return Trace(plan_as_strings);
+}
+
+
 //---------------------------------- DefaultMMAXAgent ------------------------------------    
 
 void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,

@@ -79,6 +79,7 @@ private:
         void PlanningStageThree(unordered_set<PatternLink> master_keyers);
         void PlanCompare();
         void PlanReplace();
+        void Dump();
         string GetTrace() const; // used for debug
         
         SCREngine * const algo;
