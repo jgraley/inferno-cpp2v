@@ -40,15 +40,24 @@ public:
     StringNoQuotes() {}
     StringNoQuotes(string s) : value(s) {}
     StringNoQuotes& operator=(string s) { value=s; return *this; }
-    operator string() { return value; }
+    operator string() const { return value; }
     
 private:
     string value;
 };    
     
+class KeyValuePair
+{
+public:
+    KeyValuePair(string sk, string sv) : key(sk), value(sv) {}    
+    string key;
+    string value;
+};    
+    
 string Trace(const Traceable &t); 
 string Trace(string s); 
-string Trace(StringNoQuotes snq); 
+string Trace(const StringNoQuotes &snq); 
+string Trace(const KeyValuePair &kvp); 
 string Trace(bool b); 
 string Trace(int i); 
 string Trace(size_t i); 

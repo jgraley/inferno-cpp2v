@@ -30,9 +30,19 @@ string Trace(string s)
 }
 
 
-string Trace(StringNoQuotes snq)
+string Trace(const StringNoQuotes &snq)
 {
     return (string)snq;
+}
+
+
+// Note: In JSON, everything is ordered (it's based on text files) 
+// including maps (what JSON calls objects) and it will be usedful to 
+// be able to trace a map-like thing that's order-preserving. Do this 
+// by specialising eg Trace( list<KeyValuePair> )
+string Trace(const KeyValuePair &kvp)
+{
+    return Trace(kvp.key) + ": " + string(kvp.value);
 }
 
 

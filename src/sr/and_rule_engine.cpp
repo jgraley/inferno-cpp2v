@@ -55,8 +55,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 {    
     INDENT("P");
     TRACE(algo->GetTrace())(" planning\n");
-
-    TRACE("Master plinks: ")(master_plinks)("\n");
     
     master_agents.clear();
     for( PatternLink plink : master_plinks )
@@ -74,7 +72,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     reached_links.clear();    
     PopulateMasterBoundaryStuff( root_plink, 
                         master_agents );
-    TRACE("Normal agents ")(normal_agents)("\nMaster boundary agents ")(master_boundary_agents)("\n");
 
     // Collect together the parent links to agents
     for( PatternLink plink : my_normal_links )
@@ -105,7 +102,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     for( PatternLink plink : master_keyer_plinks_ )
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
-    TRACE("master_boundary_keyer_links ")(master_boundary_keyer_links)("\n");
     
     // Trivial problem checks   
     if( my_normal_links.empty() ) 
@@ -283,7 +279,6 @@ void AndRuleEngine::Plan::DetermineNontrivialKeyers()
 
 void AndRuleEngine::Plan::ConfigureAgents()
 {
-    TRACE("Configuring these ")(coupling_keyer_links_all)("\n");
     for( PatternLink keyer_plink : coupling_keyer_links_all )
     {
         ASSERT( keyer_plink );
@@ -447,7 +442,7 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
 
 void AndRuleEngine::Plan::Dump()
 {
-    map<string, StringNoQuotes> plan_as_strings = 
+    list<KeyValuePair> plan_as_strings = 
     {
         { "root_plink", 
           Trace(root_plink) },
@@ -496,6 +491,7 @@ void AndRuleEngine::Plan::Dump()
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");
+    solver->Dump();
 }
 
 

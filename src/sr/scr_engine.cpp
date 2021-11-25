@@ -255,7 +255,7 @@ void SCREngine::Plan::PlanReplace()
 
 void SCREngine::Plan::Dump()
 {
-    map<string, StringNoQuotes> plan_as_strings = 
+    list<KeyValuePair> plan_as_strings = 
     {
         { "overall_master_ptr", 
           Trace(overall_master_ptr) },

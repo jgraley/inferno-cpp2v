@@ -51,15 +51,18 @@ public:
     /**
      * Try to extract a single solution from the solver. 
      * 
-     * @param values [out] if non-null and solution exists: values that solve the CSP, organsied into a list for each constraint. Each list is ordered as per `Constraint::GetFreeVariables()`.
-     * 
-     * @param side_info [out] if non-null and solution exists: side-information as required by the `AndRuleEngine` in order to make use of the solution.
+     * @param solution [out] if non-null and solution exists: A fullly populated assignments map
      *
      * @retval true A solution was found, and non-null arguments are filled in
      * @retval false No solutions are left, and the pointer arguments are unused
      */
     bool GetNextSolution( Solution *solution = nullptr );
  
+    /**
+     * Write info about the problem to log via TRACE
+     */
+    void Dump() const;
+    
 private:
     void ReportSolution( const Solution &solution );
 #ifdef COROUTINE_HOLDER

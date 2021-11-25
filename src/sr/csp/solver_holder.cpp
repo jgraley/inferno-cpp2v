@@ -107,3 +107,10 @@ void SolverHolder::MaybeRethrow()
     }
 }
 #endif
+
+
+void SolverHolder::Dump() const
+{
+    solver->Dump();
+}
+
