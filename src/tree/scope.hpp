@@ -8,6 +8,9 @@
 // parent in the tree. We have to do searches for this, since the tree does not contain 
 // back-pointers.
 //
+class ScopeNotFoundMismatch : public Mismatch {};
+class ScopeOnNonSpecificMismatch : public Mismatch {};
+
 TreePtr<CPPTree::Scope> GetScope( TreePtr<CPPTree::Program> program, TreePtr<CPPTree::Identifier> id );
 
 #endif

@@ -142,7 +142,16 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 
 string Render::RenderScopePrefix( TreePtr<Identifier> id )
 {
-	TreePtr<Scope> scope = GetScope( program, id );
+    TreePtr<Scope> scope;
+    try
+    {
+        scope = GetScope( program, id );
+    }
+    catch( ::Mismatch &me )
+    {
+        return RenderMismatchException(me);
+    } 
+        
 	//TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
 	if( scope == scope_stack.top() )
 		return string(); // local scope
@@ -588,9 +597,9 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
                     continue;
                 }
             }
-            catch( ::Mismatch )
+            catch( ::Mismatch &me )
             {
-                remainder.push_back(MakeTreePtr<SpecificString>("ERROR: cannot analyse call"));
+                remainder.push_back(MakeTreePtr<SpecificString>(RenderMismatchException(me)));
                 continue;
             }
 		}
@@ -1094,3 +1103,8 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	return s;
 }
 
+
+string Render::RenderMismatchException( const Mismatch &me )
+{
+    return "«Caught:"+me.What()+"»";
+}

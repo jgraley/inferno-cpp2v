@@ -40,10 +40,9 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	}
 	
 	if( TreePtr<SpecificIdentifier> sid = DynamicTreePtrCast<SpecificIdentifier>( id ) )
-		ASSERT(0)("cannot get scope of ")( *sid );
+		throw ScopeNotFoundMismatch();
 	else
-		ASSERT(0)("non-specific type ")(*id)(" - should not be doing GetScope() on these" );
-	// every identifier should have a scope - if this fails, we've missed out a kind of scope
-	// Note: if FlattenNodeer is not automated yet, then it may have missed something
+		throw ScopeOnNonSpecificMismatch();
+	// Every identifier should have a scope - if this fails, we've missed out a kind of scope
 	return TreePtr<Scope>();
 }

@@ -70,6 +70,7 @@ private:
 			                            bool separate_last,
 			                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
 			                            bool showtype=true );
+    string RenderMismatchException( const Mismatch &me );
     const string outfile;			                         
     SimpleCompare sc;
 };
