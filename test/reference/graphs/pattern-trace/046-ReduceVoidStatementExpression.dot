@@ -102,6 +102,7 @@ subgraph "clusterAnd#R46-3" {
 ];
 
 "And#R46-3/#B-881" -> "And#R46-3/#B-882" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -225,24 +226,6 @@ subgraph "clusterAnd#R46-0" {
         height = 0.4
     ];
     
-    // -------- region And#R46-0/And#R46-1 ----------
-    subgraph "clusterAnd#R46-0/And#R46-1" {
-        label = "And#R46-1"
-        style = "filled"
-        color = antiquewhite3
-        fontsize = "15"
-        // -------- block And#R46-0/And#R46-1/#B-878 ----------
-        "And#R46-0/And#R46-1/#B-878" [
-            fillcolor = "/set28/1"
-            xlabel = "#B-878"
-            fontsize = "12"
-            fontcolor = grey40
-            shape = "none"
-            style = "invisible"
-        ];
-        
-    }
-    
     // -------- region And#R46-0/And#R46-2 ----------
     subgraph "clusterAnd#R46-0/And#R46-2" {
         label = "And#R46-2"
@@ -253,6 +236,24 @@ subgraph "clusterAnd#R46-0" {
         "And#R46-0/And#R46-2/#B-879" [
             fillcolor = "/set28/2"
             xlabel = "#B-879"
+            fontsize = "12"
+            fontcolor = grey40
+            shape = "none"
+            style = "invisible"
+        ];
+        
+    }
+    
+    // -------- region And#R46-0/And#R46-1 ----------
+    subgraph "clusterAnd#R46-0/And#R46-1" {
+        label = "And#R46-1"
+        style = "filled"
+        color = antiquewhite3
+        fontsize = "15"
+        // -------- block And#R46-0/And#R46-1/#B-878 ----------
+        "And#R46-0/And#R46-1/#B-878" [
+            fillcolor = "/set28/1"
+            xlabel = "#B-878"
             fontsize = "12"
             fontcolor = grey40
             shape = "none"
@@ -282,7 +283,8 @@ subgraph "clusterAnd#R46-0" {
 }
 
 "And#R46-0/#X46-1" -> "And#R46-0/#X46-0" [
-    label = "#95"
+    arrowhead="normalnonebox"
+    label = "#96"
     decorate = true
     color = black
     fontcolor = black
@@ -305,6 +307,7 @@ subgraph "clusterAnd#R46-0" {
 ];
 
 "And#R46-0/#B-877":port2 -> "And#R46-0/#B-880" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -312,6 +315,7 @@ subgraph "clusterAnd#R46-0" {
 ];
 
 "And#R46-0/#X46-0" -> "And#R46-0/#B-877" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -498,7 +502,7 @@ subgraph "clusterAnd#R46-0" {
 ];
 
 "#X46-1" -> "#X46-0" [
-    label = "#95"
+    label = "#96"
     decorate = true
     color = black
     fontcolor = black

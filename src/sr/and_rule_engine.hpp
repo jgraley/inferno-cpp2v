@@ -74,7 +74,6 @@ public:
                               unordered_set<Agent *> master_agents );
         void DetermineResiduals( Agent *agent,
                                  unordered_set<Agent *> master_agents );
-        void DetermineNontrivialKeyers();
         void ConfigureAgents();
         void PopulateNormalAgents( unordered_set<Agent *> *normal_agents, 
                                    unordered_set<PatternLink> *my_normal_links,
@@ -107,7 +106,6 @@ public:
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         unordered_set<Agent *> master_boundary_agents;
         unordered_set<PatternLink> coupling_residual_links;
-        unordered_set<PatternLink> coupling_keyer_links_nontrivial; // Only where child X has at least one residual link
         unordered_set<PatternLink> coupling_keyer_links_all; // All keyers
         unordered_set<PatternLink> my_master_boundary_links; // These are ALL residuals
         unordered_set<PatternLink> master_boundary_keyer_links; // Keyers linked from master

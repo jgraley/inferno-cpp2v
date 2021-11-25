@@ -75,6 +75,7 @@ subgraph "clusterAnd#R68-7" {
 ];
 
 "And#R68-7/#B-1306":port1 -> "And#R68-7/#B-1319" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -89,6 +90,20 @@ subgraph "clusterAnd#R68-6" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
+    // -------- block And#R68-6/#X68-13 ----------
+    "And#R68-6/#X68-13" [
+        xlabel = "#X68-13"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
     // -------- block And#R68-6/#B-1308 ----------
     "And#R68-6/#B-1308" [
         fillcolor = "/set28/2"
@@ -132,20 +147,6 @@ subgraph "clusterAnd#R68-6" {
         height = 0.4
     ];
     
-    // -------- block And#R68-6/#X68-13 ----------
-    "And#R68-6/#X68-13" [
-        xlabel = "#X68-13"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- region And#R68-6/And#R68-7 ----------
     subgraph "clusterAnd#R68-6/And#R68-7" {
         label = "And#R68-7"
@@ -166,7 +167,16 @@ subgraph "clusterAnd#R68-6" {
     
 }
 
+"And#R68-6/#X68-13" -> "And#R68-6/#X68-6" [
+    arrowhead="normalnonebox"
+    label = "#18"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 "And#R68-6/#B-1308":port0 -> "And#R68-6/#B-1310" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -174,6 +184,7 @@ subgraph "clusterAnd#R68-6" {
 ];
 
 "And#R68-6/#X68-6" -> "And#R68-6/#B-1308" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -183,13 +194,6 @@ subgraph "clusterAnd#R68-6" {
 "And#R68-6/#B-1310" -> "And#R68-6/And#R68-7/#B-1306" [
     arrowhead="normalnoneodiamond"
     label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-6/#X68-13" -> "And#R68-6/#X68-6" [
-    label = "#18"
     decorate = true
     color = black
     fontcolor = black
@@ -259,20 +263,6 @@ subgraph "clusterAnd#R68-4" {
         height = 0.4
     ];
     
-    // -------- block And#R68-4/#B-1299 ----------
-    "And#R68-4/#B-1299" [
-        xlabel = "#B-1299"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "diamond"
-        label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R68-4/#B-1302 ----------
     "And#R68-4/#B-1302" [
         xlabel = "#B-1302"
@@ -287,34 +277,18 @@ subgraph "clusterAnd#R68-4" {
         height = 0.4
     ];
     
-    // -------- block And#R68-4/#B-1297 ----------
-    "And#R68-4/#B-1297" [
-        xlabel = "#B-1297"
+    // -------- block And#R68-4/#B-1299 ----------
+    "And#R68-4/#B-1299" [
+        xlabel = "#B-1299"
         fontsize = "12"
         fontcolor = grey40
         shape = "diamond"
-        label = <<FONT COLOR="black" POINT-SIZE="20">∧</FONT>>
+        label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
         style = "filled"
         penwidth = 0.0
         fixedsize = true
         width = 0.4
         height = 0.4
-    ];
-    
-    // -------- block And#R68-4/#B-1303 ----------
-    "And#R68-4/#B-1303" [
-        fillcolor = "/set28/3"
-        xlabel = "#B-1303"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="20">Δ</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(Type)</FONT></TD><TD PORT="port0"></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">through</FONT></TD><TD PORT="port1"></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">overlay</FONT></TD><TD PORT="port2"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
     ];
     
     // -------- block And#R68-4/#B-1301 ----------
@@ -344,6 +318,36 @@ subgraph "clusterAnd#R68-4" {
         style = "rounded,filled"
     ];
     
+    // -------- block And#R68-4/#B-1303 ----------
+    "And#R68-4/#B-1303" [
+        fillcolor = "/set28/3"
+        xlabel = "#B-1303"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="20">Δ</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(Type)</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">through</FONT></TD><TD PORT="port1"></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">overlay</FONT></TD><TD PORT="port2"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R68-4/#B-1297 ----------
+    "And#R68-4/#B-1297" [
+        xlabel = "#B-1297"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "diamond"
+        label = <<FONT COLOR="black" POINT-SIZE="20">∧</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
     // -------- region And#R68-4/And#R68-5 ----------
     subgraph "clusterAnd#R68-4/And#R68-5" {
         label = "And#R68-5"
@@ -365,7 +369,16 @@ subgraph "clusterAnd#R68-4" {
 }
 
 "And#R68-4/#X68-11" -> "And#R68-4/#B-1302" [
+    arrowhead="normalnonebox"
     label = "#2"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-4/#B-1302" -> "And#R68-4/#B-1297" [
+    arrowhead="normalnonebox"
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black
@@ -379,21 +392,8 @@ subgraph "clusterAnd#R68-4" {
     fontcolor = black
 ];
 
-"And#R68-4/#B-1302" -> "And#R68-4/#B-1297" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-4/#B-1297" -> "And#R68-4/#B-1301" [
-    label = "#1"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-4/#B-1297" -> "And#R68-4/#B-1299" [
+"And#R68-4/#B-1301" -> "And#R68-4/#B-1303" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -401,13 +401,23 @@ subgraph "clusterAnd#R68-4" {
 ];
 
 "And#R68-4/#B-1303":port1 -> "And#R68-4/#B-1315" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R68-4/#B-1301" -> "And#R68-4/#B-1303" [
+"And#R68-4/#B-1297" -> "And#R68-4/#B-1301" [
+    arrowhead="normalnonebox"
+    label = "#1"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-4/#B-1297" -> "And#R68-4/#B-1299" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -502,6 +512,7 @@ subgraph "clusterAnd#R68-3" {
 ];
 
 "And#R68-3/#B-1304":port1 -> "And#R68-3/#B-1307" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -509,6 +520,7 @@ subgraph "clusterAnd#R68-3" {
 ];
 
 "And#R68-3/#X68-5" -> "And#R68-3/#B-1304" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -516,6 +528,7 @@ subgraph "clusterAnd#R68-3" {
 ];
 
 "And#R68-3/#X68-9" -> "And#R68-3/#X68-5" [
+    arrowhead="normalnonebox"
     label = "#18"
     decorate = true
     color = black
@@ -523,15 +536,15 @@ subgraph "clusterAnd#R68-3" {
 ];
 
 
-// -------------------- figure And#R68-1 --------------------
-// -------- region And#R68-1 ----------
-subgraph "clusterAnd#R68-1" {
-    label = "And#R68-1"
+// -------------------- figure And#R68-2 --------------------
+// -------- region And#R68-2 ----------
+subgraph "clusterAnd#R68-2" {
+    label = "And#R68-2"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R68-1/IRIP ----------
-    "And#R68-1/IRIP" [
+    // -------- block And#R68-2/IRIP ----------
+    "And#R68-2/IRIP" [
         fontsize = "12"
         fontcolor = grey40
         shape = "none"
@@ -540,8 +553,8 @@ subgraph "clusterAnd#R68-1" {
     
 }
 
-// -------- block And#R68-1/#B-1292 ----------
-"And#R68-1/#B-1292" [
+// -------- block And#R68-2/#B-1292 ----------
+"And#R68-2/#B-1292" [
     fillcolor = "/set28/1"
     xlabel = "#B-1292"
     fontsize = "12"
@@ -557,7 +570,7 @@ subgraph "clusterAnd#R68-1" {
     style = "rounded,filled"
 ];
 
-"And#R68-1/IRIP" -> "And#R68-1/#B-1292" [
+"And#R68-2/IRIP" -> "And#R68-2/#B-1292" [
     label = "#0"
     decorate = true
     color = black
@@ -565,15 +578,15 @@ subgraph "clusterAnd#R68-1" {
 ];
 
 
-// -------------------- figure And#R68-2 --------------------
-// -------- region And#R68-2 ----------
-subgraph "clusterAnd#R68-2" {
-    label = "And#R68-2"
+// -------------------- figure And#R68-1 --------------------
+// -------- region And#R68-1 ----------
+subgraph "clusterAnd#R68-1" {
+    label = "And#R68-1"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R68-2/#B-1314 ----------
-    "And#R68-2/#B-1314" [
+    // -------- block And#R68-1/#B-1314 ----------
+    "And#R68-1/#B-1314" [
         fillcolor = "/set28/1"
         xlabel = "#B-1314"
         fontsize = "12"
@@ -597,20 +610,6 @@ subgraph "clusterAnd#R68-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R68-0/#B-1296 ----------
-    "And#R68-0/#B-1296" [
-        xlabel = "#B-1296"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "diamond"
-        label = <<FONT COLOR="black" POINT-SIZE="20">∧</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R68-0/#X68-4 ----------
     "And#R68-0/#X68-4" [
         xlabel = "#X68-4"
@@ -625,10 +624,24 @@ subgraph "clusterAnd#R68-0" {
         height = 0.4
     ];
     
-    // -------- block And#R68-0/#B-1291 ----------
-    "And#R68-0/#B-1291" [
+    // -------- block And#R68-0/#B-1296 ----------
+    "And#R68-0/#B-1296" [
+        xlabel = "#B-1296"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "diamond"
+        label = <<FONT COLOR="black" POINT-SIZE="20">∧</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R68-0/#B-1321 ----------
+    "And#R68-0/#B-1321" [
         fillcolor = "/set28/3"
-        xlabel = "#B-1291"
+        xlabel = "#B-1321"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -638,63 +651,30 @@ subgraph "clusterAnd#R68-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R68-0/#B-1294 ----------
-    "And#R68-0/#B-1294" [
-        fillcolor = "/set28/3"
-        xlabel = "#B-1294"
+    // -------- block And#R68-0/#B-1293 ----------
+    "And#R68-0/#B-1293" [
+        fillcolor = "/set28/7"
+        xlabel = "#B-1293"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Array</FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Const</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
     
-    // -------- block And#R68-0/#B-1289 ----------
-    "And#R68-0/#B-1289" [
-        fillcolor = "/set28/4"
-        xlabel = "#B-1289"
+    // -------- block And#R68-0/#B-1295 ----------
+    "And#R68-0/#B-1295" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-1295"
         fontsize = "12"
         fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
-    // -------- block And#R68-0/#B-1290 ----------
-    "And#R68-0/#B-1290" [
-        fillcolor = "/set28/4"
-        xlabel = "#B-1290"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
-    // -------- block And#R68-0/#B-1298 ----------
-    "And#R68-0/#B-1298" [
-        xlabel = "#B-1298"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "diamond"
-        label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
     ];
     
     // -------- block And#R68-0/#B-1313 ----------
@@ -712,15 +692,32 @@ subgraph "clusterAnd#R68-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R68-0/#B-1321 ----------
-    "And#R68-0/#B-1321" [
+    // -------- block And#R68-0/#B-1290 ----------
+    "And#R68-0/#B-1290" [
+        fillcolor = "/set28/4"
+        xlabel = "#B-1290"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R68-0/#B-1294 ----------
+    "And#R68-0/#B-1294" [
         fillcolor = "/set28/3"
-        xlabel = "#B-1321"
+        xlabel = "#B-1294"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
         label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Labeley</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Array</FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Type</FONT></TD><TD PORT="port0"></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">Initialiser</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">NULL</FONT></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -742,13 +739,26 @@ subgraph "clusterAnd#R68-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R68-0/#B-1300 ----------
-    "And#R68-0/#B-1300" [
-        xlabel = "#B-1300"
+    // -------- block And#R68-0/#B-1291 ----------
+    "And#R68-0/#B-1291" [
+        fillcolor = "/set28/3"
+        xlabel = "#B-1291"
         fontsize = "12"
         fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#=1</FONT>>
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Labeley</FONT></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R68-0/#B-1298 ----------
+    "And#R68-0/#B-1298" [
+        xlabel = "#B-1298"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "diamond"
+        label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
         style = "filled"
         penwidth = 0.0
         fixedsize = true
@@ -756,17 +766,18 @@ subgraph "clusterAnd#R68-0" {
         height = 0.4
     ];
     
-    // -------- block And#R68-0/#B-1295 ----------
-    "And#R68-0/#B-1295" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-1295"
+    // -------- block And#R68-0/#X68-7 ----------
+    "And#R68-0/#X68-7" [
+        xlabel = "#X68-7"
         fontsize = "12"
         fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">InstanceIdentifier</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
     // -------- block And#R68-0/#B-1312 ----------
@@ -784,9 +795,10 @@ subgraph "clusterAnd#R68-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R68-0/#X68-7 ----------
-    "And#R68-0/#X68-7" [
-        xlabel = "#X68-7"
+    // -------- block And#R68-0/#B-1289 ----------
+    "And#R68-0/#B-1289" [
+        fillcolor = "/set28/4"
+        xlabel = "#B-1289"
         fontsize = "12"
         fontcolor = grey40
         shape = "square"
@@ -798,17 +810,18 @@ subgraph "clusterAnd#R68-0" {
         height = 0.4
     ];
     
-    // -------- block And#R68-0/#B-1293 ----------
-    "And#R68-0/#B-1293" [
-        fillcolor = "/set28/7"
-        xlabel = "#B-1293"
+    // -------- block And#R68-0/#B-1300 ----------
+    "And#R68-0/#B-1300" [
+        xlabel = "#B-1300"
         fontsize = "12"
         fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15">Const</FONT></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#=1</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
     // -------- region And#R68-0/And#R68-1 ----------
@@ -817,10 +830,10 @@ subgraph "clusterAnd#R68-0" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        // -------- block And#R68-0/And#R68-1/#B-1292 ----------
-        "And#R68-0/And#R68-1/#B-1292" [
+        // -------- block And#R68-0/And#R68-1/#B-1314 ----------
+        "And#R68-0/And#R68-1/#B-1314" [
             fillcolor = "/set28/1"
-            xlabel = "#B-1292"
+            xlabel = "#B-1314"
             fontsize = "12"
             fontcolor = grey40
             shape = "none"
@@ -835,10 +848,10 @@ subgraph "clusterAnd#R68-0" {
         style = "filled"
         color = antiquewhite3
         fontsize = "15"
-        // -------- block And#R68-0/And#R68-2/#B-1314 ----------
-        "And#R68-0/And#R68-2/#B-1314" [
+        // -------- block And#R68-0/And#R68-2/#B-1292 ----------
+        "And#R68-0/And#R68-2/#B-1292" [
             fillcolor = "/set28/1"
-            xlabel = "#B-1314"
+            xlabel = "#B-1292"
             fontsize = "12"
             fontcolor = grey40
             shape = "none"
@@ -849,7 +862,16 @@ subgraph "clusterAnd#R68-0" {
     
 }
 
+"And#R68-0/#X68-4" -> "And#R68-0/#B-1312" [
+    arrowhead="normalnonebox"
+    label = "#1"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 "And#R68-0/#B-1296" -> "And#R68-0/#B-1300" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -857,49 +879,14 @@ subgraph "clusterAnd#R68-0" {
 ];
 
 "And#R68-0/#B-1296" -> "And#R68-0/#B-1298" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R68-0/#X68-4" -> "And#R68-0/#B-1312" [
-    label = "#1"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1294":port0 -> "And#R68-0/#B-1321" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1289" -> "And#R68-0/#B-1296" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1290" -> "And#R68-0/#B-1292" [
-    label = "#1"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1298" -> "And#R68-0/And#R68-1/#B-1292" [
-    arrowhead="normalnoneodiamond"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1313":port1 -> "And#R68-0/And#R68-2/#B-1314" [
+"And#R68-0/#B-1313":port1 -> "And#R68-0/And#R68-1/#B-1314" [
     arrowhead="normalnoneodot"
     label = "#0"
     decorate = true
@@ -907,7 +894,24 @@ subgraph "clusterAnd#R68-0" {
     fontcolor = black
 ];
 
+"And#R68-0/#B-1290" -> "And#R68-0/#B-1292" [
+    arrowhead="normalnonebox"
+    label = "#1"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-0/#B-1294":port0 -> "And#R68-0/#B-1321" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
 "And#R68-0/#B-1292":port0 -> "And#R68-0/#B-1294" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -915,6 +919,7 @@ subgraph "clusterAnd#R68-0" {
 ];
 
 "And#R68-0/#B-1292":port1 -> "And#R68-0/#B-1295" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -922,34 +927,15 @@ subgraph "clusterAnd#R68-0" {
 ];
 
 "And#R68-0/#B-1292":port3 -> "And#R68-0/#B-1293" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R68-0/#B-1300" -> "And#R68-0/#B-1291" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1312":port1 -> "And#R68-0/#B-1313" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1312":port1 -> "And#R68-0/#B-1289" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R68-0/#B-1312":port1 -> "And#R68-0/#B-1290" [
+"And#R68-0/#B-1298" -> "And#R68-0/And#R68-2/#B-1292" [
+    arrowhead="normalnoneodiamond"
     label = "#0"
     decorate = true
     color = black
@@ -957,7 +943,48 @@ subgraph "clusterAnd#R68-0" {
 ];
 
 "And#R68-0/#X68-7" -> "And#R68-0/#X68-4" [
+    arrowhead="normalnonebox"
     label = "#38"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-0/#B-1312":port1 -> "And#R68-0/#B-1313" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-0/#B-1312":port1 -> "And#R68-0/#B-1289" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-0/#B-1312":port1 -> "And#R68-0/#B-1290" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-0/#B-1289" -> "And#R68-0/#B-1296" [
+    arrowhead="normalnonebox"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R68-0/#B-1300" -> "And#R68-0/#B-1291" [
+    arrowhead="normalnonebox"
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black

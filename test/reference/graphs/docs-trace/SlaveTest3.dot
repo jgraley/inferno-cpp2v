@@ -53,6 +53,7 @@ subgraph "clusterAnd#R2-2" {
 }
 
 "And#R2-2/#X2-3" -> "And#R2-2/#B-19" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -97,6 +98,7 @@ subgraph "clusterAnd#R2-1" {
 }
 
 "And#R2-1/#X2-2" -> "And#R2-1/#B-15" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -173,6 +175,7 @@ subgraph "clusterAnd#R2-0" {
 }
 
 "And#R2-0/#B-17":port0 -> "And#R2-0/#B-22" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -180,6 +183,7 @@ subgraph "clusterAnd#R2-0" {
 ];
 
 "And#R2-0/#B-22":port0 -> "And#R2-0/#B-21" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -187,6 +191,7 @@ subgraph "clusterAnd#R2-0" {
 ];
 
 "And#R2-0/#B-18":port0 -> "And#R2-0/#B-17" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black

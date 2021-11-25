@@ -156,6 +156,24 @@ subgraph "clusterAnd#R50-0" {
         height = 0.4
     ];
     
+    // -------- region And#R50-0/And#R50-3 ----------
+    subgraph "clusterAnd#R50-0/And#R50-3" {
+        label = "And#R50-3"
+        style = "filled"
+        color = antiquewhite3
+        fontsize = "15"
+        // -------- block And#R50-0/And#R50-3/#B-937 ----------
+        "And#R50-0/And#R50-3/#B-937" [
+            fillcolor = "/set28/2"
+            xlabel = "#B-937"
+            fontsize = "12"
+            fontcolor = grey40
+            shape = "none"
+            style = "invisible"
+        ];
+        
+    }
+    
     // -------- region And#R50-0/And#R50-1 ----------
     subgraph "clusterAnd#R50-0/And#R50-1" {
         label = "And#R50-1"
@@ -192,24 +210,6 @@ subgraph "clusterAnd#R50-0" {
         
     }
     
-    // -------- region And#R50-0/And#R50-3 ----------
-    subgraph "clusterAnd#R50-0/And#R50-3" {
-        label = "And#R50-3"
-        style = "filled"
-        color = antiquewhite3
-        fontsize = "15"
-        // -------- block And#R50-0/And#R50-3/#B-937 ----------
-        "And#R50-0/And#R50-3/#B-937" [
-            fillcolor = "/set28/2"
-            xlabel = "#B-937"
-            fontsize = "12"
-            fontcolor = grey40
-            shape = "none"
-            style = "invisible"
-        ];
-        
-    }
-    
 }
 
 "And#R50-0/#B-932":port0 -> "And#R50-0/And#R50-1/#B-935" [
@@ -229,6 +229,7 @@ subgraph "clusterAnd#R50-0" {
 ];
 
 "And#R50-0/#B-932":port2 -> "And#R50-0/#B-934" [
+    arrowhead="normalnonebox"
     label = "#0"
     decorate = true
     color = black
@@ -244,6 +245,7 @@ subgraph "clusterAnd#R50-0" {
 ];
 
 "And#R50-0/#X50-0" -> "And#R50-0/#B-932" [
+    arrowhead="normalnonebox"
     label = "#1"
     decorate = true
     color = black
@@ -251,7 +253,8 @@ subgraph "clusterAnd#R50-0" {
 ];
 
 "And#R50-0/#X50-1" -> "And#R50-0/#X50-0" [
-    label = "#97"
+    arrowhead="normalnonebox"
+    label = "#98"
     decorate = true
     color = black
     fontcolor = black
@@ -400,7 +403,7 @@ subgraph "clusterAnd#R50-0" {
 ];
 
 "#X50-1" -> "#X50-0" [
-    label = "#97"
+    label = "#98"
     decorate = true
     color = black
     fontcolor = black

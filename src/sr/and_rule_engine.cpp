@@ -88,7 +88,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         
     DetermineKeyers( root_plink, master_agents );
     DetermineResiduals( root_agent, master_agents );
-    DetermineNontrivialKeyers();
     
     // Turns out these two are the same
     my_normal_links_unique_by_agent = coupling_keyer_links_all;
@@ -256,28 +255,6 @@ void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
         }
         
         DetermineResiduals( link.GetChildAgent(), master_agents );        
-    }
-}
-
-
-void AndRuleEngine::Plan::DetermineNontrivialKeyers()
-{
-    coupling_keyer_links_nontrivial.clear();
-    for( PatternLink keyer_plink : coupling_keyer_links_all )
-    {
-        bool found_residual_on_same_child_node = false;
-        for( PatternLink residual_plink : coupling_residual_links )
-        {
-            if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
-            {
-                found_residual_on_same_child_node = true;
-                break;
-            }
-        }
-        if( found_residual_on_same_child_node )
-        {
-            coupling_keyer_links_nontrivial.insert( keyer_plink );
-        }
     }
 }
 
@@ -492,8 +469,6 @@ void AndRuleEngine::Plan::Dump()
           Trace(master_boundary_agents) },
         { "coupling_residual_links", 
           Trace(coupling_residual_links) },
-        { "coupling_keyer_links_nontrivial", 
-          Trace(coupling_keyer_links_nontrivial) },
         { "coupling_keyer_links_all", 
           Trace(coupling_keyer_links_all) },
         { "my_master_boundary_links", 
@@ -569,11 +544,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         ASSERT( knowledge->domain.count(link) > 0 )(link)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
 
-        TRACE("Comparing normal link ")(link)
-             (" keyer? %d residual? %d master? %d\n", 
-             plan.coupling_keyer_links_nontrivial.count( (PatternLink)link ), 
-             plan.coupling_residual_links.count( (PatternLink)link ), 
-             plan.my_master_boundary_links.count( (PatternLink)link ) );
+        TRACE("Comparing normal link ")(link)("\n");
         ASSERT( link.GetChildX() );
                              
         DecidedCompare(link);      
@@ -1009,7 +980,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
     
 	TRACE("   Interior (my agents/links):\n");    
     figure.interior_agents = agents_lambda( plan.parent_links_to_my_normal_agents,
-                                            plan.coupling_keyer_links_nontrivial,
+                                            plan.coupling_keyer_links_all,
                                             plan.coupling_residual_links );
 	TRACE("   Exterior (master boundary agents/links):\n");    
     figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_master_boundary_agents,
