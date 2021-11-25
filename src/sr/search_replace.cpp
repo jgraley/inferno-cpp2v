@@ -61,7 +61,7 @@ void CompareReplace::Plan::PlanningStageThree()
     // Third, create subordinate AndRuleEngines
     scr_engine->PlanningStageThree( {} );
         
-    map<const Agent *, string> agent_plans;
+    map<const Agent *, StringNoQuotes> agent_plans;
     for( auto p : agent_phases )
     {
         const Agent *agent = p.first;

@@ -724,7 +724,7 @@ string AgentCommon::GetGraphId() const
 
 string AgentCommon::GetPlanAsString() const
 {
-    map<string, string> plan_as_strings = 
+    map<string, StringNoQuotes> plan_as_strings = 
     {
         { "master_scr_engine", 
           Trace(master_scr_engine) },

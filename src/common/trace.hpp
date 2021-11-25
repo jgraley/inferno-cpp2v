@@ -34,8 +34,21 @@ using namespace std;
     
 ////////////////////////// Trace() free functions //////////////////////////
     
+class StringNoQuotes
+{
+public:
+    StringNoQuotes() {}
+    StringNoQuotes(string s) : value(s) {}
+    StringNoQuotes& operator=(string s) { value=s; return *this; }
+    operator string() { return value; }
+    
+private:
+    string value;
+};    
+    
 string Trace(const Traceable &t); 
 string Trace(string s); 
+string Trace(StringNoQuotes snq); 
 string Trace(bool b); 
 string Trace(int i); 
 string Trace(size_t i); 

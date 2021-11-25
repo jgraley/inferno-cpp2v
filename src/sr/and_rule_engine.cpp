@@ -447,7 +447,7 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
 
 void AndRuleEngine::Plan::Dump()
 {
-    map<string, string> plan_as_strings = 
+    map<string, StringNoQuotes> plan_as_strings = 
     {
         { "root_plink", 
           Trace(root_plink) },

@@ -29,6 +29,13 @@ string Trace(string s)
     return "\""+s+"\""; // quoted so we can spot an empty string TODO un-escape
 }
 
+
+string Trace(StringNoQuotes snq)
+{
+    return (string)snq;
+}
+
+
 string Trace(bool b)
 {    
     return b?string("true"):string("false");
