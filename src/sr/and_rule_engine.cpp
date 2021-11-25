@@ -51,7 +51,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     root_plink( root_plink_ ),
     root_pattern( root_plink.GetPattern() ),
     root_agent( root_plink.GetChildAgent() ),
-    master_plinks( master_plinks_ )
+    master_plinks( master_plinks_ ),
+    master_keyer_plinks( master_keyer_plinks_ )
 {    
     INDENT("P");
     TRACE(algo->GetTrace())(" planning\n");
@@ -90,18 +91,15 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // Turns out these two are the same
     my_normal_links_unique_by_agent = coupling_keyer_links_all;
 
-    // Well, obviously...
-    ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
-    
-    ConfigureAgents();       
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_nontrivial, master_keyer_plinks );         
-    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );   
-    
     master_boundary_keyer_links.clear();
-    for( PatternLink plink : master_keyer_plinks_ )
+    for( PatternLink plink : master_keyer_plinks )
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
+
+    Dump();
+
+    // Well, obviously...
+    ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
     
     // Trivial problem checks   
     if( my_normal_links.empty() ) 
@@ -117,8 +115,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( !my_normal_agents.empty() );
     }
 
-    Dump();
-
+    ConfigureAgents();       
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_nontrivial, master_keyer_plinks );         
+    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );   
+        
     // For CSP solver only...
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyFullConstraints(constraints_list);
@@ -397,6 +398,19 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
 
 void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
+#ifdef CHECK_FOR_MASTER_KEYERS
+    // First do some checking
+    for( PatternLink residual_plink : my_master_boundary_links )
+    {
+        Agent *agent = residual_plink.GetChildAgent();
+        bool found_keyer = false;
+        for( PatternLink keyer_plink : master_boundary_keyer_links )
+            if( keyer_plink.GetChildAgent()==agent )
+                found_keyer = true;
+        ASSERT( found_keyer )("Master boundary residual plink ")(residual_plink)(" has no keyer\n");
+    }
+#endif
+    
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
         CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::SystemicConstraint::VariableFlags
