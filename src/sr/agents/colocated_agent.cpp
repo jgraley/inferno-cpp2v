@@ -58,17 +58,18 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
         }
     };
     
-    ASSERT( common_xlink )("Empty query!");
+    if( !common_xlink )
+        return; // we said "false" in NLQRequiresKeyer() so have to accept disjoint query 
     
     // Now that the common xlink is known to be really common,
     // we can apply the usual checks including PR check and allowing for MMAX
-    if( common_xlink != XLink::MMAX_Link )
-    {
-        if( !IsLocalMatch( common_xlink.GetChildX().get() ) ) 
-            throw PreRestrictionMismatch();
+    if( common_xlink == XLink::MMAX_Link )
+        return;
 
-        RunColocatedQuery(common_xlink);
-    }    
+    if( !IsLocalMatch( common_xlink.GetChildX().get() ) ) 
+        throw PreRestrictionMismatch();
+
+    RunColocatedQuery(common_xlink);    
 }                            
 
 

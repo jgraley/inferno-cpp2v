@@ -204,25 +204,8 @@ void SystemicConstraint::Test( Assignments frees_map )
 
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by NLQ.
-    SR::SolutionMap required_links;
-    list<Value>::const_iterator forceit = forces.begin();
-    for( const VariableRecord &var : plan.all_variables )
-    {
-        switch( var.flags.freedom )
-        {
-        case Freedom::FORCED:
-            ASSERT( forces_map.count(var.id)==1 )
-                  ("FORCED ")(var)(" not found in ")(forces_map);
-            required_links[var.id] = forces_map.at(var.id);
-            break;
-        
-        case Freedom::FREE:
-            if( frees_map.count(var.id)!=0 )
-                required_links[var.id] = frees_map.at(var.id);
-            break;
-        }        
-    }    
-    //required_links = UnionOfSolo(forces_map, frees_map);
+    SR::SolutionMap full_map;
+    full_map = UnionOfSolo(forces_map, frees_map);
 
     //TRACE("Now ready to query the agent, with these required links:\n")
     //     (required_links)("\n");
@@ -234,17 +217,17 @@ void SystemicConstraint::Test( Assignments frees_map )
         {
             // First check any coupling at this pattern node
             //TRACE("Coupling query\n");
-            plan.agent->RunCouplingQuery( &required_links );
+            plan.agent->RunCouplingQuery( &full_map );
         }
                       
-        if( plan.action==Action::FULL && required_links.size() > 0 )
+        if( plan.action==Action::FULL )
         {
             //TRACE("Normal linked query\n");
             // Use a normal-linked query on our underlying agent.
             // We only need one match to know that required_links_list are good, 
             // i.e. to run once without throuwing a mismatch. Don't need
             // the returned query.
-            plan.agent->RunNormalLinkedQuery( &required_links, knowledge );    
+            plan.agent->RunNormalLinkedQuery( &full_map, knowledge );    
         }
     }            
 }
