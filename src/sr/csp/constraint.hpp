@@ -59,7 +59,7 @@ public:
     /**
      * Write info about the problem to log via TRACE
      */
-    virtual void TraceProblem() const = 0;
+    virtual void Dump() const = 0;
         
     /**
      * Set the values of the forced varibles

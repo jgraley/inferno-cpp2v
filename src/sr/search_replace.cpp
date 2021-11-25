@@ -68,8 +68,8 @@ void CompareReplace::Plan::PlanningStageThree()
         agent_plans[agent] = agent->GetPlanAsString();
     }    
 
-    TRACE("=============================================== ")
-         (*this)(":\n")(agent_plans)("\n");
+    TRACE("=============================================== AGENTS:")
+         (agent_plans)("\n");
 }                                      
 
 

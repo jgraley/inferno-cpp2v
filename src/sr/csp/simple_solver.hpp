@@ -82,7 +82,7 @@ private:
     };
 
     tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
-    void TraceProblem() const;
+    void Dump() const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlanVariablesUsed();

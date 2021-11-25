@@ -64,7 +64,7 @@ public:
     /**
      * Write info about the problem to log via TRACE
      */
-    virtual void TraceProblem() const = 0;
+    virtual void Dump() const = 0;
 
     /**
      * Run the solver to exhaustion (i.e. it will discover all the

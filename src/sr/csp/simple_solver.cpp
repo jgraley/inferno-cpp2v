@@ -76,7 +76,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
     holder(nullptr),
     my_index( next_index++ )
 {
-    TraceProblem();
+    Dump();
     CheckPlanVariablesUsed();    
 }
                         
@@ -336,11 +336,11 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 }
 
 
-void SimpleSolver::TraceProblem() const
+void SimpleSolver::Dump() const
 {
     TRACE("SimpleSolver SS%d; %d constraints:", my_index, plan.constraints.size());
     for( shared_ptr<Constraint> c : plan.constraints )    
-        c->TraceProblem();   
+        c->Dump();   
     TRACEC("%d variables:", plan.variables.size());        
     for( VariableId var : plan.variables )
         TRACEC(var)("\n");

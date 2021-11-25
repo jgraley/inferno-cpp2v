@@ -111,11 +111,9 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
             my_plinks.insert( plink );
 
     // Need the replace plinks in the same order that BuildReplace() walks the tree
-    TRACE("Making ordered replace plinks\n");
     for( PatternLink plink : visible_replace_plinks_postorder )
         if( master_plinks.count(plink) == 0 ) // exclude by plink
         {
-            TRACEC(plink)("\n");
             my_replace_plinks_postorder.push_back( plink );
             if( dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
                 my_subordinate_plinks_postorder.push_back(plink);
@@ -245,9 +243,7 @@ void SCREngine::Plan::PlanReplace()
     for( PatternLink plink : my_replace_plinks_postorder )
     {
         Agent *agent = plink.GetChildAgent();
-        if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) ) // works for old solver, but leaves loose couplings in CSP solver see #387
-        //if( all_keyer_plinks.count(plink) == 0 )  // No worky, because different links to the same agent differ
-        //if( all_keyed_agents.count(agent)==0 )
+        if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) )
         {
             InsertSolo( all_keyer_plinks, plink );
             agent->ConfigureCoupling( algo, plink, {} );

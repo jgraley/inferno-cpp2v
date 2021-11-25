@@ -157,7 +157,7 @@ list<VariableId> SystemicConstraint::GetRequiredVariables() const
 }
 
 
-void SystemicConstraint::TraceProblem() const
+void SystemicConstraint::Dump() const
 {
     TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.all_variables.size(), GetFreeDegree());
     for( auto var : plan.all_variables )

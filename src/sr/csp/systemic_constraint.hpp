@@ -80,7 +80,7 @@ private:
     int GetFreeDegree() const;
     list<VariableId> GetFreeVariables() const;
     list<VariableId> GetRequiredVariables() const;
-    void TraceProblem() const;
+    void Dump() const;
     virtual void Start( const Assignments &forces, 
                         const SR::TheKnowledge *knowledge );    
     void Test( Assignments frees_map );

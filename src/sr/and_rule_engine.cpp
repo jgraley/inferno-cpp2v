@@ -475,8 +475,6 @@ void AndRuleEngine::Plan::Dump()
           Trace(my_evaluator_abnormal_engines) },
         { "my_multiplicity_engines", 
           Trace(my_multiplicity_engines) },
-        { "my_constraints", 
-          Trace(my_constraints) },
         { "master_boundary_agents", 
           Trace(master_boundary_agents) },
         { "coupling_residual_links", 

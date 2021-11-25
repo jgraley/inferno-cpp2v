@@ -105,7 +105,6 @@ public:
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        unordered_map< PatternLink, shared_ptr<CSP::Constraint> > my_constraints;
         unordered_set<Agent *> master_boundary_agents;
         unordered_set<PatternLink> coupling_residual_links;
         unordered_set<PatternLink> coupling_keyer_links_nontrivial; // Only where child X has at least one residual link
