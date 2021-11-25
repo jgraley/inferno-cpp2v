@@ -116,7 +116,7 @@ public:
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
-        list<PatternLink> normal_links_ordered;
+        list<PatternLink> normal_and_boundary_links_preorder;
         
     private: // working variables in plan construction
         unordered_set<Agent *> reached_agents;

@@ -27,8 +27,6 @@
 
 //#define NLQ_TEST
 
-#define FIX_ORDERED_NORMALS
-
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -74,12 +72,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     reached_links.clear();    
     PopulateMasterBoundaryStuff( root_plink, 
                                  master_agents );
-#ifdef FIX_ORDERED_NORMALS
-    unordered_set<PatternLink> my_normal_links_check;
-    for( PatternLink plink : normal_links_ordered )
-        InsertSolo(my_normal_links_check, plink); // normal_links_ordered should have no duplicates
-    ASSERT( my_normal_links_check == my_normal_links ); // and should match
-#endif
 
     // Collect together the parent links to agents
     for( PatternLink plink : my_normal_links )
@@ -160,10 +152,8 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
     // Note: here, we WILL see root if root is a master agent (i.e. trivial pattern)
     if( master_agents.count( agent ) )
         my_master_boundary_links.insert( link );
-#ifdef FIX_ORDERED_NORMALS
-    else
-#endif
-        normal_links_ordered.push_back( link );    
+
+    normal_and_boundary_links_preorder.push_back( link );    
 
     if( reached_agents.count(agent) > 0 )    
         return; 
@@ -442,7 +432,7 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
     // take the same route we do with DecidedCompare(). Need to remove FORCED agents
     // though.
     list<PatternLink> free_normal_links_ordered;
-    for( PatternLink link : normal_links_ordered )
+    for( PatternLink link : normal_and_boundary_links_preorder )
     {
         if( link != root_plink )
             free_normal_links_ordered.push_back( link );
@@ -498,8 +488,8 @@ void AndRuleEngine::Plan::Dump()
           Trace(parent_links_to_my_normal_agents) },
         { "parent_residual_links_to_master_boundary_agents",
           Trace(parent_residual_links_to_master_boundary_agents) },
-        { "normal_links_ordered", 
-          Trace(normal_links_ordered) }
+        { "normal_and_boundary_links_preorder", 
+          Trace(normal_and_boundary_links_preorder) }
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");
