@@ -85,7 +85,7 @@ private:
     void Dump() const;
     void ShowBestAssignment();
     void TimedOperations();
-    void CheckPlanVariablesUsed();
+    void CheckPlan() const;
     set<VariableId> GetAllAffected( ConstraintSet constraints );
 
     // Structural

@@ -27,6 +27,8 @@
 
 //#define NLQ_TEST
 
+#define FIX_ORDERED_NORMALS
+
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -71,7 +73,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     reached_agents.clear();
     reached_links.clear();    
     PopulateMasterBoundaryStuff( root_plink, 
-                        master_agents );
+                                 master_agents );
+#ifdef FIX_ORDERED_NORMALS
+    unordered_set<PatternLink> my_normal_links_check;
+    for( PatternLink plink : normal_links_ordered )
+        InsertSolo(my_normal_links_check, plink); // normal_links_ordered should have no duplicates
+    ASSERT( my_normal_links_check == my_normal_links ); // and should match
+#endif
 
     // Collect together the parent links to agents
     for( PatternLink plink : my_normal_links )
@@ -117,6 +125,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( !my_normal_agents.empty() );
     }
 
+    Dump();
+
     // For CSP solver only...
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyFullConstraints(constraints_list);
@@ -124,11 +134,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateCSPSolver(constraints_list);
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
+    solver->Dump();    
+    solver->CheckPlan();   
 
     // For old solver only...
-    conj = make_shared<Conjecture>(my_normal_agents, root_agent);   
-    
-    Dump();
+    conj = make_shared<Conjecture>(my_normal_agents, root_agent);       
 }
 
 
@@ -150,8 +160,10 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
     // Note: here, we WILL see root if root is a master agent (i.e. trivial pattern)
     if( master_agents.count( agent ) )
         my_master_boundary_links.insert( link );
-
-    normal_links_ordered.push_back( link );    
+#ifdef FIX_ORDERED_NORMALS
+    else
+#endif
+        normal_links_ordered.push_back( link );    
 
     if( reached_agents.count(agent) > 0 )    
         return; 
@@ -491,7 +503,6 @@ void AndRuleEngine::Plan::Dump()
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");
-    solver->Dump();
 }
 
 

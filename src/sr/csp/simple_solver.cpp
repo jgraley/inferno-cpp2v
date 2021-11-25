@@ -76,7 +76,6 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
     holder(nullptr),
     my_index( next_index++ )
 {
-    CheckPlanVariablesUsed();    
 }
                         
 
@@ -395,7 +394,7 @@ void SimpleSolver::TimedOperations()
 }
 
 
-void SimpleSolver::CheckPlanVariablesUsed()
+void SimpleSolver::CheckPlan() const
 {
     set<VariableId> variables_used;
     for( shared_ptr<Constraint> c : plan.constraints )

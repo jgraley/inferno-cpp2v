@@ -62,6 +62,11 @@ public:
      * Write info about the problem to log via TRACE
      */
     void Dump() const;
+
+    /**
+     * Check for coherence in the problem we've been asked to plan for
+     */
+    void CheckPlan() const;
     
 private:
     void ReportSolution( const Solution &solution );

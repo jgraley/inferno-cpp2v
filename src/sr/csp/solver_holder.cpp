@@ -114,3 +114,8 @@ void SolverHolder::Dump() const
     solver->Dump();
 }
 
+
+void SolverHolder::CheckPlan() const
+{
+    solver->CheckPlan();
+}

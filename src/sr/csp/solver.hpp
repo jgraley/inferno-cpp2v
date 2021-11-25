@@ -67,6 +67,11 @@ public:
     virtual void Dump() const = 0;
 
     /**
+     * Check for coherence in the problem we've been asked to plan for
+     */
+    virtual void CheckPlan() const = 0;
+
+    /**
      * Run the solver to exhaustion (i.e. it will discover all the
      * solutions) given an initial domain. Solutions will be reported
      * back to the supplied holder class.
