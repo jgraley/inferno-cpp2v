@@ -235,11 +235,7 @@ void SCREngine::Plan::PlanReplace()
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
-        
-    set<Agent *> all_keyed_agents;
-    for( PatternLink plink : all_keyer_plinks )
-        all_keyed_agents.insert( plink.GetChildAgent() );
-        
+
     for( PatternLink plink : my_replace_plinks_postorder )
     {
         Agent *agent = plink.GetChildAgent();
@@ -247,7 +243,6 @@ void SCREngine::Plan::PlanReplace()
         {
             InsertSolo( all_keyer_plinks, plink );
             agent->ConfigureCoupling( algo, plink, {} );
-            all_keyed_agents.insert(agent);
         }
     }
 }
