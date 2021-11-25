@@ -27,6 +27,8 @@
 
 //#define NLQ_TEST
 
+#define CHECK_FOR_MASTER_KEYERS
+
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -117,7 +119,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
     ConfigureAgents();       
     unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_nontrivial, master_keyer_plinks );         
+    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );   
         
     // For CSP solver only...
