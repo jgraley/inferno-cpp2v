@@ -34,9 +34,9 @@ public:
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
                   const list<VariableId> *variables = nullptr );
 
-    void Run( ReportageObserver *holder, 
-              const Assignments &forces,
-              const SR::TheKnowledge *knowledge );
+    virtual void Start( const Assignments &forces,
+                        const SR::TheKnowledge *knowledge );
+    virtual void Run( ReportageObserver *holder );
 
 private:
     typedef set<shared_ptr<Constraint>> ConstraintSet;

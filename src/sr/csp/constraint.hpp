@@ -34,27 +34,20 @@ class Constraint : public Traceable
 public:
     Constraint() {}
     virtual ~Constraint() {}
-
-    /**
-     * Get the degree of the constraint.
-     * 
-     * @return The constraint's degree.
-     */
-    virtual int GetFreeDegree() const = 0;
-    
+  
     /**
      * Get the free variables.
      * 
      * @return A list of free variables affecteed by this constraint. Size equals the return from GetFreeDegree()
      */
-    virtual list<VariableId> GetFreeVariables() const = 0;
+    virtual const list<VariableId> &GetFreeVariables() const = 0;
     
     /**
      * Get the free variables that must be assigned when calling Test.
      * 
      * @return A list of free variables required by Test().
      */
-    virtual list<VariableId> GetRequiredVariables() const = 0;
+    virtual const list<VariableId> &GetRequiredFreeVariables() const = 0;
 
     /**
      * Write info about the problem to log via TRACE

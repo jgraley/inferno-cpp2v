@@ -7,6 +7,8 @@
 
 using namespace CSP;
 
+#define NEW_CORO_ORDER
+
 
 SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
     solver( solver_ )
@@ -25,16 +27,20 @@ SolverHolder::~SolverHolder()
 void SolverHolder::Start( const Assignments &forces,
                           const SR::TheKnowledge *knowledge )
 {
+    solver->Start( forces, knowledge );    
+
 #ifdef COROUTINE_HOLDER
     ReapSource();
     if( source )
         delete source; // will unwind any stack frames using an exception
+    
     auto lambda = [&](Coroutine::push_type& sink_)
-    {
+    {        
         sink = &sink_;
+        (*sink)( {} ); // Yield so we don't do "real work" until GetNextSolution()
         try
-        {
-            solver->Run( this, forces, knowledge);
+        {            
+            solver->Run( this );
         }
         catch(const exception& e)
         {
@@ -43,6 +49,7 @@ void SolverHolder::Start( const Assignments &forces,
         }
         sink = nullptr;
     };
+    
     source = new Coroutine::pull_type(lambda);    
     MaybeRethrow();
 #else
@@ -56,11 +63,17 @@ bool SolverHolder::GetNextSolution( Solution *solution )
 {
 #ifdef COROUTINE_HOLDER
     ASSERT( source );
+    // Yield to solver first so that the portion of the solver's
+    // work done during this call to GetNextSolution() corresponds to 
+    // the solution (or exception, or completion) we return from this 
+    // call. We prefer not to let solver run ahead. This is so the logs 
+    // etc are easier to understand. We're not in the business of 
+    // seeking concurrancy. See #393
+    (*source)();
     ReapSource();
     if( !source )
         return false;
     *solution = source->get();
-    (*source)();
     MaybeRethrow();
     return true;
 #else

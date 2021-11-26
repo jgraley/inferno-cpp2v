@@ -77,9 +77,8 @@ public:
                                  VariableQueryLambda vql );
     
 private:
-    int GetFreeDegree() const;
-    list<VariableId> GetFreeVariables() const;
-    list<VariableId> GetRequiredVariables() const;
+    const list<VariableId> &GetFreeVariables() const;
+    const list<VariableId> &GetRequiredFreeVariables() const;
     void Dump() const;
     virtual void Start( const Assignments &forces, 
                         const SR::TheKnowledge *knowledge );    
@@ -109,6 +108,9 @@ private:
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
         list<VariableRecord> all_variables;
+        int free_degree;
+        list<VariableId> free_variable_ids;
+        list<VariableId> required_free_variable_ids;
     } plan;
     
     list<Value> forces;

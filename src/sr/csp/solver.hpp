@@ -62,6 +62,20 @@ public:
     virtual ~Solver();
     
     /**
+     * Prepare to solve.
+     */
+    virtual void Start( const Assignments &forces,
+                        const SR::TheKnowledge *knowledge ) = 0;
+                      
+    /**
+     * Run the solver to exhaustion (i.e. it will discover all the
+     * solutions). Solutions will be reported back to the supplied holder class.
+     * 
+     * @param holder [inout] solutions reported to this object via `ReportSolution()`
+     */
+    virtual void Run( ReportageObserver *holder ) = 0;
+
+    /**
      * Write info about the problem to log via TRACE
      */
     virtual void Dump() const = 0;
@@ -70,19 +84,6 @@ public:
      * Check for coherence in the problem we've been asked to plan for
      */
     virtual void CheckPlan() const = 0;
-
-    /**
-     * Run the solver to exhaustion (i.e. it will discover all the
-     * solutions) given an initial domain. Solutions will be reported
-     * back to the supplied holder class.
-     * 
-     * @param holder [inout] solutions reported to this object via `ReportSolution()`
-     * 
-     * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
-     */
-    virtual void Run( ReportageObserver *holder, 
-                      const Assignments &forces,
-                      const SR::TheKnowledge *knowledge ) = 0;
 };
 
 };

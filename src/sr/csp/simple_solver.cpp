@@ -79,23 +79,27 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
 }
                         
 
-void SimpleSolver::Run( ReportageObserver *holder_, 
-                        const Assignments &forces,
-                        const SR::TheKnowledge *knowledge_ )
+void SimpleSolver::Start( const Assignments &forces,
+                          const SR::TheKnowledge *knowledge_ )
 {
     TRACE("Simple solver begins\n");
     INDENT("S");
     knowledge = knowledge_;
-    ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
-    ScopedAssign<ReportageObserver *> sa(holder, holder_);
-    ASSERT( holder );
 
     // Tell all the constraints about the forces
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
         c->Start( forces, knowledge );
-        
-    assignments.clear();    
+}
+
     
+void SimpleSolver::Run( ReportageObserver *holder_ )
+{
+    ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
+    ScopedAssign<ReportageObserver *> sa(holder, holder_);
+    ASSERT( holder );
+
+    assignments.clear();    
+
     // Do a test with all constraints but no assignments (=free variables), so forced variables 
     // will be tested. From here on we can test only constraints affected by changed assignments.
     TRACE("testing\n");
@@ -301,7 +305,7 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
     for( shared_ptr<Constraint> c : to_test )
     {                  
         int required_frees_assigned = 0;
-        list<VariableId> required_vars = c->GetRequiredVariables();
+        list<VariableId> required_vars = c->GetRequiredFreeVariables();
         for( VariableId rv : required_vars )
             if( assigns.count(rv) > 0 )
                 required_frees_assigned++;

@@ -66,6 +66,31 @@ SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
         ASSERT( residual_plink.GetChildAgent() == agent );
     
     RunVariableQueries( vql );
+    
+    for( auto var : all_variables )
+    {
+        if( var.flags.freedom == Freedom::FREE )
+            free_variable_ids.push_back( var.id );
+    }
+
+    for( auto var : all_variables )
+    {
+        // Only need to report FREE variables as being required
+        if( var.flags.freedom != Freedom::FREE )
+            continue;
+             
+        switch( var.kind )
+        {
+        case Kind::KEYER: 
+            if( agent->NLQRequiresKeyer() )
+                required_free_variable_ids.push_back( var.id );
+            break;
+        case Kind::RESIDUAL:
+            break;
+        case Kind::CHILD:
+            break;
+        }        
+    }
 }
 
 
@@ -108,58 +133,21 @@ string SystemicConstraint::Plan::GetTrace() const
 }
 
 
-int SystemicConstraint::GetFreeDegree() const
-{
-    int free_degree = 0;
-    for( auto var : plan.all_variables )
-    {
-        if( var.flags.freedom == Freedom::FREE )
-            free_degree++;
-    }
-    return free_degree;
+const list<VariableId> &SystemicConstraint::GetFreeVariables() const
+{ 
+    return plan.free_variable_ids;
 }
 
 
-list<VariableId> SystemicConstraint::GetFreeVariables() const
+const list<VariableId> &SystemicConstraint::GetRequiredFreeVariables() const
 { 
-    list<VariableId> free_vars;
-    for( auto var : plan.all_variables )
-    {
-        if( var.flags.freedom == Freedom::FREE )
-            free_vars.push_back( var.id );
-    }
-    return free_vars;
-}
-
-
-list<VariableId> SystemicConstraint::GetRequiredVariables() const
-{ 
-    list<VariableId> required_free_vars;
-    for( auto var : plan.all_variables )
-    {
-        // Only need to report FREE variables as being required
-        if( var.flags.freedom != Freedom::FREE )
-            continue;
-             
-        switch( var.kind )
-        {
-        case Kind::KEYER: 
-            if( plan.agent->NLQRequiresKeyer() )
-                required_free_vars.push_back( var.id );
-            break;
-        case Kind::RESIDUAL:
-            break;
-        case Kind::CHILD:
-            break;
-        }        
-    }
-    return required_free_vars;
+    return plan.required_free_variable_ids;
 }
 
 
 void SystemicConstraint::Dump() const
 {
-    TRACE("Degree %d free degree %d\n", plan.all_variables.size(), GetFreeDegree());
+    TRACE("Degree %d free degree %d\n", plan.all_variables.size(), plan.free_variable_ids.size());
     for( auto var : plan.all_variables )
     {
         TRACEC(var)("\n");
@@ -250,7 +238,7 @@ string SystemicConstraint::GetTrace() const
         break;
     }
 
-    s += SSPrintf(" req=%d/%d", GetRequiredVariables().size(), GetFreeVariables().size());
+    s += SSPrintf(" req=%d/%d", plan.free_variable_ids.size(), plan.required_free_variable_ids.size());
 
     s += ")";
     return s;
