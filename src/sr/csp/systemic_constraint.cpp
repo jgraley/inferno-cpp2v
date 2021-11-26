@@ -69,15 +69,11 @@ SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
     
     for( auto var : all_variables )
     {
-        if( var.flags.freedom == Freedom::FREE )
-            free_variable_ids.push_back( var.id );
-    }
-
-    for( auto var : all_variables )
-    {
         // Only need to report FREE variables as being required
         if( var.flags.freedom != Freedom::FREE )
             continue;
+             
+        free_variable_ids.push_back( var.id );
              
         switch( var.kind )
         {
