@@ -29,7 +29,8 @@ typedef Assignments Solution;
 
 /** Implements a systemic constraint as discussed in #107
  */
-class Constraint : public Traceable
+class Constraint : public Traceable,
+                   public SerialNumber
 {
 public:
     Constraint() {}
@@ -48,11 +49,6 @@ public:
      * @return A list of free variables required by Test().
      */
     virtual const list<VariableId> &GetRequiredFreeVariables() const = 0;
-
-    /**
-     * Write info about the problem to log via TRACE
-     */
-    virtual void Dump() const = 0;
         
     /**
      * Set the values of the forced varibles
@@ -71,6 +67,13 @@ public:
      * are ignored.
      */
     virtual void Test( Assignments frees_map ) = 0;        
+    
+    string GetTrace() const;
+
+    /**
+     * Write info about the problem to log via TRACE
+     */
+    virtual void Dump() const = 0;
 };
 
 };

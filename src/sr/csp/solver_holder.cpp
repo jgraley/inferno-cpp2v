@@ -122,13 +122,21 @@ void SolverHolder::MaybeRethrow()
 #endif
 
 
+string SolverHolder::GetTrace() const
+{
+    return GetName() + "(" + (solver?solver->GetTrace():"") + ")";
+}
+
+
 void SolverHolder::Dump() const
 {
+    ASSERT( solver );
     solver->Dump();
 }
 
 
 void SolverHolder::CheckPlan() const
 {
+    ASSERT( solver );
     solver->CheckPlan();
 }

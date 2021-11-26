@@ -13,8 +13,6 @@ class TheKnowledge;
 
 namespace CSP
 {     
-class SolverHolderReportInterface;
-
 /** Interface class for constraint problem solvers. 
  * 
  * This class is unstated - i.e.
@@ -26,7 +24,8 @@ class SolverHolderReportInterface;
  * to "just deal with it". This class has no idea how that will happen
  * but hopes it will be both fun and safe.
  */
-class Solver : public Traceable
+class Solver : public Traceable,
+               public SerialNumber
 {
 public:
 
@@ -74,6 +73,8 @@ public:
      * @param holder [inout] solutions reported to this object via `ReportSolution()`
      */
     virtual void Run( ReportageObserver *holder ) = 0;
+
+    string GetTrace() const;
 
     /**
      * Write info about the problem to log via TRACE

@@ -82,11 +82,13 @@ private:
     };
 
     tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
-    void Dump() const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;
     set<VariableId> GetAllAffected( ConstraintSet constraints );
+
+    void Dump() const;
+
 
     // Structural
     ReportageObserver *holder;    
@@ -97,9 +99,6 @@ private:
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;
-    
-    const int my_index;
-    static int next_index;
 };
 
 };

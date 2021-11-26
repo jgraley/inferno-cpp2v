@@ -79,7 +79,6 @@ public:
 private:
     const list<VariableId> &GetFreeVariables() const;
     const list<VariableId> &GetRequiredFreeVariables() const;
-    void Dump() const;
     virtual void Start( const Assignments &forces, 
                         const SR::TheKnowledge *knowledge );    
     void Test( Assignments frees_map );
@@ -117,7 +116,7 @@ private:
     Assignments forces_map;
     const SR::TheKnowledge *knowledge;
     
-    virtual string GetTrace() const;
+    void Dump() const;
 };
 
 };

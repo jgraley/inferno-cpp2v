@@ -59,6 +59,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     INDENT("P");
     TRACE(algo->GetTrace())(" planning\n");
     
+    // ------------------ Fill in the plan ---------------------
     master_agents.clear();
     for( PatternLink plink : master_plinks )
         master_agents.insert( plink.GetChildAgent() );
@@ -97,8 +98,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
 
+    // ------------------ Log it ---------------------
     Dump();
 
+    // ------------------ Check it ---------------------
     // Well, obviously...
     ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
     
@@ -116,11 +119,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( !my_normal_agents.empty() );
     }
 
-    ConfigureAgents();       
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
-    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );   
-        
+    // ------------------ Set up CSP/old solver ---------------------
     // For CSP solver only...
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyFullConstraints(constraints_list);
@@ -133,6 +132,15 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
     // For old solver only...
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);       
+
+    // ------------------ Configure subordinates ---------------------
+    // Do this last to keep all the rest of the planning trace/dumps
+    // all together in the same pre-order sequence instead of mixed pre 
+    // and post order
+    ConfigureAgents();       
+    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
+    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );          
 }
 
 
@@ -905,8 +913,7 @@ const unordered_set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
 
 string AndRuleEngine::GetTrace() const
 {
-    string s = Traceable::GetName() + GetSerialString();
-    return s;
+    return GetName() + GetSerialString();
 }
 
 

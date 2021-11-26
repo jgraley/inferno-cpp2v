@@ -141,16 +141,6 @@ const list<VariableId> &SystemicConstraint::GetRequiredFreeVariables() const
 }
 
 
-void SystemicConstraint::Dump() const
-{
-    TRACE("Degree %d free degree %d\n", plan.all_variables.size(), plan.free_variable_ids.size());
-    for( auto var : plan.all_variables )
-    {
-        TRACEC(var)("\n");
-    }    
-}
-
-
 void SystemicConstraint::Start( const Assignments &forces_map_, 
                                 const SR::TheKnowledge *knowledge_ )
 {
@@ -217,25 +207,24 @@ void SystemicConstraint::Test( Assignments frees_map )
 }
 
 
-string SystemicConstraint::GetTrace() const
+void SystemicConstraint::Dump() const
 {
-    string s = string("SystemicConstraint(");
-    
-    s += plan.agent->GetTrace() + ": ";
-    
+    TRACE("Degree %d ", 
+          plan.all_variables.size());
+        
     switch( plan.action )
     {
     case Action::FULL:
-        s += "FULL";
+        TRACEC("FULL ");
         break;
     
     case Action::COUPLING:
-        s += "COUPLING";
+        TRACEC("COUPLING ");
         break;
     }
 
-    s += SSPrintf(" req=%d/%d", plan.free_variable_ids.size(), plan.required_free_variable_ids.size());
-
-    s += ")";
-    return s;
+    TRACEC("Agent=")(plan.agent)("\n");
+    TRACEC("Variables: ")(plan.all_variables)("\n");
+    TRACEC("Free var ids: ")(plan.free_variable_ids)("\n");
+    TRACEC("Required free var ids: ")(plan.required_free_variable_ids)("\n");
 }      

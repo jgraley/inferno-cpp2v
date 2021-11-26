@@ -73,8 +73,7 @@ string SimpleSolver::Plan::GetTrace() const
 SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
                             const list<VariableId> *variables_ ) :
     plan( this, constraints_, variables_ ),
-    holder(nullptr),
-    my_index( next_index++ )
+    holder(nullptr)
 {
 }
                         
@@ -338,15 +337,6 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 }
 
 
-void SimpleSolver::Dump() const
-{
-    TRACE("SimpleSolver SS%d; %d constraints:\n", my_index, plan.constraints.size());
-    for( shared_ptr<Constraint> c : plan.constraints )    
-        c->Dump();   
-    TRACEC("%d variables:\n", plan.variables.size())(plan.variables)("\n");        
-}
-
-
 void SimpleSolver::ShowBestAssignment()
 {
     Assignments &assignments_to_show = assignments;
@@ -428,7 +418,13 @@ set<VariableId> SimpleSolver::GetAllAffected( ConstraintSet constraints )
     for( shared_ptr<Constraint> c : constraints )
         all_vars = UnionOf(all_vars, c->GetFreeVariables());
     return all_vars;            
+} 
+
+
+void SimpleSolver::Dump() const
+{
+    TRACE("%d constraints:\n", plan.constraints.size());
+    for( shared_ptr<Constraint> c : plan.constraints )    
+        c->Dump();   
+    TRACEC("%d free variables:\n", plan.variables.size())(plan.variables)("\n");        
 }
-
-
-int SimpleSolver::next_index = 0;

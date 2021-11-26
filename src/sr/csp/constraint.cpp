@@ -4,3 +4,7 @@
 
 using namespace CSP;
 
+string Constraint::GetTrace() const
+{
+    return GetName() + GetSerialString();
+}

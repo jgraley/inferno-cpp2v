@@ -25,7 +25,8 @@ class Solver;
 
 /** A simple back-tracking solver
  */
-class SolverHolder : private Solver::ReportageObserver
+class SolverHolder : private Solver::ReportageObserver,
+                     public Traceable
 {
 public:
     /**
@@ -58,6 +59,8 @@ public:
      */
     bool GetNextSolution( Solution *solution = nullptr );
  
+    string GetTrace() const;
+
     /**
      * Write info about the problem to log via TRACE
      */

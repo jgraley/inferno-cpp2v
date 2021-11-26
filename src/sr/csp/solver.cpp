@@ -13,3 +13,8 @@ Solver::~Solver()
 {
 }
  
+ 
+string Solver::GetTrace() const
+{
+    return GetName() + GetSerialString();
+}
