@@ -8,6 +8,7 @@
 // Temporary
 #include "tree/cpptree.hpp"
 #include "transform_of_agent.hpp"
+#include "symbolic/lambda_operator.hpp"
 
 #include <stdexcept>
 
@@ -299,6 +300,27 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
                 throw CouplingMismatch();               
         }
     }     
+}
+
+
+shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only )
+{
+    if( coupling_only )
+    {
+        return make_shared<SYM::LambdaOperator>([&](const SYM::Operator::EvalKit &kit)
+        {
+            RunCouplingQuery( kit.required_links ); // throws on mismatch   
+        });
+    }
+    else // Full
+    {
+        return make_shared<SYM::LambdaOperator>([&](const SYM::Operator::EvalKit &kit)
+        {
+            RunCouplingQuery( kit.required_links ); // throws on mismatch   
+            RunNormalLinkedQuery( kit.required_links,
+                                  kit.knowledge ); // throws on mismatch   
+        });
+    }
 }
 
 
