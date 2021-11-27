@@ -7,8 +7,8 @@
 using namespace CSP;
 
 AgentConstraint::VariableRecord::VariableRecord( Kind kind_,
-                                                    VariableId id_,
-                                                    VariableFlags flags_ ) :
+                                                 VariableId id_,
+                                                 VariableFlags flags_ ) :
     kind( kind_ ),
     id( id_ ),
     flags( flags_ )
@@ -51,18 +51,16 @@ string AgentConstraint::VariableRecord::GetTrace() const
 
 
 AgentConstraint::Plan::Plan( AgentConstraint *algo_,
-                             SR::PatternLink keyer_plink_, 
-                             set<SR::PatternLink> residual_plinks_,
+                             SR::Agent *agent,
+                             set<SR::PatternLink> feasible_residuals,
                              Action action_,
                              VariableQueryLambda vql ) :
     algo( algo_ ),
-    //keyer_plink( keyer_plink_ ),
-    residual_plinks( residual_plinks_ ),
     action( action_ ),
-    agent( keyer_plink_.GetChildAgent() ),
+    agent( agent ),
     pq( agent->GetPatternQuery() )
 {
-    RunVariableQueries( vql );
+    RunVariableQueries( feasible_residuals, vql );
     
     for( auto var : all_variables )
     {
@@ -72,16 +70,17 @@ AgentConstraint::Plan::Plan( AgentConstraint *algo_,
 }
 
 
-AgentConstraint::AgentConstraint( SR::PatternLink keyer_plink, 
-                                  set<SR::PatternLink> residual_plinks,
+AgentConstraint::AgentConstraint( SR::Agent *agent,
+                                  set<SR::PatternLink> feasible_residuals,
                                   Action action,
                                   VariableQueryLambda vql ) :
-    plan( this, keyer_plink, residual_plinks, action, vql )
+    plan( this, agent, feasible_residuals, action, vql )
 {
 }
 
 
-void AgentConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
+void AgentConstraint::Plan::RunVariableQueries( set<SR::PatternLink> feasible_residuals,
+                                                VariableQueryLambda vql )
 { 
     // The keyer
     SR::PatternLink keyer_plink = agent->GetKeyerPatternLink();
@@ -90,11 +89,8 @@ void AgentConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
                                              vql(keyer_plink) } ); 
     
     // The residuals
-    set<SR::PatternLink> o_residual_plinks = agent->GetResidualPatternLinks();
-    //ASSERT( o_residual_plinks==residual_plinks )("Residuals don't match:\n")
-    //      ("Agent: ")(agent)(" action %d\n", action)
-    //      ("From agent:\n")(o_residual_plinks)("\n")
-    //      ("From engine:\n")(residual_plinks)("\n");
+    set<SR::PatternLink> residual_plinks = agent->GetResidualPatternLinks();
+    residual_plinks = IntersectionOf( residual_plinks, feasible_residuals );
     for( VariableId residual_plink : residual_plinks )
         all_variables.push_back( VariableRecord{ Kind::RESIDUAL, 
                                                  residual_plink, 

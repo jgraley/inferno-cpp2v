@@ -369,16 +369,14 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
             return flags;            
         };
                 
-        // Determine the coupling residuals for this agent
-        set<PatternLink> residual_plinks;
-        for( PatternLink residual_plink : coupling_residual_links )
-            if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
-                residual_plinks.insert( residual_plink );
+        set<PatternLink> coupling_residual_links_set;
+        for( PatternLink p : coupling_residual_links )
+            coupling_residual_links_set.insert( p );
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink, 
-                                                                              residual_plinks, 
-                                                                              CSP::AgentConstraint::Action::FULL,
-                                                                              vql );
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
+                                                                           coupling_residual_links_set,
+                                                                           CSP::AgentConstraint::Action::FULL,
+                                                                           vql );
         constraints_list.push_back(c);    
     }
 }
@@ -413,16 +411,14 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
             return flags;            
         };
                 
-        // Determine the coupling residuals for this agent
-        set<PatternLink> residual_plinks;
-        for( PatternLink residual_plink : my_master_boundary_links )
-            if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
-                residual_plinks.insert( residual_plink );
-                
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink, 
-                                                                              residual_plinks, 
-                                                                              CSP::AgentConstraint::Action::COUPLING,
-                                                                              vql );
+        set<PatternLink> my_master_boundary_links_set;
+        for( PatternLink p : my_master_boundary_links )
+            my_master_boundary_links_set.insert( p );
+            
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
+                                                                           my_master_boundary_links_set,
+                                                                           CSP::AgentConstraint::Action::COUPLING,
+                                                                           vql );
         constraints_list.push_back(c);    
     }
 }

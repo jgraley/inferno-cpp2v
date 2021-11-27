@@ -71,10 +71,10 @@ public:
      * 
      * @param vql callback that requests information about variables
      */
-    explicit AgentConstraint( SR::PatternLink keyer_plink, 
-                                 set<SR::PatternLink> residual_plinks,
-                                 Action action,
-                                 VariableQueryLambda vql );
+    explicit AgentConstraint( SR::Agent *agent,
+                              set<SR::PatternLink> feasible_residuals,
+                              Action action,
+                              VariableQueryLambda vql );
     
 private:
     const list<VariableId> &GetFreeVariables() const;
@@ -91,17 +91,16 @@ private:
     
     const struct Plan : public virtual Traceable
     {
-        explicit Plan( AgentConstraint *algo,
-                       SR::PatternLink keyer_plink, 
-                       set<SR::PatternLink> residual_plinks,             
+        explicit Plan( AgentConstraint *algo,  
+                       SR::Agent *agent,
+                       set<SR::PatternLink> feasible_residuals,       
                        Action action,          
                        VariableQueryLambda vql );
-        void RunVariableQueries( VariableQueryLambda vql );
+        void RunVariableQueries( set<SR::PatternLink> feasible_residuals, 
+                                 VariableQueryLambda vql );
         string GetTrace() const; // used for debug
 
         AgentConstraint * const algo;
-        //const SR::PatternLink keyer_plink;
-        const set<SR::PatternLink> residual_plinks;
         const Action action;
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
