@@ -6,87 +6,33 @@
 
 using namespace CSP;
 
-AgentConstraint::VariableRecord::VariableRecord( Kind kind_,
-                                                 VariableId id_,
-                                                 VariableFlags flags_ ) :
-    kind( kind_ ),
-    id( id_ ),
-    flags( flags_ )
-{
-}
-
-
-string AgentConstraint::VariableRecord::GetTrace() const
-{
-    string skind;
-    switch( kind )
-    {
-    case AgentConstraint::Kind::KEYER:
-        skind = "KEYER";
-        break;
-    
-    case AgentConstraint::Kind::RESIDUAL:
-        skind = "RESIDUAL";
-        break;
-        
-    case AgentConstraint::Kind::CHILD:
-        skind = "CHILD";
-        break;
-    }
-
-    string sfreedom;
-    switch( flags.freedom )
-    {
-    case AgentConstraint::Freedom::FREE:
-        sfreedom = "FREE";
-        break;
-        
-    case AgentConstraint::Freedom::FORCED:
-        sfreedom = "FORCED";
-        break;
-    }
-        
-    return skind+":"+id.GetTrace()+"("+sfreedom+")";
-}
-
 
 AgentConstraint::Plan::Plan( AgentConstraint *algo_,
                              SR::Agent *agent,
                              set<SR::PatternLink> relevent_residuals,
-                             Action action_,
-                             VariableQueryLambda vql ) :
+                             Action action_ ) :
     algo( algo_ ),
     action( action_ ),
     agent( agent ),
     pq( agent->GetPatternQuery() )
 {
-    RunVariableQueries( relevent_residuals, vql );
-    
-    for( auto var : all_variables )
-    {
-        if( var.flags.freedom == Freedom::FREE )
-            free_variable_ids.push_back( var.id );     
-    }
+    DetermineVariables( relevent_residuals );       
 }
 
 
 AgentConstraint::AgentConstraint( SR::Agent *agent,
                                   set<SR::PatternLink> relevent_residuals,
-                                  Action action,
-                                  VariableQueryLambda vql ) :
-    plan( this, agent, relevent_residuals, action, vql )
+                                  Action action ) :
+    plan( this, agent, relevent_residuals, action )
 {
 }
 
 
-void AgentConstraint::Plan::RunVariableQueries( set<SR::PatternLink> relevent_residuals,
-                                                VariableQueryLambda vql )
+void AgentConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_residuals )
 { 
     // The keyer
     SR::PatternLink keyer_plink = agent->GetKeyerPatternLink();
-    all_variables.push_back( VariableRecord{ Kind::KEYER, 
-                                             keyer_plink, 
-                                             vql(keyer_plink) } ); 
+    variables.push_back( keyer_plink ); 
     
     // The residuals. Agent will give us residuals that belong to 
     // AndRuleEngines other than the one we're helping to solve for,
@@ -94,17 +40,13 @@ void AgentConstraint::Plan::RunVariableQueries( set<SR::PatternLink> relevent_re
     set<SR::PatternLink> residual_plinks = agent->GetResidualPatternLinks();
     residual_plinks = IntersectionOf( residual_plinks, relevent_residuals );
     for( VariableId residual_plink : residual_plinks )
-        all_variables.push_back( VariableRecord{ Kind::RESIDUAL, 
-                                                 residual_plink, 
-                                                 vql(residual_plink) } );     
+        variables.push_back( residual_plink );     
     
     // The children
     if( action==Action::FULL )
     {
         FOREACH( SR::PatternLink child_plink, pq->GetNormalLinks() )
-            all_variables.push_back( VariableRecord{ Kind::CHILD, 
-                                                     child_plink, 
-                                                     vql(child_plink) } );      
+            variables.push_back( child_plink );      
     }
 }
 
@@ -115,9 +57,9 @@ string AgentConstraint::Plan::GetTrace() const
 }
 
 
-const list<VariableId> &AgentConstraint::GetFreeVariables() const
+const list<VariableId> &AgentConstraint::GetVariables() const
 { 
-    return plan.free_variable_ids;
+    return plan.variables;
 }
 
 
@@ -170,7 +112,7 @@ void AgentConstraint::Test( Assignments frees_map )
 void AgentConstraint::Dump() const
 {
     TRACE("Degree %d ", 
-          plan.all_variables.size());
+          plan.variables.size());
         
     switch( plan.action )
     {
@@ -184,6 +126,5 @@ void AgentConstraint::Dump() const
     }
 
     TRACEC("Agent=")(plan.agent)("\n");
-    TRACEC("Variables: ")(plan.all_variables)("\n");
-    TRACEC("Free var ids: ")(plan.free_variable_ids)("\n");
+    TRACEC("Variables: ")(plan.variables)("\n");
 }      

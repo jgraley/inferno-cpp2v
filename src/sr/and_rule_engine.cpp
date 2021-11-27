@@ -356,23 +356,10 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *>
 void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
-    {                        
-        CSP::AgentConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::AgentConstraint::VariableFlags
-        {
-            CSP::AgentConstraint::VariableFlags flags;
-                                  
-            if( plink == root_plink ) // Root variable will be forced
-                flags.freedom = CSP::AgentConstraint::Freedom::FORCED;
-            else 
-                flags.freedom = CSP::AgentConstraint::Freedom::FREE;
-            
-            return flags;            
-        };
-                
+    {                         
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
                                                                            coupling_residual_links,
-                                                                           CSP::AgentConstraint::Action::FULL,
-                                                                           vql );
+                                                                           CSP::AgentConstraint::Action::FULL );
         constraints_list.push_back(c);    
     }
 }
@@ -395,22 +382,9 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
-        CSP::AgentConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::AgentConstraint::VariableFlags
-        {
-            CSP::AgentConstraint::VariableFlags flags;
-                                  
-            if( plink == root_plink || plink == keyer_plink ) // keyer will be forced
-                flags.freedom = CSP::AgentConstraint::Freedom::FORCED;
-            else // residual
-                flags.freedom = CSP::AgentConstraint::Freedom::FREE;
-            
-            return flags;            
-        };
-
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
                                                                            my_master_boundary_links,
-                                                                           CSP::AgentConstraint::Action::COUPLING,
-                                                                           vql );
+                                                                           CSP::AgentConstraint::Action::COUPLING );
         constraints_list.push_back(c);    
     }
 }
@@ -422,12 +396,20 @@ void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constrain
     // take the same route we do with DecidedCompare(). Need to remove FORCED agents
     // though.
     list<PatternLink> free_normal_links_ordered;
+    list<PatternLink> forced_normal_links_ordered;
     for( PatternLink link : normal_and_boundary_links_preorder )
     {
         if( link != root_plink )
             free_normal_links_ordered.push_back( link );
+        else
+            forced_normal_links_ordered.push_back( link );
     }
-    auto salg = make_shared<CSP::SimpleSolver>(constraints_list, &free_normal_links_ordered);
+    for( PatternLink link : master_boundary_keyer_links )
+        forced_normal_links_ordered.push_back( link );
+        
+    auto salg = make_shared<CSP::SimpleSolver>( constraints_list, 
+                                                &free_normal_links_ordered, 
+                                                &forced_normal_links_ordered );
     solver = make_shared<CSP::SolverHolder>(salg);
 }
 

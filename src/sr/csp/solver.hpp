@@ -38,7 +38,7 @@ public:
         /**
          * Report that a single solution has been found. 
          * 
-         * @param values [in] values that solve the CSP, organsied into a list for each constraint. Each list is ordered as per `Constraint::GetFreeVariables()`.
+         * @param values [in] values that solve the CSP, organised into a list for each constraint. Each list is ordered as per `Constraint::GetVariables()`.
          * 
          * @param side_info [in] side-information as required by the `AndRuleEngine` in order to make use of the solution.
          */

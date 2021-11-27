@@ -39,10 +39,10 @@ public:
     /**
      * Get the free variables.
      * 
-     * @return A list of free variables affecteed by this constraint. Size equals the return from GetFreeDegree()
+     * @return A list of variables affecteed by this constraint.
      */
-    virtual const list<VariableId> &GetFreeVariables() const = 0;
-      
+    virtual const list<VariableId> &GetVariables() const = 0;
+          
     /**
      * Set the values of the forced varibles
      * 

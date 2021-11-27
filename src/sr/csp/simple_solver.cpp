@@ -17,50 +17,52 @@ using namespace CSP;
 
 SimpleSolver::Plan::Plan( SimpleSolver *algo_,
                           const list< shared_ptr<Constraint> > &constraints_, 
-                          const list<VariableId> *variables_ ) :
+                          const list<VariableId> *free_variables_, 
+                          const list<VariableId> *forced_variables_ ) :
     algo( algo_ ), 
     constraints(constraints_)
 {
-    DeduceVariables(variables_);
+    DeduceVariables(free_variables_, forced_variables_);
 }
 
 
-void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
-{
-    list<VariableId> my_variables;
-    set<VariableId> variables_check_set;
+void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *free_variables_, 
+                                          const list<VariableId> *forced_variables_ )
+{   
+    free_variables = *free_variables_;
+    forced_variables = *forced_variables_;
 
+    set<VariableId> free_variables_set;
+    for( VariableId v : *free_variables_ )       
+        InsertSolo(free_variables_set, v); // Checks that elements of the list are unique
+
+    set<VariableId> forced_variables_set;
+    for( VariableId v : *forced_variables_ )       
+        InsertSolo(forced_variables_set, v); // Checks that elements of the list are unique
+
+    ASSERT( IntersectionOf( free_variables_set, forced_variables_set ).empty() );
+ 
+    set<VariableId> variables_check_set;
     for( shared_ptr<Constraint> c : constraints )
     {
         constraint_set.insert(c);
-        list<VariableId> vars = c->GetFreeVariables();
+        list<VariableId> vars = algo->GetFreeVarsforConstraint(*c);
         
         for( VariableId v : vars )
         {
             if( variables_check_set.count(v) == 0 )
             {
                 variables_check_set.insert( v );
-                if( variables_ == nullptr )
-                    my_variables.push_back( v ); 
             }
             affected_constraints[v].insert(c);
         }
     }
     
-    if( variables_ == nullptr )
-    {
-        TRACE("Variables not supplied by engine: using own\n");
-        // No variables list was supplied, so return the one we generated
-        variables = my_variables;
-    }
-    else
-    {
-        TRACE("Variables supplied by engine: cross-checking\n");
-        // A variables list was supplied and it must have the same set of variables
-        for( VariableId v : *variables_ )
-            ASSERT( variables_check_set.count(v) == 1 );
-        variables = *variables_;
-    }
+    TRACE("Variables supplied by engine: cross-checking\n");
+    // A variables list was supplied and it must have the same set of variables
+    for( VariableId v : *free_variables_ )
+        ASSERT( variables_check_set.count(v) == 1 );
+    ASSERT( free_variables_->size() == variables_check_set.size() );    
 }
 
 
@@ -71,8 +73,9 @@ string SimpleSolver::Plan::GetTrace() const
 
 
 SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
-                            const list<VariableId> *variables_ ) :
-    plan( this, constraints_, variables_ ),
+                            const list<VariableId> *free_variables_, 
+                            const list<VariableId> *forced_variables_ ) :
+    plan( this, constraints_, free_variables_, forced_variables_ ),
     holder(nullptr)
 {
 }
@@ -111,7 +114,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
         return; // We failed with no assignments, so we cannot match - no solutions will be reported
     }
     
-    if( plan.variables.empty() )
+    if( plan.free_variables.empty() )
     {
         TRACE("Simple solver matched on forced variables and no frees\n");  
         // No free vars, so we've got a solution
@@ -120,7 +123,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     else
     {                
         TRACE("Simple solver matched on forced variables; solving for frees\n");  
-        Solve( plan.variables.begin() );    
+        Solve( plan.free_variables.begin() );    
     }
 
     TRACE("Simple solver ends\n");    
@@ -130,12 +133,12 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
 void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
 {     
     TRACE("SS%d solving...\n");
-    TRACEC("Vars ")(plan.variables)("\n");
+    TRACEC("Free vars ")(plan.free_variables)("\n");
     TRACEC("Starting at ")(*current_it)("\n");
     
     // Selector for first variable
     map< VariableId, shared_ptr<ValueSelector> > value_selectors;
-    value_selectors[plan.variables.front()] = 
+    value_selectors[plan.free_variables.front()] = 
         make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );
     TRACEC("Made selector for ")(*current_it)("\n");
 
@@ -156,7 +159,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 value_selectors.erase(*current_it);            
                 TRACEC("Killed selector for ")(*current_it)("\n");
                 
-                if( current_it == plan.variables.begin() )
+                if( current_it == plan.free_variables.begin() )
                     goto CEASE; // no more solutions
                 --current_it; 
                 TRACEC("Back to ")(*current_it)("\n");
@@ -171,7 +174,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
         else
         {
             ++current_it; // try advance
-            if( current_it != plan.variables.end() ) // new variable
+            if( current_it != plan.free_variables.end() ) // new variable
             {
                 value_selectors[*current_it] = 
                     make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
@@ -204,14 +207,14 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     current_it( current_it_ ),
     current_var( *current_it )
 {
-    ASSERT( current_it != solver_plan.variables.end() );
+    ASSERT( current_it != solver_plan.free_variables.end() );
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
     Value start_val = knowledge->ordered_domain.front();
     
 #ifdef DYNAMIC_START_VALUE    
-    if( current_it!=solver_plan.variables.begin() )
+    if( current_it!=solver_plan.free_variables.begin() )
     {
         list<VariableId>::const_iterator prev_it = current_it;
         --prev_it; 
@@ -334,8 +337,8 @@ void SimpleSolver::ShowBestAssignment()
     INDENT("B");
     if( assignments_to_show.empty() )
         return; // didn't get around to updating it yet
-    TRACE("VARIABLES: assigned %d of %d:\n", assignments_to_show.size(), plan.variables.size());
-    for( VariableId var : plan.variables )
+    TRACE("FREE VARIABLES: assigned %d of %d:\n", assignments_to_show.size(), plan.free_variables.size());
+    for( VariableId var : plan.free_variables )
     {
         TRACEC(var);
         if( assignments_to_show.count(var) > 0 )
@@ -349,7 +352,7 @@ void SimpleSolver::ShowBestAssignment()
             else
             {
                 TRACEC(" is not a local match (two reasons this might be OK)\n");            
-                ASSERT(assignments_to_show.size() <= plan.variables.size())("local mismatch in passing complete assignment");
+                ASSERT(assignments_to_show.size() <= plan.free_variables.size())("local mismatch in passing complete assignment");
             }
             // Reason 1: At the point we gave up, no constraint containing this 
             // variable had all of its required variables assigned.
@@ -384,17 +387,17 @@ void SimpleSolver::CheckPlan() const
     set<VariableId> variables_used;
     for( shared_ptr<Constraint> c : plan.constraints )
     {
-        list<VariableId> cfv = c->GetFreeVariables();
+        list<VariableId> cfv = GetFreeVarsforConstraint(*c);
         for( VariableId v : cfv )
         {
-            ASSERT( find( plan.variables.begin(), plan.variables.end(), v ) != plan.variables.end() )
+            ASSERT( find( plan.free_variables.begin(), plan.free_variables.end(), v ) != plan.free_variables.end() )
                   ("Planning error: ")(c)(" is missing variables\n")
                   ("expecting ")(cfv)("\n")
-                  ("provided ")(plan.variables)("\n");
+                  ("provided ")(plan.free_variables)("\n");
             variables_used.insert( v );
         }
     }
-    for( VariableId v : plan.variables )
+    for( VariableId v : plan.free_variables )
     {
         ASSERT( variables_used.count(v) > 0 )
               ("Planning error: variable ")(v)(" is not used by any constraints\n")
@@ -407,9 +410,23 @@ set<VariableId> SimpleSolver::GetAllAffected( ConstraintSet constraints )
 {
     set<VariableId> all_vars;
     for( shared_ptr<Constraint> c : constraints )
-        all_vars = UnionOf(all_vars, c->GetFreeVariables());
+        all_vars = UnionOf(all_vars, GetFreeVarsforConstraint(*c));
     return all_vars;            
 } 
+
+
+list<VariableId> SimpleSolver::GetFreeVarsforConstraint( const Constraint &c ) const
+{
+    list<VariableId> cfvars;
+    list<VariableId> cvars = c.GetVariables();
+    for( VariableId v : cvars )
+    {
+        if( find( plan.free_variables.begin(), plan.free_variables.end(), v ) != plan.free_variables.end() )
+            cfvars.push_back(v);
+    }
+        
+    return cfvars;
+}
 
 
 void SimpleSolver::Dump() const
@@ -417,5 +434,5 @@ void SimpleSolver::Dump() const
     TRACE("%d constraints:\n", plan.constraints.size());
     for( shared_ptr<Constraint> c : plan.constraints )    
         c->Dump();   
-    TRACEC("%d free variables:\n", plan.variables.size())(plan.variables)("\n");        
+    TRACEC("%d free variables:\n", plan.free_variables.size())(plan.free_variables)("\n");        
 }

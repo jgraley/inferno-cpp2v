@@ -22,45 +22,12 @@ namespace CSP
  */
 class AgentConstraint : public Constraint
 {
-public:
-    enum class Freedom
-    {
-        FORCED,
-        FREE
-    };
-
-    struct VariableFlags
-    {
-        // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
-        Freedom freedom;
-    };
-    
-    enum class Kind
-    {
-        KEYER,
-        RESIDUAL,
-        CHILD
-    };
-    
-    struct VariableRecord : Traceable
-    {
-        VariableRecord( Kind kind_,
-                        VariableId id_,
-                        VariableFlags flags_ );
-        string GetTrace() const;
-
-        Kind kind;
-        VariableId id;
-        VariableFlags flags;
-    };
-
+public:    
     enum class Action
     {
         FULL,
         COUPLING
     };
-
-    typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
 
     /**
      * Create the constraint. 
@@ -73,11 +40,10 @@ public:
      */
     explicit AgentConstraint( SR::Agent *agent,
                               set<SR::PatternLink> relevent_residuals,
-                              Action action,
-                              VariableQueryLambda vql );
+                              Action action );
     
 private:
-    const list<VariableId> &GetFreeVariables() const;
+    const list<VariableId> &GetVariables() const;
     virtual void Start( const Assignments &forces_map_, 
                         const SR::TheKnowledge *knowledge_ );    
     void Test( Assignments frees_map );
@@ -94,19 +60,15 @@ private:
         explicit Plan( AgentConstraint *algo,  
                        SR::Agent *agent,
                        set<SR::PatternLink> relevent_residuals,       
-                       Action action,          
-                       VariableQueryLambda vql );
-        void RunVariableQueries( set<SR::PatternLink> relevent_residuals, 
-                                 VariableQueryLambda vql );
+                       Action action );
+        void DetermineVariables( set<SR::PatternLink> relevent_residuals );
         string GetTrace() const; // used for debug
 
         AgentConstraint * const algo;
         const Action action;
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
-        list<VariableRecord> all_variables;
-        int free_degree;
-        list<VariableId> free_variable_ids;
+        list<VariableId> variables;
     } plan;
     
     list<Value> forces;
