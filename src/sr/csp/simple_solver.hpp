@@ -56,8 +56,9 @@ private:
         list<VariableId> free_variables;
         list<VariableId> forced_variables;
         list< shared_ptr<Constraint> > constraints;
-
         ConstraintSet constraint_set;
+        map< shared_ptr<Constraint>, list<VariableId> > free_vars_for_constraint;
+
         map<VariableId, ConstraintSet> affected_constraints;
     } plan;
 
@@ -90,7 +91,6 @@ private:
     void TimedOperations();
     void CheckPlan() const;
     set<VariableId> GetAllAffected( ConstraintSet constraints );
-    list<VariableId> GetFreeVarsforConstraint( const Constraint &c ) const;
 
     void Dump() const;
 

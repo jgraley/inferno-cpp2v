@@ -46,9 +46,16 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *free_variables
     for( shared_ptr<Constraint> c : constraints )
     {
         constraint_set.insert(c);
-        list<VariableId> vars = algo->GetFreeVarsforConstraint(*c);
         
-        for( VariableId v : vars )
+        list<VariableId> cfvars;
+        list<VariableId> cvars = c->GetVariables();
+        for( VariableId v : cvars )
+        {
+            if( find( free_variables.begin(), free_variables.end(), v ) != free_variables.end() )
+                cfvars.push_back(v);
+        }        
+        
+        for( VariableId v : cfvars )
         {
             if( variables_check_set.count(v) == 0 )
             {
@@ -56,6 +63,8 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *free_variables
             }
             affected_constraints[v].insert(c);
         }
+        
+        free_vars_for_constraint[c] = cfvars;
     }
     
     TRACE("Variables supplied by engine: cross-checking\n");
@@ -387,7 +396,7 @@ void SimpleSolver::CheckPlan() const
     set<VariableId> variables_used;
     for( shared_ptr<Constraint> c : plan.constraints )
     {
-        list<VariableId> cfv = GetFreeVarsforConstraint(*c);
+        list<VariableId> cfv = plan.free_vars_for_constraint.at(c);
         for( VariableId v : cfv )
         {
             ASSERT( find( plan.free_variables.begin(), plan.free_variables.end(), v ) != plan.free_variables.end() )
@@ -410,23 +419,9 @@ set<VariableId> SimpleSolver::GetAllAffected( ConstraintSet constraints )
 {
     set<VariableId> all_vars;
     for( shared_ptr<Constraint> c : constraints )
-        all_vars = UnionOf(all_vars, GetFreeVarsforConstraint(*c));
+        all_vars = UnionOf(all_vars, plan.free_vars_for_constraint.at(c));
     return all_vars;            
 } 
-
-
-list<VariableId> SimpleSolver::GetFreeVarsforConstraint( const Constraint &c ) const
-{
-    list<VariableId> cfvars;
-    list<VariableId> cvars = c.GetVariables();
-    for( VariableId v : cvars )
-    {
-        if( find( plan.free_variables.begin(), plan.free_variables.end(), v ) != plan.free_variables.end() )
-            cfvars.push_back(v);
-    }
-        
-    return cfvars;
-}
 
 
 void SimpleSolver::Dump() const

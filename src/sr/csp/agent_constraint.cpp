@@ -9,44 +9,46 @@ using namespace CSP;
 
 AgentConstraint::Plan::Plan( AgentConstraint *algo_,
                              SR::Agent *agent,
-                             set<SR::PatternLink> relevent_residuals,
+                             set<SR::PatternLink> relevent_plinks,
                              Action action_ ) :
     algo( algo_ ),
     action( action_ ),
-    agent( agent ),
-    pq( agent->GetPatternQuery() )
+    agent( agent )
 {
-    DetermineVariables( relevent_residuals );       
+    DetermineVariables( relevent_plinks );       
 }
 
 
 AgentConstraint::AgentConstraint( SR::Agent *agent,
-                                  set<SR::PatternLink> relevent_residuals,
+                                  set<SR::PatternLink> relevent_plinks,
                                   Action action ) :
-    plan( this, agent, relevent_residuals, action )
+    plan( this, agent, relevent_plinks, action )
 {
 }
 
 
-void AgentConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_residuals )
+void AgentConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_plinks )
 { 
     // The keyer
     SR::PatternLink keyer_plink = agent->GetKeyerPatternLink();
-    variables.push_back( keyer_plink ); 
+    if( relevent_plinks.count(keyer_plink)==1 )
+        variables.push_back( keyer_plink ); 
     
     // The residuals. Agent will give us residuals that belong to 
     // AndRuleEngines other than the one we're helping to solve for,
     // so filter them down by taking an intersection.
     set<SR::PatternLink> residual_plinks = agent->GetResidualPatternLinks();
-    residual_plinks = IntersectionOf( residual_plinks, relevent_residuals );
+    residual_plinks = IntersectionOf( residual_plinks, relevent_plinks );
     for( VariableId residual_plink : residual_plinks )
         variables.push_back( residual_plink );     
     
     // The children
     if( action==Action::FULL )
     {
+        shared_ptr<SR::PatternQuery> pq = agent->GetPatternQuery();
         FOREACH( SR::PatternLink child_plink, pq->GetNormalLinks() )
-            variables.push_back( child_plink );      
+            if( relevent_plinks.count(child_plink)==1 )
+                variables.push_back( child_plink );      
     }
 }
 

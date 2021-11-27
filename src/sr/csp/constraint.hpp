@@ -39,7 +39,7 @@ public:
     /**
      * Get the free variables.
      * 
-     * @return A list of variables affecteed by this constraint.
+     * @return A list of variables affected by this constraint.
      */
     virtual const list<VariableId> &GetVariables() const = 0;
           

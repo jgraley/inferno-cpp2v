@@ -97,6 +97,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     for( PatternLink plink : master_keyer_plinks )
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
+            
+    DeduceCSPVariables();
 
     // ------------------ Log it ---------------------
     Dump();
@@ -353,12 +355,31 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *>
 }
 
 
+void AndRuleEngine::Plan::DeduceCSPVariables()
+{
+    for( PatternLink link : normal_and_boundary_links_preorder )
+    {
+        if( link != root_plink )
+            free_normal_links_ordered.push_back( link );
+        else
+            forced_normal_links_ordered.push_back( link );
+        relevent_links.insert( link );
+    }
+    
+    for( PatternLink link : master_boundary_keyer_links )
+    {
+        forced_normal_links_ordered.push_back( link );
+        relevent_links.insert( link );
+    }
+}
+
+
 void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {                         
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
-                                                                           coupling_residual_links,
+                                                                           relevent_links,
                                                                            CSP::AgentConstraint::Action::FULL );
         constraints_list.push_back(c);    
     }
@@ -383,7 +404,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
-                                                                           my_master_boundary_links,
+                                                                           relevent_links,
                                                                            CSP::AgentConstraint::Action::COUPLING );
         constraints_list.push_back(c);    
     }
@@ -392,21 +413,6 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
 
 void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list )
 {       
-    // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
-    // take the same route we do with DecidedCompare(). Need to remove FORCED agents
-    // though.
-    list<PatternLink> free_normal_links_ordered;
-    list<PatternLink> forced_normal_links_ordered;
-    for( PatternLink link : normal_and_boundary_links_preorder )
-    {
-        if( link != root_plink )
-            free_normal_links_ordered.push_back( link );
-        else
-            forced_normal_links_ordered.push_back( link );
-    }
-    for( PatternLink link : master_boundary_keyer_links )
-        forced_normal_links_ordered.push_back( link );
-        
     auto salg = make_shared<CSP::SimpleSolver>( constraints_list, 
                                                 &free_normal_links_ordered, 
                                                 &forced_normal_links_ordered );
@@ -459,7 +465,13 @@ void AndRuleEngine::Plan::Dump()
         { "parent_residual_links_to_master_boundary_agents",
           Trace(parent_residual_links_to_master_boundary_agents) },
         { "normal_and_boundary_links_preorder", 
-          Trace(normal_and_boundary_links_preorder) }
+          Trace(normal_and_boundary_links_preorder) },
+        { "free_normal_links_ordered",
+          Trace(free_normal_links_ordered) },
+        { "forced_normal_links_ordered",
+          Trace(forced_normal_links_ordered) },
+        { "relevent_links",
+          Trace(relevent_links) }
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");

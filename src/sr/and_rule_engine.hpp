@@ -82,6 +82,7 @@ public:
                                        const unordered_set<PatternLink> &surrounding_plinks, 
                                        const unordered_set<PatternLink> &surrounding_keyer_plinks );
         // CSP solver stuff
+        void DeduceCSPVariables();
         void CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
@@ -111,6 +112,9 @@ public:
         unordered_set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
         unordered_map< Agent *, unordered_set<PatternLink> > parent_residual_links_to_master_boundary_agents;
+        list<PatternLink> free_normal_links_ordered;
+        list<PatternLink> forced_normal_links_ordered;
+        set<PatternLink> relevent_links;
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;

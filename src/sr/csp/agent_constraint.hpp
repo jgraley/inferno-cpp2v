@@ -39,7 +39,7 @@ public:
      * @param vql callback that requests information about variables
      */
     explicit AgentConstraint( SR::Agent *agent,
-                              set<SR::PatternLink> relevent_residuals,
+                              set<SR::PatternLink> relevent_plinks,
                               Action action );
     
 private:
@@ -59,15 +59,14 @@ private:
     {
         explicit Plan( AgentConstraint *algo,  
                        SR::Agent *agent,
-                       set<SR::PatternLink> relevent_residuals,       
+                       set<SR::PatternLink> relevent_plinks,       
                        Action action );
-        void DetermineVariables( set<SR::PatternLink> relevent_residuals );
+        void DetermineVariables( set<SR::PatternLink> relevent_plinks );
         string GetTrace() const; // used for debug
 
         AgentConstraint * const algo;
         const Action action;
         SR::Agent * agent;
-        shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
         list<VariableId> variables;
     } plan;
     
