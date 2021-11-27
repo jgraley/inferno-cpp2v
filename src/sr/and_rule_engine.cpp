@@ -1,6 +1,6 @@
 #include "and_rule_engine.hpp"
 
-#include "csp/systemic_constraint.hpp"
+#include "csp/agent_constraint.hpp"
 #include "csp/simple_solver.hpp"
 #include "csp/solver_holder.hpp"
 #include "scr_engine.hpp"
@@ -357,14 +357,14 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
 {
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {                        
-        CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::SystemicConstraint::VariableFlags
+        CSP::AgentConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::AgentConstraint::VariableFlags
         {
-            CSP::SystemicConstraint::VariableFlags flags;
+            CSP::AgentConstraint::VariableFlags flags;
                                   
             if( plink == root_plink ) // Root variable will be forced
-                flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
+                flags.freedom = CSP::AgentConstraint::Freedom::FORCED;
             else 
-                flags.freedom = CSP::SystemicConstraint::Freedom::FREE;
+                flags.freedom = CSP::AgentConstraint::Freedom::FREE;
             
             return flags;            
         };
@@ -375,9 +375,9 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
             if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
                 residual_plinks.insert( residual_plink );
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( keyer_plink, 
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink, 
                                                                               residual_plinks, 
-                                                                              CSP::SystemicConstraint::Action::FULL,
+                                                                              CSP::AgentConstraint::Action::FULL,
                                                                               vql );
         constraints_list.push_back(c);    
     }
@@ -401,14 +401,14 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
-        CSP::SystemicConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::SystemicConstraint::VariableFlags
+        CSP::AgentConstraint::VariableQueryLambda vql = [&](PatternLink plink) -> CSP::AgentConstraint::VariableFlags
         {
-            CSP::SystemicConstraint::VariableFlags flags;
+            CSP::AgentConstraint::VariableFlags flags;
                                   
             if( plink == root_plink || plink == keyer_plink ) // keyer will be forced
-                flags.freedom = CSP::SystemicConstraint::Freedom::FORCED;
+                flags.freedom = CSP::AgentConstraint::Freedom::FORCED;
             else // residual
-                flags.freedom = CSP::SystemicConstraint::Freedom::FREE;
+                flags.freedom = CSP::AgentConstraint::Freedom::FREE;
             
             return flags;            
         };
@@ -419,9 +419,9 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
             if( residual_plink.GetChildAgent() == keyer_plink.GetChildAgent() )
                 residual_plinks.insert( residual_plink );
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( keyer_plink, 
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink, 
                                                                               residual_plinks, 
-                                                                              CSP::SystemicConstraint::Action::COUPLING,
+                                                                              CSP::AgentConstraint::Action::COUPLING,
                                                                               vql );
         constraints_list.push_back(c);    
     }

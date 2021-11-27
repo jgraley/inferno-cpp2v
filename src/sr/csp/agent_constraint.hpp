@@ -1,5 +1,5 @@
-#ifndef SYSTEMIC_CONSTRAINT_HPP
-#define SYSTEMIC_CONSTRAINT_HPP
+#ifndef AGENT_CONSTRAINT_HPP
+#define AGENT_CONSTRAINT_HPP
 
 #include "constraint.hpp"
 
@@ -20,7 +20,7 @@ namespace CSP
 
 /** Implements a systemic constraint as discussed in #107
  */
-class SystemicConstraint : public Constraint
+class AgentConstraint : public Constraint
 {
 public:
     enum class Freedom
@@ -71,7 +71,7 @@ public:
      * 
      * @param vql callback that requests information about variables
      */
-    explicit SystemicConstraint( SR::PatternLink keyer_plink, 
+    explicit AgentConstraint( SR::PatternLink keyer_plink, 
                                  set<SR::PatternLink> residual_plinks,
                                  Action action,
                                  VariableQueryLambda vql );
@@ -92,7 +92,7 @@ private:
     
     const struct Plan : public virtual Traceable
     {
-        explicit Plan( SystemicConstraint *algo,
+        explicit Plan( AgentConstraint *algo,
                        SR::PatternLink keyer_plink, 
                        set<SR::PatternLink> residual_plinks,             
                        Action action,          
@@ -100,7 +100,7 @@ private:
         void RunVariableQueries( VariableQueryLambda vql );
         string GetTrace() const; // used for debug
 
-        SystemicConstraint * const algo;
+        AgentConstraint * const algo;
         const SR::PatternLink keyer_plink;
         const set<SR::PatternLink> residual_plinks;
         const Action action;

@@ -1,4 +1,4 @@
-#include "systemic_constraint.hpp"
+#include "agent_constraint.hpp"
 
 #include "query.hpp"
 #include "agents/agent.hpp"
@@ -6,7 +6,7 @@
 
 using namespace CSP;
 
-SystemicConstraint::VariableRecord::VariableRecord( Kind kind_,
+AgentConstraint::VariableRecord::VariableRecord( Kind kind_,
                                                     VariableId id_,
                                                     VariableFlags flags_ ) :
     kind( kind_ ),
@@ -16,20 +16,20 @@ SystemicConstraint::VariableRecord::VariableRecord( Kind kind_,
 }
 
 
-string SystemicConstraint::VariableRecord::GetTrace() const
+string AgentConstraint::VariableRecord::GetTrace() const
 {
     string skind;
     switch( kind )
     {
-    case SystemicConstraint::Kind::KEYER:
+    case AgentConstraint::Kind::KEYER:
         skind = "KEYER";
         break;
     
-    case SystemicConstraint::Kind::RESIDUAL:
+    case AgentConstraint::Kind::RESIDUAL:
         skind = "RESIDUAL";
         break;
         
-    case SystemicConstraint::Kind::CHILD:
+    case AgentConstraint::Kind::CHILD:
         skind = "CHILD";
         break;
     }
@@ -37,11 +37,11 @@ string SystemicConstraint::VariableRecord::GetTrace() const
     string sfreedom;
     switch( flags.freedom )
     {
-    case SystemicConstraint::Freedom::FREE:
+    case AgentConstraint::Freedom::FREE:
         sfreedom = "FREE";
         break;
         
-    case SystemicConstraint::Freedom::FORCED:
+    case AgentConstraint::Freedom::FORCED:
         sfreedom = "FORCED";
         break;
     }
@@ -50,7 +50,7 @@ string SystemicConstraint::VariableRecord::GetTrace() const
 }
 
 
-SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
+AgentConstraint::Plan::Plan( AgentConstraint *algo_,
                                 SR::PatternLink keyer_plink_, 
                                 set<SR::PatternLink> residual_plinks_,
                                 Action action_,
@@ -78,7 +78,7 @@ SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
 }
 
 
-SystemicConstraint::SystemicConstraint( SR::PatternLink keyer_plink, 
+AgentConstraint::AgentConstraint( SR::PatternLink keyer_plink, 
                                         set<SR::PatternLink> residual_plinks,
                                         Action action,
                                         VariableQueryLambda vql ) :
@@ -87,7 +87,7 @@ SystemicConstraint::SystemicConstraint( SR::PatternLink keyer_plink,
 }
 
 
-void SystemicConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
+void AgentConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
 { 
     // The keyer
     all_variables.push_back( VariableRecord{ Kind::KEYER, 
@@ -111,25 +111,25 @@ void SystemicConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
 }
 
 
-string SystemicConstraint::Plan::GetTrace() const 
+string AgentConstraint::Plan::GetTrace() const 
 {
     return algo->GetName() + ".plan";
 }
 
 
-const list<VariableId> &SystemicConstraint::GetFreeVariables() const
+const list<VariableId> &AgentConstraint::GetFreeVariables() const
 { 
     return plan.free_variable_ids;
 }
 
 
-const list<VariableId> &SystemicConstraint::GetRequiredFreeVariables() const
+const list<VariableId> &AgentConstraint::GetRequiredFreeVariables() const
 { 
     return plan.required_free_variable_ids;
 }
 
 
-void SystemicConstraint::Start( const Assignments &forces_map_, 
+void AgentConstraint::Start( const Assignments &forces_map_, 
                                 const SR::TheKnowledge *knowledge_ )
 {
     forces_map = forces_map_;
@@ -158,7 +158,7 @@ void SystemicConstraint::Start( const Assignments &forces_map_,
 }   
 
 
-void SystemicConstraint::Test( Assignments frees_map )
+void AgentConstraint::Test( Assignments frees_map )
 {   
     INDENT("T");
     //TRACE("Free assignments:\n")
@@ -195,7 +195,7 @@ void SystemicConstraint::Test( Assignments frees_map )
 }
 
 
-void SystemicConstraint::Dump() const
+void AgentConstraint::Dump() const
 {
     TRACE("Degree %d ", 
           plan.all_variables.size());
