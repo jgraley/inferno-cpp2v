@@ -73,17 +73,7 @@ SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
         if( var.flags.freedom != Freedom::FREE )
             continue;
              
-        free_variable_ids.push_back( var.id );
-             
-        switch( var.kind )
-        {
-        case Kind::KEYER: 
-            break;
-        case Kind::RESIDUAL:
-            break;
-        case Kind::CHILD:
-            break;
-        }        
+        free_variable_ids.push_back( var.id );     
     }
 }
 

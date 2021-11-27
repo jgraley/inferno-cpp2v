@@ -100,6 +100,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
     // ------------------ Log it ---------------------
     Dump();
+    
+    ConfigureAgents();       
 
     // ------------------ Check it ---------------------
     // Well, obviously...
@@ -137,7 +139,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // Do this last to keep all the rest of the planning trace/dumps
     // all together in the same pre-order sequence instead of mixed pre 
     // and post order
-    ConfigureAgents();       
     unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
     unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );          
