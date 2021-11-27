@@ -78,9 +78,8 @@ public:
     
 private:
     const list<VariableId> &GetFreeVariables() const;
-    const list<VariableId> &GetRequiredFreeVariables() const;
-    virtual void Start( const Assignments &forces, 
-                        const SR::TheKnowledge *knowledge );    
+    virtual void Start( const Assignments &forces_map_, 
+                        const SR::TheKnowledge *knowledge_ );    
     void Test( Assignments frees_map );
         
     class ByLocationLinkMismatch : public ::Mismatch
@@ -101,7 +100,7 @@ private:
         string GetTrace() const; // used for debug
 
         AgentConstraint * const algo;
-        const SR::PatternLink keyer_plink;
+        //const SR::PatternLink keyer_plink;
         const set<SR::PatternLink> residual_plinks;
         const Action action;
         SR::Agent * agent;
@@ -109,7 +108,6 @@ private:
         list<VariableRecord> all_variables;
         int free_degree;
         list<VariableId> free_variable_ids;
-        list<VariableId> required_free_variable_ids;
     } plan;
     
     list<Value> forces;

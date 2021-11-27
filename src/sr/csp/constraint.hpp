@@ -42,14 +42,7 @@ public:
      * @return A list of free variables affecteed by this constraint. Size equals the return from GetFreeDegree()
      */
     virtual const list<VariableId> &GetFreeVariables() const = 0;
-    
-    /**
-     * Get the free variables that must be assigned when calling Test.
-     * 
-     * @return A list of free variables required by Test().
-     */
-    virtual const list<VariableId> &GetRequiredFreeVariables() const = 0;
-        
+      
     /**
      * Set the values of the forced varibles
      * 

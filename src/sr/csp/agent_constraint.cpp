@@ -51,37 +51,31 @@ string AgentConstraint::VariableRecord::GetTrace() const
 
 
 AgentConstraint::Plan::Plan( AgentConstraint *algo_,
-                                SR::PatternLink keyer_plink_, 
-                                set<SR::PatternLink> residual_plinks_,
-                                Action action_,
-                                VariableQueryLambda vql ) :
+                             SR::PatternLink keyer_plink_, 
+                             set<SR::PatternLink> residual_plinks_,
+                             Action action_,
+                             VariableQueryLambda vql ) :
     algo( algo_ ),
-    keyer_plink( keyer_plink_ ),
+    //keyer_plink( keyer_plink_ ),
     residual_plinks( residual_plinks_ ),
     action( action_ ),
-    agent( keyer_plink.GetChildAgent() ),
+    agent( keyer_plink_.GetChildAgent() ),
     pq( agent->GetPatternQuery() )
 {
-    for( SR::PatternLink residual_plink : residual_plinks )
-        ASSERT( residual_plink.GetChildAgent() == agent );
-    
     RunVariableQueries( vql );
     
     for( auto var : all_variables )
     {
-        // Only need to report FREE variables as being required
-        if( var.flags.freedom != Freedom::FREE )
-            continue;
-             
-        free_variable_ids.push_back( var.id );     
+        if( var.flags.freedom == Freedom::FREE )
+            free_variable_ids.push_back( var.id );     
     }
 }
 
 
 AgentConstraint::AgentConstraint( SR::PatternLink keyer_plink, 
-                                        set<SR::PatternLink> residual_plinks,
-                                        Action action,
-                                        VariableQueryLambda vql ) :
+                                  set<SR::PatternLink> residual_plinks,
+                                  Action action,
+                                  VariableQueryLambda vql ) :
     plan( this, keyer_plink, residual_plinks, action, vql )
 {
 }
@@ -90,11 +84,17 @@ AgentConstraint::AgentConstraint( SR::PatternLink keyer_plink,
 void AgentConstraint::Plan::RunVariableQueries( VariableQueryLambda vql )
 { 
     // The keyer
+    SR::PatternLink keyer_plink = agent->GetKeyerPatternLink();
     all_variables.push_back( VariableRecord{ Kind::KEYER, 
                                              keyer_plink, 
                                              vql(keyer_plink) } ); 
     
     // The residuals
+    set<SR::PatternLink> o_residual_plinks = agent->GetResidualPatternLinks();
+    //ASSERT( o_residual_plinks==residual_plinks )("Residuals don't match:\n")
+    //      ("Agent: ")(agent)(" action %d\n", action)
+    //      ("From agent:\n")(o_residual_plinks)("\n")
+    //      ("From engine:\n")(residual_plinks)("\n");
     for( VariableId residual_plink : residual_plinks )
         all_variables.push_back( VariableRecord{ Kind::RESIDUAL, 
                                                  residual_plink, 
@@ -123,38 +123,12 @@ const list<VariableId> &AgentConstraint::GetFreeVariables() const
 }
 
 
-const list<VariableId> &AgentConstraint::GetRequiredFreeVariables() const
-{ 
-    return plan.required_free_variable_ids;
-}
-
-
 void AgentConstraint::Start( const Assignments &forces_map_, 
-                                const SR::TheKnowledge *knowledge_ )
+                             const SR::TheKnowledge *knowledge_ )
 {
     forces_map = forces_map_;
     knowledge = knowledge_;
     ASSERT( knowledge );
-    
-    forces.clear();
-    for( auto var : plan.all_variables )
-    {
-        switch( var.flags.freedom )
-        {
-        case Freedom::FREE:
-            ASSERT( forces_map.count( var.id ) == 0 )
-                  (*this)("\n")
-                  (var)(" should not be in forces: ")(forces_map)("\n");
-            break;
-            
-        case Freedom::FORCED:
-            ASSERT( forces_map.count( var.id ) == 1 )
-                  (*this)("\n")
-                  (var)(" missing from forces: ")(forces_map)("\n"); 
-            forces.push_back( forces_map.at( var.id ) );            
-            break;
-        }
-    }    
 }   
 
 
@@ -214,5 +188,4 @@ void AgentConstraint::Dump() const
     TRACEC("Agent=")(plan.agent)("\n");
     TRACEC("Variables: ")(plan.all_variables)("\n");
     TRACEC("Free var ids: ")(plan.free_variable_ids)("\n");
-    TRACEC("Required free var ids: ")(plan.required_free_variable_ids)("\n");
 }      

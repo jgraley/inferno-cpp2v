@@ -534,6 +534,14 @@ PatternLink AgentCommon::GetKeyerPatternLink() const
 }
 
 
+set<PatternLink> AgentCommon::GetResidualPatternLinks() const
+{
+    ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
+    
+    return residual_plinks;
+}                                  
+
+
 void AgentCommon::Reset()
 {
 }
