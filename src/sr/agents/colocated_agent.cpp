@@ -25,12 +25,6 @@ bool ColocatedAgent::ImplHasNLQ() const
     return true;
 }
 
-    
-bool ColocatedAgent::NLQRequiresKeyer() const
-{
-    return false;
-}                                         
-
 
 void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                                const TheKnowledge *knowledge ) const
@@ -38,7 +32,7 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
     // Baseless query strategy: symmetrical
 
     XLink common_xlink;
-    for( PatternLink plink : base_and_normal_plinks )                 
+    for( PatternLink plink : keyer_and_normal_plinks )                 
     {
         if( required_links->count(plink) == 1 )
         {
@@ -59,7 +53,7 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
     };
     
     if( !common_xlink )
-        return; // we said "false" in NLQRequiresKeyer() so have to accept disjoint query 
+        return; // disjoint query (no overlap between required and expected links
     
     // Now that the common xlink is known to be really common,
     // we can apply the usual checks including PR check and allowing for MMAX

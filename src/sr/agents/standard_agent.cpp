@@ -395,12 +395,6 @@ bool StandardAgent::ImplHasNLQ() const
     return true;
 }
 
-    
-bool StandardAgent::NLQRequiresKeyer() const
-{
-    return false;
-}                                         
-
 
 void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                               const TheKnowledge *knowledge ) const

@@ -78,7 +78,6 @@ public:
 
     /// Test an Agent given partial map of locations of base and normal links. 
     virtual bool ImplHasNLQ() const = 0;                                              
-    virtual bool NLQRequiresKeyer() const = 0;                                              
     virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
                                        const TheKnowledge *knowledge ) const = 0;
 
@@ -147,7 +146,6 @@ public:
                                   XLink base_xlink ) const;       
                                                                            
     virtual bool ImplHasNLQ() const;
-    virtual bool NLQRequiresKeyer() const;
     void NLQFromDQ( const SolutionMap *required_links,
                     const TheKnowledge *knowledge ) const;                                              
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
@@ -199,7 +197,7 @@ protected:
     PatternLink keyer_plink;
     set<PatternLink> residual_plinks;
     PatternLink overlay_under_plink;
-    list<PatternLink> base_and_normal_plinks;
+    list<PatternLink> keyer_and_normal_plinks;
     Phase phase = UNDEFINED;
     
 private:    

@@ -22,7 +22,6 @@ public:
                                       XLink x ) const;                                    
                                                                
     virtual bool ImplHasNLQ() const;
-    virtual bool NLQRequiresKeyer() const; 
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                
                                                                          

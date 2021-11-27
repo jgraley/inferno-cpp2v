@@ -122,7 +122,6 @@ private:
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
-    virtual bool NLQRequiresKeyer() const;
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                              
     void NormalLinkedQuerySequence( SequenceInterface *x_seq,

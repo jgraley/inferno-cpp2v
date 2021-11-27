@@ -126,10 +126,10 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     // down.
     if( phase != IN_REPLACE_ONLY && keyer_plink )
     {
-        base_and_normal_plinks.clear();
-        base_and_normal_plinks.push_back( keyer_plink );
+        keyer_and_normal_plinks.clear();
+        keyer_and_normal_plinks.push_back( keyer_plink );
         for( PatternLink plink : pattern_query->GetNormalLinks() )
-            base_and_normal_plinks.push_back( plink );
+            keyer_and_normal_plinks.push_back( plink );
     }
 }
                                 
@@ -202,12 +202,6 @@ bool AgentCommon::ImplHasNLQ() const
     return false;
 }
 
-    
-bool AgentCommon::NLQRequiresKeyer() const
-{
-    return true;
-}                                         
-
 
 void AgentCommon::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                             const TheKnowledge *knowledge ) const
@@ -221,9 +215,10 @@ void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(keyer_plink)("\n");
     
+    
     // Can't do baseless query using DQ
-    ASSERT( NLQRequiresKeyer() ); // Agent shouldn't advertise
-    ASSERT( required_links->count(keyer_plink) ); // Solver shouldn't try
+    if( required_links->count(keyer_plink)==0 )
+        return;
     
     auto query = CreateDecidedQuery();
     RunDecidedQueryImpl( *query, required_links->at(keyer_plink) );
@@ -760,8 +755,8 @@ string AgentCommon::GetPlanAsString() const
           Trace(residual_plinks) },
         { "overlay_under_plink", 
           Trace(overlay_under_plink) },
-        { "base_and_normal_plinks", 
-          Trace(base_and_normal_plinks) }
+        { "keyer_and_normal_plinks", 
+          Trace(keyer_and_normal_plinks) }
     };
     return Trace(plan_as_strings);
 }

@@ -78,8 +78,6 @@ SystemicConstraint::Plan::Plan( SystemicConstraint *algo_,
         switch( var.kind )
         {
         case Kind::KEYER: 
-            if( agent->NLQRequiresKeyer() )
-                required_free_variable_ids.push_back( var.id );
             break;
         case Kind::RESIDUAL:
             break;

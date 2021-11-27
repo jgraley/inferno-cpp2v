@@ -65,12 +65,6 @@ bool DisjunctionAgent::ImplHasNLQ() const
     return true;
 }
 
-    
-bool DisjunctionAgent::NLQRequiresKeyer() const
-{
-    return false;
-}                                         
-
 
 void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
