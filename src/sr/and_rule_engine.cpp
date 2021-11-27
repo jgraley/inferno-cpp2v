@@ -369,12 +369,8 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
             return flags;            
         };
                 
-        set<PatternLink> coupling_residual_links_set;
-        for( PatternLink p : coupling_residual_links )
-            coupling_residual_links_set.insert( p );
-                
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
-                                                                           coupling_residual_links_set,
+                                                                           coupling_residual_links,
                                                                            CSP::AgentConstraint::Action::FULL,
                                                                            vql );
         constraints_list.push_back(c);    
@@ -410,13 +406,9 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
             
             return flags;            
         };
-                
-        set<PatternLink> my_master_boundary_links_set;
-        for( PatternLink p : my_master_boundary_links )
-            my_master_boundary_links_set.insert( p );
-            
+
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
-                                                                           my_master_boundary_links_set,
+                                                                           my_master_boundary_links,
                                                                            CSP::AgentConstraint::Action::COUPLING,
                                                                            vql );
         constraints_list.push_back(c);    
@@ -957,7 +949,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
     
 	auto agents_lambda = [&](const unordered_map< Agent *, unordered_set<PatternLink> > &parent_links_to_agents,
                              const unordered_set<PatternLink> &keyers,
-                             const unordered_set<PatternLink> &residuals ) -> list<Graph::Figure::Agent>
+                             const set<PatternLink> &residuals ) -> list<Graph::Figure::Agent>
     {
         list<Graph::Figure::Agent> figure_agents;
         for( auto p : parent_links_to_agents )

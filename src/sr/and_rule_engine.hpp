@@ -105,9 +105,9 @@ public:
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         unordered_set<Agent *> master_boundary_agents;
-        unordered_set<PatternLink> coupling_residual_links;
+        set<PatternLink> coupling_residual_links;
         unordered_set<PatternLink> coupling_keyer_links_all; // All keyers
-        unordered_set<PatternLink> my_master_boundary_links; // These are ALL residuals
+        set<PatternLink> my_master_boundary_links; // These are ALL residuals
         unordered_set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
         unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
         unordered_map< Agent *, unordered_set<PatternLink> > parent_residual_links_to_master_boundary_agents;

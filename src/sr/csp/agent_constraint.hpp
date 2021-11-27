@@ -72,7 +72,7 @@ public:
      * @param vql callback that requests information about variables
      */
     explicit AgentConstraint( SR::Agent *agent,
-                              set<SR::PatternLink> feasible_residuals,
+                              set<SR::PatternLink> relevent_residuals,
                               Action action,
                               VariableQueryLambda vql );
     
@@ -93,10 +93,10 @@ private:
     {
         explicit Plan( AgentConstraint *algo,  
                        SR::Agent *agent,
-                       set<SR::PatternLink> feasible_residuals,       
+                       set<SR::PatternLink> relevent_residuals,       
                        Action action,          
                        VariableQueryLambda vql );
-        void RunVariableQueries( set<SR::PatternLink> feasible_residuals, 
+        void RunVariableQueries( set<SR::PatternLink> relevent_residuals, 
                                  VariableQueryLambda vql );
         string GetTrace() const; // used for debug
 

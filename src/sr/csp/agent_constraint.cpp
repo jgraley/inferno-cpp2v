@@ -52,7 +52,7 @@ string AgentConstraint::VariableRecord::GetTrace() const
 
 AgentConstraint::Plan::Plan( AgentConstraint *algo_,
                              SR::Agent *agent,
-                             set<SR::PatternLink> feasible_residuals,
+                             set<SR::PatternLink> relevent_residuals,
                              Action action_,
                              VariableQueryLambda vql ) :
     algo( algo_ ),
@@ -60,7 +60,7 @@ AgentConstraint::Plan::Plan( AgentConstraint *algo_,
     agent( agent ),
     pq( agent->GetPatternQuery() )
 {
-    RunVariableQueries( feasible_residuals, vql );
+    RunVariableQueries( relevent_residuals, vql );
     
     for( auto var : all_variables )
     {
@@ -71,15 +71,15 @@ AgentConstraint::Plan::Plan( AgentConstraint *algo_,
 
 
 AgentConstraint::AgentConstraint( SR::Agent *agent,
-                                  set<SR::PatternLink> feasible_residuals,
+                                  set<SR::PatternLink> relevent_residuals,
                                   Action action,
                                   VariableQueryLambda vql ) :
-    plan( this, agent, feasible_residuals, action, vql )
+    plan( this, agent, relevent_residuals, action, vql )
 {
 }
 
 
-void AgentConstraint::Plan::RunVariableQueries( set<SR::PatternLink> feasible_residuals,
+void AgentConstraint::Plan::RunVariableQueries( set<SR::PatternLink> relevent_residuals,
                                                 VariableQueryLambda vql )
 { 
     // The keyer
@@ -88,9 +88,11 @@ void AgentConstraint::Plan::RunVariableQueries( set<SR::PatternLink> feasible_re
                                              keyer_plink, 
                                              vql(keyer_plink) } ); 
     
-    // The residuals
+    // The residuals. Agent will give us residuals that belong to 
+    // AndRuleEngines other than the one we're helping to solve for,
+    // so filter them down by taking an intersection.
     set<SR::PatternLink> residual_plinks = agent->GetResidualPatternLinks();
-    residual_plinks = IntersectionOf( residual_plinks, feasible_residuals );
+    residual_plinks = IntersectionOf( residual_plinks, relevent_residuals );
     for( VariableId residual_plink : residual_plinks )
         all_variables.push_back( VariableRecord{ Kind::RESIDUAL, 
                                                  residual_plink, 
