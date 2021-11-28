@@ -8,7 +8,6 @@
 
 #include <memory>
 #include <list>
-#include <memory>
 
 namespace SR
 {
@@ -48,13 +47,6 @@ private:
                         const SR::TheKnowledge *knowledge_ );    
     void Test( Assignments frees_map );
         
-    class ByLocationLinkMismatch : public ::Mismatch
-    {
-    };
-    class ByValueLinkMismatch : public ::Mismatch
-    {
-    };
-    
     const struct Plan : public virtual Traceable
     {
         explicit Plan( AgentConstraint *algo,  

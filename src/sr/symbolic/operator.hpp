@@ -21,13 +21,15 @@ public:
         const SR::SolutionMap *required_links;
         const SR::TheKnowledge *knowledge;
     };
+
+    virtual set<SR::PatternLink> GetInputPatternLinks() const = 0;
 };
 
 
 class BooleanOperator : public Operator
 {    
 public:
-    virtual void Evaluate( const EvalKit &kit ) = 0; // throws on mismatch
+    virtual void Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
 };
 
 };

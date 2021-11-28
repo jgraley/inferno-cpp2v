@@ -300,21 +300,34 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
 
 shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only )
 {
+    ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
+	set<PatternLink> input_plinks;
+	
+    // The keyer and residuals (parent links)
+    input_plinks = residual_plinks;
+    input_plinks.insert( keyer_plink );
+
     if( coupling_only )
     {
-        return make_shared<SYM::LambdaOperator>([&](const SYM::Operator::EvalKit &kit)
+		auto lambda = [this](const SYM::Operator::EvalKit &kit)
         {
-            RunCouplingQuery( kit.required_links ); // throws on mismatch   
-        });
+            //RunCouplingQuery( kit.required_links ); // throws on mismatch   
+        };
+        return make_shared<SYM::LambdaOperator>(input_plinks, lambda);
     }
     else // Full
     {
-        return make_shared<SYM::LambdaOperator>([&](const SYM::Operator::EvalKit &kit)
+		// The normal children
+		FOREACH( SR::PatternLink child_plink, pattern_query->GetNormalLinks() )
+			input_plinks.insert( child_plink );      
+		
+		auto lambda = [this](const SYM::Operator::EvalKit &kit)
         {
-            RunCouplingQuery( kit.required_links ); // throws on mismatch   
-            RunNormalLinkedQuery( kit.required_links,
-                                  kit.knowledge ); // throws on mismatch   
-        });
+            //RunCouplingQuery( kit.required_links ); // throws on mismatch   
+           // RunNormalLinkedQuery( kit.required_links,
+            //                      kit.knowledge ); // throws on mismatch   
+        };
+        return make_shared<SYM::LambdaOperator>(input_plinks, lambda);
     }
 }
 

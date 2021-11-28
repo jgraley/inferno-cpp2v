@@ -2,14 +2,24 @@
 
 using namespace SYM;
 
-LambdaOperator::LambdaOperator( const BooleanLambda &lambda_ ) :
+LambdaOperator::LambdaOperator( set<SR::PatternLink> input_plinks_,
+                                const BooleanLambda &lambda_ ) :
+    input_plinks(input_plinks_),
     lambda(lambda_)
 {
+    ASSERT( lambda );
 }
 
 
-void LambdaOperator::Evaluate( const EvalKit &kit )
+set<SR::PatternLink> LambdaOperator::GetInputPatternLinks() const
 {
+    return input_plinks;
+}
+
+
+void LambdaOperator::Evaluate( const EvalKit &kit ) const
+{
+    ASSERT( lambda );
     lambda(kit); // throws on mismatch
 }
 

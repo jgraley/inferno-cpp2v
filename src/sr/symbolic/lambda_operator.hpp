@@ -16,10 +16,13 @@ class LambdaOperator : public BooleanOperator
 public:
     typedef function<void( const EvalKit &kit )> BooleanLambda;
     
-    LambdaOperator( const BooleanLambda &lambda_ );
-    virtual void Evaluate( const EvalKit &kit ) override;
+    LambdaOperator( set<SR::PatternLink> input_plinks_,
+                    const BooleanLambda &lambda_ );
+    virtual set<SR::PatternLink> GetInputPatternLinks() const override;
+    virtual void Evaluate( const EvalKit &kit ) const override;
     
 private:
+    set<SR::PatternLink> input_plinks;
     const BooleanLambda &lambda;
 };
 

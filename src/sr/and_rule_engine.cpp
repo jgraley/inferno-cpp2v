@@ -1,6 +1,7 @@
 #include "and_rule_engine.hpp"
 
 #include "csp/agent_constraint.hpp"
+#include "csp/symbolic_constraint.hpp"
 #include "csp/simple_solver.hpp"
 #include "csp/solver_holder.hpp"
 #include "scr_engine.hpp"
@@ -20,14 +21,14 @@
 #include "render/graph.hpp"
 
 #include <list>
-
-//#define TEST_PATTERN_QUERY
  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
 //#define NLQ_TEST
 
 #define CHECK_FOR_MASTER_KEYERS
+
+//#define USE_SYMBOLIC
 
 using namespace SR;
 
@@ -377,10 +378,20 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
-    {                         
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
+    {
+		Agent *agent = keyer_plink.GetChildAgent();
+#ifdef USE_SYMBOLIC
+		shared_ptr<SYM::BooleanOperator> op = agent->SymbolicQuery(false);
+		op->Evaluate(SYM::Operator::EvalKit());
+		CSP::SymbolicConstraint ttt(op, relevent_links);
+		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
+		                                                                     relevent_links);
+		op->Evaluate(SYM::Operator::EvalKit());
+#else
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( agent,
                                                                            relevent_links,
                                                                            CSP::AgentConstraint::Action::FULL );
+#endif
         constraints_list.push_back(c);    
     }
 }
@@ -403,9 +414,18 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( keyer_plink.GetChildAgent(),
+		Agent *agent = keyer_plink.GetChildAgent();
+#ifdef USE_SYMBOLIC
+		shared_ptr<SYM::BooleanOperator> op = agent->SymbolicQuery(true);
+		op->Evaluate(SYM::Operator::EvalKit());
+		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
+		                                                                     relevent_links);
+		op->Evaluate(SYM::Operator::EvalKit());
+#else
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( agent,
                                                                            relevent_links,
                                                                            CSP::AgentConstraint::Action::COUPLING );
+#endif
         constraints_list.push_back(c);    
     }
 }
@@ -571,19 +591,6 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
         TRACE("Normal ")(query->GetNormalLinks())("\n")
              ("Abormal ")(query->GetAbnormalLinks())("\n")
              ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
-#ifdef TEST_PATTERN_QUERY
-        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-        ASSERT( pq->GetNormalLinks() == query->GetNormalLinks() &&
-                pq->GetAbnormalLinks() == query->GetAbnormalLinks() &&
-                pq->GetMultiplicityLinks() == query->GetMultiplicityLinks() &&
-                pq->GetDecisions().size() == query->GetDecisions().size() )
-              ("PatternQuery disagrees with DecidedQuery!!!!\n")
-              ("GetNormalLinks().size() : %d vs %d\n", pq->GetNormalLinks().size(), query->GetNormalLinks().size() )
-              ("GetAbnormalLinks().size() : %d vs %d\n", pq->GetAbnormalLinks().size(), query->GetAbnormalLinks().size() )
-              ("GetMultiplicityLinks().size() : %d vs %d\n", pq->GetMultiplicityLinks().size(), query->GetMultiplicityLinks().size() )
-              ("GetDecisions().size() : %d vs %d\n", pq->GetDecisions().size(), query->GetDecisions().size() )
-              (*agent);
-#endif
         CompareLinks( agent, query );
     }
 }
