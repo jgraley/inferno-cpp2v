@@ -26,11 +26,13 @@ public:
 };
 
 
+// Kept in operator.hpp because of wider inclusion thatn the impl classes
 class BooleanOperator : public Operator
 {    
 public:
     virtual void Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
 };
+
 
 };
 

@@ -8,7 +8,7 @@
 // Temporary
 #include "tree/cpptree.hpp"
 #include "transform_of_agent.hpp"
-#include "symbolic/lambda_operator.hpp"
+#include "symbolic/boolean_operators.hpp"
 
 #include <stdexcept>
 
@@ -304,33 +304,34 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
 shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only )
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
-	set<PatternLink> input_plinks;
 	
     // The keyer and residuals (parent links)
-    input_plinks = residual_plinks;
-    input_plinks.insert( keyer_plink );
+    set<PatternLink> c_plinks = residual_plinks;
+    c_plinks.insert( keyer_plink );
+    auto clambda = [this](const SYM::Operator::EvalKit &kit)
+    {
+        RunCouplingQuery( kit.required_links ); // throws on mismatch   
+    };
+    auto ce = make_shared<SYM::BooleanLambda>(c_plinks, clambda);
 
     if( coupling_only )
     {
-		auto lambda = [this](const SYM::Operator::EvalKit &kit)
-        {
-            RunCouplingQuery( kit.required_links ); // throws on mismatch   
-        };
-        return make_shared<SYM::LambdaOperator>(input_plinks, lambda);
+        return ce;
     }
     else // Full
     {
-		// The normal children
+		// The keyer and normal children
+        set<PatternLink> n_plinks;
 		FOREACH( SR::PatternLink child_plink, pattern_query->GetNormalLinks() )
-			input_plinks.insert( child_plink );      
-		
-		auto lambda = [this](const SYM::Operator::EvalKit &kit)
+			n_plinks.insert( child_plink );  
+        n_plinks.insert( keyer_plink );
+		auto nlambda = [this](const SYM::Operator::EvalKit &kit)
         {
-            RunCouplingQuery( kit.required_links ); // throws on mismatch   
             RunNormalLinkedQuery( kit.required_links,
                                   kit.knowledge ); // throws on mismatch   
         };
-        return make_shared<SYM::LambdaOperator>(input_plinks, lambda);
+        auto ne = make_shared<SYM::BooleanLambda>(n_plinks, nlambda);
+        return make_shared<SYM::AndOperator>( ce, ne );
     }
 }
 
