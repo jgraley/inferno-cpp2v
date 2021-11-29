@@ -76,7 +76,8 @@ void SymbolicConstraint::Test( Assignments frees_map )
 
 void SymbolicConstraint::Dump() const
 {
-    TRACE("Degree %d ", 
+    TRACE("Degree %d\n", 
           plan.variables.size());
+    TRACEC("Expression: ")(plan.op->Render())("\n");
     TRACEC("Variables: ")(plan.variables)("\n");
 }      

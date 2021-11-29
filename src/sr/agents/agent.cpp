@@ -312,7 +312,7 @@ shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only 
     {
         RunCouplingQuery( kit.required_links ); // throws on mismatch   
     };
-    auto ce = make_shared<SYM::BooleanLambda>(c_plinks, clambda);
+    auto ce = make_shared<SYM::BooleanLambda>(c_plinks, clambda, GetTrace()+".CQ()");
 
     if( coupling_only )
     {
@@ -330,7 +330,7 @@ shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only 
             RunNormalLinkedQuery( kit.required_links,
                                   kit.knowledge ); // throws on mismatch   
         };
-        auto ne = make_shared<SYM::BooleanLambda>(n_plinks, nlambda);
+        auto ne = make_shared<SYM::BooleanLambda>(n_plinks, nlambda, GetTrace()+".NLQ()");
         return make_shared<SYM::AndOperator>( ce, ne );
     }
 }

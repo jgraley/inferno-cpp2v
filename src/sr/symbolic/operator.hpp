@@ -23,6 +23,7 @@ public:
     };
 
     virtual set<SR::PatternLink> GetInputPatternLinks() const = 0;
+    virtual string Render() const = 0;
 };
 
 

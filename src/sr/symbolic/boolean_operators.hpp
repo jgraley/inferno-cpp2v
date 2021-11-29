@@ -17,13 +17,16 @@ public:
     typedef function<void( const EvalKit &kit )> LambdaType;
     
     BooleanLambda( set<SR::PatternLink> input_plinks_,
-                    const LambdaType &lambda_ );
+                    const LambdaType &lambda_,
+                    string description );
     virtual set<SR::PatternLink> GetInputPatternLinks() const override;
     virtual void Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
     
 private:
-    set<SR::PatternLink> input_plinks;
+    const set<SR::PatternLink> input_plinks;
     const LambdaType lambda;
+    const string description;
 };
 
 
@@ -34,6 +37,7 @@ public:
                  shared_ptr<BooleanOperator> b );
     virtual set<SR::PatternLink> GetInputPatternLinks() const override;
     virtual void Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
     
 private:
     shared_ptr<BooleanOperator> a;

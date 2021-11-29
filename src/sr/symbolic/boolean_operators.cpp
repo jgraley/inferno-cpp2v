@@ -5,9 +5,11 @@ using namespace SYM;
 // ------------------------- BooleanLambda --------------------------
 
 BooleanLambda::BooleanLambda( set<SR::PatternLink> input_plinks_,
-                                const LambdaType &lambda_ ) :
+                              const LambdaType &lambda_,
+                              string description_ ) :
     input_plinks(input_plinks_),
-    lambda(lambda_)
+    lambda(lambda_),
+    description(description_)
 {
     ASSERT( lambda );
 }
@@ -26,6 +28,12 @@ void BooleanLambda::Evaluate( const EvalKit &kit ) const
     ASSERT( kit.knowledge );    
     lambda(kit); // throws on mismatch
 }
+
+
+string BooleanLambda::Render() const
+{
+    return "["+description+"]";
+};
 
 // ------------------------- AndOperator --------------------------
 
@@ -52,3 +60,9 @@ void AndOperator::Evaluate( const EvalKit &kit ) const
     a->Evaluate(kit);
     b->Evaluate(kit);
 }
+
+
+string AndOperator::Render() const
+{
+    return a->Render() + " && " + b->Render();
+};
