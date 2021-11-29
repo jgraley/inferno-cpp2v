@@ -34,9 +34,7 @@ void AgentConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_pl
     if( relevent_plinks.count(keyer_plink)==1 )
         variables.push_back( keyer_plink ); 
     
-    // The residuals. Agent will give us residuals that belong to 
-    // AndRuleEngines other than the one we're helping to solve for,
-    // so filter them down by taking an intersection.
+    // The residuals
     set<SR::PatternLink> residual_plinks = agent->GetResidualPatternLinks();
     residual_plinks = IntersectionOf( residual_plinks, relevent_plinks );
     for( VariableId residual_plink : residual_plinks )

@@ -23,7 +23,7 @@ public:
     
 private:
     set<SR::PatternLink> input_plinks;
-    const BooleanLambda &lambda;
+    const BooleanLambda lambda;
 };
 
 };

@@ -28,7 +28,7 @@
 
 #define CHECK_FOR_MASTER_KEYERS
 
-//#define USE_SYMBOLIC
+#define USE_SYMBOLIC
 
 using namespace SR;
 
@@ -382,11 +382,8 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
 		Agent *agent = keyer_plink.GetChildAgent();
 #ifdef USE_SYMBOLIC
 		shared_ptr<SYM::BooleanOperator> op = agent->SymbolicQuery(false);
-		op->Evaluate(SYM::Operator::EvalKit());
-		CSP::SymbolicConstraint ttt(op, relevent_links);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
-		op->Evaluate(SYM::Operator::EvalKit());
 #else
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( agent,
                                                                            relevent_links,
@@ -417,10 +414,8 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
 		Agent *agent = keyer_plink.GetChildAgent();
 #ifdef USE_SYMBOLIC
 		shared_ptr<SYM::BooleanOperator> op = agent->SymbolicQuery(true);
-		op->Evaluate(SYM::Operator::EvalKit());
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
-		op->Evaluate(SYM::Operator::EvalKit());
 #else
         shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( agent,
                                                                            relevent_links,

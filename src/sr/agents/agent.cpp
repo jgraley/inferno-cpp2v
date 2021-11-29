@@ -258,6 +258,8 @@ void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
 void AgentCommon::RunNormalLinkedQuery( const SolutionMap *required_links,
                                         const TheKnowledge *knowledge ) const
 {
+    ASSERT( required_links );
+    ASSERT( knowledge );
     if( ImplHasNLQ() )    
         RunNormalLinkedQueryImpl( required_links, knowledge );
     else
@@ -272,6 +274,7 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
     
+    ASSERT( required_links );
     // Without keyer, don't bother to check anything
     if( required_links->count(keyer_plink) == 0 )
         return;
@@ -311,7 +314,7 @@ shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only 
     {
 		auto lambda = [this](const SYM::Operator::EvalKit &kit)
         {
-            //RunCouplingQuery( kit.required_links ); // throws on mismatch   
+            RunCouplingQuery( kit.required_links ); // throws on mismatch   
         };
         return make_shared<SYM::LambdaOperator>(input_plinks, lambda);
     }
@@ -323,9 +326,9 @@ shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only 
 		
 		auto lambda = [this](const SYM::Operator::EvalKit &kit)
         {
-            //RunCouplingQuery( kit.required_links ); // throws on mismatch   
-           // RunNormalLinkedQuery( kit.required_links,
-            //                      kit.knowledge ); // throws on mismatch   
+            RunCouplingQuery( kit.required_links ); // throws on mismatch   
+            RunNormalLinkedQuery( kit.required_links,
+                                  kit.knowledge ); // throws on mismatch   
         };
         return make_shared<SYM::LambdaOperator>(input_plinks, lambda);
     }

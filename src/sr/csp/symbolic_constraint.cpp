@@ -13,10 +13,7 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
     algo( algo_ ),
     op( op_ )
 {
-    op_->Evaluate(SYM::Operator::EvalKit());
-    op->Evaluate(SYM::Operator::EvalKit());
     DetermineVariables( relevent_plinks );       
-	op->Evaluate(SYM::Operator::EvalKit());
 }
 
 
@@ -55,14 +52,12 @@ void SymbolicConstraint::Start( const Assignments &forces_map_,
     forces_map = forces_map_;
     knowledge = knowledge_;
     ASSERT( knowledge );
-    plan.op->Evaluate(SYM::Operator::EvalKit());
 }   
 
 
 void SymbolicConstraint::Test( Assignments frees_map )
 {   
     INDENT("T");
-    plan.op->Evaluate(SYM::Operator::EvalKit());
 
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the links required by the operator.
@@ -72,7 +67,7 @@ void SymbolicConstraint::Test( Assignments frees_map )
     {
         //Tracer::RAIIDisable silencer(); // make queries be quiet
 
-        SYM::Operator::EvalKit kit;// { &full_map, knowledge };
+        SYM::Operator::EvalKit kit { &full_map, knowledge };
         ASSERT(plan.op);
         plan.op->Evaluate( kit );
     }            

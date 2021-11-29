@@ -20,6 +20,8 @@ set<SR::PatternLink> LambdaOperator::GetInputPatternLinks() const
 void LambdaOperator::Evaluate( const EvalKit &kit ) const
 {
     ASSERT( lambda );
+    ASSERT( kit.required_links );
+    ASSERT( kit.knowledge );    
     lambda(kit); // throws on mismatch
 }
 
