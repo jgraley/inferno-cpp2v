@@ -245,13 +245,7 @@ void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
             
         // Compare by location
         if( (XLink)alink != (XLink)rlink ) 
-        {
-            NLQFromDQLinkMismatch e; // value of links mismatches
-#ifdef HINTS_IN_EXCEPTIONS
-            e.hint = alink;
-#endif            
-            throw e;       
-        }                          
+            throw NLQFromDQLinkMismatch();               
     }            
 }                           
                                 
