@@ -381,7 +381,7 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
     {
 		Agent *agent = keyer_plink.GetChildAgent();
 #ifdef USE_SYMBOLIC
-		shared_ptr<SYM::BooleanOperator> op = agent->SymbolicQuery(false);
+		shared_ptr<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
 #else
@@ -413,7 +413,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
 #ifdef USE_SYMBOLIC
-		shared_ptr<SYM::BooleanOperator> op = agent->SymbolicQuery(true);
+		shared_ptr<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
 #else

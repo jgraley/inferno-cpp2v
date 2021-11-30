@@ -1,5 +1,5 @@
-#ifndef OPERATOR_HPP
-#define OPERATOR_HPP
+#ifndef EXPRESSION_HPP
+#define EXPRESSION_HPP
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -9,7 +9,7 @@
 namespace SYM
 { 
 
-class Operator
+class Expression
 {    
 public:
     /**
@@ -28,7 +28,7 @@ public:
 
 
 // Kept in operator.hpp because of wider inclusion thatn the impl classes
-class BooleanOperator : public Operator
+class BooleanExpression : public Expression
 {    
 public:
     virtual void Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch

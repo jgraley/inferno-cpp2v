@@ -8,7 +8,7 @@ using namespace CSP;
 
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
-                                shared_ptr<SYM::BooleanOperator> op_,
+                                shared_ptr<SYM::BooleanExpression> op_,
                                 set<SR::PatternLink> relevent_plinks ) :
     algo( algo_ ),
     op( op_ )
@@ -17,7 +17,7 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
 }
 
 
-SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanOperator> op,
+SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
                                         set<SR::PatternLink> relevent_plinks ) :
     plan( this, op, relevent_plinks )
 {
@@ -67,7 +67,7 @@ void SymbolicConstraint::Test( Assignments frees_map )
     {
         //Tracer::RAIIDisable silencer(); // make queries be quiet
 
-        SYM::Operator::EvalKit kit { &full_map, knowledge };
+        SYM::Expression::EvalKit kit { &full_map, knowledge };
         ASSERT(plan.op);
         plan.op->Evaluate( kit );
     }            

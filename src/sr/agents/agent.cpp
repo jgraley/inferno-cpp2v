@@ -8,6 +8,7 @@
 // Temporary
 #include "tree/cpptree.hpp"
 #include "transform_of_agent.hpp"
+#include "symbolic/lambdas.hpp"
 #include "symbolic/boolean_operators.hpp"
 
 #include <stdexcept>
@@ -301,37 +302,37 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
 }
 
 
-shared_ptr<SYM::BooleanOperator> AgentCommon::SymbolicQuery( bool coupling_only )
+shared_ptr<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only )
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
     // The keyer and residuals (parent links)
-    set<PatternLink> c_plinks = residual_plinks;
-    c_plinks.insert( keyer_plink );
-    auto clambda = [this](const SYM::Operator::EvalKit &kit)
+    set<PatternLink> cq_plinks = residual_plinks;
+    cq_plinks.insert( keyer_plink );
+    auto cq_lambda = [this](const SYM::Expression::EvalKit &kit)
     {
         RunCouplingQuery( kit.required_links ); // throws on mismatch   
     };
-    auto ce = make_shared<SYM::BooleanLambda>(c_plinks, clambda, GetTrace()+".CQ()");
+    auto cq_expression = make_shared<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
 
     if( coupling_only )
     {
-        return ce;
+        return cq_expression;
     }
     else // Full
     {
 		// The keyer and normal children
-        set<PatternLink> n_plinks;
+        set<PatternLink> nlq_plinks;
 		FOREACH( SR::PatternLink child_plink, pattern_query->GetNormalLinks() )
-			n_plinks.insert( child_plink );  
-        n_plinks.insert( keyer_plink );
-		auto nlambda = [this](const SYM::Operator::EvalKit &kit)
+			nlq_plinks.insert( child_plink );  
+        nlq_plinks.insert( keyer_plink );
+		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
         {
             RunNormalLinkedQuery( kit.required_links,
                                   kit.knowledge ); // throws on mismatch   
         };
-        auto ne = make_shared<SYM::BooleanLambda>(n_plinks, nlambda, GetTrace()+".NLQ()");
-        return make_shared<SYM::AndOperator>( ce, ne );
+        auto nlq_expression = make_shared<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+        return make_shared<SYM::AndOperator>( cq_expression, nlq_expression );
     }
 }
 

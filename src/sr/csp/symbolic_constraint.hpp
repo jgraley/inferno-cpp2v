@@ -5,7 +5,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
-#include "../symbolic/operator.hpp"
+#include "../symbolic/expression.hpp"
 
 #include <memory>
 #include <list>
@@ -31,7 +31,7 @@ public:
      * 
      * @param op a shared pointer to the boolean operator
      */
-    explicit SymbolicConstraint( shared_ptr<SYM::BooleanOperator> op,
+    explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
                                  set<SR::PatternLink> relevent_plinks );
     
 private:
@@ -43,13 +43,13 @@ private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
-                       shared_ptr<SYM::BooleanOperator> op,
+                       shared_ptr<SYM::BooleanExpression> op,
                        set<SR::PatternLink> relevent_plinks );
         void DetermineVariables( set<SR::PatternLink> relevent_plinks );
         string GetTrace() const; // used for debug
 
         SymbolicConstraint * const algo;
-        shared_ptr<SYM::BooleanOperator> op;
+        shared_ptr<SYM::BooleanExpression> op;
         list<VariableId> variables;
     } plan;
     
