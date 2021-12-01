@@ -1,6 +1,5 @@
 #include "and_rule_engine.hpp"
 
-#include "csp/agent_constraint.hpp"
 #include "csp/symbolic_constraint.hpp"
 #include "csp/simple_solver.hpp"
 #include "csp/solver_holder.hpp"
@@ -27,8 +26,6 @@
 //#define NLQ_TEST
 
 #define CHECK_FOR_MASTER_KEYERS
-
-#define USE_SYMBOLIC
 
 using namespace SR;
 
@@ -380,15 +377,9 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {
 		Agent *agent = keyer_plink.GetChildAgent();
-#ifdef USE_SYMBOLIC
 		shared_ptr<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
-#else
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( agent,
-                                                                           relevent_links,
-                                                                           CSP::AgentConstraint::Action::FULL );
-#endif
         constraints_list.push_back(c);    
     }
 }
@@ -412,15 +403,9 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
-#ifdef USE_SYMBOLIC
 		shared_ptr<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
-#else
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::AgentConstraint>( agent,
-                                                                           relevent_links,
-                                                                           CSP::AgentConstraint::Action::COUPLING );
-#endif
         constraints_list.push_back(c);    
     }
 }
