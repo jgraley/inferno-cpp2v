@@ -14,7 +14,7 @@ public:
     BuilderAgent() {}
 
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
-                                    unordered_set<PatternLink> keyer_plinks ); 
+                                    set<PatternLink> keyer_plinks ); 
                                  
     virtual TreePtr<Node> BuildNewSubtree() = 0;
 

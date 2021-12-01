@@ -121,7 +121,7 @@ private: friend class PatternLink; friend class XLink;
     XLink xlink; 
 };
 
-typedef unordered_map< PatternLink, XLink > SolutionMap;
+typedef map< PatternLink, XLink > SolutionMap;
 
 //bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 

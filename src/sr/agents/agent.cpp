@@ -597,7 +597,7 @@ void AgentCommon::PlanOverlayImpl( PatternLink me_plink,
 
 
 bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink, 
-                                     unordered_set<PatternLink> keyer_plinks )
+                                     set<PatternLink> keyer_plinks )
 {
     return false;
 }

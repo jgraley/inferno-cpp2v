@@ -32,7 +32,7 @@ SCREngine::SCREngine( const CompareReplace *overall_master,
                       CompareReplace::AgentPhases &in_progress_agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
-                      const unordered_set<PatternLink> &master_plinks,
+                      const set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
     plan(this, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
@@ -45,7 +45,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        CompareReplace::AgentPhases &in_progress_agent_phases,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
-                       const unordered_set<PatternLink> &master_plinks_,
+                       const set<PatternLink> &master_plinks_,
                        const SCREngine *master ) : // Note: Is planning stage one
     algo( algo_ ),
     master_ptr( nullptr ),
@@ -71,20 +71,20 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 }
 
     
-void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master_plinks, 
+void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks, 
                                         CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
     // compare and replace sets separately.
-    unordered_set<PatternLink> visible_compare_plinks, visible_replace_plinks;
+    set<PatternLink> visible_compare_plinks, visible_replace_plinks;
     list<PatternLink> visible_replace_plinks_postorder;
     WalkVisible( visible_compare_plinks, nullptr, root_plink, Agent::COMPARE_PATH );
     WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, root_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though slave "through", 
     // not into the slave's pattern)
-    unordered_set<PatternLink> visible_plinks = UnionOf( visible_compare_plinks, visible_replace_plinks );
+    set<PatternLink> visible_plinks = UnionOf( visible_compare_plinks, visible_replace_plinks );
     
     for( PatternLink plink : visible_plinks )
     {
@@ -133,7 +133,7 @@ void SCREngine::Plan::CategoriseAgents( const unordered_set<PatternLink> &master
 }
 
 
-void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
+void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
                                    list<PatternLink> *visible_postorder, // optional
                                    PatternLink base_plink, 
                                    Agent::Path path ) const
@@ -154,7 +154,7 @@ void SCREngine::Plan::WalkVisible( unordered_set<PatternLink> &visible,
 void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Determine which agents our slaves should not configure
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
+    set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
             
     for( PatternLink plink : my_subordinate_plinks_postorder )
     {
@@ -196,7 +196,7 @@ void SCREngine::Plan::ConfigureAgents()
 }
 
 
- void SCREngine::Plan::PlanningStageThree(unordered_set<PatternLink> master_keyers)
+ void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.

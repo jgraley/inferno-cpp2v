@@ -46,13 +46,13 @@ public:
                CompareReplace::AgentPhases &in_progress_agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
-               const unordered_set<PatternLink> &master_plinks = unordered_set<PatternLink>(),                            
+               const set<PatternLink> &master_plinks = set<PatternLink>(),                            
                const SCREngine *master = nullptr); /* if null, you are overall master */ 
     void PlanningStageTwo( const CompareReplace::AgentPhases &in_progress_agent_phases )
     {
         plan.PlanningStageTwo(in_progress_agent_phases); 
     }
-    void PlanningStageThree(unordered_set<PatternLink> master_keyers)
+    void PlanningStageThree(set<PatternLink> master_keyers)
     {
         plan.PlanningStageThree(master_keyers); 
     }
@@ -65,18 +65,18 @@ private:
               CompareReplace::AgentPhases &in_progress_agent_phases,
               TreePtr<Node> cp,
               TreePtr<Node> rp,
-              const unordered_set<PatternLink> &master_plinks,                            
+              const set<PatternLink> &master_plinks,                            
               const SCREngine *master ); /* if null, you are overall master */ 
-        void CategoriseAgents( const unordered_set<PatternLink> &master_plinks, 
+        void CategoriseAgents( const set<PatternLink> &master_plinks, 
                                CompareReplace::AgentPhases &in_progress_agent_phases );
-        void WalkVisible( unordered_set<PatternLink> &visible, 
+        void WalkVisible( set<PatternLink> &visible, 
                           list<PatternLink> *visible_postorder,
                           PatternLink base_plink, 
                           Agent::Path path ) const;
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
-        void PlanningStageThree(unordered_set<PatternLink> master_keyers);
+        void PlanningStageThree(set<PatternLink> master_keyers);
         void PlanCompare();
         void PlanReplace();
         void Dump();
@@ -88,11 +88,11 @@ private:
         PatternLink root_plink;
         Agent *root_agent;
         const SCREngine *master_ptr;
-        const unordered_set<PatternLink> master_plinks;
-        unordered_set<Agent *> master_agents;
-        unordered_set<PatternLink> my_plinks;   
-        unordered_set<Agent *> my_agents;   
-        unordered_set<PatternLink> all_keyer_plinks;   
+        const set<PatternLink> master_plinks;
+        set<Agent *> master_agents;
+        set<PatternLink> my_plinks;   
+        set<Agent *> my_agents;   
+        set<PatternLink> all_keyer_plinks;   
         set<StartsOverlay *> my_overlay_starter_engines;   
         map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;

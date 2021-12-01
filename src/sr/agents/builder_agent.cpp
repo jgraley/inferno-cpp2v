@@ -4,7 +4,7 @@
 using namespace SR;
 
 bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink, 
-                                      unordered_set<PatternLink> keyer_plinks )
+                                      set<PatternLink> keyer_plinks )
 {
     ASSERT( me_plink.GetChildAgent() == this );
     ASSERT( !master_scr_engine->IsKeyed(me_plink) ); // should only be reached once for each plink

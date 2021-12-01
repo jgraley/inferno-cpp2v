@@ -54,8 +54,8 @@ public:
     };
     
     AndRuleEngine( PatternLink root_plink, 
-                   const unordered_set<PatternLink> &master_plinks,
-                   const unordered_set<PatternLink> &master_keyer_plinks );
+                   const set<PatternLink> &master_plinks,
+                   const set<PatternLink> &master_keyer_plinks );
     
     ~AndRuleEngine();
     
@@ -63,24 +63,24 @@ public:
     {
         Plan( AndRuleEngine *algo,  
               PatternLink root_plink, 
-              const unordered_set<PatternLink> &master_plinks,
-              const unordered_set<PatternLink> &master_keyer_plinks );
+              const set<PatternLink> &master_plinks,
+              const set<PatternLink> &master_keyer_plinks );
         void PopulateMasterBoundaryStuff( PatternLink link,
-                                          const unordered_set<Agent *> &master_agents );
+                                          const set<Agent *> &master_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
-                                               unordered_set<Agent *> *master_agents,
-                                               unordered_set<Agent *> *match_any_agents );
+                                               set<Agent *> *senior_agents,
+                                               set<Agent *> *disjunction_agents );
         void DetermineKeyers( PatternLink plink,
-                              unordered_set<Agent *> master_agents );
+                              set<Agent *> master_agents );
         void DetermineResiduals( Agent *agent,
-                                 unordered_set<Agent *> master_agents );
+                                 set<Agent *> master_agents );
         void ConfigureAgents();
-        void PopulateNormalAgents( unordered_set<Agent *> *normal_agents, 
-                                   unordered_set<PatternLink> *my_normal_links,
+        void PopulateNormalAgents( set<Agent *> *normal_agents, 
+                                   set<PatternLink> *my_normal_links,
                                    PatternLink link );
-        void CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
-                                       const unordered_set<PatternLink> &surrounding_plinks, 
-                                       const unordered_set<PatternLink> &surrounding_keyer_plinks );
+        void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
+                                       const set<PatternLink> &surrounding_plinks, 
+                                       const set<PatternLink> &surrounding_keyer_plinks );
         // CSP solver stuff
         void DeduceCSPVariables();
         void CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
@@ -95,23 +95,23 @@ public:
         const PatternLink root_plink;
         const TreePtr<Node> root_pattern;
         Agent * const root_agent;
-        const unordered_set<PatternLink> master_plinks;
-        const unordered_set<PatternLink> master_keyer_plinks;
-        unordered_set<Agent *> master_agents;
-        unordered_set<Agent *> my_normal_agents;   
-        unordered_set<PatternLink> my_normal_links;
-        unordered_set<PatternLink> my_normal_links_unique_by_agent;
-        unordered_set< Agent *> my_evaluators;   
-        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
-        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
-        unordered_map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        unordered_set<Agent *> master_boundary_agents;
+        const set<PatternLink> master_plinks;
+        const set<PatternLink> master_keyer_plinks;
+        set<Agent *> master_agents;
+        set<Agent *> my_normal_agents;   
+        set<PatternLink> my_normal_links;
+        set<PatternLink> my_normal_links_unique_by_agent;
+        set< Agent *> my_evaluators;   
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
+        set<Agent *> master_boundary_agents;
         set<PatternLink> coupling_residual_links;
-        unordered_set<PatternLink> coupling_keyer_links_all; // All keyers
+        set<PatternLink> coupling_keyer_links_all; // All keyers
         set<PatternLink> my_master_boundary_links; // These are ALL residuals
-        unordered_set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
-        unordered_map< Agent *, unordered_set<PatternLink> > parent_links_to_my_normal_agents;
-        unordered_map< Agent *, unordered_set<PatternLink> > parent_residual_links_to_master_boundary_agents;
+        set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
+        map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
+        map< Agent *, set<PatternLink> > parent_residual_links_to_master_boundary_agents;
         list<PatternLink> free_normal_links_ordered;
         list<PatternLink> forced_normal_links_ordered;
         set<PatternLink> relevent_links;
@@ -121,8 +121,8 @@ public:
         list<PatternLink> normal_and_boundary_links_preorder;
         
     private: // working variables in plan construction
-        unordered_set<Agent *> reached_agents;
-        unordered_set<PatternLink> reached_links; 
+        set<Agent *> reached_agents;
+        set<PatternLink> reached_links; 
     } plan;
     
 private:        
@@ -148,8 +148,8 @@ public:
 
     const SolutionMap &GetSolution();
     void ClearSolution();
-    const unordered_set<Agent *> &GetKeyedAgents() const;
-    const unordered_set<PatternLink> GetKeyerPatternLinks() const;
+    const set<Agent *> &GetKeyedAgents() const;
+    const set<PatternLink> GetKeyerPatternLinks() const;
 
 public:
     string GetTrace() const; // used for debug

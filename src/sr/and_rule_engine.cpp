@@ -30,8 +30,8 @@
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
-                              const unordered_set<PatternLink> &master_plinks,
-                              const unordered_set<PatternLink> &master_keyer_plinks ) :
+                              const set<PatternLink> &master_plinks,
+                              const set<PatternLink> &master_keyer_plinks ) :
     plan( this, root_plink, master_plinks, master_keyer_plinks )
 {
 }    
@@ -45,8 +45,8 @@ AndRuleEngine::~AndRuleEngine()
  
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
                            PatternLink root_plink_, 
-                           const unordered_set<PatternLink> &master_plinks_,
-                           const unordered_set<PatternLink> &master_keyer_plinks_ ) :
+                           const set<PatternLink> &master_plinks_,
+                           const set<PatternLink> &master_keyer_plinks_ ) :
     algo( algo_ ),
     root_plink( root_plink_ ),
     root_pattern( root_plink.GetPattern() ),
@@ -62,8 +62,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     for( PatternLink plink : master_plinks )
         master_agents.insert( plink.GetChildAgent() );
 
-    unordered_set<Agent *> normal_agents;
-    unordered_set<PatternLink> normal_links;
+    set<Agent *> normal_agents;
+    set<PatternLink> normal_links;
     PopulateNormalAgents( &normal_agents, &normal_links, root_plink );    
     for( PatternLink plink : normal_links )
         if( master_agents.count( plink.GetChildAgent() ) == 0 )
@@ -139,14 +139,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // Do this last to keep all the rest of the planning trace/dumps
     // all together in the same pre-order sequence instead of mixed pre 
     // and post order
-    unordered_set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    unordered_set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
+    set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
     CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );          
 }
 
 
 void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
-                                                       const unordered_set<Agent *> &master_agents )
+                                                       const set<Agent *> &master_agents )
 {
     // Definition: it's a master boundary link/agent if:
     // 1. It's a master agent
@@ -187,8 +187,8 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
 
         
 void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
-                                                            unordered_set<Agent *> *senior_agents,
-                                                            unordered_set<Agent *> *disjunction_agents )
+                                                            set<Agent *> *senior_agents,
+                                                            set<Agent *> *disjunction_agents )
 {
     if( senior_agents->count( plink.GetChildAgent() ) > 0 )
         return; // will be fixed values for our solver
@@ -216,13 +216,13 @@ void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
 
         
 void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
-                                           unordered_set<Agent *> senior_agents ) 
+                                           set<Agent *> senior_agents ) 
 {
     // See rule #384
     // Scan the senior region. We wish to break off at Disjunction nodes. Senior is the
     // region up to and including a Disjunction; junior is the region under each of its
     // links.
-    unordered_set<Agent *> my_disjunction_agents;
+    set<Agent *> my_disjunction_agents;
     DetermineKeyersModuloDisjunction( plink, &senior_agents, &my_disjunction_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
@@ -244,7 +244,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
         
         
 void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
-                                              unordered_set<Agent *> master_agents ) 
+                                              set<Agent *> master_agents ) 
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
@@ -296,8 +296,8 @@ void AndRuleEngine::Plan::ConfigureAgents()
 }
 
 
-void AndRuleEngine::Plan::PopulateNormalAgents( unordered_set<Agent *> *normal_agents, 
-                                                unordered_set<PatternLink> *normal_links,
+void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents, 
+                                                set<PatternLink> *normal_links,
                                                 PatternLink link )
 {
     // Note that different links can point to the same agent, so 
@@ -320,9 +320,9 @@ void AndRuleEngine::Plan::PopulateNormalAgents( unordered_set<Agent *> *normal_a
 }
 
 
-void AndRuleEngine::Plan::CreateSubordniateEngines( const unordered_set<Agent *> &normal_agents, 
-                                                    const unordered_set<PatternLink> &surrounding_plinks, 
-                                                    const unordered_set<PatternLink> &surrounding_keyer_plinks )
+void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
+                                                    const set<PatternLink> &surrounding_plinks, 
+                                                    const set<PatternLink> &surrounding_keyer_plinks )
 {
     for( PatternLink plink : my_normal_links_unique_by_agent )
     {
@@ -861,16 +861,16 @@ void AndRuleEngine::ClearSolution()
 }
 
     
-const unordered_set<Agent *> &AndRuleEngine::GetKeyedAgents() const
+const set<Agent *> &AndRuleEngine::GetKeyedAgents() const
 {
    // We will key all our normal agents
    return plan.my_normal_agents;
 }
 
 
-const unordered_set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
+const set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
 {
-    unordered_set<PatternLink> keyer_plinks_incl_subs;
+    set<PatternLink> keyer_plinks_incl_subs;
     //keyer_plinks_incl_subs = plan.coupling_keyer_links_all; 
     
     list<const AndRuleEngine *> subs = GetAndRuleEngines();
@@ -928,8 +928,8 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 	figure.id = GetGraphId();
 	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
     
-	auto agents_lambda = [&](const unordered_map< Agent *, unordered_set<PatternLink> > &parent_links_to_agents,
-                             const unordered_set<PatternLink> &keyers,
+	auto agents_lambda = [&](const map< Agent *, set<PatternLink> > &parent_links_to_agents,
+                             const set<PatternLink> &keyers,
                              const set<PatternLink> &residuals ) -> list<Graph::Figure::Agent>
     {
         list<Graph::Figure::Agent> figure_agents;
@@ -964,7 +964,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                                             plan.master_boundary_keyer_links, // Won't show up as not in p_r_l_t_m_b_a, but could generate invisible nodes and links?
                                             plan.my_master_boundary_links );       
         
-	auto subordinates_lambda = [&](const unordered_map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
+	auto subordinates_lambda = [&](const map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
     {
         set< shared_ptr<AndRuleEngine> > reached;
         for( auto p : engines )
