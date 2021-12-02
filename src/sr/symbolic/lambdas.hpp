@@ -14,6 +14,7 @@ namespace SYM
 class BooleanLambda : public BooleanExpression
 {
 public:
+    typedef BooleanExpression EvalType;
     typedef function<void( const EvalKit &kit )> LambdaType;
     
     BooleanLambda( set<SR::PatternLink> input_plinks_,
@@ -22,6 +23,7 @@ public:
     virtual set<SR::PatternLink> GetInputPatternLinks() const override;
     virtual void Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
     
 private:
     const set<SR::PatternLink> input_plinks;

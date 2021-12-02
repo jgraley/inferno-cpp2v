@@ -296,7 +296,7 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
 }
 
 
-shared_ptr<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only )
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only )
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
@@ -307,11 +307,11 @@ shared_ptr<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_onl
     {
         RunCouplingQuery( kit.required_links ); // throws on mismatch   
     };
-    auto cq_expression = make_shared<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
+    auto cq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
 
     if( coupling_only )
     {
-        return cq_expression;
+        return cq_lazy;
     }
     else // Full
     {
@@ -325,8 +325,9 @@ shared_ptr<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_onl
             RunNormalLinkedQuery( kit.required_links,
                                   kit.knowledge ); // throws on mismatch   
         };
-        auto nlq_expression = make_shared<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
-        return make_shared<SYM::AndOperator>( cq_expression, nlq_expression );
+        auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+        
+        return cq_lazy & nlq_lazy; // Lazy-style symbolic expression
     }
 }
 

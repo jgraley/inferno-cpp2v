@@ -21,9 +21,32 @@ public:
         const SR::SolutionMap *required_links;
         const SR::TheKnowledge *knowledge;
     };
-
+    
+    // Bigger number is LOWER precedence.
+    enum Precedence
+    {
+        LITERAL,
+        SCOPE,
+        POSTFIX,
+        PREFIX,
+        MULTIPLY,
+        ADD,
+        SHIFT,
+        COMPARE_GTLT, // <, >, <=, >=
+        COMPARE_EQNE, // ==, !=
+        AND,
+        XOR,
+        OR,
+        COMMA 
+    };    
+        
     virtual set<SR::PatternLink> GetInputPatternLinks() const = 0;
-    virtual string Render() const = 0;
+    
+    virtual string Render() const = 0;    
+    
+protected:    
+    virtual Precedence GetPrecedence() const = 0;
+    string RenderForMe( shared_ptr<const Expression> inner ) const;
 };
 
 

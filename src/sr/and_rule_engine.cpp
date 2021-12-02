@@ -377,7 +377,7 @@ void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constra
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {
 		Agent *agent = keyer_plink.GetChildAgent();
-		shared_ptr<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
+		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
         constraints_list.push_back(c);    
@@ -403,7 +403,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP:
     for( PatternLink keyer_plink : master_boundary_keyer_links )
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
-		shared_ptr<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
+		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
 		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
 		                                                                     relevent_links);
         constraints_list.push_back(c);    

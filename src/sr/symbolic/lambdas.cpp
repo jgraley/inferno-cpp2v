@@ -31,4 +31,10 @@ void BooleanLambda::Evaluate( const EvalKit &kit ) const
 string BooleanLambda::Render() const
 {
     return "["+description+"]";
-};
+}
+
+
+Expression::Precedence BooleanLambda::GetPrecedence() const
+{
+    return LITERAL;
+}

@@ -31,5 +31,17 @@ void AndOperator::Evaluate( const EvalKit &kit ) const
 
 string AndOperator::Render() const
 {
-    return a->Render() + " && " + b->Render();
-};
+    return RenderForMe(a) + " & " + RenderForMe(b);
+}
+
+
+Expression::Precedence AndOperator::GetPrecedence() const
+{
+    return AND;
+}
+
+
+Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
+{
+    return MakeLazy<AndOperator>( a, b );
+}

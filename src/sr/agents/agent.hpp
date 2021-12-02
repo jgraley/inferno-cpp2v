@@ -16,7 +16,7 @@
 #include <boost/type_traits.hpp>
 #include <functional>
 #include "node/graphable.hpp"
-#include "../symbolic/expression.hpp"
+#include "../symbolic/lazy.hpp"
 
 #define HINTS_IN_EXCEPTIONS
 
@@ -85,7 +85,7 @@ public:
     virtual void RunCouplingQuery( const SolutionMap *required_links ) = 0;                                       
 
     /// Obtain a symbolic expression for this node's queries (NLQ and coupling)
-    virtual shared_ptr<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) = 0;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) = 0;                                       
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
@@ -155,7 +155,7 @@ public:
                                        const TheKnowledge *knowledge ) const;
                                        
     virtual void RunCouplingQuery( const SolutionMap *required_links );                                       
-    virtual shared_ptr<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override;                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *required_links,
