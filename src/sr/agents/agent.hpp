@@ -55,6 +55,8 @@ public:
     class NLQConjOutAfterHitMismatch : public NLQMismatch {};
     class NLQConjOutAfterMissMismatch : public NLQMismatch {};
     class NLQFromDQLinkMismatch : public NLQMismatch {};
+    class MMAXPropagationMismatch : public Mismatch {};
+    class PreRestrictionMismatch : public Mismatch {};
     
     class CouplingMismatch : public Mismatch {};
         
@@ -215,8 +217,6 @@ private:
 class DefaultMMAXAgent : public AgentCommon
 {
 public:    
-    class MMAXPropagationMismatch : public Mismatch {};
-
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                      
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
@@ -225,15 +225,13 @@ public:
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;                                             
     virtual void RunNormalLinkedQueryMMed( const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;
+                                           const TheKnowledge *knowledge ) const;                                                                                
 };
 
 
 class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
-    class PreRestrictionMismatch : public Mismatch {};
-
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const;                                      
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,

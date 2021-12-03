@@ -10,7 +10,7 @@ namespace SR
 /// Boolean node that matches if any of the sub-patterns at the pointers in
 /// `patterns` do match i.e. an "or" operation. `patterns` point to abnormal 
 /// contexts since in an overall match, some sub-patterns may not match.
-class DisjunctionAgent : public virtual PreRestrictedAgent 
+class DisjunctionAgent : public virtual AgentCommon
 {
 public:
     class NoOptionsMatchedMismatch : public Mismatch {};
@@ -18,12 +18,12 @@ public:
     class MMAXRequiredOnUntakenOptionMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                    
                                                                
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
-                                           const TheKnowledge *knowledge ) const;                
+    virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
+                                       const TheKnowledge *knowledge ) const;                
                                                                          
     virtual Block GetGraphBlockInfo() const;
     

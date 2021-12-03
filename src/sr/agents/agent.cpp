@@ -806,32 +806,25 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                                  const TheKnowledge *knowledge ) const
 {
-    XLink base_xlink;
-    if( required_links->count(keyer_plink) > 0 )
-        base_xlink = required_links->at(keyer_plink);
-
-    // Baseless or MMAX query strategy: hand-rolled
-    if( !base_xlink || base_xlink == XLink::MMAX_Link )
+    bool all_non_mmax = true;
+    bool all_mmax = true;
+    for( PatternLink plink : keyer_and_normal_plinks ) 
     {
-        bool saw_non_mmax = false;
-        for( PatternLink plink : pattern_query->GetNormalLinks() ) 
+        if( required_links->count(plink) > 0 )
         {
-            if( required_links->count(plink) > 0 )
-            {
-                XLink req_xlink = required_links->at(plink);
-                if( req_xlink != XLink::MMAX_Link )
-                    saw_non_mmax = true;                    
-            }
-        }   
-        
-        if( !saw_non_mmax )
-            return; // Done: all are MMAX
-        
-        if( base_xlink == XLink::MMAX_Link )
-            throw MMAXPropagationMismatch(); // Mismatch: there are non-MMAX but base is MMAX
+            if( required_links->at(plink) == XLink::MMAX_Link )
+                all_non_mmax = false;
+            else
+                all_mmax = false;                    
+        }
     }   
+
+    if( all_mmax )
+        return; // Done: all are MMAX            
     
-    ASSERT( base_xlink != XLink::MMAX_Link );
+    if( !all_non_mmax )
+        throw MMAXPropagationMismatch(); // Mismatch: mixed MMAX and non-MMAX
+    
     RunNormalLinkedQueryMMed( required_links, knowledge );
 }
 

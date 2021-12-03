@@ -29,12 +29,26 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-void DisjunctionAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
+void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                             XLink x ) const
 {
     INDENT("∨");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
     
+    /*if( x == XLink::MMAX_Link )
+    {
+        // Magic Match Anything node: all normal children also match anything
+        // This is just to keep normal-domain solver happy, so we 
+        // only need normals. 
+        for( PatternLink plink : pattern_query->GetNormalLinks() )       
+            query.RegisterNormalLink( plink, x );
+        return;
+    } 
+*/    
+    // Check pre-restriction
+    if( !IsLocalMatch( x.GetChildX().get() ) )
+        throw PreRestrictionMismatch();
+
     // We register a decision that actually chooses between our agents - that
     // is, the options for the OR operation.
     ContainerInterface::iterator choice_it = query.RegisterDecision( options, false );
@@ -66,21 +80,25 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
 
-void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
-                                                 const TheKnowledge *knowledge ) const
+void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *required_links,
+                                             const TheKnowledge *knowledge ) const
 { 
     // Baseless query strategy: hand-rolled
     INDENT("∨");
     XLink base_xlink;
     if( required_links->count(keyer_plink) > 0 )
+    { 
         base_xlink = required_links->at(keyer_plink);
-    
-    ASSERT( base_xlink != XLink::MMAX_Link ); // DefaultMMAXAgent should have taken care of this case
-       
+        
+        // Check pre-restriction
+        if( base_xlink == XLink::MMAX_Link && !IsLocalMatch( base_xlink.GetChildX().get() ) )
+            throw PreRestrictionMismatch();
+    }
+           
     // Loop over the options for this disjunction and collect the links 
     // that are not MMAX. Also take note of missing children.
     bool children_complete = true;
-    list<XLink> non_mmax_links;
+    list<XLink> non_mmax_residuals;
     FOREACH( const TreePtrInterface &p, GetPatterns() )           
     {
         PatternLink plink(this, &p);
@@ -90,7 +108,7 @@ void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_lin
             XLink xlink = required_links->at(plink); 
             ASSERT( xlink );
             if( xlink != XLink::MMAX_Link )
-                non_mmax_links.push_back( xlink );
+                non_mmax_residuals.push_back( xlink );
         }        
         else
         {
@@ -98,27 +116,50 @@ void DisjunctionAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_lin
         }        
     }
     
-    // Choose a checking strategy based on the number of non-MMAX we saw. 
-    // Roughly speaking, it should be 1, but see the code for details.
-    switch( non_mmax_links.size() )
+    if( base_xlink == XLink::MMAX_Link )
     {
-    case 0:
-        // All were MMAX: we only have a mismatch if query was full i.e. we tried all the options
-        if( children_complete )
-            throw NoOptionsMatchedMismatch();    
-        break;        
-        
-    case 1:
-        // This is the correct number of non-MMAX. If we have a base, check against it.
-        if( base_xlink && non_mmax_links.front() != base_xlink )
-            throw TakenOptionMismatch();  
-        break;        
-        
-    default: // 2 or more
-        // It's never OK to have more than one non-MMAX.
-        throw MMAXRequiredOnUntakenOptionMismatch();        
-        break;
-    }    
+        // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
+        // Roughly speaking, it should be 0, but see the code for details.
+        switch( non_mmax_residuals.size() )
+        {
+        case 0:
+            // All were MMAX: great! 
+            break;        
+            
+        default: // 1 or more
+            // It's never OK to have non-MMAX under MMAX.
+            throw MMAXPropagationMismatch();        
+            break;
+        }    
+    }
+    else
+    {
+        // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
+        // Roughly speaking, it should be 1, but see the code for details.
+        switch( non_mmax_residuals.size() )
+        {
+        case 0:
+            // All were MMAX: we only have a mismatch if query was full i.e. we tried all the options
+            if( children_complete )
+                throw NoOptionsMatchedMismatch();    
+            break;        
+            
+        case 1:
+            // This is the correct number of non-MMAX. If we have a base, check against it.
+            if( base_xlink )
+            {
+                XLink taken_option_x_link = non_mmax_links.front(); // size() is 1 so is the only one
+                if( taken_option_x_link != base_xlink )
+                    throw TakenOptionMismatch();  
+            }
+            break;        
+            
+        default: // 2 or more
+            // It's never OK to have more than one non-MMAX (strict MMAX rules).
+            throw MMAXRequiredOnUntakenOptionMismatch();        
+            break;
+        }    
+    }
 }
 
 
