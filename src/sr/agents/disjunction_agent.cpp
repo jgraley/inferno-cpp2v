@@ -148,7 +148,7 @@ void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *required_links,
             // This is the correct number of non-MMAX. If we have a base, check against it.
             if( base_xlink )
             {
-                XLink taken_option_x_link = non_mmax_links.front(); // size() is 1 so is the only one
+                XLink taken_option_x_link = non_mmax_residuals.front(); // size() is 1 so is the only one
                 if( taken_option_x_link != base_xlink )
                     throw TakenOptionMismatch();  
             }
