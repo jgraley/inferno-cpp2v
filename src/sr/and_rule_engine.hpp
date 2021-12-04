@@ -81,10 +81,14 @@ public:
         void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
                                        const set<PatternLink> &surrounding_plinks, 
                                        const set<PatternLink> &surrounding_keyer_plinks );
+        void CreateMyFullSymbolics();
+        void CreateMasterCouplingSymbolics();
+
+        void SplitSymbolics();
+
         // CSP solver stuff
         void DeduceCSPVariables();
-        void CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
-        void CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
+        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
         void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
 
         void Dump();
@@ -115,6 +119,8 @@ public:
         list<PatternLink> free_normal_links_ordered;
         list<PatternLink> forced_normal_links_ordered;
         set<PatternLink> relevent_links;
+        list< pair<SYM::Lazy<SYM::BooleanExpression>, Agent *> > raw_expressions_and_agents;
+        list< pair<SYM::Lazy<SYM::BooleanExpression>, Agent *> > split_expressions_and_agents;
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;

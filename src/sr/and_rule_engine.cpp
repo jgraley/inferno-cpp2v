@@ -18,6 +18,7 @@
 #include "tree/cpptree.hpp"
 #include "equivalence.hpp"
 #include "render/graph.hpp"
+#include "symbolic/boolean_operators.hpp"
 
 #include <list>
  
@@ -122,10 +123,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     }
 
     // ------------------ Set up CSP/old solver ---------------------
-    // For CSP solver only...
+    CreateMyFullSymbolics();
+    CreateMasterCouplingSymbolics();    
+    SplitSymbolics();
+    
+    // For CSP solver only...    
     list< shared_ptr<CSP::Constraint> > constraints_list;
-    CreateMyFullConstraints(constraints_list);
-    CreateMasterCouplingConstraints(constraints_list);
+    CreateMyConstraints(constraints_list);
     CreateCSPSolver(constraints_list);
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
@@ -353,6 +357,61 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
 }
 
 
+void AndRuleEngine::Plan::CreateMyFullSymbolics()
+{
+    for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
+    {
+		Agent *agent = keyer_plink.GetChildAgent();
+		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
+        raw_expressions_and_agents.push_back( make_pair(op, agent) );
+    }
+}
+
+
+void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
+{
+#ifdef CHECK_FOR_MASTER_KEYERS
+    // First do some checking
+    for( PatternLink residual_plink : my_master_boundary_links )
+    {
+        Agent *agent = residual_plink.GetChildAgent();
+        bool found_keyer = false;
+        for( PatternLink keyer_plink : master_boundary_keyer_links )
+            if( keyer_plink.GetChildAgent()==agent )
+                found_keyer = true;
+        ASSERT( found_keyer )("Master boundary residual plink ")(residual_plink)(" has no keyer\n");
+    }
+#endif
+    
+    for( PatternLink keyer_plink : master_boundary_keyer_links )
+    {                                    
+		Agent *agent = keyer_plink.GetChildAgent();
+		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
+        raw_expressions_and_agents.push_back( make_pair(op, agent) );
+    }
+}
+
+
+void AndRuleEngine::Plan::SplitSymbolics()
+{    
+    for( auto p : raw_expressions_and_agents )
+    {
+        if( auto pand = dynamic_pointer_cast<SYM::AndOperator>((shared_ptr<SYM::BooleanExpression>)p.first) )
+        {
+            set<shared_ptr<SYM::Expression>> se = pand->GetOperands();
+            for( shared_ptr<SYM::Expression> e : se )
+                split_expressions_and_agents.push_back( make_pair(dynamic_pointer_cast<SYM::BooleanExpression>(e), p.second) );
+        }   
+        else
+        {
+            split_expressions_and_agents.push_back( p );
+        }
+    }
+    FTRACE(raw_expressions_and_agents);
+    FTRACE(split_expressions_and_agents);
+}
+
+
 void AndRuleEngine::Plan::DeduceCSPVariables()
 {
     for( PatternLink link : normal_and_boundary_links_preorder )
@@ -372,44 +431,15 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 }
 
 
-void AndRuleEngine::Plan::CreateMyFullConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
+void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
-    for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
+    for( auto p : split_expressions_and_agents )
     {
-		Agent *agent = keyer_plink.GetChildAgent();
-		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
-		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
+		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(p.first,
 		                                                                     relevent_links);
         constraints_list.push_back(c);    
-    }
+    }        
 }
-
-
-void AndRuleEngine::Plan::CreateMasterCouplingConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
-{
-#ifdef CHECK_FOR_MASTER_KEYERS
-    // First do some checking
-    for( PatternLink residual_plink : my_master_boundary_links )
-    {
-        Agent *agent = residual_plink.GetChildAgent();
-        bool found_keyer = false;
-        for( PatternLink keyer_plink : master_boundary_keyer_links )
-            if( keyer_plink.GetChildAgent()==agent )
-                found_keyer = true;
-        ASSERT( found_keyer )("Master boundary residual plink ")(residual_plink)(" has no keyer\n");
-    }
-#endif
-    
-    for( PatternLink keyer_plink : master_boundary_keyer_links )
-    {                                    
-		Agent *agent = keyer_plink.GetChildAgent();
-		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
-		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(op,
-		                                                                     relevent_links);
-        constraints_list.push_back(c);    
-    }
-}
-
 
 void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list )
 {       

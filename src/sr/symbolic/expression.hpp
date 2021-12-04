@@ -11,7 +11,7 @@
 namespace SYM
 { 
 
-class Expression
+class Expression : public Traceable
 {    
 public:
     /**
@@ -43,8 +43,10 @@ public:
     };    
         
     virtual set<SR::PatternLink> GetInputPatternLinks() const = 0;
-    
+    virtual set<shared_ptr<Expression>> GetOperands() const;
+
     virtual string Render() const = 0;    
+    string GetTrace() const; // used for debug
     
 protected:    
     virtual Precedence GetPrecedence() const = 0;
