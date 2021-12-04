@@ -25,10 +25,11 @@ public:
     virtual bool ImplHasNLQ() const;
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
                                            const TheKnowledge *knowledge ) const;
-                                          
+    //virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override; 
+    
+    virtual void RunColocatedQuery(XLink common_xlink) const;
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
-    virtual void RunColocatedQuery(XLink common_xlink) const;
 };
 
 };

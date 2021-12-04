@@ -31,40 +31,60 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
 {
     // Baseless query strategy: symmetrical
 
-    XLink common_xlink;
+    XLink prev_xlink;
     for( PatternLink plink : keyer_and_normal_plinks )                 
     {
         if( required_links->count(plink) == 1 )
         {
             XLink xlink = required_links->at(plink);
-            if( !common_xlink )   
+            if( !prev_xlink )   
             {         
-                common_xlink = xlink;
+                prev_xlink = xlink;
             }
-            else if( xlink != common_xlink )
+            else
             {
-                ColocationMismatch e; // value of links mismatches
+                if( xlink != prev_xlink )
+                {
+                    ColocationMismatch e; // value of links mismatches
 #ifdef HINTS_IN_EXCEPTIONS
-                e.hint = LocatedLink( plink, common_xlink );
+                    e.hint = LocatedLink( plink, prev_xlink );
 #endif           
-                throw e;                    
+                    throw e;                    
+                }
             }
         }
     };
     
-    if( !common_xlink )
+    if( !prev_xlink )
         return; // disjoint query (no overlap between required and expected links
     
-    // Now that the common xlink is known to be really common,
-    // we can apply the usual checks including PR check and allowing for MMAX
-    if( common_xlink == XLink::MMAX_Link )
-        return;
+    if( required_links->count(keyer_plink) == 1 )
+    {
+        XLink keyer_xlink = required_links->at(keyer_plink);
+        
+        // Now that the common xlink is known to be really common,
+        // we can apply the usual checks including PR check and allowing for MMAX
+        if( keyer_xlink == XLink::MMAX_Link )
+            return;
 
-    if( !IsLocalMatch( common_xlink.GetChildX().get() ) ) 
-        throw PreRestrictionMismatch();
-
-    RunColocatedQuery(common_xlink);    
+        if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
+            throw PreRestrictionMismatch();
+        
+        RunColocatedQuery(keyer_xlink);    
+    }
 }                            
+
+/*
+SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicQuery( bool coupling_only ) override
+{
+nlq_plinks.insert( keyer_plink );
+		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
+        {
+            RunNormalLinkedQuery( kit.required_links,
+                                  kit.knowledge ); // throws on mismatch   
+        };
+        auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+}*/
 
 
 void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const

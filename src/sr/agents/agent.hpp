@@ -87,7 +87,7 @@ public:
     virtual void RunCouplingQuery( const SolutionMap *required_links ) = 0;                                       
 
     /// Obtain a symbolic expression for this node's queries (NLQ and coupling)
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) = 0;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) = 0; 
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,

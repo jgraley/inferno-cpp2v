@@ -407,8 +407,8 @@ void AndRuleEngine::Plan::SplitSymbolics()
             split_expressions_and_agents.push_back( p );
         }
     }
-    FTRACE(raw_expressions_and_agents);
-    FTRACE(split_expressions_and_agents);
+    FTRACE("Raw symbolcs and agents:\n")(raw_expressions_and_agents)("\n");
+    FTRACE("Split symbolcs and agents:\n")(split_expressions_and_agents)("\n");
 }
 
 
