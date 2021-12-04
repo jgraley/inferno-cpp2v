@@ -16,7 +16,7 @@ public:
     typedef BooleanExpression EvalType;
     AndOperator( set< shared_ptr<BooleanExpression> > sa );
     virtual set<SR::PatternLink> GetInputPatternLinks() const override;
-    virtual void Evaluate( const EvalKit &kit ) const override;
+    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

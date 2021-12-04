@@ -19,12 +19,20 @@ set<SR::PatternLink> BooleanLambda::GetInputPatternLinks() const
 }
 
 
-void BooleanLambda::Evaluate( const EvalKit &kit ) const
+BooleanResult BooleanLambda::Evaluate( const EvalKit &kit ) const
 {
     ASSERT( lambda );
     ASSERT( kit.required_links );
     ASSERT( kit.knowledge );    
-    lambda(kit); // throws on mismatch
+    try
+    {
+        lambda(kit); // throws on mismatch
+        return {true, nullptr};
+    }
+    catch( const ::Mismatch &e )
+    {
+        return {false, current_exception()};
+    }
 }
 
 

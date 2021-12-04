@@ -312,13 +312,13 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 {
     ConstraintSet unsatisfied;
     list<Assignment> hints;
-    bool ok = true;
+    bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
         Assignment hint;
-        bool my_ok;
-        tie(my_ok, hint) = c->Test(assigns); 
-        if( !my_ok )
+        bool my_matched;
+        tie(my_matched, hint) = c->Test(assigns); 
+        if( !my_matched )
         {            
 #ifdef HINTS_IN_EXCEPTIONS   
             if( hint ) // could have a hint            
@@ -327,10 +327,10 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
 #endif
-            ok = false;
+            matched = false;
         }
     } 
-    return make_tuple( ok, 
+    return make_tuple( matched, 
                        hints.empty() ? Assignment() : hints.front(),
                        unsatisfied );
 }

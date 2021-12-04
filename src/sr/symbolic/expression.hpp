@@ -6,6 +6,8 @@
 #include "../link.hpp"
 #include "../the_knowledge.hpp"
 
+#include <exception>
+
 namespace SYM
 { 
 
@@ -50,13 +52,19 @@ protected:
 };
 
 
-// Kept in operator.hpp because of wider inclusion thatn the impl classes
+struct BooleanResult
+{
+    bool matched;
+    exception_ptr reason; // Actually an exception object
+};
+
+
+// Kept in operator.hpp because of wider inclusion than the impl classes
 class BooleanExpression : public Expression
 {    
 public:
-    virtual void Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
+    virtual BooleanResult Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
 };
-
 
 };
 

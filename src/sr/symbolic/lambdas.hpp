@@ -21,7 +21,7 @@ public:
                     const LambdaType &lambda_,
                     string description );
     virtual set<SR::PatternLink> GetInputPatternLinks() const override;
-    virtual void Evaluate( const EvalKit &kit ) const override;
+    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

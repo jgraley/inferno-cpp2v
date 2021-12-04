@@ -20,12 +20,17 @@ set<SR::PatternLink> AndOperator::GetInputPatternLinks() const
 }
 
 
-void AndOperator::Evaluate( const EvalKit &kit ) const
+BooleanResult AndOperator::Evaluate( const EvalKit &kit ) const
 {
     // This works with exceptions for mismatch but will prioritise
     // a's exception in the case where both mismatch.
     for( shared_ptr<BooleanExpression> a : sa )
-        a->Evaluate(kit);
+    {
+        BooleanResult r = a->Evaluate(kit);
+        if( !r.matched )
+            return r; // early out on first mismatch
+    }
+    return {true, nullptr};
 }
 
 

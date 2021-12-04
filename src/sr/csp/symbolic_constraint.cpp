@@ -64,23 +64,30 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map )
     SR::SolutionMap full_map;
     full_map = UnionOfSolo(forces_map, frees_map);
     
-    try
-    {
         //Tracer::RAIIDisable silencer(); // make queries be quiet
 
         SYM::Expression::EvalKit kit { &full_map, knowledge };
         ASSERT(plan.op);
-        plan.op->Evaluate( kit );
-        return make_tuple(true, Assignment());
-    }  
-    catch( const ::Mismatch &e )
-    {
+        SYM::BooleanResult r = plan.op->Evaluate( kit );
+        if( r.matched )
+        {
+            return make_tuple(true, Assignment());
+        }
+        else
+        {
+            try
+            {
+                rethrow_exception(r.reason);
+            }  
+            catch( const ::Mismatch &e )
+            {
 #ifdef HINTS_IN_EXCEPTIONS   
-        if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
-            return make_tuple(false, pae->hint );
+                if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
+                    return make_tuple( false, pae->hint );
 #endif
-        return make_tuple(false, Assignment());
-    }          
+                return make_tuple(false, Assignment());
+            }          
+        }
 }
 
 
