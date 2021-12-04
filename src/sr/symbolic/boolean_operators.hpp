@@ -14,16 +14,14 @@ class AndOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression EvalType;
-    AndOperator( shared_ptr<BooleanExpression> a,
-                 shared_ptr<BooleanExpression> b );
+    AndOperator( set< shared_ptr<BooleanExpression> > sa );
     virtual set<SR::PatternLink> GetInputPatternLinks() const override;
     virtual void Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
 private:
-    shared_ptr<BooleanExpression> a;
-    shared_ptr<BooleanExpression> b;
+    set< shared_ptr<BooleanExpression> > sa;
 };
 
 Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
