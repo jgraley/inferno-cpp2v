@@ -7,6 +7,13 @@
 using namespace CSP;
 
 
+SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
+                                        set<SR::PatternLink> relevent_plinks ) :
+    plan( this, op, relevent_plinks )
+{
+}
+
+
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> op_,
                                 set<SR::PatternLink> relevent_plinks ) :
@@ -14,13 +21,6 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
     op( op_ )
 {
     DetermineVariables( relevent_plinks );       
-}
-
-
-SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
-                                        set<SR::PatternLink> relevent_plinks ) :
-    plan( this, op, relevent_plinks )
-{
 }
 
 
@@ -55,7 +55,7 @@ void SymbolicConstraint::Start( const Assignments &forces_map_,
 }   
 
 
-void SymbolicConstraint::Test( Assignments frees_map )
+tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map )
 {   
     INDENT("T");
 
@@ -63,14 +63,24 @@ void SymbolicConstraint::Test( Assignments frees_map )
     // values that must tally up with the links required by the operator.
     SR::SolutionMap full_map;
     full_map = UnionOfSolo(forces_map, frees_map);
-
+    
+    try
     {
         //Tracer::RAIIDisable silencer(); // make queries be quiet
 
         SYM::Expression::EvalKit kit { &full_map, knowledge };
         ASSERT(plan.op);
         plan.op->Evaluate( kit );
-    }            
+        return make_tuple(true, Assignment());
+    }  
+    catch( const ::Mismatch &e )
+    {
+#ifdef HINTS_IN_EXCEPTIONS   
+        if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
+            return make_tuple(false, pae->hint );
+#endif
+        return make_tuple(false, Assignment());
+    }          
 }
 
 

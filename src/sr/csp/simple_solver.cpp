@@ -315,18 +315,14 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
     bool ok = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
-        try
-        {
-            //TRACE("test constraint ")(c)("\n");
-            c->Test(assigns); 
-            //TRACE("returned\n");
-        }
-        catch( const ::Mismatch &e )
+        Assignment hint;
+        bool my_ok;
+        tie(my_ok, hint) = c->Test(assigns); 
+        if( !my_ok )
         {            
-            //TRACE("threw ")(e)("\n");
 #ifdef HINTS_IN_EXCEPTIONS   
-            if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
-                hints.push_back( pae->hint );
+            if( hint ) // could have a hint            
+                hints.push_back( hint );
 #endif
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
