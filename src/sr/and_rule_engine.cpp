@@ -19,6 +19,7 @@
 #include "equivalence.hpp"
 #include "render/graph.hpp"
 #include "symbolic/boolean_operators.hpp"
+#include "symbolic/rewrites.hpp"
 
 #include <list>
  
@@ -125,7 +126,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // ------------------ Set up CSP/old solver ---------------------
     CreateMyFullSymbolics();
     CreateMasterCouplingSymbolics();    
-    SplitSymbolics();
+    SymbolicRewrites();
     
     // For CSP solver only...    
     list< shared_ptr<CSP::Constraint> > constraints_list;
@@ -392,21 +393,9 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
 }
 
 
-void AndRuleEngine::Plan::SplitSymbolics()
+void AndRuleEngine::Plan::SymbolicRewrites()
 {    
-    for( auto p : raw_expressions_and_agents )
-    {
-        if( auto pand = dynamic_pointer_cast<SYM::AndOperator>((shared_ptr<SYM::BooleanExpression>)p.first) )
-        {
-            set<shared_ptr<SYM::Expression>> se = pand->GetOperands();
-            for( shared_ptr<SYM::Expression> e : se )
-                split_expressions_and_agents.push_back( make_pair(dynamic_pointer_cast<SYM::BooleanExpression>(e), p.second) );
-        }   
-        else
-        {
-            split_expressions_and_agents.push_back( p );
-        }
-    }
+    split_expressions_and_agents = SYM::Splitter()(raw_expressions_and_agents);
     FTRACE("Raw symbolcs and agents:\n")(raw_expressions_and_agents)("\n");
     FTRACE("Split symbolcs and agents:\n")(split_expressions_and_agents)("\n");
 }

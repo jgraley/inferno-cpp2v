@@ -28,6 +28,7 @@ SR_AGENTS_MODULES += $(SR_AGENTS)/search_container_agent $(SR_AGENTS)/green_gras
 SR_AGENTS_MODULES += $(SR_AGENTS)/transform_of_agent $(SR_AGENTS)/pointer_is_agent $(SR_AGENTS)/builder_agent
 SR_CSP_MODULES = $(SR_CSP)/constraint $(SR_CSP)/symbolic_constraint $(SR_CSP)/solver $(SR_CSP)/simple_solver $(SR_CSP)/solver_holder
 SR_SYMBOLIC_MODULES = $(SR_SYMBOLIC)/expression $(SR_SYMBOLIC)/lazy $(SR_SYMBOLIC)/lambdas $(SR_SYMBOLIC)/boolean_operators
+SR_SYMBOLIC_MODULES += $(SR_SYMBOLIC)/rewrites
 PARSE_MODULES = $(PARSE)/identifier_tracker $(PARSE)/rc_hold
 RENDER_MODULES = $(RENDER)/sort_decls $(RENDER)/graph $(RENDER)/render $(RENDER)/uniquify_identifiers $(RENDER)/doc_graphs
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/slave_test $(STEPS)/lower_control_flow 

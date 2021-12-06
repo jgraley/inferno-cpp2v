@@ -84,7 +84,7 @@ public:
         void CreateMyFullSymbolics();
         void CreateMasterCouplingSymbolics();
 
-        void SplitSymbolics();
+        void SymbolicRewrites();
 
         // CSP solver stuff
         void DeduceCSPVariables();
