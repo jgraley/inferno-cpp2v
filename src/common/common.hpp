@@ -5,6 +5,7 @@
 #include "trace.hpp"
 
 #include <string>
+#include <functional>
 
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
@@ -179,5 +180,23 @@ string GetInnermostTemplateParam( string s );
 string RemoveAllTemplateParam( string s );
 string RemoveOneOuterScope( string s );
 void RemoveCommonPrefix( string &s1, string &s2 );
+
+
+// Acting on a container such as [1, 2, 3, 4], will call func with (1, 2), 
+// then (2, 3), then (3, 4). No iteratons if size() is 0 or 1.
+template<typename T>
+void LoopOverlappingAdjacentPairs( T container, 
+                                   function<void(const typename T::value_type &first, 
+                                                 const typename T::value_type &second)> func) 
+{
+    const typename T::value_type *prev_x = nullptr;
+	for( const auto &x : container )
+    {
+        if( prev_x )
+             func( *prev_x, x );
+ 		prev_x = &x;
+	}
+}
+
 
 #endif

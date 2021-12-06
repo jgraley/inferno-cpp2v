@@ -10,7 +10,7 @@ EqualsOperator::EqualsOperator( set< shared_ptr<SymbolExpression> > sa_ ) :
 }    
     
 
-set<SR::PatternLink> EqualsOperator::GetRequiredPatternLinks() const // TODO should be in base class, making use of GetOperands()
+set<SR::PatternLink> EqualsOperator::GetRequiredPatternLinks() const 
 {
     set<SR::PatternLink> sipl;
     // Non-strict union (i.e. not Solo) because common links are fine
@@ -29,27 +29,21 @@ set<shared_ptr<Expression>> EqualsOperator::GetOperands() const
 }
 
 
-BooleanResult EqualsOperator::Evaluate( const EvalKit &kit ) const
+BooleanResult EqualsOperator::Evaluate( const EvalKit &kit ) const 
 {
-    // This works with exceptions for mismatch but will prioritise
-    // a's exception in the case where both mismatch.
-    SymbolResult prev_result;
-    bool first = true;
+    list<SymbolResult> results;
     for( shared_ptr<SymbolExpression> a : sa )
+        results.push_back( a->Evaluate(kit) );
+    bool equal = true;
+    LoopOverlappingAdjacentPairs( results, [&](const SymbolResult &ra,
+                                               const SymbolResult &rb) 
     {
-        SymbolResult result = a->Evaluate(kit);
-        if( !first )
-        {
-            // For equality, it is sufficient to compare the x links
-            // themselves, which have the required uniqueness properties
-            // within the full arrowhead model.
-            if( result.xlink != prev_result.xlink )
-                return {false, nullptr}; // early out on mismatch
-        }
-        prev_result = result;
-        first = false;
-    }
-    return {true, nullptr};
+        // For equality, it is sufficient to compare the x links
+        // themselves, which have the required uniqueness properties
+        // within the full arrowhead model.
+        equal = equal && ( ra.xlink == rb.xlink );
+    });
+    return {equal, nullptr};   
 }
 
 
