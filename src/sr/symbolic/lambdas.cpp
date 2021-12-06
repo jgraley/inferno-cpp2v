@@ -38,7 +38,7 @@ BooleanResult BooleanLambda::Evaluate( const EvalKit &kit ) const
 
 string BooleanLambda::Render() const
 {
-    return "["+description+"]";
+    return "[](){"+description+"}"; // Look like a lambda!
 }
 
 

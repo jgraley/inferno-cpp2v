@@ -68,6 +68,20 @@ public:
     virtual BooleanResult Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
 };
 
+
+struct SymbolResult
+{
+    SR::XLink xlink;
+};
+
+
+// Kept in operator.hpp because of wider inclusion than the impl classes
+class SymbolExpression : public Expression
+{    
+public:
+    virtual SymbolResult Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
+};
+
 };
 
 #endif // include guard
