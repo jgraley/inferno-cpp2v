@@ -26,17 +26,17 @@ bool ColocatedAgent::ImplHasNLQ() const
 }
 
 
-void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
+void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                                const TheKnowledge *knowledge ) const
 {
     // Baseless query strategy: symmetrical
 
     XLink prev_xlink;
-    for( PatternLink plink : keyer_and_normal_plinks )                 
+    for( PatternLink plink : keyer_and_normal_plinks )   // loop over required plinks              
     {
-        if( required_links->count(plink) == 1 )
+        if( hypothesis_links->count(plink) == 1 )
         {
-            XLink xlink = required_links->at(plink);
+            XLink xlink = hypothesis_links->at(plink);
             if( !prev_xlink )   
             {         
                 prev_xlink = xlink;
@@ -56,11 +56,11 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links
     };
     
     if( !prev_xlink )
-        return; // disjoint query (no overlap between required and expected links
+        return; // disjoint query (no overlap between hypothesis and required plinks)
     
-    if( required_links->count(keyer_plink) == 1 )
+    if( hypothesis_links->count(keyer_plink) == 1 )
     {
-        XLink keyer_xlink = required_links->at(keyer_plink);
+        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
         
         // Now that the common xlink is known to be really common,
         // we can apply the usual checks including PR check and allowing for MMAX
@@ -80,7 +80,7 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicQuery( bool coupling_o
 nlq_plinks.insert( keyer_plink );
 		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
         {
-            RunNormalLinkedQuery( kit.required_links,
+            RunNormalLinkedQuery( kit.hypothesis_links,
                                   kit.knowledge ); // throws on mismatch   
         };
         auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");

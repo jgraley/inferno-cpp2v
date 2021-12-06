@@ -80,15 +80,15 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
 
-void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *required_links,
+void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
                                              const TheKnowledge *knowledge ) const
 { 
     // Baseless query strategy: hand-rolled
     INDENT("∨");
     XLink base_xlink;
-    if( required_links->count(keyer_plink) > 0 )
+    if( hypothesis_links->count(keyer_plink) > 0 )
     { 
-        base_xlink = required_links->at(keyer_plink);
+        base_xlink = hypothesis_links->at(keyer_plink);
         
         // Check pre-restriction
         if( base_xlink == XLink::MMAX_Link && !IsLocalMatch( base_xlink.GetChildX().get() ) )
@@ -103,9 +103,9 @@ void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *required_links,
     {
         PatternLink plink(this, &p);
         
-        if( required_links->count(plink) > 0 ) 
+        if( hypothesis_links->count(plink) > 0 ) 
         {
-            XLink xlink = required_links->at(plink); 
+            XLink xlink = hypothesis_links->at(plink); 
             ASSERT( xlink );
             if( xlink != XLink::MMAX_Link )
                 non_mmax_residuals.push_back( xlink );

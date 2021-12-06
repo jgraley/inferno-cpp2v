@@ -204,25 +204,25 @@ bool AgentCommon::ImplHasNLQ() const
 }
 
 
-void AgentCommon::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
+void AgentCommon::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                             const TheKnowledge *knowledge ) const
 {
     ASSERTFAIL();
 }
     
     
-void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
+void AgentCommon::NLQFromDQ( const SolutionMap *hypothesis_links,
                              const TheKnowledge *knowledge ) const
 {    
     TRACE("common DNLQ: ")(*this)(" at ")(keyer_plink)("\n");
     
     
     // Can't do baseless query using DQ
-    if( required_links->count(keyer_plink)==0 )
+    if( hypothesis_links->count(keyer_plink)==0 )
         return;
     
     auto query = CreateDecidedQuery();
-    RunDecidedQueryImpl( *query, required_links->at(keyer_plink) );
+    RunDecidedQueryImpl( *query, hypothesis_links->at(keyer_plink) );
     
     // The query now has populated links, which should be full
     // (otherwise RunDecidedQuery() should have thrown). We loop 
@@ -235,10 +235,10 @@ void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
     for( LocatedLink alink : actual_links )
     {
         auto plink = (PatternLink)alink;
-        if(required_links->count(plink)==0)
+        if(hypothesis_links->count(plink)==0)
             continue; // partial query support
             
-        LocatedLink rlink( plink, required_links->at(plink) );
+        LocatedLink rlink( plink, hypothesis_links->at(plink) );
         ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
         if( (XLink)alink == XLink::MMAX_Link )
             continue; // only happens when agent pushes out MMAX, as with DisjunctionAgent
@@ -250,30 +250,30 @@ void AgentCommon::NLQFromDQ( const SolutionMap *required_links,
 }                           
                                 
     
-void AgentCommon::RunNormalLinkedQuery( const SolutionMap *required_links,
+void AgentCommon::RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
                                         const TheKnowledge *knowledge ) const
 {
-    ASSERT( required_links );
+    ASSERT( hypothesis_links );
     ASSERT( knowledge );
     if( ImplHasNLQ() )    
-        RunNormalLinkedQueryImpl( required_links, knowledge );
+        RunNormalLinkedQueryImpl( hypothesis_links, knowledge );
     else
-        NLQFromDQ( required_links, knowledge );               
+        NLQFromDQ( hypothesis_links, knowledge );               
 }                                            
 
 
-void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
+void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links )
 {    
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
     // And it always will be: see #121; para starting at "No!!"
     // HOWEVER: it is now possible for agents to override this policy.
     
-    ASSERT( required_links );
+    ASSERT( hypothesis_links );
     // Without keyer, don't bother to check anything
-    if( required_links->count(keyer_plink) == 0 )
+    if( hypothesis_links->count(keyer_plink) == 0 )
         return;
-    XLink keyer = required_links->at(keyer_plink);
+    XLink keyer = hypothesis_links->at(keyer_plink);
     
     // Rule #384 means we can skip a coupling when keyer is MMAX
     if( keyer == XLink::MMAX_Link )
@@ -281,9 +281,9 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *required_links )
         
     for( PatternLink residual_plink : residual_plinks )
     {
-        if( required_links->count(residual_plink) )
+        if( hypothesis_links->count(residual_plink) )
         {
-            XLink residual = required_links->at(residual_plink);
+            XLink residual = hypothesis_links->at(residual_plink);
             if( residual == XLink::MMAX_Link )
                 continue;
             
@@ -305,7 +305,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
     cq_plinks.insert( keyer_plink );
     auto cq_lambda = [this](const SYM::Expression::EvalKit &kit)
     {
-        RunCouplingQuery( kit.required_links ); // throws on mismatch   
+        RunCouplingQuery( kit.hypothesis_links ); // throws on mismatch   
     };
     auto cq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
 
@@ -322,7 +322,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
         nlq_plinks.insert( keyer_plink );
 		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
         {
-            RunNormalLinkedQuery( kit.required_links,
+            RunNormalLinkedQuery( kit.hypothesis_links,
                                   kit.knowledge ); // throws on mismatch   
         };
         auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
@@ -333,14 +333,14 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
 
 
 void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                            const SolutionMap *required_links,
+                                            const SolutionMap *hypothesis_links,
                                             const TheKnowledge *knowledge ) const
 {
 }
     
     
 void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                                        const SolutionMap *required_links,
+                                        const SolutionMap *hypothesis_links,
                                         const TheKnowledge *knowledge ) const
 {
     // Admin stuff every RQ has to do
@@ -348,13 +348,13 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset(); 
 
-    XLink base_xlink = required_links->at(keyer_plink);
+    XLink base_xlink = hypothesis_links->at(keyer_plink);
     if( base_xlink != XLink::MMAX_Link )
-        this->RunRegenerationQueryImpl( query, required_links, knowledge );
+        this->RunRegenerationQueryImpl( query, hypothesis_links, knowledge );
 }                             
                       
                       
-AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap *required_links,
+AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                               const TheKnowledge *knowledge,
                                                               bool use_DQ ) const
 {
@@ -383,7 +383,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 query = nlq_conjecture->GetQuery(this);
-                RunRegenerationQuery( *query, required_links, knowledge );       
+                RunRegenerationQuery( *query, hypothesis_links, knowledge );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
@@ -410,7 +410,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
 }   
                                               
                                               
-AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const SolutionMap *required_links,
+AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                                   const TheKnowledge *knowledge ) const
 {
     QueryLambda mut_lambda;
@@ -419,19 +419,19 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartRegenerationQuery( required_links, knowledge, false );
+        mut_lambda = StartRegenerationQuery( hypothesis_links, knowledge, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIDisable silencer(); // make ref algo be quiet            
-            (void)StartRegenerationQuery( required_links, knowledge, true );
+            (void)StartRegenerationQuery( hypothesis_links, knowledge, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
-                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
-                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
-                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
+                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
+                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
+                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
         }
         catch( ::Mismatch &e ) 
         {
@@ -443,15 +443,15 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     try
     {
         Tracer::RAIIDisable silencer(); // make ref algo be quiet             
-        ref_lambda = StartRegenerationQuery( required_links, knowledge, true );        
+        ref_lambda = StartRegenerationQuery( hypothesis_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
     {
         ASSERT(false)("Ref start threw ")(e)(" but MUT didn't\n")
                      (*this)("\n")
-                     ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
-                     ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
-                     ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
+                     ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
+                     ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
+                     ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
     }
 
     QueryLambda test_lambda = [=]()mutable->shared_ptr<DecidedQuery>
@@ -480,9 +480,9 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
                 ASSERT(false)("MUT lambda threw ")(e)(" but ref didn't\n")
                              ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
                              (*this)("\n")
-                             ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
-                             ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
-                             ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
+                             ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
+                             ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
+                             ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
             }
             catch( ::Mismatch &e ) 
             {
@@ -506,9 +506,9 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
             ASSERT(false)("Ref lambda threw ")(e)(" but MUT didn't\n")
                          ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
                          (*this)("\n")
-                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *required_links))("\n")
-                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *required_links))("\n")
-                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *required_links))("\n");
+                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
+                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
+                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
         }
             
         
@@ -803,16 +803,16 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_links,
+void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const
 {
     bool all_non_mmax = true;
     bool all_mmax = true;
     for( PatternLink plink : keyer_and_normal_plinks ) 
     {
-        if( required_links->count(plink) > 0 )
+        if( hypothesis_links->count(plink) > 0 )
         {
-            if( required_links->at(plink) == XLink::MMAX_Link )
+            if( hypothesis_links->at(plink) == XLink::MMAX_Link )
                 all_non_mmax = false;
             else
                 all_mmax = false;                    
@@ -825,11 +825,11 @@ void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *required_lin
     if( !all_non_mmax )
         throw MMAXPropagationMismatch(); // Mismatch: mixed MMAX and non-MMAX
     
-    RunNormalLinkedQueryMMed( required_links, knowledge );
+    RunNormalLinkedQueryMMed( hypothesis_links, knowledge );
 }
 
                                
-void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *required_links,
+void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const                                      
 {                      
     ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
@@ -848,23 +848,23 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 }
 
 
-void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *required_links,
+void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                                    const TheKnowledge *knowledge ) const
 {
     // Baseless query strategy: don't check pre-restriction
-    bool based = (required_links->count(keyer_plink) == 1);
+    bool based = (hypothesis_links->count(keyer_plink) == 1);
     if( based )
     { 
         // Check pre-restriction
-        if( !IsLocalMatch( required_links->at(keyer_plink).GetChildX().get() ) )
+        if( !IsLocalMatch( hypothesis_links->at(keyer_plink).GetChildX().get() ) )
             throw PreRestrictionMismatch();
     }
     
-    RunNormalLinkedQueryPRed( required_links, knowledge );
+    RunNormalLinkedQueryPRed( hypothesis_links, knowledge );
 }
 
                                
-void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                                    const TheKnowledge *knowledge ) const                                      
 {                      
     ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");

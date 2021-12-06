@@ -27,9 +27,11 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
 void SymbolicConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_plinks )
 { 
     // The keyer
-    set<SR::PatternLink> input_plinks = op->GetInputPatternLinks();
-    set<SR::PatternLink> my_input_plinks = IntersectionOf( input_plinks, relevent_plinks );
-    for( VariableId plink : my_input_plinks )
+    set<SR::PatternLink> required_plinks = op->GetRequiredPatternLinks();
+    
+    // Filter down to variables relevent to the current solver
+    set<SR::PatternLink> my_required_plinks = IntersectionOf( required_plinks, relevent_plinks );
+    for( VariableId plink : my_required_plinks )
         variables.push_back( plink );     
 }
 

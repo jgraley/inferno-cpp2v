@@ -122,33 +122,33 @@ private:
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
     void NormalLinkedQuerySequence( SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
-                                    const SolutionMap *required_links,
+                                    const SolutionMap *hypothesis_links,
                                     const TheKnowledge *knowledge ) const;
     void NormalLinkedQueryCollection( CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
-                                      const SolutionMap *required_links,
+                                      const SolutionMap *hypothesis_links,
                                       const TheKnowledge *knowledge ) const;
     void NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
                                     const Plan::Singular &plan_sing,
-                                    const SolutionMap *required_links,
+                                    const SolutionMap *hypothesis_links,
                                     const TheKnowledge *knowledge ) const;
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           const SolutionMap *required_links,
+                                           const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
     void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                     SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
-                                    const SolutionMap *required_links,
+                                    const SolutionMap *hypothesis_links,
                                     const TheKnowledge *knowledge ) const;
     void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                       CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
-                                      const SolutionMap *required_links,
+                                      const SolutionMap *hypothesis_links,
                                       const TheKnowledge *knowledge ) const;
                                            
 public:

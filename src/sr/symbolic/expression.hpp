@@ -20,7 +20,7 @@ public:
      */
     struct EvalKit
     {
-        const SR::SolutionMap *required_links;
+        const SR::SolutionMap *hypothesis_links;
         const SR::TheKnowledge *knowledge;
     };
     
@@ -42,7 +42,7 @@ public:
         COMMA 
     };    
         
-    virtual set<SR::PatternLink> GetInputPatternLinks() const = 0;
+    virtual set<SR::PatternLink> GetRequiredPatternLinks() const = 0;
     virtual set<shared_ptr<Expression>> GetOperands() const;
 
     virtual string Render() const = 0;    

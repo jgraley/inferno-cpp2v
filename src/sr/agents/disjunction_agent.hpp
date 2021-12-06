@@ -22,7 +22,7 @@ public:
                                       XLink x ) const;                                    
                                                                
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
                                        const TheKnowledge *knowledge ) const;                
                                                                          
     virtual Block GetGraphBlockInfo() const;

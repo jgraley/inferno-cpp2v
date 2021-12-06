@@ -2,10 +2,10 @@
 
 using namespace SYM;
 
-BooleanLambda::BooleanLambda( set<SR::PatternLink> input_plinks_,
+BooleanLambda::BooleanLambda( set<SR::PatternLink> required_plinks_,
                               const LambdaType &lambda_,
                               string description_ ) :
-    input_plinks(input_plinks_),
+    required_plinks(required_plinks_),
     lambda(lambda_),
     description(description_)
 {
@@ -13,16 +13,16 @@ BooleanLambda::BooleanLambda( set<SR::PatternLink> input_plinks_,
 }
 
 
-set<SR::PatternLink> BooleanLambda::GetInputPatternLinks() const
+set<SR::PatternLink> BooleanLambda::GetRequiredPatternLinks() const
 {
-    return input_plinks;
+    return required_plinks;
 }
 
 
 BooleanResult BooleanLambda::Evaluate( const EvalKit &kit ) const
 {
     ASSERT( lambda );
-    ASSERT( kit.required_links );
+    ASSERT( kit.hypothesis_links );
     ASSERT( kit.knowledge );    
     try
     {

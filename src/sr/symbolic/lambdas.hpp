@@ -17,16 +17,16 @@ public:
     typedef BooleanExpression EvalType;
     typedef function<void( const EvalKit &kit )> LambdaType;
     
-    BooleanLambda( set<SR::PatternLink> input_plinks_,
+    BooleanLambda( set<SR::PatternLink> required_plinks_,
                     const LambdaType &lambda_,
                     string description );
-    virtual set<SR::PatternLink> GetInputPatternLinks() const override;
+    virtual set<SR::PatternLink> GetRequiredPatternLinks() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const set<SR::PatternLink> input_plinks;
+    const set<SR::PatternLink> required_plinks;
     const LambdaType lambda;
     const string description;
 };

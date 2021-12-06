@@ -80,20 +80,20 @@ public:
 
     /// Test an Agent given partial map of locations of base and normal links. 
     virtual bool ImplHasNLQ() const = 0;                                              
-    virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
                                        const TheKnowledge *knowledge ) const = 0;
 
     /// Test an agent given given partial map of locations of keyer and residuals.  
-    virtual void RunCouplingQuery( const SolutionMap *required_links ) = 0;                                       
+    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) = 0;                                       
 
     /// Obtain a symbolic expression for this node's queries (NLQ and coupling)
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) = 0; 
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
-    virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
+    virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                 const TheKnowledge *knowledge,
                                                 bool use_DQ = false ) const = 0;
-    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *required_links,
+    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const TheKnowledge *knowledge ) const = 0;
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
@@ -149,26 +149,26 @@ public:
                                   XLink base_xlink ) const;       
                                                                            
     virtual bool ImplHasNLQ() const;
-    void NLQFromDQ( const SolutionMap *required_links,
+    void NLQFromDQ( const SolutionMap *hypothesis_links,
                     const TheKnowledge *knowledge ) const;                                              
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQuery( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
                                        const TheKnowledge *knowledge ) const;
                                        
-    virtual void RunCouplingQuery( const SolutionMap *required_links );                                       
+    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links );                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override;                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           const SolutionMap *required_links,
+                                           const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
-                               const SolutionMap *required_links,
+                               const SolutionMap *hypothesis_links,
                                const TheKnowledge *knowledge ) const;
-    virtual QueryLambda StartRegenerationQuery( const SolutionMap *required_links,
+    virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                 const TheKnowledge *knowledge,
                                                 bool use_DQ = false ) const;
-    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *required_links,
+    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const TheKnowledge *knowledge ) const;
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
@@ -222,9 +222,9 @@ public:
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;
                                                                                       
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                             
-    virtual void RunNormalLinkedQueryMMed( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                
 };
 
@@ -237,9 +237,9 @@ public:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink base_xlink ) const = 0;                                          
                                       
-    virtual void RunNormalLinkedQueryMMed( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                      
 };
 

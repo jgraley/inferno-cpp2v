@@ -10,12 +10,12 @@ AndOperator::AndOperator( set< shared_ptr<BooleanExpression> > sa_ ) :
 }    
     
 
-set<SR::PatternLink> AndOperator::GetInputPatternLinks() const
+set<SR::PatternLink> AndOperator::GetRequiredPatternLinks() const
 {
     set<SR::PatternLink> sipl;
     // Non-strict union (i.e. not Solo) because common links are fine
     for( shared_ptr<BooleanExpression> a : sa )
-        sipl = UnionOf( sipl, a->GetInputPatternLinks() );
+        sipl = UnionOf( sipl, a->GetRequiredPatternLinks() );
     return sipl;
 }
 

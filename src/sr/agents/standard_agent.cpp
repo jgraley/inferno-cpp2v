@@ -396,16 +396,16 @@ bool StandardAgent::ImplHasNLQ() const
 }
 
 
-void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
 
     // Get the members of x corresponding to pattern's class
-    bool based = required_links->count(keyer_plink);
+    bool based = hypothesis_links->count(keyer_plink);
     vector< Itemiser::Element * > x_memb;
     if( based )
-        x_memb = Itemise( required_links->at(keyer_plink).GetChildX().get() );   
+        x_memb = Itemise( hypothesis_links->at(keyer_plink).GetChildX().get() );   
 
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
@@ -413,7 +413,7 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                      dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]) :
                                      nullptr;
         ASSERT( p_x_singular )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySingular( p_x_singular, plan_sing, required_links, knowledge );
+        NormalLinkedQuerySingular( p_x_singular, plan_sing, hypothesis_links, knowledge );
     }
     for( const Plan::Collection &plan_col : plan.collections )
     {
@@ -421,7 +421,7 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                        dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]) :
                                        nullptr;
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQueryCollection( p_x_col, plan_col, required_links, knowledge );
+        NormalLinkedQueryCollection( p_x_col, plan_col, hypothesis_links, knowledge );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
@@ -429,14 +429,14 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
                                      dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]) :
                                      nullptr;
         ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySequence( p_x_seq, plan_seq, required_links, knowledge );
+        NormalLinkedQuerySequence( p_x_seq, plan_seq, hypothesis_links, knowledge );
     }
 }
 
 
 void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
-                                               const SolutionMap *required_links,
+                                               const SolutionMap *hypothesis_links,
                                                const TheKnowledge *knowledge ) const
 {
     INDENT("S");
@@ -446,9 +446,9 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
     // directly off the nugget).
     for( PatternLink plink : plan_seq.non_stars )  // independent of p_x_seq
     {
-        if( required_links->count(plink) > 0 ) 
+        if( hypothesis_links->count(plink) > 0 ) 
         {
-            XLink req_xlink = required_links->at(plink);
+            XLink req_xlink = hypothesis_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE) )
                 throw WrongCadenceSequenceMismatch(); // Be in the right sequence        
@@ -462,9 +462,9 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
     {
         for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
         {        
-            if( required_links->count(plink) > 0 ) 
+            if( hypothesis_links->count(plink) > 0 ) 
             {
-                XLink req_xlink = required_links->at(plink);
+                XLink req_xlink = hypothesis_links->at(plink);
                 const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
                 if( !(nugget.container == p_x_seq) )
                     throw WrongContainerSequenceMismatch(); // Be in the right sequence        
@@ -476,13 +476,13 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
     // front node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_front ) // independent of p_x_seq
     {
-        if( required_links->count(plan_seq.non_star_at_front) > 0 ) 
+        if( hypothesis_links->count(plan_seq.non_star_at_front) > 0 ) 
         {        
-            XLink req_xlink = required_links->at(plan_seq.non_star_at_front);
+            XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_front);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
             auto req_seq = dynamic_cast<SequenceInterface *>(nugget.container);
             ASSERT( req_seq )("Front element not in a sequence, cadence check should have ensured this");            
-            XLink req_front_xlink(required_links->at(keyer_plink).GetChildX(), &req_seq->front());            
+            XLink req_front_xlink(hypothesis_links->at(keyer_plink).GetChildX(), &req_seq->front());            
             if( req_xlink != req_front_xlink )
                 throw NotAtFrontMismatch();
         }
@@ -492,13 +492,13 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
     // back node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_back ) // independent of p_x_seq
     {
-        if( required_links->count(plan_seq.non_star_at_back) > 0 ) 
+        if( hypothesis_links->count(plan_seq.non_star_at_back) > 0 ) 
         {        
-            XLink req_xlink = required_links->at(plan_seq.non_star_at_back);
+            XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_back);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
             auto req_seq = dynamic_cast<SequenceInterface *>(nugget.container);
             ASSERT( req_seq )("Back element not in a sequence, cadence check should have ensured this");            
-            XLink req_back_xlink(required_links->at(keyer_plink).GetChildX(), &req_seq->back());            
+            XLink req_back_xlink(hypothesis_links->at(keyer_plink).GetChildX(), &req_seq->back());            
             if( req_xlink != req_back_xlink )
                 throw NotAtBackMismatch();
         }
@@ -508,10 +508,10 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
     // pairs of child x nodes. Only needs the two child x nodes, so binary constraint.
     for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of p_x_seq
     {
-        if( required_links->count(p.first) > 0 && required_links->count(p.second) > 0 )
+        if( hypothesis_links->count(p.first) > 0 && hypothesis_links->count(p.second) > 0 )
         {
-            XLink a_req_xlink = required_links->at(p.first);
-            XLink b_req_xlink = required_links->at(p.second);
+            XLink a_req_xlink = hypothesis_links->at(p.first);
+            XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );       
             ContainerInterface::iterator a_it_incremented = a_nugget.iterator;
@@ -526,10 +526,10 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
     // the two child x nodes, so binary constraint.    
     for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of p_x_seq
     {
-        if( required_links->count(p.first) > 0 && required_links->count(p.second) > 0 )
+        if( hypothesis_links->count(p.first) > 0 && hypothesis_links->count(p.second) > 0 )
         {
-            XLink a_req_xlink = required_links->at(p.first);
-            XLink b_req_xlink = required_links->at(p.second);
+            XLink a_req_xlink = hypothesis_links->at(p.first);
+            XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );        
             if( !(a_nugget.container == b_nugget.container && a_nugget.index < b_nugget.index) )
@@ -541,7 +541,7 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
 
 void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
-                                                 const SolutionMap *required_links,
+                                                 const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const
 {
     INDENT("C");
@@ -552,9 +552,9 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
     // nugget).
     for( PatternLink plink : plan_col.non_stars )  // independent of p_x_col
     {
-        if( required_links->count(plink) > 0 )
+        if( hypothesis_links->count(plink) > 0 )
         {
-            XLink req_xlink = required_links->at(plink);
+            XLink req_xlink = hypothesis_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
             if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION) )
                 throw WrongCadenceCollectionMismatch(); // Be in a collection
@@ -566,9 +566,9 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
     {
         for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
         {
-            if( required_links->count(plink) > 0 )
+            if( hypothesis_links->count(plink) > 0 )
             {
-                XLink req_xlink = required_links->at(plink);
+                XLink req_xlink = hypothesis_links->at(plink);
                 const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
                 if( nugget.container != p_x_col )
                     throw WrongContainerCollectionMismatch(); // Be in the right collection
@@ -580,9 +580,9 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
     set<XLink> x_so_far;
     for( PatternLink plink : plan_col.non_stars ) // independent of p_x_col
     {
-        if( required_links->count(plink) > 0 )
+        if( hypothesis_links->count(plink) > 0 )
         {
-            XLink req_xlink = required_links->at(plink);
+            XLink req_xlink = hypothesis_links->at(plink);
             if( x_so_far.count( req_xlink ) > 0 )
                 throw CollisionCollectionMismatch(); // Already removed this one: collision
             x_so_far.insert( req_xlink );
@@ -603,15 +603,15 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
 
 void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
                                                const Plan::Singular &plan_sing,
-                                               const SolutionMap *required_links,
+                                               const SolutionMap *hypothesis_links,
                                                const TheKnowledge *knowledge ) const
 {
     if( p_x_singular )
     {
-        XLink sing_xlink(required_links->at(keyer_plink).GetChildX(), p_x_singular);        
-        if( required_links->count(plan_sing.plink) > 0 ) 
+        XLink sing_xlink(hypothesis_links->at(keyer_plink).GetChildX(), p_x_singular);        
+        if( hypothesis_links->count(plan_sing.plink) > 0 ) 
         {
-            XLink req_sing_xlink = required_links->at(plan_sing.plink);                
+            XLink req_sing_xlink = hypothesis_links->at(plan_sing.plink);                
             if( sing_xlink != req_sing_xlink )
                 throw SingularMismatch();
         }
@@ -620,24 +620,24 @@ void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
 
                                                
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                              const SolutionMap *required_links,
+                                              const SolutionMap *hypothesis_links,
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
 
     // Get the members of x corresponding to pattern's class
-    XLink base_xlink = required_links->at(keyer_plink);
+    XLink base_xlink = hypothesis_links->at(keyer_plink);
     vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )
     {
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
-        RegenerationQueryCollection( query, p_x_col, plan_col, required_links, knowledge );
+        RegenerationQueryCollection( query, p_x_col, plan_col, hypothesis_links, knowledge );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
-        RegenerationQuerySequence( query, p_x_seq, plan_seq, required_links, knowledge );
+        RegenerationQuerySequence( query, p_x_seq, plan_seq, hypothesis_links, knowledge );
     }
 }
 
@@ -645,7 +645,7 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                                SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
-                                               const SolutionMap *required_links,
+                                               const SolutionMap *hypothesis_links,
                                                const TheKnowledge *knowledge ) const
 {
     INDENT("S");
@@ -664,10 +664,10 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 
         if( run->predecessor )
         {
-            if( required_links->count(run->predecessor) == 0 )         
+            if( hypothesis_links->count(run->predecessor) == 0 )         
                 break; // can't do any more in the current run
             
-            XLink pred_xlink = required_links->at(run->predecessor);
+            XLink pred_xlink = hypothesis_links->at(run->predecessor);
             const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
             xit = pred_nugget.iterator;
             ++xit; // get past the non-star
@@ -679,10 +679,10 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
         
         if( run->successor )
         {
-            if( required_links->count(run->successor) == 0 )         
+            if( hypothesis_links->count(run->successor) == 0 )         
                 break; // can't do any more in the current run
             
-            XLink succ_xlink = required_links->at(run->successor);
+            XLink succ_xlink = hypothesis_links->at(run->successor);
             const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
             xit_star_limit = succ_nugget.iterator;
         }
@@ -710,7 +710,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             }
             
             // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
-            XLink base_xlink = required_links->at(keyer_plink);
+            XLink base_xlink = hypothesis_links->at(keyer_plink);
             TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
@@ -724,7 +724,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                                  CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
-                                                 const SolutionMap *required_links,
+                                                 const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const
 {
     INDENT("C");
@@ -734,10 +734,10 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
         // Determine the set of non-star tree pointers 
         SubCollectionRange::ExclusionSet excluded_x;
         for( PatternLink plink : plan_col.non_stars ) // independent of p_x_col
-            excluded_x.insert( required_links->at(plink).GetXPtr() );
+            excluded_x.insert( hypothesis_links->at(plink).GetXPtr() );
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
-        XLink base_xlink = required_links->at(keyer_plink);
+        XLink base_xlink = hypothesis_links->at(keyer_plink);
         TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       

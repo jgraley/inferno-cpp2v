@@ -23,7 +23,7 @@ public:
                                       XLink base_xlink ) const;         
                                                                                      
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;
     //virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override; 
     

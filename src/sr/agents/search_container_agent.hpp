@@ -49,7 +49,7 @@ class AnyNodeAgent : public SearchContainerAgent
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink base_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;                                             
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
 };
@@ -88,10 +88,10 @@ public:
     virtual XLink GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           const SolutionMap *required_links,
+                                           const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
 

@@ -19,7 +19,7 @@ public:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           const SolutionMap *required_links,
+                                           const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
     virtual Block GetGraphBlockInfo() const;
     

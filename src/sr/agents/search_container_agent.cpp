@@ -110,7 +110,7 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::
 }
 
     
-void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                              const TheKnowledge *knowledge ) const
 {
     INDENT("#");
@@ -120,15 +120,15 @@ void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
-    SolutionMap::const_iterator req_terminus_it = required_links->find(terminus_plink);
-    if( req_terminus_it==required_links->end() ) 
+    SolutionMap::const_iterator req_terminus_it = hypothesis_links->find(terminus_plink);
+    if( req_terminus_it==hypothesis_links->end() ) 
         return;
     XLink req_terminus_xlink = req_terminus_it->second; 
 
     const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
     if( !nugget.parent_xlink )
         throw NoParentMismatch();                    
-    if( nugget.parent_xlink != required_links->at(keyer_plink) )      
+    if( nugget.parent_xlink != hypothesis_links->at(keyer_plink) )      
         throw TerminusMismatch();     
 }                                                                                        
 
@@ -193,7 +193,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
 }
 
 
-void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
+void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const
 {
     INDENT("#");
@@ -203,17 +203,17 @@ void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_plink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
-    if( required_links->count(terminus_plink) > 0 )
+    if( hypothesis_links->count(terminus_plink) > 0 )
     {        
         // Get nugget for base - base is first descendant (inclusive) in depth-first ordering
-        XLink base_xlink = required_links->at(keyer_plink);
+        XLink base_xlink = hypothesis_links->at(keyer_plink);
         const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(base_xlink) );
         
         // Get nugget for last descendant of base
         const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(base_nugget.last_descendant_xlink) );
         
         // Get nugget for terminus
-        XLink req_terminus_xlink = required_links->at(terminus_plink);
+        XLink req_terminus_xlink = hypothesis_links->at(terminus_plink);
         const TheKnowledge::Nugget &req_terminus_nugget( knowledge->GetNugget(req_terminus_xlink) );
 
         // Terminus must be base or a descendant of base 
@@ -225,7 +225,7 @@ void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *required_links,
 
 
 void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                           const SolutionMap *required_links,
+                                           const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const
 {
     INDENT("#");
@@ -235,11 +235,11 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     if( !recurse_restriction )
         return;
 
-    XLink base_xlink = required_links->at(keyer_plink);
+    XLink base_xlink = hypothesis_links->at(keyer_plink);
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
-    XLink req_terminus_xlink = required_links->at(terminus_plink); 
+    XLink req_terminus_xlink = hypothesis_links->at(terminus_plink); 
     
     XLink xlink = req_terminus_xlink;
     TreePtr<SubSequence> xpr_ss( new SubSequence() );
