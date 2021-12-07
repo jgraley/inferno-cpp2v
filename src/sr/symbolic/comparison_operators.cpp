@@ -35,8 +35,8 @@ BooleanResult EqualsOperator::Evaluate( const EvalKit &kit ) const
     for( shared_ptr<SymbolExpression> a : sa )
         results.push_back( a->Evaluate(kit) );
     bool equal = true;
-    LoopOverlappingAdjacentPairs( results, [&](const SymbolResult &ra,
-                                               const SymbolResult &rb) 
+    ForOverlappingAdjacentPairs( results, [&](const SymbolResult &ra,
+                                              const SymbolResult &rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties

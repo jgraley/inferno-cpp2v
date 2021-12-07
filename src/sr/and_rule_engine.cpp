@@ -396,8 +396,8 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
 void AndRuleEngine::Plan::SymbolicRewrites()
 {    
     split_expressions_and_agents = SYM::Splitter()(raw_expressions_and_agents);
-    FTRACE("Raw symbolcs and agents:\n")(raw_expressions_and_agents)("\n");
-    FTRACE("Split symbolcs and agents:\n")(split_expressions_and_agents)("\n");
+    //FTRACE("Raw symbolcs and agents:\n")(raw_expressions_and_agents)("\n");
+    //FTRACE("Split symbolcs and agents:\n")(split_expressions_and_agents)("\n");
 }
 
 
