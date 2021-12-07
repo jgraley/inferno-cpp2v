@@ -90,7 +90,7 @@ template<typename TF, typename TS>
 string Trace(const pair<TF, TS> &p) 
 {
     list<string> elts = { Trace(p.first), Trace(p.second) };
-    return Join(elts, "(", ", ", ")");
+    return Join(elts, ", ", "(", ")");
 }
 
 
@@ -122,7 +122,7 @@ string Trace(tuple<TYPES...> const & t)
     typedef tuple<TYPES...> TUPLE;
     list<string> elts;
     TraceTupleWorker<TUPLE, tuple_size<TUPLE>::value>::Execute(elts, t);
-    return Join( elts, "[", CONTAINER_SEP, "]" );
+    return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
 
@@ -132,7 +132,7 @@ string Trace(const vector<T> &l)
     list<string> elts;
     for( auto x : l )
         elts.push_back( Trace(x) );
-    return Join( elts, "[", CONTAINER_SEP, "]" );
+    return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
 
@@ -142,7 +142,7 @@ string Trace(const list<T> &l)
     list<string> elts;
     for( auto x : l )
         elts.push_back( Trace(x) );
-    return Join( elts, "[", CONTAINER_SEP, "]" );
+    return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
 
@@ -152,7 +152,7 @@ string Trace(const set<T> &s)
     list<string> elts;
     for( auto x : s )
         elts.push_back( Trace(x) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -162,7 +162,7 @@ string Trace(const map<TK, TV> &m)
     list<string> elts;
     for( auto p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -172,7 +172,7 @@ string Trace(const multiset<T> &s)
     list<string> elts;
     for( auto x : s )
         elts.push_back( Trace(x) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -182,7 +182,7 @@ string Trace(const multimap<TK, TV> &m)
     list<string> elts;
     for( auto p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -192,7 +192,7 @@ string Trace(const unordered_set<T> &s)
     list<string> elts;
     for( auto x : s )
         elts.push_back( Trace(x) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -202,7 +202,7 @@ string Trace(const unordered_map<TK, TV> &m)
     list<string> elts;
     for( auto p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -212,7 +212,7 @@ string Trace(const unordered_multiset<T> &s)
     list<string> elts;
     for( auto x : s )
         elts.push_back( Trace(x) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 
@@ -222,7 +222,7 @@ string Trace(const unordered_multimap<TK, TV> &m)
     list<string> elts;
     for( auto p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
-    return Join( elts, "{", CONTAINER_SEP, "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 

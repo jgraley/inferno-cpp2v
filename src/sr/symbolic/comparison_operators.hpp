@@ -16,7 +16,6 @@ public:
     class Mismatch : public ::Mismatch {}; // only one kind of mismatch here
     typedef BooleanExpression EvalType;
     EqualsOperator( set< shared_ptr<SymbolExpression> > sa );
-    virtual set<SR::PatternLink> GetRequiredPatternLinks() const override;
     virtual set<shared_ptr<Expression>> GetOperands() const;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;

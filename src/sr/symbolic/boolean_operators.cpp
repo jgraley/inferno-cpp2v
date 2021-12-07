@@ -8,16 +8,6 @@ AndOperator::AndOperator( set< shared_ptr<BooleanExpression> > sa_ ) :
     sa(sa_)
 {
 }    
-    
-
-set<SR::PatternLink> AndOperator::GetRequiredPatternLinks() const
-{
-    set<SR::PatternLink> sipl;
-    // Non-strict union (i.e. not Solo) because common links are fine
-    for( shared_ptr<BooleanExpression> a : sa )
-        sipl = UnionOf( sipl, a->GetRequiredPatternLinks() );
-    return sipl;
-}
 
 
 set<shared_ptr<Expression>> AndOperator::GetOperands() const
@@ -48,7 +38,7 @@ string AndOperator::Render() const
     list<string> ls;
     for( shared_ptr<BooleanExpression> a : sa )
         ls.push_back( RenderForMe(a) );
-    return Join( ls, "", " & ", "" );
+    return Join( ls, " & " );
 }
 
 

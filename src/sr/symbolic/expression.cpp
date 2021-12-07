@@ -8,6 +8,16 @@ set<shared_ptr<Expression>> Expression::GetOperands() const
 }
 
 
+set<SR::PatternLink> Expression::GetRequiredPatternLinks() const 
+{
+    set<SR::PatternLink> sipl;
+    // Non-strict union (i.e. not Solo) because common links are fine
+    for( const shared_ptr<Expression> a : GetOperands() )
+        sipl = UnionOf( sipl, a->GetRequiredPatternLinks() );
+    return sipl;
+}
+
+
 string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
 {
     string bare = inner->Render();

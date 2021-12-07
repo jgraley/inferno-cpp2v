@@ -10,16 +10,6 @@ EqualsOperator::EqualsOperator( set< shared_ptr<SymbolExpression> > sa_ ) :
 }    
     
 
-set<SR::PatternLink> EqualsOperator::GetRequiredPatternLinks() const 
-{
-    set<SR::PatternLink> sipl;
-    // Non-strict union (i.e. not Solo) because common links are fine
-    for( shared_ptr<SymbolExpression> a : sa )
-        sipl = UnionOf( sipl, a->GetRequiredPatternLinks() );
-    return sipl;
-}
-
-
 set<shared_ptr<Expression>> EqualsOperator::GetOperands() const
 {
     set<shared_ptr<Expression>> ops;
@@ -52,7 +42,7 @@ string EqualsOperator::Render() const
     list<string> ls;
     for( shared_ptr<SymbolExpression> a : sa )
         ls.push_back( RenderForMe(a) );
-    return Join( ls, "", "==", "" );
+    return Join( ls, "==" );
 }
 
 

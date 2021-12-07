@@ -108,7 +108,7 @@ void CommonTest()
 }
 
 
-string Join( const list<string> &ls, string pre, string sep, string post )
+string Join( const list<string> &ls, string sep, string pre, string post )
 {
     bool first = true;
     string s;

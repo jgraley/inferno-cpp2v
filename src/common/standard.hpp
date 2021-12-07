@@ -38,6 +38,6 @@ string SSPrintf(string fmt, ...);
 
 void CommonTest();
 
-string Join( const list<string> &v, string pre="", string sep=" ", string post="" );
+string Join( const list<string> &v, string sep=" ", string pre="", string post="" );
 
 #endif

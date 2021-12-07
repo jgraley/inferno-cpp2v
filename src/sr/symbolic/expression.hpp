@@ -42,9 +42,9 @@ public:
         COMMA 
     };    
         
-    virtual set<SR::PatternLink> GetRequiredPatternLinks() const = 0;
     virtual set<shared_ptr<Expression>> GetOperands() const;
 
+    virtual set<SR::PatternLink> GetRequiredPatternLinks() const;
     virtual string Render() const = 0;    
     string GetTrace() const; // used for debug
     
