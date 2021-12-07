@@ -7,6 +7,11 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 
+namespace SR
+{
+    class Agent;
+};
+
 namespace SYM
 { 
 
@@ -26,6 +31,22 @@ private:
 };
 
 Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
+class PreRestrictionOperator : public BooleanExpression
+{
+public:    
+    class Mismatch : public ::Mismatch {}; // only one kind of mismatch here
+    typedef BooleanExpression EvalType;
+    PreRestrictionOperator( shared_ptr<SymbolExpression> sa );
+    virtual set<shared_ptr<Expression>> GetOperands() const;
+    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    shared_ptr<SymbolExpression> a;
+    const SR::Agent *pre_restrictor; // TODO Would like to use an archetype to reduce coupling
+};
 
 };
 

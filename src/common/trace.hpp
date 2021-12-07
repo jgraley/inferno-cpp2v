@@ -192,7 +192,7 @@ string Trace(const unordered_set<T> &s)
     list<string> elts;
     for( auto x : s )
         elts.push_back( Trace(x) );
-    return Join( Join( elts, CONTAINER_SEP, "{", "}" );
+    return Join( elts, CONTAINER_SEP, "{", "}" );
 }
 
 

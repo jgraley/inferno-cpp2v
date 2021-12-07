@@ -731,26 +731,18 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 }
 
 
+bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
+{
+    // Pre-restriction policy defined here. Would like to be able to 
+    // export an archetype and implement the policy centrally or in
+    // the symbolic stuff.
+    return IsLocalMatch( x.GetChildX().get() );
+}
+
+
 string AgentCommon::GetTrace() const
 {
-    string s = Traceable::GetName() + GetSerialString();
-/* Adds clutter to trace for little benefit and is wrong
-   because the trace id for a node should describe the node itself
-   and not surrounding context - that's what trace pattern graphs 
-   are for.    
-    switch( phase )
-    {
-    case IN_COMPARE_ONLY:
-        s += "/C";
-        break;
-    case IN_COMPARE_AND_REPLACE:
-        s += "/CR";
-        break;
-    case IN_REPLACE_ONLY:
-        s += "/R";
-        break;
-    }*/
-    return s;
+    return Traceable::GetName() + GetSerialString();
 }
 
 
@@ -841,7 +833,7 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                               XLink base_xlink ) const
 {
     // Check pre-restriction
-    if( !IsLocalMatch( base_xlink.GetChildX().get() ) )
+    if( !IsPreRestrictionMatch(base_xlink) )
         throw PreRestrictionMismatch();
             
     RunDecidedQueryPRed( query, base_xlink );
@@ -856,7 +848,8 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis
     if( based )
     { 
         // Check pre-restriction
-        if( !IsLocalMatch( hypothesis_links->at(keyer_plink).GetChildX().get() ) )
+        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+        if( !IsPreRestrictionMatch(keyer_xlink) )
             throw PreRestrictionMismatch();
     }
     
@@ -905,7 +898,7 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &base_x
     {
         if( base_xlink == XLink::MMAX_Link )
             continue; // MMAX at base never expands domain because all child patterns are also MMAX
-        if( !IsLocalMatch( base_xlink.GetChildX().get() ) )
+        if( !IsPreRestrictionMatch(base_xlink) )
             continue; // Failed pre-restriction so can't expand domain
 
         try
