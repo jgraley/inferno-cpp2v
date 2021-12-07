@@ -21,14 +21,14 @@ shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 
 
 void NegationAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                         XLink base_xlink ) const
+                                         XLink keyer_xlink ) const
 {
     INDENT("¬");
     ASSERT( *GetPattern() );
     query.Reset();
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), base_xlink ); // Link into X, abnormal
+    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), keyer_xlink ); // Link into X, abnormal
 }
 
 
@@ -37,8 +37,8 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const TheKnowledge *knowledge ) const
 { 
     // This agent has no normal links, so just do this to populate query
-    XLink base_xlink = hypothesis_links->at(keyer_plink);
-    RunDecidedQueryPRed( query, base_xlink ); 
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    RunDecidedQueryPRed( query, keyer_xlink ); 
 }
 
 

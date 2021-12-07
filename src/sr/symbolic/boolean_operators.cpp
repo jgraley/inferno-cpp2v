@@ -44,7 +44,7 @@ string AndOperator::Render() const
 
 Expression::Precedence AndOperator::GetPrecedence() const
 {
-    return AND;
+    return Precedence::AND;
 }
 
 

@@ -26,7 +26,7 @@ struct Matcher
     {
     };
 
-	virtual bool IsSubclass( const Matcher *source_architype ) const = 0;
+	virtual bool IsSubclass( const Matcher *source_archetype ) const = 0;
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		// Default local matching criterion checks only the type of the candidate. If the
@@ -35,11 +35,11 @@ struct Matcher
 	}
     virtual ~Matcher() {}
     template< class TARGET_TYPE >
-    static inline bool IsSubclassStatic( const TARGET_TYPE *target_architype, const Matcher *source_architype )
+    static inline bool IsSubclassStatic( const TARGET_TYPE *target_archetype, const Matcher *source_archetype )
     {
-        ASSERT( source_architype );
-        (void)target_architype; // don't care about value of architypes; just want the type
-        return !!dynamic_cast<const TARGET_TYPE *>(source_architype);
+        ASSERT( source_archetype );
+        (void)target_archetype; // don't care about value of archetypes; just want the type
+        return !!dynamic_cast<const TARGET_TYPE *>(source_archetype);
     }
     static CompareResult Compare( const Matcher *l, const Matcher *r, Ordering ordering = UNIQUE )
     {
@@ -56,9 +56,9 @@ struct Matcher
 };
 
 #define MATCHER_FUNCTION \
-    virtual bool IsSubclass( const Matcher *source_architype ) const \
+    virtual bool IsSubclass( const Matcher *source_archetype ) const \
     { \
-        return IsSubclassStatic( this, source_architype ); \
+        return IsSubclassStatic( this, source_archetype ); \
     }
 
 #endif

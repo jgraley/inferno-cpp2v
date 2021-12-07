@@ -108,7 +108,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;
+                                      XLink keyer_xlink ) const;
 
     string name;
 };
@@ -169,8 +169,8 @@ struct NestedAgent : public virtual TeleportAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;                
+                                      XLink keyer_xlink ) const;                  
+    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const;                
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
     virtual Block GetGraphBlockInfo() const;

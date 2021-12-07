@@ -44,5 +44,5 @@ string BooleanLambda::Render() const
 
 Expression::Precedence BooleanLambda::GetPrecedence() const
 {
-    return LITERAL;
+    return Precedence::LITERAL;
 }

@@ -33,7 +33,7 @@
 // benefits accrue, including:
 // - SerialNumber is used for inequality comparisons, for repeatability
 // - Tracing support
-// - Can obtain an architype object for the type of an object
+// - Can obtain an archetype object for the type of an object
 //
 template<typename VALUE_TYPE>
 struct TreePtr;
@@ -56,7 +56,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     	(void)Traceable::operator=( o );
     	return *this;
     }
-    virtual TreePtr<Node> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
+    virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetTrace() const
     {
         if( operator bool() )           
@@ -180,7 +180,7 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
 			return TreePtr<VALUE_TYPE>();
 		}
 	}
-	virtual TreePtr<Node> MakeValueArchitype() const
+	virtual TreePtr<Node> MakeValueArchetype() const
 	{
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }

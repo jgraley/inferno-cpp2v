@@ -24,7 +24,7 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 
 
 void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                                XLink base_xlink ) const
+                                                XLink keyer_xlink ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -34,7 +34,7 @@ void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &quer
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
     // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
     // facade for the iterators and can be abandoned safely?
-    shared_ptr<ContainerInterface> pwx = GetContainerInterface( base_xlink );
+    shared_ptr<ContainerInterface> pwx = GetContainerInterface( keyer_xlink );
     
     if( pwx->empty() )
     {
@@ -43,13 +43,13 @@ void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    XLink terminus_xlink = GetXLinkFromIterator(base_xlink, thistime);
+    XLink terminus_xlink = GetXLinkFromIterator(keyer_xlink, thistime);
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(terminus_xlink)("\n");
 
     query.RegisterNormalLink( PatternLink(this, &terminus), terminus_xlink ); // Link into X
 
     // Let subclasses implement further restrictions
-    DecidedQueryRestrictions( query, thistime, base_xlink );
+    DecidedQueryRestrictions( query, thistime, keyer_xlink );
 }
 
 
@@ -96,17 +96,17 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
 
 //---------------------------------- AnyNode ------------------------------------    
 
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink base_xlink ) const
+shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink keyer_xlink ) const
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new FlattenNode( base_xlink.GetChildX() ) );
+    return shared_ptr<ContainerInterface>( new FlattenNode( keyer_xlink.GetChildX() ) );
 }
 
 
-XLink AnyNodeAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const
+XLink AnyNodeAgent::GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const
 {
-    return XLink(base_xlink.GetChildX(), &*it);
+    return XLink(keyer_xlink.GetChildX(), &*it);
 }
 
     
@@ -145,19 +145,19 @@ Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 
 //---------------------------------- Stuff ------------------------------------    
 
-shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink base_xlink ) const
+shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink keyer_xlink ) const
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new Walk( base_xlink.GetChildX(), nullptr, nullptr ) );
+    return shared_ptr<ContainerInterface>( new Walk( keyer_xlink.GetChildX(), nullptr, nullptr ) );
 }
 
 
-XLink StuffAgent::GetXLinkFromIterator( XLink base_xlink, ContainerInterface::iterator it ) const
+XLink StuffAgent::GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const
 {
     const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(it.GetUnderlyingIterator());
     ASSERT( pwtt );
-    return XLink::FromWalkIterator( *pwtt, base_xlink );
+    return XLink::FromWalkIterator( *pwtt, keyer_xlink );
 }
 
 
@@ -168,7 +168,7 @@ void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 }
 
 
-void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink base_xlink ) const
+void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const
 {
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.
@@ -183,7 +183,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         // Check all the nodes that we recursed through in order to get here
         for( pair<TreePtr<Node>, const TreePtrInterface *> p : pwtt->GetCurrentPath() )
         {
-            xpr_ss->elts.push_back( p.second ? XLink(p.first, p.second) : base_xlink );
+            xpr_ss->elts.push_back( p.second ? XLink(p.first, p.second) : keyer_xlink );
             TRACE("DQR ")(p.first)(" ")(p.second)("\n");
         }
 
@@ -206,8 +206,8 @@ void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
     if( hypothesis_links->count(terminus_plink) > 0 )
     {        
         // Get nugget for base - base is first descendant (inclusive) in depth-first ordering
-        XLink base_xlink = hypothesis_links->at(keyer_plink);
-        const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(base_xlink) );
+        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+        const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(keyer_xlink) );
         
         // Get nugget for last descendant of base
         const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(base_nugget.last_descendant_xlink) );
@@ -235,15 +235,15 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     if( !recurse_restriction )
         return;
 
-    XLink base_xlink = hypothesis_links->at(keyer_plink);
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(base_xlink)("\n");
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_xlink)("\n");
     
     PatternLink terminus_plink(this, &terminus);
     XLink req_terminus_xlink = hypothesis_links->at(terminus_plink); 
     
     XLink xlink = req_terminus_xlink;
     TreePtr<SubSequence> xpr_ss( new SubSequence() );
-    while(xlink != base_xlink)
+    while(xlink != keyer_xlink)
     {       
         const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );       
         xlink = nugget.parent_xlink;

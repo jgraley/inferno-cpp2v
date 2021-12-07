@@ -49,7 +49,7 @@ string EqualsOperator::Render() const
 
 Expression::Precedence EqualsOperator::GetPrecedence() const
 {
-    return AND;
+    return Precedence::AND;
 }
 
 
@@ -90,5 +90,5 @@ string PreRestrictionOperator::Render() const
 
 Expression::Precedence PreRestrictionOperator::GetPrecedence() const
 {
-    return PREFIX;
+    return Precedence::PREFIX;
 }

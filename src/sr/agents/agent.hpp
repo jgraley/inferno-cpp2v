@@ -74,7 +74,7 @@ public:
     
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink base_xlink ) const = 0;     
+                                  XLink keyer_xlink ) const = 0;     
     
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
 
@@ -95,7 +95,7 @@ public:
                                                 bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const TheKnowledge *knowledge ) const = 0;
-    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) = 0;
+    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      
@@ -146,9 +146,9 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                                                
+                                      XLink keyer_xlink ) const;                                                
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink base_xlink ) const;       
+                                  XLink keyer_xlink ) const;       
                                                                            
     virtual bool ImplHasNLQ() const;
     void NLQFromDQ( const SolutionMap *hypothesis_links,
@@ -172,7 +172,7 @@ public:
                                                 bool use_DQ = false ) const;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const TheKnowledge *knowledge ) const;
-    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks ) { return {}; }
+    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
      
 public:
@@ -221,9 +221,9 @@ class DefaultMMAXAgent : public AgentCommon
 {
 public:    
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                                      
+                                      XLink keyer_xlink ) const;                                      
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const = 0;
+                                      XLink keyer_xlink ) const = 0;
                                                                                       
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                             
@@ -236,9 +236,9 @@ class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                                      
+                                      XLink keyer_xlink ) const;                                      
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const = 0;                                          
+                                      XLink keyer_xlink ) const = 0;                                          
                                       
     virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;
@@ -251,10 +251,10 @@ class TeleportAgent : public PreRestrictedAgent
 {
 public:    
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const { ASSERTFAIL(); }
+                                      XLink keyer_xlink ) const;                  
+    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }
     
-    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &base_xlinks );
+    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks );
 
     virtual void Reset();    
 
@@ -267,7 +267,7 @@ class SearchLeafAgent : public PreRestrictedAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
+                                      XLink keyer_xlink ) const;                  
 };
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
@@ -292,7 +292,7 @@ class SearchLeafAgent : public PreRestrictedAgent
 class SpecialBase
 {
 public:    
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() const = 0;
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const = 0;
 	static bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
 
 };
@@ -304,7 +304,7 @@ class Special : public SpecialBase,
                 public virtual PRE_RESTRICTION
 {
 public:
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() const
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const
     {
         // Esta muchos indirection
         return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  

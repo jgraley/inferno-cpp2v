@@ -9,7 +9,7 @@ namespace SR
 {
 /// Match based on the type of a a parent pointer. This agent matches
 /// if the pointer-type of whichever agent points to this one matches the 
-/// subtree under `pointer`. An architype node is created from the 
+/// subtree under `pointer`. An archetype node is created from the 
 /// original pointer object for the purposes of comparison, so if the
 /// original pointer is unavailable, as may be the case if it was 
 /// created locally, this agent will not work correctly.
@@ -17,7 +17,7 @@ class PointerIsAgent : public virtual TeleportAgent
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink base_xlink ) const;
+    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const;
                  
     virtual Block GetGraphBlockInfo() const;
 private:

@@ -120,7 +120,7 @@ struct String : Literal { NODE_FUNCTIONS };
 struct SpecificString : String
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificString(); ///< default constructor, for making architypes 
+    SpecificString(); ///< default constructor, for making archetypes 
     SpecificString( string s ); /// Construct with a given STL string
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const; /// Overloaded comparison for search&replace
@@ -149,7 +149,7 @@ struct Integer : Number { NODE_FUNCTIONS };
 struct SpecificInteger : Integer, llvm::APSInt
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificInteger(); ///< default constructor, for making architypes 
+    SpecificInteger(); ///< default constructor, for making archetypes 
     SpecificInteger( llvm::APSInt i ); ///< Construct with an LLVM-style integer
     SpecificInteger( int i ); ///< Construct with an ordinary int
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
@@ -168,7 +168,7 @@ struct Float : Number { NODE_FUNCTIONS };
 struct SpecificFloat : Float, llvm::APFloat
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificFloat(); ///< default constructor, for making architypes 
+    SpecificFloat(); ///< default constructor, for making archetypes 
     SpecificFloat( llvm::APFloat v ); ///< Construct with an LLVM-style float
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const; /// Overloaded comparison for search&replace
@@ -221,7 +221,7 @@ struct Identifier : virtual Property
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
-	SpecificIdentifier(); ///< default constructor, for making architypes 
+	SpecificIdentifier(); ///< default constructor, for making archetypes 
 	SpecificIdentifier( string s ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
@@ -544,7 +544,7 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificFloatSemantics(); ///< default constructor, for making architypes 
+    SpecificFloatSemantics(); ///< default constructor, for making archetypes 
     SpecificFloatSemantics( const llvm::fltSemantics *s ); /// Construct from LLVM's class
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const; /// Overloaded comparison for search&replace

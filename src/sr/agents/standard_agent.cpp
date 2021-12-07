@@ -213,38 +213,38 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 
 
 void StandardAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                         XLink base_xlink ) const
+                                         XLink keyer_xlink ) const
 {
     INDENT("Q");
 
     // Get the members of x corresponding to pattern's class
-    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > x_memb = Itemise( keyer_xlink.GetChildX().get() );   
     
     for( const Plan::Singular &plan_sing : plan.singulars )
     {
         auto p_x_singular = dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]);
         ASSERT( p_x_singular )( "itemise for x didn't match itemise for pattern");
-        DecidedQuerySingular( query, base_xlink, p_x_singular, plan_sing );
+        DecidedQuerySingular( query, keyer_xlink, p_x_singular, plan_sing );
     }
 
     for( const Plan::Collection &plan_col : plan.collections )
     {
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
         ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-        DecidedQueryCollection( query, base_xlink, p_x_col, plan_col );
+        DecidedQueryCollection( query, keyer_xlink, p_x_col, plan_col );
     }
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
         ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-        DecidedQuerySequence( query, base_xlink, p_x_seq, plan_seq );
+        DecidedQuerySequence( query, keyer_xlink, p_x_seq, plan_seq );
     }
 }
 
 
 void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
-                                          XLink base_xlink,
+                                          XLink keyer_xlink,
                                           SequenceInterface *p_x_seq,
 		                                  const Plan::Sequence &plan_seq ) const
 {
@@ -291,7 +291,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
-            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit, xit_star_end ) );
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( keyer_xlink.GetChildX(), xit, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern_seq restriction
@@ -305,7 +305,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             if( xit == p_x_seq->end() )
                 break;
        
-            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
+            query.RegisterNormalLink( PatternLink(this, &*pit), XLink(keyer_xlink.GetChildX(), &*xit) ); // Link into X
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -325,7 +325,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
 
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
-                                            XLink base_xlink,
+                                            XLink keyer_xlink,
                                             CollectionInterface *p_x_col,
 		 					                const Plan::Collection &plan_col ) const
 {
@@ -344,7 +344,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // We have to decide which node in the tree to match, so use the present conjecture
         // Make a SubCollectionRange excluding x elements we already matched
         ContainerInterface::iterator xit;
-        auto x_decision = make_shared< SubCollectionRange >( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() );
+        auto x_decision = make_shared< SubCollectionRange >( keyer_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() );
         x_decision->SetExclusions( excluded_x );                       
                    
         // An empty decision would imply we ran out of elements in p_x_col
@@ -356,7 +356,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         xit = query.RegisterDecision( x_decision->begin(), x_decision->end(), false, x_decision );    
         
         // We have our x element
-        query.RegisterNormalLink( plink, XLink(base_xlink.GetChildX(), &*xit) ); // Link into X
+        query.RegisterNormalLink( plink, XLink(keyer_xlink.GetChildX(), &*xit) ); // Link into X
         excluded_x.insert( &*xit );        
     }
 
@@ -366,7 +366,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     
     if( plan_col.star_plink )
     {
-        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( keyer_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!
     }
@@ -380,12 +380,12 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 
 
 void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
-                                          XLink base_xlink,
+                                          XLink keyer_xlink,
                                           TreePtrInterface *p_x_singular,
 		                                  const Plan::Singular &plan_sing ) const
 {
     PatternLink sing_plink(this, plan_sing.pattern);
-    XLink sing_xlink(base_xlink.GetChildX(), p_x_singular);
+    XLink sing_xlink(keyer_xlink.GetChildX(), p_x_singular);
     query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
 }
 
@@ -626,8 +626,8 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("Q");
 
     // Get the members of x corresponding to pattern's class
-    XLink base_xlink = hypothesis_links->at(keyer_plink);
-    vector< Itemiser::Element * > x_memb = Itemise( base_xlink.GetChildX().get() );   
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    vector< Itemiser::Element * > x_memb = Itemise( keyer_xlink.GetChildX().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )
     {
@@ -710,8 +710,8 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             }
             
             // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
-            XLink base_xlink = hypothesis_links->at(keyer_plink);
-            TreePtr<SubSequenceRange> xss( new SubSequenceRange( base_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
+            XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( keyer_xlink.GetChildX(), xit_star_begin, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern_seq restriction
@@ -737,8 +737,8 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
             excluded_x.insert( hypothesis_links->at(plink).GetXPtr() );
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
-        XLink base_xlink = hypothesis_links->at(keyer_plink);
-        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( base_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
+        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+        TreePtr<SubCollectionRange> x_subcollection( new SubCollectionRange( keyer_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() ) );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    

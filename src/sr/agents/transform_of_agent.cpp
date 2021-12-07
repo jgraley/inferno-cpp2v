@@ -12,11 +12,11 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink base_xlink ) const
+map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
-    TreePtr<Node> base_x = base_xlink.GetChildX();
+    TreePtr<Node> base_x = keyer_xlink.GetChildX();
     TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
     if( trans_x )
     {

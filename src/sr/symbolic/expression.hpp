@@ -25,7 +25,7 @@ public:
     };
     
     // Bigger number is LOWER precedence.
-    enum Precedence
+    enum class Precedence
     {
         LITERAL,
         SCOPE,

@@ -30,7 +30,7 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
+                                      XLink keyer_xlink ) const;                  
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          

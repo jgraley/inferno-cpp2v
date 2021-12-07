@@ -180,21 +180,21 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
     
     
 void AgentCommon::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                       XLink base_xlink ) const
+                                       XLink keyer_xlink ) const
 {
     ASSERTFAIL();
 }                                       
 
 
 void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                   XLink base_xlink ) const
+                                   XLink keyer_xlink ) const
 {
     // Admin stuff every DQ has to do
     query.last_activity = DecidedQueryCommon::QUERY;   
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset(); 
 
-    RunDecidedQueryImpl( query, base_xlink );
+    RunDecidedQueryImpl( query, keyer_xlink );
 }                             
 
 
@@ -348,8 +348,8 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     query.Reset(); 
 
-    XLink base_xlink = hypothesis_links->at(keyer_plink);
-    if( base_xlink != XLink::MMAX_Link )
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    if( keyer_xlink != XLink::MMAX_Link )
         this->RunRegenerationQueryImpl( query, hypothesis_links, knowledge );
 }                             
                       
@@ -778,19 +778,19 @@ string AgentCommon::GetPlanAsString() const
 //---------------------------------- DefaultMMAXAgent ------------------------------------    
 
 void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                            XLink base_xlink ) const
+                                            XLink keyer_xlink ) const
 {
-    if( base_xlink == XLink::MMAX_Link )
+    if( keyer_xlink == XLink::MMAX_Link )
     {
         // Magic Match Anything node: all normal children also match anything
         // This is just to keep normal-domain solver happy, so we 
         // only need normals. 
         for( PatternLink plink : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( plink, base_xlink );
+            query.RegisterNormalLink( plink, keyer_xlink );
     }   
     else
     {
-        RunDecidedQueryMMed( query, base_xlink );
+        RunDecidedQueryMMed( query, keyer_xlink );
     }
 }
 
@@ -830,13 +830,13 @@ void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_l
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
 void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                              XLink base_xlink ) const
+                                              XLink keyer_xlink ) const
 {
     // Check pre-restriction
-    if( !IsPreRestrictionMatch(base_xlink) )
+    if( !IsPreRestrictionMatch(keyer_xlink) )
         throw PreRestrictionMismatch();
             
-    RunDecidedQueryPRed( query, base_xlink );
+    RunDecidedQueryPRed( query, keyer_xlink );
 }
 
 
@@ -866,15 +866,15 @@ void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis
 //---------------------------------- TeleportAgent ------------------------------------    
 
 void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                         XLink base_xlink ) const
+                                         XLink keyer_xlink ) const
 {
     INDENT("T");
     
-    auto op = [&](XLink base_xlink) -> map<PatternLink, XLink>
+    auto op = [&](XLink keyer_xlink) -> map<PatternLink, XLink>
     {
-        map<PatternLink, XLink> tp_links = RunTeleportQuery( base_xlink );
+        map<PatternLink, XLink> tp_links = RunTeleportQuery( keyer_xlink );
         
-        // We will uniquify the link against the domain and then cache it against base_xlink
+        // We will uniquify the link against the domain and then cache it against keyer_xlink
         
         for( pair<PatternLink, XLink> p : tp_links )
             p.second = master_scr_engine->UniquifyDomainExtension(p.second); // in-place
@@ -882,7 +882,7 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
         return tp_links;
     };
     
-    map<PatternLink, XLink> cached_links = cache( base_xlink, op );
+    map<PatternLink, XLink> cached_links = cache( keyer_xlink, op );
     for( LocatedLink cached_link : cached_links )
     {   
         ASSERT( cached_link );
@@ -891,20 +891,20 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }                                    
 
 
-set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &base_xlinks )
+set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks )
 {
     set<XLink> extra_xlinks;
-    for( XLink base_xlink : base_xlinks )
+    for( XLink keyer_xlink : keyer_xlinks )
     {
-        if( base_xlink == XLink::MMAX_Link )
+        if( keyer_xlink == XLink::MMAX_Link )
             continue; // MMAX at base never expands domain because all child patterns are also MMAX
-        if( !IsPreRestrictionMatch(base_xlink) )
+        if( !IsPreRestrictionMatch(keyer_xlink) )
             continue; // Failed pre-restriction so can't expand domain
 
         try
         {
             shared_ptr<DecidedQuery> query = CreateDecidedQuery();
-            RunDecidedQueryPRed( *query, base_xlink );
+            RunDecidedQueryPRed( *query, keyer_xlink );
            
             for( LocatedLink extra_link : query->GetNormalLinks() )
                 extra_xlinks.insert( (XLink)extra_link );
@@ -930,7 +930,7 @@ shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
 
 
 void SearchLeafAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                           XLink base_xlink ) const
+                                           XLink keyer_xlink ) const
 {
 }
 
@@ -942,7 +942,7 @@ bool SpecialBase::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
     {
         if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*ptr) )   // is to a special node
         {
-            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )    // pre-restrictor is nontrivial
+            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchetype()) ) )    // pre-restrictor is nontrivial
             {
                 return true;
             }

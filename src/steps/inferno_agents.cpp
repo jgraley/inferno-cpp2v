@@ -110,10 +110,10 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 
 
 void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                                 XLink base_xlink ) const                
+                                                 XLink keyer_xlink ) const                
 {
     string newname = name; 
-    TreePtr<Node> base_x = base_xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
+    TreePtr<Node> base_x = keyer_xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
         TRACE("Comparing ")(si_x->GetRender())(" with ")(newname);
@@ -140,17 +140,17 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 
 
 void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                       XLink base_xlink ) const                          
+                                       XLink keyer_xlink ) const                          
 {
     INDENT("N");
     
     // Do the teleporty bit
-    TeleportAgent::RunDecidedQueryPRed(query, base_xlink);    
+    TeleportAgent::RunDecidedQueryPRed(query, keyer_xlink);    
     
     string s;
     // Keep advancing until we get nullptr, and remember the last non-null position
     int i = 0;
-    XLink xlink = base_xlink;
+    XLink xlink = keyer_xlink;
     while( XLink next_xlink = Advance(xlink, &s) )
         xlink = next_xlink;
             
@@ -159,7 +159,7 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }
 
     
-map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink base_xlink ) const
+map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
     map<PatternLink, XLink> tp_links;
     
@@ -169,7 +169,7 @@ map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink base_xlink ) const
         string s;
         // Keep advancing until we get nullptr, and remember the last non-null position
         int i = 0;
-        XLink xlink = base_xlink;
+        XLink xlink = keyer_xlink;
         while( XLink next_xlink = Advance(xlink, &s) )
             xlink = next_xlink;
 

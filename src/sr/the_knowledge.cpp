@@ -144,7 +144,7 @@ void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
 void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink )
 {
     ASSERT( p_x_singular );
-    // MakeValueArchitype() can generate nodes with NULL pointers (eg in PointerIs)
+    // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)
     // and these get into the domain even though they are not allowed in input trees.
     // In this case, stop recursing since there's no child to build knowledge for.    
     if( !*p_x_singular )

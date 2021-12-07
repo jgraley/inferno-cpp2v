@@ -15,10 +15,10 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink base_xlink ) const
+map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
     TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
-    if( base_xlink.GetChildX() == context )
+    if( keyer_xlink.GetChildX() == context )
     {
         // Imagine that the root is pointed to by a TreePtr<Node>
         // (in this case wit.GetNodePointerInParent() would return NULL)
@@ -32,7 +32,7 @@ map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink base_xlink ) con
     Walk e( context ); 
     for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
     {
-        if( *wit == base_xlink.GetChildX() ) // found ourself TODO use find()
+        if( *wit == keyer_xlink.GetChildX() ) // found ourself TODO use find()
         {            
             if(found_one_already)
                 throw Mismatch(); // X has multiple parents - ambiguous, so don't match
@@ -42,7 +42,7 @@ map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink base_xlink ) con
             const TreePtrInterface *px = wit.GetNodePointerInParent();    
             ASSERT(px);     
             // Make an architypical node matching the pointer's type
-            TreePtr<Node> ptr_arch = px->MakeValueArchitype();
+            TreePtr<Node> ptr_arch = px->MakeValueArchetype();
 
             // Stick that in your pipe + smoke it
             XLink tp_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct

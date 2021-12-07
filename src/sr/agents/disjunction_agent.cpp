@@ -85,13 +85,13 @@ void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *hypothesis_links
 { 
     // Baseless query strategy: hand-rolled
     INDENT("∨");
-    XLink base_xlink;
+    XLink keyer_xlink;
     if( hypothesis_links->count(keyer_plink) > 0 )
     { 
-        base_xlink = hypothesis_links->at(keyer_plink);
+        keyer_xlink = hypothesis_links->at(keyer_plink);
         
         // Check pre-restriction
-        if( base_xlink == XLink::MMAX_Link && !IsLocalMatch( base_xlink.GetChildX().get() ) )
+        if( keyer_xlink == XLink::MMAX_Link && !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
             throw PreRestrictionMismatch();
     }
            
@@ -116,7 +116,7 @@ void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *hypothesis_links
         }        
     }
     
-    if( base_xlink == XLink::MMAX_Link )
+    if( keyer_xlink == XLink::MMAX_Link )
     {
         // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
         // Roughly speaking, it should be 0, but see the code for details.
@@ -146,10 +146,10 @@ void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *hypothesis_links
             
         case 1:
             // This is the correct number of non-MMAX. If we have a base, check against it.
-            if( base_xlink )
+            if( keyer_xlink )
             {
                 XLink taken_option_x_link = non_mmax_residuals.front(); // size() is 1 so is the only one
-                if( taken_option_x_link != base_xlink )
+                if( taken_option_x_link != keyer_xlink )
                     throw TakenOptionMismatch();  
             }
             break;        

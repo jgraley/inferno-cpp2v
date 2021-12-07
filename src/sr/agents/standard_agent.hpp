@@ -107,17 +107,17 @@ public:
 
 private:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink base_xlink ) const;                  
+                                      XLink keyer_xlink ) const;                  
     void DecidedQuerySequence( DecidedQueryAgentInterface &query,
-                               XLink base_xlink,
+                               XLink keyer_xlink,
                                SequenceInterface *x_seq,
     	                       const Plan::Sequence &plan_seq ) const;
     void DecidedQueryCollection( DecidedQueryAgentInterface &query,
-                                 XLink base_xlink,
+                                 XLink keyer_xlink,
                                  CollectionInterface *x_col,
     		                     const Plan::Collection &plan_col ) const;
     void DecidedQuerySingular( DecidedQueryAgentInterface &query,
-                               XLink base_xlink,
+                               XLink keyer_xlink,
                                TreePtrInterface *p_x_singular,
 	                           const Plan::Singular &plan_sing ) const;
                                            

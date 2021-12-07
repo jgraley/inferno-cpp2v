@@ -5,18 +5,18 @@
 using namespace SR;
 
 void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                          XLink base_xlink ) const
+                                          XLink keyer_xlink ) const
 {     
-    if( base_xlink != XLink::MMAX_Link )
+    if( keyer_xlink != XLink::MMAX_Link )
     {
-        if( !IsLocalMatch( base_xlink.GetChildX().get() ) ) 
+        if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
             throw PreRestrictionMismatch();
 
-        RunColocatedQuery(base_xlink);
+        RunColocatedQuery(keyer_xlink);
     }
     
     for( PatternLink plink : pattern_query->GetNormalLinks() )                 
-        query.RegisterNormalLink( plink, base_xlink ); // Link into X
+        query.RegisterNormalLink( plink, keyer_xlink ); // Link into X
 }    
 
 
