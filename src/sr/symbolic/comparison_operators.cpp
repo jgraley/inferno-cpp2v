@@ -1,4 +1,5 @@
 #include "comparison_operators.hpp"
+#include "../agents/agent.hpp"
 
 using namespace SYM;
 
@@ -55,4 +56,39 @@ Expression::Precedence EqualsOperator::GetPrecedence() const
 Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
     return MakeLazy<EqualsOperator>( set< shared_ptr<SymbolExpression> >({ a, b }) );
+}
+
+// ------------------------- PreRestrictionOperator --------------------------
+
+PreRestrictionOperator::PreRestrictionOperator( shared_ptr<SymbolExpression> a_,
+                                                const SR::Agent *pre_restrictor_ ) :
+    a( a_ ),
+    pre_restrictor( pre_restrictor_ )
+{    
+}                                                
+
+set<shared_ptr<Expression>> PreRestrictionOperator::GetOperands() const
+{
+    return { a };
+}
+
+
+BooleanResult PreRestrictionOperator::Evaluate( const EvalKit &kit ) const 
+{
+    SymbolResult ar = a->Evaluate( kit );
+    bool matches = pre_restrictor->IsPreRestrictionMatch(ar.xlink);
+    return { matches, nullptr };
+}
+
+
+string PreRestrictionOperator::Render() const
+{
+    // Not using RenderForMe() because we always want () here
+    return "Pre(" + a->Render() + ")"; 
+}
+
+
+Expression::Precedence PreRestrictionOperator::GetPrecedence() const
+{
+    return PREFIX;
 }

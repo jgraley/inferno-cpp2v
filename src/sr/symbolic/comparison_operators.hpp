@@ -18,10 +18,9 @@ namespace SYM
 class EqualsOperator : public BooleanExpression
 {
 public:    
-    class Mismatch : public ::Mismatch {}; // only one kind of mismatch here
     typedef BooleanExpression EvalType;
     EqualsOperator( set< shared_ptr<SymbolExpression> > sa );
-    virtual set<shared_ptr<Expression>> GetOperands() const;
+    virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -35,10 +34,10 @@ Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpress
 class PreRestrictionOperator : public BooleanExpression
 {
 public:    
-    class Mismatch : public ::Mismatch {}; // only one kind of mismatch here
     typedef BooleanExpression EvalType;
-    PreRestrictionOperator( shared_ptr<SymbolExpression> sa );
-    virtual set<shared_ptr<Expression>> GetOperands() const;
+    PreRestrictionOperator( shared_ptr<SymbolExpression> a,
+                            const SR::Agent *pre_restrictor ); 
+    virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

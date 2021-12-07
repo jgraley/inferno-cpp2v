@@ -15,7 +15,7 @@ class AndOperator : public BooleanExpression
 public:    
     typedef BooleanExpression EvalType;
     AndOperator( set< shared_ptr<BooleanExpression> > sa );
-    virtual set<shared_ptr<Expression>> GetOperands() const;
+    virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
