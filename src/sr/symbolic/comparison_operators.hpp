@@ -15,6 +15,8 @@ namespace SR
 namespace SYM
 { 
 
+// ------------------------- EqualsOperator --------------------------
+
 class EqualsOperator : public BooleanExpression
 {
 public:    
@@ -29,7 +31,10 @@ private:
     set< shared_ptr<SymbolExpression> > sa;
 };
 
+
 Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
+// ------------------------- PreRestrictionOperator --------------------------
 
 class PreRestrictionOperator : public BooleanExpression
 {

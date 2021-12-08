@@ -184,6 +184,9 @@ void RemoveCommonPrefix( string &s1, string &s2 );
 
 // Acting on a container such as [1, 2, 3, 4], will call func with (1, 2), 
 // then (2, 3), then (3, 4). No iteratons if size() is 0 or 1.
+// Note: using on set/map with arbitrary ordering can amplify reproducibility
+// problems because the set of pairs actually changes membership, not just
+// the order seen.
 template<typename T>
 void ForOverlappingAdjacentPairs( T container, 
                                   function<void(const typename T::value_type &first, 

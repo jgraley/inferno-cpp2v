@@ -43,7 +43,7 @@ string EqualsOperator::Render() const
     list<string> ls;
     for( shared_ptr<SymbolExpression> a : sa )
         ls.push_back( RenderForMe(a) );
-    return Join( ls, "==" );
+    return Join( ls, " == " );
 }
 
 
@@ -84,7 +84,7 @@ BooleanResult PreRestrictionOperator::Evaluate( const EvalKit &kit ) const
 string PreRestrictionOperator::Render() const
 {
     // Not using RenderForMe() because we always want () here
-    return "Pre(" + a->Render() + ")"; 
+    return "PR[" + pre_restrictor->GetTrace() + "](" + a->Render() + ")"; 
 }
 
 
