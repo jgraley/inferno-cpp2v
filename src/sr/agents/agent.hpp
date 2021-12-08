@@ -16,7 +16,7 @@
 #include <boost/type_traits.hpp>
 #include <functional>
 #include "node/graphable.hpp"
-#include "../symbolic/lazy.hpp"
+#include "../sym/lazy.hpp"
 
 #define HINTS_IN_EXCEPTIONS
 

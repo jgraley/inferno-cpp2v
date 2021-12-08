@@ -18,8 +18,8 @@
 #include "tree/cpptree.hpp"
 #include "equivalence.hpp"
 #include "render/graph.hpp"
-#include "symbolic/boolean_operators.hpp"
-#include "symbolic/rewrites.hpp"
+#include "sym/boolean_operators.hpp"
+#include "sym/rewrites.hpp"
 
 #include <list>
  

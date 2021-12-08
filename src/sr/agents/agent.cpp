@@ -8,8 +8,8 @@
 // Temporary
 #include "tree/cpptree.hpp"
 #include "transform_of_agent.hpp"
-#include "symbolic/lambdas.hpp"
-#include "symbolic/boolean_operators.hpp"
+#include "sym/lambdas.hpp"
+#include "sym/boolean_operators.hpp"
 
 #include <stdexcept>
 

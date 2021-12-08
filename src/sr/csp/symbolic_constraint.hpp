@@ -5,7 +5,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
-#include "../symbolic/expression.hpp"
+#include "../sym/expression.hpp"
 
 #include <memory>
 #include <list>
