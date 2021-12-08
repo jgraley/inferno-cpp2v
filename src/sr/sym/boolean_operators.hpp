@@ -10,6 +10,8 @@
 namespace SYM
 { 
 
+// ------------------------- AndOperator --------------------------
+
 class AndOperator : public BooleanExpression
 {
 public:    
@@ -25,6 +27,24 @@ private:
 };
 
 Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
+
+// ------------------------- OrOperator --------------------------
+
+class OrOperator : public BooleanExpression
+{
+public:    
+    typedef BooleanExpression EvalType;
+    OrOperator( set< shared_ptr<BooleanExpression> > sa );
+    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    set< shared_ptr<BooleanExpression> > sa;
+};
+
+Lazy<BooleanExpression> operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
 
 };
 
