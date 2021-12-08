@@ -19,7 +19,7 @@
 #include "equivalence.hpp"
 #include "render/graph.hpp"
 #include "sym/boolean_operators.hpp"
-#include "sym/rewrites.hpp"
+#include "sym/rewriters.hpp"
 
 #include <list>
  
