@@ -364,7 +364,7 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
     {
 		Agent *agent = keyer_plink.GetChildAgent();
 		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
-        raw_expressions_and_agents.push_back( make_pair(op, agent) );
+        expressions_from_agents.push_back( op );
     }
 }
 
@@ -388,16 +388,16 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
 		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
-        raw_expressions_and_agents.push_back( make_pair(op, agent) );
+        expressions_from_agents.push_back( op );
     }
 }
 
 
 void AndRuleEngine::Plan::SymbolicRewrites()
 {    
-    split_expressions_and_agents = SYM::Splitter()(raw_expressions_and_agents);
-    //FTRACE("Raw symbolcs and agents:\n")(raw_expressions_and_agents)("\n");
-    //FTRACE("Split symbolcs and agents:\n")(split_expressions_and_agents)("\n");
+    expressions_split = SYM::Splitter()(expressions_from_agents);
+    //FTRACE("Symbolics from agents:\n")(expressions_from_agents)("\n");
+    //FTRACE("Split symbolcs:\n")(expressions_split)("\n");
 }
 
 
@@ -409,23 +409,23 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
             free_normal_links_ordered.push_back( link );
         else
             forced_normal_links_ordered.push_back( link );
-        relevent_links.insert( link );
+        current_solve_plinks.insert( link );
     }
     
     for( PatternLink link : master_boundary_keyer_links )
     {
         forced_normal_links_ordered.push_back( link );
-        relevent_links.insert( link );
+        current_solve_plinks.insert( link );
     }
 }
 
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
-    for( auto p : split_expressions_and_agents )
+    for( auto bexpr : expressions_split )
     {
-		shared_ptr<CSP::Constraint> c = make_shared<CSP::SymbolicConstraint>(p.first,
-		                                                                     relevent_links);
+		auto c = make_shared<CSP::SymbolicConstraint>(bexpr,
+		                                              current_solve_plinks);
         constraints_list.push_back(c);    
     }        
 }
@@ -489,8 +489,8 @@ void AndRuleEngine::Plan::Dump()
           Trace(free_normal_links_ordered) },
         { "forced_normal_links_ordered",
           Trace(forced_normal_links_ordered) },
-        { "relevent_links",
-          Trace(relevent_links) }
+        { "current_solve_plinks",
+          Trace(current_solve_plinks) }
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");

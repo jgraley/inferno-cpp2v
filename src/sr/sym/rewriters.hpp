@@ -9,10 +9,8 @@ namespace SR
 };
 
 namespace SYM
-{     
-    typedef SR::Agent *Metadata;
-    
-    typedef list< pair<SYM::Lazy<SYM::BooleanExpression>, Metadata> > BooleanExpressionList;
+{         
+    typedef list< SYM::Lazy<SYM::BooleanExpression> > BooleanExpressionList;
     
     class Splitter
     {

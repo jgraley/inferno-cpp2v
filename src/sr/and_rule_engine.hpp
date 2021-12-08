@@ -118,9 +118,9 @@ public:
         map< Agent *, set<PatternLink> > parent_residual_links_to_master_boundary_agents;
         list<PatternLink> free_normal_links_ordered;
         list<PatternLink> forced_normal_links_ordered;
-        set<PatternLink> relevent_links;
-        list< pair<SYM::Lazy<SYM::BooleanExpression>, Agent *> > raw_expressions_and_agents;
-        list< pair<SYM::Lazy<SYM::BooleanExpression>, Agent *> > split_expressions_and_agents;
+        set<PatternLink> current_solve_plinks;
+        list< SYM::Lazy<SYM::BooleanExpression> > expressions_from_agents;
+        list< SYM::Lazy<SYM::BooleanExpression> > expressions_split;
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
