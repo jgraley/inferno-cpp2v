@@ -123,10 +123,11 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() co
 			if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
 				throw PreRestrictionMismatch();
 			
-			RunColocatedQuery(keyer_xlink);    
+			//RunColocatedQuery(keyer_xlink);    
 		}
 	};
-	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".arb()") &
+		   SymbolicColocatedQuery();
 }
 
 

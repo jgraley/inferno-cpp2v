@@ -1,11 +1,12 @@
 #include "boolean_operators.hpp"
+#include "rewriters.hpp"
 
 using namespace SYM;
 
 // ------------------------- AndOperator --------------------------
 
 AndOperator::AndOperator( set< shared_ptr<BooleanExpression> > sa_ ) :
-    sa(sa_)
+    sa( sa_ )
 {
 }    
 
@@ -48,14 +49,19 @@ Expression::Precedence AndOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
 {
-    return MakeLazy<AndOperator>( set< shared_ptr<BooleanExpression> >({ a, b }) );
+    // Overloaded operator can only take 2 args, but operator is commutative and
+    // associative: we want a o b o c to generate Operator({a, b, c}) not
+    // some nested pair. Note: this can over-kill but I don't expect that to cause
+    // problems.
+    auto flattened_sa = SetFlattener<AndOperator>()({ a, b });
+    return MakeLazy<AndOperator>( flattened_sa );
 }
 
 // ------------------------- OrOperator --------------------------
 
 OrOperator::OrOperator( set< shared_ptr<BooleanExpression> > sa_ ) :
-    sa(sa_)
-{
+    sa( sa_ )
+{   
 }    
 
 
@@ -97,7 +103,12 @@ Expression::Precedence OrOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
 {
-    return MakeLazy<OrOperator>( set< shared_ptr<BooleanExpression> >({ a, b }) );
+    // Overloaded operator can only take 2 args, but operator is commutative and
+    // associative: we want a o b o c to generate Operator({a, b, c}) not
+    // some nested pair. Note: this can over-kill but I don't expect that to cause
+    // problems.
+    auto flattened_sa = SetFlattener<OrOperator>()({ a, b });
+    return MakeLazy<OrOperator>( flattened_sa );
 }
 
 

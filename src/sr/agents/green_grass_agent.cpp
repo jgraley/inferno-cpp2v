@@ -2,6 +2,7 @@
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
 #include "link.hpp"
+#include "sym/lambdas.hpp"
 
 using namespace SR;
 
@@ -22,10 +23,10 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
     if( master_scr_engine->GetOverallMaster()->dirty_grass.find( common_xlink.GetChildX() ) != 
         master_scr_engine->GetOverallMaster()->dirty_grass.end() ) // TODO .count() > 0
     {
-        TRACE(" says ")(common_xlink)(" is dirty grass so rejecting\n");
+        TRACE(common_xlink)(" is dirty grass so rejecting\n");
         throw Mismatch();            
     }
-    TRACE(" says ")(common_xlink)(" is green grass\n");
+    TRACE(common_xlink)(" is green grass\n");
 }
 
 
@@ -34,7 +35,8 @@ SYM::Lazy<SYM::BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() cons
 	set<PatternLink> clq_plinks = { keyer_plink };
 	auto clq_lambda = [this](const SYM::Expression::EvalKit &kit)
 	{
-		RunColocatedQuery( kit.hypothesis_links.at(keyer_plink) ); // throws on mismatch   
+		if( kit.hypothesis_links->count(keyer_plink) == 1 )
+			RunColocatedQuery( kit.hypothesis_links->at(keyer_plink) ); // throws on mismatch   
 	};
 	return SYM::MakeLazy<SYM::BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
 }

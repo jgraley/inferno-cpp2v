@@ -395,7 +395,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
 
 void AndRuleEngine::Plan::SymbolicRewrites()
 {    
-    expressions_split = SYM::Splitter()(expressions_from_agents);
+    expressions_split = SYM::ListSplitter()(expressions_from_agents);
 }
 
 
