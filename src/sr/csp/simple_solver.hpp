@@ -86,7 +86,9 @@ private:
         ConstraintSet all_unsatisfied;     
     };
 
-    tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns, const ConstraintSet &to_test ) const;
+    tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns,
+                                                 const ConstraintSet &to_test,
+                                                 VariableId current_var ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;

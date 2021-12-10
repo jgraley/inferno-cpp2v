@@ -51,7 +51,8 @@ private:
     const list<VariableId> &GetVariables() const override;
     virtual void Start( const Assignments &forces_map_, 
                         const SR::TheKnowledge *knowledge_ );    
-    tuple<bool, Assignment> Test( Assignments frees_map ) override;
+    tuple<bool, Assignment> Test( Assignments frees_map,
+                                  VariableId current_var ) override;
             
     list<Value> forces;
     Assignments forces_map;

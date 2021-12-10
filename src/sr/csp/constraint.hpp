@@ -59,7 +59,8 @@ public:
      * All required varaibles should be present. Variables not used by this constraint 
      * are ignored.
      */
-    virtual tuple<bool, Assignment> Test( Assignments frees_map ) = 0;        
+    virtual tuple<bool, Assignment> Test( Assignments frees_map,
+                                          VariableId current_var ) = 0;        
     
     string GetTrace() const;
 

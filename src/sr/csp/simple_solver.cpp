@@ -114,7 +114,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     // Do a test with all constraints but no assignments (=free variables), so forced variables 
     // will be tested. From here on we can test only constraints affected by changed assignments.
     TRACE("testing\n");
-    auto t = Test( assignments, plan.constraint_set );
+    auto t = Test( assignments, plan.constraint_set, VariableId() );
     TRACE("tested\n");
     
     if( !get<0>(t) )
@@ -278,7 +278,7 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
         bool ok;
         Assignment hint;  
         ConstraintSet unsatisfied;     
-        tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var) );        
+        tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var), current_var );        
 #ifdef BACKJUMPING
         ASSERT( ok || !unsatisfied.empty() );
 #endif
@@ -308,7 +308,9 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
 }
 
 
-tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const Assignments &assigns, const ConstraintSet &to_test ) const 
+tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const Assignments &assigns,
+                                                                         const ConstraintSet &to_test,
+                                                                         VariableId current_var ) const 
 {
     ConstraintSet unsatisfied;
     list<Assignment> hints;
@@ -317,7 +319,7 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
     {                               
         Assignment hint;
         bool my_matched;
-        tie(my_matched, hint) = c->Test(assigns); 
+        tie(my_matched, hint) = c->Test(assigns, current_var); 
         if( !my_matched )
         {            
 #ifdef HINTS_IN_EXCEPTIONS   

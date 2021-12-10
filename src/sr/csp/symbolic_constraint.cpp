@@ -3,6 +3,8 @@
 #include "query.hpp"
 #include "agents/agent.hpp"
 #include "link.hpp"
+#include "../sym/comparison_operators.hpp"
+#include "../sym/primary_expressions.hpp"
 
 using namespace CSP;
 
@@ -57,7 +59,8 @@ void SymbolicConstraint::Start( const Assignments &forces_map_,
 }   
 
 
-tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map )
+tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map,
+                                                  VariableId current_var )
 {   
     INDENT("T");
 
@@ -77,6 +80,30 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map )
     }
     else
     {
+        if( current_var )
+        {
+            if( auto eq = dynamic_pointer_cast<SYM::EqualsOperator>(plan.op) )
+            {
+                shared_ptr<SYM::SymbolExpression> other;
+                for( shared_ptr<SYM::Expression> op : eq->GetOperands() )
+                {
+                    bool is_curr = false;
+                    if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
+                        if( OnlyElementOf( sv_op->GetRequiredPatternLinks() ) == current_var )
+                            is_curr = true;
+                    if( !is_curr )
+                        other = dynamic_pointer_cast<SYM::SymbolExpression>(op);                    
+                }
+                ASSERT( other )
+                      ("didn't find any other operands or not a symbol expression, current_var=")(current_var)
+                      ("expression:\n")(plan.op); 
+
+                SYM::SymbolResult other_result = other->Evaluate( kit );
+                if( other_result.xlink ) // Evaluate was ambiguous due missing assignments?
+                    return make_tuple(false, SR::LocatedLink( current_var, other_result.xlink ));            
+            }
+        }
+        
         try
         {
             if( r.reason )

@@ -80,56 +80,43 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_lin
 }                            
 
 
-SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
+Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
 	{
-		XLink prev_xlink;
-		for( PatternLink plink : keyer_and_normal_plinks )   // loop over required plinks              
+		if( kit.hypothesis_links->count(keyer_plink) == 1 )
 		{
-			if( kit.hypothesis_links->count(plink) == 1 )
+			XLink keyer_xlink = kit.hypothesis_links->at(keyer_plink);
+			for( PatternLink plink : pattern_query->GetNormalLinks() )          
 			{
-				XLink xlink = kit.hypothesis_links->at(plink);
-				if( !prev_xlink )   
-				{         
-					prev_xlink = xlink;
-				}
-				else
+				if( kit.hypothesis_links->count(plink) == 1 )
 				{
-					if( xlink != prev_xlink )
+					XLink xlink = kit.hypothesis_links->at(plink);
+					if( xlink != keyer_xlink )
 					{
 						ColocationMismatch e; // value of links mismatches
 #ifdef HINTS_IN_EXCEPTIONS
-						e.hint = LocatedLink( plink, prev_xlink );
+						e.hint = LocatedLink( plink, keyer_xlink );
 #endif           
 						throw e;                    
 					}
 				}
 			}
 		};
-		
-/*		if( !prev_xlink )
-			return; // disjoint query (no overlap between hypothesis and required plinks)
-		
-		if( kit.hypothesis_links->count(keyer_plink) == 1 )
-		{
-			XLink keyer_xlink = kit.hypothesis_links->at(keyer_plink);
-			
-			// Now that the common xlink is known to be really common,
-			// we can apply the usual checks including PR check and allowing for MMAX
-			if( keyer_xlink == XLink::MMAX_Link )
-				return;
-
-			if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
-				throw PreRestrictionMismatch();  
-		}*/
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".arb()") &
-		   SymbolicColocatedQuery() &
-		   ( MakeLazy<PreRestrictionOperator>(this, MakeLazy<SymbolVariable>(keyer_plink)) |
-		     MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
+	Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
+
+	for( PatternLink plink : pattern_query->GetNormalLinks() )
+		my_expr = my_expr & MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
+	
+	my_expr = my_expr & //MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".arb()") &
+		      SymbolicColocatedQuery() &
+		      ( MakeLazy<PreRestrictionOperator>(this, MakeLazy<SymbolVariable>(keyer_plink)) |
+		        MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
+
+	return my_expr;
 }
 
 
