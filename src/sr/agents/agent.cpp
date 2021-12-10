@@ -14,6 +14,7 @@
 #include <stdexcept>
 
 using namespace SR;
+using namespace SYM;
 
 //---------------------------------- Agent ------------------------------------    
 
@@ -296,7 +297,7 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
+Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 {
 	auto cq_lazy = SymbolicCouplingQuery();
     if( coupling_only )
@@ -307,32 +308,32 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
+Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
 	{
 		RunNormalLinkedQuery( kit.hypothesis_links,
 							  kit.knowledge ); // throws on mismatch   
 	};
-	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
 	
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
+Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
     // The keyer and residuals (parent links)
     set<PatternLink> cq_plinks = residual_plinks;
     cq_plinks.insert( keyer_plink );
-    auto cq_lambda = [this](const SYM::Expression::EvalKit &kit)
+    auto cq_lambda = [this](const Expression::EvalKit &kit)
     {
         RunCouplingQuery( kit.hypothesis_links ); // throws on mismatch   
     };
-    return SYM::MakeLazy<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
+    return MakeLazy<BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
 }
 
 

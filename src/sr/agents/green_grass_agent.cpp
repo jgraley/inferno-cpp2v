@@ -5,6 +5,7 @@
 #include "sym/lambdas.hpp"
 
 using namespace SR;
+using namespace SYM;
 
 shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 {
@@ -30,15 +31,15 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
+Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
 	set<PatternLink> clq_plinks = { keyer_plink };
-	auto clq_lambda = [this](const SYM::Expression::EvalKit &kit)
+	auto clq_lambda = [this](const Expression::EvalKit &kit)
 	{
 		if( kit.hypothesis_links->count(keyer_plink) == 1 )
 			RunColocatedQuery( kit.hypothesis_links->at(keyer_plink) ); // throws on mismatch   
 	};
-	return SYM::MakeLazy<SYM::BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
+	return MakeLazy<BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
 }
 
 

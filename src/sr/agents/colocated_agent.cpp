@@ -7,6 +7,7 @@
 #include "sym/primary_expressions.hpp"
 
 using namespace SR;
+using namespace SYM;
 
 void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                           XLink keyer_xlink ) const
@@ -109,7 +110,7 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() co
 			}
 		};
 		
-		if( !prev_xlink )
+/*		if( !prev_xlink )
 			return; // disjoint query (no overlap between hypothesis and required plinks)
 		
 		if( kit.hypothesis_links->count(keyer_plink) == 1 )
@@ -123,11 +124,12 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() co
 
 			if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
 				throw PreRestrictionMismatch();  
-		}
+		}*/
 	};
-	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".arb()") &
-		   SymbolicColocatedQuery() /*&
-		   SYM::MakeLazy<SYM::PreRestrictionOperator>(this, SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink))*/;
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".arb()") &
+		   SymbolicColocatedQuery() &
+		   ( MakeLazy<PreRestrictionOperator>(this, MakeLazy<SymbolVariable>(keyer_plink)) |
+		     MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
 }
 
 

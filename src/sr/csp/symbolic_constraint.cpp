@@ -79,16 +79,17 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map )
     {
         try
         {
-            rethrow_exception(r.reason);
+            if( r.reason )
+                rethrow_exception(r.reason);            
         }  
         catch( const ::Mismatch &e )
         {
 #ifdef HINTS_IN_EXCEPTIONS   
             if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
                 return make_tuple( false, pae->hint );
-#endif
-            return make_tuple(false, Assignment());
-        }          
+#endif            
+        }
+        return make_tuple(false, Assignment());
     }
 }
 
