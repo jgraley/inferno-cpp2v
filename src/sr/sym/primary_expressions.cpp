@@ -2,58 +2,84 @@
 
 using namespace SYM;
 
-// ------------------------- Constant --------------------------
+// ------------------------- SymbolConstant --------------------------
 
-Constant::Constant( SR::XLink xlink_ ) :
+SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
     xlink( xlink_ )
 {
 }
 
 
-SymbolResult Constant::Evaluate( const EvalKit &kit ) const
+SymbolResult SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
     return { xlink };
 }
 
 
-string Constant::Render() const
+string SymbolConstant::Render() const
 {
     return xlink.GetTrace();
 }
 
 
-Expression::Precedence Constant::GetPrecedence() const
+Expression::Precedence SymbolConstant::GetPrecedence() const
 {
     return Precedence::LITERAL;
 }
 
-// ------------------------- Variable --------------------------
+// ------------------------- SymbolVariable --------------------------
 
-Variable::Variable( SR::PatternLink plink_ ) :
+SymbolVariable::SymbolVariable( SR::PatternLink plink_ ) :
     plink( plink_ )
 {
 }
 
 
-set<SR::PatternLink> Variable::GetRequiredPatternLinks() const
+set<SR::PatternLink> SymbolVariable::GetRequiredPatternLinks() const
 {
     return { plink };
 }
 
 
-SymbolResult Variable::Evaluate( const EvalKit &kit ) const
+SymbolResult SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     return { kit.hypothesis_links->at(plink) };
 }
 
 
-string Variable::Render() const
+string SymbolVariable::Render() const
 {
     return "[" + plink.GetTrace() + "]";
 }
 
 
-Expression::Precedence Variable::GetPrecedence() const
+Expression::Precedence SymbolVariable::GetPrecedence() const
 {
     return Precedence::LITERAL;
 }
+
+// ------------------------- BooleanConstant --------------------------
+
+BooleanConstant::BooleanConstant( bool value_ ) :
+    value( value_ )
+{
+}
+
+
+BooleanResult BooleanConstant::Evaluate( const EvalKit &kit ) const
+{
+    return { value, nullptr };
+}
+
+
+string BooleanConstant::Render() const
+{
+    return value ? "true" : "false";
+}
+
+
+Expression::Precedence BooleanConstant::GetPrecedence() const
+{
+    return Precedence::LITERAL;
+}
+

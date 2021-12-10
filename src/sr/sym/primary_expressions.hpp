@@ -10,13 +10,13 @@
 namespace SYM
 { 
 
-// ------------------------- Constant --------------------------
+// ------------------------- SymbolConstant --------------------------
 
-class Constant : public SymbolExpression
+class SymbolConstant : public SymbolExpression
 {
 public:    
     typedef SymbolExpression EvalType;
-    Constant( SR::XLink xlink );
+    SymbolConstant( SR::XLink xlink );
     virtual SymbolResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -25,13 +25,13 @@ private:
     SR::XLink xlink;
 };
 
-// ------------------------- Variable --------------------------
+// ------------------------- SymbolVariable --------------------------
 
-class Variable : public SymbolExpression
+class SymbolVariable : public SymbolExpression
 {
 public:    
     typedef SymbolExpression EvalType;
-    Variable( SR::PatternLink plink );
+    SymbolVariable( SR::PatternLink plink );
     virtual set<SR::PatternLink> GetRequiredPatternLinks() const override;
     virtual SymbolResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
@@ -39,6 +39,21 @@ public:
     
 private:
     SR::PatternLink plink;
+};
+
+// ------------------------- BooleanConstant --------------------------
+
+class BooleanConstant : public BooleanExpression
+{
+public:    
+    typedef BooleanExpression EvalType;
+    BooleanConstant( bool value );
+    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    bool value;
 };
 
 };

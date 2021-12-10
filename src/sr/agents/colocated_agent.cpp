@@ -3,6 +3,7 @@
 #include "link.hpp"
 #include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
+#include "sym/primary_expressions.hpp"
 
 using namespace SR;
 
@@ -132,6 +133,12 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() co
 void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 {
     // No restriction by default
+}
+
+
+SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
+{
+	return SYM::MakeLazy<SYM::BooleanConstant>(true); 
 }
 
 

@@ -28,7 +28,7 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
     virtual void RunColocatedQuery(XLink common_xlink) const;
-    //virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
 };
