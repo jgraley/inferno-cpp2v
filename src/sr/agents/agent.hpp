@@ -160,6 +160,8 @@ public:
                                        
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links );                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery();                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery();                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

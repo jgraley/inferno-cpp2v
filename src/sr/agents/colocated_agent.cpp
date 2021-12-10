@@ -1,6 +1,8 @@
 #include "colocated_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
+#include "sym/lambdas.hpp"
+#include "sym/boolean_operators.hpp"
 
 using namespace SR;
 
@@ -74,18 +76,19 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_lin
     }
 }                            
 
-/*
-SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicQuery( bool coupling_only ) override
+
+SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery()
 {
-nlq_plinks.insert( keyer_plink );
-		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
-        {
-            RunNormalLinkedQuery( kit.hypothesis_links,
-                                  kit.knowledge ); // throws on mismatch   
-        };
-        auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+	// The keyer and normal children
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQuery( kit.hypothesis_links,
+							  kit.knowledge ); // throws on mismatch   
+	};
+	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
 }
-*/
+
 
 void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 {

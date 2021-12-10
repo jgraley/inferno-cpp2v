@@ -298,6 +298,31 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links )
 
 SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only )
 {
+	auto cq_lazy = SymbolicCouplingQuery();
+    if( coupling_only )
+        return cq_lazy;
+
+    auto nlq_lazy = SymbolicNormalLinkedQuery();
+   	return cq_lazy & nlq_lazy; // Lazy-style symbolic expression
+}
+
+
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery()
+{
+	// The keyer and normal children
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQuery( kit.hypothesis_links,
+							  kit.knowledge ); // throws on mismatch   
+	};
+	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
+	
+}
+
+
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicCouplingQuery()
+{
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
     // The keyer and residuals (parent links)
@@ -307,25 +332,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
     {
         RunCouplingQuery( kit.hypothesis_links ); // throws on mismatch   
     };
-    auto cq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
-
-    if( coupling_only )
-    {
-        return cq_lazy;
-    }
-    else // Full
-    {
-		// The keyer and normal children
-        set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
-        {
-            RunNormalLinkedQuery( kit.hypothesis_links,
-                                  kit.knowledge ); // throws on mismatch   
-        };
-        auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
-        
-        return cq_lazy & nlq_lazy; // Lazy-style symbolic expression
-    }
+    return SYM::MakeLazy<SYM::BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
 }
 
 
