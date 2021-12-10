@@ -84,8 +84,8 @@ nlq_plinks.insert( keyer_plink );
                                   kit.knowledge ); // throws on mismatch   
         };
         auto nlq_lazy = SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
-}*/
-
+}
+*/
 
 void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 {

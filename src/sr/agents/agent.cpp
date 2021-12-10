@@ -316,10 +316,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
     else // Full
     {
 		// The keyer and normal children
-        set<PatternLink> nlq_plinks;
-		FOREACH( SR::PatternLink child_plink, pattern_query->GetNormalLinks() )
-			nlq_plinks.insert( child_plink );  
-        nlq_plinks.insert( keyer_plink );
+        set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 		auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
         {
             RunNormalLinkedQuery( kit.hypothesis_links,
