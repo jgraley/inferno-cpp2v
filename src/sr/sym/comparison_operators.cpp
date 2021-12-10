@@ -25,16 +25,22 @@ BooleanResult EqualsOperator::Evaluate( const EvalKit &kit ) const
     list<SymbolResult> results;
     for( shared_ptr<SymbolExpression> a : sa )
         results.push_back( a->Evaluate(kit) );
-    bool equal = true;
+    BooleanResult::Matched m = BooleanResult::TRUE;
     ForOverlappingAdjacentPairs( results, [&](const SymbolResult &ra,
                                               const SymbolResult &rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
-        equal = equal && ( ra.xlink == rb.xlink );
+        if( (!ra.xlink || !rb.xlink) )
+        {
+            if( m != BooleanResult::FALSE )
+                m = BooleanResult::UNKNOWN;
+        }
+        else if( ra.xlink != rb.xlink )
+            m = BooleanResult::FALSE;
     });
-    return {equal, nullptr};   
+    return {m, nullptr};   
 }
 
 
@@ -60,8 +66,8 @@ Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolEx
 
 // ------------------------- PreRestrictionOperator --------------------------
 
-PreRestrictionOperator::PreRestrictionOperator( shared_ptr<SymbolExpression> a_,
-                                                const SR::Agent *pre_restrictor_ ) :
+PreRestrictionOperator::PreRestrictionOperator( const SR::Agent *pre_restrictor_,
+                                                shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
     pre_restrictor( pre_restrictor_ )
 {    
@@ -76,8 +82,10 @@ set<shared_ptr<Expression>> PreRestrictionOperator::GetOperands() const
 BooleanResult PreRestrictionOperator::Evaluate( const EvalKit &kit ) const 
 {
     SymbolResult ar = a->Evaluate( kit );
+    if( !ar.xlink )
+        return { BooleanResult::UNKNOWN, nullptr };
     bool matches = pre_restrictor->IsPreRestrictionMatch(ar.xlink);
-    return { matches, nullptr };
+    return { matches ? BooleanResult::TRUE : BooleanResult::FALSE, nullptr };
 }
 
 

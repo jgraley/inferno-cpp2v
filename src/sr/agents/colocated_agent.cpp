@@ -3,6 +3,7 @@
 #include "link.hpp"
 #include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
+#include "sym/comparison_operators.hpp"
 #include "sym/primary_expressions.hpp"
 
 using namespace SR;
@@ -121,13 +122,12 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() co
 				return;
 
 			if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
-				throw PreRestrictionMismatch();
-			
-			//RunColocatedQuery(keyer_xlink);    
+				throw PreRestrictionMismatch();  
 		}
 	};
 	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".arb()") &
-		   SymbolicColocatedQuery();
+		   SymbolicColocatedQuery() /*&
+		   SYM::MakeLazy<SYM::PreRestrictionOperator>(this, SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink))*/;
 }
 
 

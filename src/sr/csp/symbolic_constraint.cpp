@@ -71,7 +71,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map )
     SYM::Expression::EvalKit kit { &full_map, knowledge };
     ASSERT(plan.op);
     SYM::BooleanResult r = plan.op->Evaluate( kit );
-    if( r.matched )
+    if( r.matched == SYM::BooleanResult::TRUE || r.matched == SYM::BooleanResult::UNKNOWN )
     {
         return make_tuple(true, Assignment());
     }

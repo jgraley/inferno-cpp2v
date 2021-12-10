@@ -1,5 +1,5 @@
-#ifndef BOOLEAN_OPERATORS_HPP
-#define BOOLEAN_OPERATORS_HPP
+#ifndef COMPARISON_OPERATORS_HPP
+#define COMPARISON_OPERATORS_HPP
 
 #include "expression.hpp"
 #include "lazy.hpp"
@@ -40,8 +40,8 @@ class PreRestrictionOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression EvalType;
-    PreRestrictionOperator( shared_ptr<SymbolExpression> a,
-                            const SR::Agent *pre_restrictor ); 
+    PreRestrictionOperator( const SR::Agent *pre_restrictor,
+                            shared_ptr<SymbolExpression> a); 
     virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;

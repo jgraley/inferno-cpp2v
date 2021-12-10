@@ -43,7 +43,10 @@ set<SR::PatternLink> SymbolVariable::GetRequiredPatternLinks() const
 
 SymbolResult SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
-    return { kit.hypothesis_links->at(plink) };
+    if( kit.hypothesis_links->count(plink) == 0 )
+        return { SR::XLink() };
+    else
+        return { kit.hypothesis_links->at(plink) };
 }
 
 
@@ -60,21 +63,30 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 
 // ------------------------- BooleanConstant --------------------------
 
-BooleanConstant::BooleanConstant( bool value_ ) :
-    value( value_ )
+BooleanConstant::BooleanConstant( bool value ) :
+    matched( value ? BooleanResult::TRUE : BooleanResult::FALSE )
 {
 }
 
 
 BooleanResult BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return { value, nullptr };
+    return { matched, nullptr };
 }
 
 
 string BooleanConstant::Render() const
 {
-    return value ? "true" : "false";
+    switch( matched )
+    {
+    case BooleanResult::UNKNOWN:
+        return "UNKNOWN";
+    case BooleanResult::TRUE:
+        return "TRUE";
+    case BooleanResult::FALSE:
+        return "FALSE";
+    }
+    ASSERTFAIL("Invalid matched");
 }
 
 

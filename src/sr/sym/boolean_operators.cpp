@@ -22,13 +22,22 @@ set<shared_ptr<Expression>> AndOperator::GetOperands() const
 
 BooleanResult AndOperator::Evaluate( const EvalKit &kit ) const
 {
+    BooleanResult::Matched m = BooleanResult::TRUE;
     for( shared_ptr<BooleanExpression> a : sa )
     {
         BooleanResult r = a->Evaluate(kit);
-        if( !r.matched )
-            return r; // early out on first mismatch
+        switch( r.matched )
+        {
+        case BooleanResult::UNKNOWN:
+            m = BooleanResult::UNKNOWN;
+            break;            
+        case BooleanResult::TRUE:
+            break;
+        case BooleanResult::FALSE:
+            return r; // early out
+        }
     }
-    return {true, nullptr};
+    return {m, nullptr};
 }
 
 
@@ -76,13 +85,22 @@ set<shared_ptr<Expression>> OrOperator::GetOperands() const
 
 BooleanResult OrOperator::Evaluate( const EvalKit &kit ) const
 {
+    BooleanResult::Matched m = BooleanResult::FALSE;
     for( shared_ptr<BooleanExpression> a : sa )
     {
         BooleanResult r = a->Evaluate(kit);
-        if( r.matched )
-            return r; // early out on first match
+        switch( r.matched )
+        {
+        case BooleanResult::UNKNOWN:
+            m = BooleanResult::UNKNOWN;
+            break;            
+        case BooleanResult::TRUE:
+            return r; // early out
+        case BooleanResult::FALSE:
+            break;
+        }
     }
-    return {false, nullptr};
+    return {m, nullptr};
 }
 
 
