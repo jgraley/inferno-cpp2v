@@ -29,6 +29,17 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
+SYM::Lazy<SYM::BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
+{
+	set<PatternLink> clq_plinks = { keyer_plink };
+	auto clq_lambda = [this](const SYM::Expression::EvalKit &kit)
+	{
+		RunColocatedQuery( kit.hypothesis_links.at(keyer_plink) ); // throws on mismatch   
+	};
+	return SYM::MakeLazy<SYM::BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
+}
+
+
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
 	// The GreenGrass node appears as a triangle containing four vertical line characters,
