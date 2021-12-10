@@ -77,14 +77,53 @@ void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_lin
 }                            
 
 
-SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery()
+SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const SYM::Expression::EvalKit &kit)
 	{
-		RunNormalLinkedQuery( kit.hypothesis_links,
-							  kit.knowledge ); // throws on mismatch   
+		XLink prev_xlink;
+		for( PatternLink plink : keyer_and_normal_plinks )   // loop over required plinks              
+		{
+			if( kit.hypothesis_links->count(plink) == 1 )
+			{
+				XLink xlink = kit.hypothesis_links->at(plink);
+				if( !prev_xlink )   
+				{         
+					prev_xlink = xlink;
+				}
+				else
+				{
+					if( xlink != prev_xlink )
+					{
+						ColocationMismatch e; // value of links mismatches
+#ifdef HINTS_IN_EXCEPTIONS
+						e.hint = LocatedLink( plink, prev_xlink );
+#endif           
+						throw e;                    
+					}
+				}
+			}
+		};
+		
+		if( !prev_xlink )
+			return; // disjoint query (no overlap between hypothesis and required plinks)
+		
+		if( kit.hypothesis_links->count(keyer_plink) == 1 )
+		{
+			XLink keyer_xlink = kit.hypothesis_links->at(keyer_plink);
+			
+			// Now that the common xlink is known to be really common,
+			// we can apply the usual checks including PR check and allowing for MMAX
+			if( keyer_xlink == XLink::MMAX_Link )
+				return;
+
+			if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
+				throw PreRestrictionMismatch();
+			
+			RunColocatedQuery(keyer_xlink);    
+		}
 	};
 	return SYM::MakeLazy<SYM::BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
 }

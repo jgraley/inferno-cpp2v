@@ -262,7 +262,7 @@ void AgentCommon::RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
 }                                            
 
 
-void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links )
+void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
 {    
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
@@ -296,7 +296,7 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links )
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only )
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 {
 	auto cq_lazy = SymbolicCouplingQuery();
     if( coupling_only )
@@ -307,7 +307,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery()
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
@@ -321,7 +321,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery()
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicCouplingQuery()
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	

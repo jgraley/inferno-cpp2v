@@ -15,7 +15,7 @@ EquivalenceRelation::EquivalenceRelation() :
 }
 
 
-CompareResult EquivalenceRelation::Compare( XLink xlink, XLink ylink )
+CompareResult EquivalenceRelation::Compare( XLink xlink, XLink ylink ) const
 {
     // Get the child nodes and disregard the arrow heads
     TreePtr<Node> xnode = xlink.GetChildX();
@@ -26,13 +26,13 @@ CompareResult EquivalenceRelation::Compare( XLink xlink, XLink ylink )
 }
 
 
-bool EquivalenceRelation::operator()( XLink xlink, XLink ylink )
+bool EquivalenceRelation::operator()( XLink xlink, XLink ylink ) const
 {
     return Compare(xlink, ylink) < EQUAL;
 }
 
 
-void EquivalenceRelation::TestProperties( const set<XLink> &xlinks )
+void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
 {
     // Need a random access container because we will in fact randomly access it
     vector<XLink> vxlinks;

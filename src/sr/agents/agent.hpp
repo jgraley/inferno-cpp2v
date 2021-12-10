@@ -84,10 +84,10 @@ public:
                                        const TheKnowledge *knowledge ) const = 0;
 
     /// Test an agent given given partial map of locations of keyer and residuals.  
-    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) = 0;                                       
+    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const = 0;                                       
 
-    /// Obtain a symbolic expression for this node's queries (NLQ and coupling)
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) = 0; 
+    /// Obtain a symbolic expression for this node's queries (coupling and maybe NLQ)
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const = 0; 
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
@@ -158,10 +158,10 @@ public:
     virtual void RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
                                        const TheKnowledge *knowledge ) const;
                                        
-    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links );                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) override;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery();                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery();                                       
+    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery() const;                                       
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

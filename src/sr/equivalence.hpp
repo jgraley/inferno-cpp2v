@@ -19,15 +19,15 @@ class EquivalenceRelation
 {
 public:
     EquivalenceRelation();
-    CompareResult Compare( XLink xlink, XLink ylink );
+    CompareResult Compare( XLink xlink, XLink ylink ) const;
 
     /// Less operator: for use with set, map etc
-    bool operator()( XLink xlink, XLink ylink );
+    bool operator()( XLink xlink, XLink ylink ) const;
     
     /// Perform a test to check the reflexiv, symmetric and 
     /// transitive properties, given a representative set
     /// of links. Pass if no assert failure.
-    void TestProperties( const set<XLink> &xlinks );
+    void TestProperties( const set<XLink> &xlinks ) const;
 private:
     shared_ptr<SimpleCompare> simple_compare;
 }; 
