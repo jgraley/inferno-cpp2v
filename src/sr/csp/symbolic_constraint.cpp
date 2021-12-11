@@ -10,18 +10,18 @@
 using namespace CSP;
 
 
-SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
+SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
                                         set<SR::PatternLink> relevent_plinks ) :
-    plan( this, op, relevent_plinks )
+    plan( this, expression, relevent_plinks )
 {
 }
 
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
-                                shared_ptr<SYM::BooleanExpression> op_,
+                                shared_ptr<SYM::BooleanExpression> expression_,
                                 set<SR::PatternLink> relevent_plinks ) :
     algo( algo_ ),
-    op( op_ )
+    expression( expression_ )
 {
     DetermineVariables( relevent_plinks );       
 }
@@ -30,7 +30,7 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
 void SymbolicConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_plinks )
 { 
     // The keyer
-    set<SR::PatternLink> required_plinks = op->GetRequiredPatternLinks();
+    set<SR::PatternLink> required_plinks = expression->GetRequiredPatternLinks();
     
     // Filter down to variables relevent to the current solver
     set<SR::PatternLink> my_required_plinks = IntersectionOf( required_plinks, relevent_plinks );
@@ -73,15 +73,15 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map,
     
     //Tracer::RAIIDisable silencer(); // make queries be quiet
 
-    ASSERT(plan.op);
-    SYM::BooleanResult r = plan.op->Evaluate( kit );
+    ASSERT(plan.expression);
+    SYM::BooleanResult r = plan.expression->Evaluate( kit );
     if( r.matched == SYM::BooleanResult::TRUE || r.matched == SYM::BooleanResult::UNKNOWN )
         return make_tuple(true, Assignment()); // Successful
 
     if( !current_var )
         return make_tuple(false, Assignment()); // Failed and we don't want a hint
     
-    SYM::Solver sym_solver(plan.op);
+    SYM::Solver sym_solver(plan.expression);
     auto solve_for = make_shared<SYM::SymbolVariable>(current_var);
     shared_ptr<SYM::SymbolExpression> solution = sym_solver.TrySolveForSymbol(solve_for);
     if( !solution ) 
@@ -97,8 +97,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map,
 
 void SymbolicConstraint::Dump() const
 {
-    TRACE("Degree %d\n", 
-          plan.variables.size());
-    TRACEC("Expression: ")(plan.op->Render())("\n");
+    TRACE("Degree %d\n", plan.variables.size());
+    TRACEC("Expression: ")(plan.expression->Render())("\n");
     TRACEC("Variables: ")(plan.variables)("\n");
 }      

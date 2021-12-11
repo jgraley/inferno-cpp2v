@@ -38,13 +38,13 @@ private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
-                       shared_ptr<SYM::BooleanExpression> op,
+                       shared_ptr<SYM::BooleanExpression> expression,
                        set<SR::PatternLink> relevent_plinks );
         void DetermineVariables( set<SR::PatternLink> relevent_plinks );
         string GetTrace() const; // used for debug
 
         SymbolicConstraint * const algo;
-        shared_ptr<SYM::BooleanExpression> op;
+        shared_ptr<SYM::BooleanExpression> expression;
         list<VariableId> variables;
     } plan;
 
