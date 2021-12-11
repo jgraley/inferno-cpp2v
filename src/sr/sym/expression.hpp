@@ -62,7 +62,6 @@ struct BooleanResult
         TRUE,
         FALSE
     } matched;
-    exception_ptr reason; // Actually an exception object
 };
 
 

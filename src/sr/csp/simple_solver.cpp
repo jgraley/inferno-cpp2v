@@ -322,10 +322,8 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
         tie(my_matched, hint) = c->Test(assigns, current_var); 
         if( !my_matched )
         {            
-#ifdef HINTS_IN_EXCEPTIONS   
             if( hint ) // could have a hint            
                 hints.push_back( hint );
-#endif
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
 #endif

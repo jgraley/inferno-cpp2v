@@ -5,6 +5,7 @@
 #include "link.hpp"
 #include "../sym/comparison_operators.hpp"
 #include "../sym/primary_expressions.hpp"
+#include "../sym/rewriters.hpp"
 
 using namespace CSP;
 
@@ -68,56 +69,29 @@ tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map,
     // values that must tally up with the links required by the operator.
     SR::SolutionMap full_map;
     full_map = UnionOfSolo(forces_map, frees_map);
+    SYM::Expression::EvalKit kit { &full_map, knowledge };
     
     //Tracer::RAIIDisable silencer(); // make queries be quiet
 
-    SYM::Expression::EvalKit kit { &full_map, knowledge };
     ASSERT(plan.op);
     SYM::BooleanResult r = plan.op->Evaluate( kit );
     if( r.matched == SYM::BooleanResult::TRUE || r.matched == SYM::BooleanResult::UNKNOWN )
-    {
-        return make_tuple(true, Assignment());
-    }
-    else
-    {
-        if( current_var )
-        {
-            if( auto eq = dynamic_pointer_cast<SYM::EqualsOperator>(plan.op) )
-            {
-                shared_ptr<SYM::SymbolExpression> other;
-                for( shared_ptr<SYM::Expression> op : eq->GetOperands() )
-                {
-                    bool is_curr = false;
-                    if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
-                        if( OnlyElementOf( sv_op->GetRequiredPatternLinks() ) == current_var )
-                            is_curr = true;
-                    if( !is_curr )
-                        other = dynamic_pointer_cast<SYM::SymbolExpression>(op);                    
-                }
-                ASSERT( other )
-                      ("didn't find any other operands or not a symbol expression, current_var=")(current_var)
-                      ("expression:\n")(plan.op); 
+        return make_tuple(true, Assignment()); // Successful
 
-                SYM::SymbolResult other_result = other->Evaluate( kit );
-                if( other_result.xlink ) // Evaluate was ambiguous due missing assignments?
-                    return make_tuple(false, SR::LocatedLink( current_var, other_result.xlink ));            
-            }
-        }
+    if( !current_var )
+        return make_tuple(false, Assignment()); // Failed and we don't want a hint
+    
+    SYM::Solver sym_solver(plan.op);
+    auto solve_for = make_shared<SYM::SymbolVariable>(current_var);
+    shared_ptr<SYM::SymbolExpression> solution = sym_solver.TrySolveForSymbol(solve_for);
+    if( !solution ) 
+        return make_tuple(false, Assignment()); // Failed and could not solve equation
+     
+    SYM::SymbolResult solution_result = solution->Evaluate( kit );
+    if( !solution_result.xlink )
+        return make_tuple(false, Assignment()); // Failed and could not evaluate solved equation
         
-        try
-        {
-            if( r.reason )
-                rethrow_exception(r.reason);            
-        }  
-        catch( const ::Mismatch &e )
-        {
-#ifdef HINTS_IN_EXCEPTIONS   
-            if( auto pae = dynamic_cast<const SR::Agent::Mismatch *>(&e) ) // could have a hint            
-                return make_tuple( false, pae->hint );
-#endif            
-        }
-        return make_tuple(false, Assignment());
-    }
+    return make_tuple(false, SR::LocatedLink( current_var, solution_result.xlink ));
 }
 
 

@@ -71,7 +71,7 @@ BooleanConstant::BooleanConstant( bool value ) :
 
 BooleanResult BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return { matched, nullptr };
+    return { matched };
 }
 
 

@@ -40,7 +40,7 @@ BooleanResult EqualsOperator::Evaluate( const EvalKit &kit ) const
         else if( ra.xlink != rb.xlink )
             m = BooleanResult::FALSE;
     });
-    return {m, nullptr};   
+    return { m };   
 }
 
 
@@ -83,9 +83,9 @@ BooleanResult PreRestrictionOperator::Evaluate( const EvalKit &kit ) const
 {
     SymbolResult ar = a->Evaluate( kit );
     if( !ar.xlink )
-        return { BooleanResult::UNKNOWN, nullptr };
+        return { BooleanResult::UNKNOWN };
     bool matches = pre_restrictor->IsPreRestrictionMatch(ar.xlink);
-    return { matches ? BooleanResult::TRUE : BooleanResult::FALSE, nullptr };
+    return { matches ? BooleanResult::TRUE : BooleanResult::FALSE };
 }
 
 

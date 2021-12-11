@@ -27,11 +27,11 @@ BooleanResult BooleanLambda::Evaluate( const EvalKit &kit ) const
     try
     {
         lambda(kit); // throws on mismatch
-        return {BooleanResult::TRUE, nullptr};
+        return {BooleanResult::TRUE};
     }
     catch( const ::Mismatch &e )
     {
-        return {BooleanResult::FALSE, current_exception()};
+        return {BooleanResult::FALSE};
     }
 }
 

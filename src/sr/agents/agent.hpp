@@ -18,8 +18,6 @@
 #include "node/graphable.hpp"
 #include "../sym/lazy.hpp"
 
-#define HINTS_IN_EXCEPTIONS
-
 namespace SR
 { 
 class SpecialBase;
@@ -42,15 +40,7 @@ public:
     };
     
     // Any mismatch this class throws
-    class Mismatch : public ::Mismatch 
-    {
-#ifdef HINTS_IN_EXCEPTIONS        
-    public:
-        LocatedLink hint;
-        virtual string What() const noexcept { return ::Mismatch::What() + (hint ? string(",hint:") + Trace(hint) : string(",no-hint")); }
-#endif        
-    };
-    
+    class Mismatch : public ::Mismatch {};
     class NLQMismatch : public Mismatch {};
     class NLQConjOutAfterHitMismatch : public NLQMismatch {};
     class NLQConjOutAfterMissMismatch : public NLQMismatch {};

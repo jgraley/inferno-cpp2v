@@ -2,6 +2,7 @@
 #define REWRITES_HPP
 
 #include "lazy.hpp"
+#include "primary_expressions.hpp"
 
 namespace SR
 { 
@@ -10,6 +11,9 @@ namespace SR
 
 namespace SYM
 {         
+// Bake in the idea that an "equation" is really just a boolean expression
+// which is required to evaluate to TRUE i.e. the "== TRUE` is assumed.
+typedef BooleanExpression Equation;
 
 typedef list< SYM::Lazy<SYM::BooleanExpression> > BooleanExpressionList;
 typedef set< shared_ptr<SYM::BooleanExpression> > BooleanExpressionSet;
@@ -47,6 +51,19 @@ public:
         return out;
     }
 };
+
+// ------------------------- Solver --------------------------
+
+class Solver
+{
+public:
+    Solver( shared_ptr<Equation> equation );
+    shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target );
+
+private:
+    shared_ptr<Equation> equation;
+};
+
 
 };
 

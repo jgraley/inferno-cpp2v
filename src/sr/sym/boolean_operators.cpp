@@ -37,7 +37,7 @@ BooleanResult AndOperator::Evaluate( const EvalKit &kit ) const
             return r; // early out
         }
     }
-    return {m, nullptr};
+    return {m};
 }
 
 
@@ -100,7 +100,7 @@ BooleanResult OrOperator::Evaluate( const EvalKit &kit ) const
             break;
         }
     }
-    return {m, nullptr};
+    return { m };
 }
 
 
