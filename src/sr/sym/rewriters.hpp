@@ -19,7 +19,7 @@ typedef list< SYM::Lazy<SYM::BooleanExpression> > BooleanExpressionList;
 typedef set< shared_ptr<SYM::BooleanExpression> > BooleanExpressionSet;
 
 
-class ListSplitter
+class PreprocessForEngine
 {
 public:
     BooleanExpressionList operator()( BooleanExpressionList in ) const;

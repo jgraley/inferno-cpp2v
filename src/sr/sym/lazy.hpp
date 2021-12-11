@@ -27,6 +27,11 @@ public:
         return pexpr->GetTrace(); // Skip the shared_ptr
     }
 
+    shared_ptr<EVALTYPE> operator->()
+    {
+        return pexpr;
+    }
+
 private:    
     shared_ptr<EVALTYPE> pexpr;        
 };

@@ -5,23 +5,49 @@
 
 using namespace SYM;
 
-BooleanExpressionList ListSplitter::operator()( BooleanExpressionList in ) const
+BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in ) const
 {
-    BooleanExpressionList out;
+    BooleanExpressionList l1;
     for( auto bexpr : in )
     {
         if( auto and_expr = dynamic_pointer_cast<AndOperator>((shared_ptr<BooleanExpression>)bexpr) )
         {
             set<shared_ptr<Expression>> se = and_expr->GetOperands();
             for( shared_ptr<Expression> sub_expr : se )
-                out.push_back( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
+                l1.push_back( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
         }   
         else
         {
-            out.push_back( bexpr );
+            l1.push_back( bexpr );
         }
     }
-    return out;
+
+    BooleanExpressionList l2;
+    for( auto bexpr : l1 )
+    {
+        if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
+        {
+            BooleanResult r = bool_const_expr->GetValue();
+            switch(r.matched)
+            {
+            case BooleanResult::UNKNOWN:
+                ASSERT(false)("Got UNKNOWN from a BooleanConstant");
+                break;
+            case BooleanResult::TRUE:
+                break; // no action required
+            case BooleanResult::FALSE:
+                ASSERT(false)("Got a FALSE BooleanConstant clause in engine and-rule context");
+                // Of course, there IS a correct thing to do - replace the whole list with a single constant FALSE
+                return { MakeLazy<BooleanConstant>(false) }; // ...like this
+            }
+        }
+        else
+        {
+            l2.push_back( bexpr );
+        }
+    }
+    
+    return l2;
 }
 
 // ------------------------- Solver --------------------------

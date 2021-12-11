@@ -49,6 +49,7 @@ public:
     typedef BooleanExpression EvalType;
     BooleanConstant( bool value );
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
+    BooleanResult GetValue() const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

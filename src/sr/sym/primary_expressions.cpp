@@ -75,6 +75,12 @@ BooleanResult BooleanConstant::Evaluate( const EvalKit &kit ) const
 }
 
 
+BooleanResult BooleanConstant::GetValue() const
+{
+    return { matched };
+}
+
+
 string BooleanConstant::Render() const
 {
     switch( matched )
