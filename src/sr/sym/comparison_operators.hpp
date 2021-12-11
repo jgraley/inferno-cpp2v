@@ -34,14 +34,14 @@ private:
 
 Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
-// ------------------------- PreRestrictionOperator --------------------------
+// ------------------------- KindOfOperator --------------------------
 
-class PreRestrictionOperator : public BooleanExpression
+class KindOfOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression EvalType;
-    PreRestrictionOperator( const SR::Agent *pre_restrictor,
-                            shared_ptr<SymbolExpression> a); 
+    KindOfOperator( const SR::Agent *ref_agent,
+                    shared_ptr<SymbolExpression> a); 
     virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
@@ -49,7 +49,7 @@ public:
     
 private:
     shared_ptr<SymbolExpression> a;
-    const SR::Agent *pre_restrictor; // TODO Would like to use an archetype to reduce coupling
+    const SR::Agent *ref_agent; // TODO Would like to use an archetype to reduce coupling
 };
 
 };

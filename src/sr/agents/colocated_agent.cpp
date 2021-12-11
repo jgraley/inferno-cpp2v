@@ -45,9 +45,10 @@ Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 	for( PatternLink plink : pattern_query->GetNormalLinks() )
 		my_expr = my_expr & MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
 	
-	my_expr = my_expr & SymbolicColocatedQuery() &
-   		                ( MakeLazy<PreRestrictionOperator>(this, MakeLazy<SymbolVariable>(keyer_plink)) |
-		                  MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
+	my_expr = my_expr &
+	          SymbolicColocatedQuery() &
+   		      ( SymbolicPreRestriction() |
+		        MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
 
 	return my_expr;
 }

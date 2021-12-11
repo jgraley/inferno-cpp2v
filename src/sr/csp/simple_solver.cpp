@@ -324,10 +324,12 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
         {            
             if( hint ) // could have a hint            
                 hints.push_back( hint );
+            matched = false;
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
+#else
+            break;
 #endif
-            matched = false;
         }
     } 
     return make_tuple( matched, 

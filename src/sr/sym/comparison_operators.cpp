@@ -64,39 +64,45 @@ Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolEx
     return MakeLazy<EqualsOperator>( set< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
-// ------------------------- PreRestrictionOperator --------------------------
+// ------------------------- KindOfOperator --------------------------
 
-PreRestrictionOperator::PreRestrictionOperator( const SR::Agent *pre_restrictor_,
-                                                shared_ptr<SymbolExpression> a_ ) :
+KindOfOperator::KindOfOperator( const SR::Agent *ref_agent_,
+                                shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
-    pre_restrictor( pre_restrictor_ )
+    ref_agent( ref_agent_ )
 {    
 }                                                
 
-set<shared_ptr<Expression>> PreRestrictionOperator::GetOperands() const
+set<shared_ptr<Expression>> KindOfOperator::GetOperands() const
 {
     return { a };
 }
 
 
-BooleanResult PreRestrictionOperator::Evaluate( const EvalKit &kit ) const 
+BooleanResult KindOfOperator::Evaluate( const EvalKit &kit ) const 
 {
     SymbolResult ar = a->Evaluate( kit );
     if( !ar.xlink )
         return { BooleanResult::UNKNOWN };
-    bool matches = pre_restrictor->IsPreRestrictionMatch(ar.xlink);
+    bool matches = ref_agent->IsLocalMatch( ar.xlink.GetChildX().get() );
     return { matches ? BooleanResult::TRUE : BooleanResult::FALSE };
 }
 
 
-string PreRestrictionOperator::Render() const
+string KindOfOperator::Render() const
 {
+    string real_typename = ref_agent->GetTypeName();
+    size_t open_pos = real_typename.find('<');
+    size_t close_pos = real_typename.rfind('>');
+    if( open_pos != string::npos && close_pos != string::npos )
+        real_typename = real_typename.substr(open_pos+1, close_pos-(open_pos+1));
+
     // Not using RenderForMe() because we always want () here
-    return "PR[" + pre_restrictor->GetTrace() + "](" + a->Render() + ")"; 
+    return "KindOf<" + real_typename + ">(" + a->Render() + ")"; 
 }
 
 
-Expression::Precedence PreRestrictionOperator::GetPrecedence() const
+Expression::Precedence KindOfOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }

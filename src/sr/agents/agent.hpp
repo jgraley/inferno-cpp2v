@@ -152,7 +152,8 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery() const;                                       
-    
+	virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
+	
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;

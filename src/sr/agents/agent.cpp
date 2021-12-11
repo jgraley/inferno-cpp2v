@@ -10,6 +10,8 @@
 #include "transform_of_agent.hpp"
 #include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
+#include "sym/comparison_operators.hpp"
+#include "sym/primary_expressions.hpp"
 
 #include <stdexcept>
 
@@ -334,6 +336,12 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
         RunCouplingQuery( kit.hypothesis_links ); // throws on mismatch   
     };
     return MakeLazy<BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
+}
+
+
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
+{
+	return MakeLazy<KindOfOperator>(this, MakeLazy<SymbolVariable>(keyer_plink));
 }
 
 
