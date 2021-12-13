@@ -598,7 +598,7 @@ XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
     // Don't worry about generated nodes that are already in 
     // the X tree (they had to have been found there after a
     // search). 
-    if( knowledge.domain.count(xlink) > 0 )
+    if( knowledge.unordered_domain.count(xlink) > 0 )
         return xlink;
         
     return knowledge.domain_extension_classes->Uniquify( xlink ); 

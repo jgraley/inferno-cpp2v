@@ -220,7 +220,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
-    Value start_val = knowledge->ordered_domain.front();
+    Value start_val = knowledge->depth_first_ordered_domain.front();
     
 #ifdef DYNAMIC_START_VALUE    
     if( current_it!=solver_plan.free_variables.begin() )
@@ -232,22 +232,22 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
 #endif
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
-    SR::TheKnowledge::Nugget::OrderedIt fwd_it = nugget.ordered_it;
-    SR::TheKnowledge::Nugget::OrderedIt rev_it = nugget.ordered_it;
+    SR::TheKnowledge::DepthFirstOrderedIt fwd_it = nugget.depth_first_ordered_it;
+    SR::TheKnowledge::DepthFirstOrderedIt rev_it = nugget.depth_first_ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
     bool go_forward = true;
-    for( Value v_unused : knowledge->ordered_domain ) // just to get the right number of iterations
+    for( Value v_unused : knowledge->depth_first_ordered_domain ) // just to get the right number of iterations
     {
         Value v;
         if( go_forward )
         {
             v = *fwd_it;
-            AdvanceWithWrap( knowledge->ordered_domain, fwd_it, 1 );
+            AdvanceWithWrap( knowledge->depth_first_ordered_domain, fwd_it, 1 );
         }
         else
         {
-            AdvanceWithWrap( knowledge->ordered_domain, rev_it, -1 );
+            AdvanceWithWrap( knowledge->depth_first_ordered_domain, rev_it, -1 );
             v = *rev_it;
         }
         if( v == SR::XLink::MMAX_Link )

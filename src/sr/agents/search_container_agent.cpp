@@ -207,18 +207,18 @@ void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
     {        
         // Get nugget for base - base is first descendant (inclusive) in depth-first ordering
         XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-        const TheKnowledge::Nugget &base_nugget( knowledge->GetNugget(keyer_xlink) );
+        const TheKnowledge::Nugget &keyer_nugget( knowledge->GetNugget(keyer_xlink) );
         
         // Get nugget for last descendant of base
-        const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(base_nugget.last_descendant_xlink) );
+        const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(keyer_nugget.last_descendant_xlink) );
         
         // Get nugget for terminus
         XLink req_terminus_xlink = hypothesis_links->at(terminus_plink);
         const TheKnowledge::Nugget &req_terminus_nugget( knowledge->GetNugget(req_terminus_xlink) );
 
         // Terminus must be base or a descendant of base 
-        if( !(req_terminus_nugget.index >= base_nugget.index &&
-              req_terminus_nugget.index <= last_descendant_nugget.index) )
+        if( !(req_terminus_nugget.depth_first_index >= keyer_nugget.depth_first_index &&
+              req_terminus_nugget.depth_first_index <= last_descendant_nugget.depth_first_index) )
             throw TerminusMismatch();
     }
 }                                                                                        

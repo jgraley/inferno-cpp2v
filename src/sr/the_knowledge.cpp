@@ -14,8 +14,8 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 
 void TheKnowledge::Clear()
 {
-    domain.clear();
-    ordered_domain.clear();
+    unordered_domain.clear();
+    depth_first_ordered_domain.clear();
     nuggets.clear();
     if( domain_extension_classes )
         domain_extension_classes->Clear();
@@ -25,8 +25,8 @@ void TheKnowledge::Clear()
 void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 {   
     // Both should be cleared together
-    domain.clear();
-    ordered_domain.clear();
+    unordered_domain.clear();
+    depth_first_ordered_domain.clear();
     domain_extension_classes = make_shared<QuotientSet>();
     nuggets.clear();
     current_index = 0;
@@ -44,7 +44,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
-    e.TestProperties( domain );
+    e.TestProperties( unordered_domain );
 #endif
 }
 
@@ -52,7 +52,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 void TheKnowledge::ExtendDomain( PatternLink plink )
 {
     // Extend locally first and then pass that into children.
-    set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( domain );    
+    set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( unordered_domain );    
     if( !extra_xlinks.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
     for( XLink extra_xlink : extra_xlinks )
@@ -83,7 +83,7 @@ void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
 {
     // Bootstrap the recursive process with initial (root) values
     Nugget nugget;
-    nugget.cadence = Nugget::ROOT;
+    nugget.containment_context = Nugget::ROOT;
     AddLink( mode, root_xlink, nugget );
 }
 
@@ -97,13 +97,13 @@ void TheKnowledge::AddLink( SubtreeMode mode,
         return; // Terminate into the existing domain
     
     // Update domain 
-    InsertSolo( domain, xlink );
-    ordered_domain.push_back(xlink);
+    InsertSolo( unordered_domain, xlink );
+    depth_first_ordered_domain.push_back(xlink);
     
-    Nugget::OrderedIt it = ordered_domain.end();
+    DepthFirstOrderedIt it = depth_first_ordered_domain.end();
     --it; // I know this is OK because we just pushed to ordered_domain
-    nugget.ordered_it = it;
-    nugget.index = current_index++;  
+    nugget.depth_first_ordered_it = it;
+    nugget.depth_first_index = current_index++;  
         
     // Keep track of the lask added on the way in
     last_xlink = xlink;
@@ -152,7 +152,7 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
         
     XLink child_xlink( xlink.GetChildX(), p_x_singular );        
     Nugget nugget;
-    nugget.cadence = Nugget::SINGULAR;
+    nugget.containment_context = Nugget::SINGULAR;
     nugget.parent_xlink = xlink;
     AddLink( mode, child_xlink, nugget );
 }
@@ -166,10 +166,10 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
     {
         XLink child_xlink( xlink.GetChildX(), &*xit );
         Nugget nugget;
-        nugget.cadence = Nugget::IN_SEQUENCE;
+        nugget.containment_context = Nugget::IN_SEQUENCE;
         nugget.parent_xlink = xlink;
-        nugget.container = x_seq;
-        nugget.iterator = xit;
+        nugget.my_container = x_seq;
+        nugget.my_container_it = xit;
         AddLink( mode, child_xlink, nugget );
     }
 }
@@ -183,10 +183,10 @@ void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, 
     {
         XLink child_xlink( xlink.GetChildX(), &*xit );        
         Nugget nugget;
-        nugget.cadence = Nugget::IN_COLLECTION;
+        nugget.containment_context = Nugget::IN_COLLECTION;
         nugget.parent_xlink = xlink;
-        nugget.container = x_col;
-        nugget.iterator = xit;
+        nugget.my_container = x_col;
+        nugget.my_container_it = xit;
         AddLink( mode, child_xlink, nugget );
     }
 }
@@ -199,7 +199,7 @@ string TheKnowledge::Nugget::GetTrace() const
     bool par = false;
     bool cont = false;
     bool idx = false;
-    switch( cadence )
+    switch( containment_context )
     {
         case ROOT:
             s += "ROOT";
@@ -221,11 +221,13 @@ string TheKnowledge::Nugget::GetTrace() const
         s += ", parent_xlink=" + Trace(parent_xlink);
     if( cont )
     {
-        s += SSPrintf(", container=(%d)", container->size());
-        s += "@" + (iterator==container->end() ? string("END") : Trace(*iterator));
+        s += SSPrintf(", container=(%d)", my_container->size());
+        s += "@" + (my_container_it==my_container->end() ? 
+                   string("END") : 
+                   Trace(*my_container_it));
     }
     if( idx )
-        s += SSPrintf(", index=%d", index);
+        s += SSPrintf(", dfi=%d", depth_first_index);
     s += ")";
     return s;
 }

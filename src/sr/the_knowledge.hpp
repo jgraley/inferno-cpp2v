@@ -31,35 +31,52 @@ public:
         STOP_IF_ALREADY_IN
     };
     
+    typedef int DepthFirstIndexType;
+
+    // Domain ordered by depth-first walk
     // Don't use a vector for this:
     // (a) you'd need the size in advance otherwise the iterators in
     // the nuggets will go bad while populating and
     // (b) incremental domain update will be hard
-    typedef list<XLink> OrderedDomain;    
+    typedef list<XLink> DepthFirstOrderedDomain;    
+    typedef DepthFirstOrderedDomain::const_iterator DepthFirstOrderedIt;    
     
     class Nugget : public Traceable
     {
     public:
-        enum Cadence
+        enum ContainmentContext
         {
             ROOT,
             SINGULAR,
             IN_SEQUENCE,
             IN_COLLECTION
         };
-        typedef int IndexType;
-        typedef OrderedDomain::const_iterator OrderedIt;
-        Cadence cadence;
+
+        ContainmentContext containment_context;
+        
+        // Parent X link if not ROOT
         // Note that the parent is unique because:
         // - nugget is relative to a link, not a node,
         // - multiple parents only allowed at leaf, and parent is 
         //   (at least) one level back from that.
         XLink parent_xlink = XLink();
+        
+        // Last of the descendents in depth first order
         XLink last_descendant_xlink = XLink();
-        ContainerInterface *container = nullptr;
-        ContainerInterface::iterator iterator;
-        IndexType index = -1;
-        OrderedIt ordered_it;
+        
+        // Container that contains me, if IN_SEQUENCE or IN_COLLECTION
+        // but see #425
+        ContainerInterface *my_container = nullptr;
+        
+        // Iterator on my_container that dereferneces to me, if 
+        // IN_SEQUENCE or IN_COLLECTION
+        ContainerInterface::iterator my_container_it;
+        
+        // Index in a depth-first walk
+        DepthFirstIndexType depth_first_index = -1;
+        
+        // Iterator in a depth-first walk
+        DepthFirstOrderedIt depth_first_ordered_it;
         
         string GetTrace() const;
     };
@@ -80,17 +97,18 @@ private:
     
 public:
     // Global domain of possible xlink values
-    unordered_set<XLink> domain;            
+    unordered_set<XLink> unordered_domain;            
     
     // Global domain of possible xlink values - ordered
-    OrderedDomain ordered_domain;            
+    DepthFirstOrderedDomain depth_first_ordered_domain;            
     
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;
     
     // Child-to-parent map
     map<XLink, Nugget> nuggets;
-    
+
+private:    
     // Depth-first ordering
     int current_index;
     

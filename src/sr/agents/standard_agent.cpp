@@ -450,7 +450,7 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
         {
             XLink req_xlink = hypothesis_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.cadence == TheKnowledge::Nugget::IN_SEQUENCE) )
+            if( !(nugget.containment_context == TheKnowledge::Nugget::IN_SEQUENCE) )
                 throw WrongCadenceSequenceMismatch(); // Be in the right sequence        
         }
     }
@@ -466,7 +466,7 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
             {
                 XLink req_xlink = hypothesis_links->at(plink);
                 const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-                if( !(nugget.container == p_x_seq) )
+                if( !(nugget.my_container == p_x_seq) )
                     throw WrongContainerSequenceMismatch(); // Be in the right sequence        
             }
         }
@@ -480,8 +480,8 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
         {        
             XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_front);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
-            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.container);
-            ASSERT( req_seq )("Front element not in a sequence, cadence check should have ensured this");            
+            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.my_container);
+            ASSERT( req_seq )("Front element not in a sequence, containment_context check should have ensured this");            
             XLink req_front_xlink(hypothesis_links->at(keyer_plink).GetChildX(), &req_seq->front());            
             if( req_xlink != req_front_xlink )
                 throw NotAtFrontMismatch();
@@ -496,8 +496,8 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
         {        
             XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_back);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
-            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.container);
-            ASSERT( req_seq )("Back element not in a sequence, cadence check should have ensured this");            
+            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.my_container);
+            ASSERT( req_seq )("Back element not in a sequence, containment_context check should have ensured this");            
             XLink req_back_xlink(hypothesis_links->at(keyer_plink).GetChildX(), &req_seq->back());            
             if( req_xlink != req_back_xlink )
                 throw NotAtBackMismatch();
@@ -514,9 +514,10 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
             XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );       
-            ContainerInterface::iterator a_it_incremented = a_nugget.iterator;
+            ContainerInterface::iterator a_it_incremented = a_nugget.my_container_it;
             ++a_it_incremented;
-            if( !(a_nugget.container == b_nugget.container && a_it_incremented == b_nugget.iterator) )
+            if( !(a_nugget.my_container == b_nugget.my_container && 
+                  a_it_incremented == b_nugget.my_container_it) )
                  throw NotSuccessorSequenceMismatch();
         }
     }
@@ -532,7 +533,8 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
             XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );        
-            if( !(a_nugget.container == b_nugget.container && a_nugget.index < b_nugget.index) )
+            if( !(a_nugget.my_container == b_nugget.my_container && 
+                  a_nugget.depth_first_index < b_nugget.depth_first_index) )
                 throw NotAfterSequenceMismatch();
         }
     }
@@ -556,7 +558,7 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
         {
             XLink req_xlink = hypothesis_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.cadence == TheKnowledge::Nugget::IN_COLLECTION) )
+            if( !(nugget.containment_context == TheKnowledge::Nugget::IN_COLLECTION) )
                 throw WrongCadenceCollectionMismatch(); // Be in a collection
         }
     }
@@ -570,7 +572,7 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
             {
                 XLink req_xlink = hypothesis_links->at(plink);
                 const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
-                if( nugget.container != p_x_col )
+                if( nugget.my_container != p_x_col )
                     throw WrongContainerCollectionMismatch(); // Be in the right collection
             }
         }
@@ -669,7 +671,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             
             XLink pred_xlink = hypothesis_links->at(run->predecessor);
             const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
-            xit = pred_nugget.iterator;
+            xit = pred_nugget.my_container_it;
             ++xit; // get past the non-star
         }
         else
@@ -684,7 +686,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             
             XLink succ_xlink = hypothesis_links->at(run->successor);
             const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
-            xit_star_limit = succ_nugget.iterator;
+            xit_star_limit = succ_nugget.my_container_it;
         }
         else
         {
