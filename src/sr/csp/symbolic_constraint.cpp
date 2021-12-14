@@ -21,9 +21,11 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_,
                                 set<VariableId> relevent_variables ) :
     algo( algo_ ),
-    consistency_expression( expression_ )
+    consistency_expression( expression_ ),
+    sym_solver( consistency_expression )
 {
-    DetermineVariables( relevent_variables );       
+    DetermineVariables( relevent_variables );   
+    DetermineHintExpressions();    
 }
 
 
@@ -37,8 +39,19 @@ void SymbolicConstraint::Plan::DetermineVariables( set<VariableId> relevent_vari
     // irrelevent. This only happens with coupling keyer/residuals
     set<VariableId> my_required_variables = IntersectionOf( required_variables, 
                                                             relevent_variables );
-    for( VariableId v : my_required_variables )
-        variables.push_back( v );     
+    variables = ToList(my_required_variables);
+}
+
+
+void SymbolicConstraint::Plan::DetermineHintExpressions()
+{
+    for( VariableId v : variables )
+    {
+        auto v_expr = make_shared<SYM::SymbolVariable>(v);
+        shared_ptr<SYM::SymbolExpression> he = sym_solver.TrySolveForSymbol(v_expr);
+        if( he )
+            hint_expressions[v] = he; // only store good ones in the map
+    }
 }
 
 
@@ -75,20 +88,14 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     if( r.matched == SYM::BooleanResult::TRUE || r.matched == SYM::BooleanResult::UNKNOWN )
         return make_tuple(true, Assignment()); // Successful
 
-    if( !current_var )
-        return make_tuple(false, Assignment()); // Failed and we don't want a hint
-    
-    SYM::Solver sym_solver(plan.consistency_expression);
-    auto solve_for = make_shared<SYM::SymbolVariable>(current_var);
-    shared_ptr<SYM::SymbolExpression> solution = sym_solver.TrySolveForSymbol(solve_for);
-    if( !solution ) 
-        return make_tuple(false, Assignment()); // Failed and could not solve equation
+    if( !current_var || plan.hint_expressions.count(current_var)==0 )
+        return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one
      
-    SYM::SymbolResult solution_result = solution->Evaluate( kit );
-    if( !solution_result.xlink )
-        return make_tuple(false, Assignment()); // Failed and could not evaluate solved equation
+    SYM::SymbolResult hint_result = plan.hint_expressions.at(current_var)->Evaluate( kit );
+    if( !hint_result.xlink )
+        return make_tuple(false, Assignment()); // Could not evaluate expression (eg due partial assignment)
         
-    return make_tuple(false, SR::LocatedLink( current_var, solution_result.xlink ));
+    return make_tuple(false, SR::LocatedLink( current_var, hint_result.xlink ));
 }
 
 
@@ -96,5 +103,7 @@ void SymbolicConstraint::Dump() const
 {
     TRACE("Degree %d\n", plan.variables.size());
     TRACEC("Consistency expression: ")(plan.consistency_expression->Render())("\n");
+    for( auto p : plan.hint_expressions )
+        TRACEC("Hint expression for ")(p.first)(" is ")(p.second->Render())("\n");
     TRACEC("Variables: ")(plan.variables)("\n");
 }      

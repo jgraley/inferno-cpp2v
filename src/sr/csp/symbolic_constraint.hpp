@@ -6,6 +6,7 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 #include "../sym/expression.hpp"
+#include "../sym/rewriters.hpp"
 
 #include <memory>
 #include <list>
@@ -41,12 +42,14 @@ private:
                        shared_ptr<SYM::BooleanExpression> expression,
                        set<VariableId> relevent_variables );
         void DetermineVariables( set<VariableId> relevent_variables );
+        void DetermineHintExpressions();
         string GetTrace() const; // used for debug
 
         SymbolicConstraint * const algo;
-        shared_ptr<SYM::BooleanExpression> consistency_expression;
-        
+        shared_ptr<SYM::BooleanExpression> consistency_expression;        
+        SYM::Solver sym_solver;
         list<VariableId> variables;
+        map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions;
     } plan;
 
     const list<VariableId> &GetVariables() const override;

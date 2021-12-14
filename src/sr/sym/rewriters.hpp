@@ -58,7 +58,7 @@ class Solver
 {
 public:
     Solver( shared_ptr<Equation> equation );
-    shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target );
+    shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const;
 
 private:
     shared_ptr<Equation> equation;
