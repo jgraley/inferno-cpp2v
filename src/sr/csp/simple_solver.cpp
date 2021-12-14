@@ -10,8 +10,7 @@
 
 using namespace CSP;
 
-
-//#define BACKJUMPING
+// BACKJUMPING moved to header
 #define TAKE_HINTS
 #define DYNAMIC_START_VALUE
 
@@ -153,11 +152,17 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
 
     while(true)
     {
-        auto p = value_selectors.at(*current_it)->SelectNextValue();        
-        if( !p.first ) // no consistent value
+        Value value;
+#ifdef BACKJUMPING
+        ConstraintSet unsatisfied;
+        tie(value, unsatisfied) = value_selectors.at(*current_it)->SelectNextValue();        
+#else        
+        value = value_selectors.at(*current_it)->SelectNextValue();        
+#endif
+
+        if( !value ) // no consistent value
         {
 #ifdef BACKJUMPING
-            ConstraintSet unsatisfied = p.second;
             TRACEC("Inconsistent. Unsatisfied constraints: ")(unsatisfied)("\n");
             set<VariableId> possibly_conflicted_vars = GetAllAffected(unsatisfied);
             TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
@@ -265,7 +270,7 @@ SimpleSolver::ValueSelector::~ValueSelector()
 }
 
 
-pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNextValue()
+SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::SelectNextValue()
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(current_var)("\n");
@@ -277,10 +282,12 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
         
         bool ok;
         Assignment hint;  
+#ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
         tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var), current_var );        
-#ifdef BACKJUMPING
         ASSERT( ok || !unsatisfied.empty() );
+#else
+        tie(ok, hint) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var), current_var );        
 #endif
 
 #ifdef TAKE_HINTS
@@ -292,27 +299,36 @@ pair<Value, SimpleSolver::ConstraintSet> SimpleSolver::ValueSelector::SelectNext
         }
 #endif
        
+#ifdef BACKJUMPING
         all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
-       
+#endif       
         if( ok )
         {
             TRACEC("Value is ")(value)("\n");
+#ifdef BACKJUMPING
             return make_pair(value, all_unsatisfied);
+#else
+            return value;
+#endif
         }
     }
     TRACEC("No (more) values found\n");
 #ifdef BACKJUMPING
     ASSERT( !all_unsatisfied.empty() ); // Note: could fire if domain is empty
-#endif
     return make_pair(Value(), all_unsatisfied);
+#else
+    return Value();
+#endif
 }
 
 
-tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const Assignments &assigns,
-                                                                         const ConstraintSet &to_test,
-                                                                         VariableId current_var ) const 
+SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assigns,
+                                         const ConstraintSet &to_test,
+                                         VariableId current_var ) const 
 {
+#ifdef BACKJUMPING
     ConstraintSet unsatisfied;
+#endif
     list<Assignment> hints;
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
@@ -332,9 +348,14 @@ tuple<bool, Assignment, SimpleSolver::ConstraintSet> SimpleSolver::Test( const A
 #endif
         }
     } 
+#ifdef BACKJUMPING
     return make_tuple( matched, 
                        hints.empty() ? Assignment() : hints.front(),
                        unsatisfied );
+#else                       
+    return make_tuple( matched, 
+                       hints.empty() ? Assignment() : hints.front() );
+#endif                       
 }
 
 

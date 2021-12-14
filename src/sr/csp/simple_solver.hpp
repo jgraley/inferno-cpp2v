@@ -10,6 +10,8 @@
 #include <chrono>
 #include <functional>
 
+//#define BACKJUMPING
+
 namespace CSP
 { 
     
@@ -73,7 +75,12 @@ private:
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
         ~ValueSelector();
-        pair<Value, ConstraintSet> SelectNextValue();
+#ifdef BACKJUMPING
+        typedef pair<Value, ConstraintSet> SelectNextValueRV;
+#else
+        typedef Value SelectNextValueRV;
+#endif
+        SelectNextValueRV SelectNextValue();
         
     private:
         const Plan &solver_plan;
@@ -83,12 +90,19 @@ private:
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
         list<Value> value_queue;    
+#ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
+#endif
     };
 
-    tuple<bool, Assignment, ConstraintSet> Test( const Assignments &assigns,
-                                                 const ConstraintSet &to_test,
-                                                 VariableId current_var ) const;
+#ifdef BACKJUMPING
+    typedef tuple<bool, Assignment, ConstraintSet> TestRV;
+#else
+    typedef tuple<bool, Assignment> TestRV;
+#endif
+    TestRV Test( const Assignments &assigns,
+                 const ConstraintSet &to_test,
+                 VariableId current_var ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;
