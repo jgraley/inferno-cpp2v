@@ -44,7 +44,7 @@ public:
         
     virtual set<shared_ptr<Expression>> GetOperands() const;
 
-    virtual set<SR::PatternLink> GetRequiredPatternLinks() const;
+    virtual set<SR::PatternLink> GetRequiredVariables() const;
     virtual string Render() const = 0;    
     string GetTrace() const; // used for debug
     

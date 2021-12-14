@@ -8,12 +8,12 @@ set<shared_ptr<Expression>> Expression::GetOperands() const
 }
 
 
-set<SR::PatternLink> Expression::GetRequiredPatternLinks() const 
+set<SR::PatternLink> Expression::GetRequiredVariables() const 
 {
     set<SR::PatternLink> sipl;
     // Non-strict union (i.e. not Solo) because common links are fine
     for( const shared_ptr<Expression> a : GetOperands() )
-        sipl = UnionOf( sipl, a->GetRequiredPatternLinks() );
+        sipl = UnionOf( sipl, a->GetRequiredVariables() );
     return sipl;
 }
 

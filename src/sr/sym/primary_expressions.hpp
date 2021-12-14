@@ -32,7 +32,7 @@ class SymbolVariable : public SymbolExpression
 public:    
     typedef SymbolExpression EvalType;
     SymbolVariable( const SR::PatternLink &plink );
-    virtual set<SR::PatternLink> GetRequiredPatternLinks() const override;
+    virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual SymbolResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

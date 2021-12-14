@@ -67,8 +67,8 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
         {
             bool is_curr = false;
             if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
-                if( OnlyElementOf( sv_op->GetRequiredPatternLinks() ) ==
-                    OnlyElementOf( target->GetRequiredPatternLinks() ) )
+                if( OnlyElementOf( sv_op->GetRequiredVariables() ) ==
+                    OnlyElementOf( target->GetRequiredVariables() ) )
                     is_curr = true;
             if( !is_curr )
                 other_op = dynamic_pointer_cast<SYM::SymbolExpression>(op);                    

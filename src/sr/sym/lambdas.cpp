@@ -13,7 +13,7 @@ BooleanLambda::BooleanLambda( set<SR::PatternLink> required_plinks_,
 }
 
 
-set<SR::PatternLink> BooleanLambda::GetRequiredPatternLinks() const
+set<SR::PatternLink> BooleanLambda::GetRequiredVariables() const
 {
     return required_plinks;
 }

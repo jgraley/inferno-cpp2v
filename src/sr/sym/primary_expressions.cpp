@@ -35,7 +35,7 @@ SymbolVariable::SymbolVariable( const SR::PatternLink &plink_ ) :
 }
 
 
-set<SR::PatternLink> SymbolVariable::GetRequiredPatternLinks() const
+set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 {
     return { plink };
 }

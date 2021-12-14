@@ -20,7 +20,7 @@ public:
     BooleanLambda( set<SR::PatternLink> required_plinks_,
                     const LambdaType &lambda_,
                     string description );
-    virtual set<SR::PatternLink> GetRequiredPatternLinks() const override;
+    virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

@@ -11,31 +11,34 @@ using namespace CSP;
 
 
 SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
-                                        set<SR::PatternLink> relevent_plinks ) :
-    plan( this, expression, relevent_plinks )
+                                        set<VariableId> relevent_variables ) :
+    plan( this, expression, relevent_variables )
 {
 }
 
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_,
-                                set<SR::PatternLink> relevent_plinks ) :
+                                set<VariableId> relevent_variables ) :
     algo( algo_ ),
-    expression( expression_ )
+    consistency_expression( expression_ )
 {
-    DetermineVariables( relevent_plinks );       
+    DetermineVariables( relevent_variables );       
 }
 
 
-void SymbolicConstraint::Plan::DetermineVariables( set<SR::PatternLink> relevent_plinks )
+void SymbolicConstraint::Plan::DetermineVariables( set<VariableId> relevent_variables )
 { 
-    // The keyer
-    set<SR::PatternLink> required_plinks = expression->GetRequiredPatternLinks();
+    // Which variables are required in order to check consistency
+    set<VariableId> required_variables = consistency_expression->GetRequiredVariables();
     
     // Filter down to variables relevent to the current solver
-    set<SR::PatternLink> my_required_plinks = IntersectionOf( required_plinks, relevent_plinks );
-    for( VariableId plink : my_required_plinks )
-        variables.push_back( plink );     
+    // This means we will permit partial queries when some required variables are 
+    // irrelevent. This only happens with coupling keyer/residuals
+    set<VariableId> my_required_variables = IntersectionOf( required_variables, 
+                                                            relevent_variables );
+    for( VariableId v : my_required_variables )
+        variables.push_back( v );     
 }
 
 
@@ -67,15 +70,15 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     
     //Tracer::RAIIDisable silencer(); // make queries be quiet
 
-    ASSERT(plan.expression);
-    SYM::BooleanResult r = plan.expression->Evaluate( kit );
+    ASSERT(plan.consistency_expression);
+    SYM::BooleanResult r = plan.consistency_expression->Evaluate( kit );
     if( r.matched == SYM::BooleanResult::TRUE || r.matched == SYM::BooleanResult::UNKNOWN )
         return make_tuple(true, Assignment()); // Successful
 
     if( !current_var )
         return make_tuple(false, Assignment()); // Failed and we don't want a hint
     
-    SYM::Solver sym_solver(plan.expression);
+    SYM::Solver sym_solver(plan.consistency_expression);
     auto solve_for = make_shared<SYM::SymbolVariable>(current_var);
     shared_ptr<SYM::SymbolExpression> solution = sym_solver.TrySolveForSymbol(solve_for);
     if( !solution ) 
@@ -92,6 +95,6 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 void SymbolicConstraint::Dump() const
 {
     TRACE("Degree %d\n", plan.variables.size());
-    TRACEC("Expression: ")(plan.expression->Render())("\n");
+    TRACEC("Consistency expression: ")(plan.consistency_expression->Render())("\n");
     TRACEC("Variables: ")(plan.variables)("\n");
 }      

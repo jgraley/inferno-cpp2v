@@ -32,19 +32,20 @@ public:
      * @param op a shared pointer to the boolean operator
      */
     explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
-                                 set<SR::PatternLink> relevent_plinks );
+                                 set<VariableId> relevent_variables );
     
 private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
                        shared_ptr<SYM::BooleanExpression> expression,
-                       set<SR::PatternLink> relevent_plinks );
-        void DetermineVariables( set<SR::PatternLink> relevent_plinks );
+                       set<VariableId> relevent_variables );
+        void DetermineVariables( set<VariableId> relevent_variables );
         string GetTrace() const; // used for debug
 
         SymbolicConstraint * const algo;
-        shared_ptr<SYM::BooleanExpression> expression;
+        shared_ptr<SYM::BooleanExpression> consistency_expression;
+        
         list<VariableId> variables;
     } plan;
 
@@ -53,8 +54,6 @@ private:
     tuple<bool, Assignment> Test( const Assignments &assignments,
                                   const VariableId &current_var ) override;
             
-    list<Value> forces;
-    Assignments forces_map;
     const SR::TheKnowledge *knowledge;
     
     void Dump() const;
