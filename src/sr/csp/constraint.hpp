@@ -60,7 +60,7 @@ public:
      * are ignored.
      */
     virtual tuple<bool, Assignment> Test( Assignments frees_map,
-                                          VariableId current_var ) = 0;        
+                                          const VariableId &current_var ) = 0;        
     
     string GetTrace() const;
 

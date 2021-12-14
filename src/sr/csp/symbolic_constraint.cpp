@@ -61,7 +61,7 @@ void SymbolicConstraint::Start( const Assignments &forces_map_,
 
 
 tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map,
-                                                  VariableId current_var )
+                                                  const VariableId &current_var )
 {   
     INDENT("T");
 

@@ -29,7 +29,7 @@ Expression::Precedence SymbolConstant::GetPrecedence() const
 
 // ------------------------- SymbolVariable --------------------------
 
-SymbolVariable::SymbolVariable( SR::PatternLink plink_ ) :
+SymbolVariable::SymbolVariable( const SR::PatternLink &plink_ ) :
     plink( plink_ )
 {
 }

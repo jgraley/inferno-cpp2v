@@ -109,7 +109,7 @@ private:
 #endif
     TestRV Test( const Assignments &assigns,
                  const ConstraintSet &to_test,
-                 VariableId current_var ) const;
+                 const VariableId &current_var ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;

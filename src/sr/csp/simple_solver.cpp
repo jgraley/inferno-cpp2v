@@ -354,7 +354,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 
 SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assigns,
                                          const ConstraintSet &to_test,
-                                         VariableId current_var ) const 
+                                         const VariableId &current_var ) const 
 {
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
