@@ -12,6 +12,19 @@
 
 using namespace std;
 
+
+struct PairHash
+{
+    template<class T1, class T2>
+    size_t operator()( const pair<T1,T2> &p ) const 
+    {
+        auto h1 = hash<T1>{}(p.first);
+        auto h2 = hash<T2>{}(p.second);
+        return h1 ^ h2;  
+    }
+};
+
+
 class LeakCheck
 {
 public:
@@ -116,11 +129,17 @@ public:
     string GetSerialString() const;
     
 private:
-    typedef map<const void *, SatelliteSNType> SerialBySatelliteInstance;
+    struct MotherBlock
+    {
+        map<const void *, SatelliteSNType> serial_by_satellite;
+        int next_serial=0;
+    };
     // Index by location, then serial. Serial scales with input tree size so
     // use unordered_map for that.
-    typedef map< SerialNumber::SNType, unordered_map< SerialNumber::SNType, SerialBySatelliteInstance > > SerialByMotherSerial;
-    static SerialByMotherSerial serial_by_child_node;    
+    typedef unordered_map< pair<SerialNumber::SNType, SerialNumber::SNType>, 
+                           MotherBlock, 
+                           PairHash > BlocksByMotherSerial;
+    static BlocksByMotherSerial blocks_by_mother_serial;    
 
     SatelliteSNType serial;
 };

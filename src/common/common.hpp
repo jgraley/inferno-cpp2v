@@ -268,5 +268,4 @@ typename T::value_type OnlyElementOf( const T&c )
     return *(c.begin());
 }
 
-
 #endif
