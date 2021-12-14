@@ -122,6 +122,7 @@ private:
         
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
+    Assignments forced_assignments;
     Assignments assignments;
     
     // Timed reports

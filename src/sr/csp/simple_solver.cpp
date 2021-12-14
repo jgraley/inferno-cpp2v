@@ -50,17 +50,15 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *free_variables
         list<VariableId> cvars = c->GetVariables();
         for( VariableId v : cvars )
         {
-            if( find( free_variables.begin(), free_variables.end(), v ) != free_variables.end() )
+            if( free_variables_set.count(v) == 1 )
                 cfvars.push_back(v);
         }        
         
         for( VariableId v : cfvars )
         {
-            if( variables_check_set.count(v) == 0 )
-            {
-                variables_check_set.insert( v );
-            }
             affected_constraints[v].insert(c);
+            if( variables_check_set.count(v) == 0 )
+                variables_check_set.insert( v );
         }
         
         free_vars_for_constraint[c] = cfvars;
@@ -94,11 +92,14 @@ void SimpleSolver::Start( const Assignments &forces,
 {
     TRACE("Simple solver begins\n");
     INDENT("S");
+    forced_assignments = forces;
     knowledge = knowledge_;
 
     // Tell all the constraints about the forces
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
-        c->Start( forces, knowledge );
+        c->Start( knowledge );
+
+    assignments = forced_assignments;    
 }
 
     
@@ -107,8 +108,6 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     ScopedAssign<ReportageObserver *> sa(holder, holder_);
     ASSERT( holder );
-
-    assignments.clear();    
 
     // Do a test with all constraints but no assignments (=free variables), so forced variables 
     // will be tested. From here on we can test only constraints affected by changed assignments.
@@ -126,7 +125,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     {
         TRACE("Simple solver matched on forced variables and no frees\n");  
         // No free vars, so we've got a solution
-        holder->ReportSolution( assignments );
+        holder->ReportSolution( Assignments{} );
     }
     else
     {                
@@ -197,7 +196,10 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
             else // complete
             {
                 TRACEC("Reporting solution\n");
-                holder->ReportSolution( assignments );
+                // Engine wants free assignments only, don't annoy it.
+                Assignments free_assignments = DifferenceOfSolo( assignments, 
+                                                                forced_assignments );
+                holder->ReportSolution( free_assignments );
                 TRACE("SS%d finished reporting solution\n");
                 --current_it;
                 TRACEC("Back to ")(*current_it)("\n");                
@@ -221,7 +223,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     current_it( current_it_ ),
     current_var( *current_it )
 {
-    ASSERT( current_it != solver_plan.free_variables.end() );
+    //ASSERT( current_it != solver_plan.free_variables.end() );
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
@@ -238,8 +240,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
 
-    fwd_it = nugget.depth_first_ordered_it;
-    rev_it = nugget.depth_first_ordered_it;
+    fwd_it = rev_it = nugget.depth_first_ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
     go_forward = true;
@@ -309,7 +310,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #endif
 
 #ifdef TAKE_HINTS
-        if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
+        if( !ok && hint ) // hint now guaranteed to be for current variable
         {
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
@@ -352,24 +353,24 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 }
 
 
-SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assigns,
+SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assignments,
                                          const ConstraintSet &to_test,
                                          const VariableId &current_var ) const 
 {
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
 #endif
-    list<Assignment> hints;
+    Assignment hint;
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
-        Assignment hint;
+        Assignment chint;
         bool my_matched;
-        tie(my_matched, hint) = c->Test(assigns, current_var); 
+        tie(my_matched, chint) = c->Test(assignments, current_var); 
         if( !my_matched )
         {            
-            if( hint ) // could have a hint            
-                hints.push_back( hint );
+            if( chint && !hint ) // could have a hint            
+                hint = chint; // pick the first
             matched = false;
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
@@ -379,12 +380,9 @@ SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assigns,
         }
     } 
 #ifdef BACKJUMPING
-    return make_tuple( matched, 
-                       hints.empty() ? Assignment() : hints.front(),
-                       unsatisfied );
+    return make_tuple( matched, hint, unsatisfied );
 #else                       
-    return make_tuple( matched, 
-                       hints.empty() ? Assignment() : hints.front() );
+    return make_tuple( matched, hint );
 #endif                       
 }
 

@@ -46,20 +46,22 @@ public:
     /**
      * Set the values of the forced varibles
      * 
-     * @param forces [in] a map from varaibles to forced values
+     * @param knowledge [in] pointer to an uptodate TheKnowledge object
      */    
-    virtual void Start( const Assignments &forces, 
-                        const SR::TheKnowledge *knowledge ) = 0;    
+    virtual void Start( const SR::TheKnowledge *knowledge ) = 0;    
     
     /**
-     * Test a list of free variable values for inclusion in the constraint. A MisMatch
-     * exception is thrown if the assignment does not match.
+     * Test a list of variable values for consistency with this constraint. 
      * 
-     * @param frees_map [in] a partial assignment of free varaibles for this constraint. 
-     * All required varaibles should be present. Variables not used by this constraint 
-     * are ignored.
+     * @param assignments [in] a partial assignment of free and forced 
+     * varaibles for this constraint. 
+     * 
+     * @note All required variables should be present. Variables not used 
+     * by this constraint are ignored.
+     * 
+     * @return A tuple of: success (true of consistent) and an optional hint.
      */
-    virtual tuple<bool, Assignment> Test( Assignments frees_map,
+    virtual tuple<bool, Assignment> Test( const Assignments &assignments,
                                           const VariableId &current_var ) = 0;        
     
     string GetTrace() const;

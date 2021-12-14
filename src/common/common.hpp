@@ -78,10 +78,10 @@ inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 
 // Intersect set with complement, any compatible associative 
 // containers, ordered or otherwise.
-template< typename S1, typename S2 >
-inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
+template< typename T1, typename T2 >
+inline set<T1> DifferenceOf( const set<T1> &s1, const set<T2> &s2 )
 {
-    S1 result;
+    set<T1> result;
     result = s1;
     for( auto x : s2 )
         result.erase(x);                 
@@ -90,15 +90,44 @@ inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 
 
 // Intersect set with complement, any compatible associative 
-// containers, ordered or otherwise. s2 must be subset of s1.
-template< typename S1, typename S2 >
-inline S1 DifferenceOfSolo( const S1 &s1, const S2 &s2 )
+// containers, ordered or otherwise.
+template< typename T1, typename T2 >
+inline map<T1, T2> DifferenceOf( const map<T1, T2> &s1, const map<T1, T2> &s2 )
 {
-    S1 result;
+    map<T1, T2> result;
+    result = s1;
+    for( auto x : s2 )
+        result.erase(x.first); // this .first is why we need separate version for map     
+    return result; // There, much nicer!
+}    
+
+
+// Intersect set with complement, any compatible associative 
+// containers, ordered or otherwise. s2 must be subset of s1.
+template< typename T1, typename T2 >
+inline set<T1> DifferenceOfSolo( const set<T1> &s1, const set<T2> &s2 )
+{
+    set<T1> result;
     result = s1;
     for( auto x : s2 )
     {
         int n = result.erase(x);                 
+        ASSERT( n > 0 );
+    }
+    return result; // There, much nicer!
+}    
+
+
+// Intersect set with complement, any compatible associative 
+// containers, ordered or otherwise. s2 must be subset of s1.
+template< typename T1, typename T2 >
+inline map<T1, T2> DifferenceOfSolo( const map<T1, T2> &s1, const map<T1, T2> &s2 )
+{
+    map<T1, T2> result;
+    result = s1;
+    for( auto x : s2 )
+    {
+        int n = result.erase(x.first); // this .first is why we need separate version for map                      
         ASSERT( n > 0 );
     }
     return result; // There, much nicer!

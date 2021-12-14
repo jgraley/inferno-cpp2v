@@ -51,25 +51,19 @@ const list<VariableId> &SymbolicConstraint::GetVariables() const
 }
 
 
-void SymbolicConstraint::Start( const Assignments &forces_map_, 
-                                const SR::TheKnowledge *knowledge_ )
+void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
 {
-    forces_map = forces_map_;
     knowledge = knowledge_;
     ASSERT( knowledge );
 }   
 
 
-tuple<bool, Assignment> SymbolicConstraint::Test( Assignments frees_map,
+tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments,
                                                   const VariableId &current_var )
 {   
     INDENT("T");
 
-    // Merge incoming values with the forces to get a full set of 
-    // values that must tally up with the links required by the operator.
-    SR::SolutionMap full_map;
-    full_map = UnionOfSolo(forces_map, frees_map);
-    SYM::Expression::EvalKit kit { &full_map, knowledge };
+    SYM::Expression::EvalKit kit { &assignments, knowledge };
     
     //Tracer::RAIIDisable silencer(); // make queries be quiet
 
