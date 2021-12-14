@@ -6,6 +6,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
+#include "the_knowledge.hpp"
 
 #include <chrono>
 #include <functional>
@@ -89,10 +90,16 @@ private:
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
-        list<Value> value_queue;    
+        function<Value()> values_generator;    
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
 #endif
+        // For the lambda...
+        SR::TheKnowledge::DepthFirstOrderedIt fwd_it;
+        SR::TheKnowledge::DepthFirstOrderedIt rev_it;
+        bool go_forward;
+        bool insert_mmax_next;
+        int remaining_count;        
     };
 
 #ifdef BACKJUMPING

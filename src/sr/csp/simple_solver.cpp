@@ -237,30 +237,47 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
 #endif
     
     const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
-    SR::TheKnowledge::DepthFirstOrderedIt fwd_it = nugget.depth_first_ordered_it;
-    SR::TheKnowledge::DepthFirstOrderedIt rev_it = nugget.depth_first_ordered_it;
+
+    fwd_it = nugget.depth_first_ordered_it;
+    rev_it = nugget.depth_first_ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
-    bool go_forward = true;
-    for( Value v_unused : knowledge->depth_first_ordered_domain ) // just to get the right number of iterations
+    go_forward = true;
+    insert_mmax_next = knowledge->unordered_domain.count(SR::XLink::MMAX_Link);
+    remaining_count = knowledge->depth_first_ordered_domain.size();
+    
+    values_generator = [this]() -> Value
     {
         Value v;
-        if( go_forward )
+        if( remaining_count == 0 )
         {
-            v = *fwd_it;
-            AdvanceWithWrap( knowledge->depth_first_ordered_domain, fwd_it, 1 );
+            v = Value();
+        }
+        else if( insert_mmax_next )
+        {
+            v = SR::XLink::MMAX_Link; 
+            insert_mmax_next = false;
         }
         else
         {
-            AdvanceWithWrap( knowledge->depth_first_ordered_domain, rev_it, -1 );
-            v = *rev_it;
-        }
-        if( v == SR::XLink::MMAX_Link )
-            value_queue.push_front(v);
-        else
-            value_queue.push_back(v);
-        go_forward = !go_forward;
-    }
+            do
+            {
+                if( go_forward )
+                {
+                    v = *fwd_it;
+                    AdvanceWithWrap( knowledge->depth_first_ordered_domain, fwd_it, 1 );
+                }
+                else
+                {
+                    AdvanceWithWrap( knowledge->depth_first_ordered_domain, rev_it, -1 );
+                    v = *rev_it;
+                }
+                go_forward = !go_forward;
+            } while( v == SR::XLink::MMAX_Link );
+        }                            
+        remaining_count--;      
+        return v;          
+    };
 }
 
 
@@ -274,11 +291,12 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(current_var)("\n");
-    while( !value_queue.empty() )
+    while(1)
     {       
-        Value value = value_queue.front();
+        Value value = values_generator();
+        if( !value )
+            break;
         assignments[current_var] = value;
-        value_queue.pop_front();
         
         bool ok;
         Assignment hint;  
@@ -294,8 +312,20 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         if( !ok && hint && current_var==(VariableId)(hint) ) // we got a hint, and for the current variable
         {
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
-            value_queue.clear();
-            value_queue.push_back( (Value)(hint) ); 
+            // Taking hint means new generator that only reveals the hint
+            remaining_count = 1;
+            values_generator = [this, hint]() -> Value
+            {
+                if( remaining_count==1 )
+                {
+                    remaining_count--;
+                    return hint;
+                }
+                else
+                {
+                    return Value();
+                }
+            };
         }
 #endif
        
