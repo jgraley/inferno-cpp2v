@@ -410,11 +410,17 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_link
 { 
     INDENT("Q");
     
-    //if( hypothesis_links->count(keyer_plink) )
-    //    return; // not attempting baseless queries
+    if( hypothesis_links->count(keyer_plink)==0 )
+        return; // not attempting baseless queries
 
     // Get the members of x corresponding to pattern's class
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    
+    // We require a co-iteimise because pattern may be a base of X (i.e. 
+    // topological wild-carding). It may not be possible in general, but 
+    // IS possible if pre-restriction is satisfied.
+    if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
+        return; // Will not be able to itemise due incompatible type
     vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
 
     for( const Plan::Singular &plan_sing : plan.singulars )

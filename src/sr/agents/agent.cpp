@@ -810,6 +810,17 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const
 {
+    exception_ptr eptr;
+    try
+    {
+        // This function must not "protect" client agents from eg partial queries.        
+        RunNormalLinkedQueryMMed( hypothesis_links, knowledge );
+    }
+    catch( ::Mismatch & )
+    {
+        eptr = current_exception();
+    }
+    
     bool all_non_mmax = true;
     bool all_mmax = true;
     for( PatternLink plink : keyer_and_normal_plinks ) 
@@ -829,7 +840,8 @@ void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
     if( !all_non_mmax )
         throw MMAXPropagationMismatch(); // Mismatch: mixed MMAX and non-MMAX
     
-    RunNormalLinkedQueryMMed( hypothesis_links, knowledge );
+    if (eptr)
+       std::rethrow_exception(eptr);
 }
 
 
@@ -882,6 +894,9 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                                    const TheKnowledge *knowledge ) const
 {
+    // This function must not "protect" client agents from eg partial queries. 
+    RunNormalLinkedQueryPRed( hypothesis_links, knowledge );
+
     // Baseless query strategy: don't check pre-restriction
     bool based = (hypothesis_links->count(keyer_plink) == 1);
     if( based )
@@ -891,8 +906,6 @@ void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis
         if( !IsPreRestrictionMatch(keyer_xlink) )
             throw PreRestrictionMismatch();
     }
-    
-    RunNormalLinkedQueryPRed( hypothesis_links, knowledge );
 }
 
                                
