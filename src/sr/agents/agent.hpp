@@ -18,7 +18,6 @@
 #include "node/graphable.hpp"
 #include "../sym/lazy.hpp"
 
-//#define MMAX_SYMBOLICS
 //#define STANDARD_SYMBOLICS
 
 namespace SR
@@ -153,6 +152,7 @@ public:
                                        
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery() const;                                       
 	virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
@@ -226,10 +226,8 @@ public:
     virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                
 
-#ifdef MMAX_SYMBOLICS
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
-#endif    
 };
 
 
@@ -245,6 +243,9 @@ public:
                                            const TheKnowledge *knowledge ) const;
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                      
+
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 };
 
 

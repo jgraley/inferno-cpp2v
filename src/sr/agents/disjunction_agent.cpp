@@ -80,8 +80,8 @@ bool DisjunctionAgent::ImplHasNLQ() const
 }
 
 
-void DisjunctionAgent::RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
-                                             const TheKnowledge *knowledge ) const
+void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
+                                                 const TheKnowledge *knowledge ) const
 { 
     // Baseless query strategy: hand-rolled
     INDENT("∨");

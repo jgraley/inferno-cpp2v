@@ -312,14 +312,30 @@ Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 
 Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
+    if( ImplHasNLQ() )    
+        return SymbolicNormalLinkedQueryImpl();
+
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const Expression::EvalKit &kit)
 	{
-		RunNormalLinkedQuery( kit.hypothesis_links,
-							  kit.knowledge ); // throws on mismatch   
+		NLQFromDQ( kit.hypothesis_links,
+                   kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");	
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQFromDQ()");	             
+}
+
+
+Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
+{
+	// The keyer and normal children
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQueryImpl( kit.hypothesis_links,
+							      kit.knowledge ); // throws on mismatch   
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQImpl()");	
 }
 
 
@@ -851,8 +867,8 @@ void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_l
     ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
 }                     
 
-#ifdef MMAX_SYMBOLICS
-SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
+
+SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
 {
 	Lazy<BooleanExpression> all_mmax_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
 	for( PatternLink plink : keyer_and_normal_plinks )
@@ -876,7 +892,6 @@ SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMe
 	};
 	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQMMed()");	
 }                     
-#endif
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
@@ -913,6 +928,24 @@ void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis
                                                    const TheKnowledge *knowledge ) const                                      
 {                      
     ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");
+}                     
+
+
+SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
+{
+    return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
+}
+
+                               
+SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
+{                      
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQueryPRed( kit.hypothesis_links,
+						    	  kit.knowledge ); // throws on mismatch   
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
 }                     
 
 //---------------------------------- TeleportAgent ------------------------------------    
