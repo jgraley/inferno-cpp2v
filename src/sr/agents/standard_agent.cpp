@@ -634,7 +634,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed()
 		RunNormalLinkedQueryPRed( kit.hypothesis_links,
                                   kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");	
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
 }                                  
 #endif
                                                
