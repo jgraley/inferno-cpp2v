@@ -20,13 +20,13 @@ set<shared_ptr<Expression>> AndOperator::GetOperands() const
 }
 
 
-BooleanResult AndOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit ) const
 {
     BooleanResult::Matched m = BooleanResult::TRUE;
     for( shared_ptr<BooleanExpression> a : sa )
     {
-        BooleanResult r = a->Evaluate(kit);
-        switch( r.matched )
+        unique_ptr<BooleanResult> r = a->Evaluate(kit);
+        switch( r->matched )
         {
         case BooleanResult::UNKNOWN:
             m = BooleanResult::UNKNOWN;
@@ -37,7 +37,7 @@ BooleanResult AndOperator::Evaluate( const EvalKit &kit ) const
             return r; // early out
         }
     }
-    return {m};
+    return make_unique<BooleanResult>( m );
 }
 
 
@@ -83,13 +83,13 @@ set<shared_ptr<Expression>> OrOperator::GetOperands() const
 }
 
 
-BooleanResult OrOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit ) const
 {
     BooleanResult::Matched m = BooleanResult::FALSE;
     for( shared_ptr<BooleanExpression> a : sa )
     {
-        BooleanResult r = a->Evaluate(kit);
-        switch( r.matched )
+        unique_ptr<BooleanResult> r = a->Evaluate(kit);
+        switch( r->matched )
         {
         case BooleanResult::UNKNOWN:
             m = BooleanResult::UNKNOWN;
@@ -100,7 +100,7 @@ BooleanResult OrOperator::Evaluate( const EvalKit &kit ) const
             break;
         }
     }
-    return { m };
+    return make_unique<BooleanResult>( m );
 }
 
 

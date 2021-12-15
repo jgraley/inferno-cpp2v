@@ -6,6 +6,10 @@
 
 #include <string>
 #include <functional>
+#include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
@@ -217,7 +221,7 @@ void RemoveCommonPrefix( string &s1, string &s2 );
 // problems because the set of pairs actually changes membership, not just
 // the order seen.
 template<typename T>
-void ForOverlappingAdjacentPairs( T container, 
+void ForOverlappingAdjacentPairs( const T &container, 
                                   function<void(const typename T::value_type &first, 
                                                 const typename T::value_type &second)> func) 
 {
@@ -267,5 +271,45 @@ typename T::value_type OnlyElementOf( const T&c )
     ASSERT( c.size()==1 );
     return *(c.begin());
 }
+
+// ----------------------- make_unique<>() -----------------------
+
+template<class T> 
+struct _Unique_if 
+{
+    typedef unique_ptr<T> _Single_object;
+};
+
+
+template<class T> 
+struct _Unique_if<T[]> 
+{
+    typedef unique_ptr<T[]> _Unknown_bound;
+};
+
+
+template<class T, size_t N> 
+struct _Unique_if<T[N]> {
+    typedef void _Known_bound;
+};
+
+
+template<class T, class... Args>
+typename _Unique_if<T>::_Single_object make_unique(Args&&... args) 
+{
+    return unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+
+template<class T>
+typename _Unique_if<T>::_Unknown_bound make_unique(size_t n) 
+{
+    typedef typename remove_extent<T>::type U;
+    return unique_ptr<T>(new U[n]());
+}
+
+
+template<class T, class... Args>
+typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
 #endif

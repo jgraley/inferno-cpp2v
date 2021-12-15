@@ -27,8 +27,8 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
     {
         if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
-            BooleanResult r = bool_const_expr->GetValue();
-            switch(r.matched)
+            unique_ptr<BooleanResult> r = bool_const_expr->GetValue();
+            switch(r->matched)
             {
             case BooleanResult::UNKNOWN:
                 ASSERT(false)("Got UNKNOWN from a BooleanConstant");
@@ -36,7 +36,7 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
             case BooleanResult::TRUE:
                 break; // no action required
             case BooleanResult::FALSE:
-                ASSERT(false)("Got a FALSE BooleanConstant clause in engine and-rule context");
+                ASSERT(false)("Got a FALSE BooleanConstant clause in engine and-rule preprocessing");
                 // Of course, there IS a correct thing to do - replace the whole list with a single constant FALSE
                 return { MakeLazy<BooleanConstant>(false) }; // ...like this
             }

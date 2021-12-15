@@ -20,27 +20,27 @@ set<shared_ptr<Expression>> EqualsOperator::GetOperands() const
 }
 
 
-BooleanResult EqualsOperator::Evaluate( const EvalKit &kit ) const 
+unique_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit ) const 
 {
-    list<SymbolResult> results;
+    list<unique_ptr<SymbolResult>> results;
     for( shared_ptr<SymbolExpression> a : sa )
         results.push_back( a->Evaluate(kit) );
     BooleanResult::Matched m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( results, [&](const SymbolResult &ra,
-                                              const SymbolResult &rb) 
+    ForOverlappingAdjacentPairs( results, [&](const unique_ptr<SymbolResult> &ra,
+                                              const unique_ptr<SymbolResult> &rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
-        if( (!ra.xlink || !rb.xlink) )
+        if( (!ra->xlink || !rb->xlink) )
         {
             if( m != BooleanResult::FALSE )
                 m = BooleanResult::UNKNOWN;
         }
-        else if( ra.xlink != rb.xlink )
+        else if( ra->xlink != rb->xlink )
             m = BooleanResult::FALSE;
     });
-    return { m };   
+    return make_unique<BooleanResult>( m );   
 }
 
 
@@ -79,13 +79,13 @@ set<shared_ptr<Expression>> KindOfOperator::GetOperands() const
 }
 
 
-BooleanResult KindOfOperator::Evaluate( const EvalKit &kit ) const 
+unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit ) const 
 {
-    SymbolResult ar = a->Evaluate( kit );
-    if( !ar.xlink )
-        return { BooleanResult::UNKNOWN };
-    bool matches = ref_agent->IsLocalMatch( ar.xlink.GetChildX().get() );
-    return { matches ? BooleanResult::TRUE : BooleanResult::FALSE };
+    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    if( !ar->xlink )
+        return make_unique<BooleanResult>( BooleanResult::UNKNOWN );
+    bool matches = ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() );
+    return make_unique<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
 }
 
 

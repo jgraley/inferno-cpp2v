@@ -54,14 +54,17 @@ protected:
 };
 
 
-struct BooleanResult
+class BooleanResult
 {
+public:
     enum Matched
     {
         UNKNOWN,
         TRUE,
         FALSE
-    } matched;
+    };    
+    BooleanResult( Matched matched_ );
+    Matched matched;
 };
 
 
@@ -69,12 +72,14 @@ struct BooleanResult
 class BooleanExpression : public Expression
 {    
 public:
-    virtual BooleanResult Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
 };
 
 
-struct SymbolResult
+class SymbolResult
 {
+public:
+    SymbolResult( SR::XLink xlink );
     SR::XLink xlink;
 };
 
@@ -83,7 +88,7 @@ struct SymbolResult
 class SymbolExpression : public Expression
 {    
 public:
-    virtual SymbolResult Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
 };
 
 };

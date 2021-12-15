@@ -10,9 +10,9 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 }
 
 
-SymbolResult SymbolConstant::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-    return { xlink };
+    return make_unique<SymbolResult>( xlink );
 }
 
 
@@ -41,12 +41,12 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 }
 
 
-SymbolResult SymbolVariable::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     if( kit.hypothesis_links->count(plink) == 0 )
-        return { SR::XLink() };
+        return make_unique<SymbolResult>( SR::XLink() );
     else
-        return { kit.hypothesis_links->at(plink) };
+        return make_unique<SymbolResult>( kit.hypothesis_links->at(plink) );
 }
 
 
@@ -69,15 +69,15 @@ BooleanConstant::BooleanConstant( bool value ) :
 }
 
 
-BooleanResult BooleanConstant::Evaluate( const EvalKit &kit ) const
+unique_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return { matched };
+    return make_unique<BooleanResult>( matched );
 }
 
 
-BooleanResult BooleanConstant::GetValue() const
+unique_ptr<BooleanResult> BooleanConstant::GetValue() const
 {
-    return { matched };
+    return make_unique<BooleanResult>( matched );
 }
 
 

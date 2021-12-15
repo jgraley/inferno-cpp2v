@@ -38,3 +38,16 @@ string Expression::GetTrace() const
 {
     return "SYM::\"" + Render() + "\"";
 }
+
+
+BooleanResult::BooleanResult( Matched matched_ ) :
+    matched( matched_ )
+{
+}
+
+
+SymbolResult::SymbolResult( SR::XLink xlink_ ) :
+    xlink( xlink_ )
+{
+}
+

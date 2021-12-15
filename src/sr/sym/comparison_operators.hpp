@@ -23,7 +23,7 @@ public:
     typedef BooleanExpression EvalType;
     EqualsOperator( set< shared_ptr<SymbolExpression> > sa );
     virtual set<shared_ptr<Expression>> GetOperands() const override;
-    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -43,7 +43,7 @@ public:
     KindOfOperator( const SR::Agent *ref_agent,
                     shared_ptr<SymbolExpression> a); 
     virtual set<shared_ptr<Expression>> GetOperands() const override;
-    virtual BooleanResult Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
