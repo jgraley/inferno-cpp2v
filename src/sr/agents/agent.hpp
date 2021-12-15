@@ -18,6 +18,9 @@
 #include "node/graphable.hpp"
 #include "../sym/lazy.hpp"
 
+//#define MMAX_SYMBOLICS
+//#define STANDARD_SYMBOLICS
+
 namespace SR
 { 
 class SpecialBase;
@@ -222,6 +225,11 @@ public:
                                            const TheKnowledge *knowledge ) const;                                             
     virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                
+
+#ifdef MMAX_SYMBOLICS
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+#endif    
 };
 
 
@@ -299,7 +307,6 @@ class Special : public SpecialBase,
 public:
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const
     {
-        // Esta muchos indirection
         return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  
     }
 };

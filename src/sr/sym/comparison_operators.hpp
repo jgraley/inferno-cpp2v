@@ -34,6 +34,25 @@ private:
 
 Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
+// ------------------------- NotEqualsOperator --------------------------
+
+class NotEqualsOperator : public BooleanExpression
+{
+public:    
+    typedef BooleanExpression EvalType;
+    NotEqualsOperator( set< shared_ptr<SymbolExpression> > sa );
+    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    set< shared_ptr<SymbolExpression> > sa;
+};
+
+
+Lazy<BooleanExpression> operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
 // ------------------------- KindOfOperator --------------------------
 
 class KindOfOperator : public BooleanExpression

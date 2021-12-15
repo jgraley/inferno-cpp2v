@@ -55,13 +55,76 @@ string EqualsOperator::Render() const
 
 Expression::Precedence EqualsOperator::GetPrecedence() const
 {
-    return Precedence::AND;
+    return Precedence::COMPARE_EQNE;
 }
 
 
 Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
     return MakeLazy<EqualsOperator>( set< shared_ptr<SymbolExpression> >({ a, b }) );
+}
+
+// ------------------------- NotEqualsOperator --------------------------
+
+NotEqualsOperator::NotEqualsOperator( set< shared_ptr<SymbolExpression> > sa_ ) :
+    sa(sa_)
+{
+    ASSERT( sa.size()==2 );
+    // Note: not an alldiff, and not well defined for more than 2 operands, see #429
+}    
+    
+
+set<shared_ptr<Expression>> NotEqualsOperator::GetOperands() const
+{
+    set<shared_ptr<Expression>> ops;
+    for( shared_ptr<SymbolExpression> a : sa )
+        ops.insert(a);
+    return ops;
+}
+
+
+unique_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit ) const 
+{    
+    list<unique_ptr<SymbolResult>> results;
+    for( shared_ptr<SymbolExpression> a : sa )
+        results.push_back( a->Evaluate(kit) );
+    BooleanResult::Matched m = BooleanResult::TRUE;
+    ForOverlappingAdjacentPairs( results, [&](const unique_ptr<SymbolResult> &ra,
+                                              const unique_ptr<SymbolResult> &rb) 
+    {
+        // For equality, it is sufficient to compare the x links
+        // themselves, which have the required uniqueness properties
+        // within the full arrowhead model.
+        if( (!ra->xlink || !rb->xlink) )
+        {
+            if( m != BooleanResult::FALSE )
+                m = BooleanResult::UNKNOWN;
+        }
+        else if( ra->xlink == rb->xlink )
+            m = BooleanResult::FALSE;
+    });
+    return make_unique<BooleanResult>( m );   
+}
+
+
+string NotEqualsOperator::Render() const
+{
+    list<string> ls;
+    for( shared_ptr<SymbolExpression> a : sa )
+        ls.push_back( RenderForMe(a) );
+    return Join( ls, " != " );
+}
+
+
+Expression::Precedence NotEqualsOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE_EQNE;
+}
+
+
+Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+{
+    return MakeLazy<NotEqualsOperator>( set< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
 // ------------------------- KindOfOperator --------------------------

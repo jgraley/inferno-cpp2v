@@ -124,18 +124,22 @@ private:
     virtual bool ImplHasNLQ() const;
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              
-    void NormalLinkedQuerySequence( SequenceInterface *x_seq,
-                                    const Plan::Sequence &plan_seq,
+    void NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
                                     const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge ) const;
-    void NormalLinkedQueryCollection( CollectionInterface *x_col,
-                                      const Plan::Collection &plan_col,
+                                    const TheKnowledge *knowledge,
+                                    const vector< Itemiser::Element * > &keyer_itemised ) const;
+    void NormalLinkedQueryCollection( const Plan::Collection &plan_col,
                                       const SolutionMap *hypothesis_links,
-                                      const TheKnowledge *knowledge ) const;
-    void NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
-                                    const Plan::Singular &plan_sing,
+                                      const TheKnowledge *knowledge,
+                                      const vector< Itemiser::Element * > &keyer_itemised ) const;
+    void NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
                                     const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge ) const;
+                                    const TheKnowledge *knowledge,
+                                    const vector< Itemiser::Element * > &keyer_itemised ) const;
+
+#ifdef STANDARD_SYMBOLICS
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+#endif                                    
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

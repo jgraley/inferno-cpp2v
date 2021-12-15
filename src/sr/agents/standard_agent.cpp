@@ -6,10 +6,15 @@
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
+#include "sym/lambdas.hpp"
+#include "sym/boolean_operators.hpp"
+#include "sym/comparison_operators.hpp"
+#include "sym/primary_expressions.hpp"
 
 #define ITEMS_BY_PLAN
 
 using namespace SR;
+using namespace SYM;
 
 void StandardAgent::SCRConfigure( const SCREngine *e,
                                   Phase phase )
@@ -18,6 +23,7 @@ void StandardAgent::SCRConfigure( const SCREngine *e,
     AgentCommon::SCRConfigure(e, phase);
 }
 
+// ---------------------------- Planning ----------------------------------                                               
 
 void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 {
@@ -157,6 +163,7 @@ string StandardAgent::Plan::GetTrace() const
     return algo->GetName() + ".plan" + algo->GetSerialString();
 }
 
+// ---------------------------- Pattern Query ----------------------------------                                               
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
@@ -211,6 +218,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
     return pattern_query;
 }
 
+// ---------------------------- Decided Queries ----------------------------------                                               
 
 void StandardAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink keyer_xlink ) const
@@ -389,6 +397,7 @@ void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
     query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
 }
 
+// ---------------------------- Normal Linked Queries ----------------------------------                                               
 
 bool StandardAgent::ImplHasNLQ() const
 {    
@@ -400,48 +409,35 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_link
                                               const TheKnowledge *knowledge ) const
 { 
     INDENT("Q");
+    
+    //if( hypothesis_links->count(keyer_plink) )
+    //    return; // not attempting baseless queries
 
     // Get the members of x corresponding to pattern's class
-    bool based = hypothesis_links->count(keyer_plink);
-    vector< Itemiser::Element * > x_memb;
-    if( based )
-        x_memb = Itemise( hypothesis_links->at(keyer_plink).GetChildX().get() );   
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
 
     for( const Plan::Singular &plan_sing : plan.singulars )
-    {
-        TreePtrInterface *p_x_singular = based ? 
-                                     dynamic_cast<TreePtrInterface *>(x_memb[plan_sing.itemise_index]) :
-                                     nullptr;
-        ASSERT( p_x_singular )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySingular( p_x_singular, plan_sing, hypothesis_links, knowledge );
-    }
+        NormalLinkedQuerySingular( plan_sing, hypothesis_links, knowledge, keyer_itemised );
+
     for( const Plan::Collection &plan_col : plan.collections )
-    {
-        CollectionInterface *p_x_col = based ?
-                                       dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]) :
-                                       nullptr;
-        ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQueryCollection( p_x_col, plan_col, hypothesis_links, knowledge );
-    }
+        NormalLinkedQueryCollection( plan_col, hypothesis_links, knowledge, keyer_itemised );
+
     for( const Plan::Sequence &plan_seq : plan.sequences )
-    {
-        SequenceInterface *p_x_seq = based ? 
-                                     dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]) :
-                                     nullptr;
-        ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
-        NormalLinkedQuerySequence( p_x_seq, plan_seq, hypothesis_links, knowledge );
-    }
+        NormalLinkedQuerySequence( plan_seq, hypothesis_links, knowledge, keyer_itemised );
 }
 
 
-void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
-                                               const Plan::Sequence &plan_seq,
+void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
                                                const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge ) const
+                                               const TheKnowledge *knowledge,
+                                               const vector< Itemiser::Element * > &keyer_itemised ) const
 {
     INDENT("S");
     ASSERT( planned );
     
+    SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(keyer_itemised[plan_seq.itemise_index]);
+
     // Every child x link is in some sequence (because that can be read 
     // directly off the nugget).
     for( PatternLink plink : plan_seq.non_stars )  // independent of p_x_seq
@@ -541,13 +537,15 @@ void StandardAgent::NormalLinkedQuerySequence( SequenceInterface *p_x_seq,
 }
 
 
-void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
-                                                 const Plan::Collection &plan_col,
+void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_col,
                                                  const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const
+                                                 const TheKnowledge *knowledge,
+                                                 const vector< Itemiser::Element * > &keyer_itemised ) const
 {
     INDENT("C");
     bool incomplete = false;
+
+    CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(keyer_itemised[plan_col.itemise_index]);
 
     // The only true unary constraint is that every child x link
     // is in some collection (because that can be read directly off the
@@ -603,23 +601,38 @@ void StandardAgent::NormalLinkedQueryCollection( CollectionInterface *p_x_col,
 }
 
 
-void StandardAgent::NormalLinkedQuerySingular( TreePtrInterface *p_x_singular,
-                                               const Plan::Singular &plan_sing,
+void StandardAgent::NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
                                                const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge ) const
+                                               const TheKnowledge *knowledge,
+                                               const vector< Itemiser::Element * > &keyer_itemised ) const
 {
-    if( p_x_singular )
+    TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(keyer_itemised[plan_sing.itemise_index]);
+    XLink sing_xlink(hypothesis_links->at(keyer_plink).GetChildX(), p_x_singular);        
+    
+    if( hypothesis_links->count(plan_sing.plink) > 0 ) 
     {
-        XLink sing_xlink(hypothesis_links->at(keyer_plink).GetChildX(), p_x_singular);        
-        if( hypothesis_links->count(plan_sing.plink) > 0 ) 
-        {
-            XLink req_sing_xlink = hypothesis_links->at(plan_sing.plink);                
-            if( sing_xlink != req_sing_xlink )
-                throw SingularMismatch();
-        }
-    }
+        XLink req_sing_xlink = hypothesis_links->at(plan_sing.plink);                
+        if( sing_xlink != req_sing_xlink )
+            throw SingularMismatch();
+    }    
 }
 
+// ---------------------------- Symbolic Queries ----------------------------------                                               
+                                               
+#ifdef STANDARD_SYMBOLICS
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryMMed() const
+{
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQueryMMed( kit.hypothesis_links,
+                                  kit.knowledge ); // throws on mismatch   
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");	
+}                                  
+#endif
+                                               
+// ---------------------------- Regeneration Queries ----------------------------------                                               
                                                
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const SolutionMap *hypothesis_links,
@@ -746,6 +759,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
     }    
 }
 
+// ---------------------------- Replace stuff ----------------------------------                                               
 
 void StandardAgent::PlanOverlayImpl( PatternLink me_plink, 
                                      PatternLink under_plink )

@@ -319,8 +319,7 @@ Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 		RunNormalLinkedQuery( kit.hypothesis_links,
 							  kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");
-	
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");	
 }
 
 
@@ -833,12 +832,39 @@ void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
     RunNormalLinkedQueryMMed( hypothesis_links, knowledge );
 }
 
-                               
+
 void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const                                      
 {                      
     ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
 }                     
+
+#ifdef MMAX_SYMBOLICS
+SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
+{
+	Lazy<BooleanExpression> all_mmax_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
+	for( PatternLink plink : keyer_and_normal_plinks )
+		all_mmax_expr = all_mmax_expr & MakeLazy<SymbolVariable>(plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link);
+
+	Lazy<BooleanExpression> all_non_mmax_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
+	for( PatternLink plink : keyer_and_normal_plinks )
+		all_non_mmax_expr = all_non_mmax_expr & MakeLazy<SymbolVariable>(plink) != MakeLazy<SymbolConstant>(XLink::MMAX_Link);
+    
+    return all_mmax_expr | (all_non_mmax_expr & SymbolicNormalLinkedQueryMMed());
+}
+
+                               
+SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMed() const                                      
+{                      
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQueryMMed( kit.hypothesis_links,
+						    	  kit.knowledge ); // throws on mismatch   
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQMMed()");	
+}                     
+#endif
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
