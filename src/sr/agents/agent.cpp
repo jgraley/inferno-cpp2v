@@ -797,7 +797,11 @@ string AgentCommon::GetPlanAsString() const
         { "overlay_under_plink", 
           Trace(overlay_under_plink) },
         { "keyer_and_normal_plinks", 
-          Trace(keyer_and_normal_plinks) }
+          Trace(keyer_and_normal_plinks) },
+        { "SymbolicCouplingQuery()", 
+          coupling_master_engine ? Trace(SymbolicCouplingQuery()) : string("<not configured for couplings>") },
+        { "SymbolicNormalLinkedQuery()", 
+          pattern_query ? Trace(SymbolicNormalLinkedQuery()) : string("<no pattern_query>") }
     };
     return Trace(plan_as_strings);
 }

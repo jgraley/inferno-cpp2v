@@ -97,14 +97,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     for( PatternLink plink : master_keyer_plinks )
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
-            
-    ConfigureAgents();       
-
-    DeduceCSPVariables();
-    CreateMyFullSymbolics();
-    CreateMasterCouplingSymbolics();    
-    SymbolicRewrites();
-    
+        
     // ------------------ Log it ---------------------
     Dump();
     
@@ -126,9 +119,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( !my_normal_agents.empty() );
     }
 
-    // ------------------ Set up CSP/old solver ---------------------
+    // ------------------ Set up Agents ---------------------
+    ConfigureAgents();       
+
+    // ------------------ Set up Symbolics ---------------------
+    DeduceCSPVariables(); 
+    CreateMyFullSymbolics();
+    CreateMasterCouplingSymbolics();    
+    SymbolicRewrites();
     
-    // For CSP solver only...    
+    // ------------------ Set up CSP/old solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list);
     CreateCSPSolver(constraints_list);
@@ -488,11 +488,7 @@ void AndRuleEngine::Plan::Dump()
         { "forced_normal_links_ordered",
           Trace(forced_normal_links_ordered) },
         { "current_solve_plinks",
-          Trace(current_solve_plinks) },
-        { "expressions_from_agents",
-		  Trace(expressions_from_agents) },
-		{ "expressions_split",
-		  Trace(expressions_split) }		  	
+          Trace(current_solve_plinks) }	  	
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");
