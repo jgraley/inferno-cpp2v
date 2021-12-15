@@ -626,12 +626,12 @@ void StandardAgent::NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
 #ifdef STANDARD_SYMBOLICS
-SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryMMed() const
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const Expression::EvalKit &kit)
 	{
-		RunNormalLinkedQueryMMed( kit.hypothesis_links,
+		RunNormalLinkedQueryPRed( kit.hypothesis_links,
                                   kit.knowledge ); // throws on mismatch   
 	};
 	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQ()");	

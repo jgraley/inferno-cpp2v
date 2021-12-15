@@ -18,7 +18,7 @@
 #include "node/graphable.hpp"
 #include "../sym/lazy.hpp"
 
-//#define STANDARD_SYMBOLICS
+#define STANDARD_SYMBOLICS
 
 namespace SR
 { 

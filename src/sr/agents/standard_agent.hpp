@@ -138,7 +138,7 @@ private:
                                     const vector< Itemiser::Element * > &keyer_itemised ) const;
 
 #ifdef STANDARD_SYMBOLICS
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 #endif                                    
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

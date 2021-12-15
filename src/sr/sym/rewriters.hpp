@@ -64,6 +64,17 @@ private:
     shared_ptr<Equation> equation;
 };
 
+// ------------------------- ClutchRewriterUnified --------------------------
+
+class ClutchRewriterUnified
+{
+public:    
+    ClutchRewriterUnified( shared_ptr<SymbolExpression> disengager );
+    shared_ptr<BooleanExpression> Apply(shared_ptr<BooleanExpression> original_expr) const;
+    
+private:
+    shared_ptr<SymbolExpression> disengager_expr;
+};
 
 };
 

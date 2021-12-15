@@ -12,6 +12,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/comparison_operators.hpp"
 #include "sym/primary_expressions.hpp"
+#include "sym/rewriters.hpp"
 
 #include <stdexcept>
 
@@ -873,16 +874,11 @@ void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_l
 
 
 SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
-{
-	Lazy<BooleanExpression> all_mmax_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
-	for( PatternLink plink : keyer_and_normal_plinks )
-		all_mmax_expr = all_mmax_expr & MakeLazy<SymbolVariable>(plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link);
-
-	Lazy<BooleanExpression> all_non_mmax_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
-	for( PatternLink plink : keyer_and_normal_plinks )
-		all_non_mmax_expr = all_non_mmax_expr & MakeLazy<SymbolVariable>(plink) != MakeLazy<SymbolConstant>(XLink::MMAX_Link);
-    
-    return all_mmax_expr | (all_non_mmax_expr & SymbolicNormalLinkedQueryMMed());
+{    
+    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
+    ClutchRewriterUnified mmax_rewriter( mmax_expr );
+    shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
+    return mmax_rewriter.Apply( original_expr );
 }
 
                                

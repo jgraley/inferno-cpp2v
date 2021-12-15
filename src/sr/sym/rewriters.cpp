@@ -81,3 +81,28 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
 
     return nullptr;
 }
+
+// ------------------------- ClutchRewriterUnified --------------------------
+
+ClutchRewriterUnified::ClutchRewriterUnified( shared_ptr<SymbolExpression> disengager_expr_ ) : 
+    disengager_expr( disengager_expr_ )
+{
+}
+
+
+shared_ptr<BooleanExpression> ClutchRewriterUnified::Apply(shared_ptr<BooleanExpression> original_expr) const
+{
+	set< shared_ptr<BooleanExpression> > s_disengaged, s_engaged;
+    for( SR::PatternLink plink : original_expr->GetRequiredVariables() )
+    {
+        auto x = MakeLazy<SymbolVariable>(plink);
+        s_disengaged.insert( x == disengager_expr );
+        s_engaged.insert( x != disengager_expr );
+    }
+
+    auto all_disengaged_expr = MakeLazy<AndOperator>(s_disengaged);
+    auto all_engaged_expr = MakeLazy<AndOperator>(s_engaged);
+
+    return all_disengaged_expr | (all_engaged_expr & original_expr);
+}    
+    
