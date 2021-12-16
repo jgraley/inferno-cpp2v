@@ -405,10 +405,12 @@ bool StandardAgent::ImplHasNLQ() const
 }
 
 
-void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                              const TheKnowledge *knowledge ) const
-{ 
-    INDENT("Q");
+void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
+                                               const SolutionMap *hypothesis_links,
+                                               const TheKnowledge *knowledge ) const
+{
+    INDENT("S");
+    ASSERT( planned );
     
     if( hypothesis_links->count(keyer_plink)==0 )
         return; // not attempting baseless queries
@@ -422,26 +424,6 @@ void StandardAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_link
     if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
         return; // Will not be able to itemise due incompatible type
     vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
-
-    for( const Plan::Singular &plan_sing : plan.singulars )
-        NormalLinkedQuerySingular( plan_sing, hypothesis_links, knowledge, keyer_itemised );
-
-    for( const Plan::Collection &plan_col : plan.collections )
-        NormalLinkedQueryCollection( plan_col, hypothesis_links, knowledge, keyer_itemised );
-
-    for( const Plan::Sequence &plan_seq : plan.sequences )
-        NormalLinkedQuerySequence( plan_seq, hypothesis_links, knowledge, keyer_itemised );
-}
-
-
-void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
-                                               const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge,
-                                               const vector< Itemiser::Element * > &keyer_itemised ) const
-{
-    INDENT("S");
-    ASSERT( planned );
-    
     SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(keyer_itemised[plan_seq.itemise_index]);
 
     // Every child x link is in some sequence (because that can be read 
@@ -545,12 +527,23 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
 
 void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_col,
                                                  const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge,
-                                                 const vector< Itemiser::Element * > &keyer_itemised ) const
+                                                 const TheKnowledge *knowledge ) const
 {
     INDENT("C");
     bool incomplete = false;
 
+    if( hypothesis_links->count(keyer_plink)==0 )
+        return; // not attempting baseless queries
+
+    // Get the members of x corresponding to pattern's class
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    
+    // We require a co-iteimise because pattern may be a base of X (i.e. 
+    // topological wild-carding). It may not be possible in general, but 
+    // IS possible if pre-restriction is satisfied.
+    if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
+        return; // Will not be able to itemise due incompatible type
+    vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
     CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(keyer_itemised[plan_col.itemise_index]);
 
     // The only true unary constraint is that every child x link
@@ -609,9 +602,20 @@ void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_co
 
 void StandardAgent::NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
                                                const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge,
-                                               const vector< Itemiser::Element * > &keyer_itemised ) const
+                                               const TheKnowledge *knowledge ) const
 {
+    if( hypothesis_links->count(keyer_plink)==0 )
+        return; // not attempting baseless queries
+
+    // Get the members of x corresponding to pattern's class
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    
+    // We require a co-iteimise because pattern may be a base of X (i.e. 
+    // topological wild-carding). It may not be possible in general, but 
+    // IS possible if pre-restriction is satisfied.
+    if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
+        return; // Will not be able to itemise due incompatible type
+    vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
     TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(keyer_itemised[plan_sing.itemise_index]);
     XLink sing_xlink(hypothesis_links->at(keyer_plink).GetChildX(), p_x_singular);        
     
@@ -625,18 +629,22 @@ void StandardAgent::NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
 
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
-#ifdef STANDARD_SYMBOLICS
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const Expression::EvalKit &kit)
 	{
-		RunNormalLinkedQueryPRed( kit.hypothesis_links,
-                                  kit.knowledge ); // throws on mismatch   
+        for( const Plan::Singular &plan_sing : plan.singulars )
+            NormalLinkedQuerySingular( plan_sing, kit.hypothesis_links, kit.knowledge );
+
+        for( const Plan::Collection &plan_col : plan.collections )
+            NormalLinkedQueryCollection( plan_col, kit.hypothesis_links, kit.knowledge );
+
+        for( const Plan::Sequence &plan_seq : plan.sequences )
+            NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
 	};
 	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
 }                                  
-#endif
                                                
 // ---------------------------- Regeneration Queries ----------------------------------                                               
                                                

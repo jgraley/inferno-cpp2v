@@ -121,25 +121,18 @@ private:
                                TreePtrInterface *p_x_singular,
 	                           const Plan::Singular &plan_sing ) const;
                                            
-    virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+    virtual bool ImplHasNLQ() const;                                            
     void NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
                                     const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge,
-                                    const vector< Itemiser::Element * > &keyer_itemised ) const;
+                                    const TheKnowledge *knowledge ) const;
     void NormalLinkedQueryCollection( const Plan::Collection &plan_col,
                                       const SolutionMap *hypothesis_links,
-                                      const TheKnowledge *knowledge,
-                                      const vector< Itemiser::Element * > &keyer_itemised ) const;
+                                      const TheKnowledge *knowledge ) const;
     void NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
                                     const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge,
-                                    const vector< Itemiser::Element * > &keyer_itemised ) const;
+                                    const TheKnowledge *knowledge ) const;
 
-#ifdef STANDARD_SYMBOLICS
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-#endif                                    
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

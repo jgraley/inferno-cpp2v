@@ -18,8 +18,6 @@
 #include "node/graphable.hpp"
 #include "../sym/lazy.hpp"
 
-#define STANDARD_SYMBOLICS
-
 namespace SR
 { 
 class SpecialBase;
@@ -72,8 +70,6 @@ public:
 
     /// Test an Agent given partial map of locations of base and normal links. 
     virtual bool ImplHasNLQ() const = 0;                                              
-    virtual void RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
-                                       const TheKnowledge *knowledge ) const = 0;
 
     /// Test an agent given given partial map of locations of keyer and residuals.  
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const = 0;                                       
@@ -147,8 +143,6 @@ public:
                     const TheKnowledge *knowledge ) const;                                              
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
-                                       const TheKnowledge *knowledge ) const;
                                        
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       

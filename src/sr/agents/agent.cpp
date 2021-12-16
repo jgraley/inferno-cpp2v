@@ -254,18 +254,6 @@ void AgentCommon::NLQFromDQ( const SolutionMap *hypothesis_links,
 }                           
                                 
     
-void AgentCommon::RunNormalLinkedQuery( const SolutionMap *hypothesis_links,
-                                        const TheKnowledge *knowledge ) const
-{
-    ASSERT( hypothesis_links );
-    ASSERT( knowledge );
-    if( ImplHasNLQ() )    
-        RunNormalLinkedQueryImpl( hypothesis_links, knowledge );
-    else
-        NLQFromDQ( hypothesis_links, knowledge );               
-}                                            
-
-
 void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
 {    
     // This function establishes the policy for couplings in one place.
