@@ -631,21 +631,53 @@ void StandardAgent::NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-        for( const Plan::Singular &plan_sing : plan.singulars )
-            NormalLinkedQuerySingular( plan_sing, kit.hypothesis_links, kit.knowledge );
+	set< shared_ptr<BooleanExpression> > s;
 
-        for( const Plan::Collection &plan_col : plan.collections )
-            NormalLinkedQueryCollection( plan_col, kit.hypothesis_links, kit.knowledge );
+    for( const Plan::Singular &plan_sing : plan.singulars )
+        s.insert( SymbolicNormalLinkedQuerySingular( plan_sing ) );
 
-        for( const Plan::Sequence &plan_seq : plan.sequences )
-            NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
-	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
+    for( const Plan::Collection &plan_col : plan.collections )
+        s.insert( SymbolicNormalLinkedQueryCollection( plan_col ) );
+
+    for( const Plan::Sequence &plan_seq : plan.sequences )
+        s.insert( SymbolicNormalLinkedQuerySequence( plan_seq ) );
+
+    return MakeLazy<AndOperator>(s);    
 }                                  
+
                                                
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
+{
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this, plan_seq](const Expression::EvalKit &kit)
+	{
+        NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSequence()");	
+}                                  
+
+
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const
+{
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this, plan_col](const Expression::EvalKit &kit)
+	{
+        NormalLinkedQueryCollection( plan_col, kit.hypothesis_links, kit.knowledge );
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQCollection()");	
+}                                  
+
+
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
+{
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this, plan_sing](const Expression::EvalKit &kit)
+	{
+        NormalLinkedQuerySingular( plan_sing, kit.hypothesis_links, kit.knowledge );
+	};
+	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSingular()");	
+}                                  
+
 // ---------------------------- Regeneration Queries ----------------------------------                                               
                                                
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
