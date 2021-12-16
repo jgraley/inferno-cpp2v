@@ -104,6 +104,12 @@ public:
     };
     
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
+    void IncrPatternQuerySequence( const Plan::Sequence &plan_seq, 
+                                   shared_ptr<PatternQuery> &pattern_query ) const;
+    void IncrPatternQueryCollection( const Plan::Collection &plan_col, 
+                                     shared_ptr<PatternQuery> &pattern_query ) const;
+    void IncrPatternQuerySingular( const Plan::Singular &plan_sing, 
+                                   shared_ptr<PatternQuery> &pattern_query ) const;
 
 private:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
@@ -133,9 +139,9 @@ private:
                                     const TheKnowledge *knowledge ) const;
 
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const;                                       
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

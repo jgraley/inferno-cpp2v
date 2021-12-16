@@ -174,49 +174,64 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
     // link before the sequences' otherwise LoopRotation becaomes very slow.
 
     for( const Plan::Singular &plan_sing : plan.singulars )
-    {
-        pattern_query->RegisterNormalLink(PatternLink(this, plan_sing.pattern));
-    }
+        IncrPatternQuerySingular( plan_sing, pattern_query );
 
     for( const Plan::Collection &plan_col : plan.collections )
-    {
-        for( CollectionInterface::iterator pit = plan_col.pattern->begin(); pit != plan_col.pattern->end(); ++pit )                 
-        {
-            const TreePtrInterface *pe = &*pit; 
-            if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
-            {
-                pattern_query->RegisterDecision( false ); // Exclusive, please
-                pattern_query->RegisterNormalLink(PatternLink(this, pe));    	     
-            }
-        }
-        if( plan_col.star_plink )
-        {
-            pattern_query->RegisterAbnormalLink( plan_col.star_plink );   		                    
-        }
-    }
+        IncrPatternQueryCollection( plan_col, pattern_query );
     
-    const vector< Itemiser::Element * > my_memb = Itemise();
     for( const Plan::Sequence &plan_seq : plan.sequences )
-    {
-        for( SequenceInterface::iterator pit = plan_seq.pattern->begin(); pit != plan_seq.pattern->end(); ++pit )                 
-        {
-            const TreePtrInterface *pe = &*pit; 
-            ASSERT( pe );
-            if( dynamic_cast<StarAgent *>(pe->get()) )
-            {
-                if( pit != plan_seq.pit_last_star )
-                    pattern_query->RegisterDecision( true ); // Inclusive, please.
-                pattern_query->RegisterAbnormalLink(PatternLink(this, pe));    
-            }
-            else
-            {
-                pattern_query->RegisterNormalLink(PatternLink(this, pe));    
-            }
-        }
-    }
+        IncrPatternQuerySequence( plan_seq, pattern_query );
         
     return pattern_query;
 }
+
+
+void StandardAgent::IncrPatternQuerySequence( const Plan::Sequence &plan_seq, 
+                                              shared_ptr<PatternQuery> &pattern_query ) const
+{
+    for( SequenceInterface::iterator pit = plan_seq.pattern->begin(); pit != plan_seq.pattern->end(); ++pit )                 
+    {
+        const TreePtrInterface *pe = &*pit; 
+        ASSERT( pe );
+        if( dynamic_cast<StarAgent *>(pe->get()) )
+        {
+            if( pit != plan_seq.pit_last_star )
+                pattern_query->RegisterDecision( true ); // Inclusive, please.
+            pattern_query->RegisterAbnormalLink(PatternLink(this, pe));    
+        }
+        else
+        {
+            pattern_query->RegisterNormalLink(PatternLink(this, pe));    
+        }
+    }
+}
+
+                                              
+void StandardAgent::IncrPatternQueryCollection( const Plan::Collection &plan_col, 
+                                                shared_ptr<PatternQuery> &pattern_query ) const
+{
+    for( CollectionInterface::iterator pit = plan_col.pattern->begin(); pit != plan_col.pattern->end(); ++pit )                 
+    {
+        const TreePtrInterface *pe = &*pit; 
+        if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
+        {
+            pattern_query->RegisterDecision( false ); // Exclusive, please
+            pattern_query->RegisterNormalLink(PatternLink(this, pe));    	     
+        }
+    }
+    if( plan_col.star_plink )
+    {
+        pattern_query->RegisterAbnormalLink( plan_col.star_plink );   		                    
+    }
+}
+
+                                                
+void StandardAgent::IncrPatternQuerySingular( const Plan::Singular &plan_sing, 
+                                              shared_ptr<PatternQuery> &pattern_query ) const
+{
+    pattern_query->RegisterNormalLink(PatternLink(this, plan_sing.pattern));
+}                                              
+
 
 // ---------------------------- Decided Queries ----------------------------------                                               
 
@@ -648,7 +663,11 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed()
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+    auto pattern_query = make_shared<PatternQuery>(this);
+    IncrPatternQuerySequence( plan_seq, pattern_query );
+    set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
+    nlq_plinks.insert( keyer_plink );
+    
 	auto nlq_lambda = [this, plan_seq](const Expression::EvalKit &kit)
 	{
         NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
@@ -659,8 +678,12 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
 
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const
 {
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this, plan_col](const Expression::EvalKit &kit)
+    auto pattern_query = make_shared<PatternQuery>(this);
+    IncrPatternQueryCollection( plan_col, pattern_query );
+    set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
+    nlq_plinks.insert( keyer_plink );
+    
+    auto nlq_lambda = [this, plan_col](const Expression::EvalKit &kit)
 	{
         NormalLinkedQueryCollection( plan_col, kit.hypothesis_links, kit.knowledge );
 	};
@@ -670,7 +693,11 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+    auto pattern_query = make_shared<PatternQuery>(this);
+    IncrPatternQuerySingular( plan_sing, pattern_query );
+    set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
+    nlq_plinks.insert( keyer_plink );
+    
 	auto nlq_lambda = [this, plan_sing](const Expression::EvalKit &kit)
 	{
         NormalLinkedQuerySingular( plan_sing, kit.hypothesis_links, kit.knowledge );

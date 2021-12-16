@@ -10,11 +10,11 @@ set<shared_ptr<Expression>> Expression::GetOperands() const
 
 set<SR::PatternLink> Expression::GetRequiredVariables() const 
 {
-    set<SR::PatternLink> sipl;
+    set<SR::PatternLink> required_vars;
     // Non-strict union (i.e. not Solo) because common links are fine
     for( const shared_ptr<Expression> a : GetOperands() )
-        sipl = UnionOf( sipl, a->GetRequiredVariables() );
-    return sipl;
+        required_vars = UnionOf( required_vars, a->GetRequiredVariables() );
+    return required_vars;
 }
 
 
@@ -36,7 +36,10 @@ string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
 
 string Expression::GetTrace() const
 {
-    return "SYM::\"" + Render() + "\"";
+    return "SYM::\"" + 
+           Render() + 
+           "\" requiring " + 
+           Trace(GetRequiredVariables());
 }
 
 
