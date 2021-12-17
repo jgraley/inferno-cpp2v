@@ -15,7 +15,7 @@ namespace SYM
 class AndOperator : public BooleanExpression
 {
 public:    
-    typedef BooleanExpression EvalType;
+    typedef BooleanExpression NominalType;
     AndOperator( set< shared_ptr<BooleanExpression> > sa_ );
     virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
@@ -33,7 +33,7 @@ Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpres
 class OrOperator : public BooleanExpression
 {
 public:    
-    typedef BooleanExpression EvalType;
+    typedef BooleanExpression NominalType;
     OrOperator( set< shared_ptr<BooleanExpression> > sa_ );
     virtual set<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;

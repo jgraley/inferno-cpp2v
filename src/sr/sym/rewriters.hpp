@@ -64,13 +64,19 @@ private:
     shared_ptr<Equation> equation;
 };
 
-// ------------------------- ClutchRewriterUnified --------------------------
+// ------------------------- ClutchRewriter --------------------------
 
-class ClutchRewriterUnified
+class ClutchRewriter
 {
 public:    
-    ClutchRewriterUnified( shared_ptr<SymbolExpression> disengager );
-    shared_ptr<BooleanExpression> Apply(shared_ptr<BooleanExpression> original_expr) const;
+    ClutchRewriter( shared_ptr<SymbolExpression> disengager );
+    
+    // Wrap the given expression in clutch logic, using GetRequiredVariables() to
+    // determine which variables should be de-clutched by the disengager expression
+    shared_ptr<BooleanExpression> ApplyUnified(shared_ptr<BooleanExpression> original_expr) const;
+
+    // Apply the unified rewrite individually to each clause of a conjunctive expression
+    shared_ptr<BooleanExpression> ApplyDistributed(shared_ptr<BooleanExpression> original_expr) const;
     
 private:
     shared_ptr<SymbolExpression> disengager_expr;

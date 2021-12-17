@@ -49,7 +49,11 @@ BooleanResult::BooleanResult( Matched matched_ ) :
 }
 
 
-SymbolResult::SymbolResult( SR::XLink xlink_ ) :
+SymbolResult::SymbolResult()
+{
+}
+
+SymbolResult::SymbolResult( const SR::XLink &xlink_ ) :
     xlink( xlink_ )
 {
 }

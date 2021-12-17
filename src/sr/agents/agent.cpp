@@ -864,9 +864,9 @@ void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_l
 SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
 {    
     auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
-    ClutchRewriterUnified mmax_rewriter( mmax_expr );
+    ClutchRewriter mmax_rewriter( mmax_expr );
     shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
-    return mmax_rewriter.Apply( original_expr );
+    return mmax_rewriter.ApplyDistributed( original_expr );
 }
 
                                

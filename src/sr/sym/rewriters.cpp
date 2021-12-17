@@ -82,15 +82,15 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
     return nullptr;
 }
 
-// ------------------------- ClutchRewriterUnified --------------------------
+// ------------------------- ClutchRewriter --------------------------
 
-ClutchRewriterUnified::ClutchRewriterUnified( shared_ptr<SymbolExpression> disengager_expr_ ) : 
+ClutchRewriter::ClutchRewriter( shared_ptr<SymbolExpression> disengager_expr_ ) : 
     disengager_expr( disengager_expr_ )
 {
 }
 
 
-shared_ptr<BooleanExpression> ClutchRewriterUnified::Apply(shared_ptr<BooleanExpression> original_expr) const
+shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExpression> original_expr) const
 {
 	set< shared_ptr<BooleanExpression> > s_disengaged, s_engaged;
     for( SR::PatternLink plink : original_expr->GetRequiredVariables() )
@@ -106,3 +106,27 @@ shared_ptr<BooleanExpression> ClutchRewriterUnified::Apply(shared_ptr<BooleanExp
     return all_disengaged_expr | (all_engaged_expr & original_expr);
 }    
     
+
+shared_ptr<BooleanExpression> ClutchRewriter::ApplyDistributed(shared_ptr<BooleanExpression> original_expr) const
+{
+    set<shared_ptr<BooleanExpression>> clauses;
+    if( auto and_expr = dynamic_pointer_cast<AndOperator>(original_expr) )
+    {
+        set<shared_ptr<Expression>> se = and_expr->GetOperands();
+        for( shared_ptr<Expression> sub_expr : se )
+            clauses.insert( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
+    }   
+    else
+    {
+        clauses.insert( original_expr );
+    }
+
+    set<shared_ptr<BooleanExpression>> new_clauses;
+    for( shared_ptr<BooleanExpression> clause : clauses )
+        new_clauses.insert( ApplyUnified( clause ) );
+        
+    if( new_clauses.size() > 1 )
+        return make_shared<AndOperator>( new_clauses );
+    else
+        return OnlyElementOf( new_clauses );
+}

@@ -38,10 +38,10 @@ private:
 
 
 template<class T, class ... Args>
-Lazy<typename T::EvalType> MakeLazy(Args && ... args)
+Lazy<typename T::NominalType> MakeLazy(Args && ... args)
 {
     shared_ptr<T> ptr = make_shared<T>(args...);
-    return Lazy<typename T::EvalType>(ptr);
+    return Lazy<typename T::NominalType>(ptr);
 }
 
 };

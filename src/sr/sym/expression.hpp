@@ -79,7 +79,8 @@ public:
 class SymbolResult
 {
 public:
-    SymbolResult( SR::XLink xlink );
+    SymbolResult();
+    SymbolResult( const SR::XLink &xlink );
     SR::XLink xlink;
 };
 

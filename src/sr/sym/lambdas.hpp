@@ -14,7 +14,7 @@ namespace SYM
 class BooleanLambda : public BooleanExpression
 {
 public:
-    typedef BooleanExpression EvalType;
+    typedef BooleanExpression NominalType;
     typedef function<void( const EvalKit &kit )> LambdaType;
     
     BooleanLambda( set<SR::PatternLink> required_plinks_,
