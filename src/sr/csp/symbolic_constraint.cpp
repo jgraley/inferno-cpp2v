@@ -101,6 +101,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 
 void SymbolicConstraint::Dump() const
 {
+    TRACE("Degree: ")(plan.variables.size())("\n"); // keep this - useful for quickly checking the degrees
     TRACEC("Variables: ")(plan.variables)("\n");
     TRACEC("Consistency expression: ")(plan.consistency_expression->Render())("\n");
     for( auto p : plan.hint_expressions )

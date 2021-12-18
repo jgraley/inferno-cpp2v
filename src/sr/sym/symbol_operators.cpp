@@ -56,8 +56,10 @@ unique_ptr<SymbolResult> SingularChildOperator::Evaluate( const EvalKit &kit ) c
 
 string SingularChildOperator::Render() const
 {
+    string inner_typename = RemoveOuterTemplate( ref_agent->GetTypeName() );
+
     // Not using RenderForMe() because we always want () here
-    return "Sing<" + to_string(item) + ">(" + a->Render() + ")"; 
+    return "Item<" + inner_typename + ", sing " + to_string(item) + ">(" + a->Render() + ")"; 
 }
 
 

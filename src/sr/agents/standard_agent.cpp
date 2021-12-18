@@ -10,6 +10,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/comparison_operators.hpp"
 #include "sym/primary_expressions.hpp"
+#include "sym/symbol_operators.hpp"
 
 #define ITEMS_BY_PLAN
 
@@ -614,34 +615,6 @@ void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_co
     }
 }
 
-
-void StandardAgent::NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
-                                               const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge ) const
-{
-    if( hypothesis_links->count(keyer_plink)==0 )
-        return; // not attempting baseless queries
-
-    // Get the members of x corresponding to pattern's class
-    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-    
-    // We require a co-iteimise because pattern may be a base of X (i.e. 
-    // topological wild-carding). It may not be possible in general, but 
-    // IS possible if pre-restriction is satisfied.
-    if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
-        return; // Will not be able to itemise due incompatible type
-    vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
-    TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(keyer_itemised[plan_sing.itemise_index]);
-    XLink sing_xlink(hypothesis_links->at(keyer_plink).GetChildX(), p_x_singular);        
-    
-    if( hypothesis_links->count(plan_sing.plink) > 0 ) 
-    {
-        XLink req_sing_xlink = hypothesis_links->at(plan_sing.plink);                
-        if( sing_xlink != req_sing_xlink )
-            throw SingularMismatch();
-    }    
-}
-
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
@@ -693,16 +666,10 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
-    auto pattern_query = make_shared<PatternQuery>(this);
-    IncrPatternQuerySingular( plan_sing, pattern_query );
-    set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
-    nlq_plinks.insert( keyer_plink );
-    
-	auto nlq_lambda = [this, plan_sing](const Expression::EvalKit &kit)
-	{
-        NormalLinkedQuerySingular( plan_sing, kit.hypothesis_links, kit.knowledge );
-	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSingular()");	
+    auto keyer = MakeLazy<SymbolVariable>(keyer_plink);
+    auto sing = MakeLazy<SingularChildOperator>( this, plan_sing.itemise_index, keyer );
+    auto child = MakeLazy<SymbolVariable>(plan_sing.plink);
+    return sing == child;
 }                                  
 
 // ---------------------------- Regeneration Queries ----------------------------------                                               

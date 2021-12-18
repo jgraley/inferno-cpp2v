@@ -23,8 +23,6 @@ public:
                                       XLink keyer_xlink ) const;         
                                                                                      
     virtual bool ImplHasNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
     virtual void RunColocatedQuery(XLink common_xlink) const;

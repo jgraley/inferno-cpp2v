@@ -154,14 +154,10 @@ unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit ) const
 
 string KindOfOperator::Render() const
 {
-    string real_typename = ref_agent->GetTypeName();
-    size_t open_pos = real_typename.find('<');
-    size_t close_pos = real_typename.rfind('>');
-    if( open_pos != string::npos && close_pos != string::npos )
-        real_typename = real_typename.substr(open_pos+1, close_pos-(open_pos+1));
+    string inner_typename = RemoveOuterTemplate( ref_agent->GetTypeName() );
 
     // Not using RenderForMe() because we always want () here
-    return "KindOf<" + real_typename + ">(" + a->Render() + ")"; 
+    return "KindOf<" + inner_typename + ">(" + a->Render() + ")"; 
 }
 
 

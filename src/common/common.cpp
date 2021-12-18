@@ -60,3 +60,14 @@ void RemoveCommonPrefix( string &s1, string &s2 )
     }
 }
 
+
+string RemoveOuterTemplate( string s )
+{
+    size_t open_pos = s.find('<');
+    size_t close_pos = s.rfind('>');
+    if( open_pos != string::npos && close_pos != string::npos )
+        s = s.substr(open_pos+1, close_pos-(open_pos+1));
+    return s;
+}
+
+

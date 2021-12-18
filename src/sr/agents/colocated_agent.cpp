@@ -31,13 +31,6 @@ bool ColocatedAgent::ImplHasNLQ() const
 }
 
 
-void ColocatedAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge ) const
-{
-    ASSERTFAIL("NLQ not implemented, use symbolic query instead");
-}                            
-
-
 Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
 	Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);

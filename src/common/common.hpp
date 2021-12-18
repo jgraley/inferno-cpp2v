@@ -11,6 +11,12 @@
 #include <type_traits>
 #include <utility>
 
+string GetInnermostTemplateParam( string s );
+string RemoveAllTemplateParam( string s );
+string RemoveOneOuterScope( string s );
+void RemoveCommonPrefix( string &s1, string &s2 );
+string RemoveOuterTemplate( string s );
+
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
 class AutoPush
@@ -207,12 +213,6 @@ private:
     T &var;
     const T oldval;
 };
-
-
-string GetInnermostTemplateParam( string s );
-string RemoveAllTemplateParam( string s );
-string RemoveOneOuterScope( string s );
-void RemoveCommonPrefix( string &s1, string &s2 );
 
 
 // Acting on a container such as [1, 2, 3, 4], will call func with (1, 2), 
