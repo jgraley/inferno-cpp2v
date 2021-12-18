@@ -173,6 +173,14 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
         nugget.my_container_it = xit;        
         nugget.my_container_front = XLink( xlink.GetChildX(), &x_seq->front() );
         nugget.my_container_back = XLink( xlink.GetChildX(), &x_seq->back() );
+        
+        SequenceInterface::iterator xit2 = xit;
+        ++xit2;
+        if( xit2 == x_seq->end() )
+            nugget.my_sequence_successor = XLink::OffEndLink;
+        else
+            nugget.my_sequence_successor = XLink( xlink.GetChildX(), &*xit2 );
+            
         AddLink( mode, child_xlink, nugget );
     }
 }

@@ -68,16 +68,20 @@ public:
         // Defined for all item types.
         XLink my_container_front = XLink();
         XLink my_container_back = XLink();
-        
-        // Iterator on my_container that dereferneces to me, if 
-        // IN_SEQUENCE or IN_COLLECTION
-        ContainerInterface::iterator my_container_it;
-        
+
+        // Successor element within my sequence (sequences only)
+        XLink my_sequence_successor = XLink();
+
         // Index in a depth-first walk
         DepthFirstIndexType depth_first_index = -1;
         
         // Iterator in a depth-first walk
         DepthFirstOrderedIt depth_first_ordered_it;
+        
+        // Iterator on my_container that dereferneces to me, if 
+        // IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
+        // queries.
+        ContainerInterface::iterator my_container_it;
         
         string GetTrace() const;
     };

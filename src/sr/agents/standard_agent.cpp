@@ -497,11 +497,7 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
             XLink a_req_xlink = hypothesis_links->at(p.first);
             XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
-            const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );       
-            ContainerInterface::iterator a_it_incremented = a_nugget.my_container_it;
-            ++a_it_incremented;
-            if( !(a_nugget.my_container_front == b_nugget.my_container_front && 
-                  a_it_incremented == b_nugget.my_container_it) )
+            if( a_nugget.my_sequence_successor != b_req_xlink )
                  throw NotSuccessorSequenceMismatch();
         }
     }
@@ -517,8 +513,7 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
             XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );        
-            if( !(a_nugget.my_container_front == b_nugget.my_container_front && 
-                  a_nugget.depth_first_index < b_nugget.depth_first_index) )
+            if( a_nugget.depth_first_index >= b_nugget.depth_first_index )
                 throw NotAfterSequenceMismatch();
         }
     }
