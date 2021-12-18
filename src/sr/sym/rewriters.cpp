@@ -109,24 +109,20 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExp
 
 shared_ptr<BooleanExpression> ClutchRewriter::ApplyDistributed(shared_ptr<BooleanExpression> original_expr) const
 {
-    set<shared_ptr<BooleanExpression>> clauses;
     if( auto and_expr = dynamic_pointer_cast<AndOperator>(original_expr) )
     {
         set<shared_ptr<Expression>> se = and_expr->GetOperands();
+        set<shared_ptr<BooleanExpression>> new_clauses;
         for( shared_ptr<Expression> sub_expr : se )
-            clauses.insert( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
+        {
+            shared_ptr<BooleanExpression> clause;
+            clause = dynamic_pointer_cast<BooleanExpression>(sub_expr);            
+            new_clauses.insert( ApplyDistributed( clause ) ); // recurse in case of nested AndOperator
+        }
+        return make_shared<AndOperator>( new_clauses );
     }   
     else
     {
-        clauses.insert( original_expr );
+        return ApplyUnified( original_expr );
     }
-
-    set<shared_ptr<BooleanExpression>> new_clauses;
-    for( shared_ptr<BooleanExpression> clause : clauses )
-        new_clauses.insert( ApplyUnified( clause ) );
-        
-    if( new_clauses.size() > 1 )
-        return make_shared<AndOperator>( new_clauses );
-    else
-        return OnlyElementOf( new_clauses );
 }

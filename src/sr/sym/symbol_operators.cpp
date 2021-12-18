@@ -60,7 +60,7 @@ string ChildOperator::Render() const
            "@" + 
            to_string(item_index) + 
            ":" + 
-           GetItemType() + 
+           GetItemTypeName() + 
            ">(" + 
            a->Render() + 
            ")"; 
@@ -72,17 +72,9 @@ Expression::Precedence ChildOperator::GetPrecedence() const
     return Precedence::PREFIX;
 }
 
-// ------------------------- SequenceFrontChildOperator --------------------------
+// ------------------------- ChildSequenceFrontOperator --------------------------
 
-SequenceFrontChildOperator::SequenceFrontChildOperator( const SR::Agent *ref_agent,
-                                                        int item_index, 
-                                                        shared_ptr<SymbolExpression> a ) :
-    ChildOperator( ref_agent, item_index, a )
-{
-}
-    
-
-SR::XLink SequenceFrontChildOperator::XLinkFromItem( SR::XLink parent_xlink, 
+SR::XLink ChildSequenceFrontOperator::XLinkFromItem( SR::XLink parent_xlink, 
                                                      Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
@@ -95,22 +87,14 @@ SR::XLink SequenceFrontChildOperator::XLinkFromItem( SR::XLink parent_xlink,
 }
 
 
-string SequenceFrontChildOperator::GetItemType() const
+string ChildSequenceFrontOperator::GetItemTypeName() const
 {
     return "seq front";
 }
 
-// ------------------------- SequenceBackChildOperator --------------------------
+// ------------------------- ChildSequenceBackOperator --------------------------
 
-SequenceBackChildOperator::SequenceBackChildOperator( const SR::Agent *ref_agent,
-                                                        int item_index, 
-                                                        shared_ptr<SymbolExpression> a ) :
-    ChildOperator( ref_agent, item_index, a )
-{
-}
-    
-
-SR::XLink SequenceBackChildOperator::XLinkFromItem( SR::XLink parent_xlink, 
+SR::XLink ChildSequenceBackOperator::XLinkFromItem( SR::XLink parent_xlink, 
                                                      Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
@@ -123,22 +107,14 @@ SR::XLink SequenceBackChildOperator::XLinkFromItem( SR::XLink parent_xlink,
 }
 
 
-string SequenceBackChildOperator::GetItemType() const
+string ChildSequenceBackOperator::GetItemTypeName() const
 {
     return "seq back";
 }
 
-// ------------------------- CollectionFrontChildOperator --------------------------
+// ------------------------- ChildCollectionFrontOperator --------------------------
 
-CollectionFrontChildOperator::CollectionFrontChildOperator( const SR::Agent *ref_agent,
-                                                          int item_index, 
-                                                          shared_ptr<SymbolExpression> a ) :
-    ChildOperator( ref_agent, item_index, a )
-{
-}
-    
-
-SR::XLink CollectionFrontChildOperator::XLinkFromItem( SR::XLink parent_xlink, 
+SR::XLink ChildCollectionFrontOperator::XLinkFromItem( SR::XLink parent_xlink, 
                                                        Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a collection
@@ -151,22 +127,14 @@ SR::XLink CollectionFrontChildOperator::XLinkFromItem( SR::XLink parent_xlink,
 }
 
 
-string CollectionFrontChildOperator::GetItemType() const
+string ChildCollectionFrontOperator::GetItemTypeName() const
 {
     return "col front";
 }
 
-// ------------------------- SingularChildOperator --------------------------
+// ------------------------- ChildSingularOperator --------------------------
 
-SingularChildOperator::SingularChildOperator( const SR::Agent *ref_agent,
-                                              int item_index, 
-                                              shared_ptr<SymbolExpression> a ) :
-    ChildOperator( ref_agent, item_index, a )
-{
-}
-    
-
-SR::XLink SingularChildOperator::XLinkFromItem( SR::XLink parent_xlink, 
+SR::XLink ChildSingularOperator::XLinkFromItem( SR::XLink parent_xlink, 
                                                 Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a singular item
@@ -179,8 +147,99 @@ SR::XLink SingularChildOperator::XLinkFromItem( SR::XLink parent_xlink,
 }
 
 
-string SingularChildOperator::GetItemType() const
+string ChildSingularOperator::GetItemTypeName() const
 {
     return "sing";
+}
+
+// ------------------------- MyContainerOperator --------------------------
+
+MyContainerOperator::MyContainerOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}    
+
+
+set<shared_ptr<Expression>> MyContainerOperator::GetOperands() const
+{
+    set<shared_ptr<Expression>> ops;
+    ops.insert(a);
+    return ops;
+}
+
+
+string MyContainerOperator::Render() const
+{
+    // Not using RenderForMe() because we always want () here
+    return GetKnowledgeName() + 
+           "(" + 
+           a->Render() + 
+           ")"; 
+}
+
+
+Expression::Precedence MyContainerOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
+
+// ------------------------- MyContainerFrontOperator --------------------------
+    
+unique_ptr<SymbolResult> MyContainerFrontOperator::Evaluate( const EvalKit &kit ) const
+{
+    // Evaluate operand and ensure we got an XLink
+    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    if( !ar->xlink )
+        return make_unique<SymbolResult>();
+        
+    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
+    SR::XLink front_xlink = nugget.my_container_front;
+    return make_unique<SymbolResult>( front_xlink );
+}
+
+
+string MyContainerFrontOperator::GetKnowledgeName() const
+{
+    return "Front";
+}
+
+// ------------------------- MyContainerBackOperator --------------------------
+
+unique_ptr<SymbolResult> MyContainerBackOperator::Evaluate( const EvalKit &kit ) const
+{
+    // Evaluate operand and ensure we got an XLink
+    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    if( !ar->xlink )
+        return make_unique<SymbolResult>();
+        
+    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
+    SR::XLink back_xlink = nugget.my_container_back;
+    return make_unique<SymbolResult>( back_xlink );
+}
+
+
+string MyContainerBackOperator::GetKnowledgeName() const
+{
+    return "Back";
+}
+
+// ------------------------- MySequenceSuccessorOperator --------------------------
+
+unique_ptr<SymbolResult> MySequenceSuccessorOperator::Evaluate( const EvalKit &kit ) const
+{
+    // Evaluate operand and ensure we got an XLink
+    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    if( !ar->xlink )
+        return make_unique<SymbolResult>();
+        
+    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
+    SR::XLink successor_xlink = nugget.my_sequence_successor;
+    return make_unique<SymbolResult>( successor_xlink );
+}
+
+
+string MySequenceSuccessorOperator::GetKnowledgeName() const
+{
+    return "Successor";
 }
 

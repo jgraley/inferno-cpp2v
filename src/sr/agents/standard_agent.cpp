@@ -602,12 +602,14 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed()
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
+    
+    
+    
     auto pattern_query = make_shared<PatternQuery>(this);
     IncrPatternQuerySequence( plan_seq, pattern_query );
     set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
     nlq_plinks.insert( keyer_plink );
-    
-	auto nlq_lambda = [this, plan_seq](const Expression::EvalKit &kit)
+    auto nlq_lambda = [this, plan_seq](const Expression::EvalKit &kit)
 	{
         NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
 	};
@@ -633,7 +635,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
     auto keyer = MakeLazy<SymbolVariable>(keyer_plink);
-    auto sing = MakeLazy<SingularChildOperator>( this, plan_sing.itemise_index, keyer );
+    auto sing = MakeLazy<ChildSingularOperator>( this, plan_sing.itemise_index, keyer );
     auto child = MakeLazy<SymbolVariable>(plan_sing.plink);
     return sing == child;
 }                                  

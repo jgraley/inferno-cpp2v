@@ -30,7 +30,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const = 0;
-    virtual string GetItemType() const = 0;
+    virtual string GetItemTypeName() const = 0;
     
 private:
     const SR::Agent *ref_agent;
@@ -38,61 +38,105 @@ private:
     shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- SequenceFrontChildOperator --------------------------
+// ------------------------- ChildSequenceFrontOperator --------------------------
 
-class SequenceFrontChildOperator : public ChildOperator
+class ChildSequenceFrontOperator : public ChildOperator
 {
 public:    
-    SequenceFrontChildOperator( const SR::Agent *ref_agent,
-                                int item_index, 
-                                shared_ptr<SymbolExpression> a );
-
+    using ChildOperator::ChildOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
-    virtual string GetItemType() const override;    
+    virtual string GetItemTypeName() const override;    
 };
 
-// ------------------------- SequenceBackChildOperator --------------------------
+// ------------------------- ChildSequenceBackOperator --------------------------
 
-class SequenceBackChildOperator : public ChildOperator
+class ChildSequenceBackOperator : public ChildOperator
 {
 public:    
-    SequenceBackChildOperator( const SR::Agent *ref_agent,
-                               int item_index, 
-                               shared_ptr<SymbolExpression> a );
-
+    using ChildOperator::ChildOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
-    virtual string GetItemType() const override;    
+    virtual string GetItemTypeName() const override;    
 };
 
-// ------------------------- CollectionFrontChildOperator --------------------------
+// ------------------------- ChildCollectionFrontOperator --------------------------
 
-class CollectionFrontChildOperator : public ChildOperator
+class ChildCollectionFrontOperator : public ChildOperator
 {
 public:    
-    CollectionFrontChildOperator( const SR::Agent *ref_agent,
-                                  int item_index, 
-                                  shared_ptr<SymbolExpression> a );
-
+    using ChildOperator::ChildOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
-    virtual string GetItemType() const override;    
+    virtual string GetItemTypeName() const override;    
 };
 
-// ------------------------- SingularChildOperator --------------------------
+// ------------------------- ChildSingularOperator --------------------------
 
-class SingularChildOperator : public ChildOperator
+class ChildSingularOperator : public ChildOperator
 {
 public:    
-    SingularChildOperator( const SR::Agent *ref_agent,
-                           int item_index, 
-                           shared_ptr<SymbolExpression> a );
-
+    using ChildOperator::ChildOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
-    virtual string GetItemType() const override;    
+    virtual string GetItemTypeName() const override;    
 };
+
+// ------------------------- MyContainerOperator --------------------------
+
+class MyContainerOperator : public SymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    MyContainerOperator( shared_ptr<SymbolExpression> a );
+    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    virtual string GetKnowledgeName() const = 0;
+    
+private:
+    shared_ptr<SymbolExpression> a;
+};
+
+// ------------------------- MyContainerFrontOperator --------------------------
+
+class MyContainerFrontOperator : public MyContainerOperator
+{
+public:    
+    using MyContainerOperator::MyContainerOperator;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual string GetKnowledgeName() const override;
+    
+private:
+    shared_ptr<SymbolExpression> a;
+};
+
+// ------------------------- MyContainerBackOperator --------------------------
+
+class MyContainerBackOperator : public MyContainerOperator
+{
+public:    
+    using MyContainerOperator::MyContainerOperator;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual string GetKnowledgeName() const override;
+    
+private:
+    shared_ptr<SymbolExpression> a;
+};
+
+// ------------------------- MySequenceSuccessorOperator --------------------------
+
+class MySequenceSuccessorOperator : public MyContainerOperator
+{
+public:    
+    using MyContainerOperator::MyContainerOperator;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual string GetKnowledgeName() const override;
+    
+private:
+    shared_ptr<SymbolExpression> a;
+};
+
 
 };
 
