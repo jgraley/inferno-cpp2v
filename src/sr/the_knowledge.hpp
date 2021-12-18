@@ -64,9 +64,10 @@ public:
         // Last of the descendents in depth first order
         XLink last_descendant_xlink = XLink();
         
-        // Container that contains me, if IN_SEQUENCE or IN_COLLECTION
-        // but see #425
-        ContainerInterface *my_container = nullptr;
+        // First element of container of which I'm a member. 
+        // Defined for all item types.
+        XLink my_container_front = XLink();
+        XLink my_container_back = XLink();
         
         // Iterator on my_container that dereferneces to me, if 
         // IN_SEQUENCE or IN_COLLECTION

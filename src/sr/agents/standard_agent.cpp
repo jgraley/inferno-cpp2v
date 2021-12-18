@@ -442,33 +442,23 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
     vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
     SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(keyer_itemised[plan_seq.itemise_index]);
 
-    // Every child x link is in some sequence (because that can be read 
-    // directly off the nugget).
-    for( PatternLink plink : plan_seq.non_stars )  // independent of p_x_seq
-    {
-        if( hypothesis_links->count(plink) > 0 ) 
-        {
-            XLink req_xlink = hypothesis_links->at(plink);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.containment_context == TheKnowledge::Nugget::IN_SEQUENCE) )
-                throw WrongCadenceSequenceMismatch(); // Be in the right sequence        
-        }
-    }
-    
     // Require that every child x link is in the correct container.
     // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
-    if( p_x_seq )
-    {
-        for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
-        {        
-            if( hypothesis_links->count(plink) > 0 ) 
-            {
-                XLink req_xlink = hypothesis_links->at(plink);
-                const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-                if( !(nugget.my_container == p_x_seq) )
-                    throw WrongContainerSequenceMismatch(); // Be in the right sequence        
-            }
+    for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
+    {        
+        if( hypothesis_links->count(plink) > 0 ) 
+        {
+            // definitely a mismatch: there's a plink in the pattern for this
+            // sequence so we need it to be non-empty
+            if( p_x_seq->empty() )
+                throw WrongContainerSequenceMismatch(); 
+            XLink keyer_child_front( keyer_xlink.GetChildX(), &(p_x_seq->front()) );
+            
+            XLink req_xlink = hypothesis_links->at(plink);
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
+            if( !(nugget.my_container_front == keyer_child_front) )
+                throw WrongContainerSequenceMismatch(); // Be in the right sequence        
         }
     }
     
@@ -479,27 +469,21 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
         if( hypothesis_links->count(plan_seq.non_star_at_front) > 0 ) 
         {        
             XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_front);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
-            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.my_container);
-            ASSERT( req_seq )("Front element not in a sequence, containment_context check should have ensured this");            
-            XLink req_front_xlink(hypothesis_links->at(keyer_plink).GetChildX(), &req_seq->front());            
-            if( req_xlink != req_front_xlink )
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );         
+            if( req_xlink != nugget.my_container_front )
                 throw NotAtFrontMismatch();
         }
     }
 
-    // If the pattern finishes with a non-star, constrain the child x to be the 
+    // If the pattern ends with a non-star, constrain the child x to be the 
     // back node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_back ) // independent of p_x_seq
     {
         if( hypothesis_links->count(plan_seq.non_star_at_back) > 0 ) 
         {        
             XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_back);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );
-            auto req_seq = dynamic_cast<SequenceInterface *>(nugget.my_container);
-            ASSERT( req_seq )("Back element not in a sequence, containment_context check should have ensured this");            
-            XLink req_back_xlink(hypothesis_links->at(keyer_plink).GetChildX(), &req_seq->back());            
-            if( req_xlink != req_back_xlink )
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );           
+            if( req_xlink != nugget.my_container_back )
                 throw NotAtBackMismatch();
         }
     }
@@ -516,7 +500,7 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );       
             ContainerInterface::iterator a_it_incremented = a_nugget.my_container_it;
             ++a_it_incremented;
-            if( !(a_nugget.my_container == b_nugget.my_container && 
+            if( !(a_nugget.my_container_front == b_nugget.my_container_front && 
                   a_it_incremented == b_nugget.my_container_it) )
                  throw NotSuccessorSequenceMismatch();
         }
@@ -533,7 +517,7 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
             XLink b_req_xlink = hypothesis_links->at(p.second);
             const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
             const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );        
-            if( !(a_nugget.my_container == b_nugget.my_container && 
+            if( !(a_nugget.my_container_front == b_nugget.my_container_front && 
                   a_nugget.depth_first_index < b_nugget.depth_first_index) )
                 throw NotAfterSequenceMismatch();
         }
@@ -562,32 +546,19 @@ void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_co
     vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
     CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(keyer_itemised[plan_col.itemise_index]);
 
-    // The only true unary constraint is that every child x link
-    // is in some collection (because that can be read directly off the
-    // nugget).
-    for( PatternLink plink : plan_col.non_stars )  // independent of p_x_col
+    // Require that every child x link is in the correct collection.
+    for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
     {
         if( hypothesis_links->count(plink) > 0 )
         {
+            if( p_x_col->empty() )
+                throw WrongContainerCollectionMismatch(); 
+            XLink keyer_child_front( keyer_xlink.GetChildX(), &*(p_x_col->begin()) );
+        
             XLink req_xlink = hypothesis_links->at(plink);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.containment_context == TheKnowledge::Nugget::IN_COLLECTION) )
-                throw WrongCadenceCollectionMismatch(); // Be in a collection
-        }
-    }
-
-    // Require that every child x link is in the correct collection.
-    if( p_x_col )
-    {
-        for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
-        {
-            if( hypothesis_links->count(plink) > 0 )
-            {
-                XLink req_xlink = hypothesis_links->at(plink);
-                const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
-                if( nugget.my_container != p_x_col )
-                    throw WrongContainerCollectionMismatch(); // Be in the right collection
-            }
+            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
+            if( nugget.my_container_front != keyer_child_front )
+                throw WrongContainerCollectionMismatch(); // Be in the right collection
         }
     }
 

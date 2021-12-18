@@ -154,6 +154,8 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
     Nugget nugget;
     nugget.containment_context = Nugget::SINGULAR;
     nugget.parent_xlink = xlink;
+    nugget.my_container_front = child_xlink;
+    nugget.my_container_back = child_xlink;
     AddLink( mode, child_xlink, nugget );
 }
 
@@ -168,8 +170,9 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
         Nugget nugget;
         nugget.containment_context = Nugget::IN_SEQUENCE;
         nugget.parent_xlink = xlink;
-        nugget.my_container = x_seq;
-        nugget.my_container_it = xit;
+        nugget.my_container_it = xit;        
+        nugget.my_container_front = XLink( xlink.GetChildX(), &x_seq->front() );
+        nugget.my_container_back = XLink( xlink.GetChildX(), &x_seq->back() );
         AddLink( mode, child_xlink, nugget );
     }
 }
@@ -185,8 +188,10 @@ void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, 
         Nugget nugget;
         nugget.containment_context = Nugget::IN_COLLECTION;
         nugget.parent_xlink = xlink;
-        nugget.my_container = x_col;
         nugget.my_container_it = xit;
+        nugget.my_container_front = XLink( xlink.GetChildX(), &*(x_col->begin()) );
+        // Note: in real STL containers, one would use *(x_col->rbegin())
+        nugget.my_container_back = XLink( xlink.GetChildX(), &(x_col->back()) );
         AddLink( mode, child_xlink, nugget );
     }
 }
@@ -221,10 +226,8 @@ string TheKnowledge::Nugget::GetTrace() const
         s += ", parent_xlink=" + Trace(parent_xlink);
     if( cont )
     {
-        s += SSPrintf(", container=(%d)", my_container->size());
-        s += "@" + (my_container_it==my_container->end() ? 
-                   string("END") : 
-                   Trace(*my_container_it));
+        s += ", front=" + Trace(my_container_front);
+        s += ", back=" + Trace(my_container_back);
     }
     if( idx )
         s += SSPrintf(", dfi=%d", depth_first_index);
