@@ -94,7 +94,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     virtual string GetKnowledgeName() const = 0;
     
-private:
+protected:
     shared_ptr<SymbolExpression> a;
 };
 
@@ -106,9 +106,6 @@ public:
     using MyContainerOperator::MyContainerOperator;
     virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string GetKnowledgeName() const override;
-    
-private:
-    shared_ptr<SymbolExpression> a;
 };
 
 // ------------------------- MyContainerBackOperator --------------------------
@@ -119,9 +116,6 @@ public:
     using MyContainerOperator::MyContainerOperator;
     virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string GetKnowledgeName() const override;
-    
-private:
-    shared_ptr<SymbolExpression> a;
 };
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
@@ -132,9 +126,6 @@ public:
     using MyContainerOperator::MyContainerOperator;
     virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string GetKnowledgeName() const override;
-    
-private:
-    shared_ptr<SymbolExpression> a;
 };
 
 

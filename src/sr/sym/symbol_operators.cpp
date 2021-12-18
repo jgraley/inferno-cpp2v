@@ -82,8 +82,11 @@ SR::XLink ChildSequenceFrontOperator::XLinkFromItem( SR::XLink parent_xlink,
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
-    // but also coming from the correct TreePtr<Node>)
-    return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
+    // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
+    if( p_x_seq->empty() )
+        return SR::XLink::OffEndLink;
+    else
+        return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
 }
 
 
@@ -102,8 +105,11 @@ SR::XLink ChildSequenceBackOperator::XLinkFromItem( SR::XLink parent_xlink,
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
-    // but also coming from the correct TreePtr<Node>)
-    return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
+    // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
+    if( p_x_seq->empty() )
+        return SR::XLink::OffEndLink;
+    else
+        return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
 }
 
 
@@ -122,8 +128,11 @@ SR::XLink ChildCollectionFrontOperator::XLinkFromItem( SR::XLink parent_xlink,
     ASSERT( p_x_col )("item_index didn't lead to a collection");
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
-    // but also coming from the correct TreePtr<Node>)
-    return SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
+    // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
+    if( p_x_col->empty() )
+        return SR::XLink::OffEndLink;
+    else
+        return SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
 }
 
 
@@ -157,6 +166,7 @@ string ChildSingularOperator::GetItemTypeName() const
 MyContainerOperator::MyContainerOperator( shared_ptr<SymbolExpression> a_ ) :
     a( a_ )
 {
+    ASSERT(a);
 }    
 
 

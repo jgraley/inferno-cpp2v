@@ -12,7 +12,7 @@
 #include "sym/primary_expressions.hpp"
 #include "sym/symbol_operators.hpp"
 
-#define ITEMS_BY_PLAN
+#define SYMBOLIC_IN_CORRECT_SEQUENCE
 
 using namespace SR;
 using namespace SYM;
@@ -441,7 +441,8 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
         return; // Will not be able to itemise due incompatible type
     vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
     SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(keyer_itemised[plan_seq.itemise_index]);
-
+    
+#ifndef SYMBOLIC_IN_CORRECT_SEQUENCE
     // Require that every child x link is in the correct container.
     // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
@@ -457,11 +458,12 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
             
             XLink req_xlink = hypothesis_links->at(plink);
             const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( !(nugget.my_container_front == keyer_child_front) )
+            if( nugget.my_container_front != keyer_child_front )
                 throw WrongContainerSequenceMismatch(); // Be in the right sequence        
         }
     }
-    
+#endif
+
     // If the pattern begins with a non-star, constrain the child x to be the 
     // front node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_front ) // independent of p_x_seq
@@ -602,8 +604,21 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed()
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-    
-    
+	set< shared_ptr<BooleanExpression> > s;
+
+#ifdef SYMBOLIC_IN_CORRECT_SEQUENCE
+    // Require that every child x link is in the correct container.
+    // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
+    // is insufficient - they might both be stars.
+    for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
+    {        
+        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+        auto csf_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
+        auto child_expr = MakeLazy<SymbolVariable>(plink);
+        auto mcf_expr = MakeLazy<MyContainerFrontOperator>(child_expr);
+        s.insert( mcf_expr == csf_expr );
+    }
+#endif
     
     auto pattern_query = make_shared<PatternQuery>(this);
     IncrPatternQuerySequence( plan_seq, pattern_query );
@@ -613,7 +628,10 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
 	{
         NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSequence()");	
+	s.insert( MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSequenceArb()") );	
+    
+    return MakeLazy<AndOperator>(s);    
+    
 }                                  
 
 
@@ -692,6 +710,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             
             XLink pred_xlink = hypothesis_links->at(run->predecessor);
             const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
+            ASSERT( pred_nugget.containment_context == TheKnowledge::Nugget::IN_SEQUENCE );
             xit = pred_nugget.my_container_it;
             ++xit; // get past the non-star
         }
@@ -706,7 +725,8 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                 break; // can't do any more in the current run
             
             XLink succ_xlink = hypothesis_links->at(run->successor);
-            const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );                        
+            const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );  
+            ASSERT( succ_nugget.containment_context == TheKnowledge::Nugget::IN_SEQUENCE );
             xit_star_limit = succ_nugget.my_container_it;
         }
         else
@@ -728,7 +748,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                 xit = xit_star_end;
             }
             else // No decision needed, we go all the way up to the limit
-            {
+            {                
                 xit_star_end = xit_star_limit;
             }
             

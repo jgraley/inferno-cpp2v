@@ -27,8 +27,7 @@ OPTIONS += -Werror
 # Make the build abort after the first error
 OPTIONS += -Wfatal-errors
 
-# Optimisation level. -O2 is considerably slower to compile, beware
-# Update: what decade are you living in?!! Oh, right.
+# Optimisation level.
 OPTIONS += -Og
 
 # We supply an ASSERT handler in common/trace.cpp
