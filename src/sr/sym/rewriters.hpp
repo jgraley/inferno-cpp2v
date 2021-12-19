@@ -15,14 +15,18 @@ namespace SYM
 // which is required to evaluate to TRUE i.e. the "== TRUE` is assumed.
 typedef BooleanExpression Equation;
 
-typedef list< SYM::Lazy<SYM::BooleanExpression> > BooleanExpressionList;
-typedef set< shared_ptr<SYM::BooleanExpression> > BooleanExpressionSet;
+typedef list< Lazy<BooleanExpression> > BooleanExpressionList;
+typedef set< shared_ptr<BooleanExpression> > BooleanExpressionSet;
 
 
 class PreprocessForEngine
 {
 public:
     BooleanExpressionList operator()( BooleanExpressionList in ) const;
+    
+private:
+    void SplitAnds( BooleanExpressionList &split, 
+                    shared_ptr<BooleanExpression> original ) const;
 };
 
 

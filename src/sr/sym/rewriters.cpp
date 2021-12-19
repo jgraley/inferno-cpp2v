@@ -10,16 +10,7 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
     BooleanExpressionList l1;
     for( auto bexpr : in )
     {
-        if( auto and_expr = dynamic_pointer_cast<AndOperator>((shared_ptr<BooleanExpression>)bexpr) )
-        {
-            set<shared_ptr<Expression>> se = and_expr->GetOperands();
-            for( shared_ptr<Expression> sub_expr : se )
-                l1.push_back( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
-        }   
-        else
-        {
-            l1.push_back( bexpr );
-        }
+        SplitAnds( l1, bexpr );
     }
 
     BooleanExpressionList l2;
@@ -48,6 +39,26 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
     }
     
     return l2;
+}
+
+
+void PreprocessForEngine::SplitAnds( BooleanExpressionList &split, 
+                                     shared_ptr<BooleanExpression> original ) const
+{
+    if( auto and_expr = dynamic_pointer_cast<AndOperator>(original) )
+    {
+        set<shared_ptr<Expression>> se = and_expr->GetOperands();
+        for( shared_ptr<Expression> sub_expr : se )
+        {
+            auto bse = dynamic_pointer_cast<BooleanExpression>(sub_expr);
+            ASSERT( bse );
+            SplitAnds( split, bse );
+        }
+    }   
+    else
+    {
+        split.push_back( original );
+    }
 }
 
 // ------------------------- Solver --------------------------
