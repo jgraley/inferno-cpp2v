@@ -2,6 +2,26 @@
 
 using namespace SYM;
 
+// ------------------------- BooleanResult --------------------------
+
+BooleanResult::BooleanResult( Matched matched_ ) :
+    matched( matched_ )
+{
+}
+
+// ------------------------- SymbolResult --------------------------
+
+SymbolResult::SymbolResult()
+{
+}
+
+SymbolResult::SymbolResult( const SR::XLink &xlink_ ) :
+    xlink( xlink_ )
+{
+}
+
+// ------------------------- Expression --------------------------
+
 list<shared_ptr<Expression>> Expression::GetOperands() const
 {
     return {};
@@ -42,19 +62,38 @@ string Expression::GetTrace() const
            Trace(GetRequiredVariables());
 }
 
+// ------------------------- BooleanExpression --------------------------
 
-BooleanResult::BooleanResult( Matched matched_ ) :
-    matched( matched_ )
-{
+unique_ptr<BooleanResult> BooleanExpression::Evaluate( const EvalKit &kit ) const
+{ 
+/*    list<unique_ptr<Result>> op_results;
+    for( shared_ptr<SymbolExpression> a : GetOperands() )
+        op_results.push_back( a->Evaluate(kit) );
+    return Evaluate( kit, op_results );*/
+    ASSERTFAIL("nope");
 }
 
 
-SymbolResult::SymbolResult()
+unique_ptr<BooleanResult> BooleanExpression::Evaluate( const EvalKit &kit, 
+                                                       list<Result> op_results ) const
 {
+    ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
 
-SymbolResult::SymbolResult( const SR::XLink &xlink_ ) :
-    xlink( xlink_ )
-{
+// ------------------------- SymbolExpression --------------------------
+
+unique_ptr<SymbolResult> SymbolExpression::Evaluate( const EvalKit &kit ) const
+{ 
+/*    list<unique_ptr<Result>> op_results;
+    for( shared_ptr<SymbolExpression> a : GetOperands() )
+        op_results.push_back( a->Evaluate(kit) );
+    return Evaluate( kit, op_results );*/
+    ASSERTFAIL("nope");
 }
 
+
+unique_ptr<SymbolResult> SymbolExpression::Evaluate( const EvalKit &kit, 
+                                                     list<Result> op_results ) const
+{
+    ASSERTFAIL("Need to override one of the Evaluate() methods\n");
+}

@@ -11,6 +11,39 @@
 namespace SYM
 { 
 
+// ------------------------- Result --------------------------
+
+class Result
+{
+};
+
+// ------------------------- BooleanResult --------------------------
+
+class BooleanResult : public Result
+{
+public:
+    enum Matched
+    {
+        UNKNOWN,
+        TRUE,
+        FALSE
+    };    
+    BooleanResult( Matched matched_ );
+    Matched matched;
+};
+
+// ------------------------- SymbolResult --------------------------
+
+class SymbolResult : public Result
+{
+public:
+    SymbolResult();
+    SymbolResult( const SR::XLink &xlink );
+    SR::XLink xlink;
+};
+
+// ------------------------- Expression --------------------------
+
 class Expression : public Traceable
 {    
 public:
@@ -53,43 +86,26 @@ protected:
     string RenderForMe( shared_ptr<const Expression> inner ) const;
 };
 
-
-class BooleanResult
-{
-public:
-    enum Matched
-    {
-        UNKNOWN,
-        TRUE,
-        FALSE
-    };    
-    BooleanResult( Matched matched_ );
-    Matched matched;
-};
-
+// ------------------------- BooleanExpression --------------------------
 
 // Kept in operator.hpp because of wider inclusion than the impl classes
 class BooleanExpression : public Expression
 {    
 public:
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
+                                                list<Result> op_results ) const;
 };
 
-
-class SymbolResult
-{
-public:
-    SymbolResult();
-    SymbolResult( const SR::XLink &xlink );
-    SR::XLink xlink;
-};
-
+// ------------------------- SymbolExpression --------------------------
 
 // Kept in operator.hpp because of wider inclusion than the impl classes
 class SymbolExpression : public Expression
 {    
 public:
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0; // throws on mismatch
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit, 
+                                               list<Result> op_results ) const;
 };
 
 };
