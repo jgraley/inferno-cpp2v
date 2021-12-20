@@ -21,14 +21,14 @@ class EqualsOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    EqualsOperator( set< shared_ptr<SymbolExpression> > sa );
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    EqualsOperator( list< shared_ptr<SymbolExpression> > sa );
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
 private:
-    set< shared_ptr<SymbolExpression> > sa;
+    list< shared_ptr<SymbolExpression> > sa;
 };
 
 
@@ -40,14 +40,14 @@ class NotEqualsOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    NotEqualsOperator( set< shared_ptr<SymbolExpression> > sa );
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa );
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
 private:
-    set< shared_ptr<SymbolExpression> > sa;
+    list< shared_ptr<SymbolExpression> > sa;
 };
 
 
@@ -61,7 +61,7 @@ public:
     typedef BooleanExpression NominalType;
     KindOfOperator( const SR::Agent *ref_agent,
                     shared_ptr<SymbolExpression> a); 
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

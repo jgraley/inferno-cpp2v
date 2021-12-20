@@ -2,9 +2,9 @@
 
 using namespace SYM;
 
-set<shared_ptr<Expression>> Expression::GetOperands() const
+list<shared_ptr<Expression>> Expression::GetOperands() const
 {
-    return set<shared_ptr<Expression>>();
+    return {};
 }
 
 

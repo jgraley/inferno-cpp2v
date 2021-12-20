@@ -5,17 +5,17 @@ using namespace SYM;
 
 // ------------------------- AndOperator --------------------------
 
-AndOperator::AndOperator( set< shared_ptr<BooleanExpression> > sa_ ) :
+AndOperator::AndOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
     sa( sa_ )
 {
 }    
 
 
-set<shared_ptr<Expression>> AndOperator::GetOperands() const
+list<shared_ptr<Expression>> AndOperator::GetOperands() const
 {
-    set<shared_ptr<Expression>> ops;
+    list<shared_ptr<Expression>> ops;
     for( shared_ptr<BooleanExpression> a : sa )
-        ops.insert(a);
+        ops.push_back(a);
     return ops;
 }
 
@@ -62,23 +62,23 @@ Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanE
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    auto flattened_sa = SetFlattener<AndOperator>()({ a, b });
+    list< shared_ptr<BooleanExpression> > flattened_sa = ListFlattener<AndOperator>()({ a, b });
     return MakeLazy<AndOperator>( flattened_sa );
 }
 
 // ------------------------- OrOperator --------------------------
 
-OrOperator::OrOperator( set< shared_ptr<BooleanExpression> > sa_ ) :
+OrOperator::OrOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
     sa( sa_ )
 {   
 }    
 
 
-set<shared_ptr<Expression>> OrOperator::GetOperands() const
+list<shared_ptr<Expression>> OrOperator::GetOperands() const
 {
-    set<shared_ptr<Expression>> ops;
+    list<shared_ptr<Expression>> ops;
     for( shared_ptr<BooleanExpression> a : sa )
-        ops.insert(a);
+        ops.push_back(a);
     return ops;
 }
 
@@ -125,7 +125,7 @@ Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanE
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    auto flattened_sa = SetFlattener<OrOperator>()({ a, b });
+    auto flattened_sa = ListFlattener<OrOperator>()({ a, b });
     return MakeLazy<OrOperator>( flattened_sa );
 }
 

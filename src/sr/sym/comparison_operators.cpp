@@ -5,17 +5,17 @@ using namespace SYM;
 
 // ------------------------- EqualsOperator --------------------------
 
-EqualsOperator::EqualsOperator( set< shared_ptr<SymbolExpression> > sa_ ) :
+EqualsOperator::EqualsOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
     sa(sa_)
 {
 }    
     
 
-set<shared_ptr<Expression>> EqualsOperator::GetOperands() const
+list<shared_ptr<Expression>> EqualsOperator::GetOperands() const
 {
-    set<shared_ptr<Expression>> ops;
+    list<shared_ptr<Expression>> ops;
     for( shared_ptr<SymbolExpression> a : sa )
-        ops.insert(a);
+        ops.push_back(a);
     return ops;
 }
 
@@ -61,12 +61,12 @@ Expression::Precedence EqualsOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeLazy<EqualsOperator>( set< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeLazy<EqualsOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
 // ------------------------- NotEqualsOperator --------------------------
 
-NotEqualsOperator::NotEqualsOperator( set< shared_ptr<SymbolExpression> > sa_ ) :
+NotEqualsOperator::NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
     sa(sa_)
 {
     ASSERT( sa.size()==2 );
@@ -74,11 +74,11 @@ NotEqualsOperator::NotEqualsOperator( set< shared_ptr<SymbolExpression> > sa_ ) 
 }    
     
 
-set<shared_ptr<Expression>> NotEqualsOperator::GetOperands() const
+list<shared_ptr<Expression>> NotEqualsOperator::GetOperands() const
 {
-    set<shared_ptr<Expression>> ops;
+    list<shared_ptr<Expression>> ops;
     for( shared_ptr<SymbolExpression> a : sa )
-        ops.insert(a);
+        ops.push_back(a);
     return ops;
 }
 
@@ -124,7 +124,7 @@ Expression::Precedence NotEqualsOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeLazy<NotEqualsOperator>( set< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeLazy<NotEqualsOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
 // ------------------------- KindOfOperator --------------------------
@@ -136,7 +136,8 @@ KindOfOperator::KindOfOperator( const SR::Agent *ref_agent_,
 {    
 }                                                
 
-set<shared_ptr<Expression>> KindOfOperator::GetOperands() const
+
+list<shared_ptr<Expression>> KindOfOperator::GetOperands() const
 {
     return { a };
 }

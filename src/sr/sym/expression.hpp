@@ -42,7 +42,7 @@ public:
         COMMA 
     };    
         
-    virtual set<shared_ptr<Expression>> GetOperands() const;
+    virtual list<shared_ptr<Expression>> GetOperands() const;
 
     virtual set<SR::PatternLink> GetRequiredVariables() const;
     virtual string Render() const = 0;    

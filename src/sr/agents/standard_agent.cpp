@@ -587,16 +587,16 @@ void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_co
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
-	set< shared_ptr<BooleanExpression> > s;
+	list< shared_ptr<BooleanExpression> > s;
 
     for( const Plan::Singular &plan_sing : plan.singulars )
-        s.insert( SymbolicNormalLinkedQuerySingular( plan_sing ) );
+        s.push_back( SymbolicNormalLinkedQuerySingular( plan_sing ) );
 
     for( const Plan::Collection &plan_col : plan.collections )
-        s.insert( SymbolicNormalLinkedQueryCollection( plan_col ) );
+        s.push_back( SymbolicNormalLinkedQueryCollection( plan_col ) );
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
-        s.insert( SymbolicNormalLinkedQuerySequence( plan_seq ) );
+        s.push_back( SymbolicNormalLinkedQuerySequence( plan_seq ) );
 
     return MakeLazy<AndOperator>(s);    
 }                                  
@@ -604,7 +604,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed()
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-	set< shared_ptr<BooleanExpression> > s;
+	list< shared_ptr<BooleanExpression> > s;
 
 #ifdef SYMBOLIC_IN_CORRECT_SEQUENCE
     // Require that every child x link is in the correct container.
@@ -616,7 +616,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
         auto csf_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
         auto child_expr = MakeLazy<SymbolVariable>(plink);
         auto mcf_expr = MakeLazy<MyContainerFrontOperator>(child_expr);
-        s.insert( mcf_expr == csf_expr );
+        s.push_back( mcf_expr == csf_expr );
     }
 #endif
     
@@ -628,10 +628,9 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
 	{
         NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
 	};
-	s.insert( MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSequenceArb()") );	
+	s.push_back( MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSequenceArb()") );	
     
-    return MakeLazy<AndOperator>(s);    
-    
+    return MakeLazy<AndOperator>(s);        
 }                                  
 
 

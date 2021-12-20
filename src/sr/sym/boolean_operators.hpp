@@ -16,14 +16,14 @@ class AndOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    AndOperator( set< shared_ptr<BooleanExpression> > sa_ );
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
 private:
-    set< shared_ptr<BooleanExpression> > sa;
+    list< shared_ptr<BooleanExpression> > sa;
 };
 
 Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
@@ -34,14 +34,14 @@ class OrOperator : public BooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    OrOperator( set< shared_ptr<BooleanExpression> > sa_ );
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
 private:
-    set< shared_ptr<BooleanExpression> > sa;
+    list< shared_ptr<BooleanExpression> > sa;
 };
 
 Lazy<BooleanExpression> operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );

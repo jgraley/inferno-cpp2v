@@ -18,11 +18,9 @@ ChildOperator::ChildOperator( const SR::Agent *ref_agent_,
 }    
 
 
-set<shared_ptr<Expression>> ChildOperator::GetOperands() const
+list<shared_ptr<Expression>> ChildOperator::GetOperands() const
 {
-    set<shared_ptr<Expression>> ops;
-    ops.insert(a);
-    return ops;
+    return {a};
 }
 
 
@@ -170,11 +168,9 @@ MyContainerOperator::MyContainerOperator( shared_ptr<SymbolExpression> a_ ) :
 }    
 
 
-set<shared_ptr<Expression>> MyContainerOperator::GetOperands() const
+list<shared_ptr<Expression>> MyContainerOperator::GetOperands() const
 {
-    set<shared_ptr<Expression>> ops;
-    ops.insert(a);
-    return ops;
+    return {a};
 }
 
 

@@ -24,7 +24,7 @@ public:
     ChildOperator( const SR::Agent *ref_agent,
                    int item, 
                    shared_ptr<SymbolExpression> a );
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -89,7 +89,7 @@ class MyContainerOperator : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     MyContainerOperator( shared_ptr<SymbolExpression> a );
-    virtual set<shared_ptr<Expression>> GetOperands() const override;
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual string GetKnowledgeName() const = 0;
