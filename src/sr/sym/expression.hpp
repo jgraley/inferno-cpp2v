@@ -92,9 +92,11 @@ protected:
 class BooleanExpression : public Expression
 {    
 public:
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                list<Result> op_results ) const;
+                                                const list<unique_ptr<BooleanResult>> &op_results ) const;
 };
 
 // ------------------------- SymbolExpression --------------------------
@@ -103,9 +105,25 @@ public:
 class SymbolExpression : public Expression
 {    
 public:
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const;
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const;
     virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit, 
-                                               list<Result> op_results ) const;
+                                               const list<unique_ptr<SymbolResult>> &op_results ) const;
+};
+
+// ------------------------- SymbolToBooleanExpression --------------------------
+
+// Kept in operator.hpp because of wider inclusion than the impl classes
+class SymbolToBooleanExpression : public Expression
+{    
+public:
+    // If you want 0 operands and a boolean result, use BooleanExpression as the base
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const = 0;
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
+                                                const list<unique_ptr<SymbolResult>> &op_results ) const;
 };
 
 };
