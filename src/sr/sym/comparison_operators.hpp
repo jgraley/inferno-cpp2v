@@ -17,13 +17,14 @@ namespace SYM
 
 // ------------------------- EqualsOperator --------------------------
 
-class EqualsOperator : public BooleanExpression
+class EqualsOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     EqualsOperator( list< shared_ptr<SymbolExpression> > sa );
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -36,13 +37,14 @@ Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpress
 
 // ------------------------- NotEqualsOperator --------------------------
 
-class NotEqualsOperator : public BooleanExpression
+class NotEqualsOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa );
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -55,14 +57,15 @@ Lazy<BooleanExpression> operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpress
 
 // ------------------------- KindOfOperator --------------------------
 
-class KindOfOperator : public BooleanExpression
+class KindOfOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     KindOfOperator( const SR::Agent *ref_agent,
                     shared_ptr<SymbolExpression> a); 
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

@@ -266,7 +266,7 @@ list<typename T::value_type> ToList( const T&c )
 
 
 template<typename T>
-typename T::value_type OnlyElementOf( const T&c )
+const typename T::value_type &OnlyElementOf( const T&c )
 {
     ASSERT( c.size()==1 );
     return *(c.begin());

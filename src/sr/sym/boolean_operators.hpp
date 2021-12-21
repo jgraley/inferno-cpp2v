@@ -12,13 +12,14 @@ namespace SYM
 
 // ------------------------- AndOperator --------------------------
 
-class AndOperator : public BooleanExpression
+class AndOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<unique_ptr<BooleanResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -30,13 +31,14 @@ Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpres
 
 // ------------------------- OrOperator --------------------------
 
-class OrOperator : public BooleanExpression
+class OrOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<unique_ptr<BooleanResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

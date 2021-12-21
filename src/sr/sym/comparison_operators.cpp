@@ -11,23 +11,18 @@ EqualsOperator::EqualsOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
 }    
     
 
-list<shared_ptr<Expression>> EqualsOperator::GetOperands() const
+list<shared_ptr<SymbolExpression>> EqualsOperator::GetSymbolOperands() const
 {
-    list<shared_ptr<Expression>> ops;
-    for( shared_ptr<SymbolExpression> a : sa )
-        ops.push_back(a);
-    return ops;
+    return sa;
 }
 
 
-unique_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit ) const 
+unique_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
+                                                    const list<unique_ptr<SymbolResult>> &op_results ) const 
 {
-    list<unique_ptr<SymbolResult>> results;
-    for( shared_ptr<SymbolExpression> a : sa )
-        results.push_back( a->Evaluate(kit) );
     BooleanResult::Matched m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( results, [&](const unique_ptr<SymbolResult> &ra,
-                                              const unique_ptr<SymbolResult> &rb) 
+    ForOverlappingAdjacentPairs( op_results, [&](const unique_ptr<SymbolResult> &ra,
+                                                 const unique_ptr<SymbolResult> &rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -74,23 +69,18 @@ NotEqualsOperator::NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa_ )
 }    
     
 
-list<shared_ptr<Expression>> NotEqualsOperator::GetOperands() const
+list<shared_ptr<SymbolExpression>> NotEqualsOperator::GetSymbolOperands() const
 {
-    list<shared_ptr<Expression>> ops;
-    for( shared_ptr<SymbolExpression> a : sa )
-        ops.push_back(a);
-    return ops;
+    return sa;
 }
 
 
-unique_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit ) const 
+unique_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
+                                                       const list<unique_ptr<SymbolResult>> &op_results ) const 
 {    
-    list<unique_ptr<SymbolResult>> results;
-    for( shared_ptr<SymbolExpression> a : sa )
-        results.push_back( a->Evaluate(kit) );
     BooleanResult::Matched m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( results, [&](const unique_ptr<SymbolResult> &ra,
-                                              const unique_ptr<SymbolResult> &rb) 
+    ForOverlappingAdjacentPairs( op_results, [&](const unique_ptr<SymbolResult> &ra,
+                                                 const unique_ptr<SymbolResult> &rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -137,15 +127,16 @@ KindOfOperator::KindOfOperator( const SR::Agent *ref_agent_,
 }                                                
 
 
-list<shared_ptr<Expression>> KindOfOperator::GetOperands() const
+list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 {
     return { a };
 }
 
 
-unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit ) const 
+unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
+                                                    const list<unique_ptr<SymbolResult>> &op_results ) const 
 {
-    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
     if( !ar->xlink )
         return make_unique<BooleanResult>( BooleanResult::UNKNOWN );
     bool matches = ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() );

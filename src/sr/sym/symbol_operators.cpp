@@ -18,16 +18,17 @@ ChildOperator::ChildOperator( const SR::Agent *ref_agent_,
 }    
 
 
-list<shared_ptr<Expression>> ChildOperator::GetOperands() const
+list<shared_ptr<SymbolExpression>> ChildOperator::GetSymbolOperands() const
 {
     return {a};
 }
 
 
-unique_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit,
+                                                  const list<unique_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
     if( !ar->xlink )
         return make_unique<SymbolResult>();
 
@@ -168,7 +169,7 @@ MyContainerOperator::MyContainerOperator( shared_ptr<SymbolExpression> a_ ) :
 }    
 
 
-list<shared_ptr<Expression>> MyContainerOperator::GetOperands() const
+list<shared_ptr<SymbolExpression>> MyContainerOperator::GetSymbolOperands() const
 {
     return {a};
 }
@@ -191,10 +192,11 @@ Expression::Precedence MyContainerOperator::GetPrecedence() const
 
 // ------------------------- MyContainerFrontOperator --------------------------
     
-unique_ptr<SymbolResult> MyContainerFrontOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResult> MyContainerFrontOperator::Evaluate( const EvalKit &kit,
+                                                             const list<unique_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
     if( !ar->xlink )
         return make_unique<SymbolResult>();
         
@@ -211,10 +213,11 @@ string MyContainerFrontOperator::GetKnowledgeName() const
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-unique_ptr<SymbolResult> MyContainerBackOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResult> MyContainerBackOperator::Evaluate( const EvalKit &kit,
+                                                            const list<unique_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
     if( !ar->xlink )
         return make_unique<SymbolResult>();
         
@@ -231,10 +234,11 @@ string MyContainerBackOperator::GetKnowledgeName() const
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-unique_ptr<SymbolResult> MySequenceSuccessorOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResult> MySequenceSuccessorOperator::Evaluate( const EvalKit &kit,
+                                                                const list<unique_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolResult> ar = a->Evaluate( kit );
+    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
     if( !ar->xlink )
         return make_unique<SymbolResult>();
         

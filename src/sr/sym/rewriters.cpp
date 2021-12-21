@@ -47,13 +47,8 @@ void PreprocessForEngine::SplitAnds( BooleanExpressionList &split,
 {
     if( auto and_expr = dynamic_pointer_cast<AndOperator>(original) )
     {
-        list<shared_ptr<Expression>> se = and_expr->GetOperands();
-        for( shared_ptr<Expression> sub_expr : se )
-        {
-            auto bse = dynamic_pointer_cast<BooleanExpression>(sub_expr);
-            ASSERT( bse );
-            SplitAnds( split, bse );
-        }
+        for( shared_ptr<BooleanExpression> sub_expr : and_expr->GetBooleanOperands() )
+            SplitAnds( split, sub_expr );
     }   
     else
     {
@@ -74,7 +69,7 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
     if( auto equal_op = dynamic_pointer_cast<EqualsOperator>(equation) )
     {
         shared_ptr<SymbolExpression> other_op;
-        for( shared_ptr<Expression> op : equal_op->GetOperands() )
+        for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )
         {
             bool is_curr = false;
             if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
@@ -82,7 +77,7 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
                     OnlyElementOf( target->GetRequiredVariables() ) )
                     is_curr = true;
             if( !is_curr )
-                other_op = dynamic_pointer_cast<SYM::SymbolExpression>(op);                    
+                other_op = op;                    
         }
         ASSERT( other_op )
               ("didn't find any other operands or not a symbol expression, target=")(target)
@@ -122,14 +117,9 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyDistributed(shared_ptr<Boolea
 {
     if( auto and_expr = dynamic_pointer_cast<AndOperator>(original_expr) )
     {
-        list<shared_ptr<Expression>> se = and_expr->GetOperands();
         list<shared_ptr<BooleanExpression>> new_clauses;
-        for( shared_ptr<Expression> sub_expr : se )
-        {
-            shared_ptr<BooleanExpression> clause;
-            clause = dynamic_pointer_cast<BooleanExpression>(sub_expr);            
-            new_clauses.push_back( ApplyDistributed( clause ) ); // recurse in case of nested AndOperator
-        }
+        for( shared_ptr<BooleanExpression> clause : and_expr->GetBooleanOperands() )                
+            new_clauses.push_back( ApplyDistributed( clause ) ); // recurse in case of nested AndOperator        
         return make_shared<AndOperator>( new_clauses );
     }   
     else

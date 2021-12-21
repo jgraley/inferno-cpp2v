@@ -11,21 +11,18 @@ AndOperator::AndOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
 }    
 
 
-list<shared_ptr<Expression>> AndOperator::GetOperands() const
+list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 {
-    list<shared_ptr<Expression>> ops;
-    for( shared_ptr<BooleanExpression> a : sa )
-        ops.push_back(a);
-    return ops;
+    return sa;
 }
 
 
-unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
+                                                 const list<unique_ptr<BooleanResult>> &op_results ) const
 {
     BooleanResult::Matched m = BooleanResult::TRUE;
-    for( shared_ptr<BooleanExpression> a : sa )
+    for( const unique_ptr<BooleanResult> &r : op_results )
     {
-        unique_ptr<BooleanResult> r = a->Evaluate(kit);
         switch( r->matched )
         {
         case BooleanResult::UNKNOWN:
@@ -34,7 +31,7 @@ unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit ) const
         case BooleanResult::TRUE:
             break;
         case BooleanResult::FALSE:
-            return r; // early out
+            return make_unique<BooleanResult>( BooleanResult::FALSE );
         }
     }
     return make_unique<BooleanResult>( m );
@@ -74,28 +71,25 @@ OrOperator::OrOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
 }    
 
 
-list<shared_ptr<Expression>> OrOperator::GetOperands() const
+list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 {
-    list<shared_ptr<Expression>> ops;
-    for( shared_ptr<BooleanExpression> a : sa )
-        ops.push_back(a);
-    return ops;
+    return sa;
 }
 
 
-unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
+                                                const list<unique_ptr<BooleanResult>> &op_results ) const
 {
     BooleanResult::Matched m = BooleanResult::FALSE;
-    for( shared_ptr<BooleanExpression> a : sa )
+    for( const unique_ptr<BooleanResult> &r : op_results )
     {
-        unique_ptr<BooleanResult> r = a->Evaluate(kit);
         switch( r->matched )
         {
         case BooleanResult::UNKNOWN:
             m = BooleanResult::UNKNOWN;
             break;            
         case BooleanResult::TRUE:
-            return r; // early out
+            return make_unique<BooleanResult>( BooleanResult::TRUE );
         case BooleanResult::FALSE:
             break;
         }

@@ -17,15 +17,16 @@ namespace SYM
 
 // ------------------------- ChildOperator --------------------------
 
-class ChildOperator : public SymbolExpression
+class ChildOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
     ChildOperator( const SR::Agent *ref_agent,
                    int item, 
                    shared_ptr<SymbolExpression> a );
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit,
+                                               const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
@@ -84,12 +85,12 @@ public:
 
 // ------------------------- MyContainerOperator --------------------------
 
-class MyContainerOperator : public SymbolExpression
+class MyContainerOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
     MyContainerOperator( shared_ptr<SymbolExpression> a );
-    virtual list<shared_ptr<Expression>> GetOperands() const override;
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual string GetKnowledgeName() const = 0;
@@ -104,7 +105,8 @@ class MyContainerFrontOperator : public MyContainerOperator
 {
 public:    
     using MyContainerOperator::MyContainerOperator;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit,
+                                               const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
@@ -114,7 +116,8 @@ class MyContainerBackOperator : public MyContainerOperator
 {
 public:    
     using MyContainerOperator::MyContainerOperator;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit,
+                                               const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
@@ -124,7 +127,8 @@ class MySequenceSuccessorOperator : public MyContainerOperator
 {
 public:    
     using MyContainerOperator::MyContainerOperator;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit,
+                                               const list<unique_ptr<SymbolResult>> &op_results ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
