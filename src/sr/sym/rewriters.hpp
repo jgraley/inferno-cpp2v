@@ -92,7 +92,7 @@ public:
     shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const;
 
 private:
-    shared_ptr<Equation> equation;
+    const shared_ptr<Equation> equation;
 };
 
 // ------------------------- ClutchRewriter --------------------------
@@ -110,7 +110,7 @@ public:
     shared_ptr<BooleanExpression> ApplyDistributed(shared_ptr<BooleanExpression> original_expr) const;
     
 private:
-    shared_ptr<SymbolExpression> disengager_expr;
+    const shared_ptr<SymbolExpression> disengager_expr;
 };
 
 };

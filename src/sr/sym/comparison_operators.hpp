@@ -29,7 +29,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    list< shared_ptr<SymbolExpression> > sa;
+    const list< shared_ptr<SymbolExpression> > sa;
 };
 
 
@@ -49,7 +49,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    list< shared_ptr<SymbolExpression> > sa;
+    const list< shared_ptr<SymbolExpression> > sa;
 };
 
 
@@ -70,8 +70,8 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    shared_ptr<SymbolExpression> a;
-    const SR::Agent *ref_agent; // TODO Would like to use an archetype to reduce coupling
+    const shared_ptr<SymbolExpression> a;
+    const SR::Agent * const ref_agent; // TODO Would like to use an archetype to reduce coupling
 };
 
 };

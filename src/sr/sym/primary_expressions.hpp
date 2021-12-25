@@ -22,7 +22,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    SR::XLink xlink;
+    const SR::XLink xlink;
 };
 
 // ------------------------- SymbolVariable --------------------------
@@ -38,7 +38,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    SR::PatternLink plink;
+    const SR::PatternLink plink;
 };
 
 // ------------------------- BooleanConstant --------------------------
@@ -54,7 +54,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    BooleanResult::Matched matched;
+    const BooleanResult::Matched matched;
 };
 
 };

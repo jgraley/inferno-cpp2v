@@ -24,7 +24,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    list< shared_ptr<BooleanExpression> > sa;
+    const list< shared_ptr<BooleanExpression> > sa;
 };
 
 Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
@@ -43,7 +43,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    list< shared_ptr<BooleanExpression> > sa;
+    const list< shared_ptr<BooleanExpression> > sa;
 };
 
 Lazy<BooleanExpression> operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );

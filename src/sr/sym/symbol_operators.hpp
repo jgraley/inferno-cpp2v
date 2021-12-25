@@ -36,7 +36,7 @@ public:
 private:
     const SR::Agent *ref_agent;
     const int item_index;
-    shared_ptr<SymbolExpression> a;
+    const shared_ptr<SymbolExpression> a;
 };
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
@@ -100,7 +100,7 @@ public:
     virtual string GetKnowledgeName() const = 0;
     
 protected:
-    shared_ptr<SymbolExpression> a;
+    const shared_ptr<SymbolExpression> a;
 };
 
 // ------------------------- MyContainerFrontOperator --------------------------
