@@ -16,7 +16,7 @@ class AndOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
+    explicit AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
@@ -35,7 +35,7 @@ class OrOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
+    explicit OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;

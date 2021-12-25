@@ -16,7 +16,7 @@ class SymbolConstant : public SymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    SymbolConstant( SR::XLink xlink );
+    explicit SymbolConstant( SR::XLink xlink );
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -31,7 +31,7 @@ class SymbolVariable : public SymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    SymbolVariable( const SR::PatternLink &plink );
+    explicit SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
@@ -47,7 +47,7 @@ class BooleanConstant : public BooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    BooleanConstant( bool value );
+    explicit BooleanConstant( bool value );
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     shared_ptr<BooleanResult> GetValue() const;
     virtual string Render() const override;

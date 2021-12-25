@@ -88,7 +88,7 @@ public:
 class Solver
 {
 public:
-    Solver( shared_ptr<Equation> equation );
+    explicit Solver( shared_ptr<Equation> equation );
     shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const;
 
 private:
@@ -100,7 +100,7 @@ private:
 class ClutchRewriter
 {
 public:    
-    ClutchRewriter( shared_ptr<SymbolExpression> disengager );
+    explicit ClutchRewriter( shared_ptr<SymbolExpression> disengager );
     
     // Wrap the given expression in clutch logic, using GetRequiredVariables() to
     // determine which variables should be de-clutched by the disengager expression

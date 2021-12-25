@@ -21,7 +21,7 @@ class EqualsOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    EqualsOperator( list< shared_ptr<SymbolExpression> > sa );
+    explicit EqualsOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
@@ -41,7 +41,7 @@ class NotEqualsOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa );
+    explicit NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
@@ -61,8 +61,8 @@ class KindOfOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    KindOfOperator( const SR::Agent *ref_agent,
-                    shared_ptr<SymbolExpression> a); 
+    explicit KindOfOperator( const SR::Agent *ref_agent,
+                              shared_ptr<SymbolExpression> a); 
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;

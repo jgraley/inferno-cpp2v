@@ -17,9 +17,9 @@ public:
     typedef BooleanExpression NominalType;
     typedef function<void( const EvalKit &kit )> LambdaType;
     
-    BooleanLambda( set<SR::PatternLink> required_plinks_,
-                    const LambdaType &lambda_,
-                    string description );
+    explicit BooleanLambda( set<SR::PatternLink> required_plinks_,
+                             const LambdaType &lambda_,
+                             string description );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
