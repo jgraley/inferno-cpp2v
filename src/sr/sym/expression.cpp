@@ -4,8 +4,8 @@ using namespace SYM;
 
 // ------------------------- BooleanResult --------------------------
 
-BooleanResult::BooleanResult( Matched matched_ ) :
-    matched( matched_ )
+BooleanResult::BooleanResult( BooleanValue value_ ) :
+    value( value_ )
 {
 }
 

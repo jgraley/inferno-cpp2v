@@ -22,14 +22,14 @@ class Result
 class BooleanResult : public Result
 {
 public:
-    enum Matched
+    enum BooleanValue
     {
         UNKNOWN,
         TRUE,
         FALSE
     };    
-    BooleanResult( Matched matched_ );
-    Matched matched;
+    BooleanResult( BooleanValue value );
+    BooleanValue value;
 };
 
 // ------------------------- SymbolResult --------------------------

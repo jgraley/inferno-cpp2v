@@ -20,7 +20,7 @@ list<shared_ptr<SymbolExpression>> EqualsOperator::GetSymbolOperands() const
 unique_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
                                                     const list<unique_ptr<SymbolResult>> &op_results ) const 
 {
-    BooleanResult::Matched m = BooleanResult::TRUE;
+    BooleanResult::BooleanValue m = BooleanResult::TRUE;
     ForOverlappingAdjacentPairs( op_results, [&](const unique_ptr<SymbolResult> &ra,
                                                  const unique_ptr<SymbolResult> &rb) 
     {
@@ -78,7 +78,7 @@ list<shared_ptr<SymbolExpression>> NotEqualsOperator::GetSymbolOperands() const
 unique_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
                                                        const list<unique_ptr<SymbolResult>> &op_results ) const 
 {    
-    BooleanResult::Matched m = BooleanResult::TRUE;
+    BooleanResult::BooleanValue m = BooleanResult::TRUE;
     ForOverlappingAdjacentPairs( op_results, [&](const unique_ptr<SymbolResult> &ra,
                                                  const unique_ptr<SymbolResult> &rb) 
     {

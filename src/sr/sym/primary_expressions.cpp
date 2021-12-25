@@ -63,27 +63,27 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 
 // ------------------------- BooleanConstant --------------------------
 
-BooleanConstant::BooleanConstant( bool value ) :
-    matched( value ? BooleanResult::TRUE : BooleanResult::FALSE )
+BooleanConstant::BooleanConstant( bool value_ ) :
+    value( value_ ? BooleanResult::TRUE : BooleanResult::FALSE )
 {
 }
 
 
 unique_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_unique<BooleanResult>( matched );
+    return make_unique<BooleanResult>( value );
 }
 
 
 unique_ptr<BooleanResult> BooleanConstant::GetValue() const
 {
-    return make_unique<BooleanResult>( matched );
+    return make_unique<BooleanResult>( value );
 }
 
 
 string BooleanConstant::Render() const
 {
-    switch( matched )
+    switch( value )
     {
     case BooleanResult::UNKNOWN:
         return "UNKNOWN";

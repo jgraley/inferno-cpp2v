@@ -85,11 +85,11 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 
     ASSERT(plan.consistency_expression);
     unique_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
-    if( r->matched == SYM::BooleanResult::TRUE || r->matched == SYM::BooleanResult::UNKNOWN )
+    if( r->value == SYM::BooleanResult::TRUE || r->value == SYM::BooleanResult::UNKNOWN )
         return make_tuple(true, Assignment()); // Successful
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
-        return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one
+        return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one in the plan
      
     unique_ptr<SYM::SymbolResult> hint_result = plan.hint_expressions.at(current_var)->Evaluate( kit );
     if( !hint_result->xlink )

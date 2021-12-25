@@ -20,10 +20,10 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
                                                  const list<unique_ptr<BooleanResult>> &op_results ) const
 {
-    BooleanResult::Matched m = BooleanResult::TRUE;
+    BooleanResult::BooleanValue m = BooleanResult::TRUE;
     for( const unique_ptr<BooleanResult> &r : op_results )
     {
-        switch( r->matched )
+        switch( r->value )
         {
         case BooleanResult::UNKNOWN:
             m = BooleanResult::UNKNOWN;
@@ -80,10 +80,10 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
                                                 const list<unique_ptr<BooleanResult>> &op_results ) const
 {
-    BooleanResult::Matched m = BooleanResult::FALSE;
+    BooleanResult::BooleanValue m = BooleanResult::FALSE;
     for( const unique_ptr<BooleanResult> &r : op_results )
     {
-        switch( r->matched )
+        switch( r->value )
         {
         case BooleanResult::UNKNOWN:
             m = BooleanResult::UNKNOWN;

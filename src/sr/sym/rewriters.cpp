@@ -19,7 +19,7 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
         if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
             unique_ptr<BooleanResult> r = bool_const_expr->GetValue();
-            switch(r->matched)
+            switch(r->value)
             {
             case BooleanResult::UNKNOWN:
                 ASSERT(false)("Got UNKNOWN from a BooleanConstant");

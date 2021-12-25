@@ -54,7 +54,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const BooleanResult::Matched matched;
+    const BooleanResult::BooleanValue value;
 };
 
 };
