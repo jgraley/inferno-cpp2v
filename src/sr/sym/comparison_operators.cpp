@@ -79,8 +79,8 @@ shared_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
                                                        const list<shared_ptr<SymbolResult>> &op_results ) const 
 {    
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( op_results, [&](const shared_ptr<SymbolResult> &ra,
-                                                 const shared_ptr<SymbolResult> &rb) 
+    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
+                                                 shared_ptr<SymbolResult> rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
