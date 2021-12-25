@@ -24,17 +24,17 @@ list<shared_ptr<SymbolExpression>> ChildOperator::GetSymbolOperands() const
 }
 
 
-unique_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit,
-                                                  const list<unique_ptr<SymbolResult>> &op_results ) const
+shared_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit,
+                                                  const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
+    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ar->xlink )
-        return make_unique<SymbolResult>();
+        return make_shared<SymbolResult>();
 
     // XLink must match our referee (i.e. be non-strict subtype)
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-        return make_unique<SymbolResult>(); // Will not be able to itemise due incompatible type
+        return make_shared<SymbolResult>(); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -45,7 +45,7 @@ unique_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit,
     SR::XLink result_xlink = XLinkFromItem( ar->xlink, 
                                             keyer_itemised[item_index] );
     
-    return make_unique<SymbolResult>( result_xlink );
+    return make_shared<SymbolResult>( result_xlink );
 }
 
 
@@ -175,17 +175,17 @@ list<shared_ptr<SymbolExpression>> MyContainerOperator::GetSymbolOperands() cons
 }
 
 
-unique_ptr<SymbolResult> MyContainerOperator::Evaluate( const EvalKit &kit,
-                                                        const list<unique_ptr<SymbolResult>> &op_results ) const
+shared_ptr<SymbolResult> MyContainerOperator::Evaluate( const EvalKit &kit,
+                                                        const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
+    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ar->xlink )
-        return make_unique<SymbolResult>();
+        return make_shared<SymbolResult>();
         
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
     SR::XLink front_xlink = XLinkFromNugget( ar->xlink, nugget );
-    return make_unique<SymbolResult>( front_xlink );
+    return make_shared<SymbolResult>( front_xlink );
 }
 
 

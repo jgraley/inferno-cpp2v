@@ -23,8 +23,8 @@ public:
     typedef BooleanExpression NominalType;
     EqualsOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<unique_ptr<SymbolResult>> &op_results ) const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -43,8 +43,8 @@ public:
     typedef BooleanExpression NominalType;
     NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<unique_ptr<SymbolResult>> &op_results ) const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -64,8 +64,8 @@ public:
     KindOfOperator( const SR::Agent *ref_agent,
                     shared_ptr<SymbolExpression> a); 
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<unique_ptr<SymbolResult>> &op_results ) const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

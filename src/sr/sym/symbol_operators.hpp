@@ -25,8 +25,8 @@ public:
                    int item, 
                    shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit,
-                                               const list<unique_ptr<SymbolResult>> &op_results ) const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
+                                               const list<shared_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
@@ -91,8 +91,8 @@ public:
     typedef SymbolExpression NominalType;
     MyContainerOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit,
-                                               const list<unique_ptr<SymbolResult>> &op_results ) const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
+                                               const list<shared_ptr<SymbolResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 

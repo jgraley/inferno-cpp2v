@@ -21,7 +21,7 @@ public:
                     const LambdaType &lambda_,
                     string description );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

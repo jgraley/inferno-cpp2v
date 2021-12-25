@@ -18,8 +18,8 @@ public:
     typedef BooleanExpression NominalType;
     AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<unique_ptr<BooleanResult>> &op_results ) const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -37,8 +37,8 @@ public:
     typedef BooleanExpression NominalType;
     OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<unique_ptr<BooleanResult>> &op_results ) const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

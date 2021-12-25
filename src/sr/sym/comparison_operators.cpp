@@ -17,12 +17,12 @@ list<shared_ptr<SymbolExpression>> EqualsOperator::GetSymbolOperands() const
 }
 
 
-unique_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
-                                                    const list<unique_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
+                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( op_results, [&](const unique_ptr<SymbolResult> &ra,
-                                                 const unique_ptr<SymbolResult> &rb) 
+    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
+                                                 shared_ptr<SymbolResult> rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -35,7 +35,7 @@ unique_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
         else if( ra->xlink != rb->xlink )
             m = BooleanResult::FALSE;
     });
-    return make_unique<BooleanResult>( m );   
+    return make_shared<BooleanResult>( m );   
 }
 
 
@@ -75,12 +75,12 @@ list<shared_ptr<SymbolExpression>> NotEqualsOperator::GetSymbolOperands() const
 }
 
 
-unique_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
-                                                       const list<unique_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
+                                                       const list<shared_ptr<SymbolResult>> &op_results ) const 
 {    
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( op_results, [&](const unique_ptr<SymbolResult> &ra,
-                                                 const unique_ptr<SymbolResult> &rb) 
+    ForOverlappingAdjacentPairs( op_results, [&](const shared_ptr<SymbolResult> &ra,
+                                                 const shared_ptr<SymbolResult> &rb) 
     {
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -93,7 +93,7 @@ unique_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
         else if( ra->xlink == rb->xlink )
             m = BooleanResult::FALSE;
     });
-    return make_unique<BooleanResult>( m );   
+    return make_shared<BooleanResult>( m );   
 }
 
 
@@ -133,14 +133,14 @@ list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 }
 
 
-unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
-                                                    const list<unique_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
+                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
-    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
+    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ar->xlink )
-        return make_unique<BooleanResult>( BooleanResult::UNKNOWN );
+        return make_shared<BooleanResult>( BooleanResult::UNKNOWN );
     bool matches = ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() );
-    return make_unique<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
+    return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
 }
 
 

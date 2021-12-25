@@ -10,9 +10,9 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 }
 
 
-unique_ptr<SymbolResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_unique<SymbolResult>( xlink );
+    return make_shared<SymbolResult>( xlink );
 }
 
 
@@ -41,12 +41,12 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 }
 
 
-unique_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     if( kit.hypothesis_links->count(plink) == 0 )
-        return make_unique<SymbolResult>( SR::XLink() );
+        return make_shared<SymbolResult>( SR::XLink() );
     else
-        return make_unique<SymbolResult>( kit.hypothesis_links->at(plink) );
+        return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
 }
 
 
@@ -69,15 +69,15 @@ BooleanConstant::BooleanConstant( bool value_ ) :
 }
 
 
-unique_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_unique<BooleanResult>( value );
+    return make_shared<BooleanResult>( value );
 }
 
 
-unique_ptr<BooleanResult> BooleanConstant::GetValue() const
+shared_ptr<BooleanResult> BooleanConstant::GetValue() const
 {
-    return make_unique<BooleanResult>( value );
+    return make_shared<BooleanResult>( value );
 }
 
 

@@ -19,7 +19,7 @@ set<SR::PatternLink> BooleanLambda::GetRequiredVariables() const
 }
 
 
-unique_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
 {
     ASSERT( lambda );
     ASSERT( kit.hypothesis_links );
@@ -27,11 +27,11 @@ unique_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
     try
     {
         lambda(kit); // throws on mismatch
-        return make_unique<BooleanResult>(BooleanResult::TRUE);
+        return make_shared<BooleanResult>(BooleanResult::TRUE);
     }
     catch( const ::Mismatch &e )
     {
-        return make_unique<BooleanResult>(BooleanResult::FALSE);
+        return make_shared<BooleanResult>(BooleanResult::FALSE);
     }
 }
 

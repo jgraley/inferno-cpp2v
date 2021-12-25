@@ -92,7 +92,7 @@ protected:
 class BooleanExpression : public Expression
 {    
 public:
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
 };
 
 // ------------------------- SymbolExpression --------------------------
@@ -101,7 +101,7 @@ public:
 class SymbolExpression : public Expression
 {    
 public:
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0;
 };
 
 // ------------------------- BooleanToBooleanExpression --------------------------
@@ -112,9 +112,9 @@ class BooleanToBooleanExpression : public BooleanExpression
 public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const final override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                const list<unique_ptr<BooleanResult>> &op_results ) const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
 };
 
 // ------------------------- SymbolToBooleanExpression --------------------------
@@ -126,9 +126,9 @@ public:
     // If you want 0 operands and a boolean result, use BooleanExpression as the base
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const = 0;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                const list<unique_ptr<SymbolResult>> &op_results ) const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const;
 };
 
 // ------------------------- SymbolToSymbolExpression --------------------------
@@ -139,9 +139,9 @@ class SymbolToSymbolExpression : public SymbolExpression
 public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit, 
-                                               const list<unique_ptr<SymbolResult>> &op_results ) const;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit, 
+                                               const list<shared_ptr<SymbolResult>> &op_results ) const;
 };
 
 };

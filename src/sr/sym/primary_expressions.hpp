@@ -17,7 +17,7 @@ class SymbolConstant : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     SymbolConstant( SR::XLink xlink );
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -33,7 +33,7 @@ public:
     typedef SymbolExpression NominalType;
     SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
-    virtual unique_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -48,8 +48,8 @@ class BooleanConstant : public BooleanExpression
 public:    
     typedef BooleanExpression NominalType;
     BooleanConstant( bool value );
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    unique_ptr<BooleanResult> GetValue() const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    shared_ptr<BooleanResult> GetValue() const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

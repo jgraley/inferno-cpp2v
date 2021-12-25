@@ -79,24 +79,24 @@ list<shared_ptr<Expression>> BooleanToBooleanExpression::GetOperands() const
 }
 
 
-unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<unique_ptr<BooleanResult>> op_results;
+    list<shared_ptr<BooleanResult>> op_results;
     for( shared_ptr<BooleanExpression> a : GetBooleanOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, op_results );
 }
 
 
-unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                                const list<unique_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit, 
+                                                                const list<shared_ptr<BooleanResult>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
 
 
-unique_ptr<SymbolResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
-                                                             const list<unique_ptr<SymbolResult>> &op_results ) const
+shared_ptr<SymbolResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
+                                                             const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
@@ -118,9 +118,9 @@ list<shared_ptr<Expression>> SymbolToSymbolExpression::GetOperands() const
 }
 
 
-unique_ptr<SymbolResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<unique_ptr<SymbolResult>> op_results;
+    list<shared_ptr<SymbolResult>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, op_results );
@@ -137,17 +137,17 @@ list<shared_ptr<Expression>> SymbolToBooleanExpression::GetOperands() const
 }
 
 
-unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<unique_ptr<SymbolResult>> op_results;
+    list<shared_ptr<SymbolResult>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, op_results );
 }
 
 
-unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                     const list<unique_ptr<SymbolResult>> &op_results ) const
+shared_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
+                                                     const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }

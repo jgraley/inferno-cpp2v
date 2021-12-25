@@ -17,11 +17,11 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 }
 
 
-unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
-                                                 const list<unique_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
+                                                 const list<shared_ptr<BooleanResult>> &op_results ) const
 {
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    for( const unique_ptr<BooleanResult> &r : op_results )
+    for( const shared_ptr<BooleanResult> &r : op_results )
     {
         switch( r->value )
         {
@@ -31,10 +31,10 @@ unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
         case BooleanResult::TRUE:
             break;
         case BooleanResult::FALSE:
-            return make_unique<BooleanResult>( BooleanResult::FALSE );
+            return make_shared<BooleanResult>( BooleanResult::FALSE );
         }
     }
-    return make_unique<BooleanResult>( m );
+    return make_shared<BooleanResult>( m );
 }
 
 
@@ -77,11 +77,11 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 }
 
 
-unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
-                                                const list<unique_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const
 {
     BooleanResult::BooleanValue m = BooleanResult::FALSE;
-    for( const unique_ptr<BooleanResult> &r : op_results )
+    for( const shared_ptr<BooleanResult> &r : op_results )
     {
         switch( r->value )
         {
@@ -89,12 +89,12 @@ unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
             m = BooleanResult::UNKNOWN;
             break;            
         case BooleanResult::TRUE:
-            return make_unique<BooleanResult>( BooleanResult::TRUE );
+            return make_shared<BooleanResult>( BooleanResult::TRUE );
         case BooleanResult::FALSE:
             break;
         }
     }
-    return make_unique<BooleanResult>( m );
+    return make_shared<BooleanResult>( m );
 }
 
 
