@@ -15,18 +15,18 @@ namespace SR
 namespace SYM
 { 
 
-// ------------------------- ChildOperator --------------------------
+// ------------------------- ItemiseToSymbolOperator --------------------------
 
-class ChildOperator : public SymbolToSymbolExpression
+class ItemiseToSymbolOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit ChildOperator( const SR::Agent *ref_agent,
+    explicit ItemiseToSymbolOperator( const SR::Agent *ref_agent,
                              int item, 
                              shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
-                                               const list<shared_ptr<SymbolResult>> &op_results ) const override;
+                                               const list<shared_ptr<SymbolResult>> &op_results ) const override final;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
@@ -41,10 +41,10 @@ private:
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
-class ChildSequenceFrontOperator : public ChildOperator
+class ChildSequenceFrontOperator : public ItemiseToSymbolOperator
 {
 public:    
-    using ChildOperator::ChildOperator;
+    using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
@@ -52,10 +52,10 @@ public:
 
 // ------------------------- ChildSequenceBackOperator --------------------------
 
-class ChildSequenceBackOperator : public ChildOperator
+class ChildSequenceBackOperator : public ItemiseToSymbolOperator
 {
 public:    
-    using ChildOperator::ChildOperator;
+    using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
@@ -63,10 +63,10 @@ public:
 
 // ------------------------- ChildCollectionFrontOperator --------------------------
 
-class ChildCollectionFrontOperator : public ChildOperator
+class ChildCollectionFrontOperator : public ItemiseToSymbolOperator
 {
 public:    
-    using ChildOperator::ChildOperator;
+    using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
@@ -74,25 +74,25 @@ public:
 
 // ------------------------- ChildSingularOperator --------------------------
 
-class ChildSingularOperator : public ChildOperator
+class ChildSingularOperator : public ItemiseToSymbolOperator
 {
 public:    
-    using ChildOperator::ChildOperator;
+    using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
     virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
                                      Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
-// ------------------------- MyContainerOperator --------------------------
+// ------------------------- KnowledgeToSymbolOperator --------------------------
 
-class MyContainerOperator : public SymbolToSymbolExpression
+class KnowledgeToSymbolOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit MyContainerOperator( shared_ptr<SymbolExpression> a );
+    explicit KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
-                                               const list<shared_ptr<SymbolResult>> &op_results ) const override;
+                                               const list<shared_ptr<SymbolResult>> &op_results ) const override final;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
@@ -103,12 +103,34 @@ protected:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- MyContainerFrontOperator --------------------------
+// ------------------------- ParentOperator --------------------------
 
-class MyContainerFrontOperator : public MyContainerOperator
+class ParentOperator : public KnowledgeToSymbolOperator
 {
 public:    
-    using MyContainerOperator::MyContainerOperator;
+    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
+                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual string GetKnowledgeName() const override;
+};
+
+// ------------------------- LastDescendantOperator --------------------------
+
+class LastDescendantOperator : public KnowledgeToSymbolOperator
+{
+public:    
+    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
+                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual string GetKnowledgeName() const override;
+};
+
+// ------------------------- MyContainerFrontOperator --------------------------
+
+class MyContainerFrontOperator : public KnowledgeToSymbolOperator
+{
+public:    
+    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
                                        const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
@@ -116,10 +138,10 @@ public:
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-class MyContainerBackOperator : public MyContainerOperator
+class MyContainerBackOperator : public KnowledgeToSymbolOperator
 {
 public:    
-    using MyContainerOperator::MyContainerOperator;
+    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
                                        const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
@@ -127,10 +149,10 @@ public:
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-class MySequenceSuccessorOperator : public MyContainerOperator
+class MySequenceSuccessorOperator : public KnowledgeToSymbolOperator
 {
 public:    
-    using MyContainerOperator::MyContainerOperator;
+    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
                                        const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;

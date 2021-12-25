@@ -5,9 +5,9 @@
 
 using namespace SYM;
 
-// ------------------------- ChildOperator --------------------------
+// ------------------------- ItemiseToSymbolOperator --------------------------
 
-ChildOperator::ChildOperator( const SR::Agent *ref_agent_,
+ItemiseToSymbolOperator::ItemiseToSymbolOperator( const SR::Agent *ref_agent_,
                                               int item_index_, 
                                               shared_ptr<SymbolExpression> a_ ) :
     ref_agent( ref_agent_ ),
@@ -18,13 +18,13 @@ ChildOperator::ChildOperator( const SR::Agent *ref_agent_,
 }    
 
 
-list<shared_ptr<SymbolExpression>> ChildOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() const
 {
     return {a};
 }
 
 
-shared_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit,
+shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
                                                   const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
@@ -49,7 +49,7 @@ shared_ptr<SymbolResult> ChildOperator::Evaluate( const EvalKit &kit,
 }
 
 
-string ChildOperator::Render() const
+string ItemiseToSymbolOperator::Render() const
 {
     string inner_typename = RemoveOuterTemplate( ref_agent->GetTypeName() );
 
@@ -66,7 +66,7 @@ string ChildOperator::Render() const
 }
 
 
-Expression::Precedence ChildOperator::GetPrecedence() const
+Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }
@@ -160,23 +160,23 @@ string ChildSingularOperator::GetItemTypeName() const
     return "sing";
 }
 
-// ------------------------- MyContainerOperator --------------------------
+// ------------------------- KnowledgeToSymbolOperator --------------------------
 
-MyContainerOperator::MyContainerOperator( shared_ptr<SymbolExpression> a_ ) :
+KnowledgeToSymbolOperator::KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a_ ) :
     a( a_ )
 {
     ASSERT(a);
 }    
 
 
-list<shared_ptr<SymbolExpression>> MyContainerOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> KnowledgeToSymbolOperator::GetSymbolOperands() const
 {
     return {a};
 }
 
 
-shared_ptr<SymbolResult> MyContainerOperator::Evaluate( const EvalKit &kit,
-                                                        const list<shared_ptr<SymbolResult>> &op_results ) const
+shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit,
+                                                              const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
@@ -184,12 +184,12 @@ shared_ptr<SymbolResult> MyContainerOperator::Evaluate( const EvalKit &kit,
         return make_shared<SymbolResult>();
         
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
-    SR::XLink front_xlink = XLinkFromNugget( ar->xlink, nugget );
-    return make_shared<SymbolResult>( front_xlink );
+    SR::XLink result_xlink = XLinkFromNugget( ar->xlink, nugget );
+    return make_shared<SymbolResult>( result_xlink );
 }
 
 
-string MyContainerOperator::Render() const
+string KnowledgeToSymbolOperator::Render() const
 {
     // Not using RenderForMe() because we always want () here
     return GetKnowledgeName() + 
@@ -199,9 +199,39 @@ string MyContainerOperator::Render() const
 }
 
 
-Expression::Precedence MyContainerOperator::GetPrecedence() const
+Expression::Precedence KnowledgeToSymbolOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
+}
+
+// ------------------------- ParentOperator --------------------------
+    
+SR::XLink ParentOperator::XLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const
+{
+  
+    return nugget.parent_xlink;
+}
+
+
+string ParentOperator::GetKnowledgeName() const
+{
+    return "Parent";
+}
+
+// ------------------------- LastDescendantOperator --------------------------
+    
+SR::XLink LastDescendantOperator::XLinkFromNugget( SR::XLink parent_xlink, 
+                                                   const SR::TheKnowledge::Nugget &nugget ) const
+{
+  
+    return nugget.last_descendant_xlink;
+}
+
+
+string LastDescendantOperator::GetKnowledgeName() const
+{
+    return "LastDescendant";
 }
 
 // ------------------------- MyContainerFrontOperator --------------------------
@@ -216,7 +246,7 @@ SR::XLink MyContainerFrontOperator::XLinkFromNugget( SR::XLink parent_xlink,
 
 string MyContainerFrontOperator::GetKnowledgeName() const
 {
-    return "Front";
+    return "MyConFront";
 }
 
 // ------------------------- MyContainerBackOperator --------------------------
@@ -230,7 +260,7 @@ SR::XLink MyContainerBackOperator::XLinkFromNugget( SR::XLink parent_xlink,
 
 string MyContainerBackOperator::GetKnowledgeName() const
 {
-    return "Back";
+    return "MyConBack";
 }
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
@@ -244,6 +274,6 @@ SR::XLink MySequenceSuccessorOperator::XLinkFromNugget( SR::XLink parent_xlink,
 
 string MySequenceSuccessorOperator::GetKnowledgeName() const
 {
-    return "Successor";
+    return "MySeqSuccessor";
 }
 

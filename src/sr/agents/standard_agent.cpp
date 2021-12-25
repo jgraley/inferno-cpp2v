@@ -12,8 +12,6 @@
 #include "sym/primary_expressions.hpp"
 #include "sym/symbol_operators.hpp"
 
-#define SYMBOLIC_IN_CORRECT_SEQUENCE
-
 using namespace SR;
 using namespace SYM;
 
@@ -442,28 +440,6 @@ void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
     vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
     SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(keyer_itemised[plan_seq.itemise_index]);
     
-#ifndef SYMBOLIC_IN_CORRECT_SEQUENCE
-    // Require that every child x link is in the correct container.
-    // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
-    // is insufficient - they might both be stars.
-    for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
-    {        
-        if( hypothesis_links->count(plink) > 0 ) 
-        {
-            // definitely a mismatch: there's a plink in the pattern for this
-            // sequence so we need it to be non-empty
-            if( p_x_seq->empty() )
-                throw WrongContainerSequenceMismatch(); 
-            XLink keyer_child_front( keyer_xlink.GetChildX(), &(p_x_seq->front()) );
-            
-            XLink req_xlink = hypothesis_links->at(plink);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );        
-            if( nugget.my_container_front != keyer_child_front )
-                throw WrongContainerSequenceMismatch(); // Be in the right sequence        
-        }
-    }
-#endif
-
     // If the pattern begins with a non-star, constrain the child x to be the 
     // front node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_front ) // independent of p_x_seq
@@ -606,7 +582,6 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
 {
 	list< shared_ptr<BooleanExpression> > s;
 
-#ifdef SYMBOLIC_IN_CORRECT_SEQUENCE
     // Require that every child x link is in the correct container.
     // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
     // is insufficient - they might both be stars.
@@ -618,7 +593,6 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
         auto mcf_expr = MakeLazy<MyContainerFrontOperator>(child_expr);
         s.push_back( mcf_expr == csf_expr );
     }
-#endif
     
     auto pattern_query = make_shared<PatternQuery>(this);
     IncrPatternQuerySequence( plan_seq, pattern_query );
