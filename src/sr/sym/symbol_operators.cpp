@@ -175,6 +175,20 @@ list<shared_ptr<SymbolExpression>> MyContainerOperator::GetSymbolOperands() cons
 }
 
 
+unique_ptr<SymbolResult> MyContainerOperator::Evaluate( const EvalKit &kit,
+                                                        const list<unique_ptr<SymbolResult>> &op_results ) const
+{
+    // Evaluate operand and ensure we got an XLink
+    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
+    if( !ar->xlink )
+        return make_unique<SymbolResult>();
+        
+    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
+    SR::XLink front_xlink = XLinkFromNugget( ar->xlink, nugget );
+    return make_unique<SymbolResult>( front_xlink );
+}
+
+
 string MyContainerOperator::Render() const
 {
     // Not using RenderForMe() because we always want () here
@@ -192,17 +206,11 @@ Expression::Precedence MyContainerOperator::GetPrecedence() const
 
 // ------------------------- MyContainerFrontOperator --------------------------
     
-unique_ptr<SymbolResult> MyContainerFrontOperator::Evaluate( const EvalKit &kit,
-                                                             const list<unique_ptr<SymbolResult>> &op_results ) const
+SR::XLink MyContainerFrontOperator::XLinkFromNugget( SR::XLink parent_xlink, 
+                                                     const SR::TheKnowledge::Nugget &nugget ) const
 {
-    // Evaluate operand and ensure we got an XLink
-    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_unique<SymbolResult>();
-        
-    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
-    SR::XLink front_xlink = nugget.my_container_front;
-    return make_unique<SymbolResult>( front_xlink );
+  
+    return nugget.my_container_front;
 }
 
 
@@ -213,17 +221,10 @@ string MyContainerFrontOperator::GetKnowledgeName() const
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-unique_ptr<SymbolResult> MyContainerBackOperator::Evaluate( const EvalKit &kit,
-                                                            const list<unique_ptr<SymbolResult>> &op_results ) const
+SR::XLink MyContainerBackOperator::XLinkFromNugget( SR::XLink parent_xlink, 
+                                                    const SR::TheKnowledge::Nugget &nugget ) const
 {
-    // Evaluate operand and ensure we got an XLink
-    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_unique<SymbolResult>();
-        
-    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
-    SR::XLink back_xlink = nugget.my_container_back;
-    return make_unique<SymbolResult>( back_xlink );
+    return nugget.my_container_back;
 }
 
 
@@ -234,17 +235,10 @@ string MyContainerBackOperator::GetKnowledgeName() const
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-unique_ptr<SymbolResult> MySequenceSuccessorOperator::Evaluate( const EvalKit &kit,
-                                                                const list<unique_ptr<SymbolResult>> &op_results ) const
-{
-    // Evaluate operand and ensure we got an XLink
-    const unique_ptr<SymbolResult> &ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_unique<SymbolResult>();
-        
-    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
-    SR::XLink successor_xlink = nugget.my_sequence_successor;
-    return make_unique<SymbolResult>( successor_xlink );
+SR::XLink MySequenceSuccessorOperator::XLinkFromNugget( SR::XLink parent_xlink, 
+                                                        const SR::TheKnowledge::Nugget &nugget ) const
+{  
+    return nugget.my_sequence_successor;
 }
 
 
