@@ -66,7 +66,7 @@ Solver::Solver( shared_ptr<Equation> equation_ ) :
 
 shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const
 {
-    if( auto equal_op = dynamic_pointer_cast<EqualsOperator>(equation) )
+    if( auto equal_op = dynamic_pointer_cast<EqualOperator>(equation) )
     {
         shared_ptr<SymbolExpression> other_op;
         for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )

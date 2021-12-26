@@ -3,21 +3,21 @@
 
 using namespace SYM;
 
-// ------------------------- EqualsOperator --------------------------
+// ------------------------- EqualOperator --------------------------
 
-EqualsOperator::EqualsOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
+EqualOperator::EqualOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
     sa(sa_)
 {
 }    
     
 
-list<shared_ptr<SymbolExpression>> EqualsOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 {
     return sa;
 }
 
 
-shared_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
@@ -39,7 +39,7 @@ shared_ptr<BooleanResult> EqualsOperator::Evaluate( const EvalKit &kit,
 }
 
 
-string EqualsOperator::Render() const
+string EqualOperator::Render() const
 {
     list<string> ls;
     for( shared_ptr<SymbolExpression> a : sa )
@@ -48,7 +48,7 @@ string EqualsOperator::Render() const
 }
 
 
-Expression::Precedence EqualsOperator::GetPrecedence() const
+Expression::Precedence EqualOperator::GetPrecedence() const
 {
     return Precedence::COMPARE_EQNE;
 }
@@ -56,12 +56,12 @@ Expression::Precedence EqualsOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeLazy<EqualsOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeLazy<EqualOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
-// ------------------------- NotEqualsOperator --------------------------
+// ------------------------- NotEqualOperator --------------------------
 
-NotEqualsOperator::NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
+NotEqualOperator::NotEqualOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
     sa(sa_)
 {
     ASSERT( sa.size()==2 );
@@ -69,13 +69,13 @@ NotEqualsOperator::NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa_ )
 }    
     
 
-list<shared_ptr<SymbolExpression>> NotEqualsOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> NotEqualOperator::GetSymbolOperands() const
 {
     return sa;
 }
 
 
-shared_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> NotEqualOperator::Evaluate( const EvalKit &kit,
                                                        const list<shared_ptr<SymbolResult>> &op_results ) const 
 {    
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
@@ -97,7 +97,7 @@ shared_ptr<BooleanResult> NotEqualsOperator::Evaluate( const EvalKit &kit,
 }
 
 
-string NotEqualsOperator::Render() const
+string NotEqualOperator::Render() const
 {
     list<string> ls;
     for( shared_ptr<SymbolExpression> a : sa )
@@ -106,7 +106,7 @@ string NotEqualsOperator::Render() const
 }
 
 
-Expression::Precedence NotEqualsOperator::GetPrecedence() const
+Expression::Precedence NotEqualOperator::GetPrecedence() const
 {
     return Precedence::COMPARE_EQNE;
 }
@@ -114,7 +114,7 @@ Expression::Precedence NotEqualsOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeLazy<NotEqualsOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeLazy<NotEqualOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
 // ------------------------- KindOfOperator --------------------------

@@ -15,13 +15,13 @@ namespace SR
 namespace SYM
 { 
 
-// ------------------------- EqualsOperator --------------------------
+// ------------------------- EqualOperator --------------------------
 
-class EqualsOperator : public SymbolToBooleanExpression
+class EqualOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit EqualsOperator( list< shared_ptr<SymbolExpression> > sa );
+    explicit EqualOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
@@ -35,13 +35,13 @@ private:
 
 Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
-// ------------------------- NotEqualsOperator --------------------------
+// ------------------------- NotEqualOperator --------------------------
 
-class NotEqualsOperator : public SymbolToBooleanExpression
+class NotEqualOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit NotEqualsOperator( list< shared_ptr<SymbolExpression> > sa );
+    explicit NotEqualOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
