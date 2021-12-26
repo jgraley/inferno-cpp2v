@@ -57,6 +57,74 @@ private:
 
 Lazy<BooleanExpression> operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
+// ------------------------- IndexComparisonOperator --------------------------
+
+class IndexComparisonOperator : public SymbolToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
+                                      shared_ptr<SymbolExpression> b_ );
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override final;
+    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                      SR::TheKnowledge::IndexType index_b ) const = 0;
+    virtual Precedence GetPrecedence() const override;
+    
+protected:
+    const shared_ptr<SymbolExpression> a;
+    const shared_ptr<SymbolExpression> b;
+};
+
+// ------------------------- GreaterOperator --------------------------
+
+class GreaterOperator : public IndexComparisonOperator
+{
+    using IndexComparisonOperator::IndexComparisonOperator;
+    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual string Render() const override;
+};
+
+Lazy<BooleanExpression> operator>( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
+// ------------------------- LessOperator --------------------------
+
+class LessOperator : public IndexComparisonOperator
+{
+    using IndexComparisonOperator::IndexComparisonOperator;
+    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual string Render() const override;
+};
+
+Lazy<BooleanExpression> operator<( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
+// ------------------------- GreaterOrEqualOperator --------------------------
+
+class GreaterOrEqualOperator : public IndexComparisonOperator
+{
+    using IndexComparisonOperator::IndexComparisonOperator;
+    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual string Render() const override;
+};
+
+Lazy<BooleanExpression> operator>=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
+// ------------------------- LessOrEqualOperator --------------------------
+
+class LessOrEqualOperator : public IndexComparisonOperator
+{
+    using IndexComparisonOperator::IndexComparisonOperator;
+    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual string Render() const override;
+};
+
+Lazy<BooleanExpression> operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
 // ------------------------- KindOfOperator --------------------------
 
 class KindOfOperator : public SymbolToBooleanExpression

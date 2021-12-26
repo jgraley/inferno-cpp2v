@@ -67,8 +67,7 @@ public:
         MULTIPLY,
         ADD,
         SHIFT,
-        COMPARE_GTLT, // <, >, <=, >=
-        COMPARE_EQNE, // ==, !=
+        COMPARE,
         AND,
         XOR,
         OR,

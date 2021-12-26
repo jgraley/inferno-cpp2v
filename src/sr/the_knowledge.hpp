@@ -31,7 +31,7 @@ public:
         STOP_IF_ALREADY_IN
     };
     
-    typedef int DepthFirstIndexType;
+    typedef int IndexType;
 
     // Domain ordered by depth-first walk
     // Don't use a vector for this:
@@ -73,7 +73,7 @@ public:
         XLink my_sequence_successor = XLink();
 
         // Index in a depth-first walk
-        DepthFirstIndexType depth_first_index = -1;
+        IndexType depth_first_index = -1;
         
         // Iterator in a depth-first walk
         DepthFirstOrderedIt depth_first_ordered_it;

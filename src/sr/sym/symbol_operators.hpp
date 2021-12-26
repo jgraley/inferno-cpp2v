@@ -27,10 +27,10 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
                                                const list<shared_ptr<SymbolResult>> &op_results ) const override final;
+    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                         Itemiser::Element *item ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
-    virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
-                                     Itemiser::Element *item ) const = 0;
     virtual string GetItemTypeName() const = 0;
     
 private:
@@ -45,8 +45,8 @@ class ChildSequenceFrontOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
-                                     Itemiser::Element *item ) const override;
+    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                         Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -56,8 +56,8 @@ class ChildSequenceBackOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
-                                     Itemiser::Element *item ) const override;
+    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                         Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -67,8 +67,8 @@ class ChildCollectionFrontOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
-                                     Itemiser::Element *item ) const override;
+    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                         Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -78,8 +78,8 @@ class ChildSingularOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink XLinkFromItem( SR::XLink parent_xlink, 
-                                     Itemiser::Element *item ) const override;
+    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                         Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -93,10 +93,10 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
                                                const list<shared_ptr<SymbolResult>> &op_results ) const override final;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
-    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
-                                       const SR::TheKnowledge::Nugget &nugget ) const = 0;
     virtual string GetKnowledgeName() const = 0;
     
 protected:
@@ -109,8 +109,8 @@ class ParentOperator : public KnowledgeToSymbolOperator
 {
 public:    
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
-    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
-                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
@@ -120,8 +120,8 @@ class LastDescendantOperator : public KnowledgeToSymbolOperator
 {
 public:    
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
-    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
-                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
@@ -131,8 +131,8 @@ class MyContainerFrontOperator : public KnowledgeToSymbolOperator
 {
 public:    
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
-    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
-                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
@@ -142,8 +142,8 @@ class MyContainerBackOperator : public KnowledgeToSymbolOperator
 {
 public:    
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
-    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
-                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
 };
 
@@ -153,8 +153,8 @@ class MySequenceSuccessorOperator : public KnowledgeToSymbolOperator
 {
 public:    
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
-    virtual SR::XLink XLinkFromNugget( SR::XLink parent_xlink, 
-                                       const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const override;
     virtual string GetKnowledgeName() const override;
 };
 

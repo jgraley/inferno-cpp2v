@@ -42,7 +42,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Extract the item indicated by item_index. 
-    SR::XLink result_xlink = XLinkFromItem( ar->xlink, 
+    SR::XLink result_xlink = EvalXLinkFromItem( ar->xlink, 
                                             keyer_itemised[item_index] );
     
     return make_shared<SymbolResult>( result_xlink );
@@ -73,8 +73,8 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
-SR::XLink ChildSequenceFrontOperator::XLinkFromItem( SR::XLink parent_xlink, 
-                                                     Itemiser::Element *item ) const
+SR::XLink ChildSequenceFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                                         Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
@@ -96,8 +96,8 @@ string ChildSequenceFrontOperator::GetItemTypeName() const
 
 // ------------------------- ChildSequenceBackOperator --------------------------
 
-SR::XLink ChildSequenceBackOperator::XLinkFromItem( SR::XLink parent_xlink, 
-                                                     Itemiser::Element *item ) const
+SR::XLink ChildSequenceBackOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                                        Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
@@ -119,8 +119,8 @@ string ChildSequenceBackOperator::GetItemTypeName() const
 
 // ------------------------- ChildCollectionFrontOperator --------------------------
 
-SR::XLink ChildCollectionFrontOperator::XLinkFromItem( SR::XLink parent_xlink, 
-                                                       Itemiser::Element *item ) const
+SR::XLink ChildCollectionFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                                           Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a collection
     auto p_x_col = dynamic_cast<CollectionInterface *>(item);    
@@ -142,8 +142,8 @@ string ChildCollectionFrontOperator::GetItemTypeName() const
 
 // ------------------------- ChildSingularOperator --------------------------
 
-SR::XLink ChildSingularOperator::XLinkFromItem( SR::XLink parent_xlink, 
-                                                Itemiser::Element *item ) const
+SR::XLink ChildSingularOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
+                                                    Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a singular item
     TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(item);
@@ -184,7 +184,7 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
         return make_shared<SymbolResult>();
         
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
-    SR::XLink result_xlink = XLinkFromNugget( ar->xlink, nugget );
+    SR::XLink result_xlink = EvalXLinkFromNugget( ar->xlink, nugget );
     return make_shared<SymbolResult>( result_xlink );
 }
 
@@ -206,8 +206,8 @@ Expression::Precedence KnowledgeToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ParentOperator --------------------------
     
-SR::XLink ParentOperator::XLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const
+SR::XLink ParentOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                               const SR::TheKnowledge::Nugget &nugget ) const
 {
   
     return nugget.parent_xlink;
@@ -221,8 +221,8 @@ string ParentOperator::GetKnowledgeName() const
 
 // ------------------------- LastDescendantOperator --------------------------
     
-SR::XLink LastDescendantOperator::XLinkFromNugget( SR::XLink parent_xlink, 
-                                                   const SR::TheKnowledge::Nugget &nugget ) const
+SR::XLink LastDescendantOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                                       const SR::TheKnowledge::Nugget &nugget ) const
 {
   
     return nugget.last_descendant_xlink;
@@ -236,8 +236,8 @@ string LastDescendantOperator::GetKnowledgeName() const
 
 // ------------------------- MyContainerFrontOperator --------------------------
     
-SR::XLink MyContainerFrontOperator::XLinkFromNugget( SR::XLink parent_xlink, 
-                                                     const SR::TheKnowledge::Nugget &nugget ) const
+SR::XLink MyContainerFrontOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                                         const SR::TheKnowledge::Nugget &nugget ) const
 {
   
     return nugget.my_container_front;
@@ -251,8 +251,8 @@ string MyContainerFrontOperator::GetKnowledgeName() const
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-SR::XLink MyContainerBackOperator::XLinkFromNugget( SR::XLink parent_xlink, 
-                                                    const SR::TheKnowledge::Nugget &nugget ) const
+SR::XLink MyContainerBackOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                                        const SR::TheKnowledge::Nugget &nugget ) const
 {
     return nugget.my_container_back;
 }
@@ -265,8 +265,8 @@ string MyContainerBackOperator::GetKnowledgeName() const
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-SR::XLink MySequenceSuccessorOperator::XLinkFromNugget( SR::XLink parent_xlink, 
-                                                        const SR::TheKnowledge::Nugget &nugget ) const
+SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                                            const SR::TheKnowledge::Nugget &nugget ) const
 {  
     return nugget.my_sequence_successor;
 }

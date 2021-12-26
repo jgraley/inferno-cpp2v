@@ -27,7 +27,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
-        if( (!ra->xlink || !rb->xlink) )
+        if( !ra->xlink || !rb->xlink )
         {
             if( m != BooleanResult::FALSE )
                 m = BooleanResult::UNKNOWN;
@@ -50,7 +50,7 @@ string EqualOperator::Render() const
 
 Expression::Precedence EqualOperator::GetPrecedence() const
 {
-    return Precedence::COMPARE_EQNE;
+    return Precedence::COMPARE;
 }
 
 
@@ -83,10 +83,10 @@ shared_ptr<BooleanResult> NotEqualOperator::Evaluate( const EvalKit &kit,
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
 
-    if( (!ra->xlink || !rb->xlink) )
+    if( !ra->xlink || !rb->xlink )
         return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
     
-    // For (in)equality, it is sufficient to compare the x links
+    // For (un)equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model.
     if( ra->xlink != rb->xlink )
@@ -104,13 +104,139 @@ string NotEqualOperator::Render() const
 
 Expression::Precedence NotEqualOperator::GetPrecedence() const
 {
-    return Precedence::COMPARE_EQNE;
+    return Precedence::COMPARE;
 }
 
 
 Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
     return MakeLazy<NotEqualOperator>( a, b );
+}
+
+// ------------------------- IndexComparisonOperator --------------------------
+
+IndexComparisonOperator::IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
+                                                  shared_ptr<SymbolExpression> b_ ) :
+    a(a_),
+    b(b_)
+{
+    // Note: not an alldiff, see #429
+}    
+    
+
+list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() const
+{
+    return {a, b};
+}
+
+
+shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
+                                                             const list<shared_ptr<SymbolResult>> &op_results ) const 
+{    
+    ASSERT( op_results.size()==2 );
+    shared_ptr<SymbolResult> ra = op_results.front();
+    shared_ptr<SymbolResult> rb = op_results.back();
+
+    if( !ra->xlink || !rb->xlink )
+        return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
+    
+    // For greater/less, we need to consult the knowledge. We use the 
+    // overall depth-first ordering.
+    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->xlink) );   
+    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->xlink) );   
+    SR::TheKnowledge::IndexType index_a = nugget_a.depth_first_index;
+    SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
+    
+    if( EvalBoolFromIndexes( index_a, index_b ) )
+        return make_shared<BooleanResult>(BooleanResult::TRUE);
+    else
+        return make_shared<BooleanResult>(BooleanResult::FALSE);   
+}
+
+
+Expression::Precedence IndexComparisonOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}
+
+// ------------------------- GreaterOperator --------------------------
+
+bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                           SR::TheKnowledge::IndexType index_b ) const
+{
+    return index_a > index_b;
+}                    
+            
+                                  
+string GreaterOperator::Render() const
+{
+    return RenderForMe(a) + " > " + RenderForMe(b);
+}
+
+
+Lazy<BooleanExpression> SYM::operator>( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+{
+    return MakeLazy<GreaterOperator>( a, b );
+}
+
+// ------------------------- LessOperator --------------------------
+
+bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                        SR::TheKnowledge::IndexType index_b ) const
+{
+    return index_a < index_b;
+}                    
+            
+                                  
+string LessOperator::Render() const
+{
+    return RenderForMe(a) + " < " + RenderForMe(b);
+}
+
+
+Lazy<BooleanExpression> SYM::operator<( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+{
+    return MakeLazy<LessOperator>( a, b );
+}
+
+// ------------------------- GreaterOrEqualOperator --------------------------
+
+bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                                  SR::TheKnowledge::IndexType index_b ) const
+{
+    return index_a >= index_b;
+}                    
+            
+                                  
+string GreaterOrEqualOperator::Render() const
+{
+    return RenderForMe(a) + " >= " + RenderForMe(b);
+}
+
+
+Lazy<BooleanExpression> SYM::operator>=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+{
+    return MakeLazy<GreaterOrEqualOperator>( a, b );
+}
+
+// ------------------------- LessOrEqualOperator --------------------------
+
+bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+                                               SR::TheKnowledge::IndexType index_b ) const
+{
+    return index_a <= index_b;
+}                    
+            
+                                  
+string LessOrEqualOperator::Render() const
+{
+    return RenderForMe(a) + " <= " + RenderForMe(b);
+}
+
+
+Lazy<BooleanExpression> SYM::operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+{
+    return MakeLazy<LessOrEqualOperator>( a, b );
 }
 
 // ------------------------- KindOfOperator --------------------------
