@@ -51,7 +51,7 @@ string Traceable::Denamespace( string s )
 
 string Traceable::GetTypeName() const
 {
-    return Denamespace( CPPFilt( typeid( *this ).name() ) );
+    return Denamespace( TypeIdName( *this ) );
 }
 
 

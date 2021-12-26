@@ -21,11 +21,20 @@ using namespace std;
 // How many members in an array
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
+// Single source of truth for how to get printable name of a type, but
+// if you have an object, please use Traceable::TypeIdName()
+#define TYPE_ID_NAME(TYPE) ( CPPFilt( typeid(TYPE).name() ) )
+
 class Traceable
 {
 public:
     static string CPPFilt( string s );
     static string Denamespace( string s );
+    template<typename T>
+    static string TypeIdName( const T &t )
+    {
+        return TYPE_ID_NAME( t );
+    }
     
     virtual string GetTypeName() const; 
     virtual string GetName() const; // used by parse, render etc

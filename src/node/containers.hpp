@@ -164,9 +164,9 @@ public:
 		explicit operator string()
 		{   
 		    if( pib )
-		        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
+		        return Traceable::TypeIdName( *pib );
 		    else 
-		        return (string)("UNINITIALISED");
+		        return string("UNINITIALISED");
 		}
 	protected:
 		void EnsureUnique()
@@ -306,7 +306,7 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     }
 	virtual operator string() const
 	{
-        return Traceable::CPPFilt( typeid( value_type ).name() );
+        return TYPE_ID_NAME( value_type );
 	}
 };
 

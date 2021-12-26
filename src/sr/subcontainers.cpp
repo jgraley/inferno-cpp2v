@@ -191,9 +191,9 @@ shared_ptr<ContainerInterface::iterator_interface> SubContainerRangeExclusions::
 SubContainerRangeExclusions::exclusion_iterator::operator string()
 {   
     if( pib )
-        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
+        return Traceable::TypeIdName( *pib );
     else 
-        return (string)("UNINITIALISED");
+        return string("UNINITIALISED");
 }
 
 

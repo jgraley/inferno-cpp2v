@@ -4,14 +4,14 @@
 #include <exception>
 	
 
-const char* Mismatch::what() const noexcept 
+const char* Exception::what() const noexcept 
 { 
     w = What();
     return w.c_str(); 
 }    
 
 
-string Mismatch::What() const noexcept
+string Exception::What() const noexcept
 {
-    return Traceable::CPPFilt( typeid(*this).name() );
+    return Traceable::TypeIdName( *this );
 }
