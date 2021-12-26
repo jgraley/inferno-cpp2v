@@ -75,16 +75,8 @@ public:
         COMMA 
     };    
         
-/*    class Incomplete : public exception 
-    {
-    public:    
-        virtual const char* what() const noexcept;
-        virtual string What() const noexcept;
-        
-    private:
-        const SR::PatternLink plink;
-    };            
-*/
+    class Incomplete : public Exception {};            
+
     virtual list<shared_ptr<Expression>> GetOperands() const;
 
     virtual set<SR::PatternLink> GetRequiredVariables() const;

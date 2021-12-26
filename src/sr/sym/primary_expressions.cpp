@@ -2,6 +2,8 @@
 
 using namespace SYM;
 
+//#define THROW_ON_INCOMPLETE
+
 // ------------------------- SymbolConstant --------------------------
 
 SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
@@ -44,9 +46,13 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     if( kit.hypothesis_links->count(plink) == 0 )
+#ifdef THROW_ON_INCOMPLETE
+        throw Incomplete(plink);
+#else
         return make_shared<SymbolResult>( SR::XLink() );
-    else
-        return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
+#endif        
+    
+    return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
 }
 
 
@@ -59,6 +65,18 @@ string SymbolVariable::Render() const
 Expression::Precedence SymbolVariable::GetPrecedence() const
 {
     return Precedence::LITERAL;
+}
+
+
+SymbolVariable::Incomplete::Incomplete( const SR::PatternLink &plink_ ) :
+    plink( plink_ )
+{
+}
+
+
+string SymbolVariable::Incomplete::What() const noexcept
+{
+    return Exception::What() + "(" + plink.GetTrace() + ")";
 }
 
 // ------------------------- BooleanConstant --------------------------

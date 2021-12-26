@@ -9,7 +9,7 @@
 class Exception : public exception
 {
 public:    
-    virtual const char* what() const noexcept;
+    virtual const char* what() const noexcept override final;
     virtual string What() const noexcept;
     
 private:

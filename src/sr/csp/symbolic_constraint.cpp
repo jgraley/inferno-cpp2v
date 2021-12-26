@@ -84,18 +84,33 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     //Tracer::RAIIDisable silencer(); // make queries be quiet
 
     ASSERT(plan.consistency_expression);
-    shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
-    if( r->value == SYM::BooleanResult::TRUE || r->value == SYM::BooleanResult::UNKNOWN )
-        return make_tuple(true, Assignment()); // Successful
+    try
+    {
+        shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
+        if( r->value == SYM::BooleanResult::TRUE || r->value == SYM::BooleanResult::UNKNOWN )
+            return make_tuple(true, Assignment()); // Successful
+    }
+    catch( const SYM::Expression::Incomplete &e )
+    {
+        // Accept as incomplete query for now - TODO should eventually be an error
+        return make_tuple(true, Assignment());
+    }
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
         return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one in the plan
      
-    shared_ptr<SYM::SymbolResult> hint_result = plan.hint_expressions.at(current_var)->Evaluate( kit );
-    if( !hint_result->xlink )
-        return make_tuple(false, Assignment()); // Could not evaluate expression (eg due partial assignment)
-        
-    return make_tuple(false, SR::LocatedLink( current_var, hint_result->xlink ));
+    try
+    {
+        shared_ptr<SYM::SymbolResult> hint_result = plan.hint_expressions.at(current_var)->Evaluate( kit );
+        if( !hint_result->xlink )
+            return make_tuple(false, Assignment()); // Could not evaluate expression (eg due partial assignment)
+        return make_tuple(false, SR::LocatedLink( current_var, hint_result->xlink ));
+    }
+    catch( const SYM::Expression::Incomplete &e )
+    {
+        // Accept as unsuccessful hint eval for now - TODO should eventually be an error
+        return make_tuple(false, Assignment());
+    }
 }
 
 
