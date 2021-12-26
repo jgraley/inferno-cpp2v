@@ -17,6 +17,8 @@ namespace SYM
 
 // ------------------------- EqualOperator --------------------------
 
+// EqualOperator is in fact a more general "AllSame" operator, which 
+// seems to make natural sense.
 class EqualOperator : public SymbolToBooleanExpression
 {
 public:    
@@ -37,6 +39,10 @@ Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpress
 
 // ------------------------- NotEqualOperator --------------------------
 
+// NotEqualOperator is NOT a more general "AllDiff" operator; it only 
+// accepts 2 operands and if you need AllDiff you should try 
+// AllDiffOperator. It isn't 100% clear that AllDiff is the natural
+// interpretation of a multi-operand !=
 class NotEqualOperator : public SymbolToBooleanExpression
 {
 public:    
@@ -124,6 +130,23 @@ class LessOrEqualOperator : public IndexComparisonOperator
 };
 
 Lazy<BooleanExpression> operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+
+// ------------------------- AllDiffOperator --------------------------
+
+class AllDiffOperator : public SymbolToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit AllDiffOperator( list< shared_ptr<SymbolExpression> > sa );
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const list< shared_ptr<SymbolExpression> > sa;
+};
 
 // ------------------------- KindOfOperator --------------------------
 

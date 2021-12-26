@@ -29,12 +29,14 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
         // within the full arrowhead model.
         if( !ra->xlink || !rb->xlink )
         {
-            if( m != BooleanResult::FALSE )
+            if( m == BooleanResult::TRUE )
                 m = BooleanResult::UNKNOWN;
         }
         else if( ra->xlink != rb->xlink )
+        {
             m = BooleanResult::FALSE;
-    });
+        }
+    } );
     return make_shared<BooleanResult>( m );   
 }
 
@@ -237,6 +239,58 @@ string LessOrEqualOperator::Render() const
 Lazy<BooleanExpression> SYM::operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
     return MakeLazy<LessOrEqualOperator>( a, b );
+}
+
+// ------------------------- AllDiffOperator --------------------------
+
+AllDiffOperator::AllDiffOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
+    sa(sa_)
+{
+}    
+    
+
+list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
+{
+    return sa;
+}
+
+
+shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
+                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
+{
+    BooleanResult::BooleanValue m = BooleanResult::TRUE;
+    ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResult> ra,
+                                                    shared_ptr<SymbolResult> rb) 
+    {
+        // For equality, it is sufficient to compare the x links
+        // themselves, which have the required uniqueness properties
+        // within the full arrowhead model.
+        if( !ra->xlink || !rb->xlink )
+        {
+            if( m == BooleanResult::TRUE )
+                m = BooleanResult::UNKNOWN;
+        }
+        else if( ra->xlink == rb->xlink )
+        {
+            m = BooleanResult::FALSE;
+        }
+    } );
+    return make_shared<BooleanResult>( m );   
+}
+
+
+string AllDiffOperator::Render() const
+{
+    list<string> ls;
+    for( shared_ptr<SymbolExpression> a : sa )
+        ls.push_back( RenderForMe(a) );
+    return "AllDiff" + Join( ls, ", ", "( ", " )" );
+}
+
+
+Expression::Precedence AllDiffOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
 }
 
 // ------------------------- KindOfOperator --------------------------
