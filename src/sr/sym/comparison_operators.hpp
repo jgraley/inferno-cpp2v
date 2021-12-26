@@ -41,7 +41,8 @@ class NotEqualOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit NotEqualOperator( list< shared_ptr<SymbolExpression> > sa );
+    explicit NotEqualOperator( shared_ptr<SymbolExpression> a_, 
+                               shared_ptr<SymbolExpression> b_ );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
@@ -49,7 +50,8 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const list< shared_ptr<SymbolExpression> > sa;
+    const shared_ptr<SymbolExpression> a;
+    const shared_ptr<SymbolExpression> b;
 };
 
 

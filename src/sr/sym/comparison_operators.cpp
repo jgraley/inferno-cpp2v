@@ -61,48 +61,44 @@ Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolEx
 
 // ------------------------- NotEqualOperator --------------------------
 
-NotEqualOperator::NotEqualOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
-    sa(sa_)
+NotEqualOperator::NotEqualOperator( shared_ptr<SymbolExpression> a_, 
+                                    shared_ptr<SymbolExpression> b_ ) :
+    a(a_),
+    b(b_)
 {
-    ASSERT( sa.size()==2 );
-    // Note: not an alldiff, and not well defined for more than 2 operands, see #429
+    // Note: not an alldiff, see #429
 }    
     
 
 list<shared_ptr<SymbolExpression>> NotEqualOperator::GetSymbolOperands() const
 {
-    return sa;
+    return {a, b};
 }
 
 
 shared_ptr<BooleanResult> NotEqualOperator::Evaluate( const EvalKit &kit,
-                                                       const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                      const list<shared_ptr<SymbolResult>> &op_results ) const 
 {    
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
-                                                 shared_ptr<SymbolResult> rb) 
-    {
-        // For equality, it is sufficient to compare the x links
-        // themselves, which have the required uniqueness properties
-        // within the full arrowhead model.
-        if( (!ra->xlink || !rb->xlink) )
-        {
-            if( m != BooleanResult::FALSE )
-                m = BooleanResult::UNKNOWN;
-        }
-        else if( ra->xlink == rb->xlink )
-            m = BooleanResult::FALSE;
-    });
-    return make_shared<BooleanResult>( m );   
+    ASSERT( op_results.size()==2 );
+    shared_ptr<SymbolResult> ra = op_results.front();
+    shared_ptr<SymbolResult> rb = op_results.back();
+
+    if( (!ra->xlink || !rb->xlink) )
+        return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
+    
+    // For (in)equality, it is sufficient to compare the x links
+    // themselves, which have the required uniqueness properties
+    // within the full arrowhead model.
+    if( ra->xlink != rb->xlink )
+        return make_shared<BooleanResult>(BooleanResult::TRUE);
+    else
+        return make_shared<BooleanResult>(BooleanResult::FALSE);   
 }
 
 
 string NotEqualOperator::Render() const
 {
-    list<string> ls;
-    for( shared_ptr<SymbolExpression> a : sa )
-        ls.push_back( RenderForMe(a) );
-    return Join( ls, " != " );
+    return RenderForMe(a) + " != " + RenderForMe(b);
 }
 
 
@@ -114,7 +110,7 @@ Expression::Precedence NotEqualOperator::GetPrecedence() const
 
 Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeLazy<NotEqualOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeLazy<NotEqualOperator>( a, b );
 }
 
 // ------------------------- KindOfOperator --------------------------
