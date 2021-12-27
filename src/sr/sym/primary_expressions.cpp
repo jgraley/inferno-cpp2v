@@ -97,6 +97,8 @@ string BooleanConstant::Render() const
 {
     switch( value )
     {
+    case BooleanResult::UNKNOWN:
+        return "UNKNOWN";
     case BooleanResult::TRUE:
         return "TRUE";
     case BooleanResult::FALSE:

@@ -24,10 +24,7 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
     for( const shared_ptr<BooleanResult> &r : op_results )
     {
         switch( r->value )
-        {
-        case BooleanResult::UNKNOWN:
-            m = BooleanResult::UNKNOWN;
-            break;            
+        {            
         case BooleanResult::TRUE:
             break;
         case BooleanResult::FALSE:
@@ -89,10 +86,7 @@ shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
     for( const shared_ptr<BooleanResult> &r : op_results )
     {
         switch( r->value )
-        {
-        case BooleanResult::UNKNOWN:
-            m = BooleanResult::UNKNOWN;
-            break;            
+        {   
         case BooleanResult::TRUE:
             return make_shared<BooleanResult>( BooleanResult::TRUE );
         case BooleanResult::FALSE:

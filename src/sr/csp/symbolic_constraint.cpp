@@ -81,7 +81,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     
     ASSERT(plan.consistency_expression);
     shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
-    if( r->value == SYM::BooleanResult::TRUE || r->value == SYM::BooleanResult::UNKNOWN )
+    if( r->value == SYM::BooleanResult::TRUE )
         return make_tuple(true, Assignment()); // Successful
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
