@@ -167,6 +167,29 @@ private:
     const SR::Agent * const ref_agent; // TODO Would like to use an archetype to reduce coupling
 };
 
+// ------------------------- ChildCollectionSizeOperator --------------------------
+
+class ChildCollectionSizeOperator : public SymbolToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit ChildCollectionSizeOperator( const SR::Agent *ref_agent,
+                                          int item, 
+                                          shared_ptr<SymbolExpression> a,
+                                          int size );
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override final;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const SR::Agent *ref_agent;
+    const int item_index;
+    const shared_ptr<SymbolExpression> a;
+    const int size;
+};
+
 };
 
 #endif // include guard

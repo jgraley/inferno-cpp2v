@@ -418,68 +418,6 @@ bool StandardAgent::ImplHasNLQ() const
     return true;
 }
 
-
-void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_col,
-                                                 const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const
-{
-    INDENT("C");
-    bool incomplete = false;
-
-    if( hypothesis_links->count(keyer_plink)==0 )
-        return; // not attempting baseless queries
-
-    // Get the members of x corresponding to pattern's class
-    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-    
-    // We require a co-iteimise because pattern may be a base of X (i.e. 
-    // topological wild-carding). It may not be possible in general, but 
-    // IS possible if pre-restriction is satisfied.
-    if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
-        return; // Will not be able to itemise due incompatible type
-    vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
-    CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(keyer_itemised[plan_col.itemise_index]);
-
-    // Require that every child x link is in the correct collection.
-    for( PatternLink plink : plan_col.non_stars )  // depends on p_x_col
-    {
-        if( hypothesis_links->count(plink) > 0 )
-        {
-            if( p_x_col->empty() )
-                throw WrongContainerCollectionMismatch(); 
-            XLink keyer_child_front( keyer_xlink.GetChildX(), &*(p_x_col->begin()) );
-        
-            XLink req_xlink = hypothesis_links->at(plink);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );  
-            if( nugget.my_container_front != keyer_child_front )
-                throw WrongContainerCollectionMismatch(); // Be in the right collection
-        }
-    }
-
-    // Require that every child x link is different (alldiff).
-    set<XLink> x_so_far;
-    for( PatternLink plink : plan_col.non_stars ) // independent of p_x_col
-    {
-        if( hypothesis_links->count(plink) > 0 )
-        {
-            XLink req_xlink = hypothesis_links->at(plink);
-            if( x_so_far.count( req_xlink ) > 0 )
-                throw CollisionCollectionMismatch(); // Already removed this one: collision
-            x_so_far.insert( req_xlink );
-        }
-    }
-
-    // Require that there are no leftover x, if no stars in pattern. Depends on p_x_col ONLY.
-    if( !plan_col.star_plink && p_x_col )
-    {
-        if( p_x_col->size() > plan_col.non_stars.size() )
-        {
-            TRACE("mismatch - x left over\n");
-            throw SurplusXCollectionMismatch();   // there were elements left over and no p_star to match them against
-        }
-    }
-}
-
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
 Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
@@ -558,16 +496,36 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
 
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const
 {
-    auto pattern_query = make_shared<PatternQuery>(this);
-    IncrPatternQueryCollection( plan_col, pattern_query );
-    set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
-    nlq_plinks.insert( keyer_plink );
-    
-    auto nlq_lambda = [this, plan_col](const Expression::EvalKit &kit)
-	{
-        NormalLinkedQueryCollection( plan_col, kit.hypothesis_links, kit.knowledge );
-	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQCollection()");	
+    auto expr = MakeLazy<BooleanConstant>(true);
+
+    // Require that every candidate x link is in the correct container. Binary 
+    // constraint with keyer and candidate, for each candidate.
+    for( PatternLink candidate_plink : plan_col.non_stars )
+    {        
+        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+        auto keyer_child_col_front_expr = MakeLazy<ChildCollectionFrontOperator>(this, plan_col.itemise_index, keyer_expr);
+        auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
+        auto candidate_col_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
+        expr &= (candidate_col_front_expr == keyer_child_col_front_expr);
+    }
+
+    // Require that every child x link is different (alldiff). N-ary 
+    // constraint on all candidates
+    list< shared_ptr<SymbolExpression> > candidate_exprs;
+    for( PatternLink candidate_plink : plan_col.non_stars ) 
+        candidate_exprs.push_back( MakeLazy<SymbolVariable>(candidate_plink) );
+    expr &= MakeLazy<AllDiffOperator>( candidate_exprs );        
+
+
+    // Require that there are no leftover x, if no star in pattern. 
+    // Unary constraint on keyer.
+    if( !plan_col.star_plink )
+    {
+        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+        expr &= MakeLazy<ChildCollectionSizeOperator>(this, plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
+    }
+
+    return expr;
 }                                  
 
 

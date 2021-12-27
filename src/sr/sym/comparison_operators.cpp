@@ -333,3 +333,76 @@ Expression::Precedence KindOfOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }
+
+// ------------------------- ChildCollectionSizeOperator --------------------------
+
+ChildCollectionSizeOperator::ChildCollectionSizeOperator( const SR::Agent *ref_agent_,
+                                                          int item_index_, 
+                                                          shared_ptr<SymbolExpression> a_,
+                                                          int size_ ) :
+    ref_agent( ref_agent_ ),
+    item_index( item_index_ ),
+    a( a_ ),
+    size( size_ )
+{
+    ASSERT( item_index >= 0 );
+}    
+
+
+list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
+                                                                 const list<shared_ptr<SymbolResult>> &op_results ) const
+{
+    // Evaluate operand and ensure we got an XLink
+    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
+    if( !ar->xlink )
+        return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
+
+    // XLink must match our referee (i.e. be non-strict subtype)
+    if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
+        return make_shared<BooleanResult>(BooleanResult::UNKNOWN); // Will not be able to itemise due incompatible type
+    
+    // Itemise the child node of the XLink we got, according to the "schema"
+    // of the referee node (note: link number is only valid wrt referee)
+    vector< Itemiser::Element * > keyer_itemised = ref_agent->Itemise( ar->xlink.GetChildX().get() );   
+    ASSERT( item_index < keyer_itemised.size() );     
+    
+    // Cast based on assumption that we'll be looking at a collection
+    auto p_x_col = dynamic_cast<CollectionInterface *>(keyer_itemised[item_index]);    
+    ASSERT( p_x_col )("item_index didn't lead to a collection");
+    
+    // Check that the size is as required
+    if( p_x_col->size() == size )
+        return make_shared<BooleanResult>(BooleanResult::TRUE);
+    else
+        return make_shared<BooleanResult>(BooleanResult::FALSE);
+}
+
+
+string ChildCollectionSizeOperator::Render() const
+{
+    string inner_typename = RemoveOuterTemplate( ref_agent->GetTypeName() );
+
+    // Not using RenderForMe() because we always want () here
+    return "Item<" + 
+           inner_typename + 
+           "@" + 
+           to_string(item_index) + 
+           ":col size=" +
+           to_string(size) + 
+           ">(" + 
+           a->Render() + 
+           ")"; 
+}
+
+
+Expression::Precedence ChildCollectionSizeOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
+

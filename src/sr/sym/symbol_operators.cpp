@@ -8,8 +8,8 @@ using namespace SYM;
 // ------------------------- ItemiseToSymbolOperator --------------------------
 
 ItemiseToSymbolOperator::ItemiseToSymbolOperator( const SR::Agent *ref_agent_,
-                                              int item_index_, 
-                                              shared_ptr<SymbolExpression> a_ ) :
+                                                  int item_index_, 
+                                                  shared_ptr<SymbolExpression> a_ ) :
     ref_agent( ref_agent_ ),
     item_index( item_index_ ),
     a( a_ )
