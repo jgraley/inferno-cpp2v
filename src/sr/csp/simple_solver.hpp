@@ -60,6 +60,7 @@ private:
         const list<VariableId> forced_variables;
         
         ConstraintSet constraint_set;
+        ConstraintSet fully_forced_constraint_set;
         map< shared_ptr<Constraint>, list<VariableId> > free_vars_for_constraint;
 
         map<VariableId, ConstraintSet> affected_constraints; // does not depend on var ordering

@@ -165,6 +165,13 @@ inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
 }
 
 
+template< typename C1, typename C2 >
+inline bool IsSubset( const C1 &c1, const C2 &c2 )
+{
+    return DifferenceOf( c1, c2 ).empty();
+}
+
+
 template<class C, class IT>
 void AdvanceWithWrap(const C &c, IT& it, int n)
 {

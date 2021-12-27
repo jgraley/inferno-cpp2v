@@ -32,16 +32,14 @@ public:
      * 
      * @param op a shared pointer to the boolean operator
      */
-    explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
-                                 set<VariableId> relevent_variables );
+    explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op );
     
 private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
-                       shared_ptr<SYM::BooleanExpression> expression,
-                       set<VariableId> relevent_variables );
-        void DetermineVariables( set<VariableId> relevent_variables );
+                       shared_ptr<SYM::BooleanExpression> expression );
+        void DetermineVariables();
         void DetermineHintExpressions();
         string GetTrace() const; // used for debug
 

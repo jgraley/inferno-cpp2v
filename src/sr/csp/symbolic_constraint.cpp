@@ -7,39 +7,32 @@
 #include "../sym/primary_expressions.hpp"
 #include "../sym/rewriters.hpp"
 
+#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
+
 using namespace CSP;
 
-
-SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
-                                        set<VariableId> relevent_variables ) :
-    plan( this, expression, relevent_variables )
+SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression ) :
+    plan( this, expression )
 {
 }
 
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
-                                shared_ptr<SYM::BooleanExpression> expression_,
-                                set<VariableId> relevent_variables ) :
+                                shared_ptr<SYM::BooleanExpression> expression_ ) :
     algo( algo_ ),
     consistency_expression( expression_ ),
     sym_solver( consistency_expression )
 {
-    DetermineVariables( relevent_variables );   
+    DetermineVariables();   
     DetermineHintExpressions();    
 }
 
 
-void SymbolicConstraint::Plan::DetermineVariables( set<VariableId> relevent_variables )
+void SymbolicConstraint::Plan::DetermineVariables()
 { 
     // Which variables are required in order to check consistency
     set<VariableId> required_variables = consistency_expression->GetRequiredVariables();
-    
-    // Filter down to variables relevent to the current solver
-    // This means we will permit partial queries when some required variables are 
-    // irrelevent. This only happens with coupling keyer/residuals
-    set<VariableId> my_required_variables = IntersectionOf( required_variables, 
-                                                            relevent_variables );
-    variables = ToList(my_required_variables);
+    variables = ToList(required_variables);
 }
 
 
@@ -79,38 +72,25 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 {   
     INDENT("T");
 
+#ifdef CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
+    for( VariableId v : plan.variables )
+        ASSERT( assignments.count(v)==1 );
+#endif        
+
     SYM::Expression::EvalKit kit { &assignments, knowledge };
     
-    //Tracer::RAIIDisable silencer(); // make queries be quiet
-
     ASSERT(plan.consistency_expression);
-    try
-    {
-        shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
-        if( r->value == SYM::BooleanResult::TRUE || r->value == SYM::BooleanResult::UNKNOWN )
-            return make_tuple(true, Assignment()); // Successful
-    }
-    catch( const SYM::Expression::Incomplete &e )
-    {
-        // Accept as incomplete query for now - TODO should eventually be an error
-        return make_tuple(true, Assignment());
-    }
+    shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
+    if( r->value == SYM::BooleanResult::TRUE || r->value == SYM::BooleanResult::UNKNOWN )
+        return make_tuple(true, Assignment()); // Successful
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
         return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one in the plan
      
-    try
-    {
-        shared_ptr<SYM::SymbolResult> hint_result = plan.hint_expressions.at(current_var)->Evaluate( kit );
-        if( !hint_result->xlink )
-            return make_tuple(false, Assignment()); // Could not evaluate expression (eg due partial assignment)
-        return make_tuple(false, SR::LocatedLink( current_var, hint_result->xlink ));
-    }
-    catch( const SYM::Expression::Incomplete &e )
-    {
-        // Accept as unsuccessful hint eval for now - TODO should eventually be an error
-        return make_tuple(false, Assignment());
-    }
+    shared_ptr<SYM::SymbolResult> hint_result = plan.hint_expressions.at(current_var)->Evaluate( kit );
+    if( !hint_result->xlink )
+        return make_tuple(false, Assignment()); // Could not evaluate expression (eg due partial assignment)
+    return make_tuple(false, SR::LocatedLink( current_var, hint_result->xlink ));
 }
 
 

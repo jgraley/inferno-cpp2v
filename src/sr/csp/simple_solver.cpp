@@ -30,8 +30,11 @@ SimpleSolver::Plan::Plan( SimpleSolver *algo_,
 void SimpleSolver::Plan::DeduceVariables()
 {   
     set<VariableId> free_variables_set;
-    for( VariableId v : free_variables )       
+    for( VariableId v : free_variables )   
+    {    
         InsertSolo(free_variables_set, v); // Checks that elements of the list are unique
+        (void)completed_constraints[v]; // ensure there is a ConstraintSet for every var even if empty
+    }
 
     set<VariableId> forced_variables_set;
     for( VariableId v : forced_variables )       
@@ -39,27 +42,53 @@ void SimpleSolver::Plan::DeduceVariables()
 
     ASSERT( IntersectionOf( free_variables_set, forced_variables_set ).empty() );
  
+    affected_constraints.clear();
+    completed_constraints.clear();
+    fully_forced_constraint_set.clear();
+ 
     set<VariableId> variables_check_set;
     for( shared_ptr<Constraint> c : constraints )
     {
         constraint_set.insert(c);
         
-        list<VariableId> cfvars;
-        list<VariableId> cvars = c->GetVariables();
-        for( VariableId v : cvars )
+        list<VariableId> c_vars = c->GetVariables();
+        list<VariableId> c_free_vars;
+        for( VariableId v : c_vars )
         {
             if( free_variables_set.count(v) == 1 )
-                cfvars.push_back(v);
+                c_free_vars.push_back(v);
         }        
         
-        for( VariableId v : cfvars )
+        for( VariableId v : c_free_vars )
         {
             affected_constraints[v].insert(c);
             if( variables_check_set.count(v) == 0 )
                 variables_check_set.insert( v );
         }
+                        
+        if( c_free_vars.empty() )
+        {
+            fully_forced_constraint_set.insert( c );
+        }
+        else
+        {
+            set<VariableId> cumulative_free_vars;
+            for( VariableId v : free_variables )
+            {
+                cumulative_free_vars.insert(v);
+                bool got_all_c_free_vars = true;
+                for( VariableId v : c_free_vars )
+                    if( cumulative_free_vars.count(v) == 0 )
+                        got_all_c_free_vars = false;
+                if( got_all_c_free_vars )
+                {
+                    completed_constraints[v].insert(c);
+                    break; // we're done - don't insert c for any more vars
+                }
+            }
+        }
         
-        free_vars_for_constraint[c] = cfvars;
+        free_vars_for_constraint[c] = c_free_vars;
     }
     
     TRACE("Variables supplied by engine: cross-checking\n");
@@ -107,10 +136,11 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     ScopedAssign<ReportageObserver *> sa(holder, holder_);
     ASSERT( holder );
 
-    // Do a test with all constraints but no assignments (=free variables), so forced variables 
-    // will be tested. From here on we can test only constraints affected by changed assignments.
+    // Do a test with the fully forced constraints (i.e. all vars are forced) with no assignments 
+    // (=free variables), so fully forced constraints will be tested. From here on we can test only 
+    // constraints affected by changed assignments.
     TRACE("testing\n");
-    auto t = Test( assignments, plan.constraint_set, VariableId() );
+    auto t = Test( assignments, plan.fully_forced_constraint_set, VariableId() );
     TRACE("tested\n");
     
     if( !get<0>(t) )
@@ -301,10 +331,10 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         Assignment hint;  
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
-        tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var), current_var );        
+        tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.completed_constraints.at(current_var), current_var );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok, hint) = solver.Test( assignments, solver_plan.affected_constraints.at(current_var), current_var );        
+        tie(ok, hint) = solver.Test( assignments, solver_plan.completed_constraints.at(current_var), current_var );        
 #endif
 
 #ifdef TAKE_HINTS

@@ -422,11 +422,23 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
 {
     for( auto bexpr : expressions_split )
     {
-		auto c = make_shared<CSP::SymbolicConstraint>(bexpr,
-		                                              current_solve_plinks);
+        // Constraint will require these variables
+        set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
+        
+        // If required plinks are not a subset of the current solve, the
+        // constraint's requirements will not be met. Hopefully another
+        // AndRuleEngine will (TODO check this).
+        if( IsSubset( required_plinks, current_solve_plinks ) )
+            expressions_for_current_solve.push_back(bexpr);    
+    }        
+    
+    for( auto bexpr : expressions_for_current_solve )
+    {
+        auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
         constraints_list.push_back(c);    
     }        
 }
+
 
 void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list )
 {       
