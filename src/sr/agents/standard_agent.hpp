@@ -128,15 +128,9 @@ private:
 	                           const Plan::Singular &plan_sing ) const;
                                            
     virtual bool ImplHasNLQ() const;                                            
-    void NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
-                                    const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge ) const;
     void NormalLinkedQueryCollection( const Plan::Collection &plan_col,
                                       const SolutionMap *hypothesis_links,
                                       const TheKnowledge *knowledge ) const;
-    void NormalLinkedQuerySingular( const Plan::Singular &plan_sing,
-                                    const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge ) const;
 
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       

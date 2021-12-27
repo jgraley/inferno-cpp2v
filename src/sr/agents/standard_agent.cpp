@@ -419,85 +419,6 @@ bool StandardAgent::ImplHasNLQ() const
 }
 
 
-void StandardAgent::NormalLinkedQuerySequence( const Plan::Sequence &plan_seq,
-                                               const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge ) const
-{
-    INDENT("S");
-    ASSERT( planned );
-    
-    if( hypothesis_links->count(keyer_plink)==0 )
-        return; // not attempting baseless queries
-
-    // Get the members of x corresponding to pattern's class
-    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-    
-    // We require a co-iteimise because pattern may be a base of X (i.e. 
-    // topological wild-carding). It may not be possible in general, but 
-    // IS possible if pre-restriction is satisfied.
-    if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
-        return; // Will not be able to itemise due incompatible type
-    vector< Itemiser::Element * > keyer_itemised = Itemise( keyer_xlink.GetChildX().get() );   
-    SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(keyer_itemised[plan_seq.itemise_index]);
-    
-    // If the pattern begins with a non-star, constrain the child x to be the 
-    // front node in its own sequence. A unary constraint.
-    if( plan_seq.non_star_at_front ) // independent of p_x_seq
-    {
-        if( hypothesis_links->count(plan_seq.non_star_at_front) > 0 ) 
-        {        
-            XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_front);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );         
-            if( req_xlink != nugget.my_container_front )
-                throw NotAtFrontMismatch();
-        }
-    }
-
-    // If the pattern ends with a non-star, constrain the child x to be the 
-    // back node in its own sequence. A unary constraint.
-    if( plan_seq.non_star_at_back ) // independent of p_x_seq
-    {
-        if( hypothesis_links->count(plan_seq.non_star_at_back) > 0 ) 
-        {        
-            XLink req_xlink = hypothesis_links->at(plan_seq.non_star_at_back);
-            const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_xlink) );           
-            if( req_xlink != nugget.my_container_back )
-                throw NotAtBackMismatch();
-        }
-    }
-
-    // Adjacent pairs of non-stars in the pattern should correspond to adjacent
-    // pairs of child x nodes. Only needs the two child x nodes, so binary constraint.
-    for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars ) // independent of p_x_seq
-    {
-        if( hypothesis_links->count(p.first) > 0 && hypothesis_links->count(p.second) > 0 )
-        {
-            XLink a_req_xlink = hypothesis_links->at(p.first);
-            XLink b_req_xlink = hypothesis_links->at(p.second);
-            const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
-            if( a_nugget.my_sequence_successor != b_req_xlink )
-                 throw NotSuccessorSequenceMismatch();
-        }
-    }
-    
-    // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
-    // correspond to pairs of child x nodes that are ordered correctly. Only needs 
-    // the two child x nodes, so binary constraint.    
-    for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) // independent of p_x_seq
-    {
-        if( hypothesis_links->count(p.first) > 0 && hypothesis_links->count(p.second) > 0 )
-        {
-            XLink a_req_xlink = hypothesis_links->at(p.first);
-            XLink b_req_xlink = hypothesis_links->at(p.second);
-            const TheKnowledge::Nugget &a_nugget( knowledge->GetNugget(a_req_xlink) );        
-            const TheKnowledge::Nugget &b_nugget( knowledge->GetNugget(b_req_xlink) );        
-            if( a_nugget.depth_first_index >= b_nugget.depth_first_index )
-                throw NotAfterSequenceMismatch();
-        }
-    }
-}
-
-
 void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_col,
                                                  const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const
@@ -580,31 +501,58 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed()
                                                
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-	list< shared_ptr<BooleanExpression> > s;
+	list< shared_ptr<BooleanExpression> > expr_list;
 
-    // Require that every child x link is in the correct container.
-    // Note: checking p_x_seq only on non_star_at_front and non_star_at_back
-    // is insufficient - they might both be stars.
-    for( PatternLink plink : plan_seq.non_stars )  // depends on p_x_seq
+    // Require that every candidate x link is in the correct container. Binary 
+    // constraint with keyer and candidate, for each candidate.
+    for( PatternLink candidate_plink : plan_seq.non_stars )
     {        
         auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-        auto csf_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
-        auto child_expr = MakeLazy<SymbolVariable>(plink);
-        auto mcf_expr = MakeLazy<MyContainerFrontOperator>(child_expr);
-        s.push_back( mcf_expr == csf_expr );
+        auto keyer_child_seq_front_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
+        auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
+        auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
+        expr_list.push_back( candidate_seq_front_expr == keyer_child_seq_front_expr );
     }
     
-    auto pattern_query = make_shared<PatternQuery>(this);
-    IncrPatternQuerySequence( plan_seq, pattern_query );
-    set<PatternLink> nlq_plinks = ToSetSolo( pattern_query->GetNormalLinks() );
-    nlq_plinks.insert( keyer_plink );
-    auto nlq_lambda = [this, plan_seq](const Expression::EvalKit &kit)
-	{
-        NormalLinkedQuerySequence( plan_seq, kit.hypothesis_links, kit.knowledge );
-	};
-	s.push_back( MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQSequenceArb()") );	
+    // If the pattern begins with a non-star, constrain the candidate x to be the 
+    // front node in its own sequence. A unary constraint.
+    if( plan_seq.non_star_at_front ) 
+    {
+        auto candidate_expr = MakeLazy<SymbolVariable>(plan_seq.non_star_at_front);
+        auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
+        expr_list.push_back( candidate_seq_front_expr == candidate_expr );
+    }
+ 
+    // If the pattern ends with a non-star, constrain the candidate x to be the 
+    // back node in its own sequence. A unary constraint.
+    if( plan_seq.non_star_at_back ) 
+    {
+        auto candidate_expr = MakeLazy<SymbolVariable>(plan_seq.non_star_at_back);
+        auto candidate_seq_back_expr = MakeLazy<MyContainerBackOperator>(candidate_expr);
+        expr_list.push_back( candidate_seq_back_expr == candidate_expr );
+    }
     
-    return MakeLazy<AndOperator>(s);        
+    // Adjacent pairs of non-stars in the pattern should correspond to adjacent
+    // pairs of candidate x links. Only needs the two candidate x nodes, so binary constraint.
+    for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars )
+    {
+        auto candidate_a_expr = MakeLazy<SymbolVariable>(p.first);
+        auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
+        auto candidate_a_successor_expr = MakeLazy<MySequenceSuccessorOperator>(candidate_a_expr);
+        expr_list.push_back( candidate_a_successor_expr == candidate_b_expr );
+    }
+        
+    // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
+    // correspond to pairs of candidate x nodes that are ordered correctly. Only needs 
+    // the two candidate x nodes, so binary constraint.    
+    for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) 
+    {
+        auto candidate_a_expr = MakeLazy<SymbolVariable>(p.first);
+        auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
+        expr_list.push_back( candidate_a_expr < candidate_b_expr );
+    }
+
+    return MakeLazy<AndOperator>(expr_list);        
 }                                  
 
 
