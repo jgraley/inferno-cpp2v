@@ -147,7 +147,7 @@ shared_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &ki
 
 
 shared_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                     const list<shared_ptr<SymbolResult>> &op_results ) const
+                                                               const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }

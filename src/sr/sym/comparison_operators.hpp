@@ -4,6 +4,8 @@
 #include "expression.hpp"
 #include "lazy.hpp"
 
+#include "../equivalence.hpp"
+
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 
@@ -188,6 +190,24 @@ private:
     const int item_index;
     const shared_ptr<SymbolExpression> a;
     const int size;
+};
+
+// ------------------------- EquivalentOperator --------------------------
+
+class EquivalentOperator : public SymbolToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit EquivalentOperator( list< shared_ptr<SymbolExpression> > sa );
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResult>> &op_results ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const list< shared_ptr<SymbolExpression> > sa;
+    SR::EquivalenceRelation equivalence_relation;
 };
 
 };

@@ -258,6 +258,7 @@ list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
 shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
+    // Note: could be done faster using a set<XLink>
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
     ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResult> ra,
                                                     shared_ptr<SymbolResult> rb) 
@@ -405,4 +406,58 @@ Expression::Precedence ChildCollectionSizeOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }
+
+// ------------------------- EquivalentOperator --------------------------
+
+EquivalentOperator::EquivalentOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
+    sa(sa_)
+{
+}    
+    
+
+list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
+{
+    return sa;
+}
+
+
+shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
+                                                        const list<shared_ptr<SymbolResult>> &op_results ) const 
+{
+    BooleanResult::BooleanValue m = BooleanResult::TRUE;
+    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
+                                                 shared_ptr<SymbolResult> rb) 
+    {
+        // For equality, it is sufficient to compare the x links
+        // themselves, which have the required uniqueness properties
+        // within the full arrowhead model.
+        if( !ra->xlink || !rb->xlink )
+        {
+            if( m == BooleanResult::TRUE )
+                m = BooleanResult::UNKNOWN;
+        }
+        else if( equivalence_relation.Compare(ra->xlink, rb->xlink) != EQUAL  )
+        {
+            m = BooleanResult::FALSE;
+        }
+    } );
+    return make_shared<BooleanResult>( m );   
+}
+
+
+string EquivalentOperator::Render() const
+{
+    list<string> ls;
+    for( shared_ptr<SymbolExpression> a : sa )
+        ls.push_back( RenderForMe(a) );
+    return "Equivalent" + Join(ls, ", ", "(", ")");
+}
+
+
+Expression::Precedence EquivalentOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
+
+
 

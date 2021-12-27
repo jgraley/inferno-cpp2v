@@ -58,9 +58,14 @@ public:
 
 
 template<typename OP>
-class ListFlattener
+class CreateTimeTidier
 {
 public:
+    CreateTimeTidier( bool identity_ ) :
+        identity(identity_)
+    {
+    }
+    
     list< shared_ptr<BooleanExpression> > operator()( list< shared_ptr<BooleanExpression> > in ) const
     {
         list< shared_ptr<BooleanExpression> > out;
@@ -74,13 +79,34 @@ public:
                 for( shared_ptr<Expression> sub_expr : se )
                     out.push_back( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
             }   
+            else if( auto bconst_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
+            {
+                if( bconst_expr->GetValue()->value == identity )                
+                {
+                    // drop the clause - has no effect
+                }
+                else
+                {
+                    // dominates
+                    out = { bconst_expr };
+                    break;
+                }                    
+            }
             else
             {
                 out.push_back( bexpr );
             }
         }
+        
+        if( out.empty() )
+            out = { MakeLazy<BooleanConstant>(identity) };
+            
+        ASSERT( !out.empty() );
         return out;
     }
+    
+private:
+    const bool identity;
 };
 
 // ------------------------- Solver --------------------------

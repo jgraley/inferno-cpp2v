@@ -267,18 +267,14 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
         return;
     XLink keyer = hypothesis_links->at(keyer_plink);
     
-    // Rule #384 means we can skip a coupling when keyer is MMAX
-    if( keyer == XLink::MMAX_Link )
-        return; 
-        
     for( PatternLink residual_plink : residual_plinks )
     {
         if( hypothesis_links->count(residual_plink) )
         {
             XLink residual = hypothesis_links->at(residual_plink);
-            if( residual == XLink::MMAX_Link )
-                continue;
-            
+            if( residual == XLink::MMAX_Link || keyer == XLink::MMAX_Link)
+                continue; 
+                    
             CompareResult cr = equivalence_relation.Compare( keyer, 
                                                              residual );
             if( cr != EQUAL )
@@ -332,14 +328,17 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
-    // The keyer and residuals (parent links)
-    set<PatternLink> cq_plinks = residual_plinks;
-    cq_plinks.insert( keyer_plink );
-    auto cq_lambda = [this](const Expression::EvalKit &kit)
+    auto expr = MakeLazy<BooleanConstant>(true);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
+    for( PatternLink residual_plink : residual_plinks )
     {
-        RunCouplingQuery( kit.hypothesis_links ); // throws on mismatch   
-    };
-    return MakeLazy<BooleanLambda>(cq_plinks, cq_lambda, GetTrace()+".CQ()");
+        auto residual_expr = MakeLazy<SymbolVariable>(residual_plink);
+        expr &= ( MakeLazy<EquivalentOperator>( list< shared_ptr<SymbolExpression> >({keyer_expr, residual_expr}) ) |
+                  keyer_expr == mmax_expr | // See thought on #384
+                  residual_expr == mmax_expr );
+    }
+    return expr;
 }
 
 

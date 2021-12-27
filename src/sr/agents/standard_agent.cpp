@@ -443,10 +443,10 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
 
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    auto keyer_child_seq_front_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
     for( PatternLink candidate_plink : plan_seq.non_stars )
     {        
-        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-        auto keyer_child_seq_front_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
         auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
         auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
         expr &= (candidate_seq_front_expr == keyer_child_seq_front_expr);
@@ -500,10 +500,10 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    auto keyer_child_col_front_expr = MakeLazy<ChildCollectionFrontOperator>(this, plan_col.itemise_index, keyer_expr);
     for( PatternLink candidate_plink : plan_col.non_stars )
     {        
-        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-        auto keyer_child_col_front_expr = MakeLazy<ChildCollectionFrontOperator>(this, plan_col.itemise_index, keyer_expr);
         auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
         auto candidate_col_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
         expr &= (candidate_col_front_expr == keyer_child_col_front_expr);
