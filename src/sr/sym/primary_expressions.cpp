@@ -2,7 +2,7 @@
 
 using namespace SYM;
 
-//#define THROW_ON_INCOMPLETE
+#define THROW_ON_INCOMPLETE
 
 // ------------------------- SymbolConstant --------------------------
 
