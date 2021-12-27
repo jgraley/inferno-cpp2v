@@ -21,9 +21,6 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
             shared_ptr<BooleanResult> r = bool_const_expr->GetValue();
             switch(r->value)
             {
-            case BooleanResult::UNKNOWN:
-                ASSERT(false)("Got UNKNOWN from a BooleanConstant");
-                break;
             case BooleanResult::TRUE:
                 break; // no action required
             case BooleanResult::FALSE:
