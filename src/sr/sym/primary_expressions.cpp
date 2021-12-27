@@ -2,8 +2,6 @@
 
 using namespace SYM;
 
-#define THROW_ON_INCOMPLETE
-
 // ------------------------- SymbolConstant --------------------------
 
 SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
@@ -46,11 +44,7 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     if( kit.hypothesis_links->count(plink) == 0 )
-#ifdef THROW_ON_INCOMPLETE
-        throw Incomplete(plink);
-#else
-        return make_shared<SymbolResult>( SR::XLink() );
-#endif        
+        throw Incomplete(plink);        
     
     return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
 }

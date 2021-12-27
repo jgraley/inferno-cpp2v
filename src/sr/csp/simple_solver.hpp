@@ -35,8 +35,8 @@ public:
      * @param [input] if non-null, the variables to use. Must be the same set that we would deduce from querying the constraints, but in any order.
      */
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
-                  const list<VariableId> *free_variables_, 
-                  const list<VariableId> *forced_variables_ );
+                  const list<VariableId> &free_variables, 
+                  const list<VariableId> &forced_variables );
 
     virtual void Start( const Assignments &forces,
                         const SR::TheKnowledge *knowledge );
@@ -49,20 +49,21 @@ private:
     {
         Plan( SimpleSolver *algo,
               const list< shared_ptr<Constraint> > &constraints, 
-              const list<VariableId> *free_variables_, 
-              const list<VariableId> *forced_variables_ );
-        void DeduceVariables( const list<VariableId> *free_variables_, 
-                              const list<VariableId> *forced_variables_ );
+              const list<VariableId> &free_variables, 
+              const list<VariableId> &forced_variables );
+        void DeduceVariables();
         string GetTrace() const; // used for debug
     
         SimpleSolver * const algo;
-        list<VariableId> free_variables;
-        list<VariableId> forced_variables;
-        list< shared_ptr<Constraint> > constraints;
+        const list< shared_ptr<Constraint> > constraints;
+        const list<VariableId> free_variables;
+        const list<VariableId> forced_variables;
+        
         ConstraintSet constraint_set;
         map< shared_ptr<Constraint>, list<VariableId> > free_vars_for_constraint;
 
-        map<VariableId, ConstraintSet> affected_constraints;
+        map<VariableId, ConstraintSet> affected_constraints; // does not depend on var ordering
+        map<VariableId, ConstraintSet> completed_constraints; // depends on var ordering
     } plan;
 
     void Solve( list<VariableId>::const_iterator current_it );

@@ -43,7 +43,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     
     // Extract the item indicated by item_index. 
     SR::XLink result_xlink = EvalXLinkFromItem( ar->xlink, 
-                                            keyer_itemised[item_index] );
+                                                keyer_itemised[item_index] );
     
     return make_shared<SymbolResult>( result_xlink );
 }

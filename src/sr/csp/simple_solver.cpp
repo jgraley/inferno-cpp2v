@@ -16,27 +16,25 @@ using namespace CSP;
 
 SimpleSolver::Plan::Plan( SimpleSolver *algo_,
                           const list< shared_ptr<Constraint> > &constraints_, 
-                          const list<VariableId> *free_variables_, 
-                          const list<VariableId> *forced_variables_ ) :
+                          const list<VariableId> &free_variables_, 
+                          const list<VariableId> &forced_variables_ ) :
     algo( algo_ ), 
-    constraints(constraints_)
+    constraints(constraints_),
+    free_variables(free_variables_),
+    forced_variables(forced_variables)
 {
-    DeduceVariables(free_variables_, forced_variables_);
+    DeduceVariables();
 }
 
 
-void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *free_variables_, 
-                                          const list<VariableId> *forced_variables_ )
+void SimpleSolver::Plan::DeduceVariables()
 {   
-    free_variables = *free_variables_;
-    forced_variables = *forced_variables_;
-
     set<VariableId> free_variables_set;
-    for( VariableId v : *free_variables_ )       
+    for( VariableId v : free_variables )       
         InsertSolo(free_variables_set, v); // Checks that elements of the list are unique
 
     set<VariableId> forced_variables_set;
-    for( VariableId v : *forced_variables_ )       
+    for( VariableId v : forced_variables )       
         InsertSolo(forced_variables_set, v); // Checks that elements of the list are unique
 
     ASSERT( IntersectionOf( free_variables_set, forced_variables_set ).empty() );
@@ -66,9 +64,9 @@ void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *free_variables
     
     TRACE("Variables supplied by engine: cross-checking\n");
     // A variables list was supplied and it must have the same set of variables
-    for( VariableId v : *free_variables_ )
+    for( VariableId v : free_variables )
         ASSERT( variables_check_set.count(v) == 1 );
-    ASSERT( free_variables_->size() == variables_check_set.size() );    
+    ASSERT( free_variables.size() == variables_check_set.size() );    
 }
 
 
@@ -78,10 +76,10 @@ string SimpleSolver::Plan::GetTrace() const
 }
 
 
-SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
-                            const list<VariableId> *free_variables_, 
-                            const list<VariableId> *forced_variables_ ) :
-    plan( this, constraints_, free_variables_, forced_variables_ ),
+SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
+                            const list<VariableId> &free_variables, 
+                            const list<VariableId> &forced_variables ) :
+    plan( this, constraints, free_variables, forced_variables ),
     holder(nullptr)
 {
 }

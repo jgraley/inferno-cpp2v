@@ -431,8 +431,8 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
 void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list )
 {       
     auto salg = make_shared<CSP::SimpleSolver>( constraints_list, 
-                                                &free_normal_links_ordered, 
-                                                &forced_normal_links_ordered );
+                                                free_normal_links_ordered, 
+                                                forced_normal_links_ordered );
     solver = make_shared<CSP::SolverHolder>(salg);
 }
 
