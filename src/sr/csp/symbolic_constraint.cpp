@@ -7,7 +7,7 @@
 #include "../sym/primary_expressions.hpp"
 #include "../sym/rewriters.hpp"
 
-#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
+//#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
 
 using namespace CSP;
 

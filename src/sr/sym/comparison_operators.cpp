@@ -27,12 +27,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
-        if( !ra->xlink || !rb->xlink )
-        {
-            if( m == BooleanResult::TRUE )
-                m = BooleanResult::UNKNOWN;
-        }
-        else if( ra->xlink != rb->xlink )
+        if( ra->xlink != rb->xlink )
         {
             m = BooleanResult::FALSE;
         }
@@ -85,9 +80,6 @@ shared_ptr<BooleanResult> NotEqualOperator::Evaluate( const EvalKit &kit,
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
 
-    if( !ra->xlink || !rb->xlink )
-        return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
-    
     // For (un)equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model.
@@ -138,9 +130,6 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
     ASSERT( op_results.size()==2 );
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
-
-    if( !ra->xlink || !rb->xlink )
-        return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
     
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
@@ -266,12 +255,7 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
-        if( !ra->xlink || !rb->xlink )
-        {
-            if( m == BooleanResult::TRUE )
-                m = BooleanResult::UNKNOWN;
-        }
-        else if( ra->xlink == rb->xlink )
+        if( ra->xlink == rb->xlink )
         {
             m = BooleanResult::FALSE;
         }
@@ -314,8 +298,6 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_shared<BooleanResult>( BooleanResult::UNKNOWN );
     bool matches = ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() );
     return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
 }
@@ -361,12 +343,11 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 {
     // Evaluate operand and ensure we got an XLink
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_shared<BooleanResult>(BooleanResult::UNKNOWN);
 
     // XLink must match our referee (i.e. be non-strict subtype)
+    // If not, we will say that the size was wrong
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-        return make_shared<BooleanResult>(BooleanResult::UNKNOWN); // Will not be able to itemise due incompatible type
+        return make_shared<BooleanResult>(BooleanResult::FALSE); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -431,12 +412,7 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
-        if( !ra->xlink || !rb->xlink )
-        {
-            if( m == BooleanResult::TRUE )
-                m = BooleanResult::UNKNOWN;
-        }
-        else if( equivalence_relation.Compare(ra->xlink, rb->xlink) != EQUAL  )
+        if( equivalence_relation.Compare(ra->xlink, rb->xlink) != EQUAL  )
         {
             m = BooleanResult::FALSE;
         }

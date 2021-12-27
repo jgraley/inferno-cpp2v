@@ -27,14 +27,10 @@ list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() 
 shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
                                                   const list<shared_ptr<SymbolResult>> &op_results ) const
 {
-    // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_shared<SymbolResult>();
-
     // XLink must match our referee (i.e. be non-strict subtype)
+    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-        return make_shared<SymbolResult>(); // Will not be able to itemise due incompatible type
+        return make_shared<SymbolResult>(SR::XLink::UndefinedLink); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -179,10 +175,7 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
                                                               const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
-    if( !ar->xlink )
-        return make_shared<SymbolResult>();
-        
+    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);       
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
     SR::XLink result_xlink = EvalXLinkFromNugget( ar->xlink, nugget );
     return make_shared<SymbolResult>( result_xlink );
