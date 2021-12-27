@@ -98,16 +98,16 @@ ClutchRewriter::ClutchRewriter( shared_ptr<SymbolExpression> disengager_expr_ ) 
 
 shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExpression> original_expr) const
 {
-	list< shared_ptr<BooleanExpression> > s_disengaged, s_engaged;
+    // Implement strict clutch policy: ALL or NONE of the required vars 
+    // must be disengager. If some but not all are disengager we don't get a match.
+    auto all_disengaged_expr = MakeLazy<BooleanConstant>(true);
+    auto all_engaged_expr = MakeLazy<BooleanConstant>(true);
     for( SR::PatternLink plink : original_expr->GetRequiredVariables() )
     {
         auto x = MakeLazy<SymbolVariable>(plink);
-        s_disengaged.push_back( x == disengager_expr );
-        s_engaged.push_back( x != disengager_expr );
+        all_disengaged_expr &= ( x == disengager_expr );
+        all_engaged_expr &= ( x != disengager_expr );
     }
-
-    auto all_disengaged_expr = MakeLazy<AndOperator>(s_disengaged);
-    auto all_engaged_expr = MakeLazy<AndOperator>(s_engaged);
 
     return (original_expr & all_engaged_expr) | all_disengaged_expr;
 }    

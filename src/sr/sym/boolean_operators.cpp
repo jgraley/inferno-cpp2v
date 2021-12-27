@@ -40,6 +40,8 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
 
 string AndOperator::Render() const
 {
+    if( sa.empty() )
+        return "TRUE(empty-And)";
     list<string> ls;
     for( shared_ptr<BooleanExpression> a : sa )
         ls.push_back( RenderForMe(a) );
@@ -100,6 +102,8 @@ shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
 
 string OrOperator::Render() const
 {
+    if( sa.empty() )
+        return "FALSE(empty-Or)";
     list<string> ls;
     for( shared_ptr<BooleanExpression> a : sa )
         ls.push_back( RenderForMe(a) );

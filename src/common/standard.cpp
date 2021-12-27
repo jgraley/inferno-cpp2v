@@ -115,6 +115,7 @@ string Join( const list<string> &ls, string sep, string pre, string post )
     s += pre;
     for( string si : ls )
     {
+        ASSERT( !si.empty() )("Empty string in Join(); got ")(ls);
         if( !first )
             s += sep;
         first = false;

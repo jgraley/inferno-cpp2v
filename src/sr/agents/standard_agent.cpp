@@ -482,26 +482,26 @@ void StandardAgent::NormalLinkedQueryCollection( const Plan::Collection &plan_co
 
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
-SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
+Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
-	list< shared_ptr<BooleanExpression> > s;
+	auto expr = MakeLazy<BooleanConstant>(true);
 
     for( const Plan::Singular &plan_sing : plan.singulars )
-        s.push_back( SymbolicNormalLinkedQuerySingular( plan_sing ) );
+        expr &= SymbolicNormalLinkedQuerySingular( plan_sing );
 
     for( const Plan::Collection &plan_col : plan.collections )
-        s.push_back( SymbolicNormalLinkedQueryCollection( plan_col ) );
+        expr &= SymbolicNormalLinkedQueryCollection( plan_col );
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
-        s.push_back( SymbolicNormalLinkedQuerySequence( plan_seq ) );
+        expr &= SymbolicNormalLinkedQuerySequence( plan_seq );
 
-    return MakeLazy<AndOperator>(s);    
+    return expr;    
 }                                  
 
                                                
-SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
+Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-	list< shared_ptr<BooleanExpression> > expr_list;
+	auto expr = MakeLazy<BooleanConstant>(true);
 
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
@@ -511,7 +511,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
         auto keyer_child_seq_front_expr = MakeLazy<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
         auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
         auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
-        expr_list.push_back( candidate_seq_front_expr == keyer_child_seq_front_expr );
+        expr &= (candidate_seq_front_expr == keyer_child_seq_front_expr);
     }
     
     // If the pattern begins with a non-star, constrain the candidate x to be the 
@@ -520,7 +520,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
     {
         auto candidate_expr = MakeLazy<SymbolVariable>(plan_seq.non_star_at_front);
         auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
-        expr_list.push_back( candidate_seq_front_expr == candidate_expr );
+        expr &= ( candidate_seq_front_expr == candidate_expr );
     }
  
     // If the pattern ends with a non-star, constrain the candidate x to be the 
@@ -529,7 +529,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
     {
         auto candidate_expr = MakeLazy<SymbolVariable>(plan_seq.non_star_at_back);
         auto candidate_seq_back_expr = MakeLazy<MyContainerBackOperator>(candidate_expr);
-        expr_list.push_back( candidate_seq_back_expr == candidate_expr );
+        expr &= ( candidate_seq_back_expr == candidate_expr );
     }
     
     // Adjacent pairs of non-stars in the pattern should correspond to adjacent
@@ -539,7 +539,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
         auto candidate_a_expr = MakeLazy<SymbolVariable>(p.first);
         auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
         auto candidate_a_successor_expr = MakeLazy<MySequenceSuccessorOperator>(candidate_a_expr);
-        expr_list.push_back( candidate_a_successor_expr == candidate_b_expr );
+        expr &= ( candidate_a_successor_expr == candidate_b_expr );
     }
         
     // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
@@ -549,10 +549,10 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequen
     {
         auto candidate_a_expr = MakeLazy<SymbolVariable>(p.first);
         auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
-        expr_list.push_back( candidate_a_expr < candidate_b_expr );
+        expr &= ( candidate_a_expr < candidate_b_expr );
     }
 
-    return MakeLazy<AndOperator>(expr_list);        
+    return expr;        
 }                                  
 
 
@@ -574,9 +574,9 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
     auto keyer = MakeLazy<SymbolVariable>(keyer_plink);
-    auto sing = MakeLazy<ChildSingularOperator>( this, plan_sing.itemise_index, keyer );
-    auto child = MakeLazy<SymbolVariable>(plan_sing.plink);
-    return sing == child;
+    auto keyer_sing_expr = MakeLazy<ChildSingularOperator>( this, plan_sing.itemise_index, keyer );
+    auto candidate_expr = MakeLazy<SymbolVariable>(plan_sing.plink);
+    return keyer_sing_expr == candidate_expr;
 }                                  
 
 // ---------------------------- Regeneration Queries ----------------------------------                                               

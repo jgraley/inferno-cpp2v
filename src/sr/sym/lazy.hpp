@@ -31,6 +31,18 @@ public:
     {
         return pexpr;
     }
+    
+    Lazy<EVALTYPE> operator &=( Lazy<EVALTYPE> other )
+    {
+        pexpr = shared_ptr<EVALTYPE>(*this & other);
+        return *this;
+    }
+
+    Lazy<EVALTYPE> operator |=( Lazy<EVALTYPE> other )
+    {
+        pexpr = shared_ptr<EVALTYPE>(*this | other);
+        return *this;
+    }
 
 private:    
     shared_ptr<EVALTYPE> pexpr;        

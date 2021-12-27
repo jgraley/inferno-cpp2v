@@ -66,7 +66,7 @@ public:
         list< shared_ptr<BooleanExpression> > out;
         for( auto bexpr : in )
         {
-            // Use non-solo inserts because we do want to de-duplciate if
+            // Use non-solo inserts because we do want to de-duplicate if
             // the same expr appears more than once
             if( auto and_expr = dynamic_pointer_cast<OP>((shared_ptr<BooleanExpression>)bexpr) )
             {
@@ -97,6 +97,15 @@ private:
 
 // ------------------------- ClutchRewriter --------------------------
 
+// The clutch idea works like this:
+//  - CSP solvers will only find solutions when all constraints are 
+//    satisfied. Constraints are made from symbolic expressions.
+//  - There are symbolic expressions that we wish to make "optional"
+//  - This is likened to disengaging a clutch in a car.
+//  - Disengagement occurs when the required variables match the 
+//    disengager expression, usually a constant (MMAX)
+//  - Given disengager and original expressions, the clutched
+//    version is just a combination of these and some new logic.
 class ClutchRewriter
 {
 public:    

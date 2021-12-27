@@ -345,8 +345,8 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 
 SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
-    auto keyer = MakeLazy<SymbolVariable>(keyer_plink);
-	return MakeLazy<KindOfOperator>(this, keyer);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+	return MakeLazy<KindOfOperator>(this, keyer_expr);
 }
 
 
