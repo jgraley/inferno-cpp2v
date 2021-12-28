@@ -24,7 +24,6 @@ class BooleanResult : public Result
 public:
     enum BooleanValue
     {
-        UNKNOWN,
         TRUE,
         FALSE
     };    

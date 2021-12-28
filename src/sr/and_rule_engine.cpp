@@ -395,7 +395,9 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
 
 void AndRuleEngine::Plan::SymbolicRewrites()
 {    
+    //TRACE("expressions_from_agents:\n")(expressions_from_agents)("\n");
     expressions_split = SYM::PreprocessForEngine()(expressions_from_agents);
+    //TRACE("expressions_split:\n")(expressions_split)("\n");
 }
 
 

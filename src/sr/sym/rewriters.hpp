@@ -81,7 +81,7 @@ public:
             }   
             else if( auto bconst_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
             {
-                if( bconst_expr->GetValue()->value == identity )                
+                if( bconst_expr->GetValue()->value == (identity ? BooleanResult::TRUE : BooleanResult::FALSE) )                
                 {
                     // drop the clause - has no effect
                 }

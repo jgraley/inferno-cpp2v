@@ -46,7 +46,8 @@ void SimpleSolver::Plan::DeduceVariables()
     completed_constraints.clear();
     fully_forced_constraint_set.clear();
  
-    set<VariableId> variables_check_set;
+    set<VariableId> free_variables_used_by_constraints; // For a cross-check
+    //TRACE("Constraints:\n")(constraints)("\n");
     for( shared_ptr<Constraint> c : constraints )
     {
         constraint_set.insert(c);
@@ -58,12 +59,11 @@ void SimpleSolver::Plan::DeduceVariables()
             if( free_variables_set.count(v) == 1 )
                 c_free_vars.push_back(v);
         }        
-        
         for( VariableId v : c_free_vars )
         {
             affected_constraints[v].insert(c);
-            if( variables_check_set.count(v) == 0 )
-                variables_check_set.insert( v );
+            if( free_variables_used_by_constraints.count(v) == 0 )
+                free_variables_used_by_constraints.insert( v );
         }
                         
         if( c_free_vars.empty() )
@@ -92,10 +92,12 @@ void SimpleSolver::Plan::DeduceVariables()
     }
     
     TRACE("Variables supplied by engine: cross-checking\n");
-    // A variables list was supplied and it must have the same set of variables
+    // Ensure that every free variable supplied to our constructor is
+    // used by at least one constraint.
     for( VariableId v : free_variables )
-        ASSERT( variables_check_set.count(v) == 1 );
-    ASSERT( free_variables.size() == variables_check_set.size() );    
+        ASSERT( free_variables_used_by_constraints.count(v) == 1 )
+              ("free_variables:\n")(free_variables)
+              ("\nfree_variables_used_by_constraints:\n")(free_variables_used_by_constraints); 
 }
 
 
