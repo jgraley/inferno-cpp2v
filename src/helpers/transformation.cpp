@@ -49,7 +49,7 @@ void TransformationVector::operator()( TreePtr<Node> context,     // The whole p
 {
     INDENT("¬");
     TreePtr<Node> *pcontext;
-    if( context = *proot )
+    if( context == *proot )
         pcontext = proot;
     else 
         pcontext = &context;

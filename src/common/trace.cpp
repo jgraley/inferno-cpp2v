@@ -288,7 +288,7 @@ void Tracer::PrintPrefix()
 
 void Tracer::MaybePrintBanner()
 {
-    if( require_banner && (file != "" || line != 0 || instance != "" || function != "") )
+    if( require_banner && (strcmp(file, "") != 0 || line != 0 || instance != "" || strcmp(function, "") != 0) )
     {
         string indot;
         if( instance != "" && instance.substr(instance. size()-2) != "::" )

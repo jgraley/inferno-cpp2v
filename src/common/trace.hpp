@@ -362,7 +362,7 @@ private:
 #define TRACES if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION )
 #define FTRACES Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
 #define TRACEC if(!Tracer::IsEnabled()) {} else Tracer()
-#define FTRACEC Tracer(Tracer::FORCE)
+#define FTRACEC Tracer{Tracer::FORCE}
 
 // Asserts and such...
 #define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )

@@ -72,9 +72,9 @@ struct Node : NodeBases,
     
     // It's nice to share. So we try to make these available to other 
     // graphables, such as agents
-    static list<Graphable::SubBlock> GetSubblocks( const SequenceInterface *seq, 
+    static list<Graphable::SubBlock> GetSubblocks( SequenceInterface *seq, 
                                                    Phase phase=Graphable::UNDEFINED );
-    static list<Graphable::SubBlock> GetSubblocks( const CollectionInterface *col, 
+    static list<Graphable::SubBlock> GetSubblocks( CollectionInterface *col, 
                                                    Phase phase=Graphable::UNDEFINED );
     static list<Graphable::SubBlock> GetSubblocks( const TreePtrInterface *singular, 
                                                    Phase phase=Graphable::UNDEFINED );

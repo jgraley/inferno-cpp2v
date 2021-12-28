@@ -328,7 +328,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         return *this;
     }
 
-    using typename Impl::insert; // due to silly C++ rule where different overloads hide each other
+    using Impl::insert; // due to silly C++ rule where different overloads hide each other
     inline Sequential<VALUE_TYPE>() {}
 	struct iterator : public ContainerCommon<Impl>::iterator
     {

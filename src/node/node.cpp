@@ -53,7 +53,7 @@ Graphable::Block Node::GetGraphBlockInfo() const
 }
 
 
-list<Graphable::SubBlock> Node::GetSubblocks( const SequenceInterface *seq, 
+list<Graphable::SubBlock> Node::GetSubblocks( SequenceInterface *seq, 
                                               Phase phase )
 {
     list<SubBlock> sub_blocks;
@@ -76,7 +76,7 @@ list<Graphable::SubBlock> Node::GetSubblocks( const SequenceInterface *seq,
 }
 
 
-list<Graphable::SubBlock> Node::GetSubblocks( const CollectionInterface *col, 
+list<Graphable::SubBlock> Node::GetSubblocks( CollectionInterface *col, 
                                               Phase phase )
 {
     list<SubBlock> sub_blocks;

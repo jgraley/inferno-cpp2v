@@ -12,9 +12,12 @@ ILC_OPTIONS +=
 # Use the C++11 standard 
 OPTIONS += -std=c++11
  
-# This warning is hard to deal with in C++11
-#OPTIONS += -Wno-virtual-move-assign 
- 
+# [for clang] There are LOTS of missing overrides see #452
+OPTIONS += -Wno-inconsistent-missing-override 
+
+# [for clang] our TRACE and ASSERT macros use dangling else in a safe way
+OPTIONS += -Wno-dangling-else
+
 # No path needed when include file is in same directory
 OPTIONS += -I.
 
