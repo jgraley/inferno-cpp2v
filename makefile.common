@@ -1,8 +1,13 @@
 # If including this from a subdirectory, preset LEVEL the the required amount of ..
 LEVEL ?= .
 
-# Standard tools
+# Compiler used for Inferno, LLVM and clang 
 ICC ?= g++
+
+# Compiler used for resources
+RCC ?= g++
+
+# Standard tools
 AR ?= ar
 MAKE ?= make
  
@@ -43,7 +48,7 @@ OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
 OPTIONS += -ggdb3
 
 # Enable profiling
-OPTIONS += -pg
+#OPTIONS += -pg
 
 # Workaround compile error with SystemC
 OPTIONS += -fpermissive
