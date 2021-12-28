@@ -989,6 +989,7 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
     
     switch( phase )
     {
+    case UNDEFINED:
     case IN_COMPARE_ONLY:
     case IN_COMPARE_AND_REPLACE:
         //atts += "style=\"solid\"\n";

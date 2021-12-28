@@ -442,7 +442,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     {
         try
         {
-            Tracer::RAIIDisable silencer(); // make ref algo be quiet            
+            Tracer::RAIIDisable silencer; // make ref algo be quiet            
             (void)StartRegenerationQuery( hypothesis_links, knowledge, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
@@ -459,7 +459,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     // FastStartNormalLinkedQuery() didn't throw
     try
     {
-        Tracer::RAIIDisable silencer(); // make ref algo be quiet             
+        Tracer::RAIIDisable silencer; // make ref algo be quiet             
         ref_lambda = StartRegenerationQuery( hypothesis_links, knowledge, true );        
     }
     catch( ::Mismatch &e ) 
@@ -488,7 +488,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
             try 
             { 
                 {
-                    Tracer::RAIIDisable silencer(); // make ref algo be quiet            
+                    Tracer::RAIIDisable silencer; // make ref algo be quiet            
                     ref_query = ref_lambda(); 
                 }
                 TRACE("Ref lambda hit #%d\n", (*ref_hits))
@@ -510,7 +510,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
         try
         {
             {
-                Tracer::RAIIDisable silencer(); // make ref algo be quiet             
+                Tracer::RAIIDisable silencer; // make ref algo be quiet             
                 ref_query = ref_lambda(); 
             }
             TRACE("Ref lambda hit #%d\n", (*ref_hits))
@@ -1014,7 +1014,7 @@ bool SpecialBase::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
     if( ptr )		// is normal tree link
     {
         if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*ptr) )   // is to a special node
-        {
+        {            
             if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchetype()) ) )    // pre-restrictor is nontrivial
             {
                 return true;

@@ -122,7 +122,7 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	{
 		if( TreePtr<SpecificIdentifier> ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
         {
-            if( !unique.count(ii) > 0 )
+            if( unique.count(ii) == 0 )
                 return ERROR_UNKNOWN( SSPrintf("identifier %s undeclared", ii->GetRender().c_str() ) );
             ids = unique.at(ii);
         }
@@ -508,12 +508,12 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 	string s;
 
 	// Get a reference to the ordered list of members for this record from a backing list
-	if( !backing_ordering.count( r ) > 0 )
+	if( backing_ordering.count( r ) == 0 )
 	{
 	    TRACE("Needed to see ")(*r)(" before ")(*ro)(" so map may not match; sorting now\n");	    
 	    backing_ordering[r] = SortDecls( r->members, true, &unique );
 	}
-	ASSERT( backing_ordering.count( r ) >  0 );
+	ASSERT( backing_ordering.count( r ) > 0 );
 	Sequence<Declaration> &sd = backing_ordering[r];
 	ASSERT( sd.size() == r->members.size() );
 	bool first = true;

@@ -233,7 +233,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           ReadArgs::trace, false, false, false,
           SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
           nullptr, 
-          [this](){ Parse(ReadArgs::infile)( algo->program, &algo->program ); } }
+          [this](){ Parse{ ReadArgs::infile }( algo->program, &algo->program ); } }
     );
     
     // Render output X
@@ -241,7 +241,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
         { Progress::RENDERING, 
           false, ReadArgs::trace_hits, false, false,
           "Rendering output to code", 
-          nullptr, [&](){ Render( ReadArgs::outfile )( &algo->program ); } }
+          nullptr, [&](){ Render{ ReadArgs::outfile }( &algo->program ); } }
     );
 
     // Output a pattern graph

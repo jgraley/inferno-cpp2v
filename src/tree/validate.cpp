@@ -76,7 +76,7 @@ void Validate::operator()( TreePtr<Node> context,
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.
 			TreePtr<Node> y( dynamic_pointer_cast<Node>((*x).Clone()) );
-			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(wit);
+			ASSERT( y->GetName()==x->GetName() )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(wit);
         }
 
 		if( x && x != context && connected ) // Skip the root, since we won't have counted any refs to it

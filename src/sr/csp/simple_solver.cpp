@@ -21,7 +21,7 @@ SimpleSolver::Plan::Plan( SimpleSolver *algo_,
     algo( algo_ ), 
     constraints(constraints_),
     free_variables(free_variables_),
-    forced_variables(forced_variables)
+    forced_variables(forced_variables_)
 {
     DeduceVariables();
 }

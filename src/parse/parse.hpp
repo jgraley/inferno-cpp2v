@@ -1003,6 +1003,8 @@ private:
                 o=TreePtr<NODE>(new NODE);\
                 break;
 #include "tree/operator_db.inc"
+            default:
+                ASSERTFAIL("Unsupported token kind");
 		}
 		ASSERT( o );
 		if( TreePtr<NonCommutativeOperator> nco = DynamicTreePtrCast< NonCommutativeOperator >(o) )
@@ -1033,6 +1035,8 @@ private:
 	            o=TreePtr<NODE>(new NODE); \
 	            break;
 #include "tree/operator_db.inc"
+            default:
+                ASSERTFAIL("Unsupported token kind");
 		}
 		ASSERT( o );
 		o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -1051,6 +1055,8 @@ private:
                 o=TreePtr<NODE>(new NODE); \
                 break;
 #include "tree/operator_db.inc"
+            default:
+                ASSERTFAIL("Unsupported token kind");
 		}
 		ASSERT( o );
 		o->operands.push_back( hold_expr.FromRaw(Input) );

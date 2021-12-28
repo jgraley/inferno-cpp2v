@@ -403,7 +403,7 @@ TreePtr<Node> SCREngine::Replace( const SolutionMap *master_solution )
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
     // and that would break knowledge building. See #217
-    {Tracer::RAIIDisable silencer();return plan.root_agent->DuplicateSubtree(new_root_x);}
+    {Tracer::RAIIDisable silencer;return plan.root_agent->DuplicateSubtree(new_root_x);}
 }
 
 
