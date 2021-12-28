@@ -124,6 +124,11 @@ void SimpleSolver::Start( const Assignments &forces,
     forced_assignments = forces;
     knowledge = knowledge_;
 
+    // Check that the forces passed to us here match the plan
+    for( VariableId v : plan.forced_variables )           
+        ASSERT( forces.count(v) == 1 );
+    ASSERT( forces.size() == plan.forced_variables.size() );
+
     // Tell all the constraints about the forces
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
         c->Start( knowledge );
