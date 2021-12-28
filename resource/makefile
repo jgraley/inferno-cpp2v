@@ -6,7 +6,7 @@ resource : ${RESOURCE_ARTEFACTS}
 
 resource/lib/sc_glue.o : resource/src/sc_glue.cpp makefile.common
 	mkdir -p resource/lib
-	$(RCC) -c $(OPTIONS) resource/src/sc_glue.cpp -o resource/lib/sc_glue.o -Isystemc/include
+	$(ICC) -c $(OPTIONS) resource/src/sc_glue.cpp -o resource/lib/sc_glue.o -Isystemc/include
 
 #JSG Due to SystemC bug discussed here: http://www.accellera.org/Discussion_Forums/systemc-forum/archive/msg?list_name=systemc-forum&monthdir=201002&msg=msg00026.html
 # I have to use -fpermissive and cannot use -Werror (in $OPTIONS) even though I want to. Apparently a fix is in SystemC 2.3 which is in betaa presently. TODO ensure using SC2.3+ and revert bodge here.
