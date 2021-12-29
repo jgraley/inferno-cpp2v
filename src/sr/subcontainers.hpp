@@ -85,7 +85,6 @@ struct SubContainerRangeExclusions : SubContainerRange
 		bool operator!=( const exclusion_iterator &i ) const;
 		void Overwrite( const value_type *v ) const;
 		const bool IsOrdered() const;
-		const int GetCount() const;
 		iterator_interface *GetUnderlyingIterator() const;
 		virtual shared_ptr<iterator_interface> Clone() const ;
 		operator string();

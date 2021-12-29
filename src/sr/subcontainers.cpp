@@ -167,12 +167,6 @@ const bool SubContainerRangeExclusions::exclusion_iterator::IsOrdered() const
 }
 
 
-const int SubContainerRangeExclusions::exclusion_iterator::GetCount() const
-{
-    return pib->GetCount();
-}
-
-
 ContainerInterface::iterator_interface *SubContainerRangeExclusions::exclusion_iterator::GetUnderlyingIterator() const
 {
     if( pib )

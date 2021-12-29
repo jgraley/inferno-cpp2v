@@ -20,13 +20,7 @@
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
-//
-// Template for a base class for STL containers with forward iterators.
-// Supports direct calls and iterators.
-//
-// VALUE_INTERFACE should
-// be a base (or compatible type) for the elements of all sub-containers.
-//
+//----------------------- ContainerInterface -------------------------
 
 class ContainerInterface : public virtual Traceable, public virtual Itemiser::Element
 {
@@ -37,20 +31,18 @@ public:
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
-		virtual iterator_interface &operator--() { ASSERTFAIL("Only on reversible iterator"); };
+		virtual iterator_interface &operator--();
 		const virtual TreePtrInterface &operator*() const = 0;
 		const virtual TreePtrInterface *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
 		virtual void Overwrite( const TreePtrInterface *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
-		virtual const int GetCount() const { ASSERTFAIL("Only on CountingIterator"); }
 	};
 
 public:
 	// Wrapper for iterator_interface, uses boost::shared_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible. These can be passed around
 	// by value, and have copy-on-write semantics, so big iterators will actually get optimised
-	// (in your face, Stepanov!)
 	class iterator : public iterator_interface
 	{
 	public:
@@ -60,124 +52,25 @@ public:
 		typedef const value_type *pointer;
 		typedef const value_type &reference;
 
-		iterator() :
-			pib( shared_ptr<iterator_interface>() ) {}
+		iterator();
+		iterator( const iterator_interface &ib );
 
-		iterator( const iterator_interface &ib ) 
-        {
-            if( typeid(*this)==typeid(ib) )
-                pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
-            else
-                pib = ib.Clone(); // Deep copy because from unmanaged source
-        }
-
-		iterator &operator=( const iterator_interface &ib )
-		{
-            if( typeid(*this)==typeid(ib) )
-                pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
-            else
-                pib = ib.Clone(); // Deep copy because from unmanaged source
-			return *this;
-		}
-
-		iterator &operator++()
-		{
-			ASSERT(pib)("Attempt to increment uninitialised iterator");
-			EnsureUnique();
-			pib->operator++();
-			return *this;
-		}
-
-		iterator &operator--()
-		{
-			ASSERT(pib)("Attempt to increment uninitialised iterator");
-			EnsureUnique();
-			pib->operator--();
-			return *this;
-		}
-
-		const value_type &operator*() const 
-		{
-			ASSERT(pib)("Attempt to dereference uninitialised iterator");
-			return pib->operator*();
-		}
-
-		const value_type *operator->() const
-		{
-			ASSERT(pib)("Attempt to dereference uninitialised iterator");
-			return pib->operator->();
-		}
-
-		bool operator==( const iterator_interface &ib ) const // isovariant param
-		{
-            if( typeid(*this)==typeid(ib) )
-                return operator==(dynamic_cast<const iterator &>(ib));
-            else
-                return pib->operator==(ib); 
-        }
-
-		bool operator==( const iterator &i ) const // covariant param
-		{
-			ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
-			return pib->operator==( *(i.pib) );
-		}
-
-		bool operator!=( const iterator_interface &ib ) const // isovariant param
-		{
-			return !operator==( ib );
-		}
-        
-		bool operator!=( const iterator &i ) const // covariant param
-		{
-			ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
-			return !operator==( i );
-		}
-
-		void Overwrite( const value_type *v ) const
-		{
-			ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
-		    pib->Overwrite( v );
-		}
-				
-		const bool IsOrdered() const
-		{
-			return pib->IsOrdered();
-		}
-
-		const int GetCount() const
-		{
-			return pib->GetCount();
-		}
-
-		iterator_interface *GetUnderlyingIterator() const
-		{
-			if( pib )
-				return pib.get();
-			else
-				return nullptr;
-		}
-		
-		virtual shared_ptr<iterator_interface> Clone() const 
-		{
-			return make_shared<iterator>(*this);
-		}
-		
-		explicit operator string()
-		{   
-		    if( pib )
-		        return Traceable::TypeIdName( *pib );
-		    else 
-		        return string("UNINITIALISED");
-		}
+		iterator &operator=( const iterator_interface &ib );
+		iterator &operator++();
+		iterator &operator--();
+		const value_type &operator*() const;
+		const value_type *operator->() const;
+        bool operator==( const iterator_interface &ib ) const; // isovariant param
+        bool operator==( const iterator &i ) const; // covariant param;
+		bool operator!=( const iterator_interface &ib ) const; // isovariant param;
+		bool operator!=( const iterator &i ) const; // covariant param;
+		void Overwrite( const value_type *v ) const;
+		const bool IsOrdered() const;
+		iterator_interface *GetUnderlyingIterator() const;
+		virtual shared_ptr<iterator_interface> Clone() const ;
+		explicit operator string();
 	protected:
-		void EnsureUnique()
-		{
-			// Call this before modifying the underlying iterator - Performs a deep copy
-			// if required to make sure there are no other refs.
-			if( pib && !pib.unique() )
-				pib = pib->Clone();
-			ASSERT( !pib || pib.unique() );
-		}
+		void EnsureUnique();
 
 		shared_ptr<iterator_interface> pib;
 	};
@@ -187,29 +80,11 @@ public:
     virtual void insert( const TreePtrInterface &gx ) = 0;
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
-    virtual const TreePtrInterface &front()
-    {
-        ASSERT( !empty() )("Attempting to obtain front() of an empty container");
-        return *begin();
-    }
-    virtual const TreePtrInterface &back()
-    {
-        ASSERT( !empty() )("Attempting to obtain back() of an empty container");
-        iterator t = end();
-        --t;
-        return *t;
-    }
+    virtual const TreePtrInterface &front();
+    virtual const TreePtrInterface &back();
     virtual void erase( const iterator_interface &it ) = 0;
-    virtual bool empty() { return begin()==end(); }
-    virtual int size() const
-    {
-    	// TODO support const_interator properly and get rid of this const_cast
-    	ContainerInterface *nct = const_cast<ContainerInterface *>(this);
-    	int n=0;
-    	FOREACH( const TreePtrInterface &x, *nct )
-    	    n++;
-    	return n;
-    }
+    virtual bool empty();
+    virtual int size() const;
     virtual void clear() = 0;
 };
 
@@ -572,140 +447,6 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 	}
 };
 
-//
-// Iterator that points to a single object, no container required.
-// We do not support looping/incrementing or FOREACH (which requires a
-// container) but we do permit compare, deref and Overwrite(). This lets
-// ContainerInterface::iterator be used generically even when objects are
-// not in containers.
-//
-struct PointIterator : public ContainerInterface::iterator_interface
-{
-    TreePtrInterface * element;
-
-    PointIterator() :
-        element(nullptr) // means end-of-range
-    {
-    }
-
-    PointIterator( const PointIterator &other ) :
-        element(other.element)
-    {
-    }
-
-    explicit PointIterator( TreePtrInterface *i ) :
-        element(i)
-    {      
-        ASSERT(i); // We don't allow nullptr as input because it means end-of-range
-    }
-
-	virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
-	{
-		shared_ptr<PointIterator> ni( new PointIterator(*this) );
-		return ni;
-	}
-
-	virtual PointIterator &operator++()
-	{
-		element = nullptr; // ie if we increment, we get to the end of the range
-		return *this;
-	}
-
-	virtual TreePtrInterface &operator*() const
-	{
-	    ASSERT(element)("Tried to dereference nullptr PointIterator");
-		return *element;
-	}
-
-	virtual TreePtrInterface *operator->() const
-	{
-	    ASSERT(element)("Tried to dereference nullptr PointIterator");
-		return element;
-	}
-
-	virtual bool operator==( const typename ContainerInterface::iterator_interface &ib ) const
-	{
-		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
-		ASSERT(pi)("Comparing point iterator with something else ")(ib);
-		return pi->element == element;
-	}
-	
-	virtual void Overwrite( const TreePtrInterface *v ) const
-	{
-	    *element = *v;
-	}
-
-	virtual const bool IsOrdered() const
-	{
-		return true; // shouldn't matter what we return here
-	}
-};
-
-
-struct CountingIterator : public ContainerInterface::iterator_interface
-{
-    int element;
-
-    CountingIterator() :
-        element(0)
-    {
-    }
-
-    explicit CountingIterator( int i ) :
-        element(i)
-    {
-    }
-
-	virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
-	{
-		shared_ptr<CountingIterator> ni( new CountingIterator(*this) );
-		return ni;
-	}
-
-	virtual CountingIterator &operator++()
-	{
-		element++;
-		return *this;
-	}
-
-	virtual CountingIterator &operator--()
-	{
-		element--;
-		return *this;
-	}
-
-	virtual TreePtrInterface &operator*() const
-	{
-	    ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
-	}
-
-	const virtual TreePtrInterface *operator->() const
-	{
-		ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
-	}
-
-	virtual bool operator==( const typename ContainerInterface::iterator_interface &ib ) const
-	{
-		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
-		ASSERT(pi)("Comparing counting iterator with something else ")( ib );
-		return pi->element == element;
-	}
-
-	virtual void Overwrite( const TreePtrInterface *v ) const
-	{
-	    ASSERTFAIL("Cannot Overwrite through CountingIterator");
-	}
-
-	virtual const bool IsOrdered() const
-	{
-		return true; // counting iterator counts 1, 2, 3, like that, so seems to be ordered
-	}
-
-	const int GetCount() const
-	{
-		return element;
-	}
-};
 
 // Allow operator, to be used to create pairs. Also handy for maps.
 template<typename L, typename R>
