@@ -8,9 +8,7 @@
 #include <set>
 #include <bits/stdint-uintn.h>
 #include <memory>
-#include <algorithm>
 #include <stdarg.h>
-#include <unordered_map>
 
 // JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
 #include <boost/foreach.hpp>

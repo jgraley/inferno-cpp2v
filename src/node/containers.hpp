@@ -15,6 +15,7 @@
 #include <list>
 #include <set>
 #include <iterator>
+#include <algorithm>
 
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
