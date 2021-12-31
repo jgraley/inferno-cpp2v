@@ -1,7 +1,6 @@
 #ifndef SLAVE_AGENT_HPP
 #define SLAVE_AGENT_HPP
 
-#include "agent.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "../scr_engine.hpp" 

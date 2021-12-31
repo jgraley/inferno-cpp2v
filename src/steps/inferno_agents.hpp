@@ -1,7 +1,7 @@
 #ifndef INFERNO_AGENTS_HPP
 #define INFERNO_AGENTS_HPP
 
-#include "sr/agents/agent.hpp"
+#include "sr/agents/agent_common.hpp"
 #include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
 #include "tree/sctree.hpp"

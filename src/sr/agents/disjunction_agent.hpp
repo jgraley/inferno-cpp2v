@@ -1,6 +1,7 @@
 #ifndef DISJUNCTION_AGENT_HPP
 #define DISJUNCTION_AGENT_HPP
 
+#include "agent_common.hpp"
 #include "../search_replace.hpp"
 #include "../boolean_evaluator.hpp"
 

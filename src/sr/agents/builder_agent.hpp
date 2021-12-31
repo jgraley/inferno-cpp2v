@@ -2,7 +2,7 @@
 #define BUILDER_AGENT_HPP
 
 #include "../search_replace.hpp"
-#include "agent.hpp"
+#include "agent_common.hpp"
 
 namespace SR
 {

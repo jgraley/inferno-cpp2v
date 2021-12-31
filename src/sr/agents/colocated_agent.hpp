@@ -1,7 +1,7 @@
 #ifndef COLOCATED_AGENT_HPP
 #define COLOCATED_AGENT_HPP
 
-#include "agent.hpp"
+#include "agent_common.hpp"
 
 namespace SR
 {

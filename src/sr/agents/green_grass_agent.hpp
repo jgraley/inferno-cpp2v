@@ -1,7 +1,6 @@
 #ifndef GREEN_GRASS_AGENT_HPP
 #define GREEN_GRASS_AGENT_HPP
 
-#include "agent.hpp"
 #include "common/common.hpp"
 #include "colocated_agent.hpp"
 

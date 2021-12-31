@@ -1,7 +1,7 @@
 #ifndef STANDARD_AGENT_HPP
 #define STANDARD_AGENT_HPP
 
-#include "agent.hpp"
+#include "agent_common.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
