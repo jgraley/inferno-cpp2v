@@ -1,7 +1,7 @@
 #ifndef NEGATION_AGENT_HPP
 #define NEGATION_AGENT_HPP
 
-#include "agent_common.hpp"
+#include "agent_intermediates.hpp"
 #include "../search_replace.hpp"
 #include "../boolean_evaluator.hpp"
 

@@ -3,7 +3,7 @@
 
 #include "../search_replace.hpp"
 #include "helpers/transformation.hpp"
-#include "agent_common.hpp"
+#include "agent_intermediates.hpp"
 #include "delta_agent.hpp"
 #include "slave_agent.hpp"
 #include "../cache.hpp"

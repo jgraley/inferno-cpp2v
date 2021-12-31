@@ -4,20 +4,9 @@
 #include "agent.hpp"
 
 #include "common/common.hpp"
-#include "common/read_args.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/transformation.hpp"
 #include "../conjecture.hpp"
-#include "../boolean_evaluator.hpp"
 #include "../query.hpp"
-#include "common/mismatch.hpp"
 #include "../equivalence.hpp"
-#include "../cache.hpp"
-
-#include <vector>
-#include <boost/type_traits.hpp>
-#include <functional>
-#include "node/graphable.hpp"
 #include "../sym/lazy.hpp"
 
 namespace SR
@@ -114,65 +103,6 @@ private:
 };
 
 
-class DefaultMMAXAgent : public AgentCommon
-{
-public:    
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                                      
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const = 0;
-                                                                                      
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                             
-    virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                                                                
-
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
-};
-
-
-class PreRestrictedAgent : public DefaultMMAXAgent
-{
-public:    
-    virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                                      
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const = 0;                                          
-                                      
-    virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                      
-
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-};
-
-
-class TeleportAgent : public PreRestrictedAgent
-{
-public:    
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                  
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }
-    
-    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks );
-
-    virtual void Reset();    
-
-private:
-    mutable CacheByLocation cache;    
-};
-
-
-class SearchLeafAgent : public PreRestrictedAgent
-{
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                  
-};
-
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
 // Special nodes (that is nodes defined here with special S&R behaviour)
 // derive from a standard tree node via templating. This base class is
@@ -214,4 +144,5 @@ public:
 };
 
 };
+
 #endif

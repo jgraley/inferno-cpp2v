@@ -1,7 +1,6 @@
-#ifndef OVERLAY_AGENT_HPP
-#define OVERLAY_AGENT_HPP
+#ifndef DELTA_AGENT_HPP
+#define DELTA_AGENT_HPP
 
-#include "agent.hpp"
 #include "common/common.hpp"
 #include "colocated_agent.hpp"
 #include "../scr_engine.hpp" 
