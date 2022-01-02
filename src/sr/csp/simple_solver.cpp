@@ -52,12 +52,12 @@ void SimpleSolver::Plan::DeduceVariables()
     {
         constraint_set.insert(c);
         
-        list<VariableId> c_vars = c->GetVariables();
-        list<VariableId> c_free_vars;
+        set<VariableId> c_vars = c->GetVariables();
+        set<VariableId> c_free_vars;
         for( VariableId v : c_vars )
         {
             if( free_variables_set.count(v) == 1 )
-                c_free_vars.push_back(v);
+                c_free_vars.insert(v);
         }        
         for( VariableId v : c_free_vars )
         {
@@ -72,6 +72,7 @@ void SimpleSolver::Plan::DeduceVariables()
         }
         else
         {
+            // Which variables complete this contraint
             set<VariableId> cumulative_free_vars;
             for( VariableId v : free_variables )
             {
@@ -478,7 +479,7 @@ void SimpleSolver::CheckPlan() const
     set<VariableId> variables_used;
     for( shared_ptr<Constraint> c : plan.constraints )
     {
-        list<VariableId> cfv = plan.free_vars_for_constraint.at(c);
+        set<VariableId> cfv = plan.free_vars_for_constraint.at(c);
         for( VariableId v : cfv )
         {
             ASSERT( find( plan.free_variables.begin(), plan.free_variables.end(), v ) != plan.free_variables.end() )

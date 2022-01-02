@@ -46,11 +46,11 @@ private:
         SymbolicConstraint * const algo;
         shared_ptr<SYM::BooleanExpression> consistency_expression;        
         SYM::Solver sym_solver;
-        list<VariableId> variables;
+        set<VariableId> variables;
         map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions;
     } plan;
 
-    const list<VariableId> &GetVariables() const override;
+    const set<VariableId> &GetVariables() const override;
     virtual void Start( const SR::TheKnowledge *knowledge_ );    
     tuple<bool, Assignment> Test( const Assignments &assignments,
                                   const VariableId &current_var ) override;

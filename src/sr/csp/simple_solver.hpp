@@ -61,7 +61,7 @@ private:
         
         ConstraintSet constraint_set;
         ConstraintSet fully_forced_constraint_set;
-        map< shared_ptr<Constraint>, list<VariableId> > free_vars_for_constraint;
+        map< shared_ptr<Constraint>, set<VariableId> > free_vars_for_constraint;
 
         map<VariableId, ConstraintSet> affected_constraints; // does not depend on var ordering
         map<VariableId, ConstraintSet> completed_constraints; // depends on var ordering

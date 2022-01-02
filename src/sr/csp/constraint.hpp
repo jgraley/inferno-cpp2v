@@ -41,7 +41,7 @@ public:
      * 
      * @return A list of variables affected by this constraint.
      */
-    virtual const list<VariableId> &GetVariables() const = 0;
+    virtual const set<VariableId> &GetVariables() const = 0;
           
     /**
      * Set the values of the forced varibles

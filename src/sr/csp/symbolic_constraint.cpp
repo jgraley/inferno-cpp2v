@@ -31,8 +31,7 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
 void SymbolicConstraint::Plan::DetermineVariables()
 { 
     // Which variables are required in order to check consistency
-    set<VariableId> required_variables = consistency_expression->GetRequiredVariables();
-    variables = ToList(required_variables);
+    variables = consistency_expression->GetRequiredVariables();
 }
 
 
@@ -54,7 +53,7 @@ string SymbolicConstraint::Plan::GetTrace() const
 }
 
 
-const list<VariableId> &SymbolicConstraint::GetVariables() const
+const set<VariableId> &SymbolicConstraint::GetVariables() const
 { 
     return plan.variables;
 }
