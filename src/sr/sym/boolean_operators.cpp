@@ -58,7 +58,7 @@ Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanE
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    return CreateTimeTidier<AndOperator>(true)({ a, b });
+    return CreateTidiedOperator<AndOperator>(true)({ a, b });
 }
 
 // ------------------------- OrOperator --------------------------
@@ -116,7 +116,7 @@ Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanE
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    return CreateTimeTidier<OrOperator>(false)({ a, b });
+    return CreateTidiedOperator<OrOperator>(false)({ a, b });
 }
 
 

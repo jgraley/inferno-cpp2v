@@ -447,7 +447,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
     {
         // Tidily AND-together p.second, which is the set of expressions for the constraint
         list<shared_ptr<SYM::BooleanExpression>> bexpr_list = ToList(p.second);        
-        shared_ptr<SYM::BooleanExpression> bexpr = SYM::CreateTimeTidier<SYM::AndOperator>(true)(bexpr_list);
+        shared_ptr<SYM::BooleanExpression> bexpr = SYM::CreateTidiedOperator<SYM::AndOperator>(true)(bexpr_list);
         auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
         constraints_list.push_back(c);    
     }        

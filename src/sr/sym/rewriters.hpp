@@ -1,8 +1,7 @@
 #ifndef REWRITES_HPP
 #define REWRITES_HPP
 
-#include "lazy.hpp"
-#include "primary_expressions.hpp"
+#include "expression.hpp"
 
 namespace SR
 { 
@@ -11,11 +10,13 @@ namespace SR
 
 namespace SYM
 {         
+
+class SymbolVariable;
+
 // Bake in the idea that an "equation" is really just a boolean expression
 // which is required to evaluate to TRUE i.e. the "== TRUE` is assumed.
 typedef BooleanExpression Equation;
 
-typedef list< Lazy<BooleanExpression> > BooleanExpressionList;
 typedef set< shared_ptr<BooleanExpression> > BooleanExpressionSet;
 
 // ------------------------- PreprocessForEngine --------------------------
@@ -30,13 +31,13 @@ private:
                     shared_ptr<BooleanExpression> original ) const;
 };
 
-// ------------------------- CreateTimeTidier --------------------------
+// ------------------------- CreateTidiedOperator --------------------------
 
 template<typename OP>
-class CreateTimeTidier
+class CreateTidiedOperator
 {
 public:
-    CreateTimeTidier( bool identity_ );    
+    CreateTidiedOperator( bool identity_ );    
     shared_ptr<BooleanExpression> operator()( list< shared_ptr<BooleanExpression> > in ) const;
     
 private:

@@ -2,6 +2,7 @@
 
 #include "boolean_operators.hpp"
 #include "comparison_operators.hpp"
+#include "primary_expressions.hpp"
 
 using namespace SYM;
 
@@ -53,21 +54,22 @@ void PreprocessForEngine::SplitAnds( BooleanExpressionSet &split,
     }
 }
 
-// ------------------------- CreateTimeTidier --------------------------
+// ------------------------- CreateTidiedOperator --------------------------
 
 template<typename OP>
-CreateTimeTidier<OP>::CreateTimeTidier( bool identity_ ) :
+CreateTidiedOperator<OP>::CreateTidiedOperator( bool identity_ ) :
     identity(identity_)
 {
 }
 
 
 template<typename OP>
-shared_ptr<BooleanExpression> CreateTimeTidier<OP>::operator()( list< shared_ptr<BooleanExpression> > in ) const
+shared_ptr<BooleanExpression> CreateTidiedOperator<OP>::operator()( list< shared_ptr<BooleanExpression> > in ) const
 {
     list< shared_ptr<BooleanExpression> > out;
     for( auto bexpr : in )
     {
+        // Handle finding our own opeator as an operand - expand one level (non-recursive)
         if( auto op_expr = dynamic_pointer_cast<OP>((shared_ptr<BooleanExpression>)bexpr) )
         {
             for( shared_ptr<Expression> sub_expr : op_expr->GetOperands() )
@@ -75,6 +77,7 @@ shared_ptr<BooleanExpression> CreateTimeTidier<OP>::operator()( list< shared_ptr
         }   
         else if( auto bconst_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
+            // Handle finding constant booleans relevent to the operator
             if( bconst_expr->GetValue()->value == (identity ? BooleanResult::TRUE : BooleanResult::FALSE) )                
             {
                 // drop the clause - has no effect
@@ -92,6 +95,7 @@ shared_ptr<BooleanExpression> CreateTimeTidier<OP>::operator()( list< shared_ptr
         }
     }
     
+    // By cases: empty get identity, singlur gets returned, otherwise actually generate the operator
     if( out.empty() )
         return MakeLazy<BooleanConstant>(identity);
     else if( out.size()==1 )
@@ -101,8 +105,8 @@ shared_ptr<BooleanExpression> CreateTimeTidier<OP>::operator()( list< shared_ptr
 }
 
 // Explicit template instantiations
-template class CreateTimeTidier<AndOperator>;
-template class CreateTimeTidier<OrOperator>;
+template class CreateTidiedOperator<AndOperator>;
+template class CreateTidiedOperator<OrOperator>;
 
 // ------------------------- Solver --------------------------
 
