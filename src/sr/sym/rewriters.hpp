@@ -22,10 +22,10 @@ typedef set< shared_ptr<BooleanExpression> > BooleanExpressionSet;
 class PreprocessForEngine
 {
 public:
-    BooleanExpressionList operator()( BooleanExpressionList in ) const;
+    BooleanExpressionSet operator()( BooleanExpressionSet in ) const;
     
 private:
-    void SplitAnds( BooleanExpressionList &split, 
+    void SplitAnds( BooleanExpressionSet &split, 
                     shared_ptr<BooleanExpression> original ) const;
 };
 

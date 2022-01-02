@@ -119,9 +119,9 @@ public:
         list<PatternLink> free_normal_links_ordered;
         list<PatternLink> forced_normal_links_ordered;
         set<PatternLink> current_solve_plinks;
-        list< SYM::Lazy<SYM::BooleanExpression> > expressions_from_agents;
-        list< SYM::Lazy<SYM::BooleanExpression> > expressions_split;
-        list< SYM::Lazy<SYM::BooleanExpression> > expressions_for_current_solve;
+        set< shared_ptr<SYM::BooleanExpression> > expressions_from_agents;
+        set< shared_ptr<SYM::BooleanExpression> > expressions_split;
+        set< shared_ptr<SYM::BooleanExpression> > expressions_for_current_solve;
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;

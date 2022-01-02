@@ -5,15 +5,15 @@
 
 using namespace SYM;
 
-BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in ) const
+BooleanExpressionSet PreprocessForEngine::operator()( BooleanExpressionSet in ) const
 {
-    BooleanExpressionList l1;
+    BooleanExpressionSet l1;
     for( auto bexpr : in )
     {
         SplitAnds( l1, bexpr );
     }
 
-    BooleanExpressionList l2;
+    BooleanExpressionSet l2;
     for( auto bexpr : l1 )
     {
         if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
@@ -31,7 +31,7 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
         }
         else
         {
-            l2.push_back( bexpr );
+            l2.insert( bexpr );
         }
     }
     
@@ -39,7 +39,7 @@ BooleanExpressionList PreprocessForEngine::operator()( BooleanExpressionList in 
 }
 
 
-void PreprocessForEngine::SplitAnds( BooleanExpressionList &split, 
+void PreprocessForEngine::SplitAnds( BooleanExpressionSet &split, 
                                      shared_ptr<BooleanExpression> original ) const
 {
     if( auto and_expr = dynamic_pointer_cast<AndOperator>(original) )
@@ -49,7 +49,7 @@ void PreprocessForEngine::SplitAnds( BooleanExpressionList &split,
     }   
     else
     {
-        split.push_back( original );
+        split.insert( original );
     }
 }
 

@@ -364,7 +364,7 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
     {
 		Agent *agent = keyer_plink.GetChildAgent();
 		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
-        expressions_from_agents.push_back( op );
+        expressions_from_agents.insert( op );
     }
 }
 
@@ -388,7 +388,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
 		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
-        expressions_from_agents.push_back( op );
+        expressions_from_agents.insert( op );
     }
 }
 
@@ -431,7 +431,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         // constraint's requirements will not be met. Hopefully another
         // AndRuleEngine will (TODO check this).
         if( IsSubset( required_plinks, current_solve_plinks ) )
-            expressions_for_current_solve.push_back(bexpr);    
+            expressions_for_current_solve.insert(bexpr);    
     }        
     
     for( auto bexpr : expressions_for_current_solve )
