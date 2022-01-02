@@ -122,6 +122,7 @@ public:
         set< shared_ptr<SYM::BooleanExpression> > expressions_from_agents;
         set< shared_ptr<SYM::BooleanExpression> > expressions_split;
         set< shared_ptr<SYM::BooleanExpression> > expressions_for_current_solve;
+        map< set<PatternLink>, set<shared_ptr<SYM::BooleanExpression>> > expressions_condensed;
 
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;

@@ -433,9 +433,28 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         if( IsSubset( required_plinks, current_solve_plinks ) )
             expressions_for_current_solve.insert(bexpr);    
     }        
-    
+     
     for( auto bexpr : expressions_for_current_solve )
+    {    
+        // Constraint will require these variables
+        set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
+        
+        // Uniquify over required_plinks
+        expressions_condensed[required_plinks].insert( bexpr );
+    }
+    
+    for( auto p : expressions_condensed )
     {
+        list<shared_ptr<SYM::BooleanExpression>> bexpr_list = ToList(p.second);
+        
+        shared_ptr<SYM::BooleanExpression> bexpr;// = make_shared<SYM::AndOperator>(p.second);
+        list< shared_ptr<SYM::BooleanExpression> > flattened_sa = SYM::CreateTimeTidier<SYM::AndOperator>(true)(bexpr_list);
+        if( flattened_sa.size()==1 )
+            bexpr = OnlyElementOf(flattened_sa);
+        else
+            bexpr = SYM::MakeLazy<SYM::AndOperator>( flattened_sa );
+
+
         auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
         constraints_list.push_back(c);    
     }        
