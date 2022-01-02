@@ -53,6 +53,57 @@ void PreprocessForEngine::SplitAnds( BooleanExpressionSet &split,
     }
 }
 
+// ------------------------- CreateTimeTidier --------------------------
+
+template<typename OP>
+CreateTimeTidier<OP>::CreateTimeTidier( bool identity_ ) :
+    identity(identity_)
+{
+}
+
+
+template<typename OP>
+shared_ptr<BooleanExpression> CreateTimeTidier<OP>::operator()( list< shared_ptr<BooleanExpression> > in ) const
+{
+    list< shared_ptr<BooleanExpression> > out;
+    for( auto bexpr : in )
+    {
+        if( auto op_expr = dynamic_pointer_cast<OP>((shared_ptr<BooleanExpression>)bexpr) )
+        {
+            for( shared_ptr<Expression> sub_expr : op_expr->GetOperands() )
+                out.push_back( dynamic_pointer_cast<BooleanExpression>(sub_expr) );
+        }   
+        else if( auto bconst_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
+        {
+            if( bconst_expr->GetValue()->value == (identity ? BooleanResult::TRUE : BooleanResult::FALSE) )                
+            {
+                // drop the clause - has no effect
+            }
+            else
+            {
+                // dominates
+                out = { bconst_expr };
+                break;
+            }                    
+        }
+        else
+        {
+            out.push_back( bexpr );
+        }
+    }
+    
+    if( out.empty() )
+        return MakeLazy<BooleanConstant>(identity);
+    else if( out.size()==1 )
+        return OnlyElementOf(out);
+    else
+        return make_shared<OP>( out );
+}
+
+// Explicit template instantiations
+template class CreateTimeTidier<AndOperator>;
+template class CreateTimeTidier<OrOperator>;
+
 // ------------------------- Solver --------------------------
 
 Solver::Solver( shared_ptr<Equation> equation_ ) :

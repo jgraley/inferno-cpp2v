@@ -445,16 +445,9 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
     
     for( auto p : expressions_condensed )
     {
-        list<shared_ptr<SYM::BooleanExpression>> bexpr_list = ToList(p.second);
-        
-        shared_ptr<SYM::BooleanExpression> bexpr;// = make_shared<SYM::AndOperator>(p.second);
-        list< shared_ptr<SYM::BooleanExpression> > flattened_sa = SYM::CreateTimeTidier<SYM::AndOperator>(true)(bexpr_list);
-        if( flattened_sa.size()==1 )
-            bexpr = OnlyElementOf(flattened_sa);
-        else
-            bexpr = SYM::MakeLazy<SYM::AndOperator>( flattened_sa );
-
-
+        // Tidily AND-together p.second, which is the set of expressions for the constraint
+        list<shared_ptr<SYM::BooleanExpression>> bexpr_list = ToList(p.second);        
+        shared_ptr<SYM::BooleanExpression> bexpr = SYM::CreateTimeTidier<SYM::AndOperator>(true)(bexpr_list);
         auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
         constraints_list.push_back(c);    
     }        

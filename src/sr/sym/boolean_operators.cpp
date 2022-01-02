@@ -58,11 +58,7 @@ Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanE
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    list< shared_ptr<BooleanExpression> > flattened_sa = CreateTimeTidier<AndOperator>(true)({ a, b });
-    if( flattened_sa.size()==1 )
-        return OnlyElementOf(flattened_sa);
-    else
-        return MakeLazy<AndOperator>( flattened_sa );
+    return CreateTimeTidier<AndOperator>(true)({ a, b });
 }
 
 // ------------------------- OrOperator --------------------------
@@ -120,11 +116,7 @@ Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanE
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    auto flattened_sa = CreateTimeTidier<OrOperator>(false)({ a, b });
-    if( flattened_sa.size()==1 )
-        return OnlyElementOf(flattened_sa);
-    else
-        return MakeLazy<OrOperator>( flattened_sa );
+    return CreateTimeTidier<OrOperator>(false)({ a, b });
 }
 
 
