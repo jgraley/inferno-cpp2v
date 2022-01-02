@@ -16,6 +16,12 @@ shared_ptr<SymbolResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 }
 
 
+shared_ptr<SymbolResult> SymbolConstant::GetValue() const
+{
+    return make_shared<SymbolResult>( xlink );
+}
+
+
 string SymbolConstant::Render() const
 {
     return xlink.GetTrace();

@@ -2,6 +2,7 @@
 
 #include "boolean_operators.hpp"
 #include "comparison_operators.hpp"
+#include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
 
 using namespace SYM;
@@ -125,8 +126,7 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
         {
             bool is_curr = false;
             if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
-                if( OnlyElementOf( sv_op->GetRequiredVariables() ) ==
-                    OnlyElementOf( target->GetRequiredVariables() ) )
+                if( DependsOn( sv_op, target ) )
                     is_curr = true;
             if( !is_curr )
                 other_op = op;                    
@@ -136,25 +136,79 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
               ("equation:\n")(equation);
         return other_op;
     }
-#if 0    
+#if 0
     else if( auto and_op = dynamic_pointer_cast<AndOperator>(equation) )
     {
-        shared_ptr<ImplicationOperator> implies;
-        shared_ptr<ImplicationOperator> implies;
+        set<shared_ptr<ImplicationOperator>> implies;
+        set<shared_ptr<BoolEqualOperator>> bequals;
         for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )
         {
-            bool is_curr = false;
-            if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
-                if( OnlyElementOf( sv_op->GetRequiredVariables() ) ==
-                    OnlyElementOf( target->GetRequiredVariables() ) )
-                    is_curr = true;
-            if( !is_curr )
-                other_op = op;                    
+            if( auto o = dynamic_pointer_cast<ImplicationOperator>(op) )       
+                implies.insert(o);
+            if( auto o = dynamic_pointer_cast<BoolEqualOperator>(op) )       
+                bequals.insert(o);
+        }
+        if( implies.size()==1 && 
+            bequals.size()==1 )
+        {
+            list< shared_ptr<BooleanExpression> > imply_ops = OnlyElementOf(implies)->GetBooleanOperands();           
+            list< shared_ptr<BooleanExpression> > beq_ops = OnlyElementOf(bequals)->GetBooleanOperands(); 
+            
+            // Ugly bit
+            SR::PatternLink beq_plink, imply_plink;
+            SR::XLink beq_xlink, imply_xlink;
+            if( auto imply_nequal_op = dynamic_pointer_cast<NotEqualOperator>(imply_ops.front() ) )
+            {
+                if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolExpression>(imply_nequal_op->GetOperands().front() ) )
+                    imply_plink = OnlyElementOf( imply_nequal_lop->GetRequiredVariables() );
+                if( auto imply_nequal_rop = dynamic_pointer_cast<SymbolConstant>(imply_nequal_op->GetOperands().back() ) )
+                    imply_xlink = imply_nequal_rop->GetValue()->xlink;
+            }
+            if( auto beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front() ) )
+            {
+                if( auto beq_equal_lop = dynamic_pointer_cast<SymbolExpression>(beq_equal_op->GetOperands().front() ) )
+                    beq_plink = OnlyElementOf( beq_equal_lop->GetRequiredVariables() );
+                if( auto beq_equal_rop = dynamic_pointer_cast<SymbolConstant>(beq_equal_op->GetOperands().back() ) )
+                    beq_xlink = beq_equal_rop->GetValue()->xlink;
+            }            
+
+            if( beq_plink && beq_plink==imply_plink &&
+                beq_xlink && beq_xlink==imply_xlink )
+            {
+                // Fronts of imply and beq are negation of each other.
+                shared_ptr<SymbolExpression> try_solve_b = Solver( beq_ops.back() ).TrySolveForSymbol(target);
+                shared_ptr<SymbolExpression> try_solve_c = Solver( imply_ops.back() ).TrySolveForSymbol(target);
+                if( try_solve_b && try_solve_c )
+                    return make_shared<ConditionalOperator>( beq_ops.front(),
+                                                             try_solve_b,
+                                                             try_solve_c );
+            }
         }
     }
 #endif
     return nullptr;
 }
+
+
+bool Solver::DependsOn( shared_ptr<Expression> expr, shared_ptr<SymbolVariable> target )
+{
+    if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(expr) )
+    {
+        if( OnlyElementOf( sv_op->GetRequiredVariables() ) ==
+            OnlyElementOf( target->GetRequiredVariables() ) )
+            return true;
+    }
+    else
+    {            
+        for( shared_ptr<Expression> op : expr->GetOperands() )
+        {
+            if( DependsOn( op, target ) )
+                return true;
+        }
+    }
+    return false;
+}
+
 
 // ------------------------- ClutchRewriter --------------------------
 

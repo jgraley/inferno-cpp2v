@@ -51,6 +51,7 @@ class Solver
 public:
     explicit Solver( shared_ptr<Equation> equation );
     shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const;
+    static bool DependsOn( shared_ptr<Expression> expr, shared_ptr<SymbolVariable> target );
 
 private:
     const shared_ptr<Equation> equation;

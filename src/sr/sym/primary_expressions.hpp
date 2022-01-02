@@ -19,6 +19,7 @@ public:
     typedef SymbolExpression NominalType;
     explicit SymbolConstant( SR::XLink xlink );
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    shared_ptr<SymbolResult> GetValue() const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
