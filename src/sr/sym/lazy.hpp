@@ -12,7 +12,7 @@ class Lazy : public Traceable
 public:
     // Be strict and don't support assignment, default copy etc - 
     // because most of our operators are overloaded
-    Lazy( shared_ptr<EVALTYPE> pexpr_ ) :
+    Lazy( shared_ptr<EVALTYPE> pexpr_ = nullptr ) :
         pexpr( pexpr_ )
     {
     }

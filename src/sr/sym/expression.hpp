@@ -70,6 +70,8 @@ public:
         AND,
         XOR,
         OR,
+        IMPLICATION,
+        CONDITIONAL,
         COMMA 
     };    
         
@@ -112,7 +114,7 @@ class BooleanToBooleanExpression : public BooleanExpression
 public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const final override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const;
 };
@@ -126,7 +128,7 @@ public:
     // If you want 0 operands and a boolean result, use BooleanExpression as the base
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const = 0;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const;
 };
@@ -139,7 +141,7 @@ class SymbolToSymbolExpression : public SymbolExpression
 public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit, 
                                                const list<shared_ptr<SymbolResult>> &op_results ) const;
 };

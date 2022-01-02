@@ -270,3 +270,46 @@ string MySequenceSuccessorOperator::GetKnowledgeName() const
     return "MySeqSuccessor";
 }
 
+// ------------------------- ConditionalOperator --------------------------
+
+ConditionalOperator::ConditionalOperator( shared_ptr<BooleanExpression> a_,
+                                          shared_ptr<SymbolExpression> b_,
+                                          shared_ptr<SymbolExpression> c_ ) :
+    a( a_ ),
+    b( b_ ),
+    c( c_ )
+{
+}
+
+    
+list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
+{
+    return {a, b, c};
+}
+
+
+shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
+{
+    shared_ptr<BooleanResult> ra = a->Evaluate(kit);
+    shared_ptr<SymbolResult> rb = b->Evaluate(kit);
+    shared_ptr<SymbolResult> rc = c->Evaluate(kit);
+    
+    if( ra->value == BooleanResult::TRUE )
+        return rb;
+    else
+        return rc;
+}
+
+
+string ConditionalOperator::Render() const
+{
+    return RenderForMe(a) + " ? " + RenderForMe(b) + " ? " + RenderForMe(c);
+}
+
+
+Expression::Precedence ConditionalOperator::GetPrecedence() const
+{
+    return Precedence::CONDITIONAL;
+}
+
+

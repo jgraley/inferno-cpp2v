@@ -511,11 +511,13 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 
     // Require that every child x link is different (alldiff). N-ary 
     // constraint on all candidates
-    list< shared_ptr<SymbolExpression> > candidate_exprs;
-    for( PatternLink candidate_plink : plan_col.non_stars ) 
-        candidate_exprs.push_back( MakeLazy<SymbolVariable>(candidate_plink) );
-    expr &= MakeLazy<AllDiffOperator>( candidate_exprs );        
-
+    if( plan_col.non_stars.size() >= 2 )
+    {
+        list< shared_ptr<SymbolExpression> > candidate_exprs;
+        for( PatternLink candidate_plink : plan_col.non_stars ) 
+            candidate_exprs.push_back( MakeLazy<SymbolVariable>(candidate_plink) );
+        expr &= MakeLazy<AllDiffOperator>( candidate_exprs );        
+    }
 
     // Require that there are no leftover x, if no star in pattern. 
     // Unary constraint on keyer.

@@ -136,7 +136,23 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
               ("equation:\n")(equation);
         return other_op;
     }
-
+#if 0    
+    else if( auto and_op = dynamic_pointer_cast<AndOperator>(equation) )
+    {
+        shared_ptr<ImplicationOperator> implies;
+        shared_ptr<ImplicationOperator> implies;
+        for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )
+        {
+            bool is_curr = false;
+            if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
+                if( OnlyElementOf( sv_op->GetRequiredVariables() ) ==
+                    OnlyElementOf( target->GetRequiredVariables() ) )
+                    is_curr = true;
+            if( !is_curr )
+                other_op = op;                    
+        }
+    }
+#endif
     return nullptr;
 }
 
@@ -154,14 +170,30 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExp
     // must be disengager. If some but not all are disengager we don't get a match.
     auto all_disengaged_expr = MakeLazy<BooleanConstant>(true);
     auto all_engaged_expr = MakeLazy<BooleanConstant>(true);
+    list< shared_ptr<BooleanExpression> > all_disengaged_list;
+    shared_ptr<BooleanExpression> first_engage;
     for( SR::PatternLink plink : original_expr->GetRequiredVariables() )
     {
         auto x = MakeLazy<SymbolVariable>(plink);
         all_disengaged_expr &= ( x == disengager_expr );
         all_engaged_expr &= ( x != disengager_expr );
+        all_disengaged_list.push_back( x == disengager_expr );
+        if( !first_engage )
+            first_engage = ( x != disengager_expr );
     }
+#if 1
+    if( !first_engage ) // TODO should be disallowed
+        return original_expr;  
+        
+    auto original_when_engaged = MakeLazy<ImplicationOperator>( first_engage, original_expr );            
+    if( all_disengaged_list.size()==1 )
+        return original_when_engaged;
 
+    auto all_disengage_equal = MakeLazy<BoolEqualOperator>( all_disengaged_list ); 
+    return all_disengage_equal & original_when_engaged;
+#else
     return (original_expr & all_engaged_expr) | all_disengaged_expr;
+#endif
 }    
     
 

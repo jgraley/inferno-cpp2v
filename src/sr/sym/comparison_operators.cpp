@@ -235,6 +235,7 @@ Lazy<BooleanExpression> SYM::operator<=( Lazy<SymbolExpression> a, Lazy<SymbolEx
 AllDiffOperator::AllDiffOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
     sa(sa_)
 {
+    ASSERT( sa.size() >= 2 );
 }    
     
 

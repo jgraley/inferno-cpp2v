@@ -158,6 +158,29 @@ public:
     virtual string GetKnowledgeName() const override;
 };
 
+// ------------------------- ConditionalOperator --------------------------
+
+class ConditionalOperator : public SymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    explicit ConditionalOperator( shared_ptr<BooleanExpression> a,
+                                  shared_ptr<SymbolExpression> b,
+                                  shared_ptr<SymbolExpression> c );
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<BooleanExpression> a;
+    const shared_ptr<SymbolExpression> b;
+    const shared_ptr<SymbolExpression> c;
+};
+
+
+
+
 };
 
 #endif // include guard

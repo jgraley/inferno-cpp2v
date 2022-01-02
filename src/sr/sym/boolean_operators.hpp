@@ -48,6 +48,44 @@ private:
 
 Lazy<BooleanExpression> operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
 
+// ------------------------- BoolEqualOperator --------------------------
+
+class BoolEqualOperator : public BooleanToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit BoolEqualOperator( list< shared_ptr<BooleanExpression> > sa_ );
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const list< shared_ptr<BooleanExpression> > sa;
+};
+
+Lazy<BooleanExpression> operator==( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
+
+// ------------------------- ImplicationOperator --------------------------
+
+class ImplicationOperator : public BooleanToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit ImplicationOperator( shared_ptr<BooleanExpression> a_,
+                                  shared_ptr<BooleanExpression> b_ );
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<BooleanExpression> a;
+    const shared_ptr<BooleanExpression> b;
+};
+
 };
 
 #endif // include guard

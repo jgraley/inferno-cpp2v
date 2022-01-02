@@ -120,3 +120,94 @@ Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanE
 }
 
 
+// ------------------------- BoolEqualOperator --------------------------
+
+BoolEqualOperator::BoolEqualOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
+    sa( sa_ )
+{   
+    ASSERT( sa.size() >= 2 ); 
+}    
+
+
+list<shared_ptr<BooleanExpression>> BoolEqualOperator::GetBooleanOperands() const
+{
+    return sa;
+}
+
+
+shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
+                                                       const list<shared_ptr<BooleanResult>> &op_results ) const
+{
+    BooleanResult::BooleanValue m = BooleanResult::TRUE;
+    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<BooleanResult> ra,
+                                                 shared_ptr<BooleanResult> rb) 
+    {
+        if( ra->value != rb->value )
+            m = BooleanResult::FALSE;
+    } );
+    return make_shared<BooleanResult>( m );
+}
+
+
+string BoolEqualOperator::Render() const
+{
+    list<string> ls;
+    for( shared_ptr<BooleanExpression> a : sa )
+        ls.push_back( RenderForMe(a) );
+    return Join( ls, " == " );
+}
+
+
+Expression::Precedence BoolEqualOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}
+
+
+Lazy<BooleanExpression> SYM::operator==( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
+{
+    // Overloaded operator can only take 2 args, but operator is commutative and
+    // associative: we want a o b o c to generate Operator({a, b, c}) not
+    // some nested pair. Note: this can over-kill but I don't expect that to cause
+    // problems.
+    return MakeLazy<BoolEqualOperator>( list<shared_ptr<BooleanExpression>>({ a, b }) );
+}
+
+// ------------------------- ImplicationOperator --------------------------
+
+ImplicationOperator::ImplicationOperator( shared_ptr<BooleanExpression> a_,
+                                          shared_ptr<BooleanExpression> b_ ) :
+    a( a_ ),
+    b( b_ )
+{   
+}    
+
+
+list<shared_ptr<BooleanExpression>> ImplicationOperator::GetBooleanOperands() const
+{
+    return { a, b };
+}
+
+
+shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
+                                                         const list<shared_ptr<BooleanResult>> &op_results ) const
+{
+    shared_ptr<BooleanResult> ar = op_results.front();
+    shared_ptr<BooleanResult> br = op_results.back();
+    if( ar->value == BooleanResult::TRUE )
+        return br;
+    else 
+        return make_shared<BooleanResult>( BooleanResult::TRUE );
+}
+
+
+string ImplicationOperator::Render() const
+{
+    return RenderForMe(a)+" ⇒ "+RenderForMe(b);
+}
+
+
+Expression::Precedence ImplicationOperator::GetPrecedence() const
+{
+    return Precedence::IMPLICATION;
+}
