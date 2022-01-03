@@ -15,7 +15,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/comparison_operators.hpp"
 #include "sym/primary_expressions.hpp"
-#include "sym/rewriters.hpp"
+#include "sym/clutch.hpp"
 
 #include <stdexcept>
 
