@@ -2,7 +2,7 @@
 #define SYMBOL_OPERATORS_HPP
 
 #include "expression.hpp"
-#include "lazy.hpp"
+#include "overloads.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"

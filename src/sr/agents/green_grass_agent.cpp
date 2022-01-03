@@ -31,7 +31,7 @@ void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
-Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
+Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
 	set<PatternLink> clq_plinks = { keyer_plink };
 	auto clq_lambda = [this](const Expression::EvalKit &kit)
@@ -39,7 +39,7 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 		if( kit.hypothesis_links->count(keyer_plink) == 1 )
 			RunColocatedQuery( kit.hypothesis_links->at(keyer_plink) ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
+	return MakeOver<BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
 }
 
 

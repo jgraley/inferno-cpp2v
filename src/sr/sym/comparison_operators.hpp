@@ -2,7 +2,7 @@
 #define COMPARISON_OPERATORS_HPP
 
 #include "expression.hpp"
-#include "lazy.hpp"
+#include "overloads.hpp"
 
 #include "../equivalence.hpp"
 
@@ -37,7 +37,7 @@ private:
 };
 
 
-Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+Over<BooleanExpression> operator==( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- NotEqualOperator --------------------------
 
@@ -63,7 +63,7 @@ private:
 };
 
 
-Lazy<BooleanExpression> operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- IndexComparisonOperator --------------------------
 
@@ -95,7 +95,7 @@ class GreaterOperator : public IndexComparisonOperator
     virtual string Render() const override;
 };
 
-Lazy<BooleanExpression> operator>( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+Over<BooleanExpression> operator>( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- LessOperator --------------------------
 
@@ -107,7 +107,7 @@ class LessOperator : public IndexComparisonOperator
     virtual string Render() const override;
 };
 
-Lazy<BooleanExpression> operator<( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+Over<BooleanExpression> operator<( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- GreaterOrEqualOperator --------------------------
 
@@ -119,7 +119,7 @@ class GreaterOrEqualOperator : public IndexComparisonOperator
     virtual string Render() const override;
 };
 
-Lazy<BooleanExpression> operator>=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+Over<BooleanExpression> operator>=( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- LessOrEqualOperator --------------------------
 
@@ -131,7 +131,7 @@ class LessOrEqualOperator : public IndexComparisonOperator
     virtual string Render() const override;
 };
 
-Lazy<BooleanExpression> operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
+Over<BooleanExpression> operator<=( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- AllDiffOperator --------------------------
 

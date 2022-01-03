@@ -2,7 +2,7 @@
 #define PRIMARY_EXPRESSIONS_HPP
 
 #include "expression.hpp"
-#include "lazy.hpp"
+#include "overloads.hpp"
 
 #include "common/mismatch.hpp"
 #include "common/common.hpp"

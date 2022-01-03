@@ -2,7 +2,7 @@
 #define BOOLEAN_OPERATORS_HPP
 
 #include "expression.hpp"
-#include "lazy.hpp"
+#include "overloads.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -27,7 +27,7 @@ private:
     const list< shared_ptr<BooleanExpression> > sa;
 };
 
-Lazy<BooleanExpression> operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
+Over<BooleanExpression> operator&( Over<BooleanExpression> a, Over<BooleanExpression> b );
 
 // ------------------------- OrOperator --------------------------
 
@@ -46,7 +46,7 @@ private:
     const list< shared_ptr<BooleanExpression> > sa;
 };
 
-Lazy<BooleanExpression> operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
+Over<BooleanExpression> operator|( Over<BooleanExpression> a, Over<BooleanExpression> b );
 
 // ------------------------- BoolEqualOperator --------------------------
 
@@ -65,7 +65,7 @@ private:
     const list< shared_ptr<BooleanExpression> > sa;
 };
 
-Lazy<BooleanExpression> operator==( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b );
+Over<BooleanExpression> operator==( Over<BooleanExpression> a, Over<BooleanExpression> b );
 
 // ------------------------- ImplicationOperator --------------------------
 

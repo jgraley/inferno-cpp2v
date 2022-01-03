@@ -52,7 +52,7 @@ Expression::Precedence AndOperator::GetPrecedence() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
+Over<BooleanExpression> SYM::operator&( Over<BooleanExpression> a, Over<BooleanExpression> b )
 {
     // Overloaded operator can only take 2 args, but operator is commutative and
     // associative: we want a o b o c to generate Operator({a, b, c}) not
@@ -110,7 +110,7 @@ Expression::Precedence OrOperator::GetPrecedence() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
+Over<BooleanExpression> SYM::operator|( Over<BooleanExpression> a, Over<BooleanExpression> b )
 {
     // Overloaded operator can only take 2 args, but operator is commutative and
     // associative: we want a o b o c to generate Operator({a, b, c}) not
@@ -164,13 +164,13 @@ Expression::Precedence BoolEqualOperator::GetPrecedence() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator==( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
+Over<BooleanExpression> SYM::operator==( Over<BooleanExpression> a, Over<BooleanExpression> b )
 {
     // Overloaded operator can only take 2 args, but operator is commutative and
     // associative: we want a o b o c to generate Operator({a, b, c}) not
     // some nested pair. Note: this can over-kill but I don't expect that to cause
     // problems.
-    return MakeLazy<BoolEqualOperator>( list<shared_ptr<BooleanExpression>>({ a, b }) );
+    return MakeOver<BoolEqualOperator>( list<shared_ptr<BooleanExpression>>({ a, b }) );
 }
 
 // ------------------------- ImplicationOperator --------------------------

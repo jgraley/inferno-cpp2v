@@ -247,18 +247,18 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
 }
 
 
-Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
+Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 {
 	auto cq_lazy = SymbolicCouplingQuery();
     if( coupling_only )
         return cq_lazy;
 
     auto nlq_lazy = SymbolicNormalLinkedQuery();
-   	return cq_lazy & nlq_lazy; // Lazy-style symbolic expression
+   	return cq_lazy & nlq_lazy; // Over-style symbolic expression
 }
 
 
-Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
+Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
     if( ImplHasNLQ() )    
         return SymbolicNormalLinkedQueryImpl();
@@ -270,11 +270,11 @@ Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 		NLQFromDQ( kit.hypothesis_links,
                    kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQFromDQ()");	             
+	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQFromDQ()");	             
 }
 
 
-Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
+Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
 {
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
@@ -283,21 +283,21 @@ Lazy<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
 		RunNormalLinkedQueryImpl( kit.hypothesis_links,
 							      kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQImpl()");	
+	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQImpl()");	
 }
 
 
-Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
+Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
-    auto expr = MakeLazy<BooleanConstant>(true);
-    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
+    auto expr = MakeOver<BooleanConstant>(true);
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
     for( PatternLink residual_plink : residual_plinks )
     {
-        auto residual_expr = MakeLazy<SymbolVariable>(residual_plink);
-        expr &= ( MakeLazy<EquivalentOperator>( list< shared_ptr<SymbolExpression> >({keyer_expr, residual_expr}) ) |
+        auto residual_expr = MakeOver<SymbolVariable>(residual_plink);
+        expr &= ( MakeOver<EquivalentOperator>( list< shared_ptr<SymbolExpression> >({keyer_expr, residual_expr}) ) |
                   keyer_expr == mmax_expr | // See thought on #384
                   residual_expr == mmax_expr );
     }
@@ -305,10 +305,10 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
+SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
-    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-	return MakeLazy<KindOfOperator>(this, keyer_expr);
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+	return MakeOver<KindOfOperator>(this, keyer_expr);
 }
 
 

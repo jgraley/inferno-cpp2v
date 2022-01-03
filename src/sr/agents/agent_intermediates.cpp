@@ -87,16 +87,16 @@ void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_l
 }                     
 
 
-SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
+SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
 {    
-    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
+    auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
     ClutchRewriter mmax_rewriter( mmax_expr );
     shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
     return mmax_rewriter.ApplyDistributed( original_expr );
 }
 
                                
-SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMed() const                                      
+SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMed() const                                      
 {                      
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const Expression::EvalKit &kit)
@@ -104,7 +104,7 @@ SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMe
 		RunNormalLinkedQueryMMed( kit.hypothesis_links,
 						    	  kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQMMed()");	
+	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQMMed()");	
 }                     
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
@@ -145,13 +145,13 @@ void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis
 }                     
 
 
-SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
+SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
 {
     return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
 }
 
                                
-SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
+SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {                      
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const Expression::EvalKit &kit)
@@ -159,7 +159,7 @@ SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryP
 		RunNormalLinkedQueryPRed( kit.hypothesis_links,
 						    	  kit.knowledge ); // throws on mismatch   
 	};
-	return MakeLazy<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
+	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
 }                     
 
 //---------------------------------- TeleportAgent ------------------------------------    

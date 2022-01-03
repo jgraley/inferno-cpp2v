@@ -51,9 +51,9 @@ Expression::Precedence EqualOperator::GetPrecedence() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+Over<BooleanExpression> SYM::operator==( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeLazy<EqualOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeOver<EqualOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
 }
 
 // ------------------------- NotEqualOperator --------------------------
@@ -102,9 +102,9 @@ Expression::Precedence NotEqualOperator::GetPrecedence() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+Over<BooleanExpression> SYM::operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeLazy<NotEqualOperator>( a, b );
+    return MakeOver<NotEqualOperator>( a, b );
 }
 
 // ------------------------- IndexComparisonOperator --------------------------
@@ -165,9 +165,9 @@ string GreaterOperator::Render() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator>( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+Over<BooleanExpression> SYM::operator>( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeLazy<GreaterOperator>( a, b );
+    return MakeOver<GreaterOperator>( a, b );
 }
 
 // ------------------------- LessOperator --------------------------
@@ -185,9 +185,9 @@ string LessOperator::Render() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator<( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+Over<BooleanExpression> SYM::operator<( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeLazy<LessOperator>( a, b );
+    return MakeOver<LessOperator>( a, b );
 }
 
 // ------------------------- GreaterOrEqualOperator --------------------------
@@ -205,9 +205,9 @@ string GreaterOrEqualOperator::Render() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator>=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+Over<BooleanExpression> SYM::operator>=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeLazy<GreaterOrEqualOperator>( a, b );
+    return MakeOver<GreaterOrEqualOperator>( a, b );
 }
 
 // ------------------------- LessOrEqualOperator --------------------------
@@ -225,9 +225,9 @@ string LessOrEqualOperator::Render() const
 }
 
 
-Lazy<BooleanExpression> SYM::operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
+Over<BooleanExpression> SYM::operator<=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeLazy<LessOrEqualOperator>( a, b );
+    return MakeOver<LessOrEqualOperator>( a, b );
 }
 
 // ------------------------- AllDiffOperator --------------------------

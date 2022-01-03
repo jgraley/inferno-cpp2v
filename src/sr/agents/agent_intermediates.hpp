@@ -4,7 +4,7 @@
 #include "agent_common.hpp"
 #include "common/common.hpp"
 #include "../query.hpp"
-#include "../sym/lazy.hpp"
+#include "../sym/overloads.hpp"
 #include "../cache.hpp"
 
 namespace SR
@@ -23,8 +23,8 @@ public:
     virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                
 
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
 };
 
 
@@ -41,8 +41,8 @@ public:
     virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                      
 
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 };
 
 

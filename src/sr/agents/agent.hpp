@@ -4,7 +4,7 @@
 #include "common/common.hpp"
 #include "../query.hpp"
 #include "node/graphable.hpp"
-#include "../sym/lazy.hpp"
+#include "../sym/overloads.hpp"
 
 namespace SR
 { 
@@ -63,7 +63,7 @@ public:
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const = 0;                                       
 
     /// Obtain a symbolic expression for this node's queries (coupling and maybe NLQ)
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const = 0; 
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const = 0; 
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,

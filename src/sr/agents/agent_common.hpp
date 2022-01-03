@@ -7,7 +7,7 @@
 #include "../conjecture.hpp"
 #include "../query.hpp"
 #include "../equivalence.hpp"
-#include "../sym/lazy.hpp"
+#include "../sym/overloads.hpp"
 
 namespace SR
 { 
@@ -41,11 +41,11 @@ public:
                                            const TheKnowledge *knowledge ) const;
                                        
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery() const;                                       
-	virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;                                       
+	virtual SYM::Over<SYM::BooleanExpression> SymbolicPreRestriction() const;
 	
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
