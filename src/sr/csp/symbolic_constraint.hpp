@@ -45,7 +45,6 @@ private:
 
         SymbolicConstraint * const algo;
         shared_ptr<SYM::BooleanExpression> consistency_expression;        
-        SYM::Solver sym_solver;
         set<VariableId> variables;
         map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions;
     } plan;

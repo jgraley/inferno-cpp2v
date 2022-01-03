@@ -46,15 +46,15 @@ private:
 
 // ------------------------- Solver --------------------------
 
-class Solver
+class SymSolver
 {
 public:
-    explicit Solver( shared_ptr<Equation> equation );
-    shared_ptr<SymbolExpression> TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const;
-    static bool IsIndependentOf( shared_ptr<Expression> expr, shared_ptr<SymbolVariable> target );
+    explicit SymSolver( shared_ptr<SymbolVariable> target );
+    shared_ptr<SymbolExpression> TrySolve( shared_ptr<Equation> equation ) const;
+    bool IsIndependent( shared_ptr<Expression> expr ) const;
 
 private:
-    const shared_ptr<Equation> equation;
+    const shared_ptr<SymbolVariable> target;
 };
 
 // ------------------------- ClutchRewriter --------------------------

@@ -22,6 +22,12 @@ shared_ptr<SymbolResult> SymbolConstant::GetValue() const
 }
 
 
+SR::XLink SymbolConstant::GetXLink() const
+{
+    return xlink;
+}
+
+
 string SymbolConstant::Render() const
 {
     return xlink.GetTrace();
@@ -53,6 +59,12 @@ shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
         throw Incomplete(plink);        
     
     return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
+}
+
+
+SR::PatternLink SymbolVariable::GetPatternLink() const
+{
+    return plink;
 }
 
 

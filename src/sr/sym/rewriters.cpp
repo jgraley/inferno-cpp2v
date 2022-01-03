@@ -5,6 +5,8 @@
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
 
+#define BOOL_EQUALITY_METHOD
+
 using namespace SYM;
 
 BooleanExpressionSet PreprocessForEngine::operator()( BooleanExpressionSet in ) const
@@ -111,20 +113,20 @@ template class CreateTidiedOperator<OrOperator>;
 
 // ------------------------- Solver --------------------------
 
-Solver::Solver( shared_ptr<Equation> equation_ ) :
-    equation( equation_ )
+SymSolver::SymSolver( shared_ptr<SymbolVariable> target_ ) :
+    target( target_ )
 {
 }
 
 
-shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariable> target ) const
+shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<Equation> equation ) const
 {
     if( auto equal_op = dynamic_pointer_cast<EqualOperator>(equation) )
     {
         set<shared_ptr<SymbolExpression>> dep_ops, indep_ops;
         for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )
         {
-            if( IsIndependentOf( op, target ) )
+            if( IsIndependent( op ) )
                 indep_ops.insert( op );
             else
                 dep_ops.insert( op );                  
@@ -166,25 +168,25 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
             SR::XLink beq_xlink, imply_xlink;
             if( auto imply_nequal_op = dynamic_pointer_cast<NotEqualOperator>(imply_ops.front() ) )
             {
-                if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolExpression>(imply_nequal_op->GetOperands().front() ) )
-                    imply_plink = OnlyElementOf( imply_nequal_lop->GetRequiredVariables() );
+                if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolVariable>(imply_nequal_op->GetOperands().front() ) )
+                    imply_plink = imply_nequal_lop->GetPatternLink();
                 if( auto imply_nequal_rop = dynamic_pointer_cast<SymbolConstant>(imply_nequal_op->GetOperands().back() ) )
-                    imply_xlink = imply_nequal_rop->GetValue()->xlink;
+                    imply_xlink = imply_nequal_rop->GetXLink();
             }
             if( auto beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front() ) )
             {
-                if( auto beq_equal_lop = dynamic_pointer_cast<SymbolExpression>(beq_equal_op->GetOperands().front() ) )
-                    beq_plink = OnlyElementOf( beq_equal_lop->GetRequiredVariables() );
+                if( auto beq_equal_lop = dynamic_pointer_cast<SymbolVariable>(beq_equal_op->GetOperands().front() ) )
+                    beq_plink = beq_equal_lop->GetPatternLink();
                 if( auto beq_equal_rop = dynamic_pointer_cast<SymbolConstant>(beq_equal_op->GetOperands().back() ) )
-                    beq_xlink = beq_equal_rop->GetValue()->xlink;
+                    beq_xlink = beq_equal_rop->GetXLink();
             }            
 
             if( beq_plink && beq_plink==imply_plink &&
                 beq_xlink && beq_xlink==imply_xlink )
             {
                 // Fronts of imply and beq are negation of each other.
-                shared_ptr<SymbolExpression> try_solve_b = Solver( beq_ops.back() ).TrySolveForSymbol(target);
-                shared_ptr<SymbolExpression> try_solve_c = Solver( imply_ops.back() ).TrySolveForSymbol(target);
+                shared_ptr<SymbolExpression> try_solve_b = TrySolve(beq_ops.back());
+                shared_ptr<SymbolExpression> try_solve_c = TrySolve(imply_ops.back());
                 if( try_solve_b && try_solve_c )
                 {
                     TRACE("Solved an and!!\n");
@@ -200,17 +202,14 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
 }
 
 
-bool Solver::IsIndependentOf( shared_ptr<Expression> expr, shared_ptr<SymbolVariable> target )
+bool SymSolver::IsIndependent( shared_ptr<Expression> expr ) const
 {
-    if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(expr) )
-    {
-        return OnlyElementOf( sv_op->GetRequiredVariables() ) !=
-               OnlyElementOf( target->GetRequiredVariables() );      
-    }
+    if( auto sv_op = dynamic_pointer_cast<SymbolVariable>(expr) )
+        return sv_op->GetPatternLink() != target->GetPatternLink();      
 
     for( shared_ptr<Expression> op : expr->GetOperands() )
     {
-        if( !IsIndependentOf( op, target ) )
+        if( !IsIndependent( op ) )
             return false;
     }
 
@@ -243,7 +242,7 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExp
         if( !first_engage )
             first_engage = ( x != disengager_expr );
     }
-#if 1
+#ifdef BOOL_EQUALITY_METHOD
     if( !first_engage ) // TODO should be disallowed
         return original_expr;  
         
@@ -253,7 +252,7 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExp
 
     auto all_disengage_equal = MakeLazy<BoolEqualOperator>( all_disengaged_list ); 
     return all_disengage_equal & original_when_engaged;
-#else
+#else // and/or method
     return (original_expr & all_engaged_expr) | all_disengaged_expr;
 #endif
 }    

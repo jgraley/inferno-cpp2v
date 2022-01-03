@@ -18,8 +18,9 @@ class SymbolConstant : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit SymbolConstant( SR::XLink xlink );
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;    
     shared_ptr<SymbolResult> GetValue() const;
+    SR::XLink GetXLink() const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -36,6 +37,7 @@ public:
     explicit SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    SR::PatternLink GetPatternLink() const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

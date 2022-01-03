@@ -1,9 +1,10 @@
 #ifndef MATCH_HPP
 #define MATCH_HPP
 
-
 #include "common/trace.hpp"
 #include "common/mismatch.hpp"
+#include "common/common.hpp"
+
 #include <typeinfo>
 #include <string>
 #include <typeindex>		
@@ -27,13 +28,8 @@ struct Matcher
     };
 
 	virtual bool IsSubclass( const Matcher *source_archetype ) const = 0;
-	virtual bool IsLocalMatch( const Matcher *candidate ) const
-	{
-		// Default local matching criterion checks only the type of the candidate. If the
-		// candidate's class is a (non-strict) subclass of this class, we have a match.
-		return IsSubclass( candidate );
-	}
-    virtual ~Matcher() {}
+	virtual bool IsLocalMatch( const Matcher *candidate ) const;
+    virtual ~Matcher();
     template< class TARGET_TYPE >
     static inline bool IsSubclassStatic( const TARGET_TYPE *target_archetype, const Matcher *source_archetype )
     {
@@ -41,18 +37,8 @@ struct Matcher
         (void)target_archetype; // don't care about value of archetypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_archetype);
     }
-    static CompareResult Compare( const Matcher *l, const Matcher *r, Ordering ordering = UNIQUE )
-    {
-        type_index l_index( typeid(*l) );
-        type_index r_index( typeid(*r) );
-        if( l_index != r_index )
-            return (l_index > r_index) ? 1 : -1;
-        return l->CovariantCompare(r, ordering);
-    }
-    virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const 
-    {
-        return EQUAL; // usually there are no contents to compare
-    }
+    static CompareResult Compare( const Matcher *l, const Matcher *r, Ordering ordering = UNIQUE );
+    virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const;
 };
 
 #define MATCHER_FUNCTION \

@@ -21,8 +21,7 @@ SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expre
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_ ) :
     algo( algo_ ),
-    consistency_expression( expression_ ),
-    sym_solver( consistency_expression )
+    consistency_expression( expression_ )
 {
     DetermineVariables();   
     DetermineHintExpressions();    
@@ -44,7 +43,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     for( VariableId v : variables )
     {
         auto v_expr = make_shared<SYM::SymbolVariable>(v);
-        shared_ptr<SYM::SymbolExpression> he = sym_solver.TrySolveForSymbol(v_expr);
+        shared_ptr<SYM::SymbolExpression> he = SYM::SymSolver(v_expr).TrySolve(consistency_expression);
         if( he )
         {
             TRACEC("Solved for variable: ")(v)

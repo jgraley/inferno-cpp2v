@@ -17,9 +17,9 @@ SRC_OPTIONS = $(OPTIONS) -I$(SRC)
 SRC_SR_OPTIONS = $(SRC_OPTIONS) -I$(SR)
 
 COMMON_MODULES = $(COMMON)/standard $(COMMON)/common $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch $(COMMON)/serial $(COMMON)/progress
-NODE_MODULES = $(NODE)/containers $(NODE)/node $(NODE)/itemise 
+NODE_MODULES = $(NODE)/containers $(NODE)/node $(NODE)/itemise $(NODE)/match
 HELPERS_MODULES = $(HELPERS)/flatten $(HELPERS)/walk $(HELPERS)/simple_compare $(HELPERS)/duplicate $(HELPERS)/transformation
-TREE_MODULES = $(TREE)/cpptree $(TREE)/validate $(TREE)/scope $(TREE)/misc $(TREE)/typeof $(TREE)/type_db 
+TREE_MODULES = $(TREE)/cpptree $(TREE)/validate $(TREE)/scope $(TREE)/misc $(TREE)/typeof $(TREE)/type_db
 SR_MODULES = $(SR)/equivalence $(SR)/cache $(SR)/link $(SR)/query $(SR)/search_replace $(SR)/scr_engine $(SR)/and_rule_engine $(SR)/conjecture $(SR)/subcontainers 
 SR_MODULES += $(SR)/the_knowledge $(SR)/vn_transformation 
 SR_PTRANS_MODULES = $(SR_PTRANS)/pattern_transformation $(SR_PTRANS)/pattern_transformation_common $(SR_PTRANS)/combine_patterns $(SR_PTRANS)/search_to_compare
