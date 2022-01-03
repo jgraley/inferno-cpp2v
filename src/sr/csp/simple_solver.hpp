@@ -92,6 +92,7 @@ private:
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
+        bool tried_hint;    
         function<Value()> values_generator;    
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     

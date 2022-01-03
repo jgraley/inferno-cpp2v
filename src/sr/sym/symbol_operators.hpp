@@ -178,9 +178,6 @@ private:
     const shared_ptr<SymbolExpression> c;
 };
 
-
-
-
 };
 
 #endif // include guard

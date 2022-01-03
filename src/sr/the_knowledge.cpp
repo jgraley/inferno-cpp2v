@@ -252,8 +252,8 @@ const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
 {
     ASSERT( xlink );
     ASSERT( nuggets.count(xlink) > 0 )
-          ("Knowledge: no nugget for ")(xlink)("\n")
-          ("Nuggets: ")(nuggets);
+          ("Knowledge: no nugget for ")(xlink)("\n");
+    //      ("Nuggets: ")(nuggets);
     return nuggets.at(xlink);
 }
 

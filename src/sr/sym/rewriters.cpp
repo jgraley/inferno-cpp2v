@@ -121,27 +121,34 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
 {
     if( auto equal_op = dynamic_pointer_cast<EqualOperator>(equation) )
     {
-        shared_ptr<SymbolExpression> other_op;
+        set<shared_ptr<SymbolExpression>> dep_ops, indep_ops;
         for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )
         {
-            bool is_curr = false;
-            if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(op) )
-                if( DependsOn( sv_op, target ) )
-                    is_curr = true;
-            if( !is_curr )
-                other_op = op;                    
+            if( IsIndependentOf( op, target ) )
+                indep_ops.insert( op );
+            else
+                dep_ops.insert( op );                  
         }
-        ASSERT( other_op )
-              ("didn't find any other operands or not a symbol expression, target=")(target)
-              ("equation:\n")(equation);
-        return other_op;
+        
+        if( indep_ops.empty() || dep_ops.empty() )
+            return nullptr; // need at least one
+            
+        shared_ptr<SymbolExpression> indep_op = *(indep_ops.begin()); // I believe we could pick any if the equation is solveable
+            
+        for( shared_ptr<SymbolExpression> dep_op : dep_ops )
+        {
+            if( dynamic_pointer_cast<SymbolVariable>( dep_op ) ) // TODO should be "can dep_op be solved to match indep_op wrt target"?
+                return indep_op;
+        }
+        
+        return nullptr;
     }
-#if 0
+#if 1
     else if( auto and_op = dynamic_pointer_cast<AndOperator>(equation) )
     {
         set<shared_ptr<ImplicationOperator>> implies;
         set<shared_ptr<BoolEqualOperator>> bequals;
-        for( shared_ptr<SymbolExpression> op : equal_op->GetSymbolOperands() )
+        for( shared_ptr<BooleanExpression> op : and_op->GetBooleanOperands() )
         {
             if( auto o = dynamic_pointer_cast<ImplicationOperator>(op) )       
                 implies.insert(o);
@@ -179,9 +186,12 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
                 shared_ptr<SymbolExpression> try_solve_b = Solver( beq_ops.back() ).TrySolveForSymbol(target);
                 shared_ptr<SymbolExpression> try_solve_c = Solver( imply_ops.back() ).TrySolveForSymbol(target);
                 if( try_solve_b && try_solve_c )
+                {
+                    TRACE("Solved an and!!\n");
                     return make_shared<ConditionalOperator>( beq_ops.front(),
                                                              try_solve_b,
                                                              try_solve_c );
+                }
             }
         }
     }
@@ -190,23 +200,21 @@ shared_ptr<SymbolExpression> Solver::TrySolveForSymbol( shared_ptr<SymbolVariabl
 }
 
 
-bool Solver::DependsOn( shared_ptr<Expression> expr, shared_ptr<SymbolVariable> target )
+bool Solver::IsIndependentOf( shared_ptr<Expression> expr, shared_ptr<SymbolVariable> target )
 {
     if( auto sv_op = dynamic_pointer_cast<SYM::SymbolVariable>(expr) )
     {
-        if( OnlyElementOf( sv_op->GetRequiredVariables() ) ==
-            OnlyElementOf( target->GetRequiredVariables() ) )
-            return true;
+        return OnlyElementOf( sv_op->GetRequiredVariables() ) !=
+               OnlyElementOf( target->GetRequiredVariables() );      
     }
-    else
-    {            
-        for( shared_ptr<Expression> op : expr->GetOperands() )
-        {
-            if( DependsOn( op, target ) )
-                return true;
-        }
+
+    for( shared_ptr<Expression> op : expr->GetOperands() )
+    {
+        if( !IsIndependentOf( op, target ) )
+            return false;
     }
-    return false;
+
+    return true; // all operands are independent of target
 }
 
 

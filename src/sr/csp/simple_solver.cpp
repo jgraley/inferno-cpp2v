@@ -257,7 +257,8 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     current_it( current_it_ ),
-    current_var( *current_it )
+    current_var( *current_it ),
+    tried_hint( false )
 {
     //ASSERT( current_it != solver_plan.free_variables.end() );
     ASSERT( assignments.count(current_var) == 0 );
@@ -337,16 +338,18 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         
         bool ok;
         Assignment hint;  
+        const ConstraintSet &constraints_to_test = solver_plan.completed_constraints.at(current_var);
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
-        tie(ok, hint, unsatisfied) = solver.Test( assignments, solver_plan.completed_constraints.at(current_var), current_var );        
+        tie(ok, hint, unsatisfied) = solver.Test( assignments, constraints_to_test, current_var );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok, hint) = solver.Test( assignments, solver_plan.completed_constraints.at(current_var), current_var );        
+        tie(ok, hint) = solver.Test( assignments, constraints_to_test, current_var );        
 #endif
 
 #ifdef TAKE_HINTS
-        if( !ok && hint ) // hint now guaranteed to be for current variable
+        // TODO take multiple hints see #462
+        if( !ok && hint && !tried_hint ) // hint now guaranteed to be for current variable
         {
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
@@ -363,6 +366,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
                     return Value();
                 }
             };
+            tried_hint = true;
         }
 #endif
        

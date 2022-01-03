@@ -290,20 +290,17 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 
 shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
-    shared_ptr<BooleanResult> ra = a->Evaluate(kit);
-    shared_ptr<SymbolResult> rb = b->Evaluate(kit);
-    shared_ptr<SymbolResult> rc = c->Evaluate(kit);
-    
+    shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
     if( ra->value == BooleanResult::TRUE )
-        return rb;
+        return b->Evaluate(kit);
     else
-        return rc;
+        return c->Evaluate(kit);
 }
 
 
 string ConditionalOperator::Render() const
 {
-    return RenderForMe(a) + " ? " + RenderForMe(b) + " ? " + RenderForMe(c);
+    return RenderForMe(a) + " ? " + RenderForMe(b) + " : " + RenderForMe(c);
 }
 
 
