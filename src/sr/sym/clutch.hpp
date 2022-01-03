@@ -1,5 +1,5 @@
-#ifndef REWRITES_HPP
-#define REWRITES_HPP
+#ifndef CLUTCH_HPP
+#define CLUTCH_HPP
 
 #include "expression.hpp"
 

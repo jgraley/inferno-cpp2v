@@ -5,7 +5,7 @@
 #include "link.hpp"
 #include "../sym/comparison_operators.hpp"
 #include "../sym/primary_expressions.hpp"
-#include "../sym/rewriters.hpp"
+#include "../sym/sym_solver.hpp"
 
 //#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
 //#define CHECK_HINTS
