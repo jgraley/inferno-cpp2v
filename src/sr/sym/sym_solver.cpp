@@ -15,7 +15,7 @@ SymSolver::SymSolver( shared_ptr<SymbolVariable> target_ ) :
 }
 
 
-shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<Equation> equation ) const
+shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<BooleanExpression> equation ) const
 {
     if( auto equal_op = dynamic_pointer_cast<EqualOperator>(equation) )
     {
