@@ -458,7 +458,7 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     {
         auto candidate_expr = MakeOver<SymbolVariable>(plan_seq.non_star_at_front);
         auto candidate_seq_front_expr = MakeOver<MyContainerFrontOperator>(candidate_expr);
-        expr &= ( candidate_seq_front_expr == candidate_expr );
+        expr &= ( candidate_expr == candidate_seq_front_expr );
     }
  
     // If the pattern ends with a non-star, constrain the candidate x to be the 
@@ -467,7 +467,7 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     {
         auto candidate_expr = MakeOver<SymbolVariable>(plan_seq.non_star_at_back);
         auto candidate_seq_back_expr = MakeOver<MyContainerBackOperator>(candidate_expr);
-        expr &= ( candidate_seq_back_expr == candidate_expr );
+        expr &= ( candidate_expr == candidate_seq_back_expr );
     }
     
     // Adjacent pairs of non-stars in the pattern should correspond to adjacent
@@ -477,7 +477,9 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
         auto candidate_a_expr = MakeOver<SymbolVariable>(p.first);
         auto candidate_b_expr = MakeOver<SymbolVariable>(p.second);
         auto candidate_a_successor_expr = MakeOver<MySequenceSuccessorOperator>(candidate_a_expr);
-        expr &= ( candidate_a_successor_expr == candidate_b_expr );
+        expr &= ( candidate_b_expr == candidate_a_successor_expr );
+        // Avoid being pushed off the end since candidate b is not a shim
+        expr &= ( candidate_b_expr != MakeOver<SymbolConstant>(XLink::OffEndXLink) ); 
     }
         
     // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 

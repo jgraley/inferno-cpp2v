@@ -9,6 +9,7 @@
 
 //#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
 //#define CHECK_HINTS
+#define REJECT_OFF_END_HINT
 
 using namespace CSP;
 
@@ -94,8 +95,11 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
-    if( hint_result->xlink == SR::XLink::OffEndXLink || 
-        hint_result->xlink == SR::XLink::UndefinedXLink)
+    if( hint_result->xlink == SR::XLink::UndefinedXLink
+#ifdef REJECT_OFF_END_HINT
+        || hint_result->xlink == SR::XLink::OffEndXLink
+#endif
+        )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
         
     SR::LocatedLink hint( current_var, hint_result->xlink );
