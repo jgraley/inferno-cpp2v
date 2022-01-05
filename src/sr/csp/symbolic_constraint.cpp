@@ -95,29 +95,19 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
-    if( hint_result->xlink == SR::XLink::UndefinedXLink
-#ifdef REJECT_OFF_END_HINT
-        || hint_result->xlink == SR::XLink::OffEndXLink
-#endif
-        )
+    if( hint_result->xlink == SR::XLink::UndefinedXLink )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
-        
-    SR::LocatedLink hint( current_var, hint_result->xlink );
-    
-#ifdef CHECK_HINTS
-    Assignments hinted_assignments = assignments;
-    hinted_assignments[current_var] = hint_result->xlink;
-    SYM::Expression::EvalKit hinted_kit { &hinted_assignments, knowledge };
-    shared_ptr<SYM::BooleanResult> hinted_r = plan.consistency_expression->Evaluate( hinted_kit );
-    ASSERT( hinted_r->value == SYM::BooleanResult::TRUE )("Hint failed check\n")
-          ("Consistentcy expression:\n")(plan.consistency_expression)
-          ("\nCurrent variable: ")(current_var)
-          ("\nHint expression for current variable:\n")(hint_expression)
-          ("\nOriginal assignments:\n")(assignments)
-          ("\nHint: ")(hint)
-          ("\nHinted assignments:\n")(hinted_assignments);          
-#endif
+          
+    // Testing hint by evaluating using consistentcy expression with hint substituted over original value
+    SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
+    SR::XLink prev_xlink = *p_current_assignment;
+    *p_current_assignment = hint_result->xlink;
+    shared_ptr<SYM::BooleanResult> hinted_r = plan.consistency_expression->Evaluate( kit );
+    *p_current_assignment = prev_xlink; // put it back again
+    if( hinted_r->value == SYM::BooleanResult::FALSE )
+        return make_tuple(false, Assignment()); // evaluated false using hint - probably inconsistent in the OTHER variables
 
+    SR::LocatedLink hint( current_var, hint_result->xlink );
     return make_tuple(false, hint);
 }
 

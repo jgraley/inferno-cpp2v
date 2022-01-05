@@ -34,7 +34,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     AddAtRoot( REQUIRE_SOLO, root_xlink );
     
     AddAtRoot( REQUIRE_SOLO, XLink::MMAX_Link );
-    //AddAtRoot( REQUIRE_SOLO, XLink::OffEndXLink );
+    AddAtRoot( REQUIRE_SOLO, XLink::OffEndXLink );
     
     int is = nuggets.size();
     ExtendDomain( root_plink );
