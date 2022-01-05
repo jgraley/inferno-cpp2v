@@ -42,13 +42,22 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
 {
     set<shared_ptr<ImplicationOperator>> implies;
     set<shared_ptr<BoolEqualOperator>> bequals;
+    map<shared_ptr<BooleanExpression>, shared_ptr<SymbolExpression>> solveables;
     for( shared_ptr<BooleanExpression> op : sa )
     {
         if( auto o = dynamic_pointer_cast<ImplicationOperator>(op) )       
             implies.insert(o);
         if( auto o = dynamic_pointer_cast<BoolEqualOperator>(op) )       
             bequals.insert(o);
+        if( shared_ptr<SymbolExpression> solved = op->TrySolveFor( target ) )
+            solveables[op] = solved;
     }
+    
+    // Standard algorithm - first thing to try is to see if any of the clauses provide a solution
+    if( !solveables.empty() )
+        return FrontOf(solveables).second;
+    
+    // "Special Stuff" for solving the standard clutch logic (EQUALITY_METHOD only)
     if( implies.size()==1 && 
         bequals.size()==1 )
     {

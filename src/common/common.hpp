@@ -299,6 +299,15 @@ const typename T::value_type &OnlyElementOf( const T&c )
     return *(c.begin());
 }
 
+
+// Provide somehting like front() that works on sets and maps
+template<typename T>
+const typename T::value_type &FrontOf( const T&c )
+{
+    ASSERT( !c.empty() );
+    return *(c.begin());
+}
+
 // ----------------------- make_unique<>() -----------------------
 
 template<class T> 
