@@ -20,6 +20,7 @@ public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
+    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

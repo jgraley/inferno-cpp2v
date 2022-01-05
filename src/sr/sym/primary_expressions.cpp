@@ -62,6 +62,12 @@ shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 }
 
 
+bool SymbolVariable::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
+{
+    return GetPatternLink() != target->GetPatternLink();      
+}
+
+
 SR::PatternLink SymbolVariable::GetPatternLink() const
 {
     return plink;

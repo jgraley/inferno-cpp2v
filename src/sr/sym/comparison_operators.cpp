@@ -1,4 +1,5 @@
 #include "comparison_operators.hpp"
+#include "primary_expressions.hpp"
 #include "../agents/agent.hpp"
 
 using namespace SYM;
@@ -28,12 +29,37 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model.
         if( ra->xlink != rb->xlink )
-        {
-            m = BooleanResult::FALSE;
-        }
+            m = BooleanResult::FALSE;        
     } );
     return make_shared<BooleanResult>( m );   
 }
+
+
+shared_ptr<SymbolExpression> EqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    set<shared_ptr<SymbolExpression>> dep_ops, indep_ops;
+    for( shared_ptr<SymbolExpression> op : sa )
+    {
+        if( op->IsIndependentOf( target ) )
+            indep_ops.insert( op );
+        else
+            dep_ops.insert( op );                  
+    }
+    
+    if( indep_ops.empty() || dep_ops.empty() )
+        return nullptr; // need at least one
+        
+    shared_ptr<SymbolExpression> indep_op = *(indep_ops.begin()); // I believe we could pick any if the equation is solveable
+        
+    for( shared_ptr<SymbolExpression> dep_op : dep_ops )
+    {
+        if( dynamic_pointer_cast<SymbolVariable>( dep_op ) ) // TODO should be "can dep_op be solved to equal indep_op wrt target"? See #466
+            return indep_op;
+    }
+    
+    return nullptr;
+}
+
 
 
 string EqualOperator::Render() const

@@ -11,6 +11,9 @@
 namespace SYM
 { 
 
+class SymbolVariable;
+class SymbolExpression;
+
 // ------------------------- Result --------------------------
 
 class Result
@@ -78,8 +81,10 @@ public:
     class Incomplete : public Exception {};            
 
     virtual list<shared_ptr<Expression>> GetOperands() const;
-
     virtual set<SR::PatternLink> GetRequiredVariables() const;
+    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
+    virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const;
+    
     virtual string Render() const = 0;    
     string GetTrace() const; // used for debug
     

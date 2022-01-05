@@ -29,6 +29,7 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
+    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -54,6 +55,7 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
+
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

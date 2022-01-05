@@ -20,7 +20,6 @@ class SymSolver
 public:
     explicit SymSolver( shared_ptr<SymbolVariable> target );
     shared_ptr<SymbolExpression> TrySolve( shared_ptr<BooleanExpression> equation ) const;
-    bool IsIndependent( shared_ptr<Expression> expr ) const;
 
 private:
     const shared_ptr<SymbolVariable> target;

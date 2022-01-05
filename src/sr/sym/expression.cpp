@@ -38,6 +38,28 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
+shared_ptr<SymbolExpression> Expression::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    return nullptr;
+}
+
+
+bool Expression::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
+{
+    // When we extend to allow target to be any Expression, we'll want
+    // do do an expression compare in here (which means we need expression 
+    // compare) before the loop, and we'll remove the overload in 
+    // SymbolVariable, and possibly remove the virtual from here.
+    for( shared_ptr<Expression> op : GetOperands() )
+    {
+        if( !op->IsIndependentOf( target ) )
+            return false; // an operand may not be, so we may not be.
+    }
+
+    return true; // all operands are independent of target
+}
+
+
 string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
 {
     string bare = inner->Render();
