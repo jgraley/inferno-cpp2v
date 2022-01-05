@@ -94,10 +94,10 @@ public:
     static const XLink MMAX_Link;
 
     // Gone off the end
-    static const XLink OffEndLink;
+    static const XLink OffEndXLink;
 
-    // Gone off the end
-    static const XLink UndefinedLink;
+    // Cannot evaluate
+    static const XLink UndefinedXLink;
 };
 
 

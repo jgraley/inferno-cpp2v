@@ -30,7 +30,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     // XLink must match our referee (i.e. be non-strict subtype)
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-        return make_shared<SymbolResult>(SR::XLink::UndefinedLink); // Will not be able to itemise due incompatible type
+        return make_shared<SymbolResult>(SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -79,7 +79,7 @@ SR::XLink ChildSequenceFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlink,
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
     if( p_x_seq->empty() )
-        return SR::XLink::OffEndLink;
+        return SR::XLink::OffEndXLink;
     else
         return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
 }
@@ -102,7 +102,7 @@ SR::XLink ChildSequenceBackOperator::EvalXLinkFromItem( SR::XLink parent_xlink,
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
     if( p_x_seq->empty() )
-        return SR::XLink::OffEndLink;
+        return SR::XLink::UndefinedXLink;
     else
         return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
 }
@@ -125,7 +125,7 @@ SR::XLink ChildCollectionFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlin
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
     if( p_x_col->empty() )
-        return SR::XLink::OffEndLink;
+        return SR::XLink::UndefinedXLink;
     else
         return SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
 }

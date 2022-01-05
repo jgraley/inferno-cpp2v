@@ -94,7 +94,8 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
-    if( hint_result->xlink == SR::XLink::OffEndLink )
+    if( hint_result->xlink == SR::XLink::OffEndXLink || 
+        hint_result->xlink == SR::XLink::UndefinedXLink)
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
         
     SR::LocatedLink hint( current_var, hint_result->xlink );
