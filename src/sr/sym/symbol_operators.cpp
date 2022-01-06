@@ -3,6 +3,8 @@
 #include "node/node.hpp"
 #include "../agents/agent.hpp"
 
+//#define EXCEPTION_FOR_BAD_ITEMISE
+
 using namespace SYM;
 
 // ------------------------- ItemiseToSymbolOperator --------------------------
@@ -30,7 +32,11 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     // XLink must match our referee (i.e. be non-strict subtype)
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
+#ifdef EXCEPTION_FOR_BAD_ITEMISE
         throw UndefinedForThatType(); // Will not be able to itemise due incompatible type
+#else
+        return make_shared<SymbolResult>(SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
+#endif
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)

@@ -87,13 +87,17 @@ private: friend class LocatedLink;
 
     struct MMAX : virtual Node { NODE_FUNCTIONS_FINAL }; 
     struct OffEnd : virtual Node { NODE_FUNCTIONS_FINAL }; 
+    struct Undefined : virtual Node { NODE_FUNCTIONS_FINAL }; 
     
 public:
     // Magic Match Anything X link: 
     static const XLink MMAX_Link;
 
-    // Gone off the end of a sequence
+    // Gone off the end
     static const XLink OffEndXLink;
+
+    // Cannot evaluate
+    static const XLink UndefinedXLink;
 };
 
 

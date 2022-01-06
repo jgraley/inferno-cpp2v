@@ -90,7 +90,7 @@ shared_ptr<BooleanResult> BooleanExpression::TryEvaluate( const EvalKit &kit ) c
 {
     return Evaluate(kit);
 }
-catch( EvalFailure )
+catch( EvalFailure & )
 {
     return nullptr;
 }
@@ -101,7 +101,7 @@ shared_ptr<SymbolResult> SymbolExpression::TryEvaluate( const EvalKit &kit ) con
 {
     return Evaluate(kit);
 }
-catch( EvalFailure )
+catch( EvalFailure & )
 {
     return nullptr;
 }

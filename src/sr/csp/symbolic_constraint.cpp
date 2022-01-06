@@ -95,10 +95,10 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResult> hint_result = hint_expression->TryEvaluate( kit );
-    if( !r )
+    if( !hint_result || hint_result->xlink == SR::XLink::UndefinedXLink )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
           
-    // Testing hint by evaluating using consistentcy expression with hint substituted over original value
+    // Testing hint by evaluating using consistency expression with hint substituted over original value
     SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
     SR::XLink prev_xlink = *p_current_assignment;
     *p_current_assignment = hint_result->xlink;
