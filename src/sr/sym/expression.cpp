@@ -84,6 +84,28 @@ string Expression::GetTrace() const
            Trace(GetRequiredVariables());
 }
 
+// ------------------------- BooleanExpression --------------------------
+
+shared_ptr<BooleanResult> BooleanExpression::TryEvaluate( const EvalKit &kit ) const try
+{
+    return Evaluate(kit);
+}
+catch( EvalFailure )
+{
+    return nullptr;
+}
+
+// ------------------------- SymbolExpression --------------------------
+
+shared_ptr<SymbolResult> SymbolExpression::TryEvaluate( const EvalKit &kit ) const try
+{
+    return Evaluate(kit);
+}
+catch( EvalFailure )
+{
+    return nullptr;
+}
+
 // ------------------------- BooleanToBooleanExpression --------------------------
 
 list<shared_ptr<BooleanExpression>> BooleanToBooleanExpression::GetBooleanOperands() const

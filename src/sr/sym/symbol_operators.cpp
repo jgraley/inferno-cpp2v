@@ -25,12 +25,12 @@ list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() 
 
 
 shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                  const list<shared_ptr<SymbolResult>> &op_results ) const
+                                                            const list<shared_ptr<SymbolResult>> &op_results ) const
 {
     // XLink must match our referee (i.e. be non-strict subtype)
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-        return make_shared<SymbolResult>(SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
+        throw UndefinedForThatType(); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -79,9 +79,9 @@ SR::XLink ChildSequenceFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlink,
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
     if( p_x_seq->empty() )
-        return SR::XLink::OffEndXLink;
-    else
-        return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
+        return SR::XLink::OffEndXLink; // OffEnd IS allowed in this case
+    
+    return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
 }
 
 
@@ -100,11 +100,11 @@ SR::XLink ChildSequenceBackOperator::EvalXLinkFromItem( SR::XLink parent_xlink,
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
-    // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
+    // but also coming from the correct TreePtr<Node>).
     if( p_x_seq->empty() )
-        return SR::XLink::UndefinedXLink;
-    else
-        return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
+        throw UndefinedOnEmptyContainer();
+    
+    return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
 }
 
 
@@ -123,11 +123,11 @@ SR::XLink ChildCollectionFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlin
     ASSERT( p_x_col )("item_index didn't lead to a collection");
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
-    // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
+    // but also coming from the correct TreePtr<Node>).
     if( p_x_col->empty() )
-        return SR::XLink::UndefinedXLink;
-    else
-        return SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
+        throw UndefinedOnEmptyContainer();
+    
+    return SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
 }
 
 
@@ -261,7 +261,10 @@ string MyContainerBackOperator::GetKnowledgeName() const
 SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                                             const SR::TheKnowledge::Nugget &nugget ) const
 {  
-    return nugget.my_sequence_successor;
+    SR::XLink succ = nugget.my_sequence_successor;
+    if( !succ )
+        throw UndefinedSuccessor();
+    return succ;
 }
 
 

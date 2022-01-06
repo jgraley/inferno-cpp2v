@@ -87,7 +87,6 @@ void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
     nugget.containment_context = Nugget::ROOT;
     nugget.my_container_front = root_xlink;
     nugget.my_container_back = root_xlink;
-    nugget.my_sequence_successor = XLink::UndefinedXLink;
     AddLink( mode, root_xlink, nugget );
 }
 
@@ -160,7 +159,6 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
     nugget.parent_xlink = xlink;
     nugget.my_container_front = child_xlink;
     nugget.my_container_back = child_xlink;
-    nugget.my_sequence_successor = XLink::UndefinedXLink;
     AddLink( mode, child_xlink, nugget );
 }
 

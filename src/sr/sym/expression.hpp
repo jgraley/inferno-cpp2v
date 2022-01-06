@@ -78,7 +78,16 @@ public:
         COMMA 
     };    
         
-    class Incomplete : public Exception {};            
+    class EvalFailure : public Exception {};    
+    
+    // Missing assignment in kit
+    class Incomplete : public EvalFailure {};            
+    
+    // No well-defined result
+    class Undefined : public EvalFailure {};                
+    class UndefinedSuccessor : public Undefined {};                
+    class UndefinedOnEmptyContainer : public Undefined {}; 
+    class UndefinedForThatType : public Undefined {}; 
 
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
@@ -100,6 +109,7 @@ class BooleanExpression : public Expression
 {    
 public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
+    virtual shared_ptr<BooleanResult> TryEvaluate( const EvalKit &kit ) const;
 };
 
 // ------------------------- SymbolExpression --------------------------
@@ -109,6 +119,7 @@ class SymbolExpression : public Expression
 {    
 public:
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0;
+    virtual shared_ptr<SymbolResult> TryEvaluate( const EvalKit &kit ) const;
 };
 
 // ------------------------- BooleanToBooleanExpression --------------------------
