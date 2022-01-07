@@ -191,7 +191,7 @@ Over<BooleanExpression> SYM::operator|( Over<BooleanExpression> a, Over<BooleanE
 BoolEqualOperator::BoolEqualOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
     sa( sa_ )
 {   
-    ASSERT( sa.size() >= 2 ); 
+    ASSERT( sa.size() == 2 ); 
 }    
 
 

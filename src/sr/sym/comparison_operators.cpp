@@ -6,55 +6,58 @@ using namespace SYM;
 
 // ------------------------- EqualOperator --------------------------
 
-EqualOperator::EqualOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
-    sa(sa_)
+EqualOperator::EqualOperator( shared_ptr<SymbolExpression> a_, 
+                              shared_ptr<SymbolExpression> b_ ) :
+    a(a_),
+    b(b_)
 {
 }    
     
 
 list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 {
-    return sa;
+    return {a, b};
 }
 
 
 shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
-                                                 shared_ptr<SymbolResult> rb) 
-    {
-        // For equality, it is sufficient to compare the x links
-        // themselves, which have the required uniqueness properties
-        // within the full arrowhead model.
-        if( ra->xlink != rb->xlink )
-            m = BooleanResult::FALSE;        
-    } );
-    return make_shared<BooleanResult>( m );   
+    ASSERT( op_results.size()==2 );
+    shared_ptr<SymbolResult> ra = op_results.front();
+    shared_ptr<SymbolResult> rb = op_results.back();
+
+    // For equality, it is sufficient to compare the x links
+    // themselves, which have the required uniqueness properties
+    // within the full arrowhead model.
+    if( ra->xlink == rb->xlink )
+        return make_shared<BooleanResult>( BooleanResult::TRUE );
+    else
+        return make_shared<BooleanResult>( BooleanResult::FALSE );        
 }
 
 
 shared_ptr<SymbolExpression> EqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
 {
-    set<shared_ptr<SymbolExpression>> dep_ops, indep_ops;
-    for( shared_ptr<SymbolExpression> op : sa )
+    shared_ptr<SymbolExpression> dep_op, indep_op;
+    for( shared_ptr<SymbolExpression> op : list<shared_ptr<SymbolExpression>>{a, b} )
     {
         if( op->IsIndependentOf( target ) )
-            indep_ops.insert( op );
+            indep_op = op;
         else
-            dep_ops.insert( op );                  
+            dep_op = op;                  
     }
     
-    if( indep_ops.empty() || dep_ops.empty() )
+    if( !indep_op || !dep_op )
         return nullptr; // need at least one
-        
-    shared_ptr<SymbolExpression> indep_op = *(indep_ops.begin()); // I believe we could pick any if the equation is solveable
-        
-    for( shared_ptr<SymbolExpression> dep_op : dep_ops )
+                
+    // TODO should be "can dep_op be solved to equal indep_op wrt target"? See #466
+    if( auto dep_sv = dynamic_pointer_cast<SymbolVariable>( dep_op ) ) 
     {
-        if( dynamic_pointer_cast<SymbolVariable>( dep_op ) ) // TODO should be "can dep_op be solved to equal indep_op wrt target"? See #466
-            return indep_op;
+        // We already know dep_op is not independent of target. If it's also a 
+        // SymbolVariable then it must be the target.        
+        ASSERT( dep_sv->GetPatternLink()==target->GetPatternLink() );
+        return indep_op;
     }
     
     return nullptr;
@@ -64,10 +67,8 @@ shared_ptr<SymbolExpression> EqualOperator::TrySolveFor( shared_ptr<SymbolVariab
 
 string EqualOperator::Render() const
 {
-    list<string> ls;
-    for( shared_ptr<SymbolExpression> a : sa )
-        ls.push_back( RenderForMe(a) );
-    return Join( ls, " == " );
+    return RenderForMe(a) + " == " + RenderForMe(b);
+
 }
 
 
@@ -79,7 +80,7 @@ Expression::Precedence EqualOperator::GetPrecedence() const
 
 Over<BooleanExpression> SYM::operator==( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<EqualOperator>( list< shared_ptr<SymbolExpression> >({ a, b }) );
+    return MakeOver<EqualOperator>( a, b );
 }
 
 // ------------------------- NotEqualOperator --------------------------
