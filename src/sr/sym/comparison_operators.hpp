@@ -44,29 +44,6 @@ Over<BooleanExpression> operator==( Over<SymbolExpression> a, Over<SymbolExpress
 
 // ------------------------- NotEqualOperator --------------------------
 
-// NotEqualOperator is NOT a more general "AllDiff" operator; it only 
-// accepts 2 operands and if you need AllDiff you should try 
-// AllDiffOperator. It isn't 100% clear that AllDiff is the natural
-// interpretation of a multi-operand !=
-class NotEqualOperator : public SymbolToBooleanExpression
-{
-public:    
-    typedef BooleanExpression NominalType;
-    explicit NotEqualOperator( shared_ptr<SymbolExpression> a_, 
-                               shared_ptr<SymbolExpression> b_ );
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<SymbolResult>> &op_results ) const override;
-
-    virtual string Render() const override;
-    virtual Precedence GetPrecedence() const override;
-    
-private:
-    const shared_ptr<SymbolExpression> a;
-    const shared_ptr<SymbolExpression> b;
-};
-
-
 Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
 // ------------------------- IndexComparisonOperator --------------------------

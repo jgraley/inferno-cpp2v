@@ -6,6 +6,48 @@
 
 using namespace SYM;
 
+// ------------------------- NotOperator --------------------------
+
+NotOperator::NotOperator( shared_ptr<BooleanExpression> a_ ) :
+    a( a_ )
+{   
+}    
+
+
+list<shared_ptr<BooleanExpression>> NotOperator::GetBooleanOperands() const
+{
+    return { a };
+}
+
+
+shared_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
+                                                 const list<shared_ptr<BooleanResult>> &op_results ) const
+{
+    shared_ptr<BooleanResult> ra = op_results.front();
+    if( ra->value == BooleanResult::FALSE )
+        return make_shared<BooleanResult>( BooleanResult::TRUE );
+    else
+        return make_shared<BooleanResult>( BooleanResult::FALSE );     
+}
+
+
+string NotOperator::Render() const
+{
+    return "~"+RenderForMe(a);
+}
+
+
+Expression::Precedence NotOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
+
+
+Over<BooleanExpression> SYM::operator~( Over<BooleanExpression> a )
+{
+    return MakeOver<NotOperator>( a );
+}
+
 // ------------------------- AndOperator --------------------------
 
 AndOperator::AndOperator( list< shared_ptr<BooleanExpression> > sa_ ) :
@@ -67,18 +109,21 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
         // Ugly bit
         SR::PatternLink beq_plink, imply_plink;
         SR::XLink beq_xlink, imply_xlink;
-        if( auto imply_nequal_op = dynamic_pointer_cast<NotEqualOperator>(imply_ops.front() ) )
+        if( auto imply_not_op = dynamic_pointer_cast<NotOperator>( imply_ops.front() ) )
         {
-            if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolVariable>(imply_nequal_op->GetOperands().front() ) )
-                imply_plink = imply_nequal_lop->GetPatternLink();
-            if( auto imply_nequal_rop = dynamic_pointer_cast<SymbolConstant>(imply_nequal_op->GetOperands().back() ) )
-                imply_xlink = imply_nequal_rop->GetXLink();
+            if( auto imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op) )
+            {
+                if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolVariable>( imply_nequal_op->GetOperands().front() ) )
+                    imply_plink = imply_nequal_lop->GetPatternLink();
+                if( auto imply_nequal_rop = dynamic_pointer_cast<SymbolConstant>( imply_nequal_op->GetOperands().back() ) )
+                    imply_xlink = imply_nequal_rop->GetXLink();
+            }
         }
-        if( auto beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front() ) )
+        if( auto beq_equal_op = dynamic_pointer_cast<EqualOperator>( beq_ops.front() ) )
         {
-            if( auto beq_equal_lop = dynamic_pointer_cast<SymbolVariable>(beq_equal_op->GetOperands().front() ) )
+            if( auto beq_equal_lop = dynamic_pointer_cast<SymbolVariable>( beq_equal_op->GetOperands().front() ) )
                 beq_plink = beq_equal_lop->GetPatternLink();
-            if( auto beq_equal_rop = dynamic_pointer_cast<SymbolConstant>(beq_equal_op->GetOperands().back() ) )
+            if( auto beq_equal_rop = dynamic_pointer_cast<SymbolConstant>( beq_equal_op->GetOperands().back() ) )
                 beq_xlink = beq_equal_rop->GetXLink();
         }            
 
@@ -90,7 +135,7 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
             shared_ptr<SymbolExpression> try_solve_c = imply_ops.back()->TrySolveFor(target);
             if( try_solve_b && try_solve_c )
             {
-                TRACE("Solved an and!!\n");
+                FTRACE("Solved an and!!\n");
                 return make_shared<ConditionalOperator>( beq_ops.front(),
                                                          try_solve_b,
                                                          try_solve_c );

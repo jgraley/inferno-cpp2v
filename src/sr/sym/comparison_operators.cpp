@@ -1,4 +1,5 @@
 #include "comparison_operators.hpp"
+#include "boolean_operators.hpp"
 #include "primary_expressions.hpp"
 #include "../agents/agent.hpp"
 
@@ -85,53 +86,9 @@ Over<BooleanExpression> SYM::operator==( Over<SymbolExpression> a, Over<SymbolEx
 
 // ------------------------- NotEqualOperator --------------------------
 
-NotEqualOperator::NotEqualOperator( shared_ptr<SymbolExpression> a_, 
-                                    shared_ptr<SymbolExpression> b_ ) :
-    a(a_),
-    b(b_)
-{
-    // Note: not an alldiff, see #429
-}    
-    
-
-list<shared_ptr<SymbolExpression>> NotEqualOperator::GetSymbolOperands() const
-{
-    return {a, b};
-}
-
-
-shared_ptr<BooleanResult> NotEqualOperator::Evaluate( const EvalKit &kit,
-                                                      const list<shared_ptr<SymbolResult>> &op_results ) const 
-{    
-    ASSERT( op_results.size()==2 );
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
-
-    // For (un)equality, it is sufficient to compare the x links
-    // themselves, which have the required uniqueness properties
-    // within the full arrowhead model.
-    if( ra->xlink != rb->xlink )
-        return make_shared<BooleanResult>(BooleanResult::TRUE);
-    else
-        return make_shared<BooleanResult>(BooleanResult::FALSE);   
-}
-
-
-string NotEqualOperator::Render() const
-{
-    return RenderForMe(a) + " != " + RenderForMe(b);
-}
-
-
-Expression::Precedence NotEqualOperator::GetPrecedence() const
-{
-    return Precedence::COMPARE;
-}
-
-
 Over<BooleanExpression> SYM::operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<NotEqualOperator>( a, b );
+    return ~(a==b);
 }
 
 // ------------------------- IndexComparisonOperator --------------------------
