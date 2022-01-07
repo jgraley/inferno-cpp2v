@@ -39,10 +39,14 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExp
         return original_expr;  
         
     auto original_when_engaged = MakeOver<ImplicationOperator>( first_engage, original_expr );            
-    if( all_disengaged_list.size()==1 )
-        return original_when_engaged;
+    
+    auto all_disengage_equal = MakeOver<BooleanConstant>(true);
+    ForOverlappingAdjacentPairs( all_disengaged_list, [&](Over<BooleanExpression> ea,
+                                                          Over<BooleanExpression> eb) 
+    {
+        all_disengage_equal &= (ea == eb);
+    } );
 
-    auto all_disengage_equal = MakeOver<BoolEqualOperator>( all_disengaged_list ); 
     return all_disengage_equal & original_when_engaged;
 #else // and/or method
     return (original_expr & all_engaged_expr) | all_disengaged_expr;

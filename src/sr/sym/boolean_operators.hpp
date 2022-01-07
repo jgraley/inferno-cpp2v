@@ -55,7 +55,8 @@ class BoolEqualOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit BoolEqualOperator( list< shared_ptr<BooleanExpression> > sa_ );
+    explicit BoolEqualOperator( shared_ptr<BooleanExpression> a, 
+                                shared_ptr<BooleanExpression> b );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
@@ -63,7 +64,8 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const list< shared_ptr<BooleanExpression> > sa;
+    const shared_ptr<BooleanExpression> a;
+    const shared_ptr<BooleanExpression> b;
 };
 
 Over<BooleanExpression> operator==( Over<BooleanExpression> a, Over<BooleanExpression> b );
