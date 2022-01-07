@@ -111,7 +111,7 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
         SR::XLink beq_xlink, imply_xlink;
         if( auto imply_not_op = dynamic_pointer_cast<NotOperator>( imply_ops.front() ) )
         {
-            if( auto imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op) )
+            if( auto imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op->GetOperands().front()) )
             {
                 if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolVariable>( imply_nequal_op->GetOperands().front() ) )
                     imply_plink = imply_nequal_lop->GetPatternLink();
@@ -125,8 +125,8 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
                 beq_plink = beq_equal_lop->GetPatternLink();
             if( auto beq_equal_rop = dynamic_pointer_cast<SymbolConstant>( beq_equal_op->GetOperands().back() ) )
                 beq_xlink = beq_equal_rop->GetXLink();
-        }            
-
+        }                        
+            
         if( beq_plink && beq_plink==imply_plink &&
             beq_xlink && beq_xlink==imply_xlink )
         {
