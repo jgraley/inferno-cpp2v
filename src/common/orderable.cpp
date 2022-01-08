@@ -10,6 +10,7 @@ Orderable::Result Orderable::OrderCompare( const Orderable *l,
                                            OrderProperty order_property )
 {
     //FTRACE(Traceable::TypeIdName(*l))(" ")(Traceable::TypeIdName(*r))("\n");
+    
     type_index l_index( typeid(*l) );
     type_index r_index( typeid(*r) );
     if( l_index != r_index )

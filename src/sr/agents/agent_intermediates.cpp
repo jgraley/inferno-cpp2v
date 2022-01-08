@@ -241,7 +241,7 @@ bool SpecialBase::IsNonTrivialPreRestriction(const TreePtrInterface *ptr)
     {
         if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*ptr) )   // is to a special node
         {            
-            if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchetype()) ) )    // pre-restrictor is nontrivial
+            if( typeid( *ptr ) != typeid( *(sbs->GetArchetypeTreePtr()) ) )    // pre-restrictor is nontrivial
             {
                 return true;
             }

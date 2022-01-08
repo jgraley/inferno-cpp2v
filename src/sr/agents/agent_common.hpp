@@ -120,15 +120,22 @@ private:
 // SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.
 // Itemise is known required (for eg graph plotting), other bounces
 // are TBD.
-#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
+
+#define ARCHETYPE_FUNCTION \
+    virtual TreePtr<Node> GetArchetypeNode() const override \
+    { \
+        return this->SpecialGetArchetypeNode(); \
+    }
+
+
+#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION ARCHETYPE_FUNCTION
 /// Common stuff for pattern nodes other than standard nodes
 class SpecialBase
 {
 public:    
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const = 0;
-    virtual TreePtr<Node> GetPreRestrictionArchetype2() const = 0;
+    virtual shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const = 0;
+    virtual TreePtr<Node> SpecialGetArchetypeNode() const = 0;
 	static bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
-
 };
 
 
@@ -138,11 +145,11 @@ class Special : public SpecialBase,
                 public virtual PRE_RESTRICTION
 {
 public:
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const
+    virtual shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
     {
-        return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  
+        return make_shared<TreePtr<PRE_RESTRICTION>>();  
     }
-    virtual TreePtr<Node> GetPreRestrictionArchetype2() const
+    virtual TreePtr<Node> SpecialGetArchetypeNode() const override
     {
         return TreePtr<Node>( new PRE_RESTRICTION );  
     }

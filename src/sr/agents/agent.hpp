@@ -99,6 +99,8 @@ public:
 	static const Agent *TryAsAgentConst( shared_ptr<const Node> node );
     // Note the constness: thou shalt not try to mutate the agent via this function
     virtual shared_ptr<const Node> GetPatternPtr() const = 0;
+    virtual TreePtr<Node> GetArchetypeNode() const = 0;
+    
     virtual string GetPlanAsString() const = 0;
 };
 

@@ -34,12 +34,12 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     if( ar->cat == SymbolResult::UNDEFINED )
         return ar;
 
-    if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
+    if( !ref_agent->GetArchetypeNode()->IsLocalMatch( ar->xlink.GetChildX().get() ) )
         return make_shared<SymbolResult>(SymbolResult::UNDEFINED); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = ref_agent->Itemise( ar->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = ref_agent->GetArchetypeNode()->Itemise( ar->xlink.GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Extract the item indicated by item_index. 
@@ -49,7 +49,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
 
 string ItemiseToSymbolOperator::Render() const
 {
-    string inner_typename = RemoveOuterTemplate( ref_agent->GetTypeName() );
+    string inner_typename = ref_agent->GetArchetypeNode()->GetTypeName();
 
     // Not using RenderForMe() because we always want () here
     return "Item<" + 

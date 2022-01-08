@@ -208,13 +208,18 @@ public:
             return real_typename; // hopefully contains something informative
     }
 
-    shared_ptr<const Node> GetPatternPtr() const
+    shared_ptr<const Node> GetPatternPtr() const override
     {
         return shared_from_this();
-    }    
+    } 
     
+    virtual TreePtr<Node> GetArchetypeNode() const override
+    {
+        return TreePtr<Node>( new NODE_TYPE );  
+    }
+       
     // disambiguate between Agent and Node: Agent wins
-    virtual string GetTrace() const 
+    virtual string GetTrace() const override
     {
         return StandardAgent::GetTrace();
     }

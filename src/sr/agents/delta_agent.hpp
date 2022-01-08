@@ -38,7 +38,6 @@ class Delta : public DeltaAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
-
     shared_ptr<const Node> GetPatternPtr() const
     {
         return shared_from_this();
