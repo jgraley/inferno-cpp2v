@@ -25,6 +25,7 @@ struct NodeBases : Magic,
                    virtual Graphable,
                    Coloured,
                    Matcher,
+                   Orderable,
                    Itemiser,
                    Cloner,
                    SerialNumber

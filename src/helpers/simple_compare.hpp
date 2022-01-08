@@ -11,12 +11,12 @@
 class SimpleCompare : public Traceable
 {
 public:
-    // Ordering could be REPEATABLE which is weak, but we still want
+    // Orderable could be REPEATABLE which is weak, but we still want
     // to account for the number of equivalent elements, so use multiset.
     // Use a reference to SimpleCompare so derived classes can use it.
-    typedef multiset<TreePtr<Node>, SimpleCompare &> Ordered;
+    typedef multiset<TreePtr<Node>, SimpleCompare &> Ordering;
 
-    SimpleCompare( Matcher::Ordering ordering = Matcher::UNIQUE );
+    SimpleCompare( Orderable::OrderProperty order_property = Orderable::STRICT );
     
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
     virtual CompareResult Compare( TreePtr<Node> x, TreePtr<Node> y );
@@ -31,10 +31,10 @@ public:
     bool operator()( TreePtr<Node> x, TreePtr<Node> y );
     
     /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container
-    Ordered GetOrdered( ContainerInterface &c );
+    Ordering GetOrdering( ContainerInterface &c );
 
 private:
-    const Matcher::Ordering ordering;
+    const Orderable::OrderProperty order_property;
 };
 
 #endif

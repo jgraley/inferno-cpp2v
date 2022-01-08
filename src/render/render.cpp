@@ -427,7 +427,7 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 	{
 		Sequence<Expression> seq_operands;
 		// Operands are in collection, so sort them and put them in a sequence
-		FOREACH( TreePtr<Node> o, sc.GetOrdered(co->operands) )
+		FOREACH( TreePtr<Node> o, sc.GetOrdering(co->operands) )
 			seq_operands.push_back( TreePtr<Expression>::DynamicCast(o) );
 		return before +
 			   RenderOperator( co, seq_operands ) +
@@ -836,7 +836,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 				        first = false;
 				        s += "public " + scr->GetToken();
 				    }
-					FOREACH( TreePtr<Node> bn, sc.GetOrdered(ir->bases) )
+					FOREACH( TreePtr<Node> bn, sc.GetOrdering(ir->bases) )
 					{
 						if( !first )
 							s += ", ";
@@ -1017,7 +1017,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     }
     s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
     int first = true;             
-    auto sorted_members = sc.GetOrdered(m->members);
+    auto sorted_members = sc.GetOrdering(m->members);
     FOREACH( TreePtr<Node> pd, sorted_members )
     {
         // Bodge an init list that names any fields we have that are modules

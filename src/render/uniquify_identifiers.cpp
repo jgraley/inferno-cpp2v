@@ -99,7 +99,7 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 //////////////////////////// UniquifyCompare ///////////////////////////////
 
 UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
-    SimpleCompare(Matcher::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
+    SimpleCompare(Orderable::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
     unique( unique_ )
 {
 }
@@ -130,7 +130,7 @@ CompareResult UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b )
 //////////////////////////// IdentifierFingerprinter ///////////////////////////////
 
 IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
-    comparer( Matcher::REPEATABLE )
+    comparer( Orderable::REPEATABLE )
 {
     int index=0;
     ProcessNode( root_x, index );
@@ -186,7 +186,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
     TreePtr<Node> prev_x;
     int index_offset = 0;
     int prev_start_index;
-    FOREACH( TreePtr<Node> x, comparer.GetOrdered(*x_col) )
+    FOREACH( TreePtr<Node> x, comparer.GetOrdering(*x_col) )
     {
         if( prev_x && comparer.Compare(x, prev_x) == EQUAL )
         {

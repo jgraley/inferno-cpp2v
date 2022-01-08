@@ -24,7 +24,7 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-CompareResult SpecificString::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
+CompareResult SpecificString::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificString *>(candidate);    
@@ -77,7 +77,7 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificInteger::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
+CompareResult SpecificInteger::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
@@ -132,7 +132,7 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloat::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
+CompareResult SpecificFloat::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
@@ -196,7 +196,7 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificIdentifier::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
+CompareResult SpecificIdentifier::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
 {
     ASSERT( candidate );
     
@@ -211,9 +211,9 @@ CompareResult SpecificIdentifier::CovariantCompare( const Matcher *candidate, Or
         return name.compare(c->name);      
           
     CompareResult r;
-    switch( ordering )
+    switch( order_property )
     {
-    case UNIQUE:
+    case STRICT:
         // Unique order uses address to ensure different identifiers compare differently
         r = (int)(this > candidate) - (int)(this < candidate);
         // Note: just subtracting could overflow
@@ -266,16 +266,16 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloatSemantics::CovariantCompare( const Matcher *candidate, Ordering ordering ) const
+CompareResult SpecificFloatSemantics::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     ASSERT(c);    
 
     CompareResult r;
-    switch( ordering )
+    switch( order_property )
     {
-    case UNIQUE:
+    case STRICT:
         // Don't use any particular ordering apart from where the 
         // llvm::fltSemantics are being stored.
         r = (int)(value > c->value) - (int)(value < c->value);

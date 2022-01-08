@@ -9,15 +9,30 @@
 #include <string>
 #include <typeindex>		
 
-/// Support class allowing hierarchical type comparisons between nodes
-struct Matcher
+
+class Orderable
 {
-    enum Ordering
+public:
+    enum OrderProperty
     {
-        UNIQUE,     // a strong_ordering in C++20 terms
+        // Objects with different values must compare non-equal
+        STRICT,     
+        
+        // Objects with different values may compare equal if this
+        // avoids non-repeatable behaviour eg memory allocation dependencies 
         REPEATABLE
     };
-        
+    
+    static CompareResult Compare( const Orderable *l, 
+                                  const Orderable *r, 
+                                  OrderProperty order_property = STRICT );
+    virtual CompareResult CovariantCompare( const Orderable *candidate, 
+                                            OrderProperty order_property ) const;
+};
+
+/// Support class allowing hierarchical type comparisons between nodes
+struct Matcher
+{        
     // Any mismatch this class throws
     class Mismatch : public ::Mismatch
     {
@@ -37,8 +52,6 @@ struct Matcher
         (void)target_archetype; // don't care about value of archetypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_archetype);
     }
-    static CompareResult Compare( const Matcher *l, const Matcher *r, Ordering ordering = UNIQUE );
-    virtual CompareResult CovariantCompare( const Matcher *candidate, Ordering ordering ) const;
 };
 
 #define MATCHER_FUNCTION \

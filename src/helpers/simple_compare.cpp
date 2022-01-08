@@ -2,8 +2,8 @@
 #include "common/trace.hpp"
 
 
-SimpleCompare::SimpleCompare( Matcher::Ordering ordering_ ) :
-    ordering( ordering_ )
+SimpleCompare::SimpleCompare( Orderable::OrderProperty order_property_ ) :
+    order_property( order_property_ )
 {
 }
 
@@ -21,7 +21,7 @@ CompareResult SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
         return EQUAL;
         
     // Local comparison deals with node type and value if there is one
-    CompareResult cr = Node::Compare(x.get(), y.get(), ordering);
+    CompareResult cr = Node::Compare(x.get(), y.get(), order_property);
     
     if( cr != EQUAL )
         return cr;
@@ -112,8 +112,8 @@ CompareResult SimpleCompare::Compare( CollectionInterface &x, CollectionInterfac
         return sd;
         
     // Use this object so our ordering is used.
-    Ordered xo = GetOrdered(x);
-    Ordered yo = GetOrdered(y);
+    Ordering xo = GetOrdering(x);
+    Ordering yo = GetOrdering(y);
 
     // Compare them (will use SimpleCompare)
     return (int)(xo > yo) - (int)(xo < yo);
@@ -127,9 +127,9 @@ bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl )
 }
 
 
-SimpleCompare::Ordered SimpleCompare::GetOrdered( ContainerInterface &c )
+SimpleCompare::Ordering SimpleCompare::GetOrdering( ContainerInterface &c )
 {
-    Ordered ordered( *this );
+    Ordering ordered( *this );
     FOREACH( const TreePtrInterface &e, c )
     	ordered.insert( (TreePtr<Node>)e );
     return ordered; // hoping for a "move"
