@@ -23,20 +23,6 @@ subgraph "clusterAnd#R7-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R7-0/#B-66 ----------
-    "And#R7-0/#B-66" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-66"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'next_trigger'?</I></FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
-    ];
-    
     // -------- block And#R7-0/#B-65 ----------
     "And#R7-0/#B-65" [
         fillcolor = "/set28/6"
@@ -48,6 +34,20 @@ subgraph "clusterAnd#R7-0" {
          <TR><TD><FONT COLOR="black" POINT-SIZE="15">Call</FONT></TD></TR>
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">MapOperand</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{}</FONT></TD></TR>
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R7-0/#B-66 ----------
+    "And#R7-0/#B-66" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-66"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'next_trigger'?</I></FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -100,7 +100,7 @@ subgraph "clusterAnd#R7-0" {
 
 "And#R7-0/#X7-3" -> "And#R7-0/#X7-2" [
     arrowhead="normalnonebox"
-    label = "#47"
+    label = "#46"
     decorate = true
     color = black
     fontcolor = black
@@ -200,7 +200,7 @@ subgraph "clusterAnd#R7-0" {
 ];
 
 "#X7-3" -> "#X7-2" [
-    label = "#47"
+    label = "#46"
     decorate = true
     color = black
     fontcolor = black

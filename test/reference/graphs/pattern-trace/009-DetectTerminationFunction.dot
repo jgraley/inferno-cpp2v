@@ -51,34 +51,6 @@ subgraph "clusterAnd#R9-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R9-0/#X9-5 ----------
-    "And#R9-0/#X9-5" [
-        xlabel = "#X9-5"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "square"
-        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
-    // -------- block And#R9-0/#X9-4 ----------
-    "And#R9-0/#X9-4" [
-        xlabel = "#X9-4"
-        fontsize = "12"
-        fontcolor = grey40
-        shape = "triangle"
-        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
-        style = "filled"
-        penwidth = 0.0
-        fixedsize = true
-        width = 0.4
-        height = 0.4
-    ];
-    
     // -------- block And#R9-0/#B-78 ----------
     "And#R9-0/#B-78" [
         fillcolor = "/set28/8"
@@ -90,6 +62,20 @@ subgraph "clusterAnd#R9-0" {
          <TR><TD><FONT COLOR="black" POINT-SIZE="15">MapOperand</FONT></TD></TR>
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">InstanceIdentifier</FONT></TD><TD PORT="port0"></TD></TR>
          <TR><TD><FONT COLOR="black" POINT-SIZE="12">Expression</FONT></TD><TD PORT="port1"></TD></TR>
+        </TABLE>>
+        style = "rounded,filled"
+    ];
+    
+    // -------- block And#R9-0/#B-79 ----------
+    "And#R9-0/#B-79" [
+        fillcolor = "/set28/5"
+        xlabel = "#B-79"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "plaintext"
+        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'exit'?</I></FONT></TD></TR>
+         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
         </TABLE>>
         style = "rounded,filled"
     ];
@@ -106,18 +92,32 @@ subgraph "clusterAnd#R9-0" {
         penwidth = 0.0
     ];
     
-    // -------- block And#R9-0/#B-79 ----------
-    "And#R9-0/#B-79" [
-        fillcolor = "/set28/5"
-        xlabel = "#B-79"
+    // -------- block And#R9-0/#X9-4 ----------
+    "And#R9-0/#X9-4" [
+        xlabel = "#X9-4"
         fontsize = "12"
         fontcolor = grey40
-        shape = "plaintext"
-        label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-         <TR><TD><FONT COLOR="black" POINT-SIZE="15"><I>'exit'?</I></FONT></TD></TR>
-         <TR><TD><FONT COLOR="black" POINT-SIZE="12">(InstanceIdentifier)</FONT></TD><TD PORT="port0"></TD></TR>
-        </TABLE>>
-        style = "rounded,filled"
+        shape = "triangle"
+        label = <<FONT COLOR="black" POINT-SIZE="20">Δ</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
+    ];
+    
+    // -------- block And#R9-0/#X9-5 ----------
+    "And#R9-0/#X9-5" [
+        xlabel = "#X9-5"
+        fontsize = "12"
+        fontcolor = grey40
+        shape = "square"
+        label = <<FONT COLOR="black" POINT-SIZE="20">#</FONT>>
+        style = "filled"
+        penwidth = 0.0
+        fixedsize = true
+        width = 0.4
+        height = 0.4
     ];
     
 }
@@ -138,9 +138,17 @@ subgraph "clusterAnd#R9-0" {
     fontcolor = black
 ];
 
-"And#R9-0/#X9-5" -> "And#R9-0/#X9-4" [
+"And#R9-0/#B-78":port0 -> "And#R9-0/#B-80" [
     arrowhead="normalnonebox"
-    label = "#22"
+    label = "#0"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"And#R9-0/#B-78":port1 -> "And#R9-0/#B-76" [
+    arrowhead="normalnonebox"
+    label = "#0"
     decorate = true
     color = black
     fontcolor = black
@@ -154,17 +162,9 @@ subgraph "clusterAnd#R9-0" {
     fontcolor = black
 ];
 
-"And#R9-0/#B-78":port0 -> "And#R9-0/#B-80" [
+"And#R9-0/#X9-5" -> "And#R9-0/#X9-4" [
     arrowhead="normalnonebox"
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"And#R9-0/#B-78":port1 -> "And#R9-0/#B-76" [
-    arrowhead="normalnonebox"
-    label = "#0"
+    label = "#22"
     decorate = true
     color = black
     fontcolor = black

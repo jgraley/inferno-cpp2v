@@ -16,15 +16,15 @@ edge [
     fontname = "Arial"
 ];
 
-// -------------------- figure And#R2-2 --------------------
-// -------- region And#R2-2 ----------
-subgraph "clusterAnd#R2-2" {
-    label = "SCR#P2-1 / And#R2-2"
+// -------------------- figure And#R2-14 --------------------
+// -------- region And#R2-14 ----------
+subgraph "clusterAnd#R2-14" {
+    label = "SCR#P2-1 / And#R2-14"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R2-2/#B-19 ----------
-    "And#R2-2/#B-19" [
+    // -------- block And#R2-14/#B-19 ----------
+    "And#R2-14/#B-19" [
         fillcolor = "/set19/1"
         xlabel = "#B-19"
         fontsize = "12"
@@ -36,8 +36,8 @@ subgraph "clusterAnd#R2-2" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R2-2/#X2-3 ----------
-    "And#R2-2/#X2-3" [
+    // -------- block And#R2-14/#X2-3 ----------
+    "And#R2-14/#X2-3" [
         xlabel = "#X2-3"
         fontsize = "12"
         fontcolor = grey40
@@ -52,7 +52,7 @@ subgraph "clusterAnd#R2-2" {
     
 }
 
-"And#R2-2/#X2-3" -> "And#R2-2/#B-19" [
+"And#R2-14/#X2-3" -> "And#R2-14/#B-19" [
     arrowhead="normalnonebox"
     label = "#1"
     decorate = true
@@ -61,15 +61,15 @@ subgraph "clusterAnd#R2-2" {
 ];
 
 
-// -------------------- figure And#R2-1 --------------------
-// -------- region And#R2-1 ----------
-subgraph "clusterAnd#R2-1" {
-    label = "SCR#P2-2 / And#R2-1"
+// -------------------- figure And#R2-9 --------------------
+// -------- region And#R2-9 ----------
+subgraph "clusterAnd#R2-9" {
+    label = "SCR#P2-2 / And#R2-9"
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R2-1/#B-15 ----------
-    "And#R2-1/#B-15" [
+    // -------- block And#R2-9/#B-15 ----------
+    "And#R2-9/#B-15" [
         fillcolor = "/set19/1"
         xlabel = "#B-15"
         fontsize = "12"
@@ -81,8 +81,8 @@ subgraph "clusterAnd#R2-1" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R2-1/#X2-2 ----------
-    "And#R2-1/#X2-2" [
+    // -------- block And#R2-9/#X2-2 ----------
+    "And#R2-9/#X2-2" [
         xlabel = "#X2-2"
         fontsize = "12"
         fontcolor = grey40
@@ -97,7 +97,7 @@ subgraph "clusterAnd#R2-1" {
     
 }
 
-"And#R2-1/#X2-2" -> "And#R2-1/#B-15" [
+"And#R2-9/#X2-2" -> "And#R2-9/#B-15" [
     arrowhead="normalnonebox"
     label = "#1"
     decorate = true
@@ -127,10 +127,10 @@ subgraph "clusterAnd#R2-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R2-0/#B-22 ----------
-    "And#R2-0/#B-22" [
+    // -------- block And#R2-0/#B-18 ----------
+    "And#R2-0/#B-18" [
         fillcolor = antiquewhite2
-        xlabel = "#B-22"
+        xlabel = "#B-18"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -156,10 +156,10 @@ subgraph "clusterAnd#R2-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R2-0/#B-18 ----------
-    "And#R2-0/#B-18" [
+    // -------- block And#R2-0/#B-22 ----------
+    "And#R2-0/#B-22" [
         fillcolor = antiquewhite2
-        xlabel = "#B-18"
+        xlabel = "#B-22"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -182,7 +182,7 @@ subgraph "clusterAnd#R2-0" {
     fontcolor = black
 ];
 
-"And#R2-0/#B-22":port0 -> "And#R2-0/#B-21" [
+"And#R2-0/#B-18":port0 -> "And#R2-0/#B-17" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
@@ -190,7 +190,7 @@ subgraph "clusterAnd#R2-0" {
     fontcolor = black
 ];
 
-"And#R2-0/#B-18":port0 -> "And#R2-0/#B-17" [
+"And#R2-0/#B-22":port0 -> "And#R2-0/#B-21" [
     arrowhead="normalnonebox"
     label = "#0"
     decorate = true
