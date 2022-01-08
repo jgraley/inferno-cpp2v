@@ -42,15 +42,6 @@ public:
     SR::PatternLink GetPatternLink() const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
-    
-    class Incomplete : public Expression::Incomplete 
-    {
-    public:
-        Incomplete( const SR::PatternLink &plink );
-        virtual string What() const noexcept override;
-    private:
-        const SR::PatternLink plink;
-    };            
 
 private:
     const SR::PatternLink plink;

@@ -56,9 +56,9 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     if( kit.hypothesis_links->count(plink) == 0 )
-        throw Incomplete(plink);        
-    
-    return make_shared<SymbolResult>( SymbolResult::XLINK, kit.hypothesis_links->at(plink) );
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+    else
+        return make_shared<SymbolResult>( SymbolResult::XLINK, kit.hypothesis_links->at(plink) );
 }
 
 
@@ -83,18 +83,6 @@ string SymbolVariable::Render() const
 Expression::Precedence SymbolVariable::GetPrecedence() const
 {
     return Precedence::LITERAL;
-}
-
-
-SymbolVariable::Incomplete::Incomplete( const SR::PatternLink &plink_ ) :
-    plink( plink_ )
-{
-}
-
-
-string SymbolVariable::Incomplete::What() const noexcept
-{
-    return Exception::What() + "(" + plink.GetTrace() + ")";
 }
 
 // ------------------------- BooleanConstant --------------------------

@@ -35,7 +35,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
         return ar;
 
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-        return make_shared<SymbolResult>(SymbolResult::XLINK, SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
+        return make_shared<SymbolResult>(SymbolResult::UNDEFINED); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -107,7 +107,7 @@ shared_ptr<SymbolResult> ChildSequenceBackOperator::EvalFromItem( SR::XLink pare
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>).
     if( p_x_seq->empty() )
-        throw UndefinedOnEmptyContainer();
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
     return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
@@ -131,7 +131,7 @@ shared_ptr<SymbolResult> ChildCollectionFrontOperator::EvalFromItem( SR::XLink p
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>).
     if( p_x_col->empty() )
-        throw UndefinedOnEmptyContainer();
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
     return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
@@ -190,7 +190,10 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
         
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
     SR::XLink result_xlink = EvalXLinkFromNugget( ar->xlink, nugget );
-    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    if( result_xlink ) 
+        return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    else
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
 }
 
 
@@ -273,10 +276,7 @@ string MyContainerBackOperator::GetKnowledgeName() const
 SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                                             const SR::TheKnowledge::Nugget &nugget ) const
 {  
-    SR::XLink succ = nugget.my_sequence_successor;
-    if( !succ )
-        throw UndefinedSuccessor();
-    return succ;
+    return nugget.my_sequence_successor;
 }
 
 
