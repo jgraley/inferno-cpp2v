@@ -2,6 +2,7 @@
 #define STANDARD_AGENT_HPP
 
 #include "agent_intermediates.hpp"
+#include "agent_common.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
@@ -166,8 +167,6 @@ private:
     bool planned = false;
 };
 
-
-#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 
 /// Wrapper for normal pattern nodes that combines a StandardAgent with the specified pattern node
 template<typename NODE_TYPE>

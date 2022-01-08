@@ -60,3 +60,5 @@ const Agent *Agent::TryAsAgentConst( shared_ptr<const Node> node )
     ASSERTS( node )("Called TryAsAgent(")(node)(") with null shared_ptr");
     return dynamic_cast<const Agent *>(node.get());
 }
+
+

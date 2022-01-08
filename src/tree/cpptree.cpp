@@ -24,8 +24,8 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-Orderable::Result SpecificString::OrderCompareInternals( const Orderable *candidate, 
-                                                         OrderProperty order_property ) const
+Orderable::Result SpecificString::OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificString *>(candidate);    
@@ -78,8 +78,8 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificInteger::OrderCompareInternals( const Orderable *candidate, 
-                                                          OrderProperty order_property ) const
+Orderable::Result SpecificInteger::OrderCompareLocal( const Orderable *candidate, 
+                                                      OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
@@ -134,8 +134,8 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificFloat::OrderCompareInternals( const Orderable *candidate, 
-                                                        OrderProperty order_property ) const
+Orderable::Result SpecificFloat::OrderCompareLocal( const Orderable *candidate, 
+                                                    OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
@@ -199,8 +199,8 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificIdentifier::OrderCompareInternals( const Orderable *candidate, 
-                                                             OrderProperty order_property ) const
+Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candidate, 
+                                                         OrderProperty order_property ) const
 {
     ASSERT( candidate );
     
@@ -270,8 +270,8 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificFloatSemantics::OrderCompareInternals( const Orderable *candidate, 
-                                                                 OrderProperty order_property ) const
+Orderable::Result SpecificFloatSemantics::OrderCompareLocal( const Orderable *candidate, 
+                                                             OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);

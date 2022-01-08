@@ -1,4 +1,6 @@
 #include "orderable.hpp"
+#include "trace.hpp"
+#include "standard.hpp"
 
 #include <typeinfo>
 #include <typeindex>		
@@ -7,12 +9,13 @@ Orderable::Result Orderable::OrderCompare( const Orderable *l,
                                            const Orderable *r, 
                                            OrderProperty order_property )
 {
+    //FTRACE(Traceable::TypeIdName(*l))(" ")(Traceable::TypeIdName(*r))("\n");
     type_index l_index( typeid(*l) );
     type_index r_index( typeid(*r) );
     if( l_index != r_index )
         return (l_index > r_index) ? 1 : -1;
 
-    Result ir = l->OrderCompareInternals(r, order_property);
+    Result ir = l->OrderCompareLocal(r, order_property);
     if( ir != EQUAL )
         return ir;
         
@@ -20,8 +23,8 @@ Orderable::Result Orderable::OrderCompare( const Orderable *l,
 }
 
 
-Orderable::Result Orderable::OrderCompareInternals( const Orderable *candidate, 
-                                                    OrderProperty order_property ) const 
+Orderable::Result Orderable::OrderCompareLocal( const Orderable *candidate, 
+                                                OrderProperty order_property ) const 
 {
     // Often, there are no contents to compare
     return EQUAL; 

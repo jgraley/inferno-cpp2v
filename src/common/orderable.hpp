@@ -22,8 +22,8 @@ public:
     static Orderable::Result OrderCompare( const Orderable *l, 
                                            const Orderable *r, 
                                            OrderProperty order_property = STRICT );
-    virtual Orderable::Result OrderCompareInternals( const Orderable *candidate, 
-                                                     OrderProperty order_property ) const;
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const;
     virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const;
 };

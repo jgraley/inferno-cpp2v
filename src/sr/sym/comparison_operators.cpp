@@ -304,14 +304,16 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 }
 
 
-/*Orderable::Result KindOfOperator::OrderCompareInternals( const Orderable *candidate, 
-                                                OrderProperty order_property ) const 
+Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const 
 {
-    Orderable::Result cr = Expression::OrderCompareInternals( candidate, order_property
     ASSERT( candidate );
-    auto *c = dynamic_cast<const Expression *>(candidate);    
+    auto *c = dynamic_cast<const KindOfOperator *>(candidate);    
     ASSERT(c);
-*/  
+    
+    return OrderCompare(ref_agent, c->ref_agent, order_property);
+}  
+
 
 string KindOfOperator::Render() const
 {
