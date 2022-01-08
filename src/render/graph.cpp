@@ -508,7 +508,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     
     // Capture the node (if there is one: might be NULL)
 	if( pspecial )
-		my_block.prerestriction_name = (**(pspecial->GetPreRestrictionArchetype())).GetName();
+		my_block.prerestriction_name = (*(pspecial->GetPreRestrictionArchetype2())).GetName();
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && pnode )

@@ -126,6 +126,7 @@ class SpecialBase
 {
 public:    
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const = 0;
+    virtual TreePtr<Node> GetPreRestrictionArchetype2() const = 0;
 	static bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
 
 };
@@ -140,6 +141,10 @@ public:
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchetype() const
     {
         return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  
+    }
+    virtual TreePtr<Node> GetPreRestrictionArchetype2() const
+    {
+        return TreePtr<Node>( new PRE_RESTRICTION );  
     }
 };
 
