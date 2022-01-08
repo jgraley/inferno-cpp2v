@@ -6,6 +6,7 @@
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
+#include "../the_knowledge.hpp"
 
 namespace SR
 {

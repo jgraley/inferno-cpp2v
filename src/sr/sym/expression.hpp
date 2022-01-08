@@ -2,11 +2,16 @@
 #define EXPRESSION_HPP
 
 #include "common/common.hpp"
-#include "common/read_args.hpp"
+#include "common/orderable.hpp"
+
 #include "../link.hpp"
-#include "../the_knowledge.hpp"
 
 #include <exception>
+
+namespace SR
+{
+    class TheKnowledge;
+}
 
 namespace SYM
 { 
@@ -53,7 +58,7 @@ public:
 
 // ------------------------- Expression --------------------------
 
-class Expression : public Traceable
+class Expression : public Traceable, public Orderable
 {    
 public:
     /**
@@ -90,6 +95,13 @@ public:
     virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
     virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const;
     
+    using Orderable::Compare;
+    static CompareResult Compare( shared_ptr<const Expression> l, 
+                                  shared_ptr<const Expression> r, 
+                                  OrderProperty order_property = STRICT );    
+    virtual CompareResult CovariantCompare( const Orderable *candidate, 
+                                            OrderProperty order_property ) const override;
+
     virtual string Render() const = 0;    
     string GetTrace() const; // used for debug
     

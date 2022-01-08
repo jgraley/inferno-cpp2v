@@ -5,6 +5,7 @@
 #include "overloads.hpp"
 
 #include "../equivalence.hpp"
+#include "../the_knowledge.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"

@@ -73,6 +73,34 @@ bool Expression::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
 }
 
 
+CompareResult Expression::Compare( shared_ptr<const Expression> l, 
+                                   shared_ptr<const Expression> r, 
+                                   OrderProperty order_property )
+{
+    return Compare( l.get(), r.get(), order_property );
+}
+
+
+CompareResult Expression::CovariantCompare( const Orderable *candidate, 
+                                            OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const Expression *>(candidate);    
+    ASSERT(c);
+    
+    list<shared_ptr<Expression>> ll = GetOperands();
+    list<shared_ptr<Expression>> rl = c->GetOperands();
+    
+    for( auto p : Zip(ll, rl) )     
+    {
+        CompareResult cr = Compare( p.first, p.second, order_property );
+        if( cr != EQUAL )
+            return cr;
+    }
+    return EQUAL;
+}
+
+
 string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
 {
     string bare = inner->Render();
