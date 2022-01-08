@@ -3,6 +3,7 @@
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
 #include "rewriters.hpp"
+#include <algorithm>
 
 using namespace SYM;
 
@@ -24,10 +25,17 @@ shared_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<BooleanResult>> &op_results ) const
 {
     shared_ptr<BooleanResult> ra = op_results.front();
-    if( ra->value == BooleanResult::FALSE )
+    switch( ra->value )
+    {   
+    case BooleanResult::FALSE:
         return make_shared<BooleanResult>( BooleanResult::TRUE );
-    else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );     
+    case BooleanResult::UNDEFINED:
+        return ra;
+    case BooleanResult::TRUE:
+        return make_shared<BooleanResult>( BooleanResult::FALSE );
+    default:
+        ASSERTFAIL("Missing case")
+    }    
 }
 
 
@@ -66,16 +74,9 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<BooleanResult>> &op_results ) const
 {
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    for( const shared_ptr<BooleanResult> &r : op_results )
-    {
-        switch( r->value )
-        {            
-        case BooleanResult::TRUE:
-            break;
-        case BooleanResult::FALSE:
-            return make_shared<BooleanResult>( BooleanResult::FALSE );
-        }
-    }
+    for( const shared_ptr<BooleanResult> &r : op_results )    
+        m = min( m, r->value );
+        
     return make_shared<BooleanResult>( m );
 }
 
@@ -135,7 +136,6 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
             shared_ptr<SymbolExpression> try_solve_c = imply_ops.back()->TrySolveFor(target);
             if( try_solve_b && try_solve_c )
             {
-                FTRACE("Solved an and!!\n");
                 return make_shared<ConditionalOperator>( beq_ops.front(),
                                                          try_solve_b,
                                                          try_solve_c );
@@ -191,15 +191,8 @@ shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
 {
     BooleanResult::BooleanValue m = BooleanResult::FALSE;
     for( const shared_ptr<BooleanResult> &r : op_results )
-    {
-        switch( r->value )
-        {   
-        case BooleanResult::TRUE:
-            return make_shared<BooleanResult>( BooleanResult::TRUE );
-        case BooleanResult::FALSE:
-            break;
-        }
-    }
+        m = max( m, r->value );
+
     return make_shared<BooleanResult>( m );
 }
 
@@ -252,6 +245,13 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
 {
     shared_ptr<BooleanResult> ra = op_results.front();
     shared_ptr<BooleanResult> rb = op_results.back();
+    
+    if( ra->value == BooleanResult::UNDEFINED )
+        return ra;
+        
+    if( rb->value == BooleanResult::UNDEFINED )
+        return rb;
+    
     if( ra->value == rb->value )
         return make_shared<BooleanResult>( BooleanResult::TRUE );
     else
@@ -297,10 +297,20 @@ shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
 {
     shared_ptr<BooleanResult> ra = op_results.front();
     shared_ptr<BooleanResult> rb = op_results.back();
-    if( ra->value == BooleanResult::TRUE )
-        return rb;
-    else 
+    switch( ra->value )
+    {   
+    case BooleanResult::FALSE:
         return make_shared<BooleanResult>( BooleanResult::TRUE );
+    case BooleanResult::UNDEFINED:
+        if( rb->value == BooleanResult::TRUE )
+            return rb;
+        else
+            return ra;
+    case BooleanResult::TRUE:
+        return rb;
+    default:
+        ASSERTFAIL("Missing case")
+    }  
 }
 
 

@@ -11,13 +11,26 @@ BooleanResult::BooleanResult( BooleanValue value_ ) :
 
 // ------------------------- SymbolResult --------------------------
 
-SymbolResult::SymbolResult()
+SymbolResult::SymbolResult() :
+    cat( UNDEFINED )
 {
 }
 
-SymbolResult::SymbolResult( const SR::XLink &xlink_ ) :
+SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
+    cat( cat_ ),
     xlink( xlink_ )
 {
+    switch( cat )
+    {
+    case UNDEFINED:
+        ASSERT( !xlink );
+        break;
+    case XLINK:
+        ASSERT( xlink );
+        break;
+    default:
+        ASSERTFAIL("Missing case");
+    }
 }
 
 // ------------------------- Expression --------------------------

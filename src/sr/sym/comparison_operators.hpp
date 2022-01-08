@@ -42,7 +42,7 @@ private:
 
 Over<BooleanExpression> operator==( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
-// ------------------------- NotEqualOperator --------------------------
+// ------------------------- (not equal operator) --------------------------
 
 Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b );
 

@@ -104,7 +104,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     *p_current_assignment = hint_result->xlink;
     shared_ptr<SYM::BooleanResult> hinted_r = plan.consistency_expression->Evaluate( kit );
     *p_current_assignment = prev_xlink; // put it back again
-    if( !hinted_r || hinted_r->value == SYM::BooleanResult::FALSE )
+    if( !hinted_r || hinted_r->value != SYM::BooleanResult::TRUE )
         return make_tuple(false, Assignment()); // evaluated false using hint - probably inconsistent in the OTHER variables
 
     SR::LocatedLink hint( current_var, hint_result->xlink );

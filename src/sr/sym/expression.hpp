@@ -27,8 +27,9 @@ class BooleanResult : public Result
 public:
     enum BooleanValue
     {
-        TRUE,
-        FALSE
+        FALSE,
+        UNDEFINED,
+        TRUE
     };    
     BooleanResult( BooleanValue value );
     BooleanValue value;
@@ -39,8 +40,14 @@ public:
 class SymbolResult : public Result
 {
 public:
+    enum BooleanCategory
+    {
+        UNDEFINED,
+        XLINK
+    };    
     SymbolResult();
-    SymbolResult( const SR::XLink &xlink );
+    SymbolResult( BooleanCategory cat, SR::XLink xlink=SR::XLink() );
+    BooleanCategory cat; 
     SR::XLink xlink;
 };
 

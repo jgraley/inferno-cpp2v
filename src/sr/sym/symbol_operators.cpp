@@ -29,13 +29,18 @@ list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() 
 shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
                                                             const list<shared_ptr<SymbolResult>> &op_results ) const
 {
+    ASSERT( op_results.size()==1 );
+
     // XLink must match our referee (i.e. be non-strict subtype)
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
+    if( ar->cat == SymbolResult::UNDEFINED )
+        return ar;
+
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
 #ifdef EXCEPTION_FOR_BAD_ITEMISE
         throw UndefinedForThatType(); // Will not be able to itemise due incompatible type
 #else
-        return make_shared<SymbolResult>(SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
+        return make_shared<SymbolResult>(SymbolResult::XLINK, SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
 #endif
     
     // Itemise the child node of the XLink we got, according to the "schema"
@@ -47,7 +52,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     SR::XLink result_xlink = EvalXLinkFromItem( ar->xlink, 
                                                 keyer_itemised[item_index] );
     
-    return make_shared<SymbolResult>( result_xlink );
+    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
 }
 
 
@@ -182,9 +187,13 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
 {
     // Evaluate operand and ensure we got an XLink
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);       
+
+    if( ar->cat == SymbolResult::UNDEFINED )
+        return ar;
+        
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
     SR::XLink result_xlink = EvalXLinkFromNugget( ar->xlink, nugget );
-    return make_shared<SymbolResult>( result_xlink );
+    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
 }
 
 
@@ -300,10 +309,19 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
-    if( ra->value == BooleanResult::TRUE )
-        return b->Evaluate(kit);
-    else
+    switch( ra->value )
+    {   
+    case BooleanResult::FALSE:
         return c->Evaluate(kit);
+    case BooleanResult::UNDEFINED:
+        // TODO could evaluate both, and see if they're defined and equal
+        // to each other and then return either of them.
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+    case BooleanResult::TRUE:
+        return b->Evaluate(kit);
+    default:
+        ASSERTFAIL("Missing case")
+    }  
 }
 
 

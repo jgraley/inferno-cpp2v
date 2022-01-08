@@ -22,15 +22,19 @@ list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
-                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                   const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
+    for( shared_ptr<SymbolResult> ra : op_results )
+        if( ra->cat == SymbolResult::UNDEFINED )
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
-    // within the full arrowhead model.
+    // within the full arrowhead model (cf IndexComparisonOperator) .
     if( ra->xlink == rb->xlink )
         return make_shared<BooleanResult>( BooleanResult::TRUE );
     else
@@ -84,7 +88,7 @@ Over<BooleanExpression> SYM::operator==( Over<SymbolExpression> a, Over<SymbolEx
     return MakeOver<EqualOperator>( a, b );
 }
 
-// ------------------------- NotEqualOperator --------------------------
+// ------------------------- (not equal operator) --------------------------
 
 Over<BooleanExpression> SYM::operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
@@ -112,9 +116,13 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
                                                              const list<shared_ptr<SymbolResult>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
+    for( shared_ptr<SymbolResult> ra : op_results )
+        if( ra->cat == SymbolResult::UNDEFINED )
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
-    
+
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
     const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->xlink) );   
@@ -230,16 +238,20 @@ list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
-                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
+    for( shared_ptr<SymbolResult> ra : op_results )
+        if( ra->cat == SymbolResult::UNDEFINED )
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    
     // Note: could be done faster using a set<XLink>
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
     ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResult> ra,
                                                     shared_ptr<SymbolResult> rb) 
-    {
+    {    
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
-        // within the full arrowhead model.
+        // within the full arrowhead model (cf IndexComparisonOperator).
         if( ra->xlink == rb->xlink )
         {
             m = BooleanResult::FALSE;
@@ -282,8 +294,12 @@ list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
-    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
-    bool matches = ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() );
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+    if( ra->cat == SymbolResult::UNDEFINED )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    
+    bool matches = ref_agent->IsLocalMatch( ra->xlink.GetChildX().get() );
     return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
 }
 
@@ -326,17 +342,23 @@ list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperand
 shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResult>> &op_results ) const
 {
+    ASSERT( op_results.size()==1 );        
+
     // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
+    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+
+    // Propagate undefined case
+    if( ra->cat == SymbolResult::UNDEFINED )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
+    if( !ref_agent->IsLocalMatch( ra->xlink.GetChildX().get() ) )
         return make_shared<BooleanResult>(BooleanResult::FALSE); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = ref_agent->Itemise( ar->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = ref_agent->Itemise( ra->xlink.GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
@@ -390,6 +412,10 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
+    for( shared_ptr<SymbolResult> ra : op_results )
+        if( ra->cat == SymbolResult::UNDEFINED )
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+
     BooleanResult::BooleanValue m = BooleanResult::TRUE;
     ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
                                                  shared_ptr<SymbolResult> rb) 
