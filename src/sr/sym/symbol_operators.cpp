@@ -3,8 +3,6 @@
 #include "node/node.hpp"
 #include "../agents/agent.hpp"
 
-//#define EXCEPTION_FOR_BAD_ITEMISE
-
 using namespace SYM;
 
 // ------------------------- ItemiseToSymbolOperator --------------------------
@@ -37,11 +35,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
         return ar;
 
     if( !ref_agent->IsLocalMatch( ar->xlink.GetChildX().get() ) )
-#ifdef EXCEPTION_FOR_BAD_ITEMISE
-        throw UndefinedForThatType(); // Will not be able to itemise due incompatible type
-#else
         return make_shared<SymbolResult>(SymbolResult::XLINK, SR::XLink::UndefinedXLink); // Will not be able to itemise due incompatible type
-#endif
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -49,10 +43,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Extract the item indicated by item_index. 
-    SR::XLink result_xlink = EvalXLinkFromItem( ar->xlink, 
-                                                keyer_itemised[item_index] );
-    
-    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    return EvalFromItem( ar->xlink, keyer_itemised[item_index] );
 }
 
 
@@ -80,19 +71,22 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
-SR::XLink ChildSequenceFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                                         Itemiser::Element *item ) const
+shared_ptr<SymbolResult> ChildSequenceFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
+                                                                   Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
     
+    SR::XLink result_xlink;
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
     if( p_x_seq->empty() )
-        return SR::XLink::OffEndXLink; // OffEnd IS allowed in this case
-    
-    return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
+        result_xlink = SR::XLink::OffEndXLink; // OffEnd IS allowed in this case
+    else
+        result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
+        
+    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
 }
 
 
@@ -103,8 +97,8 @@ string ChildSequenceFrontOperator::GetItemTypeName() const
 
 // ------------------------- ChildSequenceBackOperator --------------------------
 
-SR::XLink ChildSequenceBackOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                                        Itemiser::Element *item ) const
+shared_ptr<SymbolResult> ChildSequenceBackOperator::EvalFromItem( SR::XLink parent_xlink, 
+                                                                  Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
@@ -115,7 +109,8 @@ SR::XLink ChildSequenceBackOperator::EvalXLinkFromItem( SR::XLink parent_xlink,
     if( p_x_seq->empty() )
         throw UndefinedOnEmptyContainer();
     
-    return SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
+    auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
+    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
 }
 
 
@@ -126,8 +121,8 @@ string ChildSequenceBackOperator::GetItemTypeName() const
 
 // ------------------------- ChildCollectionFrontOperator --------------------------
 
-SR::XLink ChildCollectionFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                                           Itemiser::Element *item ) const
+shared_ptr<SymbolResult> ChildCollectionFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
+                                                                     Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a collection
     auto p_x_col = dynamic_cast<CollectionInterface *>(item);    
@@ -138,7 +133,8 @@ SR::XLink ChildCollectionFrontOperator::EvalXLinkFromItem( SR::XLink parent_xlin
     if( p_x_col->empty() )
         throw UndefinedOnEmptyContainer();
     
-    return SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
+    auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
+    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
 }
 
 
@@ -149,8 +145,8 @@ string ChildCollectionFrontOperator::GetItemTypeName() const
 
 // ------------------------- ChildSingularOperator --------------------------
 
-SR::XLink ChildSingularOperator::EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                                    Itemiser::Element *item ) const
+shared_ptr<SymbolResult> ChildSingularOperator::EvalFromItem( SR::XLink parent_xlink, 
+                                                              Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a singular item
     TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(item);
@@ -158,7 +154,8 @@ SR::XLink ChildSingularOperator::EvalXLinkFromItem( SR::XLink parent_xlink,
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>)
-    return SR::XLink(parent_xlink.GetChildX(), p_x_singular);        
+    auto result_xlink = SR::XLink(parent_xlink.GetChildX(), p_x_singular);        
+    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
 }
 
 

@@ -27,8 +27,8 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit,
                                                const list<shared_ptr<SymbolResult>> &op_results ) const override final;
-    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                         Itemiser::Element *item ) const = 0;
+    virtual shared_ptr<SymbolResult> EvalFromItem( SR::XLink parent_xlink, 
+                                                   Itemiser::Element *item ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual string GetItemTypeName() const = 0;
@@ -45,8 +45,8 @@ class ChildSequenceFrontOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                         Itemiser::Element *item ) const override;
+    virtual shared_ptr<SymbolResult> EvalFromItem( SR::XLink parent_xlink, 
+                                                   Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -56,8 +56,8 @@ class ChildSequenceBackOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                         Itemiser::Element *item ) const override;
+    virtual shared_ptr<SymbolResult> EvalFromItem( SR::XLink parent_xlink, 
+                                                   Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -67,8 +67,8 @@ class ChildCollectionFrontOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                         Itemiser::Element *item ) const override;
+    virtual shared_ptr<SymbolResult> EvalFromItem( SR::XLink parent_xlink, 
+                                                   Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
@@ -78,8 +78,8 @@ class ChildSingularOperator : public ItemiseToSymbolOperator
 {
 public:    
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromItem( SR::XLink parent_xlink, 
-                                         Itemiser::Element *item ) const override;
+    virtual shared_ptr<SymbolResult> EvalFromItem( SR::XLink parent_xlink, 
+                                                   Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
 
