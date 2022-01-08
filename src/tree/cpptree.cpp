@@ -24,7 +24,8 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-CompareResult SpecificString::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
+Orderable::Result SpecificString::OrderCompareInternals( const Orderable *candidate, 
+                                                         OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificString *>(candidate);    
@@ -77,7 +78,8 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificInteger::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
+Orderable::Result SpecificInteger::OrderCompareInternals( const Orderable *candidate, 
+                                                          OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
@@ -132,7 +134,8 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloat::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
+Orderable::Result SpecificFloat::OrderCompareInternals( const Orderable *candidate, 
+                                                        OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
@@ -196,12 +199,13 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificIdentifier::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
+Orderable::Result SpecificIdentifier::OrderCompareInternals( const Orderable *candidate, 
+                                                             OrderProperty order_property ) const
 {
     ASSERT( candidate );
     
     if( candidate == this )
-        return EQUAL; // fast-out
+        return Orderable::EQUAL; // fast-out
     
     auto *c = dynamic_cast<const SpecificIdentifier *>(candidate);    
     ASSERT(c);
@@ -210,7 +214,7 @@ CompareResult SpecificIdentifier::CovariantCompare( const Orderable *candidate, 
     if( name != c->name )
         return name.compare(c->name);      
           
-    CompareResult r;
+    Orderable::Result r;
     switch( order_property )
     {
     case STRICT:
@@ -220,7 +224,7 @@ CompareResult SpecificIdentifier::CovariantCompare( const Orderable *candidate, 
         break;
     case REPEATABLE:
         // Repeatable ordering stops after name check since address compare is not repeatable
-        r = EQUAL;
+        r = Orderable::EQUAL;
         break;
     }
     return r;
@@ -266,13 +270,14 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-CompareResult SpecificFloatSemantics::CovariantCompare( const Orderable *candidate, OrderProperty order_property ) const
+Orderable::Result SpecificFloatSemantics::OrderCompareInternals( const Orderable *candidate, 
+                                                                 OrderProperty order_property ) const
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     ASSERT(c);    
 
-    CompareResult r;
+    Orderable::Result r;
     switch( order_property )
     {
     case STRICT:
@@ -283,7 +288,7 @@ CompareResult SpecificFloatSemantics::CovariantCompare( const Orderable *candida
         break;
     case REPEATABLE:
         // Repeatable ordering stops at type
-        r = EQUAL;
+        r = Orderable::EQUAL;
         break;
     }
     return r;

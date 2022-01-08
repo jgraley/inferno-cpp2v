@@ -304,6 +304,15 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 }
 
 
+/*Orderable::Result KindOfOperator::OrderCompareInternals( const Orderable *candidate, 
+                                                OrderProperty order_property ) const 
+{
+    Orderable::Result cr = Expression::OrderCompareInternals( candidate, order_property
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const Expression *>(candidate);    
+    ASSERT(c);
+*/  
+
 string KindOfOperator::Render() const
 {
     string inner_typename = RemoveOuterTemplate( ref_agent->GetTypeName() );

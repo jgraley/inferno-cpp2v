@@ -95,12 +95,12 @@ public:
     virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
     virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const;
     
-    using Orderable::Compare;
-    static CompareResult Compare( shared_ptr<const Expression> l, 
-                                  shared_ptr<const Expression> r, 
-                                  OrderProperty order_property = STRICT );    
-    virtual CompareResult CovariantCompare( const Orderable *candidate, 
-                                            OrderProperty order_property ) const override;
+    using Orderable::OrderCompare;
+    static Orderable::Result OrderCompare( shared_ptr<const Expression> l, 
+                                       shared_ptr<const Expression> r, 
+                                       OrderProperty order_property = STRICT );    
+    virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
+                                           OrderProperty order_property ) const override;
 
     virtual string Render() const = 0;    
     string GetTrace() const; // used for debug

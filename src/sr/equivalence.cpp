@@ -15,7 +15,7 @@ EquivalenceRelation::EquivalenceRelation() :
 }
 
 
-CompareResult EquivalenceRelation::Compare( XLink xlink, XLink ylink ) const
+Orderable::Result EquivalenceRelation::Compare( XLink xlink, XLink ylink ) const
 {
     // Get the child nodes and disregard the arrow heads
     TreePtr<Node> xnode = xlink.GetChildX();
@@ -28,7 +28,7 @@ CompareResult EquivalenceRelation::Compare( XLink xlink, XLink ylink ) const
 
 bool EquivalenceRelation::operator()( XLink xlink, XLink ylink ) const
 {
-    return Compare(xlink, ylink) < EQUAL;
+    return Compare(xlink, ylink) < Orderable::EQUAL;
 }
 
 
@@ -57,8 +57,8 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
     // Reflexive property
     for( XLink a_xlink : vxlinks )
     {
-        CompareResult aa_cr = Compare(a_xlink, a_xlink);
-        ASSERT( aa_cr == EQUAL );
+        Orderable::Result aa_cr = Compare(a_xlink, a_xlink);
+        ASSERT( aa_cr == Orderable::EQUAL );
         tr++;
     }
     
@@ -67,21 +67,21 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
     {
         XLink a_xlink = random_xlink();
         XLink b_xlink = random_xlink();
-        CompareResult ab_cr = Compare(a_xlink, b_xlink);
-        CompareResult ba_cr = Compare(b_xlink, a_xlink);
-        if( ab_cr == EQUAL )            // a == b
+        Orderable::Result ab_cr = Compare(a_xlink, b_xlink);
+        Orderable::Result ba_cr = Compare(b_xlink, a_xlink);
+        if( ab_cr == Orderable::EQUAL )            // a == b
         {
-            ASSERT( ba_cr == EQUAL );       
+            ASSERT( ba_cr == Orderable::EQUAL );       
             ts[0]++;
         }
-        else if( ab_cr < EQUAL )        // a < b
+        else if( ab_cr < Orderable::EQUAL )        // a < b
         {
-            ASSERT( ba_cr > EQUAL);
+            ASSERT( ba_cr > Orderable::EQUAL);
             ts[1]++;
         }
-        else if( ab_cr > EQUAL )        // a > b
+        else if( ab_cr > Orderable::EQUAL )        // a > b
         {
-            ASSERT( ba_cr < EQUAL);
+            ASSERT( ba_cr < Orderable::EQUAL);
             ts[2]++;
         }
         else
@@ -96,24 +96,24 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
         XLink a_xlink = random_xlink();
         XLink b_xlink = random_xlink();
         XLink c_xlink = random_xlink();
-        CompareResult ab_cr = Compare(a_xlink, b_xlink);
-        CompareResult bc_cr = Compare(b_xlink, c_xlink);
-        CompareResult ac_cr = Compare(a_xlink, c_xlink);
-        if( ab_cr == EQUAL )            // a == b
+        Orderable::Result ab_cr = Compare(a_xlink, b_xlink);
+        Orderable::Result bc_cr = Compare(b_xlink, c_xlink);
+        Orderable::Result ac_cr = Compare(a_xlink, c_xlink);
+        if( ab_cr == Orderable::EQUAL )            // a == b
         {
-            if( bc_cr == EQUAL )            // b == c
+            if( bc_cr == Orderable::EQUAL )            // b == c
             {
-                ASSERT( ac_cr == EQUAL );
+                ASSERT( ac_cr == Orderable::EQUAL );
                 tt[0]++;
             }
-            else if( bc_cr < EQUAL )        // b < c
+            else if( bc_cr < Orderable::EQUAL )        // b < c
             {
-                ASSERT( ac_cr < EQUAL );
+                ASSERT( ac_cr < Orderable::EQUAL );
                 tt[1]++;
             }
-            else if( bc_cr > EQUAL )        // b > c
+            else if( bc_cr > Orderable::EQUAL )        // b > c
             {
-                ASSERT( ac_cr > EQUAL );
+                ASSERT( ac_cr > Orderable::EQUAL );
                 tt[2]++;
             }
             else
@@ -121,19 +121,19 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
                 ASSERTFAIL("huh?\n");
             }
         }
-        else if( ab_cr < EQUAL )        // a < b
+        else if( ab_cr < Orderable::EQUAL )        // a < b
         {
-            if( bc_cr == EQUAL )            // b == c
+            if( bc_cr == Orderable::EQUAL )            // b == c
             {
-                ASSERT( ac_cr < EQUAL );
+                ASSERT( ac_cr < Orderable::EQUAL );
                 tt[3]++;
             }
-            else if( bc_cr < EQUAL )        // b < c
+            else if( bc_cr < Orderable::EQUAL )        // b < c
             {
-                ASSERT( ac_cr < EQUAL );
+                ASSERT( ac_cr < Orderable::EQUAL );
                 tt[4]++;
             }
-            else if( bc_cr > EQUAL )        // b > c
+            else if( bc_cr > Orderable::EQUAL )        // b > c
             {
                 // no information relating a to c
             }
@@ -142,20 +142,20 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
                 ASSERTFAIL("huh?\n");
             }
         }
-        else if( ab_cr > EQUAL )        // a > b
+        else if( ab_cr > Orderable::EQUAL )        // a > b
         {
-            if( bc_cr == EQUAL )            // b == c
+            if( bc_cr == Orderable::EQUAL )            // b == c
             {
-                ASSERT( ac_cr > EQUAL );
+                ASSERT( ac_cr > Orderable::EQUAL );
                 tt[6]++;
             }
-            else if( bc_cr < EQUAL )        // b < c
+            else if( bc_cr < Orderable::EQUAL )        // b < c
             {
                 // no information relating a to c
             }
-            else if( bc_cr > EQUAL )        // b > c
+            else if( bc_cr > Orderable::EQUAL )        // b > c
             {
-                ASSERT( ac_cr > EQUAL );
+                ASSERT( ac_cr > Orderable::EQUAL );
                 tt[8]++;
             }
             else

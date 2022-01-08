@@ -3,12 +3,12 @@
 
 using namespace std;
 
-typedef int CompareResult;
-static const CompareResult EQUAL = 0;
-
 class Orderable
 {
 public:
+    typedef int Result;
+    static const Result EQUAL = 0;
+
     enum OrderProperty
     {
         // Objects with different values must compare non-equal
@@ -19,11 +19,13 @@ public:
         REPEATABLE
     };
     
-    static CompareResult Compare( const Orderable *l, 
-                                  const Orderable *r, 
-                                  OrderProperty order_property = STRICT );
-    virtual CompareResult CovariantCompare( const Orderable *candidate, 
-                                            OrderProperty order_property ) const;
+    static Orderable::Result OrderCompare( const Orderable *l, 
+                                           const Orderable *r, 
+                                           OrderProperty order_property = STRICT );
+    virtual Orderable::Result OrderCompareInternals( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const;
+    virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
+                                                    OrderProperty order_property ) const;
 };
 
 #endif

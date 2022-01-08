@@ -238,9 +238,9 @@ void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
             if( residual == XLink::MMAX_Link || keyer == XLink::MMAX_Link)
                 continue; 
                     
-            CompareResult cr = equivalence_relation.Compare( keyer, 
+            Orderable::Result cr = equivalence_relation.Compare( keyer, 
                                                              residual );
-            if( cr != EQUAL )
+            if( cr != Orderable::EQUAL )
                 throw CouplingMismatch();               
         }
     }     

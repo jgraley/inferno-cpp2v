@@ -19,13 +19,13 @@ public:
     SimpleCompare( Orderable::OrderProperty order_property = Orderable::STRICT );
     
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
-    virtual CompareResult Compare( TreePtr<Node> x, TreePtr<Node> y );
+    virtual Orderable::Result Compare( TreePtr<Node> x, TreePtr<Node> y );
     
     /// Pass in two sequences of pointers to nodes, which can point to subtrees. Result is true if they match. O(n) locally.
-    CompareResult Compare( SequenceInterface &x, SequenceInterface &y );
+    Orderable::Result Compare( SequenceInterface &x, SequenceInterface &y );
     
     /// Pass in two collection of pointers to nodes, which can point to subtrees. Result is true if they match. O(nlogn) locally.
-    CompareResult Compare( CollectionInterface &x, CollectionInterface &y );
+    Orderable::Result Compare( CollectionInterface &x, CollectionInterface &y );
 
     /// Less operator: for use with set, map etc
     bool operator()( TreePtr<Node> x, TreePtr<Node> y );

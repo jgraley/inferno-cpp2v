@@ -19,7 +19,7 @@ class EquivalenceRelation
 {
 public:
     EquivalenceRelation();
-    CompareResult Compare( XLink xlink, XLink ylink ) const;
+    Orderable::Result Compare( XLink xlink, XLink ylink ) const;
 
     /// Less operator: for use with set, map etc
     bool operator()( XLink xlink, XLink ylink ) const;

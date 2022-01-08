@@ -36,7 +36,7 @@ class UniquifyCompare : public SimpleCompare
 {
 public:
     UniquifyCompare( const UniquifyIdentifiers *unique );
-    virtual CompareResult Compare( TreePtr<Node> a, TreePtr<Node> b ) override;
+    virtual Orderable::Result Compare( TreePtr<Node> a, TreePtr<Node> b ) override;
     
 private:
     const UniquifyIdentifiers * const unique;
