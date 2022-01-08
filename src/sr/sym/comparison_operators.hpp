@@ -138,7 +138,7 @@ class KindOfOperator : public SymbolToBooleanExpression
 public:    
     typedef BooleanExpression NominalType;
     explicit KindOfOperator( const SR::Agent *ref_agent,
-                              shared_ptr<SymbolExpression> a); 
+                             shared_ptr<SymbolExpression> a); 
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
@@ -179,7 +179,8 @@ class EquivalentOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit EquivalentOperator( list< shared_ptr<SymbolExpression> > sa );
+    explicit EquivalentOperator( shared_ptr<SymbolExpression> a, 
+                                 shared_ptr<SymbolExpression> b );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
@@ -187,8 +188,29 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const list< shared_ptr<SymbolExpression> > sa;
+    const shared_ptr<SymbolExpression> a;
+    const shared_ptr<SymbolExpression> b;
     SR::EquivalenceRelation equivalence_relation;
+};
+
+// ------------------------- ConditionalOperator --------------------------
+
+class ConditionalOperator : public SymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    explicit ConditionalOperator( shared_ptr<BooleanExpression> a,
+                                  shared_ptr<SymbolExpression> b,
+                                  shared_ptr<SymbolExpression> c );
+    virtual list<shared_ptr<Expression>> GetOperands() const override;
+    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<BooleanExpression> a;
+    const shared_ptr<SymbolExpression> b;
+    const shared_ptr<SymbolExpression> c;
 };
 
 };

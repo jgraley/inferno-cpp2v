@@ -297,7 +297,7 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
     for( PatternLink residual_plink : residual_plinks )
     {
         auto residual_expr = MakeOver<SymbolVariable>(residual_plink);
-        expr &= ( MakeOver<EquivalentOperator>( list< shared_ptr<SymbolExpression> >({keyer_expr, residual_expr}) ) |
+        expr &= ( MakeOver<EquivalentOperator>( keyer_expr, residual_expr ) |
                   keyer_expr == mmax_expr | // See thought on #384
                   residual_expr == mmax_expr );
     }

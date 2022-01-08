@@ -397,15 +397,17 @@ Expression::Precedence ChildCollectionSizeOperator::GetPrecedence() const
 
 // ------------------------- EquivalentOperator --------------------------
 
-EquivalentOperator::EquivalentOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
-    sa(sa_)
+EquivalentOperator::EquivalentOperator( shared_ptr<SymbolExpression> a_, 
+                                        shared_ptr<SymbolExpression> b_ ) :
+    a(a_),
+    b(b_)
 {
 }    
     
 
 list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 {
-    return sa;
+    return {a, b};
 }
 
 
@@ -416,34 +418,78 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
         if( ra->cat == SymbolResult::UNDEFINED )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForOverlappingAdjacentPairs( op_results, [&](shared_ptr<SymbolResult> ra,
-                                                 shared_ptr<SymbolResult> rb) 
-    {
-        // For equality, it is sufficient to compare the x links
-        // themselves, which have the required uniqueness properties
-        // within the full arrowhead model.
-        if( equivalence_relation.Compare(ra->xlink, rb->xlink) != EQUAL  )
-        {
-            m = BooleanResult::FALSE;
-        }
-    } );
-    return make_shared<BooleanResult>( m );   
+    shared_ptr<SymbolResult> ra = op_results.front();
+    shared_ptr<SymbolResult> rb = op_results.back();
+
+    // For equality, it is sufficient to compare the x links
+    // themselves, which have the required uniqueness properties
+    // within the full arrowhead model (cf IndexComparisonOperator).
+    if( equivalence_relation.Compare(ra->xlink, rb->xlink) == EQUAL  )
+        return make_shared<BooleanResult>( BooleanResult::TRUE );
+    else
+        return make_shared<BooleanResult>( BooleanResult::FALSE );    
+
 }
 
 
 string EquivalentOperator::Render() const
 {
-    list<string> ls;
-    for( shared_ptr<SymbolExpression> a : sa )
-        ls.push_back( RenderForMe(a) );
-    return "Equivalent" + Join(ls, ", ", "(", ")");
+    return "Equivalent(" + a->Render() + ", " + b->Render() + ")";
 }
 
 
 Expression::Precedence EquivalentOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
+}
+
+
+// ------------------------- ConditionalOperator --------------------------
+
+ConditionalOperator::ConditionalOperator( shared_ptr<BooleanExpression> a_,
+                                          shared_ptr<SymbolExpression> b_,
+                                          shared_ptr<SymbolExpression> c_ ) :
+    a( a_ ),
+    b( b_ ),
+    c( c_ )
+{
+}
+
+    
+list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
+{
+    return {a, b, c};
+}
+
+
+shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
+{
+    shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
+    switch( ra->value )
+    {   
+    case BooleanResult::FALSE:
+        return c->Evaluate(kit);
+    case BooleanResult::UNDEFINED:
+        // TODO could evaluate both, and see if they're defined and equal
+        // to each other and then return either of them.
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+    case BooleanResult::TRUE:
+        return b->Evaluate(kit);
+    default:
+        ASSERTFAIL("Missing case")
+    }  
+}
+
+
+string ConditionalOperator::Render() const
+{
+    return RenderForMe(a) + " ? " + RenderForMe(b) + " : " + RenderForMe(c);
+}
+
+
+Expression::Precedence ConditionalOperator::GetPrecedence() const
+{
+    return Precedence::CONDITIONAL;
 }
 
 
