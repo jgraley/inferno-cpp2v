@@ -10,11 +10,6 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 
-namespace SR
-{
-    class Agent;
-};
-
 namespace SYM
 { 
 
@@ -138,7 +133,7 @@ class KindOfOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit KindOfOperator( const SR::Agent *ref_agent,
+    explicit KindOfOperator( TreePtr<Node> archetype_node,
                              shared_ptr<SymbolExpression> a); 
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
@@ -161,7 +156,7 @@ class ChildCollectionSizeOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit ChildCollectionSizeOperator( const SR::Agent *ref_agent,
+    explicit ChildCollectionSizeOperator( TreePtr<Node> archetype_node,
                                           int item, 
                                           shared_ptr<SymbolExpression> a,
                                           int size );

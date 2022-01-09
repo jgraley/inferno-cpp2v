@@ -308,7 +308,7 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-	auto expr = MakeOver<KindOfOperator>(this, keyer_expr);
+	auto expr = MakeOver<KindOfOperator>(GetArchetypeNode(), keyer_expr);
     
     //ASSERT( Expression::OrderCompare( (shared_ptr<BooleanExpression>)expr, (shared_ptr<BooleanExpression>)expr, Orderable::STRICT ) == Orderable::EQUAL );
     

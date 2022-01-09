@@ -3,11 +3,6 @@
 
 #include "expression.hpp"
 
-namespace SR
-{ 
-    class Agent;
-};
-
 namespace SYM
 {         
 

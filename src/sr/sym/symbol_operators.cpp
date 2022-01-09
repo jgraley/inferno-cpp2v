@@ -1,16 +1,15 @@
 #include "symbol_operators.hpp"
 
 #include "node/node.hpp"
-#include "../agents/agent.hpp"
 
 using namespace SYM;
 
 // ------------------------- ItemiseToSymbolOperator --------------------------
 
-ItemiseToSymbolOperator::ItemiseToSymbolOperator( const SR::Agent *ref_agent_,
+ItemiseToSymbolOperator::ItemiseToSymbolOperator( TreePtr<Node> archetype_node_,
                                                   int item_index_, 
                                                   shared_ptr<SymbolExpression> a_ ) :
-    archetype_node( ref_agent_->GetArchetypeNode() ),
+    archetype_node( archetype_node_ ),
     item_index( item_index_ ),
     a( a_ )
 {

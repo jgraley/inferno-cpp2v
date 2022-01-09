@@ -1,7 +1,6 @@
 #include "comparison_operators.hpp"
 #include "boolean_operators.hpp"
 #include "primary_expressions.hpp"
-#include "../agents/agent.hpp"
 
 using namespace SYM;
 
@@ -277,10 +276,10 @@ Expression::Precedence AllDiffOperator::GetPrecedence() const
 
 // ------------------------- KindOfOperator --------------------------
 
-KindOfOperator::KindOfOperator( const SR::Agent *ref_agent_,
+KindOfOperator::KindOfOperator( TreePtr<Node> archetype_node_,
                                 shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
-    archetype_node( ref_agent_->GetArchetypeNode() )
+    archetype_node( archetype_node_ )
 {    
 }                                                
 
@@ -333,11 +332,11 @@ Expression::Precedence KindOfOperator::GetPrecedence() const
 
 // ------------------------- ChildCollectionSizeOperator --------------------------
 
-ChildCollectionSizeOperator::ChildCollectionSizeOperator( const SR::Agent *ref_agent_,
+ChildCollectionSizeOperator::ChildCollectionSizeOperator( TreePtr<Node> archetype_node_,
                                                           int item_index_, 
                                                           shared_ptr<SymbolExpression> a_,
                                                           int size_ ) :
-    archetype_node( ref_agent_->GetArchetypeNode() ),
+    archetype_node( archetype_node_ ),
     item_index( item_index_ ),
     a( a_ ),
     size( size_ )

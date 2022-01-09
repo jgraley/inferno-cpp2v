@@ -8,11 +8,6 @@
 #include "common/read_args.hpp"
 #include "../the_knowledge.hpp"
 
-namespace SR
-{
-    class Agent;
-};
-
 namespace SYM
 { 
 
@@ -22,7 +17,7 @@ class ItemiseToSymbolOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit ItemiseToSymbolOperator( const SR::Agent *ref_agent,
+    explicit ItemiseToSymbolOperator( TreePtr<Node> archetype_node,
                                       int item, 
                                       shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;

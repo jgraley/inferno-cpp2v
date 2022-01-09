@@ -444,7 +444,7 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_child_seq_front_expr = MakeOver<ChildSequenceFrontOperator>(this, plan_seq.itemise_index, keyer_expr);
+    auto keyer_child_seq_front_expr = MakeOver<ChildSequenceFrontOperator>(GetArchetypeNode(), plan_seq.itemise_index, keyer_expr);
     for( PatternLink candidate_plink : plan_seq.non_stars )
     {        
         auto candidate_expr = MakeOver<SymbolVariable>(candidate_plink);
@@ -503,7 +503,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_child_col_front_expr = MakeOver<ChildCollectionFrontOperator>(this, plan_col.itemise_index, keyer_expr);
+    auto keyer_child_col_front_expr = MakeOver<ChildCollectionFrontOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr);
     for( PatternLink candidate_plink : plan_col.non_stars )
     {        
         auto candidate_expr = MakeOver<SymbolVariable>(candidate_plink);
@@ -526,7 +526,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
     if( !plan_col.star_plink )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-        expr &= MakeOver<ChildCollectionSizeOperator>(this, plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
+        expr &= MakeOver<ChildCollectionSizeOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
     }
 
     return expr;
@@ -536,7 +536,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
     auto keyer = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_sing_expr = MakeOver<ChildSingularOperator>( this, plan_sing.itemise_index, keyer );
+    auto keyer_sing_expr = MakeOver<ChildSingularOperator>( GetArchetypeNode(), plan_sing.itemise_index, keyer );
     auto candidate_expr = MakeOver<SymbolVariable>(plan_sing.plink);
     return keyer_sing_expr == candidate_expr;
 }                                  
