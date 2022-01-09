@@ -28,6 +28,22 @@ SR::XLink SymbolConstant::GetXLink() const
 }
 
 
+Orderable::Result SymbolConstant::OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const SymbolConstant *>(candidate);    
+    ASSERT(c);
+
+    if( xlink == c->xlink )
+        return 0;
+    else if( xlink < c->xlink )
+        return -1;
+    else
+        return 1;
+}  
+
+
 string SymbolConstant::Render() const
 {
     return xlink.GetTrace();
@@ -74,6 +90,22 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 }
 
 
+Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const SymbolVariable *>(candidate);    
+    ASSERT(c);
+
+    if( plink == c->plink )
+        return 0;
+    else if( plink < c->plink )
+        return -1;
+    else
+        return 1;
+}  
+
+
 string SymbolVariable::Render() const
 {
     return "[" + plink.GetTrace() + "]";
@@ -103,6 +135,17 @@ shared_ptr<BooleanResult> BooleanConstant::GetValue() const
 {
     return make_shared<BooleanResult>( value );
 }
+
+
+Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate, 
+                                                      OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const BooleanConstant *>(candidate);    
+    ASSERT(c);
+
+    return value - c->value;
+}  
 
 
 string BooleanConstant::Render() const

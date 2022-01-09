@@ -21,6 +21,10 @@ public:
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;    
     shared_ptr<SymbolResult> GetValue() const;
     SR::XLink GetXLink() const;
+
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const override;
+
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -38,8 +42,11 @@ public:
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const override;
-    
     SR::PatternLink GetPatternLink() const;
+
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const override;
+
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
 
@@ -56,6 +63,10 @@ public:
     explicit BooleanConstant( bool value );
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     shared_ptr<BooleanResult> GetValue() const;
+
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const override;
+
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

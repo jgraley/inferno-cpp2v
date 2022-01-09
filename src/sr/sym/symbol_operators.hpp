@@ -25,6 +25,10 @@ public:
                                                const list<shared_ptr<SymbolResult>> &op_results ) const override final;
     virtual shared_ptr<SymbolResult> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const = 0;
+
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const override;                                                
+
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual string GetItemTypeName() const = 0;

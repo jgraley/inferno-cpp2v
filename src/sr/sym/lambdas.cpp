@@ -36,6 +36,30 @@ shared_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
 }
 
 
+Orderable::Result BooleanLambda::OrderCompareLocal( const Orderable *candidate, 
+                                                    OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const BooleanLambda *>(candidate);    
+    ASSERT(c);
+
+    Orderable::Result r;
+    switch( order_property )
+    {
+    case STRICT:
+        // Unique order uses address to ensure different lambdas compare differently
+        r = (int)(this > c) - (int)(this < c);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops after name check since address compare is not repeatable
+        r = Orderable::EQUAL;
+        break;
+    }
+    return r;
+}  
+
+
 string BooleanLambda::Render() const
 {
     return "[](){"+description+"}"; // Look like a lambda!

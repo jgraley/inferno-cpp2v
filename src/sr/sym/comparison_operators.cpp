@@ -385,6 +385,26 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 }
 
 
+Orderable::Result ChildCollectionSizeOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                                  OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const ChildCollectionSizeOperator *>(candidate);    
+    ASSERT(c);
+    //FTRACE(Render())("\n");
+    Result r1 = OrderCompare(archetype_node.get(), 
+                             c->archetype_node.get(), 
+                             order_property);
+    if( r1 != EQUAL )
+        return r1;
+
+    if( item_index != c->item_index )
+        return item_index - c->item_index;
+
+    return size - c->size;
+}  
+
+
 string ChildCollectionSizeOperator::Render() const
 {
     string name = archetype_node->GetTypeName();

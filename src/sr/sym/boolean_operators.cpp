@@ -107,29 +107,14 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
         list< shared_ptr<BooleanExpression> > imply_ops = OnlyElementOf(implies)->GetBooleanOperands();           
         list< shared_ptr<BooleanExpression> > beq_ops = OnlyElementOf(bequals)->GetBooleanOperands(); 
         
-        // Ugly bit
-        SR::PatternLink beq_plink, imply_plink;
-        SR::XLink beq_xlink, imply_xlink;
-        if( auto imply_not_op = dynamic_pointer_cast<NotOperator>( imply_ops.front() ) )
-        {
-            if( auto imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op->GetOperands().front()) )
-            {
-                if( auto imply_nequal_lop = dynamic_pointer_cast<SymbolVariable>( imply_nequal_op->GetOperands().front() ) )
-                    imply_plink = imply_nequal_lop->GetPatternLink();
-                if( auto imply_nequal_rop = dynamic_pointer_cast<SymbolConstant>( imply_nequal_op->GetOperands().back() ) )
-                    imply_xlink = imply_nequal_rop->GetXLink();
-            }
-        }
-        if( auto beq_equal_op = dynamic_pointer_cast<EqualOperator>( beq_ops.front() ) )
-        {
-            if( auto beq_equal_lop = dynamic_pointer_cast<SymbolVariable>( beq_equal_op->GetOperands().front() ) )
-                beq_plink = beq_equal_lop->GetPatternLink();
-            if( auto beq_equal_rop = dynamic_pointer_cast<SymbolConstant>( beq_equal_op->GetOperands().back() ) )
-                beq_xlink = beq_equal_rop->GetXLink();
-        }                        
-            
-        if( beq_plink && beq_plink==imply_plink &&
-            beq_xlink && beq_xlink==imply_xlink )
+        shared_ptr<EqualOperator> imply_nequal_op;
+        shared_ptr<EqualOperator> beq_equal_op;        
+        if( auto imply_not_op = dynamic_pointer_cast<NotOperator>(imply_ops.front()) )
+            imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op->GetOperands().front());
+        beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front()); 
+                                  
+        if( imply_nequal_op && beq_equal_op &&
+            Expression::OrderCompare( imply_nequal_op, beq_equal_op ) == EQUAL )
         {
             // Fronts of imply and beq are negation of each other.
             shared_ptr<SymbolExpression> try_solve_b = beq_ops.back()->TrySolveFor(target);
