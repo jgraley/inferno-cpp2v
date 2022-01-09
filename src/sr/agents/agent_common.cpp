@@ -19,6 +19,9 @@
 
 #include <stdexcept>
 
+// Not working, see #473
+//#define ONLY_PR_IF_NONTRIVIAL
+
 using namespace SR;
 using namespace SYM;
 
@@ -307,12 +310,19 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 
 SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-	auto expr = MakeOver<KindOfOperator>(GetArchetypeNode(), keyer_expr);
-    
-    //ASSERT( Expression::OrderCompare( (shared_ptr<BooleanExpression>)expr, (shared_ptr<BooleanExpression>)expr, Orderable::STRICT ) == Orderable::EQUAL );
-    
-    return expr;
+#ifdef ONLY_PR_IF_NONTRIVIAL
+    if( SpecialBase::IsNonTrivialPreRestriction( keyer_plink.GetPatternPtr() ) )
+#else
+    if( true )
+#endif
+    {
+        auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+	    return MakeOver<KindOfOperator>(GetArchetypeNode(), keyer_expr);
+    }
+    else
+    {
+        return MakeOver<BooleanConstant>(true);
+    }
 }
 
 
