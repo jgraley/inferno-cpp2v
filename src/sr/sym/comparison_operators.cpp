@@ -280,7 +280,7 @@ Expression::Precedence AllDiffOperator::GetPrecedence() const
 KindOfOperator::KindOfOperator( const SR::Agent *ref_agent_,
                                 shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
-    ref_agent( ref_agent_ )
+    archetype_node( ref_agent_->GetArchetypeNode() )
 {    
 }                                                
 
@@ -299,7 +299,7 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
     if( ra->cat == SymbolResult::UNDEFINED )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
-    bool matches = ref_agent->GetArchetypeNode()->IsLocalMatch( ra->xlink.GetChildX().get() );
+    bool matches = archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() );
     return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
 }
 
@@ -311,18 +311,18 @@ Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate,
     auto *c = dynamic_cast<const KindOfOperator *>(candidate);    
     ASSERT(c);
     //FTRACE(Render())("\n");
-    return OrderCompare(ref_agent->GetArchetypeNode().get(), 
-                        c->ref_agent->GetArchetypeNode().get(), 
+    return OrderCompare(archetype_node.get(), 
+                        c->archetype_node.get(), 
                         order_property);
 }  
 
 
 string KindOfOperator::Render() const
 {
-    string inner_typename = ref_agent->GetArchetypeNode()->GetTypeName();
+    string name = archetype_node->GetTypeName();
 
     // Not using RenderForMe() because we always want () here
-    return "KindOf<" + inner_typename + ">(" + a->Render() + ")"; 
+    return "KindOf<" + name + ">(" + a->Render() + ")"; 
 }
 
 
@@ -337,7 +337,7 @@ ChildCollectionSizeOperator::ChildCollectionSizeOperator( const SR::Agent *ref_a
                                                           int item_index_, 
                                                           shared_ptr<SymbolExpression> a_,
                                                           int size_ ) :
-    ref_agent( ref_agent_ ),
+    archetype_node( ref_agent_->GetArchetypeNode() ),
     item_index( item_index_ ),
     a( a_ ),
     size( size_ )
@@ -366,12 +366,12 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !ref_agent->GetArchetypeNode()->IsLocalMatch( ra->xlink.GetChildX().get() ) )
+    if( !archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() ) )
         return make_shared<BooleanResult>(BooleanResult::FALSE); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = ref_agent->GetArchetypeNode()->Itemise( ra->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->xlink.GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
@@ -388,11 +388,11 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 
 string ChildCollectionSizeOperator::Render() const
 {
-    string inner_typename = ref_agent->GetArchetypeNode()->GetTypeName();
+    string name = archetype_node->GetTypeName();
 
     // Not using RenderForMe() because we always want () here
     return "Item<" + 
-           inner_typename + 
+           name + 
            "@" + 
            to_string(item_index) + 
            ":col size=" +

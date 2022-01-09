@@ -152,7 +152,7 @@ public:
     
 private:
     const shared_ptr<SymbolExpression> a;
-    const SR::Agent * const ref_agent; // TODO Would like to use an archetype to reduce coupling
+    const TreePtr<Node> archetype_node;
 };
 
 // ------------------------- ChildCollectionSizeOperator --------------------------
@@ -172,7 +172,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const SR::Agent *ref_agent;
+    const TreePtr<Node> archetype_node;
     const int item_index;
     const shared_ptr<SymbolExpression> a;
     const int size;

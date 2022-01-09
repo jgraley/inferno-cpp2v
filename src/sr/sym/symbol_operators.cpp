@@ -10,7 +10,7 @@ using namespace SYM;
 ItemiseToSymbolOperator::ItemiseToSymbolOperator( const SR::Agent *ref_agent_,
                                                   int item_index_, 
                                                   shared_ptr<SymbolExpression> a_ ) :
-    ref_agent( ref_agent_ ),
+    archetype_node( ref_agent_->GetArchetypeNode() ),
     item_index( item_index_ ),
     a( a_ )
 {
@@ -34,12 +34,12 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     if( ar->cat == SymbolResult::UNDEFINED )
         return ar;
 
-    if( !ref_agent->GetArchetypeNode()->IsLocalMatch( ar->xlink.GetChildX().get() ) )
+    if( !archetype_node->IsLocalMatch( ar->xlink.GetChildX().get() ) )
         return make_shared<SymbolResult>(SymbolResult::UNDEFINED); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = ref_agent->GetArchetypeNode()->Itemise( ar->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ar->xlink.GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Extract the item indicated by item_index. 
@@ -49,11 +49,11 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
 
 string ItemiseToSymbolOperator::Render() const
 {
-    string inner_typename = ref_agent->GetArchetypeNode()->GetTypeName();
+    string name = archetype_node->GetTypeName();
 
     // Not using RenderForMe() because we always want () here
     return "Item<" + 
-           inner_typename + 
+           name + 
            "@" + 
            to_string(item_index) + 
            ":" + 

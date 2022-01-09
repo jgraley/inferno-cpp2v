@@ -35,7 +35,7 @@ public:
     virtual string GetItemTypeName() const = 0;
     
 private:
-    const SR::Agent *ref_agent;
+    const TreePtr<Node> archetype_node;
     const int item_index;
     const shared_ptr<SymbolExpression> a;
 };
