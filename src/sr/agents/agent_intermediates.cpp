@@ -95,18 +95,6 @@ SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImp
     return mmax_rewriter.ApplyDistributed( original_expr );
 }
 
-                               
-SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMed() const                                      
-{                      
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryMMed( kit.hypothesis_links,
-						    	  kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQMMed()");	
-}                     
-
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
 void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
@@ -232,6 +220,13 @@ void SearchLeafAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                            XLink keyer_xlink ) const
 {
 }
+
+
+SYM::Over<SYM::BooleanExpression> SearchLeafAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    return MakeOver<SYM::BooleanConstant>(true);
+}                                      
+
 
 //---------------------------------- SpecialBase ------------------------------------    
 

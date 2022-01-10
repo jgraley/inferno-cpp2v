@@ -24,7 +24,7 @@ public:
                                            const TheKnowledge *knowledge ) const;                                                                                
 
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const = 0;                                       
 };
 
 
@@ -64,9 +64,10 @@ private:
 
 class SearchLeafAgent : public PreRestrictedAgent
 {
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const override;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                  
+                                      XLink keyer_xlink ) const override;                  
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
 };
 
 };

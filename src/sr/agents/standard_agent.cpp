@@ -6,7 +6,6 @@
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
-#include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/comparison_operators.hpp"
 #include "sym/primary_expressions.hpp"

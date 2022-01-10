@@ -1,8 +1,14 @@
 #include "negation_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
+#include "sym/boolean_operators.hpp"
+#include "sym/comparison_operators.hpp"
+#include "sym/primary_expressions.hpp"
+#include "sym/symbol_operators.hpp"
+#include "sym/overloads.hpp"
 
 using namespace SR;
+using namespace SYM;
 
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
@@ -40,6 +46,12 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     RunDecidedQueryPRed( query, keyer_xlink ); 
 }
+
+
+SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    return MakeOver<SYM::BooleanConstant>(true);
+}                                      
 
 
 Graphable::Block NegationAgent::GetGraphBlockInfo() const

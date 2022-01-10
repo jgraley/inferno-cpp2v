@@ -48,9 +48,8 @@ class AnyNodeAgent : public SearchContainerAgent
 {
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const;
-    virtual XLink GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const;                                             
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+    virtual XLink GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const;                                                                                        
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual Block GetGraphBlockInfo() const;
 };
 
@@ -87,9 +86,8 @@ public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const;
     virtual XLink GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
-    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const;                                          
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                              

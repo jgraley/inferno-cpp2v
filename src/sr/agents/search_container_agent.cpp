@@ -4,8 +4,14 @@
 #include "../conjecture.hpp" 
 #include "link.hpp"
 #include "the_knowledge.hpp"
+#include "sym/boolean_operators.hpp"
+#include "sym/comparison_operators.hpp"
+#include "sym/primary_expressions.hpp"
+#include "sym/symbol_operators.hpp"
+#include "sym/overloads.hpp"
 
 using namespace SR;
+using namespace SYM;
 
 //---------------------------------- SearchContainerAgent ------------------------------------    
 
@@ -109,34 +115,19 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface:
     return XLink(keyer_xlink.GetChildX(), &*it);
 }
 
-    
-void AnyNodeAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                             const TheKnowledge *knowledge ) const
+
+SYM::Over<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    INDENT("#");
-    ASSERT( this );
-    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_plink)("\n");
-    
     PatternLink terminus_plink(this, &terminus);
-    SolutionMap::const_iterator req_terminus_it = hypothesis_links->find(terminus_plink);
-    if( req_terminus_it==hypothesis_links->end() ) 
-        return;
-    XLink req_terminus_xlink = req_terminus_it->second; 
-
-    const TheKnowledge::Nugget &nugget( knowledge->GetNugget(req_terminus_xlink) );
-    if( !nugget.parent_xlink )
-        throw NoParentMismatch();                    
-    if( nugget.parent_xlink != hypothesis_links->at(keyer_plink) )      
-        throw TerminusMismatch();     
-}                                                                                        
+    return MakeOver<ParentOperator>( MakeOver<SymbolVariable>(terminus_plink)) ==
+           MakeOver<SymbolVariable>(keyer_plink);
+}
 
 
 Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 {
 	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
-	// right of the circle. 1 implies the tendancy to match exactly one thing. See #256.
+	// right of the circle. 1 implies the tendancy to match exactly one level. See #256.
     Block block = SearchContainerAgent::GetGraphBlockInfo();
     block.title = "AnyNode";
 	block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
@@ -190,38 +181,22 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
         query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X     
     }   
-}
+}                                                                                     
 
 
-void StuffAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const
+SYM::Over<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    INDENT("#");
-    ASSERT( this );
-    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_plink)("\n");
-    
     PatternLink terminus_plink(this, &terminus);
-    if( hypothesis_links->count(terminus_plink) > 0 )
-    {        
-        // Get nugget for base - base is first descendant (inclusive) in depth-first ordering
-        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-        const TheKnowledge::Nugget &keyer_nugget( knowledge->GetNugget(keyer_xlink) );
-        
-        // Get nugget for last descendant of base
-        const TheKnowledge::Nugget &last_descendant_nugget( knowledge->GetNugget(keyer_nugget.last_descendant_xlink) );
-        
-        // Get nugget for terminus
-        XLink req_terminus_xlink = hypothesis_links->at(terminus_plink);
-        const TheKnowledge::Nugget &req_terminus_nugget( knowledge->GetNugget(req_terminus_xlink) );
-
-        // Terminus must be base or a descendant of base 
-        if( !(req_terminus_nugget.depth_first_index >= keyer_nugget.depth_first_index &&
-              req_terminus_nugget.depth_first_index <= last_descendant_nugget.depth_first_index) )
-            throw TerminusMismatch();
-    }
-}                                                                                        
+    auto expr = MakeOver<BooleanConstant>(true);
+    
+    expr &= MakeOver<SymbolVariable>(terminus_plink) >= 
+            MakeOver<SymbolVariable>(keyer_plink);
+            
+    expr &= MakeOver<SymbolVariable>(terminus_plink) <= 
+            MakeOver<LastDescendantOperator>( MakeOver<SymbolVariable>(keyer_plink) );
+    
+    return expr;
+}
 
 
 void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
