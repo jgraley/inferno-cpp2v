@@ -38,6 +38,18 @@ void NegationAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }
 
 
+bool NegationAgent::ImplHasNLQ() const
+{    
+    return true;
+}
+
+
+SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    return MakeOver<SYM::BooleanConstant>(true);
+}                                      
+
+
 void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const SolutionMap *hypothesis_links,
                                               const TheKnowledge *knowledge ) const
@@ -46,12 +58,6 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     RunDecidedQueryPRed( query, keyer_xlink ); 
 }
-
-
-SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
-{
-    return MakeOver<SYM::BooleanConstant>(true);
-}                                      
 
 
 Graphable::Block NegationAgent::GetGraphBlockInfo() const

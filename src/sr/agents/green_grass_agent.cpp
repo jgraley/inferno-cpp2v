@@ -45,7 +45,7 @@ Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
-	// The GreenGrass node appears as a triangle containing four vertical line characters,
+	// The GreenGrass node appears as a cylinder containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
 	// tired.
     Block block;

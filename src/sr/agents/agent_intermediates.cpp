@@ -141,13 +141,7 @@ SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryM
                                
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {                      
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryPRed( kit.hypothesis_links,
-						    	  kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
+	ASSERTFAIL("Override me or turn off ImplHasNLQ()\n");
 }                     
 
 //---------------------------------- TeleportAgent ------------------------------------    

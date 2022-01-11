@@ -86,34 +86,22 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
     // Baseless query strategy: hand-rolled
     INDENT("∨");
     XLink keyer_xlink;
-    if( hypothesis_links->count(keyer_plink) > 0 )
-    { 
-        keyer_xlink = hypothesis_links->at(keyer_plink);
+    keyer_xlink = hypothesis_links->at(keyer_plink);
         
-        // Check pre-restriction
-        if( keyer_xlink == XLink::MMAX_Link && !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
-            throw PreRestrictionMismatch();
-    }
+    // Check pre-restriction
+    if( keyer_xlink == XLink::MMAX_Link && !IsLocalMatch( keyer_xlink.GetChildX().get() ) )
+        throw PreRestrictionMismatch();
            
     // Loop over the options for this disjunction and collect the links 
     // that are not MMAX. Also take note of missing children.
-    bool children_complete = true;
     list<XLink> non_mmax_residuals;
     FOREACH( const TreePtrInterface &p, GetPatterns() )           
     {
         PatternLink plink(this, &p);
-        
-        if( hypothesis_links->count(plink) > 0 ) 
-        {
-            XLink xlink = hypothesis_links->at(plink); 
-            ASSERT( xlink );
-            if( xlink != XLink::MMAX_Link )
-                non_mmax_residuals.push_back( xlink );
-        }        
-        else
-        {
-            children_complete = false;
-        }        
+        XLink xlink = hypothesis_links->at(plink); 
+        ASSERT( xlink );
+        if( xlink != XLink::MMAX_Link )
+            non_mmax_residuals.push_back( xlink );
     }
     
     if( keyer_xlink == XLink::MMAX_Link )
@@ -135,24 +123,22 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
     else
     {
         // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
-        // Roughly speaking, it should be 1, but see the code for details.
+        // It should be 1.
         switch( non_mmax_residuals.size() )
         {
         case 0:
-            // All were MMAX: we only have a mismatch if query was full i.e. we tried all the options
-            if( children_complete )
-                throw NoOptionsMatchedMismatch();    
+            // All were MMAX
+            throw NoOptionsMatchedMismatch();    
             break;        
             
         case 1:
-            // This is the correct number of non-MMAX. If we have a base, check against it.
-            if( keyer_xlink )
             {
-                XLink taken_option_x_link = non_mmax_residuals.front(); // size() is 1 so is the only one
+                // This is the correct number of non-MMAX. If we have a base, check against it.
+                XLink taken_option_x_link = OnlyElementOf(non_mmax_residuals);
                 if( taken_option_x_link != keyer_xlink )
                     throw TakenOptionMismatch();  
+                break;        
             }
-            break;        
             
         default: // 2 or more
             // It's never OK to have more than one non-MMAX (strict MMAX rules).
