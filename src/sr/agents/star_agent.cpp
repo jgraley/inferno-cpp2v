@@ -29,7 +29,7 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     auto x_ci = dynamic_cast<ContainerInterface *>(keyer_xlink.GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(keyer_xlink.GetChildX());
 
-    // Nodes passed to StarAgent::RunDecidedQueryMMed() must be a SubContainer, since * matches multiple things
+    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
         throw NotASubcontainerMismatch();
     
@@ -40,13 +40,6 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         if( !IsLocalMatch( ((TreePtr<Node>)xe).get() ) )
             throw PreRestrictionMismatch();
     }
-     /* For #207
-    for( XLink elt_xlink : x_ci->elts )
-    {
-        if( !IsLocalMatch( elt_xlink.GetChildX().get() ) )
-            throw PreRestrictionMismatch();
-    }
-    */
      
     if( *GetRestriction() )
     {
