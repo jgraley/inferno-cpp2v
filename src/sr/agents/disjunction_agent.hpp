@@ -4,6 +4,7 @@
 #include "agent_common.hpp"
 #include "../search_replace.hpp"
 #include "../boolean_evaluator.hpp"
+#include "standard_agent.hpp"
 
 namespace SR
 {
@@ -28,8 +29,12 @@ public:
                                                                          
     virtual Block GetGraphBlockInfo() const;
     
-private:
+    // Interface for pattern trasformation
+    virtual void SetPatterns( CollectionInterface &ci ) = 0;
     virtual CollectionInterface &GetPatterns() const = 0;
+    virtual TreePtr<Node> CloneToEmpty() const = 0;
+    
+private:
     virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
     shared_ptr< Collection<Node> > options;
@@ -51,13 +56,29 @@ public:
     // Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual CollectionInterface &GetPatterns() const
+    virtual CollectionInterface &GetPatterns() const override
     {
         return patterns;
     }
+    
+    virtual void SetPatterns( CollectionInterface &ci ) override
+    {
+        // Note: options should not have been set yet during ptrans so 
+        // only need to update patterns
+        patterns.clear();
+        for( CollectionInterface::iterator pit = ci.begin(); 
+             pit != ci.end(); 
+             ++pit )    
+            patterns.insert( TreePtr<PRE_RESTRICTION>::DynamicCast(*pit) );      
+    }
+    
+    virtual TreePtr<Node> CloneToEmpty() const override
+    {
+        return MakePatternPtr<Disjunction<PRE_RESTRICTION>>();
+    }
+    
 };
 
-    
 };
 
 #endif

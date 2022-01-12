@@ -30,6 +30,7 @@ SimpleSolver::Plan::Plan( SimpleSolver *algo_,
 void SimpleSolver::Plan::DeduceVariables()
 {   
     set<VariableId> free_variables_set;
+    completed_constraints.clear();
     for( VariableId v : free_variables )   
     {    
         InsertSolo(free_variables_set, v); // Checks that elements of the list are unique
@@ -43,7 +44,6 @@ void SimpleSolver::Plan::DeduceVariables()
     ASSERT( IntersectionOf( free_variables_set, forced_variables_set ).empty() );
  
     affected_constraints.clear();
-    completed_constraints.clear();
     fully_forced_constraint_set.clear();
  
     set<VariableId> free_variables_used_by_constraints; // For a cross-check
@@ -83,7 +83,7 @@ void SimpleSolver::Plan::DeduceVariables()
                         got_all_c_free_vars = false;
                 if( got_all_c_free_vars )
                 {
-                    completed_constraints[v].insert(c);
+                    completed_constraints.at(v).insert(c);
                     break; // we're done - don't insert c for any more vars
                 }
             }
@@ -338,6 +338,11 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         
         bool ok;
         Assignment hint;  
+        ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
+              ("\nfree_variables")(solver_plan.free_variables)
+              ("\naffected_constraints:\n")(solver_plan.affected_constraints)
+              ("\ncompleted_constraints:\n")(solver_plan.completed_constraints)
+              ("\ncurrent_var: ")(current_var);
         const ConstraintSet &constraints_to_test = solver_plan.completed_constraints.at(current_var);
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     

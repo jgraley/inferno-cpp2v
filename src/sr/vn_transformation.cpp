@@ -3,6 +3,7 @@
 #include "scr_engine.hpp"
 #include "ptrans/combine_patterns.hpp"
 #include "ptrans/search_to_compare.hpp"
+#include "ptrans/split_disjunctions.hpp"
 
 using namespace SR;
 
@@ -31,8 +32,12 @@ void VNTransformation::Configure( TransformationType type,
 PatternTransformationVector VNTransformation::GetAllPatternTrans()
 {
     PatternTransformationVector ptv;
+    // Transformations to make life easier for the user
     ptv.push_back( make_shared<CombinePatterns>() );
     ptv.push_back( make_shared<SearchToCompare>() );
+    
+    // Transformations to make life easier for the solver
+    //ptv.push_back( make_shared<SplitDisjunctions>() );
     return ptv;
 }
 
