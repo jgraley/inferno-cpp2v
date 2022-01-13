@@ -309,3 +309,52 @@ Expression::Precedence ImplicationOperator::GetPrecedence() const
 {
     return Precedence::IMPLICATION;
 }
+
+// ------------------------- BooleanConditionalOperator --------------------------
+
+BooleanConditionalOperator::BooleanConditionalOperator( shared_ptr<BooleanExpression> a_,
+                                                        shared_ptr<BooleanExpression> b_,
+                                                        shared_ptr<BooleanExpression> c_ ) :
+    a( a_ ),
+    b( b_ ),
+    c( c_ )
+{   
+}    
+
+
+list<shared_ptr<BooleanExpression>> BooleanConditionalOperator::GetBooleanOperands() const
+{
+    return { a, b, c };
+}
+
+
+shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &kit,
+                                                                const list<shared_ptr<BooleanResult>> &op_results ) const
+{
+    shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
+    switch( ra->value )
+    {   
+    case BooleanResult::FALSE:
+        return c->Evaluate(kit);
+    case BooleanResult::UNDEFINED:
+        // TODO could evaluate both, and see if they're defined and equal
+        // to each other and then return either of them.
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    case BooleanResult::TRUE:
+        return b->Evaluate(kit);
+    default:
+        ASSERTFAIL("Missing case")
+    }  
+}
+
+
+string BooleanConditionalOperator::Render() const
+{
+    return RenderForMe(a) + " ? " + RenderForMe(b) + " : " + RenderForMe(c);
+}
+
+
+Expression::Precedence BooleanConditionalOperator::GetPrecedence() const
+{
+    return Precedence::CONDITIONAL;
+}

@@ -108,6 +108,27 @@ private:
     const shared_ptr<BooleanExpression> b;
 };
 
+// ------------------------- BooleanConditionalOperator --------------------------
+
+class BooleanConditionalOperator : public BooleanToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit BooleanConditionalOperator( shared_ptr<BooleanExpression> a_,
+                                         shared_ptr<BooleanExpression> b_,
+                                         shared_ptr<BooleanExpression> c_ );
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<BooleanExpression> a;
+    const shared_ptr<BooleanExpression> b;
+    const shared_ptr<BooleanExpression> c;
+};
+
 };
 
 #endif // include guard
