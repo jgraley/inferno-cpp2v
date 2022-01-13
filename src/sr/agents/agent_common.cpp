@@ -279,14 +279,7 @@ Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 
 Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
 {
-	// The keyer and normal children
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryImpl( kit.hypothesis_links,
-							      kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQImpl()");	
+    ASSERTFAIL();
 }
 
 

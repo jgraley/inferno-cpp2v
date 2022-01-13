@@ -1,8 +1,10 @@
 #include "disjunction_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
+#include "sym/lambdas.hpp"
 
 using namespace SR;
+using namespace SYM;
 
 void DisjunctionAgent::SCRConfigure( const SCREngine *e,
                                      Phase phase )
@@ -35,16 +37,6 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("∨");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
     
-    /*if( x == XLink::MMAX_Link )
-    {
-        // Magic Match Anything node: all normal children also match anything
-        // This is just to keep normal-domain solver happy, so we 
-        // only need normals. 
-        for( PatternLink plink : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( plink, x );
-        return;
-    } 
-*/    
     // Check pre-restriction
     if( !IsLocalMatch( x.GetChildX().get() ) )
         throw PreRestrictionMismatch();
@@ -146,6 +138,18 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
             break;
         }    
     }
+}
+
+
+SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImpl() const
+{
+	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+	auto nlq_lambda = [this](const Expression::EvalKit &kit)
+	{
+		RunNormalLinkedQueryImpl( kit.hypothesis_links,
+                                  kit.knowledge ); // throws on mismatch   
+	};
+	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".DisjuncNLQ()");	             
 }
 
 

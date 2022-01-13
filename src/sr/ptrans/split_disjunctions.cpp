@@ -22,7 +22,7 @@ void SplitDisjunctions::MaybeSplit( DisjunctionAgent *da )
             ASSERT(false)(*da)(" must have at least 2 children but got ")(patterns.size());
         case 2:
             break; // nothing to do
-        default:
+        default: // >= 3
             Split( da );
             break;
     }
@@ -50,36 +50,30 @@ void SplitDisjunctions::Split( DisjunctionAgent *da )
     }
     
     Collection<Node> new_patterns;    
-    
-    ASSERT( !l_patterns.empty() );
-    if( l_patterns.size() >= 2 )
-    {
-        TreePtr<Node> l_dis = da->CloneToEmpty();
-        new_patterns.insert( l_dis );
-        
-        auto lda = dynamic_cast<DisjunctionAgent *>( Agent::AsAgent( l_dis ) );
-        lda->SetPatterns( l_patterns );
-        MaybeSplit(lda);
-    }
-    else
-    {
-        new_patterns.insert( *(l_patterns.begin()) );
-    }
-
-    ASSERT( !r_patterns.empty() );
-    if( r_patterns.size() >= 2 )
-    {
-        TreePtr<Node> r_dis = da->CloneToEmpty();    
-        new_patterns.insert( r_dis );
-        
-        auto rda = dynamic_cast<DisjunctionAgent *>( Agent::AsAgent( r_dis ) );
-        rda->SetPatterns( r_patterns );  
-        MaybeSplit(rda); 
-    }
-    else
-    {
-        new_patterns.insert( *(r_patterns.begin()) );
-    }
-    
+    new_patterns.insert( ReduceToNode(l_patterns, da) );
+    new_patterns.insert( ReduceToNode(r_patterns, da) );    
     da->SetPatterns( new_patterns );
 }
+
+
+TreePtr<Node> SplitDisjunctions::ReduceToNode( Collection<Node> &patterns, DisjunctionAgent *da )
+{
+    switch( patterns.size() )
+    {
+    case 0:
+        ASSERT( false );
+    case 1:
+        return *(patterns.begin()); // return the only element, no new node required
+    default: // >=2
+        {
+            TreePtr<Node> new_dnode = da->CloneToEmpty();
+            
+            auto new_da = dynamic_cast<DisjunctionAgent *>( Agent::AsAgent( new_dnode ) );
+            new_da->SetPatterns( patterns );
+            MaybeSplit(new_da);
+
+            return new_dnode;
+        }
+    }    
+}
+

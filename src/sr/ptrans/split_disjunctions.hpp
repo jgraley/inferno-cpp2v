@@ -16,6 +16,7 @@ class SplitDisjunctions : public PatternTransformationCommon
     virtual void DoPatternTransformation( const PatternKnowledge &pk ) override;
     void MaybeSplit( DisjunctionAgent *da );
     void Split( DisjunctionAgent *da );
+    TreePtr<Node> ReduceToNode( Collection<Node> &patterns, DisjunctionAgent *da );
 };    
         
 }

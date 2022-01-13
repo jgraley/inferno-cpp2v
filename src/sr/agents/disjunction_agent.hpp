@@ -25,8 +25,9 @@ public:
                                                                
     virtual bool ImplHasNLQ() const;
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                
-                                                                         
+                                           const TheKnowledge *knowledge ) const;                                                                                        
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
+
     virtual Block GetGraphBlockInfo() const;
     
     // Interface for pattern trasformation
