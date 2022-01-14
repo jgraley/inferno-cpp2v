@@ -3,6 +3,7 @@
 #include "../scr_engine.hpp"
 #include "link.hpp"
 #include "sym/lambdas.hpp"
+#include "sym/primary_expressions.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -15,31 +16,11 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 }
 
 
-void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
-{
-    INDENT("G");
-    
-    // Restrict so that everything in the input program under here must be "green grass"
-    // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    if( master_scr_engine->GetOverallMaster()->dirty_grass.find( common_xlink.GetChildX() ) != 
-        master_scr_engine->GetOverallMaster()->dirty_grass.end() ) // TODO .count() > 0
-    {
-        TRACE(common_xlink)(" is dirty grass so rejecting\n");
-        throw Mismatch();            
-    }
-    TRACE(common_xlink)(" is green grass\n");
-}
-
-
 Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
-	set<PatternLink> clq_plinks = { keyer_plink };
-	auto clq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		if( kit.hypothesis_links->count(keyer_plink) == 1 )
-			RunColocatedQuery( kit.hypothesis_links->at(keyer_plink) ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    const set< TreePtr<Node> > *dirty_grass = &master_scr_engine->GetOverallMaster()->dirty_grass;    
+    return MakeOver<IsGreenGrassOperator>(dirty_grass, keyer_expr);
 }
 
 
@@ -65,4 +46,68 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
                            true,
                            { link } } };
     return block;
+}
+
+
+GreenGrassAgent::IsGreenGrassOperator::IsGreenGrassOperator( const set< TreePtr<Node> > *dirty_grass_,
+                                                             shared_ptr<SymbolExpression> a_ ) :
+    a( a_ ),
+    dirty_grass( dirty_grass_ )
+{    
+}                                                
+
+
+list<shared_ptr<SymbolExpression>> GreenGrassAgent::IsGreenGrassOperator::GetSymbolOperands() const
+{
+    return { a };
+}
+
+
+shared_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
+                                                                           const list<shared_ptr<SymbolResult>> &op_results ) const 
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+    if( ra->cat == SymbolResult::UNDEFINED )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    
+    if( dirty_grass->count( ra->xlink.GetChildX() ) > 0 ) 
+        return make_shared<BooleanResult>( BooleanResult::FALSE );         
+    return make_shared<BooleanResult>( BooleanResult::TRUE );
+}
+
+
+Orderable::Result GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const 
+{
+    ASSERT( candidate );
+    auto *c = dynamic_cast<const IsGreenGrassOperator *>(candidate);    
+    ASSERT(c);
+
+    Orderable::Result r;
+    switch( order_property )
+    {
+    case STRICT:
+        // Unique order uses address to ensure different dirty_grass sets compare differently
+        r = (int)(dirty_grass > c->dirty_grass) - (int)(dirty_grass < c->dirty_grass);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops after name check since address compare is not repeatable
+        r = Orderable::EQUAL;
+        break;
+    }
+    return r;
+}  
+
+
+string GreenGrassAgent::IsGreenGrassOperator::Render() const
+{
+    return "IsGreenGrass<" + SSPrintf("%p", dirty_grass)  + ">(" + a->Render() + ")"; 
+}
+
+
+Expression::Precedence GreenGrassAgent::IsGreenGrassOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
 }

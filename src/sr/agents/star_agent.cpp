@@ -132,7 +132,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
     }
     return block;
 }
-
+ 
 
 shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
                                                                            const list<shared_ptr<SymbolResult>> &op_results ) const
@@ -161,6 +161,6 @@ shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const
          
 string StarAgent::SubcontainerKindOfOperator::Render() const
 {
-    return "StarAgent::SubcontainerKindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
+    return "SubcontainerKindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
 }
 
