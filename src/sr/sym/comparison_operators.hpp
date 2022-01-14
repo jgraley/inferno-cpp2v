@@ -145,7 +145,7 @@ public:
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
-private:
+protected:
     const shared_ptr<SymbolExpression> a;
     const TreePtr<Node> archetype_node;
 };

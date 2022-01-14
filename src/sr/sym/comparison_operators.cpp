@@ -318,10 +318,7 @@ Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate,
 
 string KindOfOperator::Render() const
 {
-    string name = archetype_node->GetTypeName();
-
-    // Not using RenderForMe() because we always want () here
-    return "KindOf<" + name + ">(" + a->Render() + ")"; 
+    return "KindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
 }
 
 

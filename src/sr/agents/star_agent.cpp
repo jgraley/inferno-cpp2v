@@ -2,9 +2,10 @@
 #include "../subcontainers.hpp" 
 #include "../search_replace.hpp" 
 #include "link.hpp"
+#include "sym/primary_expressions.hpp"
 
 using namespace SR;
-
+using namespace SYM;
 
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {
@@ -48,6 +49,19 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         query.RegisterMultiplicityLink( PatternLink(this, GetRestriction()), keyer_xlink ); // Links into X
     }
 }                       
+
+
+bool StarAgent::ImplHasNLQ() const
+{
+    return true;
+}
+
+
+SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
+{
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
+}
 
 
 void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
@@ -117,5 +131,36 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
                                       { link } } );
     }
     return block;
+}
+
+
+shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
+                                                                           const list<shared_ptr<SymbolResult>> &op_results ) const
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+
+    if( ra->cat == SymbolResult::UNDEFINED )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+
+    auto x_ci = dynamic_cast<ContainerInterface *>(ra->xlink.GetChildX().get());
+    auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->xlink.GetChildX());
+
+    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
+    if( !( x_sc && x_ci ) )
+        return make_shared<BooleanResult>( BooleanResult::FALSE );
+    
+    // Check pre-restriction
+    bool matches = true;
+    FOREACH( const TreePtrInterface &xe, *x_ci )
+        matches = matches & archetype_node->IsLocalMatch( ((TreePtr<Node>)xe).get() );            
+
+    return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
+}                                   
+
+         
+string StarAgent::SubcontainerKindOfOperator::Render() const
+{
+    return "StarAgent::SubcontainerKindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
 }
 

@@ -550,6 +550,7 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
     // Get the members of x corresponding to pattern's class
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    ASSERT( keyer_xlink != XLink::MMAX_Link );
     vector< Itemiser::Element * > x_memb = Itemise( keyer_xlink.GetChildX().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )
