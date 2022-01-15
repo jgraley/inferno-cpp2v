@@ -2,7 +2,6 @@
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
 #include "link.hpp"
-#include "sym/lambdas.hpp"
 #include "sym/primary_expressions.hpp"
 
 using namespace SR;
@@ -13,6 +12,12 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>(this);
     pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
+}
+
+
+bool GreenGrassAgent::ImplHasNLQ() const
+{    
+    return true;
 }
 
 

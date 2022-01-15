@@ -45,38 +45,7 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                                  const TheKnowledge *knowledge ) const
 {
-    exception_ptr eptr;
-    try
-    {
-        // This function must not "protect" client agents from eg partial queries.        
-        RunNormalLinkedQueryMMed( hypothesis_links, knowledge );
-    }
-    catch( ::Mismatch & )
-    {
-        eptr = current_exception();
-    }
-    
-    bool all_non_mmax = true;
-    bool all_mmax = true;
-    for( PatternLink plink : keyer_and_normal_plinks ) 
-    {
-        if( hypothesis_links->count(plink) > 0 )
-        {
-            if( hypothesis_links->at(plink) == XLink::MMAX_Link )
-                all_non_mmax = false;
-            else
-                all_mmax = false;                    
-        }
-    }   
-
-    if( all_mmax )
-        return; // Done: all are MMAX            
-    
-    if( !all_non_mmax )
-        throw MMAXPropagationMismatch(); // Mismatch: mixed MMAX and non-MMAX
-    
-    if (eptr)
-       std::rethrow_exception(eptr);
+    ASSERTFAIL("");
 }
 
 
@@ -111,18 +80,8 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
                                                    const TheKnowledge *knowledge ) const
 {
-    // This function must not "protect" client agents from eg partial queries. 
-    RunNormalLinkedQueryPRed( hypothesis_links, knowledge );
+    ASSERTFAIL("");
 
-    // Baseless query strategy: don't check pre-restriction
-    bool based = (hypothesis_links->count(keyer_plink) == 1);
-    if( based )
-    { 
-        // Check pre-restriction
-        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-        if( !IsPreRestrictionMatch(keyer_xlink) )
-            throw PreRestrictionMismatch();
-    }
 }
 
                                
