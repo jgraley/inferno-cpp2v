@@ -72,7 +72,7 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-bool DisjunctionAgent::ImplHasNLQ() const
+bool DisjunctionAgent::ImplHasSNLQ() const
 {    
     return true;
 }

@@ -59,7 +59,7 @@ void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &quer
 }
 
 
-bool SearchContainerAgent::ImplHasNLQ() const
+bool SearchContainerAgent::ImplHasSNLQ() const
 {
     return true;
 }

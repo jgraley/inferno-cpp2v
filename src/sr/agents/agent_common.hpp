@@ -34,11 +34,9 @@ public:
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   XLink keyer_xlink ) const;       
                                                                            
-    virtual bool ImplHasNLQ() const;
+    virtual bool ImplHasSNLQ() const;
     void NLQFromDQ( const SolutionMap *hypothesis_links,
                     const TheKnowledge *knowledge ) const;                                              
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;
                                        
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       

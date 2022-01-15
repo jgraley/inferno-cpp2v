@@ -131,7 +131,7 @@ void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &que
 }           
                      
 
-bool IdentifierByNameAgent::ImplHasNLQ() const
+bool IdentifierByNameAgent::ImplHasSNLQ() const
 {    
     return true;
 }

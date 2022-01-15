@@ -38,7 +38,7 @@ void NegationAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }
 
 
-bool NegationAgent::ImplHasNLQ() const
+bool NegationAgent::ImplHasSNLQ() const
 {    
     return true;
 }

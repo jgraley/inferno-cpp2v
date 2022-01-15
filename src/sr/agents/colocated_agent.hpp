@@ -22,7 +22,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;         
                                                                                      
-    virtual bool ImplHasNLQ() const;
+    virtual bool ImplHasSNLQ() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
     virtual void RunColocatedQuery(XLink common_xlink) const;

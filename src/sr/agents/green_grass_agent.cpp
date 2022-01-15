@@ -15,7 +15,7 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 }
 
 
-bool GreenGrassAgent::ImplHasNLQ() const
+bool GreenGrassAgent::ImplHasSNLQ() const
 {    
     return true;
 }

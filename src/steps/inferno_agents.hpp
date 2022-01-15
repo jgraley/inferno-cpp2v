@@ -110,7 +110,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     virtual Block GetGraphBlockInfo() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;
-    virtual bool ImplHasNLQ() const;
+    virtual bool ImplHasSNLQ() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     string name;

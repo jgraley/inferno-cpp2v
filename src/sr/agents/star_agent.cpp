@@ -51,7 +51,7 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }                       
 
 
-bool StarAgent::ImplHasNLQ() const
+bool StarAgent::ImplHasSNLQ() const
 {
     return true;
 }

@@ -16,7 +16,7 @@ namespace SR
 class GreenGrassAgent : public virtual ColocatedAgent 
 {               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual bool ImplHasNLQ() const;
+    virtual bool ImplHasSNLQ() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
     virtual Block GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;

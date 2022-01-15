@@ -42,20 +42,6 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const
-{
-    ASSERTFAIL("");
-}
-
-
-void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const                                      
-{                      
-    ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
-}                     
-
-
 SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
 {    
     auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
@@ -77,21 +63,6 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 }
 
 
-void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                                   const TheKnowledge *knowledge ) const
-{
-    ASSERTFAIL("");
-
-}
-
-                               
-void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                                   const TheKnowledge *knowledge ) const                                      
-{                      
-    ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");
-}                     
-
-
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
 {
     return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
@@ -100,7 +71,7 @@ SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryM
                                
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {                      
-	ASSERTFAIL("Override me or turn off ImplHasNLQ()\n");
+	ASSERTFAIL("Override me or turn off ImplHasSNLQ()\n");
 }                     
 
 //---------------------------------- TeleportAgent ------------------------------------    

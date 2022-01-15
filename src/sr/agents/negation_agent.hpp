@@ -20,7 +20,7 @@ public:
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                  
 
-    virtual bool ImplHasNLQ() const;
+    virtual bool ImplHasSNLQ() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
 
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

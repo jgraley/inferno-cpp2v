@@ -16,12 +16,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                                      
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const = 0;
-                                                                                      
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                             
-    virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                                                                
+                                      XLink keyer_xlink ) const = 0;                                                                              
 
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const = 0;                                       
@@ -34,12 +29,7 @@ public:
     virtual void RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                                      
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const = 0;                                          
-                                      
-    virtual void RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;
-    virtual void RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                      
+                                      XLink keyer_xlink ) const = 0;                                                                         
 
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       

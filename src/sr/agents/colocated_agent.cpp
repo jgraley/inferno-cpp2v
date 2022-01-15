@@ -25,7 +25,7 @@ void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-bool ColocatedAgent::ImplHasNLQ() const
+bool ColocatedAgent::ImplHasSNLQ() const
 {    
     return true;
 }

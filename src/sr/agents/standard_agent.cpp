@@ -412,7 +412,7 @@ void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
 
 // ---------------------------- Normal Linked Queries ----------------------------------                                               
 
-bool StandardAgent::ImplHasNLQ() const
+bool StandardAgent::ImplHasSNLQ() const
 {    
     return true;
 }

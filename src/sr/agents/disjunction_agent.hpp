@@ -23,7 +23,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                    
                                                                
-    virtual bool ImplHasNLQ() const;
+    virtual bool ImplHasSNLQ() const;
     virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                        
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
