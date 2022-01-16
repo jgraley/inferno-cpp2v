@@ -328,8 +328,7 @@ list<shared_ptr<BooleanExpression>> BooleanConditionalOperator::GetBooleanOperan
 }
 
 
-shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &kit,
-                                                                const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
     switch( ra->value )
@@ -337,9 +336,13 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
     case BooleanResult::FALSE:
         return c->Evaluate(kit);
     case BooleanResult::UNDEFINED:
-        // TODO could evaluate both, and see if they're defined and equal
-        // to each other and then return either of them.
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        {
+            shared_ptr<BooleanResult> rb = b->Evaluate(kit);   
+            shared_ptr<BooleanResult> rc = c->Evaluate(kit);   
+            if( rb->value == rc->value )
+                return rb; // not ambiguous if both options are the same
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        }
     case BooleanResult::TRUE:
         return b->Evaluate(kit);
     default:

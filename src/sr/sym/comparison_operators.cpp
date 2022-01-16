@@ -499,9 +499,15 @@ shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) con
     case BooleanResult::FALSE:
         return c->Evaluate(kit);
     case BooleanResult::UNDEFINED:
-        // TODO could evaluate both, and see if they're defined and equal
-        // to each other and then return either of them.
-        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+        {
+            shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
+            shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
+            if( rb->cat==SymbolResult::XLINK && 
+                rc->cat==SymbolResult::XLINK && 
+                rb->xlink == rc->xlink )
+                return rb; // not ambiguous if both options are the same
+            return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+        }
     case BooleanResult::TRUE:
         return b->Evaluate(kit);
     default:
