@@ -63,10 +63,6 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
     if( OrderCompare( this, target.get() ) == EQUAL )
         return false;
         
-    // When we extend to allow target to be any Expression, we'll want
-    // do do an expression compare in here (which means we need expression 
-    // compare) before the loop, and we'll remove the overload in 
-    // SymbolVariable, and possibly remove the virtual from here.
     for( shared_ptr<Expression> op : GetOperands() )
     {
         if( !op->IsIndependentOf( target ) )
