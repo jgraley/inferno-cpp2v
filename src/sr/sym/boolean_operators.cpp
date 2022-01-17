@@ -11,7 +11,7 @@ using namespace SYM;
 
 // ------------------------- BooleanOperator --------------------------
 
-shared_ptr<SymbolExpression> BooleanOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> BooleanOperator::TrySolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution psol = PartialSolveFor( target );
     
@@ -33,33 +33,43 @@ shared_ptr<SymbolExpression> BooleanOperator::TrySolveFor( shared_ptr<SymbolVari
     // because shared_ptr<> is in the way) so we can "find" in negative sense partials.
     shared_ptr<BooleanExpression> cond, te, be;
     for( pair< shared_ptr<BooleanExpression>, 
-               shared_ptr<SymbolExpression> > posp : psol[true] ) // all entries for positive sense
+               shared_ptr<Expression> > posp : psol[true] ) // all entries for positive sense
     {
         if( !posp.first->IsIndependentOf( target ) )
             continue; // keys are now allowed to be dependent on target, but we can't use them here
             
         for( pair< shared_ptr<BooleanExpression>, 
-                   shared_ptr<SymbolExpression> > negp : psol[false] ) // all entries for negative sense
+                   shared_ptr<Expression> > negp : psol[false] ) // all entries for negative sense
         {
             if( !negp.first->IsIndependentOf( target ) )
                 continue; // keys are now allowed to be dependent on target, but we can't use them here
 
             if( OrderCompare( posp.first, negp.first ) == EQUAL ) // same expression
-                return make_shared<ConditionalOperator>( posp.first, posp.second, negp.second );
+            {
+                // If do #477, could simplify
+                if( auto sym_pos = dynamic_pointer_cast<SymbolExpression>(posp.second) )
+                    if( auto sym_neg = dynamic_pointer_cast<SymbolExpression>(negp.second) )
+                        return make_shared<ConditionalOperator>( posp.first, sym_pos, sym_neg );
+                if( auto bool_pos = dynamic_pointer_cast<BooleanExpression>(posp.second) )
+                    if( auto bool_neg = dynamic_pointer_cast<BooleanExpression>(negp.second) )
+                        return make_shared<BooleanConditionalOperator>( posp.first, bool_pos, bool_neg );
+                // It's not an error if one is symbolic and the other boolean, but there 
+                // is no solution in such a scenario.
+            }
         }
     }
     return nullptr;
 }
 
 
-void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<SymbolVariable> target,
+void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<Expression> target,
                                                 PartialSolution &psol, 
                                                 bool key_sense, 
                                                 shared_ptr<BooleanExpression> key, 
                                                 shared_ptr<BooleanExpression> val_unsolved ) const
 {
     // Try solving value for target
-    shared_ptr<SymbolExpression> val = val_unsolved->TrySolveFor(target);
+    shared_ptr<Expression> val = val_unsolved->TrySolveFor(target);
     if( !val )
         return; // couldn't solve, oh dear, never mind
     
@@ -152,12 +162,12 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> AndOperator::TrySolveFor( shared_ptr<Expression> target ) const
 {
     // With AndOperator, solving via any clause solves the whole thing. So try that first.
     for( shared_ptr<BooleanExpression> op : sa )
-        if( shared_ptr<SymbolExpression> solved = op->TrySolveFor( target ) )
-            return solved;
+        if( shared_ptr<Expression> solution = op->TrySolveFor( target ) )
+            return solution;
             
     // Didn't work so fall back to BooleanOperator's solver which will try to do it using 
     // partial solutions.
@@ -169,7 +179,7 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
 }
 
 
-BooleanExpression::PartialSolution AndOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+BooleanExpression::PartialSolution AndOperator::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution and_psol;
     
@@ -236,7 +246,7 @@ shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
 }
 
 
-BooleanExpression::PartialSolution OrOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+BooleanExpression::PartialSolution OrOperator::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution psol;
     
@@ -313,7 +323,7 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<SymbolExpression> BoolEqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> BoolEqualOperator::TrySolveFor( shared_ptr<Expression> target ) const
 {
     shared_ptr<BooleanExpression> indep_op;
     bool found_me = false;
@@ -328,14 +338,14 @@ shared_ptr<SymbolExpression> BoolEqualOperator::TrySolveFor( shared_ptr<SymbolVa
             found_me = true;                  
     }
     
-   // if( found_me )
-   //     return indep_op;
-   // else
+    if( found_me )
+        return indep_op;
+    else
         return nullptr;
 }
 
 
-BooleanExpression::PartialSolution BoolEqualOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+BooleanExpression::PartialSolution BoolEqualOperator::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution psol;
     
@@ -401,12 +411,12 @@ shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
 }
 
 
-BooleanExpression::PartialSolution ImplicationOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+BooleanExpression::PartialSolution ImplicationOperator::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution psol;
     
     TryAddPartialSolutionFor( target, psol, true, a, b );
-    //TryAddPartialSolutionFor( target, psol, true, b, a ); // would need to negate value, which we can't then solve TBD
+    //TryAddPartialSolutionFor( target, psol, true, b, a ); // would need to negate a, which we can't then solve; TBD
 
     return psol;
 }
@@ -464,7 +474,7 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
 }
 
 
-BooleanExpression::PartialSolution BooleanConditionalOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+BooleanExpression::PartialSolution BooleanConditionalOperator::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution psol;
     

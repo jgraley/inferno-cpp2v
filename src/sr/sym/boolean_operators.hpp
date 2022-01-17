@@ -15,12 +15,12 @@ namespace SYM
 class BooleanOperator : public BooleanToBooleanExpression
 {
 protected:
-    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const override;
+    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const override;
     
     // Helper function for various bool nodes that generate implications. Tries to 
     // add them to psol if they meet the required conditions, solves for value and
     // normalises nots.
-    void TryAddPartialSolutionFor( shared_ptr<SymbolVariable> target,
+    void TryAddPartialSolutionFor( shared_ptr<Expression> target,
                                    PartialSolution &psol, 
                                    bool key_sense, 
                                    shared_ptr<BooleanExpression> key, 
@@ -57,8 +57,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
-    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const override;
-    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
+    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const override;
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -80,7 +80,7 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
-    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -103,8 +103,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
-    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const override;
-    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
+    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const override;
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -128,7 +128,7 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
-    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -150,7 +150,7 @@ public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
 
-    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

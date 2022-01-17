@@ -13,11 +13,11 @@ class SymbolVariable;
 class SymSolver
 {
 public:
-    explicit SymSolver( shared_ptr<SymbolVariable> target );
+    explicit SymSolver( shared_ptr<SymbolExpression> target );
     shared_ptr<SymbolExpression> TrySolve( shared_ptr<BooleanExpression> equation ) const;
 
 private:
-    const shared_ptr<SymbolVariable> target;
+    const shared_ptr<SymbolExpression> target;
 };
 
 };

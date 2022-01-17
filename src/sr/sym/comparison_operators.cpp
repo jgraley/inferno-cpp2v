@@ -41,7 +41,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<SymbolExpression> EqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> EqualOperator::TrySolveFor( shared_ptr<Expression> target ) const
 {
     shared_ptr<SymbolExpression> indep_op;
     bool found_me = false;

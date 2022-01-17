@@ -52,7 +52,7 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
-shared_ptr<SymbolExpression> Expression::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> Expression::TrySolveFor( shared_ptr<Expression> target ) const
 {
     return nullptr;
 }
@@ -127,14 +127,13 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
-BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     // Could implement this in terms of TrySolveFor() but since BooleanOperator::TrySolveFor()
     // calls PartialSolveFor() we could recurse indefinitely. So instead the rule is that
     // callers must try and use TrySolveFor() before calling PartialSolveFor()
     return PartialSolution();
 }
-
 
 // ------------------------- SymbolExpression --------------------------
 

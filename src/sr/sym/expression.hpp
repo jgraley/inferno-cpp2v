@@ -92,9 +92,9 @@ public:
             
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
-    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
-    bool IsIndependentOf( shared_ptr<Expression> target ) const;
     
+    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const;
+    bool IsIndependentOf( shared_ptr<Expression> target ) const;
     using Orderable::OrderCompare;
     static Orderable::Result OrderCompare( shared_ptr<const Expression> l, 
                                            shared_ptr<const Expression> r, 
@@ -119,7 +119,7 @@ public:
     // Value must be independent of target it is part of a solution. 
     // Key does not have this requirement, but it must not be NotOperator.
     typedef map< shared_ptr<BooleanExpression>, 
-                 shared_ptr<SymbolExpression> > PartialSolutionForSense;
+                 shared_ptr<Expression> > PartialSolutionForSense;
     
     // key is the sense of value.key: false if there would have been an odd 
     // number of NotOperator, otherwise true. Note: use [] to access this - 
@@ -129,7 +129,7 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
     
     // Not a "try" because always "succeeds" (even though the map amy be empty)
-    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 };
 
 // ------------------------- SymbolExpression --------------------------

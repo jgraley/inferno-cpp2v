@@ -9,7 +9,7 @@ using namespace SYM;
 
 // ------------------------- SymSolver --------------------------
 
-SymSolver::SymSolver( shared_ptr<SymbolVariable> target_ ) :
+SymSolver::SymSolver( shared_ptr<SymbolExpression> target_ ) :
     target( target_ )
 {
 }
@@ -19,11 +19,15 @@ shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<BooleanExpression> 
 {
 //    FTRACE("\nTrying to solve:\n")(equation->Render())
 //          ("\nwith respect to: ")(target->Render())("\n");
-    shared_ptr<SymbolExpression> solution = equation->TrySolveFor( target );
+    shared_ptr<Expression> solution = equation->TrySolveFor( target );
 //    if( solution )
 //        FTRACEC("and got:\n")(solution->Render())("\n\n");
 //    else
 //        FTRACEC("but FAILED\n\n");
+    if( !solution )
+        return nullptr;
     
-    return solution;
+    auto sym_solution = dynamic_pointer_cast<SymbolExpression>(solution);
+    ASSERT( sym_solution )(solution->Render()); // target is shared_ptr<SymbolicExpression> so should get symbol as solution
+    return sym_solution;
 }
