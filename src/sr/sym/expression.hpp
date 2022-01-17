@@ -93,7 +93,7 @@ public:
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
     virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
-    virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const;
+    bool IsIndependentOf( shared_ptr<Expression> target ) const;
     
     using Orderable::OrderCompare;
     static Orderable::Result OrderCompare( shared_ptr<const Expression> l, 

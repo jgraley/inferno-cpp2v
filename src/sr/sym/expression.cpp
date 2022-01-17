@@ -58,7 +58,7 @@ shared_ptr<SymbolExpression> Expression::TrySolveFor( shared_ptr<SymbolVariable>
 }
 
 
-bool Expression::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
+bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
     if( OrderCompare( this, target.get() ) == EQUAL )
         return false;
