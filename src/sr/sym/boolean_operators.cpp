@@ -42,13 +42,14 @@ shared_ptr<Expression> BooleanOperator::TrySolveFor( shared_ptr<Expression> targ
                 if( !p.first->IsIndependentOf( target ) )                
                     tie( found_dependent_key, found_dependent_value ) = p;
             
+            // HAve we managed to remove all dependent keys?
             if( !found_dependent_key )
                 break;
                     
             // Now safe to erase
             ps.second.erase( found_dependent_key );
 
-            // Try to solve this expression (it's the biggest we have) with
+            // Try to solve this expression (it's the biggest we can see) with
             // respect to the dependent key sub-expression (i.e. a new target) 
             // in the hopes of getting hold of an independent sub-expression
             // that we can substitute for the key.
@@ -66,26 +67,26 @@ shared_ptr<Expression> BooleanOperator::TrySolveFor( shared_ptr<Expression> targ
             ASSERT(solved_key)("Definitely expected a BooleanExpression\n");
             
 //            FTRACEC("and got:\n")(solved_key)("\n\n");
+            // Note: does NOT guarantee indepedennce of target, since we solved 
+            // wrt something else (found_dependent_key). However, the while()
+            // loop won't exit until all keys are independent.
             ps.second[solved_key] = found_dependent_value;      
         }
 //        FTRACEC("After substitution ")(ps.first)(":\n")(ps.second)("\n");
     }
 
+    // Try to find an a=>b & !a=>c pair and solve using a conditional
     // TODO consider explicitly using ordering in the map (doesn't happen automatically
     // because shared_ptr<> is in the way) so we can "find" in negative sense partials.
     shared_ptr<BooleanExpression> cond, te, be;
     for( pair< shared_ptr<BooleanExpression>, 
                shared_ptr<Expression> > posp : psol[true] ) // all entries for positive sense
     {
-        if( !posp.first->IsIndependentOf( target ) )
-            continue; // keys are now allowed to be dependent on target, but we can't use them here
-            
+        ASSERT( posp.first->IsIndependentOf( target ) ); // all dependent keys should have been removed above     
         for( pair< shared_ptr<BooleanExpression>, 
                    shared_ptr<Expression> > negp : psol[false] ) // all entries for negative sense
         {
-            if( !negp.first->IsIndependentOf( target ) )
-                continue; // keys are now allowed to be dependent on target, but we can't use them here
-
+            ASSERT( negp.first->IsIndependentOf( target ) ); // all dependent keys should have been removed above     
             if( OrderCompare( posp.first, negp.first ) == EQUAL ) // same expression
             {
                 // If do #477, could simplify
