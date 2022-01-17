@@ -122,7 +122,8 @@ public:
                  shared_ptr<SymbolExpression> > PartialSolutionForSense;
     
     // key is the sense of value.key: false if there would have been an odd 
-    // number of NotOperator, otherwise true.
+    // number of NotOperator, otherwise true. Note: use [] to access this - 
+    // doing so will make sure an empty PartialSolutionForSense is created.
     typedef map<bool, PartialSolutionForSense> PartialSolution;
 
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;

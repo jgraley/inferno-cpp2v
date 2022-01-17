@@ -17,5 +17,13 @@ SymSolver::SymSolver( shared_ptr<SymbolVariable> target_ ) :
 
 shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<BooleanExpression> equation ) const
 {
-    return equation->TrySolveFor( target );
+    FTRACE("\nTrying to solve:\n")(equation->Render())
+          ("\nwith respect to: ")(target->Render())("\n");
+    shared_ptr<SymbolExpression> solution = equation->TrySolveFor( target );
+    if( solution )
+        FTRACEC("and got:\n")(solution->Render())("\n\n");
+    else
+        FTRACEC("but FAILED\n\n");
+    
+    return solution;
 }

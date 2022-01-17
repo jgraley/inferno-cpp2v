@@ -154,52 +154,18 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
 
 shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
 {
-    // Standard algorithm - first thing to try is to see if any of the clauses provide a solution
+    // With AndOperator, solving via any clause solves the whole thing. So try that first.
     for( shared_ptr<BooleanExpression> op : sa )
         if( shared_ptr<SymbolExpression> solved = op->TrySolveFor( target ) )
-            return solved;    
-    
-    // ---- point algo starts here ----
-    
-    // Analyse the clauses for anything we can work with
-    set<shared_ptr<ImplicationOperator>> implies;
-    set<shared_ptr<BoolEqualOperator>> bequals;
-    for( shared_ptr<BooleanExpression> op : sa )
-    {
-        if( auto o = dynamic_pointer_cast<ImplicationOperator>(op) )       
-            implies.insert(o);
-        if( auto o = dynamic_pointer_cast<BoolEqualOperator>(op) )       
-            bequals.insert(o);
-    }
-
-    // "Special Stuff" for solving the standard clutch logic (EQUALITY_METHOD only)
-    if( implies.size()==1 && 
-        bequals.size()==1 )
-    {
-        list< shared_ptr<BooleanExpression> > imply_ops = OnlyElementOf(implies)->GetBooleanOperands();           
-        list< shared_ptr<BooleanExpression> > beq_ops = OnlyElementOf(bequals)->GetBooleanOperands(); 
-        
-        shared_ptr<EqualOperator> imply_nequal_op;
-        shared_ptr<EqualOperator> beq_equal_op;        
-        if( auto imply_not_op = dynamic_pointer_cast<NotOperator>(imply_ops.front()) )
-            imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op->GetOperands().front());
-        beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front()); 
-                                  
-        if( imply_nequal_op && beq_equal_op &&
-            Expression::OrderCompare( imply_nequal_op, beq_equal_op ) == EQUAL )
-        {
-            // Fronts of imply and beq are negation of each other.
-            shared_ptr<SymbolExpression> try_solve_b = beq_ops.back()->TrySolveFor(target);
-            shared_ptr<SymbolExpression> try_solve_c = imply_ops.back()->TrySolveFor(target);
-            if( try_solve_b && try_solve_c )
-            {
-                return make_shared<ConditionalOperator>( beq_ops.front(),
-                                                         try_solve_b,
-                                                         try_solve_c );
-            }
-        }
-    }    
-    return nullptr;
+            return solved;
+            
+    // Didn't work so fall back to BooleanOperator's solver which will try to do it using 
+    // partial solutions.
+    // Note: intercept pattern: with other boolean operators, BooleanOperator::TrySolveFor()
+    // is not overridden and therefore called directly. It tries to generate a solution
+    // from that operator's partial solution. Here, though, we intercept in case we could
+    // get a solution from a clause, and only resort to partials if that fails.
+    return BooleanOperator::TrySolveFor( target );
 }
 
 
@@ -211,8 +177,8 @@ BooleanExpression::PartialSolution AndOperator::PartialSolveFor( shared_ptr<Symb
     {
         // Simply merge partial solutions together
         PartialSolution a_psol = a->PartialSolveFor(target);
-        and_psol[true] = UnionOf( and_psol[true], a_psol.at(true) );
-        and_psol[false] = UnionOf( and_psol[false], a_psol.at(false) );
+        and_psol[true] = UnionOf( and_psol[true], a_psol[true] );
+        and_psol[false] = UnionOf( and_psol[false], a_psol[false] );
     }
 
     return and_psol;
