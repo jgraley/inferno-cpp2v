@@ -7,6 +7,77 @@
 
 using namespace SYM;
 
+#define SOLVE_FROM_PARTIALS_CHECKING
+
+// ------------------------- BooleanOperator --------------------------
+
+shared_ptr<SymbolExpression> BooleanOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    PartialSolution psol = PartialSolveFor( target );
+    
+#ifdef SOLVE_FROM_PARTIALS_CHECKING
+    for( auto p : psol ) // all senses (true, false)
+    {
+        for( auto p : p.second ) // all entries for the current sense
+        {
+            // Should not depend on target, i.e. usable in a solution
+            ASSERT( p.first->IsIndependentOf( target ) );
+            
+            // Is a possible solution so also does not depend on target 
+            ASSERT( p.second->IsIndependentOf( target ) );        
+            
+            // NotOperators should have been removed from condition
+            ASSERT( !dynamic_pointer_cast<NotOperator>( p.first ) );
+        }
+    }
+#endif
+
+    // TODO consider explicitly using ordering in the map (doesn't happen automatically
+    // because shared_ptr<> is in the way) so we can "find" in negative sense partials.
+    shared_ptr<BooleanExpression> cond, te, be;
+    for( pair< shared_ptr<BooleanExpression>, 
+               shared_ptr<SymbolExpression> > posp : psol[true] ) // all entries for positive sense
+    {
+        for( pair< shared_ptr<BooleanExpression>, 
+                   shared_ptr<SymbolExpression> > negp : psol[false] ) // all entries for negative sense
+        {
+            if( OrderCompare( posp.first, negp.first ) == EQUAL ) // same expression
+                return make_shared<ConditionalOperator>( posp.first, posp.second, negp.second );
+        }
+    }
+    return nullptr;
+}
+
+
+void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<SymbolVariable> target,
+                                                PartialSolution &psol, 
+                                                bool key_sense, 
+                                                shared_ptr<BooleanExpression> key, 
+                                                shared_ptr<BooleanExpression> val_unsolved ) const
+{
+    if( !key->IsIndependentOf( target ) )
+        return; // Can't use key, would need target to be able to evaluate
+    
+    // Try solving value for target
+    shared_ptr<SymbolExpression> val = val_unsolved->TrySolveFor(target);
+    if( !val )
+        return; // couldn't solve, oh dear, never mind
+    
+    // Now feels like a good time to check solution wrt target doesn't depend on target
+    ASSERT( val->IsIndependentOf( target ) );        
+    
+    // Reduce out any "not" in the key expression, updating the sense
+    while( auto nk = dynamic_pointer_cast<NotOperator>( key ) )
+    {
+        key = OnlyElementOf( nk->GetBooleanOperands() );
+        key_sense = !key_sense;
+    }
+    
+    // Add it
+    psol[key_sense][key] = val;
+}                                            
+
+
 // ------------------------- NotOperator --------------------------
 
 NotOperator::NotOperator( shared_ptr<BooleanExpression> a_ ) :
@@ -83,23 +154,24 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
 
 shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
 {
+    // Standard algorithm - first thing to try is to see if any of the clauses provide a solution
+    for( shared_ptr<BooleanExpression> op : sa )
+        if( shared_ptr<SymbolExpression> solved = op->TrySolveFor( target ) )
+            return solved;    
+    
+    // ---- point algo starts here ----
+    
+    // Analyse the clauses for anything we can work with
     set<shared_ptr<ImplicationOperator>> implies;
     set<shared_ptr<BoolEqualOperator>> bequals;
-    map<shared_ptr<BooleanExpression>, shared_ptr<SymbolExpression>> solveables;
     for( shared_ptr<BooleanExpression> op : sa )
     {
         if( auto o = dynamic_pointer_cast<ImplicationOperator>(op) )       
             implies.insert(o);
         if( auto o = dynamic_pointer_cast<BoolEqualOperator>(op) )       
             bequals.insert(o);
-        if( shared_ptr<SymbolExpression> solved = op->TrySolveFor( target ) )
-            solveables[op] = solved;
     }
-    
-    // Standard algorithm - first thing to try is to see if any of the clauses provide a solution
-    if( !solveables.empty() )
-        return FrontOf(solveables).second;
-    
+
     // "Special Stuff" for solving the standard clutch logic (EQUALITY_METHOD only)
     if( implies.size()==1 && 
         bequals.size()==1 )
@@ -128,6 +200,22 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
         }
     }    
     return nullptr;
+}
+
+
+BooleanExpression::PartialSolution AndOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    PartialSolution and_psol;
+    
+    for( shared_ptr<BooleanExpression> a : sa )
+    {
+        // Simply merge partial solutions together
+        PartialSolution a_psol = a->PartialSolveFor(target);
+        and_psol[true] = UnionOf( and_psol[true], a_psol.at(true) );
+        and_psol[false] = UnionOf( and_psol[false], a_psol.at(false) );
+    }
+
+    return and_psol;
 }
 
 
@@ -179,6 +267,21 @@ shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
         m = max( m, r->value );
 
     return make_shared<BooleanResult>( m );
+}
+
+
+BooleanExpression::PartialSolution OrOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    PartialSolution psol;
+    
+    ForAllCommutativeDistinctPairs( sa, [&](shared_ptr<BooleanExpression> a,
+                                            shared_ptr<BooleanExpression> b) 
+    {
+        TryAddPartialSolutionFor( target, psol, false, a, b );
+        TryAddPartialSolutionFor( target, psol, false, b, a );
+    } );
+
+    return psol;
 }
 
 
@@ -244,6 +347,17 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
+BooleanExpression::PartialSolution BoolEqualOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    PartialSolution psol;
+    
+    TryAddPartialSolutionFor( target, psol, true, a, b );
+    TryAddPartialSolutionFor( target, psol, true, b, a );
+
+    return psol;
+}
+
+
 string BoolEqualOperator::Render() const
 {
     return RenderForMe(a) + " == " + RenderForMe(b);
@@ -299,6 +413,17 @@ shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
 }
 
 
+BooleanExpression::PartialSolution ImplicationOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    PartialSolution psol;
+    
+    TryAddPartialSolutionFor( target, psol, true, a, b );
+    //TryAddPartialSolutionFor( target, psol, true, b, a ); // would need to negate value, which we can't then solve TBD
+
+    return psol;
+}
+
+
 string ImplicationOperator::Render() const
 {
     return RenderForMe(a)+" ⇒ "+RenderForMe(b);
@@ -348,6 +473,17 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
     default:
         ASSERTFAIL("Missing case")
     }  
+}
+
+
+BooleanExpression::PartialSolution BooleanConditionalOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    PartialSolution psol;
+    
+    TryAddPartialSolutionFor( target, psol, true, a, b );
+    TryAddPartialSolutionFor( target, psol, false, a, c ); 
+
+    return psol;
 }
 
 

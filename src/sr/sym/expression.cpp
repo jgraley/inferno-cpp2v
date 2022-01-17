@@ -127,6 +127,15 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
+BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    // Could implement this in terms of TrySolveFor() but since BooleanOperator::TrySolveFor()
+    // calls PartialSolveFor() we could recurse indefinitely. So instead the rule is that
+    // callers must try and use TrySolveFor() before calling PartialSolveFor()
+    return PartialSolution();
+}
+
+
 // ------------------------- SymbolExpression --------------------------
 
 // ------------------------- BooleanToBooleanExpression --------------------------

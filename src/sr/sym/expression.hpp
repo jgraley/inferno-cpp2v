@@ -89,7 +89,7 @@ public:
         CONDITIONAL,
         COMMA 
     };    
-        
+            
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
     virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
@@ -116,7 +116,19 @@ protected:
 class BooleanExpression : public Expression
 {    
 public:
+    // Key and value must be independent of target because these are parts
+    // of a solution. Additionally, key must not be NotOperator.
+    typedef map< shared_ptr<BooleanExpression>, 
+                 shared_ptr<SymbolExpression> > PartialSolutionForSense;
+    
+    // key is the sense of value.key: false if there would have been an odd 
+    // number of NotOperator, otherwise true.
+    typedef map<bool, PartialSolutionForSense> PartialSolution;
+
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
+    
+    // Not a "try" because always "succeeds" (even though the map amy be empty)
+    virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
 };
 
 // ------------------------- SymbolExpression --------------------------
