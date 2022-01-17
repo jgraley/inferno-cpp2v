@@ -13,21 +13,63 @@ using namespace SYM;
 
 shared_ptr<Expression> BooleanOperator::TrySolveFor( shared_ptr<Expression> target ) const
 {
+    INDENT("T");
     PartialSolution psol = PartialSolveFor( target );
     
 #ifdef SOLVE_FROM_PARTIALS_CHECKING
-    for( auto ps : psol ) // all senses (true, false)
+    for( auto &ps : psol ) // all senses (true, false)
     {
         for( auto p : ps.second ) // all entries for the current sense
         {
             // NotOperators should have been removed from condition
             ASSERT( !dynamic_pointer_cast<NotOperator>( p.first ) );
 
-            // Is a possible solution so also does not depend on target 
+            // Is a solution to a sub-expression so should not depend on target 
             ASSERT( p.second->IsIndependentOf( target ) );                    
         }
     }
 #endif
+
+    // Try to solve FOR our dependent keys and substitute the solution or remove
+    for( auto &ps : psol ) // all senses (true, false)
+    {        
+//        FTRACEC("Before substitution ")(ps.first)(":\n")(ps.second)("\n");
+        while( true )
+        {
+            shared_ptr<BooleanExpression> found_dependent_key;
+            shared_ptr<Expression> found_dependent_value;
+            for( auto p : ps.second ) // all entries for the current sense            
+                if( !p.first->IsIndependentOf( target ) )                
+                    tie( found_dependent_key, found_dependent_value ) = p;
+            
+            if( !found_dependent_key )
+                break;
+                    
+            // Now safe to erase
+            ps.second.erase( found_dependent_key );
+
+            // Try to solve this expression (it's the biggest we have) with
+            // respect to the dependent key sub-expression (i.e. a new target) 
+            // in the hopes of getting hold of an independent sub-expression
+            // that we can substitute for the key.
+//            FTRACEC("Substitution: trying to solve:\n")(Render())
+//                   ("\nwith respect to:\n")(found_dependent_key)("\n");
+            shared_ptr<Expression> solution = TrySolveFor( found_dependent_key );
+            
+            if( !solution )    
+            {
+//                FTRACEC("but FAILED\n\n");
+                continue;
+            }
+            
+            auto solved_key = dynamic_pointer_cast<BooleanExpression>(solution);
+            ASSERT(solved_key)("Definitely expected a BooleanExpression\n");
+            
+//            FTRACEC("and got:\n")(solved_key)("\n\n");
+            ps.second[solved_key] = found_dependent_value;      
+        }
+//        FTRACEC("After substitution ")(ps.first)(":\n")(ps.second)("\n");
+    }
 
     // TODO consider explicitly using ordering in the map (doesn't happen automatically
     // because shared_ptr<> is in the way) so we can "find" in negative sense partials.
@@ -68,10 +110,18 @@ void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<Expression> target,
                                                 shared_ptr<BooleanExpression> key, 
                                                 shared_ptr<BooleanExpression> val_unsolved ) const
 {
+    INDENT("A");
+//    FTRACEC("Should I add wrt target: ")(target)
+//           ("\nkey: ")(key)
+//           ("\nvalue unsolved: ")(val_unsolved)("\n");
+           
     // Try solving value for target
     shared_ptr<Expression> val = val_unsolved->TrySolveFor(target);
     if( !val )
+    {
+//        FTRACE("No, could not solve\n");
         return; // couldn't solve, oh dear, never mind
+    }
     
     // Now feels like a good time to check solution wrt target doesn't depend on target
     ASSERT( val->IsIndependentOf( target ) );        
@@ -82,6 +132,8 @@ void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<Expression> target,
         key = OnlyElementOf( nk->GetBooleanOperands() );
         key_sense = !key_sense;
     }
+    
+//    FTRACEC("Yes, solved value: ")(val)("\n");
     
     // Add it
     psol[key_sense][key] = val;

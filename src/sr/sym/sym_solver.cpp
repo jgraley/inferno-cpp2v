@@ -5,6 +5,8 @@
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
 
+//#define FTRACE_SUCCESSES_AND_FAILURES
+
 using namespace SYM;
 
 // ------------------------- SymSolver --------------------------
@@ -17,13 +19,20 @@ SymSolver::SymSolver( shared_ptr<SymbolExpression> target_ ) :
 
 shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<BooleanExpression> equation ) const
 {
-//    FTRACE("\nTrying to solve:\n")(equation->Render())
-//          ("\nwith respect to: ")(target->Render())("\n");
+#ifdef FTRACE_SUCCESSES_AND_FAILURES
+    FTRACEC("\n----------------------------Trying to solve:\n")(equation->Render())
+           ("\nwith respect to: ")(target->Render())("\n");
+#endif
+
     shared_ptr<Expression> solution = equation->TrySolveFor( target );
-//    if( solution )
-//        FTRACEC("and got:\n")(solution->Render())("\n\n");
-//    else
-//        FTRACEC("but FAILED\n\n");
+
+#ifdef FTRACE_SUCCESSES_AND_FAILURES
+    if( solution )
+        FTRACEC("---------------------------and got:\n")(solution->Render())("\n\n");
+    else
+        FTRACEC("---------------------------but FAILED\n\n");
+#endif
+
     if( !solution )
         return nullptr;
     

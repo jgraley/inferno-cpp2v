@@ -85,6 +85,14 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
     return Precedence::PREFIX;
 }
 
+// ------------------------- ChildOperator --------------------------
+
+shared_ptr<Expression> ChildOperator::TrySolveFor( shared_ptr<Expression> target ) const
+{
+    // Hint: it's ParentOperator!!
+    return nullptr;     // Awaits #466
+}
+
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
 shared_ptr<SymbolResult> ChildSequenceFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
