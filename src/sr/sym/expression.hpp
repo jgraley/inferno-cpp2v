@@ -116,8 +116,8 @@ protected:
 class BooleanExpression : public Expression
 {    
 public:
-    // Key and value must be independent of target because these are parts
-    // of a solution. Additionally, key must not be NotOperator.
+    // Value must be independent of target it is part of a solution. 
+    // Key does not have this requirement, but it must not be NotOperator.
     typedef map< shared_ptr<BooleanExpression>, 
                  shared_ptr<SymbolExpression> > PartialSolutionForSense;
     

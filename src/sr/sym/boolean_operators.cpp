@@ -16,18 +16,15 @@ shared_ptr<SymbolExpression> BooleanOperator::TrySolveFor( shared_ptr<SymbolVari
     PartialSolution psol = PartialSolveFor( target );
     
 #ifdef SOLVE_FROM_PARTIALS_CHECKING
-    for( auto p : psol ) // all senses (true, false)
+    for( auto ps : psol ) // all senses (true, false)
     {
-        for( auto p : p.second ) // all entries for the current sense
+        for( auto p : ps.second ) // all entries for the current sense
         {
-            // Should not depend on target, i.e. usable in a solution
-            ASSERT( p.first->IsIndependentOf( target ) );
-            
-            // Is a possible solution so also does not depend on target 
-            ASSERT( p.second->IsIndependentOf( target ) );        
-            
             // NotOperators should have been removed from condition
             ASSERT( !dynamic_pointer_cast<NotOperator>( p.first ) );
+
+            // Is a possible solution so also does not depend on target 
+            ASSERT( p.second->IsIndependentOf( target ) );                    
         }
     }
 #endif
@@ -38,9 +35,15 @@ shared_ptr<SymbolExpression> BooleanOperator::TrySolveFor( shared_ptr<SymbolVari
     for( pair< shared_ptr<BooleanExpression>, 
                shared_ptr<SymbolExpression> > posp : psol[true] ) // all entries for positive sense
     {
+        if( !posp.first->IsIndependentOf( target ) )
+            continue; // keys are now allowed to be dependent on target, but we can't use them here
+            
         for( pair< shared_ptr<BooleanExpression>, 
                    shared_ptr<SymbolExpression> > negp : psol[false] ) // all entries for negative sense
         {
+            if( !negp.first->IsIndependentOf( target ) )
+                continue; // keys are now allowed to be dependent on target, but we can't use them here
+
             if( OrderCompare( posp.first, negp.first ) == EQUAL ) // same expression
                 return make_shared<ConditionalOperator>( posp.first, posp.second, negp.second );
         }
@@ -55,9 +58,6 @@ void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<SymbolVariable> targe
                                                 shared_ptr<BooleanExpression> key, 
                                                 shared_ptr<BooleanExpression> val_unsolved ) const
 {
-    if( !key->IsIndependentOf( target ) )
-        return; // Can't use key, would need target to be able to evaluate
-    
     // Try solving value for target
     shared_ptr<SymbolExpression> val = val_unsolved->TrySolveFor(target);
     if( !val )
@@ -326,7 +326,7 @@ BooleanExpression::PartialSolution BoolEqualOperator::PartialSolveFor( shared_pt
 
 string BoolEqualOperator::Render() const
 {
-    return RenderForMe(a) + " == " + RenderForMe(b);
+    return RenderForMe(a) + " iff " + RenderForMe(b);
 }
 
 
