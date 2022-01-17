@@ -43,30 +43,24 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 
 shared_ptr<SymbolExpression> EqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
 {
-    shared_ptr<SymbolExpression> dep_op, indep_op;
-    for( shared_ptr<SymbolExpression> op : list<shared_ptr<SymbolExpression>>{a, b} )
+    shared_ptr<SymbolExpression> indep_op;
+    bool found_me = false;
+    for( auto op : list<shared_ptr<SymbolExpression>>{a, b} )
     {
-        if( op->IsIndependentOf( target ) )
+        bool indep = op->IsIndependentOf( target );
+        bool is_me = (OrderCompare( op, target ) == EQUAL);
+        ASSERT( !(indep && is_me) ); 
+        if( indep )
             indep_op = op;
-        else
-            dep_op = op;                  
+        if( is_me )
+            found_me = true;                  
     }
     
-    if( !indep_op || !dep_op )
-        return nullptr; // need at least one
-                
-    // TODO should be "can dep_op be solved to equal indep_op wrt target"? See #466
-    if( auto dep_sv = dynamic_pointer_cast<SymbolVariable>( dep_op ) ) 
-    {
-        // We already know dep_op is not independent of target. If it's also a 
-        // SymbolVariable then it must be the target.        
-        ASSERT( dep_sv->GetPatternLink()==target->GetPatternLink() );
+    if( found_me )
         return indep_op;
-    }
-    
-    return nullptr;
+    else
+        return nullptr;
 }
-
 
 
 string EqualOperator::Render() const

@@ -103,6 +103,7 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
+    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const override;
     virtual PartialSolution PartialSolveFor( shared_ptr<SymbolVariable> target ) const;    
 
     virtual string Render() const override;

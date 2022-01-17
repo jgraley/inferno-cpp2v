@@ -41,7 +41,6 @@ public:
     explicit SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
-    virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const override;
     SR::PatternLink GetPatternLink() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 

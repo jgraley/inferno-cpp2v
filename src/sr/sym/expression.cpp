@@ -1,4 +1,5 @@
 #include "expression.hpp"
+#include "primary_expressions.hpp"
 
 using namespace SYM;
 
@@ -59,6 +60,9 @@ shared_ptr<SymbolExpression> Expression::TrySolveFor( shared_ptr<SymbolVariable>
 
 bool Expression::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
 {
+    if( OrderCompare( this, target.get() ) == EQUAL )
+        return false;
+        
     // When we extend to allow target to be any Expression, we'll want
     // do do an expression compare in here (which means we need expression 
     // compare) before the loop, and we'll remove the overload in 

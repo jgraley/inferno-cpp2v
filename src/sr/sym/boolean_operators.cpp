@@ -313,6 +313,28 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
+shared_ptr<SymbolExpression> BoolEqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+{
+    shared_ptr<BooleanExpression> indep_op;
+    bool found_me = false;
+    for( auto op : list<shared_ptr<BooleanExpression>>{a, b} )
+    {
+        bool indep = op->IsIndependentOf( target );
+        bool is_me = (OrderCompare( op, target ) == EQUAL);        
+        ASSERT( !(indep && is_me) ); 
+        if( indep )
+            indep_op = op;
+        if( is_me )
+            found_me = true;                  
+    }
+    
+   // if( found_me )
+   //     return indep_op;
+   // else
+        return nullptr;
+}
+
+
 BooleanExpression::PartialSolution BoolEqualOperator::PartialSolveFor( shared_ptr<SymbolVariable> target ) const
 {
     PartialSolution psol;
