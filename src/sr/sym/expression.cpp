@@ -61,7 +61,7 @@ shared_ptr<SymbolExpression> Expression::TrySolveFor( shared_ptr<SymbolVariable>
 bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
     if( OrderCompare( this, target.get() ) == EQUAL )
-        return false;
+        return false; // we ARE the target, so not independent.
         
     for( shared_ptr<Expression> op : GetOperands() )
     {
@@ -69,7 +69,7 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
             return false; // an operand may not be, so we may not be.
     }
 
-    return true; // all operands are independent of target
+    return true; // all operands are independent of target.
 }
 
 
