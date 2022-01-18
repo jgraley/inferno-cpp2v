@@ -15,8 +15,8 @@ namespace SYM
 class BooleanOperator : public BooleanToBooleanExpression
 {
 protected:
-    virtual shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                       shared_ptr<BooleanExpression> to_equal ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<BooleanExpression> to_equal ) const override;
     
     // Helper function for various bool nodes that generate implications. Tries to 
     // add them to psol if they meet the required conditions, solves for value and
@@ -58,8 +58,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                       shared_ptr<BooleanExpression> to_equal ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<BooleanExpression> to_equal ) const override;
     virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
@@ -105,8 +105,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                       shared_ptr<BooleanExpression> to_equal ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<BooleanExpression> to_equal ) const override;
     virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;

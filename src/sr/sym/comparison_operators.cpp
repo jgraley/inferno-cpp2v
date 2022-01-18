@@ -41,8 +41,8 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> EqualOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                          shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                            shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );

@@ -124,6 +124,24 @@ string Expression::GetTrace() const
 shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {
+    // Make sure any solution is independent of target
+    if( !to_equal->IsIndependentOf( target ) )
+        return nullptr;
+        
+    // To solve: (this given target) == to_equal
+    // So, if this===target then trivial solution: 
+    // target==to_equal and to_equal is solution wrt target
+    if( OrderCompare( this, target.get() ) == EQUAL )
+        return to_equal;
+    
+    // Well that didn't work, try for non-trivial solutions
+    return TrySolveForToEqualNT( target, to_equal );
+}
+
+
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                shared_ptr<BooleanExpression> to_equal ) const
+{
     return nullptr;
 }
 

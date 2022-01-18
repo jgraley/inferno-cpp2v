@@ -11,8 +11,8 @@ using namespace SYM;
 
 // ------------------------- BooleanOperator --------------------------
 
-shared_ptr<Expression> BooleanOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                            shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> BooleanOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                              shared_ptr<BooleanExpression> to_equal ) const
 {
     INDENT("T");
 
@@ -224,8 +224,8 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> AndOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                        shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> AndOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                          shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
@@ -244,8 +244,9 @@ shared_ptr<Expression> AndOperator::TrySolveForToEqual( shared_ptr<Expression> t
     // is not overridden and therefore called directly. It tries to generate a solution
     // from that operator's partial solution. Here, though, we intercept in case we could
     // get a solution from a clause, and only resort to partials if that fails.
-    return BooleanOperator::TrySolveForToEqual( target,
-                                                make_shared<BooleanConstant>(true) );
+    // Note: go to NT version to avoid indefinite recursion (it's OK because we're
+    // just forwarding and BooleanExpression:TSFTE() already had a go).
+    return BooleanOperator::TrySolveForToEqualNT( target, to_equal );
 }
 
 
@@ -393,31 +394,26 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> BoolEqualOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                              shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> BoolEqualOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
     if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
         return nullptr;
-
-    shared_ptr<BooleanExpression> indep_op;
-    bool found_me = false;
-    for( auto op : list<shared_ptr<BooleanExpression>>{a, b} )
-    {
-        bool indep = op->IsIndependentOf( target );
-        bool is_me = (OrderCompare( op, target ) == EQUAL);        
-        ASSERT( !(indep && is_me) ); 
-        if( indep )
-            indep_op = op;
-        if( is_me )
-            found_me = true;                  
-    }
+        
+    // This is already an equals operator, so very close to the semantics of
+    // TrySolveForToEqual() - we just need to try it both ways around
     
-    if( found_me )
-        return indep_op;
-    else
-        return nullptr;
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, b );
+    if( a_solution )
+        return a_solution;
+    
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, a );
+    if( b_solution )
+        return b_solution;
+    
+    return nullptr;
 }
 
 

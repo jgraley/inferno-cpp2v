@@ -27,8 +27,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResult>> &op_results ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
-                                                       shared_ptr<BooleanExpression> to_equal ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<BooleanExpression> to_equal ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
