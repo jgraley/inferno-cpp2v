@@ -43,8 +43,9 @@ public:
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
     SR::PatternLink GetPatternLink() const;
 
-    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;
+    // Note: no TrySolveForToEqualNT() because trivial solver is sufficient
+    Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                         OrderProperty order_property ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

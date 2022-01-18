@@ -52,12 +52,6 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
-shared_ptr<Expression> Expression::TrySolveFor( shared_ptr<Expression> target ) const
-{
-    return nullptr;
-}
-
-
 bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
     if( OrderCompare( this, target.get() ) == EQUAL )
@@ -127,6 +121,12 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
+shared_ptr<Expression> BooleanExpression::TrySolveFor( shared_ptr<Expression> target ) const
+{
+    return nullptr;
+}
+
+
 BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     // Could implement this in terms of TrySolveFor() but since BooleanOperator::TrySolveFor()
@@ -136,6 +136,29 @@ BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_pt
 }
 
 // ------------------------- SymbolExpression --------------------------
+
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                             shared_ptr<SymbolExpression> to_equal ) const
+{
+    // Make sure any solution is independent of target
+    if( !to_equal->IsIndependentOf( target ) )
+        return nullptr;
+        
+    // To solve: (this given target) == to_equal
+    // So, if this===target then trivial solution: 
+    // target==to_equal and to_equal is solution wrt target
+    if( OrderCompare( this, target.get() ) == EQUAL )
+        return to_equal;
+    
+    // Well that didn't work, try for non-trivial solutions
+    return TrySolveForToEqualNT( target, to_equal );
+}                                                             
+
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                               shared_ptr<SymbolExpression> to_equal ) const
+{
+    return nullptr;
+}
 
 // ------------------------- BooleanToBooleanExpression --------------------------
 

@@ -87,11 +87,11 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ChildOperator --------------------------
 
-shared_ptr<Expression> ChildOperator::TrySolveFor( shared_ptr<Expression> target ) const
+/*shared_ptr<Expression> ChildOperator::TrySolveFor( shared_ptr<Expression> target ) const
 {
     // Hint: it's ParentOperator!!
     return nullptr;     // Awaits #466
-}
+}*/
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 

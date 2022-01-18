@@ -93,7 +93,6 @@ public:
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
     
-    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const;
     bool IsIndependentOf( shared_ptr<Expression> target ) const;
     using Orderable::OrderCompare;
     static Orderable::Result OrderCompare( shared_ptr<const Expression> l, 
@@ -128,6 +127,8 @@ public:
 
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
     
+    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const;
+
     // Not a "try" because always "succeeds" (even though the map amy be empty)
     virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 };
@@ -139,6 +140,11 @@ class SymbolExpression : public Expression
 {    
 public:
     virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0;
+    
+    shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
+                                               shared_ptr<SymbolExpression> to_equal ) const;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const;
 };
 
 // ------------------------- BooleanToBooleanExpression --------------------------

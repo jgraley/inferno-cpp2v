@@ -44,7 +44,7 @@ private:
 class ChildOperator : public ItemiseToSymbolOperator
 {
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const override;
+    //virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const override;
 };
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
