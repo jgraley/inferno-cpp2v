@@ -33,7 +33,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     virtual string GetItemTypeName() const = 0;
     
-private:
+protected:
     const TreePtr<Node> archetype_node;
     const int item_index;
     const shared_ptr<SymbolExpression> a;
@@ -44,7 +44,8 @@ private:
 class ChildOperator : public ItemiseToSymbolOperator
 {
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    //virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const;
 };
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
@@ -163,6 +164,21 @@ public:
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const override;
+    virtual string GetKnowledgeName() const override;
+};
+
+// ------------------------- MySequencePredecessorOperator --------------------------
+
+class MySequencePredecessorOperator : public KnowledgeToSymbolOperator
+{
+public:    
+    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                           const SR::TheKnowledge::Nugget &nugget ) const override;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const override;
     virtual string GetKnowledgeName() const override;
 };
 

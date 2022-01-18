@@ -87,11 +87,13 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ChildOperator --------------------------
 
-/*shared_ptr<Expression> ChildOperator::TrySolveFor( shared_ptr<Expression> target ) const
-{
-    // Hint: it's ParentOperator!!
-    return nullptr;     // Awaits #466
-}*/
+shared_ptr<Expression> ChildOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                            shared_ptr<SymbolExpression> to_equal ) const
+{   
+    // ParentOperator uniquely inverts all the ChildOperators
+    auto a_to_equal = make_shared<ParentOperator>( to_equal );
+    return a->TrySolveForToEqual( target, a_to_equal );
+}
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
@@ -304,8 +306,39 @@ SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xli
 }
 
 
+shared_ptr<Expression> MySequenceSuccessorOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                          shared_ptr<SymbolExpression> to_equal ) const
+{   
+    // Predecessor and successors are inverse of each other
+    auto a_to_equal = make_shared<MySequencePredecessorOperator>( to_equal );
+    return a->TrySolveForToEqual( target, a_to_equal );
+}
+
+
 string MySequenceSuccessorOperator::GetKnowledgeName() const
 {
     return "MySeqSuccessor";
 }
 
+// ------------------------- MySequencePredecessorOperator --------------------------
+
+SR::XLink MySequencePredecessorOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
+                                                              const SR::TheKnowledge::Nugget &nugget ) const
+{  
+    return nugget.my_sequence_predecessor;
+}
+
+
+shared_ptr<Expression> MySequencePredecessorOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                            shared_ptr<SymbolExpression> to_equal ) const
+{   
+    // Predecessor and successors are inverse of each other
+    auto a_to_equal = make_shared<MySequenceSuccessorOperator>( to_equal );
+    return a->TrySolveForToEqual( target, a_to_equal );
+}
+
+
+string MySequencePredecessorOperator::GetKnowledgeName() const
+{
+    return "MySeqPredecessor";
+}
