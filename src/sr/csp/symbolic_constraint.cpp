@@ -38,7 +38,7 @@ void SymbolicConstraint::Plan::DetermineVariables()
 
 void SymbolicConstraint::Plan::DetermineHintExpressions()
 {
-    FTRACE("Trying to solve:\n")(consistency_expression->Render())("\n")
+    TRACE("Trying to solve:\n")(consistency_expression->Render())("\n")
          ("For variables:\n")(variables)("\n");
             
     for( VariableId v : variables )
@@ -47,7 +47,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
         shared_ptr<SYM::SymbolExpression> he = SYM::SymSolver(v_expr).TrySolve(consistency_expression);
         if( he )
         {
-            FTRACEC("Solved for variable: ")(v)
+            TRACEC("Solved for variable: ")(v)
                   ("\nSolution:\n")(he->Render())("\n");
             hint_expressions[v] = he; // only store good ones in the map            
         }
