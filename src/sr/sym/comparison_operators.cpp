@@ -458,7 +458,7 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
 
 string EquivalentOperator::Render() const
 {
-    return "Equivalent(" + a->Render() + ", " + b->Render() + ")";
+    return RenderForMe(a) + " ≡ " + RenderForMe(b);
 }
 
 

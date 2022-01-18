@@ -74,7 +74,10 @@ public:
     explicit operator bool() const;
     TreePtr<Node> GetChildX() const;
     const TreePtrInterface *GetXPtr() const;
+    
     string GetTrace() const; // used for debug
+    string GetName() const;
+    string GetShortName() const;
 
 private: friend class LocatedLink;
     XLink( shared_ptr<const TreePtrInterface> px,
@@ -118,7 +121,10 @@ public:
     void SetX( const XLink &xlink );
     void SetPattern( const PatternLink &plink );
     explicit operator PatternLink() const;
+    
     string GetTrace() const; // used for debug
+    string GetName() const;
+    string GetShortName() const;
 
 private: friend class PatternLink; friend class XLink;
     PatternLink plink;

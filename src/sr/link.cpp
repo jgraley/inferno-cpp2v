@@ -150,7 +150,7 @@ string PatternLink::GetTrace() const
 
 string PatternLink::GetName() const
 {
-    string s = GetShortName() + "->";
+    string s = GetSerialString() + "->";
     if(asp_pattern==nullptr)
         s += "NULL";
     else
@@ -161,7 +161,12 @@ string PatternLink::GetName() const
 
 string PatternLink::GetShortName() const
 {
-    return GetSerialString();
+    string s = GetSerialString() + "->";
+    if(asp_pattern==nullptr)
+        s += "NULL";
+    else
+        s += GetChildAgent()->GetSerialString();
+    return s;
 }
 
 
@@ -266,16 +271,34 @@ const TreePtrInterface *XLink::GetXPtr() const
 }
 
 
-string XLink::GetTrace() const // used for debug
+string XLink::GetTrace() const
+{
+    string s = GetName();
+#ifdef KEEP_WHODAT_INFO    
+    s += SSPrintf("@%lX", (unsigned long)whodat);
+#endif
+    return s;
+}
+
+
+string XLink::GetName() const 
 {
     string s = GetSerialString() + "->";
     if(asp_x==nullptr)
         s += "NULL";
     else
         s += GetChildX()->GetTrace();
-#ifdef KEEP_WHODAT_INFO    
-    s += SSPrintf("@%lX", (unsigned long)whodat);
-#endif
+    return s;
+}
+
+
+string XLink::GetShortName() const 
+{
+    string s = GetSerialString() + "->";
+    if(asp_x==nullptr)
+        s += "NULL";
+    else
+        s += GetChildX()->GetSerialString();
     return s;
 }
 
@@ -399,7 +422,19 @@ LocatedLink::operator PatternLink() const
 
 string LocatedLink::GetTrace() const
 {
-    return plink.GetTrace() + string(" := ") + xlink.GetTrace();      
+    return plink.GetName() + string(" := ") + xlink.GetTrace(); // Whodat info comes from clink     
+}
+
+
+string LocatedLink::GetName() const
+{
+    return plink.GetName() + string(" := ") + xlink.GetName();      
+}
+
+
+string LocatedLink::GetShortName() const 
+{
+    return plink.GetShortName() + string(" := ") + xlink.GetShortName();      
 }
 
 //////////////////////////// free functions ///////////////////////////////

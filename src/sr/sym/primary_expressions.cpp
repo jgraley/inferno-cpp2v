@@ -46,7 +46,7 @@ Orderable::Result SymbolConstant::OrderCompareLocal( const Orderable *candidate,
 
 string SymbolConstant::Render() const
 {
-    return xlink.GetTrace();
+    return xlink.GetName();
 }
 
 
@@ -102,7 +102,7 @@ Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate,
 
 string SymbolVariable::Render() const
 {
-    return "[" + plink.GetTrace() + "]";
+    return "[" + plink.GetShortName() + "]";
 }
 
 
@@ -148,10 +148,13 @@ string BooleanConstant::Render() const
     {
     case BooleanResult::TRUE:
         return "TRUE";
+    case BooleanResult::UNDEFINED:
+        return "UNDEFINED";
     case BooleanResult::FALSE:
         return "FALSE";
-    }
-    ASSERTFAIL("Invalid matched");
+    default:
+        ASSERTFAIL("Unknown boolean value");
+    }    
 }
 
 

@@ -7,8 +7,6 @@
 #include "sym/primary_expressions.hpp"
 #include "sym/symbol_operators.hpp"
 
-//#define SYMBOLIC_DISJUNCTION
-
 using namespace SR;
 using namespace SYM;
 
@@ -149,37 +147,42 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
 
 SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImpl() const
 {
-#ifdef SYMBOLIC_DISJUNCTION
-    auto mmax_expr = MakeOver<SymbolConstant>(XLink::MMAX_Link);
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    
-    list< shared_ptr<BooleanExpression> > is_mmax_exprs, is_keyer_exprs;
-    FOREACH( const TreePtrInterface &p, GetPatterns() )           
+    if( ReadArgs::split_disjunctions )
     {
-        PatternLink c_plink(this, &p);
-        auto c_expr = MakeOver<SymbolVariable>(c_plink);
-        is_mmax_exprs.push_back( c_expr==mmax_expr );
-        is_keyer_exprs.push_back( c_expr==keyer_expr );
-    }
-
-    ASSERT( GetPatterns().size() == 2 )
-          ("Got %d choices; to support more than 2 options, enable SplitDisjunctions; fewer than 2 not allowed", GetPatterns().size());
-          
-    // This is actually the only part that's hard with more than 2 options
-    auto non_mmax_case_expr = is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
+        auto mmax_expr = MakeOver<SymbolConstant>(XLink::MMAX_Link);
+        auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
         
-    return MakeOver<BooleanConditionalOperator>( keyer_expr == mmax_expr, 
-                                                 MakeOver<AndOperator>( is_mmax_exprs ),
-                                                 non_mmax_case_expr );
-#else
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryImpl( kit.hypothesis_links,
-                                  kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".DisjuncNLQ()");	             
-#endif    
+        list< shared_ptr<BooleanExpression> > is_mmax_exprs, is_keyer_exprs;
+        FOREACH( const TreePtrInterface &p, GetPatterns() )           
+        {
+            PatternLink c_plink(this, &p);
+            auto c_expr = MakeOver<SymbolVariable>(c_plink);
+            is_mmax_exprs.push_back( c_expr==mmax_expr );
+            is_keyer_exprs.push_back( c_expr==keyer_expr );
+        }
+
+        ASSERT( GetPatterns().size() == 2 )
+              ("Got %d choices; to support more than 2 options, enable SplitDisjunctions; fewer than 2 not allowed", GetPatterns().size());
+              
+        // This is actually the only part that's hard with more than 2 options
+        auto non_mmax_case_expr = is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
+            
+        non_mmax_case_expr &= SymbolicPreRestriction(); // Don't forget the pre-restriction, applies in non-MMAX-keyer case
+        
+        return MakeOver<BooleanConditionalOperator>( keyer_expr == mmax_expr, 
+                                                     MakeOver<AndOperator>( is_mmax_exprs ),
+                                                     non_mmax_case_expr );
+    }
+    else
+    {
+        set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
+        auto nlq_lambda = [this](const Expression::EvalKit &kit)
+        {
+            RunNormalLinkedQueryImpl( kit.hypothesis_links,
+                                      kit.knowledge ); // throws on mismatch   
+        };
+        return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".DisjuncNLQ()");	             
+    } 
 }
 
 

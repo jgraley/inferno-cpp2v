@@ -43,6 +43,7 @@ public:
     static bool documentation_graphs;
     static bool output_all;
     static bool use_csp_solver;
+    static bool split_disjunctions;
     
 private:
     void ParseQuitAfter(std::string arg);
