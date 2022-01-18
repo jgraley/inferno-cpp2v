@@ -127,7 +127,8 @@ public:
 
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
     
-    virtual shared_ptr<Expression> TrySolveFor( shared_ptr<Expression> target ) const;
+    virtual shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                       shared_ptr<BooleanExpression> to_equal ) const;
 
     // Not a "try" because always "succeeds" (even though the map amy be empty)
     virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    

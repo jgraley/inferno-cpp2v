@@ -41,8 +41,14 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> EqualOperator::TrySolveFor( shared_ptr<Expression> target ) const
+shared_ptr<Expression> EqualOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                          shared_ptr<BooleanExpression> to_equal ) const
 {
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+        return nullptr;
+        
     // This is already an equals operator, so very close to the semantics of
     // TrySolveForToEqual() - we just need to try it both ways around
     

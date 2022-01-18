@@ -11,9 +11,16 @@ using namespace SYM;
 
 // ------------------------- BooleanOperator --------------------------
 
-shared_ptr<Expression> BooleanOperator::TrySolveFor( shared_ptr<Expression> target ) const
+shared_ptr<Expression> BooleanOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                            shared_ptr<BooleanExpression> to_equal ) const
 {
     INDENT("T");
+
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+        return nullptr;
+
     PartialSolution psol = PartialSolveFor( target );
     
 #ifdef SOLVE_FROM_PARTIALS_CHECKING
@@ -55,7 +62,8 @@ shared_ptr<Expression> BooleanOperator::TrySolveFor( shared_ptr<Expression> targ
             // that we can substitute for the key.
 //            FTRACEC("Substitution: trying to solve:\n")(Render())
 //                   ("\nwith respect to:\n")(found_dependent_key)("\n");
-            shared_ptr<Expression> solution = TrySolveFor( found_dependent_key );
+            shared_ptr<Expression> solution = TrySolveForToEqual( found_dependent_key,
+                                                                  make_shared<BooleanConstant>(true) );
             
             if( !solution )    
             {
@@ -117,7 +125,8 @@ void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<Expression> target,
 //           ("\nvalue unsolved: ")(val_unsolved)("\n");
            
     // Try solving value for target
-    shared_ptr<Expression> val = val_unsolved->TrySolveFor(target);
+    shared_ptr<Expression> val = val_unsolved->TrySolveForToEqual( target,
+                                                                   make_shared<BooleanConstant>(true) );
     if( !val )
     {
 //        FTRACE("No, could not solve\n");
@@ -215,11 +224,18 @@ shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> AndOperator::TrySolveFor( shared_ptr<Expression> target ) const
+shared_ptr<Expression> AndOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                        shared_ptr<BooleanExpression> to_equal ) const
 {
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+        return nullptr;
+
     // With AndOperator, solving via any clause solves the whole thing. So try that first.
     for( shared_ptr<BooleanExpression> op : sa )
-        if( shared_ptr<Expression> solution = op->TrySolveFor( target ) )
+        if( shared_ptr<Expression> solution = op->TrySolveForToEqual( target,
+                                                                      make_shared<BooleanConstant>(true) ) )
             return solution;
             
     // Didn't work so fall back to BooleanOperator's solver which will try to do it using 
@@ -228,7 +244,8 @@ shared_ptr<Expression> AndOperator::TrySolveFor( shared_ptr<Expression> target )
     // is not overridden and therefore called directly. It tries to generate a solution
     // from that operator's partial solution. Here, though, we intercept in case we could
     // get a solution from a clause, and only resort to partials if that fails.
-    return BooleanOperator::TrySolveFor( target );
+    return BooleanOperator::TrySolveForToEqual( target,
+                                                make_shared<BooleanConstant>(true) );
 }
 
 
@@ -376,8 +393,14 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> BoolEqualOperator::TrySolveFor( shared_ptr<Expression> target ) const
+shared_ptr<Expression> BoolEqualOperator::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                              shared_ptr<BooleanExpression> to_equal ) const
 {
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+        return nullptr;
+
     shared_ptr<BooleanExpression> indep_op;
     bool found_me = false;
     for( auto op : list<shared_ptr<BooleanExpression>>{a, b} )

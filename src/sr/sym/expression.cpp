@@ -121,7 +121,8 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
-shared_ptr<Expression> BooleanExpression::TrySolveFor( shared_ptr<Expression> target ) const
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                              shared_ptr<BooleanExpression> to_equal ) const
 {
     return nullptr;
 }
@@ -129,9 +130,9 @@ shared_ptr<Expression> BooleanExpression::TrySolveFor( shared_ptr<Expression> ta
 
 BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<Expression> target ) const
 {
-    // Could implement this in terms of TrySolveFor() but since BooleanOperator::TrySolveFor()
+    // Could implement this in terms of TrySolveForToEqual() but since BooleanOperator::TrySolveFor()
     // calls PartialSolveFor() we could recurse indefinitely. So instead the rule is that
-    // callers must try and use TrySolveFor() before calling PartialSolveFor()
+    // callers must try and use TrySolveForToEqual() before calling PartialSolveFor()
     return PartialSolution();
 }
 

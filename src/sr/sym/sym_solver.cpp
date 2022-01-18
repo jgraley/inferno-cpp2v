@@ -24,7 +24,8 @@ shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<BooleanExpression> 
            ("\nwith respect to: ")(target->Render())("\n");
 #endif
 
-    shared_ptr<Expression> solution = equation->TrySolveFor( target );
+    shared_ptr<Expression> solution = equation->TrySolveForToEqual( target,
+                                                                    make_shared<BooleanConstant>(true) );
 
 #ifdef FTRACE_SUCCESSES_AND_FAILURES
     if( solution )
