@@ -24,6 +24,12 @@ class SymbolExpression;
 class Result
 {
 public:
+    enum Category
+    {
+        UNDEFINED,
+        DEFINED
+    };    
+
     virtual bool IsDefinedAndUnique() const = 0;
 };
 
@@ -32,6 +38,8 @@ public:
 class BooleanResult : public Result
 {
 public:
+    // Certainty combines category and boolean value into a single
+    // value which posesses a certainty ordering property
     enum class Certainty
     {
         FALSE,
@@ -61,17 +69,12 @@ private:
 class SymbolResult : public Result
 {
 public:
-    enum BooleanCategory
-    {
-        UNDEFINED,
-        XLINK
-    };    
-    SymbolResult( BooleanCategory cat, SR::XLink xlink=SR::XLink() );
+    SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
     
     bool IsDefinedAndUnique() const override;    
 
 private:    
-    BooleanCategory cat; 
+    Category cat; 
 public:
     SR::XLink xlink;
     

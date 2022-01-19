@@ -112,7 +112,7 @@ shared_ptr<SymbolResult> ChildSequenceFrontOperator::EvalFromItem( SR::XLink par
     else
         result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
         
-    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    return make_shared<SymbolResult>( SymbolResult::DEFINED, result_xlink );
 }
 
 
@@ -136,7 +136,7 @@ shared_ptr<SymbolResult> ChildSequenceBackOperator::EvalFromItem( SR::XLink pare
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
-    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    return make_shared<SymbolResult>( SymbolResult::DEFINED, result_xlink );
 }
 
 
@@ -160,7 +160,7 @@ shared_ptr<SymbolResult> ChildCollectionFrontOperator::EvalFromItem( SR::XLink p
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
-    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    return make_shared<SymbolResult>( SymbolResult::DEFINED, result_xlink );
 }
 
 
@@ -181,7 +181,7 @@ shared_ptr<SymbolResult> ChildSingularOperator::EvalFromItem( SR::XLink parent_x
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>)
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), p_x_singular);        
-    return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+    return make_shared<SymbolResult>( SymbolResult::DEFINED, result_xlink );
 }
 
 
@@ -217,7 +217,7 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
     SR::XLink result_xlink = EvalXLinkFromNugget( ar->xlink, nugget );
     if( result_xlink ) 
-        return make_shared<SymbolResult>( SymbolResult::XLINK, result_xlink );
+        return make_shared<SymbolResult>( SymbolResult::DEFINED, result_xlink );
     else
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
 }

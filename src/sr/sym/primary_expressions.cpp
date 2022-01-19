@@ -12,13 +12,13 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 
 shared_ptr<SymbolResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<SymbolResult>( SymbolResult::XLINK, xlink );
+    return make_shared<SymbolResult>( SymbolResult::DEFINED, xlink );
 }
 
 
 shared_ptr<SymbolResult> SymbolConstant::GetValue() const
 {
-    return make_shared<SymbolResult>( SymbolResult::XLINK, xlink );
+    return make_shared<SymbolResult>( SymbolResult::DEFINED, xlink );
 }
 
 
@@ -74,7 +74,7 @@ shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
     if( kit.hypothesis_links->count(plink) == 0 )
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     else
-        return make_shared<SymbolResult>( SymbolResult::XLINK, kit.hypothesis_links->at(plink) );
+        return make_shared<SymbolResult>( SymbolResult::DEFINED, kit.hypothesis_links->at(plink) );
 }
 
 

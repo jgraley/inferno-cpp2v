@@ -52,7 +52,7 @@ bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a,
 
 // ------------------------- SymbolResult --------------------------
 
-SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
+SymbolResult::SymbolResult( Category cat_, SR::XLink xlink_ ) :
     cat( cat_ ),
     xlink( xlink_ )
 {
@@ -61,7 +61,7 @@ SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
     case UNDEFINED:
         ASSERT( !xlink );
         break;
-    case XLINK:
+    case DEFINED:
         ASSERT( xlink );
         break;
     default:
