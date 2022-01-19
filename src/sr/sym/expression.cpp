@@ -61,17 +61,16 @@ bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a,
 
 // ------------------------- SymbolResult --------------------------
 
-SymbolResult::SymbolResult( Category cat_, SR::XLink xlink_ ) :
-    cat( cat_ ),
-    xlink( xlink_ )
+SymbolResult::SymbolResult( Category cat, SR::XLink xlink_ )
 {
     switch( cat )
     {
     case UNDEFINED:
-        ASSERT( !xlink );
+        ASSERT( !xlink_ );
         break;
     case DEFINED:
-        ASSERT( xlink );
+        ASSERT( xlink_ );
+        xlink = xlink_;
         break;
     default:
         ASSERTFAIL("Missing case");
@@ -81,13 +80,13 @@ SymbolResult::SymbolResult( Category cat_, SR::XLink xlink_ ) :
 
 bool SymbolResult::IsDefinedAndUnique() const
 {
-    return cat != UNDEFINED;
+    return (bool)xlink;
 }
 
 
 SR::XLink SymbolResult::GetAsXLink() const
 {
-    ASSERT( IsDefinedAndUnique() );
+    ASSERT( xlink );
     return xlink;
 }
 

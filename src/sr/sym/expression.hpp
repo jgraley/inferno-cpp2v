@@ -38,14 +38,6 @@ public:
 class BooleanResult : public Result
 {
 public:
-    // Certainty combines category and boolean value into a single
-    // value which posesses a certainty ordering property
-    enum class Certainty
-    {
-        FALSE,
-        UNDEFINED,
-        TRUE
-    };    
     BooleanResult( Category cat, bool value = false );
 
     bool IsDefinedAndUnique() const override;    
@@ -54,13 +46,22 @@ public:
     bool GetAsBool() const;    
 
     // Present a "certainty" ordering to simplify eval with dominance
-    // effect in And and Or operators. true is bigger than undefined, 
+    // effect in And and Or operators. True is bigger than undefined, 
     // which is bigger than false.
     bool operator<( const BooleanResult &other ) const;
     static bool CertaintyCompare( const shared_ptr<BooleanResult> &a, 
                                   const shared_ptr<BooleanResult> &b );
 
 private:
+    // Certainty combines category and boolean value into a single
+    // value which posesses a certainty ordering property
+    enum class Certainty
+    {
+        FALSE,
+        UNDEFINED,
+        TRUE
+    };    
+
     Certainty certainty;
 };
 
