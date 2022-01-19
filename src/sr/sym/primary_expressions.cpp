@@ -114,7 +114,7 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 // ------------------------- BooleanConstant --------------------------
 
 BooleanConstant::BooleanConstant( bool value_ ) :
-    value( value_ ? BooleanResult::TRUE : BooleanResult::FALSE )
+    value( value_ ? BooleanResult::Certainty::TRUE : BooleanResult::Certainty::FALSE )
 {
 }
 
@@ -138,7 +138,7 @@ Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate
     auto *c = dynamic_cast<const BooleanConstant *>(candidate);    
     ASSERT(c);
 
-    return value - c->value;
+    return (int)value - (int)(c->value);
 }  
 
 
@@ -146,11 +146,11 @@ string BooleanConstant::Render() const
 {
     switch( value )
     {
-    case BooleanResult::TRUE:
+    case BooleanResult::Certainty::TRUE:
         return "TRUE";
-    case BooleanResult::UNDEFINED:
+    case BooleanResult::Certainty::UNDEFINED:
         return "UNDEFINED";
-    case BooleanResult::FALSE:
+    case BooleanResult::Certainty::FALSE:
         return "FALSE";
     default:
         ASSERTFAIL("Unknown boolean value");

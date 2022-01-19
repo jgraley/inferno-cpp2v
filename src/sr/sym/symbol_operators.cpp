@@ -30,7 +30,7 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
 
     // XLink must match our referee (i.e. be non-strict subtype)
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);
-    if( !ar->IsDefinedSingleResult() )
+    if( !ar->IsDefinedAndUnique() )
         return ar;
 
     if( !archetype_node->IsLocalMatch( ar->xlink.GetChildX().get() ) )
@@ -211,7 +211,7 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
     // Evaluate operand and ensure we got an XLink
     shared_ptr<SymbolResult> ar = OnlyElementOf(op_results);       
 
-    if( !ar->IsDefinedSingleResult() )
+    if( !ar->IsDefinedAndUnique() )
         return ar;
         
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   

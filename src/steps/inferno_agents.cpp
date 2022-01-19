@@ -163,8 +163,8 @@ shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IdentifierByNameOperator::
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SYM::SymbolResult> ra = OnlyElementOf(op_results);
-    if( !ra->IsDefinedSingleResult() )
-        return make_shared<SYM::BooleanResult>( SYM::BooleanResult::UNDEFINED );
+    if( !ra->IsDefinedAndUnique() )
+        return make_shared<SYM::BooleanResult>( SYM::BooleanResult::Certainty::UNDEFINED );
     
     TreePtr<Node> base_x = ra->xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
@@ -173,11 +173,11 @@ shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IdentifierByNameOperator::
         if( si_x->GetRender() == name )
         {
             TRACE(" : same\n");
-            return make_shared<SYM::BooleanResult>( SYM::BooleanResult::TRUE );
+            return make_shared<SYM::BooleanResult>( SYM::BooleanResult::Certainty::TRUE );
         }
         TRACE(" : different\n");
     }
-    return make_shared<SYM::BooleanResult>( SYM::BooleanResult::FALSE );
+    return make_shared<SYM::BooleanResult>( SYM::BooleanResult::Certainty::FALSE );
 }
 
 

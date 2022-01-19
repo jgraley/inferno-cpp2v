@@ -71,7 +71,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const BooleanResult::BooleanValue value;
+    const BooleanResult::Certainty value;
 };
 
 };

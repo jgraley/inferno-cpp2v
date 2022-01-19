@@ -25,8 +25,8 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 {
     ASSERT( op_results.size()==2 );
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( !ra->IsDefinedSingleResult() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        if( !ra->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
 
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
@@ -35,9 +35,9 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
     if( ra->xlink == rb->xlink )
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
+        return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
     else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );        
+        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );        
 }
 
 
@@ -46,7 +46,7 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::Certainty::TRUE )
         return nullptr;
         
     // This is already an equals operator, so very close to the semantics of
@@ -111,8 +111,8 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 {    
     ASSERT( op_results.size()==2 );
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( !ra->IsDefinedSingleResult() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        if( !ra->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
 
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
@@ -125,9 +125,9 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
     if( EvalBoolFromIndexes( index_a, index_b ) )
-        return make_shared<BooleanResult>(BooleanResult::TRUE);
+        return make_shared<BooleanResult>(BooleanResult::Certainty::TRUE);
     else
-        return make_shared<BooleanResult>(BooleanResult::FALSE);   
+        return make_shared<BooleanResult>(BooleanResult::Certainty::FALSE);   
 }
 
 
@@ -235,11 +235,11 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
                                                      const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( !ra->IsDefinedSingleResult() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        if( !ra->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
     
     // Note: could be done faster using a set<XLink>
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
+    BooleanResult::Certainty m = BooleanResult::Certainty::TRUE;
     ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResult> ra,
                                                     shared_ptr<SymbolResult> rb) 
     {    
@@ -248,7 +248,7 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
         // within the full arrowhead model (cf IndexComparisonOperator).
         if( ra->xlink == rb->xlink )
         {
-            m = BooleanResult::FALSE;
+            m = BooleanResult::Certainty::FALSE;
         }
     } );
     return make_shared<BooleanResult>( m );   
@@ -290,11 +290,11 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
-    if( !ra->IsDefinedSingleResult() )
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    if( !ra->IsDefinedAndUnique() )
+        return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
     
     bool matches = archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() );
-    return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
+    return make_shared<BooleanResult>( matches ? BooleanResult::Certainty::TRUE : BooleanResult::Certainty::FALSE );
 }
 
 
@@ -352,13 +352,13 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
 
     // Propagate undefined case
-    if( !ra->IsDefinedSingleResult() )
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    if( !ra->IsDefinedAndUnique() )
+        return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
     if( !archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() ) )
-        return make_shared<BooleanResult>(BooleanResult::FALSE); 
+        return make_shared<BooleanResult>(BooleanResult::Certainty::FALSE); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -371,9 +371,9 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
     
     // Check that the size is as required
     if( p_x_col->size() == size )
-        return make_shared<BooleanResult>(BooleanResult::TRUE);
+        return make_shared<BooleanResult>(BooleanResult::Certainty::TRUE);
     else
-        return make_shared<BooleanResult>(BooleanResult::FALSE);
+        return make_shared<BooleanResult>(BooleanResult::Certainty::FALSE);
 }
 
 
@@ -439,8 +439,8 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( !ra->IsDefinedSingleResult() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        if( !ra->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
 
     shared_ptr<SymbolResult> ra = op_results.front();
     shared_ptr<SymbolResult> rb = op_results.back();
@@ -449,9 +449,9 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
     if( equivalence_relation.Compare(ra->xlink, rb->xlink) == EQUAL  )
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
+        return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
     else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );    
+        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );    
 
 }
 
@@ -491,19 +491,19 @@ shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) con
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
     switch( ra->value )
     {   
-    case BooleanResult::FALSE:
+    case BooleanResult::Certainty::FALSE:
         return c->Evaluate(kit);
-    case BooleanResult::UNDEFINED:
+    case BooleanResult::Certainty::UNDEFINED:
         {
             shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
             shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
-            if( rb->IsDefinedSingleResult() && 
-                rc->IsDefinedSingleResult() && 
+            if( rb->IsDefinedAndUnique() && 
+                rc->IsDefinedAndUnique() && 
                 rb->xlink == rc->xlink )
                 return rb; // not ambiguous if both options are the same
             return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
         }
-    case BooleanResult::TRUE:
+    case BooleanResult::Certainty::TRUE:
         return b->Evaluate(kit);
     default:
         ASSERTFAIL("Missing case")

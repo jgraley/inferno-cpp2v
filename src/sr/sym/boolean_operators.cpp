@@ -18,7 +18,7 @@ shared_ptr<Expression> BooleanOperator::TrySolveForToEqualNT( shared_ptr<Express
 
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::Certainty::TRUE )
         return nullptr;
 
     PartialSolution psol = PartialSolveFor( target );
@@ -170,12 +170,12 @@ shared_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
     shared_ptr<BooleanResult> ra = op_results.front();
     switch( ra->value )
     {   
-    case BooleanResult::FALSE:
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    case BooleanResult::UNDEFINED:
+    case BooleanResult::Certainty::FALSE:
+        return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
+    case BooleanResult::Certainty::UNDEFINED:
         return ra;
-    case BooleanResult::TRUE:
-        return make_shared<BooleanResult>( BooleanResult::FALSE );
+    case BooleanResult::Certainty::TRUE:
+        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );
     default:
         ASSERTFAIL("Missing case")
     }    
@@ -228,7 +228,7 @@ shared_ptr<Expression> AndOperator::TrySolveForToEqualNT( shared_ptr<Expression>
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::Certainty::TRUE )
         return nullptr;
 
     // With AndOperator, solving via any clause solves the whole thing. So try that first.
@@ -379,16 +379,16 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
     shared_ptr<BooleanResult> ra = op_results.front();
     shared_ptr<BooleanResult> rb = op_results.back();
     
-    if( ra->value == BooleanResult::UNDEFINED )
+    if( ra->value == BooleanResult::Certainty::UNDEFINED )
         return ra;
         
-    if( rb->value == BooleanResult::UNDEFINED )
+    if( rb->value == BooleanResult::Certainty::UNDEFINED )
         return rb;
     
     if( ra->value == rb->value )
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
+        return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
     else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );     
+        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );     
 }
 
 
@@ -397,7 +397,7 @@ shared_ptr<Expression> BoolEqualOperator::TrySolveForToEqualNT( shared_ptr<Expre
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::TRUE )
+    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::Certainty::TRUE )
         return nullptr;
         
     // This is already an equals operator, so very close to the semantics of
@@ -466,14 +466,14 @@ shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
     shared_ptr<BooleanResult> rb = op_results.back();
     switch( ra->value )
     {   
-    case BooleanResult::FALSE:
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    case BooleanResult::UNDEFINED:
-        if( rb->value == BooleanResult::TRUE )
+    case BooleanResult::Certainty::FALSE:
+        return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
+    case BooleanResult::Certainty::UNDEFINED:
+        if( rb->value == BooleanResult::Certainty::TRUE )
             return rb;
         else
             return ra;
-    case BooleanResult::TRUE:
+    case BooleanResult::Certainty::TRUE:
         return rb;
     default:
         ASSERTFAIL("Missing case")
@@ -526,17 +526,17 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
     switch( ra->value )
     {   
-    case BooleanResult::FALSE:
+    case BooleanResult::Certainty::FALSE:
         return c->Evaluate(kit);
-    case BooleanResult::UNDEFINED:
+    case BooleanResult::Certainty::UNDEFINED:
         {
             shared_ptr<BooleanResult> rb = b->Evaluate(kit);   
             shared_ptr<BooleanResult> rc = c->Evaluate(kit);   
             if( rb->value == rc->value )
                 return rb; // not ambiguous if both options are the same
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+            return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
         }
-    case BooleanResult::TRUE:
+    case BooleanResult::Certainty::TRUE:
         return b->Evaluate(kit);
     default:
         ASSERTFAIL("Missing case")

@@ -5,15 +5,15 @@ using namespace SYM;
 
 // ------------------------- BooleanResult --------------------------
 
-BooleanResult::BooleanResult( BooleanValue value_ ) :
+BooleanResult::BooleanResult( Certainty value_ ) :
     value( value_ )
 {
 }
 
 
-bool BooleanResult::IsDefinedSingleResult() const
+bool BooleanResult::IsDefinedAndUnique() const
 {
-    return value != UNDEFINED;
+    return value != Certainty::UNDEFINED;
 }
 
 
@@ -33,11 +33,6 @@ bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a,
 
 // ------------------------- SymbolResult --------------------------
 
-SymbolResult::SymbolResult() :
-    cat( UNDEFINED )
-{
-}
-
 SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
     cat( cat_ ),
     xlink( xlink_ )
@@ -56,7 +51,7 @@ SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
 }
 
 
-bool SymbolResult::IsDefinedSingleResult() const
+bool SymbolResult::IsDefinedAndUnique() const
 {
     return cat != UNDEFINED;
 }
