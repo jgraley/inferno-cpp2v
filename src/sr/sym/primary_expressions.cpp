@@ -114,20 +114,20 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 // ------------------------- BooleanConstant --------------------------
 
 BooleanConstant::BooleanConstant( bool value_ ) :
-    value( value_ ? BooleanResult::Certainty::TRUE : BooleanResult::Certainty::FALSE )
+    value( value_ )
 {
 }
 
 
 shared_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<BooleanResult>( value );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, value );
 }
 
 
 shared_ptr<BooleanResult> BooleanConstant::GetValue() const
 {
-    return make_shared<BooleanResult>( value );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, value );
 }
 
 
@@ -138,23 +138,13 @@ Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate
     auto *c = dynamic_cast<const BooleanConstant *>(candidate);    
     ASSERT(c);
 
-    return (int)value - (int)(c->value);
+    return value - c->value;
 }  
 
 
 string BooleanConstant::Render() const
 {
-    switch( value )
-    {
-    case BooleanResult::Certainty::TRUE:
-        return "TRUE";
-    case BooleanResult::Certainty::UNDEFINED:
-        return "UNDEFINED";
-    case BooleanResult::Certainty::FALSE:
-        return "FALSE";
-    default:
-        ASSERTFAIL("Unknown boolean value");
-    }    
+    return value ? "TRUE" : "FALSE";
 }
 
 

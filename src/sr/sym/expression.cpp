@@ -5,9 +5,20 @@ using namespace SYM;
 
 // ------------------------- BooleanResult --------------------------
 
-BooleanResult::BooleanResult( Certainty certainty_ ) :
-    certainty( certainty_ )
+BooleanResult::BooleanResult( Category cat, bool value )
 {
+    switch( cat )
+    {
+    case UNDEFINED:
+        ASSERT( !value );
+        certainty = Certainty::UNDEFINED;
+        break;
+    case DEFINED:        
+        certainty = value ? Certainty::TRUE : Certainty::FALSE;
+        break;
+    default:
+        ASSERTFAIL("Missing case");
+    }
 }
 
 
@@ -47,8 +58,6 @@ bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a,
 {
     return *a < *b;
 }                                      
-
-
 
 // ------------------------- SymbolResult --------------------------
 

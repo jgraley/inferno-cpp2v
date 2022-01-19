@@ -74,11 +74,11 @@ shared_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
     if( dirty_grass->count( ra->xlink.GetChildX() ) > 0 ) 
-        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );         
-    return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );         
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
 }
 
 

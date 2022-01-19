@@ -172,11 +172,11 @@ shared_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
     {
         if( ra->GetAsBool() ) // TRUE
         {
-            return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
         }
         else // FALSE
         {
-            return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
         }
     }
     else // UNDEFINED
@@ -390,9 +390,9 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
         return rb;
     
     if( ra->GetAsBool() == rb->GetAsBool() )
-        return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
     else
-        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );     
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );     
 }
 
 
@@ -476,7 +476,7 @@ shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
         }
         else // FALSE
         {
-            return make_shared<BooleanResult>( BooleanResult::Certainty::TRUE );
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
         }
     }
     else // UNDEFINED
@@ -551,7 +551,7 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
             rc->IsDefinedAndUnique() && 
             rb->GetAsBool() == rc->GetAsBool() )
             return rb; // not ambiguous if both options are the same
-        return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     }
 }
 

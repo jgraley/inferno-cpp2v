@@ -46,7 +46,7 @@ public:
         UNDEFINED,
         TRUE
     };    
-    BooleanResult( Certainty certainty_ );
+    BooleanResult( Category cat, bool value = false );
 
     bool IsDefinedAndUnique() const override;    
     bool IsDefinedAndTrue() const;    

@@ -141,21 +141,21 @@ shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
 
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::Certainty::UNDEFINED );
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     auto x_ci = dynamic_cast<ContainerInterface *>(ra->xlink.GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->xlink.GetChildX());
 
     // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
-        return make_shared<BooleanResult>( BooleanResult::Certainty::FALSE );
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
     
     // Check pre-restriction
     bool matches = true;
     FOREACH( const TreePtrInterface &xe, *x_ci )
         matches = matches & archetype_node->IsLocalMatch( ((TreePtr<Node>)xe).get() );            
 
-    return make_shared<BooleanResult>( matches ? BooleanResult::Certainty::TRUE : BooleanResult::Certainty::FALSE );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, matches );
 }                                   
 
          

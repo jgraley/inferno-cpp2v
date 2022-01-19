@@ -27,11 +27,11 @@ shared_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
     try
     {
         lambda(kit); // throws on mismatch
-        return make_shared<BooleanResult>(BooleanResult::Certainty::TRUE);
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
     }
     catch( const ::Mismatch &e )
     {
-        return make_shared<BooleanResult>(BooleanResult::Certainty::FALSE);
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
     }
 }
 
