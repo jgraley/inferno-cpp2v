@@ -17,6 +17,25 @@ bool BooleanResult::IsDefinedAndUnique() const
 }
 
 
+bool BooleanResult::IsDefinedAndTrue() const
+{
+    return value == Certainty::TRUE;
+}
+
+
+bool BooleanResult::IsDefinedAndFalse() const
+{
+    return value == Certainty::FALSE;
+}
+
+   
+bool BooleanResult::GetAsBool() const
+{
+    ASSERT( IsDefinedAndUnique() );
+    return value == Certainty::TRUE;
+}
+
+
 bool BooleanResult::operator<( const BooleanResult &other ) const
 {
     return value < other.value;

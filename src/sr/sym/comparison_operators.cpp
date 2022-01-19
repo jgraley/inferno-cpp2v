@@ -46,7 +46,7 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || to_equal_bc->GetValue()->value != BooleanResult::Certainty::TRUE )
+    if( !to_equal_bc || !to_equal_bc->GetValue()->IsDefinedAndTrue() )
         return nullptr;
         
     // This is already an equals operator, so very close to the semantics of
@@ -489,25 +489,27 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
-    switch( ra->value )
-    {   
-    case BooleanResult::Certainty::FALSE:
-        return c->Evaluate(kit);
-    case BooleanResult::Certainty::UNDEFINED:
+    if( ra->IsDefinedAndUnique() )
+    {
+        if( ra->GetAsBool() ) // TRUE
         {
-            shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
-            shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
-            if( rb->IsDefinedAndUnique() && 
-                rc->IsDefinedAndUnique() && 
-                rb->xlink == rc->xlink )
-                return rb; // not ambiguous if both options are the same
-            return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+            return b->Evaluate(kit);
         }
-    case BooleanResult::Certainty::TRUE:
-        return b->Evaluate(kit);
-    default:
-        ASSERTFAIL("Missing case")
-    }  
+        else // FALSE
+        {
+            return c->Evaluate(kit);
+        }
+    }
+    else // UNDEFINED
+    {
+        shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
+        shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
+        if( rb->IsDefinedAndUnique() && 
+            rc->IsDefinedAndUnique() && 
+            rb->xlink == rc->xlink )
+            return rb; // not ambiguous if both options are the same
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+    }
 }
 
 

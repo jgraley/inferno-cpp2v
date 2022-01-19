@@ -41,6 +41,9 @@ public:
     BooleanResult( Certainty value );
 
     bool IsDefinedAndUnique() const override;    
+    bool IsDefinedAndTrue() const;    
+    bool IsDefinedAndFalse() const;    
+    bool GetAsBool() const;    
 
     // Present a "certainty" ordering to simplify eval with dominance
     // effect in And and Or operators. true is bigger than undefined, 
@@ -49,6 +52,7 @@ public:
     static bool CertaintyCompare( const shared_ptr<BooleanResult> &a, 
                                   const shared_ptr<BooleanResult> &b );
 
+private:
     Certainty value;
 };
 
