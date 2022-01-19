@@ -163,7 +163,7 @@ shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IdentifierByNameOperator::
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SYM::SymbolResult> ra = OnlyElementOf(op_results);
-    if( ra->cat == SYM::SymbolResult::UNDEFINED )
+    if( !ra->IsDefinedSingleResult() )
         return make_shared<SYM::BooleanResult>( SYM::BooleanResult::UNDEFINED );
     
     TreePtr<Node> base_x = ra->xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27

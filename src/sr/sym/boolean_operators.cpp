@@ -216,11 +216,10 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<BooleanResult>> &op_results ) const
 {
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    for( const shared_ptr<BooleanResult> &r : op_results )    
-        m = min( m, r->value );
-        
-    return make_shared<BooleanResult>( m );
+    // Lower certainly dominates
+    return *min_element( op_results.begin(), 
+                         op_results.end(), 
+                         BooleanResult::CertaintyCompare );
 }
 
 
@@ -309,11 +308,10 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResult>> &op_results ) const
 {
-    BooleanResult::BooleanValue m = BooleanResult::FALSE;
-    for( const shared_ptr<BooleanResult> &r : op_results )
-        m = max( m, r->value );
-
-    return make_shared<BooleanResult>( m );
+    // Higher certainly dominates
+    return *max_element( op_results.begin(), 
+                         op_results.end(), 
+                         BooleanResult::CertaintyCompare );
 }
 
 

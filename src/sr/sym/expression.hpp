@@ -23,6 +23,8 @@ class SymbolExpression;
 
 class Result
 {
+public:
+    virtual bool IsDefinedSingleResult() const = 0;
 };
 
 // ------------------------- BooleanResult --------------------------
@@ -37,6 +39,16 @@ public:
         TRUE
     };    
     BooleanResult( BooleanValue value );
+
+    bool IsDefinedSingleResult() const override;    
+
+    // Present a "certainty" ordering to simplify eval with dominance
+    // effect in And and Or operators. true is bigger than undefined, 
+    // which is bigger than false.
+    bool operator<( const BooleanResult &other ) const;
+    static bool CertaintyCompare( const shared_ptr<BooleanResult> &a, 
+                                  const shared_ptr<BooleanResult> &b );
+
     BooleanValue value;
 };
 
@@ -52,9 +64,16 @@ public:
     };    
     SymbolResult();
     SymbolResult( BooleanCategory cat, SR::XLink xlink=SR::XLink() );
+    
+    bool IsDefinedSingleResult() const override;    
+
+private:    
     BooleanCategory cat; 
+public:
     SR::XLink xlink;
+    
 };
+
 
 // ------------------------- Expression --------------------------
 

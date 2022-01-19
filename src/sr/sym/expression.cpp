@@ -10,6 +10,27 @@ BooleanResult::BooleanResult( BooleanValue value_ ) :
 {
 }
 
+
+bool BooleanResult::IsDefinedSingleResult() const
+{
+    return value != UNDEFINED;
+}
+
+
+bool BooleanResult::operator<( const BooleanResult &other ) const
+{
+    return value < other.value;
+}
+
+
+bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a, 
+                                      const shared_ptr<BooleanResult> &b )
+{
+    return *a < *b;
+}                                      
+
+
+
 // ------------------------- SymbolResult --------------------------
 
 SymbolResult::SymbolResult() :
@@ -32,6 +53,12 @@ SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
     default:
         ASSERTFAIL("Missing case");
     }
+}
+
+
+bool SymbolResult::IsDefinedSingleResult() const
+{
+    return cat != UNDEFINED;
 }
 
 // ------------------------- Expression --------------------------

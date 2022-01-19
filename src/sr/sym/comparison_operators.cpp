@@ -25,7 +25,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 {
     ASSERT( op_results.size()==2 );
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+        if( !ra->IsDefinedSingleResult() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     shared_ptr<SymbolResult> ra = op_results.front();
@@ -111,7 +111,7 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 {    
     ASSERT( op_results.size()==2 );
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+        if( !ra->IsDefinedSingleResult() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     shared_ptr<SymbolResult> ra = op_results.front();
@@ -235,7 +235,7 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
                                                      const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+        if( !ra->IsDefinedSingleResult() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
     // Note: could be done faster using a set<XLink>
@@ -290,7 +290,7 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
-    if( ra->cat == SymbolResult::UNDEFINED )
+    if( !ra->IsDefinedSingleResult() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
     bool matches = archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() );
@@ -352,7 +352,7 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
 
     // Propagate undefined case
-    if( ra->cat == SymbolResult::UNDEFINED )
+    if( !ra->IsDefinedSingleResult() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     // XLink must match our referee (i.e. be non-strict subtype)
@@ -439,7 +439,7 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResult>> &op_results ) const 
 {
     for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+        if( !ra->IsDefinedSingleResult() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     shared_ptr<SymbolResult> ra = op_results.front();
@@ -497,8 +497,8 @@ shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) con
         {
             shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
             shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
-            if( rb->cat==SymbolResult::XLINK && 
-                rc->cat==SymbolResult::XLINK && 
+            if( rb->IsDefinedSingleResult() && 
+                rc->IsDefinedSingleResult() && 
                 rb->xlink == rc->xlink )
                 return rb; // not ambiguous if both options are the same
             return make_shared<SymbolResult>( SymbolResult::UNDEFINED );

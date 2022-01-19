@@ -95,7 +95,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
-    if( !hint_result || hint_result->cat == SYM::SymbolResult::UNDEFINED )
+    if( !hint_result || !hint_result->IsDefinedSingleResult() )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
           
     // Testing hint by evaluating using consistency expression with hint substituted over original value

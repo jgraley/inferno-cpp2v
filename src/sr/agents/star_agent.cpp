@@ -140,7 +140,7 @@ shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
 
-    if( ra->cat == SymbolResult::UNDEFINED )
+    if( !ra->IsDefinedSingleResult() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     auto x_ci = dynamic_cast<ContainerInterface *>(ra->xlink.GetChildX().get());
