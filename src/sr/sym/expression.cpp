@@ -84,6 +84,13 @@ bool SymbolResult::IsDefinedAndUnique() const
     return cat != UNDEFINED;
 }
 
+
+SR::XLink SymbolResult::GetAsXLink() const
+{
+    ASSERT( IsDefinedAndUnique() );
+    return xlink;
+}
+
 // ------------------------- Expression --------------------------
 
 list<shared_ptr<Expression>> Expression::GetOperands() const

@@ -34,7 +34,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
-    if( ra->xlink == rb->xlink )
+    if( ra->GetAsXLink() == rb->GetAsXLink() )
         return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
     else
         return make_shared<BooleanResult>( BooleanResult::DEFINED, false );        
@@ -119,8 +119,8 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
-    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->xlink) );   
-    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->xlink) );   
+    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->GetAsXLink()) );   
+    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->GetAsXLink()) );   
     SR::TheKnowledge::IndexType index_a = nugget_a.depth_first_index;
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
@@ -246,7 +246,7 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model (cf IndexComparisonOperator).
-        if( ra->xlink == rb->xlink )
+        if( ra->GetAsXLink() == rb->GetAsXLink() )
         {
             m = false;
         }
@@ -293,7 +293,7 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
     if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
-    bool matches = archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() );
+    bool matches = archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() );
     return make_shared<BooleanResult>( BooleanResult::DEFINED, matches );
 }
 
@@ -357,12 +357,12 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() ) )
+    if( !archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() ) )
         return make_shared<BooleanResult>( BooleanResult::DEFINED, false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->GetAsXLink().GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
@@ -448,7 +448,7 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
-    if( equivalence_relation.Compare(ra->xlink, rb->xlink) == EQUAL  )
+    if( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL  )
         return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
     else
         return make_shared<BooleanResult>( BooleanResult::DEFINED, false );    
@@ -506,7 +506,7 @@ shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) con
         shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
         if( rb->IsDefinedAndUnique() && 
             rc->IsDefinedAndUnique() && 
-            rb->xlink == rc->xlink )
+            rb->GetAsXLink() == rc->GetAsXLink() )
             return rb; // not ambiguous if both options are the same
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     }

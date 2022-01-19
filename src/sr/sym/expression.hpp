@@ -72,12 +72,11 @@ public:
     SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
     
     bool IsDefinedAndUnique() const override;    
+    SR::XLink GetAsXLink() const;    
 
 private:    
     Category cat; 
-public:
     SR::XLink xlink;
-    
 };
 
 

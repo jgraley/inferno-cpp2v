@@ -166,7 +166,7 @@ shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IdentifierByNameOperator::
     if( !ra->IsDefinedAndUnique() )
         return make_shared<SYM::BooleanResult>( SYM::BooleanResult::UNDEFINED );
     
-    TreePtr<Node> base_x = ra->xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
+    TreePtr<Node> base_x = ra->GetAsXLink().GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
         TRACE("Comparing ")(si_x->GetRender())(" with ")(name);

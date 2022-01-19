@@ -101,13 +101,13 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     // Testing hint by evaluating using consistency expression with hint substituted over original value
     SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
     SR::XLink prev_xlink = *p_current_assignment;
-    *p_current_assignment = hint_result->xlink;
+    *p_current_assignment = hint_result->GetAsXLink();
     shared_ptr<SYM::BooleanResult> hinted_r = plan.consistency_expression->Evaluate( kit );
     *p_current_assignment = prev_xlink; // put it back again
     if( !hinted_r || !hinted_r->IsDefinedAndTrue() )
         return make_tuple(false, Assignment()); // evaluated false using hint - probably inconsistent in the OTHER variables
 
-    SR::LocatedLink hint( current_var, hint_result->xlink );
+    SR::LocatedLink hint( current_var, hint_result->GetAsXLink() );
     return make_tuple(false, hint);
 }
 

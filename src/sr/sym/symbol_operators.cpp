@@ -33,16 +33,16 @@ shared_ptr<SymbolResult> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
-    if( !archetype_node->IsLocalMatch( ar->xlink.GetChildX().get() ) )
+    if( !archetype_node->IsLocalMatch( ar->GetAsXLink().GetChildX().get() ) )
         return make_shared<SymbolResult>(SymbolResult::UNDEFINED); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ar->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ar->GetAsXLink().GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Extract the item indicated by item_index. 
-    return EvalFromItem( ar->xlink, keyer_itemised[item_index] );
+    return EvalFromItem( ar->GetAsXLink(), keyer_itemised[item_index] );
 }
 
 
@@ -214,8 +214,8 @@ shared_ptr<SymbolResult> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit
     if( !ar->IsDefinedAndUnique() )
         return ar;
         
-    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->xlink) );   
-    SR::XLink result_xlink = EvalXLinkFromNugget( ar->xlink, nugget );
+    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->GetAsXLink()) );   
+    SR::XLink result_xlink = EvalXLinkFromNugget( ar->GetAsXLink(), nugget );
     if( result_xlink ) 
         return make_shared<SymbolResult>( SymbolResult::DEFINED, result_xlink );
     else
