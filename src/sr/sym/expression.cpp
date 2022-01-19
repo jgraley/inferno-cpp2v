@@ -5,40 +5,40 @@ using namespace SYM;
 
 // ------------------------- BooleanResult --------------------------
 
-BooleanResult::BooleanResult( Certainty value_ ) :
-    value( value_ )
+BooleanResult::BooleanResult( Certainty certainty_ ) :
+    certainty( certainty_ )
 {
 }
 
 
 bool BooleanResult::IsDefinedAndUnique() const
 {
-    return value != Certainty::UNDEFINED;
+    return certainty != Certainty::UNDEFINED;
 }
 
 
 bool BooleanResult::IsDefinedAndTrue() const
 {
-    return value == Certainty::TRUE;
+    return certainty == Certainty::TRUE;
 }
 
 
 bool BooleanResult::IsDefinedAndFalse() const
 {
-    return value == Certainty::FALSE;
+    return certainty == Certainty::FALSE;
 }
 
    
 bool BooleanResult::GetAsBool() const
 {
     ASSERT( IsDefinedAndUnique() );
-    return value == Certainty::TRUE;
+    return certainty == Certainty::TRUE;
 }
 
 
 bool BooleanResult::operator<( const BooleanResult &other ) const
 {
-    return value < other.value;
+    return certainty < other.certainty;
 }
 
 

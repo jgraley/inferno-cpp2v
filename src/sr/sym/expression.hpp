@@ -46,7 +46,7 @@ public:
         UNDEFINED,
         TRUE
     };    
-    BooleanResult( Certainty value );
+    BooleanResult( Certainty certainty_ );
 
     bool IsDefinedAndUnique() const override;    
     bool IsDefinedAndTrue() const;    
@@ -61,7 +61,7 @@ public:
                                   const shared_ptr<BooleanResult> &b );
 
 private:
-    Certainty value;
+    Certainty certainty;
 };
 
 // ------------------------- SymbolResult --------------------------
