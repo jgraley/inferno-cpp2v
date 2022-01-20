@@ -3,6 +3,7 @@
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
 #include "rewriters.hpp"
+#include "result.hpp"
 #include <algorithm>
 
 using namespace SYM;
@@ -547,9 +548,7 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
     {
         shared_ptr<BooleanResult> rb = b->Evaluate(kit);   
         shared_ptr<BooleanResult> rc = c->Evaluate(kit);   
-        if( rb->IsDefinedAndUnique() && 
-            rc->IsDefinedAndUnique() && 
-            rb->GetAsBool() == rc->GetAsBool() )
+        if( *rb == *rc )
             return rb; // not ambiguous if both options are the same
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     }

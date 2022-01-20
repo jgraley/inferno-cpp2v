@@ -1,5 +1,6 @@
 #include "symbol_operators.hpp"
 
+#include "result.hpp"
 #include "node/node.hpp"
 
 using namespace SYM;

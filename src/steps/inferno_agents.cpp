@@ -7,6 +7,7 @@
 #include "sr/search_replace.hpp"
 #include "sr/link.hpp"
 #include "sr/sym/primary_expressions.hpp"
+#include "sr/sym/result.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;

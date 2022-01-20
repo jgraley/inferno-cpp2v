@@ -1,4 +1,5 @@
 #include "lambdas.hpp"
+#include "result.hpp"
 
 using namespace SYM;
 

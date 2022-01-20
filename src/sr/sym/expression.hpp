@@ -4,7 +4,6 @@
 #include "common/common.hpp"
 #include "common/orderable.hpp"
 #include "../link.hpp"
-#include "result.hpp"
 
 #include <exception>
 
@@ -18,6 +17,8 @@ namespace SYM
 
 class SymbolVariable;
 class SymbolExpression;
+class SymbolResult;
+class BooleanResult;
 
 // ------------------------- Expression --------------------------
 

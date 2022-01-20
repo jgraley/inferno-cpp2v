@@ -3,6 +3,7 @@
 #include "../search_replace.hpp" 
 #include "link.hpp"
 #include "sym/primary_expressions.hpp"
+#include "sym/result.hpp"
 
 using namespace SR;
 using namespace SYM;

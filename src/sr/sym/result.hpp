@@ -19,6 +19,7 @@ public:
     };    
 
     virtual bool IsDefinedAndUnique() const = 0;
+    virtual bool operator==( const Result &other ) const = 0;    
 };
 
 // ------------------------- BooleanResult --------------------------
@@ -32,7 +33,8 @@ public:
     bool IsDefinedAndTrue() const;    
     bool IsDefinedAndFalse() const;    
     bool GetAsBool() const;    
-
+    bool operator==( const Result &other ) const override;    
+    
     // Present a "certainty" ordering to simplify eval with dominance
     // effect in And and Or operators. True is bigger than undefined, 
     // which is bigger than false.
@@ -62,11 +64,27 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const;    
+    bool operator==( const Result &other ) const override;    
 
 private:    
     SR::XLink xlink;
 };
 
+// ------------------------- SymbolSetResult --------------------------
+/*
+class SymbolResult : public Result
+{
+public:
+    SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>() );
+    
+    bool IsDefinedAndUnique() const override;    
+    SR::XLink GetAsXLink() const;    
+    const set<SR::XLink> &GetAsSet() const;    
+
+private:    
+    set<SR::XLink> xlinks;
+};
+*/
 };
 
 #endif // include guard

@@ -1,6 +1,7 @@
 #include "comparison_operators.hpp"
 #include "boolean_operators.hpp"
 #include "primary_expressions.hpp"
+#include "result.hpp"
 
 using namespace SYM;
 
@@ -504,9 +505,7 @@ shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) con
     {
         shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
         shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
-        if( rb->IsDefinedAndUnique() && 
-            rc->IsDefinedAndUnique() && 
-            rb->GetAsXLink() == rc->GetAsXLink() )
+        if( *rb == *rc )
             return rb; // not ambiguous if both options are the same
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     }

@@ -47,6 +47,13 @@ bool BooleanResult::GetAsBool() const
 }
 
 
+bool BooleanResult::operator==( const Result &other ) const
+{
+    auto o = dynamic_cast<const BooleanResult *>(&other);
+    return o && certainty == o->certainty;
+}
+
+
 bool BooleanResult::operator<( const BooleanResult &other ) const
 {
     return certainty < other.certainty;
@@ -89,3 +96,37 @@ SR::XLink SymbolResult::GetAsXLink() const
     ASSERT( xlink );
     return xlink;
 }
+
+
+bool SymbolResult::operator==( const Result &other ) const
+{
+    auto o = dynamic_cast<const SymbolResult *>(&other);
+    return o && xlink == o->xlink;
+}
+
+
+// ------------------------- SymbolSetResult --------------------------
+/*
+SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_ ) :
+    xlinks( xlinks_ )
+{
+}
+
+
+bool SymbolSetResult::IsDefinedAndUnique() const
+{
+    return xlinks.size() == 1;
+}
+
+
+SR::XLink SymbolSetResult::GetAsXLink() const
+{
+    return OnlyElementOf(xlink);
+}
+
+
+const set<SR::XLink> &SymbolSetResult::GetAsSet() const
+{
+    return xlinks;
+}
+*/
