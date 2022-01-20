@@ -98,6 +98,8 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
     ASSERT( hint_result );
+    auto hrs = dynamic_pointer_cast<SYM::MultiSymbolResult>(hint_result);
+    //ASSERT(!hrs)(hrs->GetAsSet());
     if( !hint_result->IsDefinedAndUnique() )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
           

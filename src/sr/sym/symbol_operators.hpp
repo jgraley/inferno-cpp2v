@@ -120,6 +120,10 @@ public:
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
+
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const override;
+
     virtual string GetKnowledgeName() const override;
 };
 
@@ -164,8 +168,10 @@ public:
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
+
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
+
     virtual string GetKnowledgeName() const override;
 };
 
@@ -177,11 +183,33 @@ public:
     using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
+
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
+
     virtual string GetKnowledgeName() const override;
 };
 
+// ------------------------- AllChildrenOperator --------------------------
+
+class AllChildrenOperator : public SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    explicit AllChildrenOperator( shared_ptr<SymbolExpression> a );
+    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
+
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const override;
+                                             
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+protected:
+    const shared_ptr<SymbolExpression> a;
+};
 };
 
 #endif // include guard

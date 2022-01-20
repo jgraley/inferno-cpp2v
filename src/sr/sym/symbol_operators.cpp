@@ -1,6 +1,8 @@
 #include "symbol_operators.hpp"
 
 #include "result.hpp"
+
+#include "helpers/flatten.hpp"
 #include "node/node.hpp"
 
 using namespace SYM;
@@ -249,6 +251,15 @@ SR::XLink ParentOperator::EvalXLinkFromNugget( SR::XLink parent_xlink,
 }
 
 
+shared_ptr<Expression> ParentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                             shared_ptr<SymbolExpression> to_equal ) const
+{   
+    // AllChildren and Parent are inverse of each other
+    auto a_to_equal = make_shared<AllChildrenOperator>( to_equal );
+    return a->TrySolveForToEqual( target, a_to_equal );
+}
+
+
 string ParentOperator::GetKnowledgeName() const
 {
     return "Parent";
@@ -343,3 +354,62 @@ string MySequencePredecessorOperator::GetKnowledgeName() const
 {
     return "MySeqPredecessor";
 }
+
+// ------------------------- AllChildrenOperator --------------------------
+
+AllChildrenOperator::AllChildrenOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}    
+
+
+list<shared_ptr<SymbolExpression>> AllChildrenOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &kit,
+                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+{
+    ASSERT( op_results.size()==1 );
+
+    // XLink must match our referee (i.e. be non-strict subtype)
+    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);
+    if( !ar->IsDefinedAndUnique() )
+        return ar;
+
+    TreePtr<Node> parent_node = ar->GetAsXLink().GetChildX();
+    FlattenNode flat( parent_node );
+
+    set<SR::XLink> child_xlinks;
+    FOREACH(const TreePtrInterface &child_node, flat )
+    {
+        SR::XLink child_xlink( parent_node, &child_node);
+        child_xlinks.insert( child_xlink );
+    }
+    
+    return make_shared<MultiSymbolResult>( child_xlinks );
+}
+
+
+shared_ptr<Expression> AllChildrenOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                  shared_ptr<SymbolExpression> to_equal ) const
+{   
+    // AllChildren and Parent are inverse of each other
+    auto a_to_equal = make_shared<ParentOperator>( to_equal );
+    return a->TrySolveForToEqual( target, a_to_equal );
+}
+
+
+string AllChildrenOperator::Render() const
+{
+    return "AllChildren(" + a->Render() + ")"; 
+}
+
+
+Expression::Precedence AllChildrenOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
+
