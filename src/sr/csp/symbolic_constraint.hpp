@@ -51,8 +51,8 @@ private:
 
     const set<VariableId> &GetVariables() const override;
     virtual void Start( const SR::TheKnowledge *knowledge_ );    
-    tuple<bool, Assignment> Test( const Assignments &assignments,
-                                  const VariableId &current_var ) override;
+    tuple<bool, Hint> Test( const Assignments &assignments,
+                            const VariableId &current_var ) override;
             
     const SR::TheKnowledge *knowledge;
     

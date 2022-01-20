@@ -72,7 +72,9 @@ private:
 class SymbolResultInterface : public ResultInterface
 {
 public:
-    virtual SR::XLink GetAsXLink() const = 0;    
+    virtual SR::XLink GetAsXLink() const = 0;   
+    virtual set<SR::XLink> GetAsSetOfXLinks() const = 0;
+     
 };
 
 // ------------------------- SingleSymbolResult --------------------------
@@ -84,6 +86,7 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
+    set<SR::XLink> GetAsSetOfXLinks() const override;    
     bool operator==( const ResultInterface &other ) const override;    
 
 private:    
@@ -99,7 +102,7 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
-    const set<SR::XLink> &GetAsSet() const;    
+    set<SR::XLink> GetAsSetOfXLinks() const override;    
     bool operator==( const ResultInterface &other ) const override;    
 
 private:    

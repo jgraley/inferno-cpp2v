@@ -75,8 +75,8 @@ void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
 }   
 
 
-tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments,
-                                                  const VariableId &current_var )
+tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
+                                            const VariableId &current_var )
 {   
     INDENT("T");
     ASSERT(plan.consistency_expression);
@@ -90,18 +90,18 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     shared_ptr<SYM::BooleanResultInterface> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
     if( result->IsDefinedAndTrue() )
-        return make_tuple(true, Assignment()); // Successful
+        return make_tuple(true, Hint()); // Successful
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
-        return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one in the plan
+        return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
     ASSERT( hint_result );
     auto hrs = dynamic_pointer_cast<SYM::MultiSymbolResult>(hint_result);
-    //ASSERT(!hrs)(hrs->GetAsSet());
+    //ASSERT(!hrs)(hrs->GetAsSetOfXLinks());
     if( !hint_result->IsDefinedAndUnique() )
-        return make_tuple(false, Assignment()); // effectively a failure to evaluate
+        return make_tuple(false, Hint()); // effectively a failure to evaluate
           
     // Testing hint by evaluating using consistency expression with hint substituted over original value
     SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
@@ -111,9 +111,9 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     ASSERT( hint_check_result );
     *p_current_assignment = prev_xlink; // put it back again    
     if( !hint_check_result->IsDefinedAndTrue() )
-        return make_tuple(false, Assignment()); // evaluated false using hint - probably inconsistent in the OTHER variables
+        return make_tuple(false, Hint()); // evaluated false using hint - probably inconsistent in the OTHER variables
 
-    SR::LocatedLink hint( current_var, hint_result->GetAsXLink() );
+    Hint hint( current_var, { hint_result->GetAsXLink() } );
     return make_tuple(false, hint);
 }
 

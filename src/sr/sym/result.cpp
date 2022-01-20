@@ -101,6 +101,12 @@ SR::XLink SingleSymbolResult::GetAsXLink() const
 }
 
 
+set<SR::XLink> SingleSymbolResult::GetAsSetOfXLinks() const
+{
+    return { xlink };
+}
+
+
 bool SingleSymbolResult::operator==( const ResultInterface &other ) const
 {
     auto o = dynamic_cast<const SingleSymbolResult *>(&other);
@@ -127,7 +133,7 @@ SR::XLink MultiSymbolResult::GetAsXLink() const
 }
 
 
-const set<SR::XLink> &MultiSymbolResult::GetAsSet() const
+set<SR::XLink> MultiSymbolResult::GetAsSetOfXLinks() const
 {
     return xlinks;
 }

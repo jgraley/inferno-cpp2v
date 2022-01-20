@@ -337,7 +337,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         assignments[current_var] = value;
         
         bool ok;
-        Assignment hint;  
+        Hint hint;  
         ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
               ("\nfree_variables")(solver_plan.free_variables)
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
@@ -354,7 +354,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 
 #ifdef TAKE_HINTS
         // TODO take multiple hints see #462
-        if( !ok && hint && !tried_hint ) // hint now guaranteed to be for current variable
+        if( !ok && hint.first && !tried_hint ) // hint now guaranteed to be for current variable
         {
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
@@ -364,7 +364,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
                 if( remaining_count==1 )
                 {
                     remaining_count--;
-                    return hint;
+                    return OnlyElementOf(hint.second);
                 }
                 else
                 {
@@ -405,16 +405,16 @@ SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assignments,
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
 #endif
-    Assignment hint;
+    Hint hint;
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
-        Assignment chint;
+        Hint chint;
         bool my_matched;
         tie(my_matched, chint) = c->Test(assignments, current_var); 
         if( !my_matched )
         {            
-            if( chint && !hint ) // could have a hint            
+            if( chint.first && !hint.first ) // could have a hint            
                 hint = chint; // pick the first
             matched = false;
 #ifdef BACKJUMPING

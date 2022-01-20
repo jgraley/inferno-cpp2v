@@ -106,9 +106,9 @@ private:
     };
 
 #ifdef BACKJUMPING
-    typedef tuple<bool, Assignment, ConstraintSet> TestRV;
+    typedef tuple<bool, Hint, ConstraintSet> TestRV;
 #else
-    typedef tuple<bool, Assignment> TestRV;
+    typedef tuple<bool, Hint> TestRV;
 #endif
     TestRV Test( const Assignments &assigns,
                  const ConstraintSet &to_test,
