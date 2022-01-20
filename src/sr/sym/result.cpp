@@ -69,7 +69,7 @@ bool BooleanResult::operator<( const BooleanResultInterface &other ) const
     return certainty < o->certainty;
 }
 
-// ------------------------- SymbolResult --------------------------
+// ------------------------- SingleSymbolResult --------------------------
 
 SingleSymbolResult::SingleSymbolResult( Category cat, SR::XLink xlink_ )
 {
@@ -107,29 +107,34 @@ bool SingleSymbolResult::operator==( const ResultInterface &other ) const
     return o && xlink == o->xlink;
 }
 
+// ------------------------- MultiSymbolResult --------------------------
 
-// ------------------------- SymbolSetResult --------------------------
-/*
-SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_ ) :
+MultiSymbolResult::MultiSymbolResult( set<SR::XLink> xlinks_ ) :
     xlinks( xlinks_ )
 {
 }
 
 
-bool SymbolSetResult::IsDefinedAndUnique() const
+bool MultiSymbolResult::IsDefinedAndUnique() const
 {
     return xlinks.size() == 1;
 }
 
 
-SR::XLink SymbolSetResult::GetAsXLink() const
+SR::XLink MultiSymbolResult::GetAsXLink() const
 {
-    return OnlyElementOf(xlink);
+    return OnlyElementOf(xlinks);
 }
 
 
-const set<SR::XLink> &SymbolSetResult::GetAsSet() const
+const set<SR::XLink> &MultiSymbolResult::GetAsSet() const
 {
     return xlinks;
 }
-*/
+
+
+bool MultiSymbolResult::operator==( const ResultInterface &other ) const
+{
+    auto o = dynamic_cast<const MultiSymbolResult *>(&other);
+    return o && xlinks == o->xlinks;
+}

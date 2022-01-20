@@ -119,7 +119,7 @@ XLink AnyNodeAgent::GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface:
 SYM::Over<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
 {
     PatternLink terminus_plink(this, &terminus);
-    return MakeOver<ParentOperator>( MakeOver<SymbolVariable>(terminus_plink)) ==
+    return MakeOver<ParentOperator>( MakeOver<SymbolVariable>(terminus_plink) ) ==
            MakeOver<SymbolVariable>(keyer_plink);
 }
 

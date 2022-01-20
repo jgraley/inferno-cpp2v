@@ -90,21 +90,22 @@ private:
     SR::XLink xlink;
 };
 
-// ------------------------- SymbolSetResult --------------------------
-/*
-class SymbolResult : public Result
+// ------------------------- MultiSymbolResult --------------------------
+
+class MultiSymbolResult : public SymbolResultInterface
 {
 public:
-    SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>() );
+    MultiSymbolResult( set<SR::XLink> xlinks = set<SR::XLink>() );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
     const set<SR::XLink> &GetAsSet() const;    
+    bool operator==( const ResultInterface &other ) const override;    
 
 private:    
     set<SR::XLink> xlinks;
 };
-*/
+
 };
 
 #endif // include guard
