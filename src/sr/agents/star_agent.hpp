@@ -49,7 +49,7 @@ private:
     {
         using KindOfOperator::KindOfOperator; 
         virtual shared_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<SYM::SymbolResult>> &op_results ) const override;
+                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
         virtual string Render() const override;
     };
 

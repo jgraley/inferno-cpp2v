@@ -160,10 +160,10 @@ list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IdentifierByNameO
 
 
 shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IdentifierByNameOperator::Evaluate( const EvalKit &kit,
-                                                                                          const list<shared_ptr<SYM::SymbolResult>> &op_results ) const 
+                                                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    shared_ptr<SYM::SymbolResult> ra = OnlyElementOf(op_results);
+    shared_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
         return make_shared<SYM::BooleanResult>( SYM::BooleanResult::UNDEFINED );
     

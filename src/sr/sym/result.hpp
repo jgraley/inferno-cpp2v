@@ -7,9 +7,9 @@
 namespace SYM
 { 
 
-// ------------------------- Result --------------------------
+// ------------------------- ResultInterface --------------------------
 
-class Result
+class ResultInterface
 {
 public:
     enum Category
@@ -19,12 +19,12 @@ public:
     };    
 
     virtual bool IsDefinedAndUnique() const = 0;
-    virtual bool operator==( const Result &other ) const = 0;    
+    virtual bool operator==( const ResultInterface &other ) const = 0;    
 };
 
 // ------------------------- BooleanResult --------------------------
 
-class BooleanResult : public Result
+class BooleanResult : public ResultInterface
 {
 public:
     BooleanResult( Category cat, bool value = false );
@@ -33,7 +33,7 @@ public:
     bool IsDefinedAndTrue() const;    
     bool IsDefinedAndFalse() const;    
     bool GetAsBool() const;    
-    bool operator==( const Result &other ) const override;    
+    bool operator==( const ResultInterface &other ) const override;    
     
     // Present a "certainty" ordering to simplify eval with dominance
     // effect in And and Or operators. True is bigger than undefined, 
@@ -55,16 +55,24 @@ private:
     Certainty certainty;
 };
 
-// ------------------------- SymbolResult --------------------------
+// ------------------------- SymbolResultInterface --------------------------
 
-class SymbolResult : public Result
+class SymbolResultInterface : public ResultInterface
 {
 public:
-    SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
+    virtual SR::XLink GetAsXLink() const = 0;    
+};
+
+// ------------------------- SingleSymbolResult --------------------------
+
+class SingleSymbolResult : public SymbolResultInterface
+{
+public:
+    SingleSymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetAsXLink() const;    
-    bool operator==( const Result &other ) const override;    
+    SR::XLink GetAsXLink() const override;    
+    bool operator==( const ResultInterface &other ) const override;    
 
 private:    
     SR::XLink xlink;

@@ -96,7 +96,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
         return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one in the plan
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
-    shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
+    shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
     ASSERT( hint_result );
     if( !hint_result->IsDefinedAndUnique() )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate

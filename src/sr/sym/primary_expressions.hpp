@@ -18,8 +18,8 @@ class SymbolConstant : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit SymbolConstant( SR::XLink xlink );
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;    
-    shared_ptr<SymbolResult> GetValue() const;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
+    shared_ptr<SymbolResultInterface> GetValue() const;
     SR::XLink GetXLink() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -40,7 +40,7 @@ public:
     typedef SymbolExpression NominalType;
     explicit SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     SR::PatternLink GetPatternLink() const;
 
     // Note: no TrySolveForToEqualNT() because trivial solver is sufficient

@@ -123,7 +123,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
                                            shared_ptr<SYM::SymbolExpression> a); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual shared_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<SYM::SymbolResult>> &op_results ) const override;
+                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;

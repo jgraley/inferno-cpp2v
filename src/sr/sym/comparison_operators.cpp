@@ -22,15 +22,15 @@ list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
-                                                   const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
-    for( shared_ptr<SymbolResult> ra : op_results )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
+    shared_ptr<SymbolResultInterface> ra = op_results.front();
+    shared_ptr<SymbolResultInterface> rb = op_results.back();
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
@@ -108,15 +108,15 @@ list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() 
 
 
 shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
-                                                             const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
-    for( shared_ptr<SymbolResult> ra : op_results )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
+    shared_ptr<SymbolResultInterface> ra = op_results.front();
+    shared_ptr<SymbolResultInterface> rb = op_results.back();
 
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
@@ -233,16 +233,16 @@ list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
-                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    for( shared_ptr<SymbolResult> ra : op_results )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
     // Note: could be done faster using a set<XLink>
     bool m = true;
-    ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResult> ra,
-                                                    shared_ptr<SymbolResult> rb) 
+    ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResultInterface> ra,
+                                                    shared_ptr<SymbolResultInterface> rb) 
     {    
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -287,10 +287,10 @@ list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
-                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
@@ -345,12 +345,12 @@ list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperand
 
 
 shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
-                                                                 const list<shared_ptr<SymbolResult>> &op_results ) const
+                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
 
     // Propagate undefined case
     if( !ra->IsDefinedAndUnique() )
@@ -437,14 +437,14 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
-                                                        const list<shared_ptr<SymbolResult>> &op_results ) const 
+                                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    for( shared_ptr<SymbolResult> ra : op_results )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
+    shared_ptr<SymbolResultInterface> ra = op_results.front();
+    shared_ptr<SymbolResultInterface> rb = op_results.back();
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
@@ -487,7 +487,7 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 }
 
 
-shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
     if( ra->IsDefinedAndUnique() )
@@ -503,11 +503,11 @@ shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) con
     }
     else // UNDEFINED
     {
-        shared_ptr<SymbolResult> rb = b->Evaluate(kit);   
-        shared_ptr<SymbolResult> rc = c->Evaluate(kit);   
+        shared_ptr<SymbolResultInterface> rb = b->Evaluate(kit);   
+        shared_ptr<SymbolResultInterface> rc = c->Evaluate(kit);   
         if( *rb == *rc )
             return rb; // not ambiguous if both options are the same
-        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+        return make_shared<SingleSymbolResult>( ResultInterface::UNDEFINED );
     }
 }
 

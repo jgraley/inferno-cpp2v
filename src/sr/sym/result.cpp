@@ -47,7 +47,7 @@ bool BooleanResult::GetAsBool() const
 }
 
 
-bool BooleanResult::operator==( const Result &other ) const
+bool BooleanResult::operator==( const ResultInterface &other ) const
 {
     auto o = dynamic_cast<const BooleanResult *>(&other);
     return o && certainty == o->certainty;
@@ -68,7 +68,7 @@ bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a,
 
 // ------------------------- SymbolResult --------------------------
 
-SymbolResult::SymbolResult( Category cat, SR::XLink xlink_ )
+SingleSymbolResult::SingleSymbolResult( Category cat, SR::XLink xlink_ )
 {
     switch( cat )
     {
@@ -85,22 +85,22 @@ SymbolResult::SymbolResult( Category cat, SR::XLink xlink_ )
 }
 
 
-bool SymbolResult::IsDefinedAndUnique() const
+bool SingleSymbolResult::IsDefinedAndUnique() const
 {
     return (bool)xlink;
 }
 
 
-SR::XLink SymbolResult::GetAsXLink() const
+SR::XLink SingleSymbolResult::GetAsXLink() const
 {
     ASSERT( xlink );
     return xlink;
 }
 
 
-bool SymbolResult::operator==( const Result &other ) const
+bool SingleSymbolResult::operator==( const ResultInterface &other ) const
 {
-    auto o = dynamic_cast<const SymbolResult *>(&other);
+    auto o = dynamic_cast<const SingleSymbolResult *>(&other);
     return o && xlink == o->xlink;
 }
 
