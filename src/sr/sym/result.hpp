@@ -64,7 +64,6 @@ public:
     SR::XLink GetAsXLink() const;    
 
 private:    
-    Category cat; 
     SR::XLink xlink;
 };
 
