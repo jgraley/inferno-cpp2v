@@ -102,7 +102,9 @@ private:
         SR::TheKnowledge::DepthFirstOrderedIt rev_it;
         bool go_forward;
         bool insert_mmax_next;
-        int remaining_count;        
+        int remaining_count;
+        Hint hint;  
+        set<SR::XLink>::iterator hint_iterator;        
     };
 
 #ifdef BACKJUMPING

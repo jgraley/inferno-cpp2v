@@ -103,7 +103,7 @@ SR::XLink SingleSymbolResult::GetAsXLink() const
 
 set<SR::XLink> SingleSymbolResult::GetAsSetOfXLinks() const
 {
-    return { xlink };
+    return xlink ? set<SR::XLink>{ xlink } : set<SR::XLink>{};
 }
 
 

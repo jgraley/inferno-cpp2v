@@ -336,35 +336,37 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
             break;
         assignments[current_var] = value;
         
-        bool ok;
-        Hint hint;  
+        bool ok;        
         ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
               ("\nfree_variables")(solver_plan.free_variables)
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
               ("\ncompleted_constraints:\n")(solver_plan.completed_constraints)
               ("\ncurrent_var: ")(current_var);
         const ConstraintSet &constraints_to_test = solver_plan.completed_constraints.at(current_var);
+        Hint new_hint;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
-        tie(ok, hint, unsatisfied) = solver.Test( assignments, constraints_to_test, current_var );        
+        tie(ok, new_hint, unsatisfied) = solver.Test( assignments, constraints_to_test, current_var );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok, hint) = solver.Test( assignments, constraints_to_test, current_var );        
+        tie(ok, new_hint) = solver.Test( assignments, constraints_to_test, current_var );        
 #endif
 
 #ifdef TAKE_HINTS
         // TODO take multiple hints see #462
-        if( !ok && hint.first && !tried_hint ) // hint now guaranteed to be for current variable
+        if( !ok && new_hint.first && !tried_hint ) // hint now guaranteed to be for current variable
         {
+            hint = new_hint;
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
-            remaining_count = 1;
-            values_generator = [this, hint]() -> Value
+            hint_iterator = hint.second.begin();
+            values_generator = [this]() -> Value
             {
-                if( remaining_count==1 )
-                {
-                    remaining_count--;
-                    return OnlyElementOf(hint.second);
+                if( hint_iterator != hint.second.end() )
+                {                     
+                    Value v = *hint_iterator;
+                    hint_iterator++;
+                    return v;
                 }
                 else
                 {
