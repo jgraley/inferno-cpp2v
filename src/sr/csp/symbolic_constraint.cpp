@@ -86,8 +86,9 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 #endif        
 
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
-    shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
-    if( r && r->IsDefinedAndTrue() )
+    shared_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
+    ASSERT( result );
+    if( result->IsDefinedAndTrue() )
         return make_tuple(true, Assignment()); // Successful
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
@@ -95,16 +96,18 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
-    if( !hint_result || !hint_result->IsDefinedAndUnique() )
+    ASSERT( hint_result );
+    if( !hint_result->IsDefinedAndUnique() )
         return make_tuple(false, Assignment()); // effectively a failure to evaluate
           
     // Testing hint by evaluating using consistency expression with hint substituted over original value
     SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
     SR::XLink prev_xlink = *p_current_assignment;
     *p_current_assignment = hint_result->GetAsXLink();
-    shared_ptr<SYM::BooleanResult> hinted_r = plan.consistency_expression->Evaluate( kit );
-    *p_current_assignment = prev_xlink; // put it back again
-    if( !hinted_r || !hinted_r->IsDefinedAndTrue() )
+    shared_ptr<SYM::BooleanResult> hint_check_result = plan.consistency_expression->Evaluate( kit );
+    ASSERT( hint_check_result );
+    *p_current_assignment = prev_xlink; // put it back again    
+    if( !hint_check_result->IsDefinedAndTrue() )
         return make_tuple(false, Assignment()); // evaluated false using hint - probably inconsistent in the OTHER variables
 
     SR::LocatedLink hint( current_var, hint_result->GetAsXLink() );
