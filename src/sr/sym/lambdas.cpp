@@ -20,7 +20,7 @@ set<SR::PatternLink> BooleanLambda::GetRequiredVariables() const
 }
 
 
-shared_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResultInterface> BooleanLambda::Evaluate( const EvalKit &kit ) const
 {
     ASSERT( lambda );
     ASSERT( kit.hypothesis_links );

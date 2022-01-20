@@ -135,7 +135,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
 }
  
 
-shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
                                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        

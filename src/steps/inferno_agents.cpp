@@ -159,7 +159,7 @@ list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IdentifierByNameO
 }
 
 
-shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IdentifierByNameOperator::Evaluate( const EvalKit &kit,
+shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IdentifierByNameOperator::Evaluate( const EvalKit &kit,
                                                                                           const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        

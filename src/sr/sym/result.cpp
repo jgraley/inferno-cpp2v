@@ -3,6 +3,14 @@
 
 using namespace SYM;
 
+// ------------------------- BooleanResultInterface --------------------------
+
+bool BooleanResultInterface::CertaintyCompare( const shared_ptr<BooleanResultInterface> &a, 
+                                               const shared_ptr<BooleanResultInterface> &b )
+{
+    return *a < *b;
+}                                      
+
 // ------------------------- BooleanResult --------------------------
 
 BooleanResult::BooleanResult( Category cat, bool value )
@@ -54,17 +62,12 @@ bool BooleanResult::operator==( const ResultInterface &other ) const
 }
 
 
-bool BooleanResult::operator<( const BooleanResult &other ) const
+bool BooleanResult::operator<( const BooleanResultInterface &other ) const
 {
-    return certainty < other.certainty;
+    auto o = dynamic_cast<const BooleanResult *>(&other);
+    ASSERT(o);
+    return certainty < o->certainty;
 }
-
-
-bool BooleanResult::CertaintyCompare( const shared_ptr<BooleanResult> &a, 
-                                      const shared_ptr<BooleanResult> &b )
-{
-    return *a < *b;
-}                                      
 
 // ------------------------- SymbolResult --------------------------
 

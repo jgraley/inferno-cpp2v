@@ -21,7 +21,7 @@ public:
                              const LambdaType &lambda_,
                              string description );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;

@@ -22,25 +22,37 @@ public:
     virtual bool operator==( const ResultInterface &other ) const = 0;    
 };
 
+// ------------------------- BooleanResultInterface --------------------------
+
+class BooleanResultInterface : public ResultInterface
+{
+public:
+    virtual bool IsDefinedAndTrue() const = 0;    
+    virtual bool IsDefinedAndFalse() const = 0;    
+    virtual bool GetAsBool() const = 0;    
+    
+    virtual bool operator<( const BooleanResultInterface &other ) const = 0;
+    static bool CertaintyCompare( const shared_ptr<BooleanResultInterface> &a, 
+                                  const shared_ptr<BooleanResultInterface> &b );
+};
+
 // ------------------------- BooleanResult --------------------------
 
-class BooleanResult : public ResultInterface
+class BooleanResult : public BooleanResultInterface
 {
 public:
     BooleanResult( Category cat, bool value = false );
 
     bool IsDefinedAndUnique() const override;    
-    bool IsDefinedAndTrue() const;    
-    bool IsDefinedAndFalse() const;    
-    bool GetAsBool() const;    
+    bool IsDefinedAndTrue() const override;    
+    bool IsDefinedAndFalse() const override;    
+    bool GetAsBool() const override;    
     bool operator==( const ResultInterface &other ) const override;    
     
     // Present a "certainty" ordering to simplify eval with dominance
     // effect in And and Or operators. True is bigger than undefined, 
     // which is bigger than false.
-    bool operator<( const BooleanResult &other ) const;
-    static bool CertaintyCompare( const shared_ptr<BooleanResult> &a, 
-                                  const shared_ptr<BooleanResult> &b );
+    bool operator<( const BooleanResultInterface &other ) const override;
 
 private:
     // Certainty combines category and boolean value into a single
@@ -86,7 +98,7 @@ public:
     SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>() );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetAsXLink() const;    
+    SR::XLink GetAsXLink() const override;    
     const set<SR::XLink> &GetAsSet() const;    
 
 private:    

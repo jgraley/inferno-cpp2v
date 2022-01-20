@@ -69,7 +69,7 @@ list<shared_ptr<SymbolExpression>> GreenGrassAgent::IsGreenGrassOperator::GetSym
 }
 
 
-shared_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
                                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        

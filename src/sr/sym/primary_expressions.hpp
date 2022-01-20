@@ -61,8 +61,8 @@ class BooleanConstant : public BooleanExpression
 public:    
     typedef BooleanExpression NominalType;
     explicit BooleanConstant( bool value );
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    shared_ptr<BooleanResult> GetValue() const;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    shared_ptr<BooleanResultInterface> GetValue() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;

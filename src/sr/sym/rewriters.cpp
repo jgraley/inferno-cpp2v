@@ -21,7 +21,7 @@ BooleanExpressionSet PreprocessForEngine::operator()( BooleanExpressionSet in ) 
     {
         if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
-            shared_ptr<BooleanResult> r = bool_const_expr->GetValue();
+            shared_ptr<BooleanResultInterface> r = bool_const_expr->GetValue();
             switch(r->GetAsBool())
             {
             case true:

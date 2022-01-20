@@ -87,7 +87,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 #endif        
 
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
-    shared_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
+    shared_ptr<SYM::BooleanResultInterface> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
     if( result->IsDefinedAndTrue() )
         return make_tuple(true, Assignment()); // Successful
@@ -105,7 +105,7 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
     SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
     SR::XLink prev_xlink = *p_current_assignment;
     *p_current_assignment = hint_result->GetAsXLink();
-    shared_ptr<SYM::BooleanResult> hint_check_result = plan.consistency_expression->Evaluate( kit );
+    shared_ptr<SYM::BooleanResultInterface> hint_check_result = plan.consistency_expression->Evaluate( kit );
     ASSERT( hint_check_result );
     *p_current_assignment = prev_xlink; // put it back again    
     if( !hint_check_result->IsDefinedAndTrue() )

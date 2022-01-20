@@ -21,7 +21,7 @@ list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
@@ -107,7 +107,7 @@ list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() 
 }
 
 
-shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const EvalKit &kit,
                                                              const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
@@ -232,7 +232,7 @@ list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> AllDiffOperator::Evaluate( const EvalKit &kit,
                                                      const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
@@ -286,7 +286,7 @@ list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> KindOfOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -344,7 +344,7 @@ list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperand
 }
 
 
-shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -436,7 +436,7 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
@@ -489,7 +489,7 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 
 shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
-    shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
+    shared_ptr<BooleanResultInterface> ra = a->Evaluate(kit);   
     if( ra->IsDefinedAndUnique() )
     {
         if( ra->GetAsBool() ) // TRUE

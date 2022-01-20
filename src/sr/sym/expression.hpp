@@ -15,10 +15,9 @@ namespace SR
 namespace SYM
 { 
 
-class SymbolVariable;
 class SymbolExpression;
 class SymbolResultInterface;
-class BooleanResult;
+class BooleanResultInterface;
 
 // ------------------------- Expression --------------------------
 
@@ -89,7 +88,7 @@ public:
     // doing so will make sure an empty PartialSolutionForSense is created.
     typedef map<bool, PartialSolutionForSense> PartialSolution;
 
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const = 0;
     
     shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
                                                shared_ptr<BooleanExpression> to_equal ) const;
@@ -122,9 +121,9 @@ class BooleanToBooleanExpression : public BooleanExpression
 public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const final override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit, 
+                                                const list<shared_ptr<BooleanResultInterface>> &op_results ) const;
 };
 
 // ------------------------- SymbolToBooleanExpression --------------------------
@@ -136,8 +135,8 @@ public:
     // If you want 0 operands and a boolean result, use BooleanExpression as the base
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const = 0;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit, 
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const;
 };
 
