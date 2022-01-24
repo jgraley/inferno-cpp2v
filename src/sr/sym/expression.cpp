@@ -65,6 +65,12 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
 }
 
 
+string Expression::RenderWithParentheses() const
+{
+    return "(" + Render() + ")";
+}
+
+
 string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
 {
     string bare = inner->Render();
@@ -75,9 +81,9 @@ string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
     // low prec expr in high prec surroundings. Also when equal to avoid
     // assuming associativity.
     if( (int)inner_prec >= (int)me_prec )
-        return "(" + bare + ")";
+        return inner->RenderWithParentheses();
     else
-        return bare;    
+        return inner->Render();    
 }
 
 

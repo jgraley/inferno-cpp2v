@@ -312,7 +312,7 @@ Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate,
 
 string KindOfOperator::Render() const
 {
-    return "KindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
+    return "KindOf<" + archetype_node->GetTypeName() + ">" + a->RenderWithParentheses(); 
 }
 
 
@@ -405,9 +405,8 @@ string ChildCollectionSizeOperator::Render() const
            to_string(item_index) + 
            ":col size=" +
            to_string(size) + 
-           ">(" + 
-           a->Render() + 
-           ")"; 
+           ">" + 
+           a->RenderWithParentheses(); 
 }
 
 

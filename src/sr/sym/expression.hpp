@@ -65,6 +65,7 @@ public:
                                                     OrderProperty order_property ) const override;
 
     virtual string Render() const = 0;    
+    string RenderWithParentheses() const;
     string GetTrace() const; // used for debug
     
 protected:    

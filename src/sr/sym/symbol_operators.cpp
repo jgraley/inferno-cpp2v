@@ -75,9 +75,8 @@ string ItemiseToSymbolOperator::Render() const
            to_string(item_index) + 
            ":" + 
            GetItemTypeName() + 
-           ">(" + 
-           a->Render() + 
-           ")"; 
+           ">" + 
+           a->RenderWithParentheses(); 
 }
 
 
@@ -226,11 +225,7 @@ shared_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const Eva
 
 string KnowledgeToSymbolOperator::Render() const
 {
-    // Not using RenderForMe() because we always want () here
-    return GetKnowledgeName() + 
-           "(" + 
-           a->Render() + 
-           ")"; 
+    return GetKnowledgeName() + a->RenderWithParentheses(); 
 }
 
 
@@ -402,7 +397,7 @@ shared_ptr<Expression> AllChildrenOperator::TrySolveForToEqualNT( shared_ptr<Exp
 
 string AllChildrenOperator::Render() const
 {
-    return "AllChildren(" + a->Render() + ")"; 
+    return "AllChildren" + a->RenderWithParentheses(); 
 }
 
 
