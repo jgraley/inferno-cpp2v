@@ -302,9 +302,7 @@ shared_ptr<BooleanResultInterface> KindOfOperator::Evaluate( const EvalKit &kit,
 Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const KindOfOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
     return OrderCompare(archetype_node.get(), 
                         c->archetype_node.get(), 
@@ -381,9 +379,7 @@ shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const 
 Orderable::Result ChildCollectionSizeOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                   OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const ChildCollectionSizeOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
     Result r1 = OrderCompare(archetype_node.get(), 
                              c->archetype_node.get(), 

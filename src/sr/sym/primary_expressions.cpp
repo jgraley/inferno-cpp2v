@@ -32,9 +32,7 @@ SR::XLink SymbolConstant::GetXLink() const
 Orderable::Result SymbolConstant::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SymbolConstant *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     if( xlink == c->xlink )
         return 0;
@@ -88,9 +86,7 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SymbolVariable *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     if( plink == c->plink )
         return 0;
@@ -135,9 +131,7 @@ shared_ptr<BooleanResultInterface> BooleanConstant::GetValue() const
 Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate, 
                                                       OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const BooleanConstant *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     return value - c->value;
 }  

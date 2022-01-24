@@ -86,9 +86,7 @@ shared_ptr<BooleanResultInterface> GreenGrassAgent::IsGreenGrassOperator::Evalua
 Orderable::Result GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const IsGreenGrassOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     Orderable::Result r;
     switch( order_property )

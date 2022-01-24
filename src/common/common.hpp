@@ -345,4 +345,15 @@ typename _Unique_if<T>::_Unknown_bound make_unique(size_t n)
 template<class T, class... Args>
 typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
+
+// Get a "that" pointer, which is a pointer of the same type as "this"
+// for multi-methods. NULL not allowed, wrong type not allowed.
+#define GET_THAT_POINTER(BT) ({ \
+    auto bt( BT ); \
+    ASSERT( bt ); \
+    auto tp = dynamic_cast<decltype(this)>(bt); \
+    ASSERT( tp ); \
+    tp; \
+})    
+
 #endif

@@ -185,9 +185,7 @@ shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IdentifierByNameO
 Orderable::Result IdentifierByNameAgent::IdentifierByNameOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                                       OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const IdentifierByNameOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     return name.compare(c->name);
 }  
 

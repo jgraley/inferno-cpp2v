@@ -52,9 +52,7 @@ shared_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalK
 Orderable::Result ItemiseToSymbolOperator::OrderCompareLocal( const Orderable *candidate, 
                                                               OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const ItemiseToSymbolOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
     Result r1 = OrderCompare(archetype_node.get(), 
                              c->archetype_node.get(), 

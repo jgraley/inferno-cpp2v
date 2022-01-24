@@ -27,9 +27,7 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 Orderable::Result SpecificString::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificString *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     return value.compare(c->value);
 }
  
@@ -81,9 +79,8 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 Orderable::Result SpecificInteger::OrderCompareLocal( const Orderable *candidate, 
                                                       OrderProperty order_property ) const
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificInteger *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
+
     if( isUnsigned() != c->isUnsigned() )
         return (int)(isUnsigned()) - (int)(c->isUnsigned());
     if( getBitWidth() != c->getBitWidth() )
@@ -137,9 +134,7 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 Orderable::Result SpecificFloat::OrderCompareLocal( const Orderable *candidate, 
                                                     OrderProperty order_property ) const
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificFloat *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
         
     // Primary ordering: the value
     cmpResult cr = compare(*c);
@@ -202,13 +197,10 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candidate, 
                                                          OrderProperty order_property ) const
 {
-    ASSERT( candidate );
-    
-    if( candidate == this )
+    auto c = GET_THAT_POINTER(candidate);
+        
+    if( c == this )
         return Orderable::EQUAL; // fast-out
-    
-    auto *c = dynamic_cast<const SpecificIdentifier *>(candidate);    
-    ASSERT(c);
         
     // Primary ordering on name should make renders more repeatable
     if( name != c->name )
@@ -273,9 +265,7 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 Orderable::Result SpecificFloatSemantics::OrderCompareLocal( const Orderable *candidate, 
                                                              OrderProperty order_property ) const
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
-    ASSERT(c);    
+    auto c = GET_THAT_POINTER(candidate); 
 
     Orderable::Result r;
     switch( order_property )
