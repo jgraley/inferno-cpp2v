@@ -45,7 +45,7 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetValue()->IsDefinedAndTrue() )
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
         
     // This is already an equals operator, so very close to the semantics of

@@ -23,7 +23,7 @@ shared_ptr<SymbolResultInterface> SymbolConstant::GetValue() const
 }
 
 
-SR::XLink SymbolConstant::GetXLink() const
+SR::XLink SymbolConstant::GetAsXLink() const
 {
     return xlink;
 }
@@ -122,9 +122,9 @@ shared_ptr<BooleanResultInterface> BooleanConstant::Evaluate( const EvalKit &kit
 }
 
 
-shared_ptr<BooleanResultInterface> BooleanConstant::GetValue() const
+bool BooleanConstant::GetAsBool() const
 {
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, value );
+    return value;
 }
 
 

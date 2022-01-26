@@ -19,7 +19,7 @@ shared_ptr<Expression> BooleanOperator::TrySolveForToEqualNT( shared_ptr<Express
 
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetValue()->IsDefinedAndTrue() )
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
 
     PartialSolution psol = PartialSolveFor( target );
@@ -226,7 +226,7 @@ shared_ptr<Expression> AndOperator::TrySolveForToEqualNT( shared_ptr<Expression>
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetValue()->IsDefinedAndTrue() )
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
 
     // With AndOperator, solving via any clause solves the whole thing. So try that first.
@@ -393,7 +393,7 @@ shared_ptr<Expression> BoolEqualOperator::TrySolveForToEqualNT( shared_ptr<Expre
 {
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetValue()->IsDefinedAndTrue() )
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
         
     // This is already an equals operator, so very close to the semantics of

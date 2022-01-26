@@ -21,8 +21,7 @@ BooleanExpressionSet PreprocessForEngine::operator()( BooleanExpressionSet in ) 
     {
         if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
-            shared_ptr<BooleanResultInterface> r = bool_const_expr->GetValue();
-            switch(r->GetAsBool())
+            switch(bool_const_expr->GetAsBool())
             {
             case true:
                 break; // no action required
@@ -80,7 +79,7 @@ shared_ptr<BooleanExpression> CreateTidiedOperator<OP>::operator()( list< shared
         else if( auto bconst_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
             // Handle finding constant booleans relevent to the operator
-            if( bconst_expr->GetValue()->GetAsBool() == identity )                
+            if( bconst_expr->GetAsBool() == identity )                
             {
                 // drop the clause - has no effect
             }

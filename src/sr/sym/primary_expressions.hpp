@@ -20,7 +20,7 @@ public:
     explicit SymbolConstant( SR::XLink xlink );
     virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
     shared_ptr<SymbolResultInterface> GetValue() const;
-    SR::XLink GetXLink() const;
+    SR::XLink GetAsXLink() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
@@ -62,7 +62,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit BooleanConstant( bool value );
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
-    shared_ptr<BooleanResultInterface> GetValue() const;
+    bool GetAsBool() const;    
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
