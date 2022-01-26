@@ -169,16 +169,9 @@ shared_ptr<BooleanResultInterface> NotOperator::Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
     shared_ptr<BooleanResultInterface> ra = op_results.front();
-    if( ra->IsDefinedAndUnique() )
+    if( ra->IsDefinedAndUnique() ) // DEFINED
     {
-        if( ra->GetAsBool() ) // TRUE
-        {
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
-        }
-        else // FALSE
-        {
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
-        }
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, !ra->GetAsBool() );
     }
     else // UNDEFINED
     {
@@ -390,10 +383,8 @@ shared_ptr<BooleanResultInterface> BoolEqualOperator::Evaluate( const EvalKit &k
     if( !rb->IsDefinedAndUnique() )
         return rb;
     
-    if( ra->GetAsBool() == rb->GetAsBool() )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
-    else
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );     
+    bool res = ( ra->GetAsBool() == rb->GetAsBool() );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );     
 }
 
 

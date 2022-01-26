@@ -77,9 +77,8 @@ shared_ptr<BooleanResultInterface> GreenGrassAgent::IsGreenGrassOperator::Evalua
     if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
-    if( dirty_grass->count( ra->GetAsXLink().GetChildX() ) > 0 ) 
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );         
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
+    bool res = ( dirty_grass->count( ra->GetAsXLink().GetChildX() ) == 0 ); 
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );         
 }
 
 

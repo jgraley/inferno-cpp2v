@@ -35,10 +35,8 @@ shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
-    if( ra->GetAsXLink() == rb->GetAsXLink() )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
-    else
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );        
+    bool res = ( ra->GetAsXLink() == rb->GetAsXLink() );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );   
 }
 
 
@@ -125,10 +123,8 @@ shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const Eval
     SR::TheKnowledge::IndexType index_a = nugget_a.depth_first_index;
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
-    if( EvalBoolFromIndexes( index_a, index_b ) )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
-    else
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );   
+    bool res = EvalBoolFromIndexes( index_a, index_b );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );  
 }
 
 
@@ -369,10 +365,8 @@ shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const 
     ASSERT( p_x_col )("item_index didn't lead to a collection");
     
     // Check that the size is as required
-    if( p_x_col->size() == size )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
-    else
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+    bool res = ( p_x_col->size() == size );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );
 }
 
 
@@ -444,11 +438,8 @@ shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
-    if( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL  )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
-    else
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );    
-
+    bool res = ( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );    
 }
 
 
