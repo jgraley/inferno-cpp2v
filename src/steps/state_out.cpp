@@ -39,10 +39,10 @@ GotoAfterWait::GotoAfterWait()
           
     all_over->through = all;
     all_over->overlay = anynode;
-    all->patterns = (anynode, notmatch);
+    all->conjuncts = (anynode, notmatch);
     anynode->terminus = over;
     over->through = wait;
-    notmatch->pattern = sx_comp;
+    notmatch->negand = sx_comp;
     sx_comp->members = sx_decls;
     sx_comp->statements = (sx_pre, wait, sx_goto, sx_post);    
     
@@ -69,7 +69,7 @@ GotoAfterWait::GotoAfterWait()
         
     s_comp->members = (decls);
     s_comp->statements = (pre, wait, notmatch, post);
-    notmatch->pattern = sx_goto;
+    notmatch->negand = sx_goto;
     
     r_comp->members = (decls);
     r_comp->statements = (pre, wait, r_goto, r_label, notmatch, post);
@@ -94,8 +94,8 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     MakePatternPtr< Conjunction<Statement> > s_all;
     MakePatternPtr< Negation<Statement> > sx_not;    
     
-    s_all->patterns = (s_comp, sx_not);
-    sx_not->pattern = sx_comp;    
+    s_all->conjuncts = (s_comp, sx_not);
+    sx_not->negand = sx_comp;    
     iif->condition = cond;
     iif->body = then_goto;
     iif->else_body = MakePatternPtr<Nop>(); 
@@ -153,8 +153,8 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     MakePatternPtr< Conjunction<Compound> > s_all;
     MakePatternPtr< Negation<Compound> > s_not;
         
-    s_all->patterns = (s_comp, s_not);
-    s_not->pattern = sx_comp;
+    s_all->conjuncts = (s_comp, s_not);
+    s_not->negand = sx_comp;
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, label, post );    
     label->identifier = label_id;
@@ -198,8 +198,8 @@ EnsureBootstrap::EnsureBootstrap()
     fn->type = thread;
     fn->initialiser = over;
     over->through = s_all;
-    s_all->patterns = (s_not, s_body);
-    s_not->pattern = sx_body;
+    s_all->conjuncts = (s_not, s_body);
+    s_not->negand = sx_body;
     // only exclude if there is a goto; a goto to anywhere will suffice to boot the state machine
     sx_body->members = (MakePatternPtr< Star<Declaration> >());
     sx_body->statements = (sx_pre, sx_goto, MakePatternPtr< Star<Statement> >());     
@@ -210,7 +210,7 @@ EnsureBootstrap::EnsureBootstrap()
     s_body->members = decls;
     s_body->statements = (pre, stop, post);
     pre->restriction = MakeResetAssignmentPattern();    
-    stop->pattern = MakeResetAssignmentPattern();
+    stop->negand = MakeResetAssignmentPattern();
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
     r_body->members = decls;
@@ -232,7 +232,7 @@ AddStateLabelVar::AddStateLabelVar()
     MakePatternPtr< BuildInstanceIdentifierAgent > state_var_id("state");
     
     ls_goto->destination = lsx_not;
-    lsx_not->pattern = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
+    lsx_not->negand = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
     
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var_id, lsx_not);
@@ -243,7 +243,7 @@ AddStateLabelVar::AddStateLabelVar()
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
     sx_goto->destination = sx_not;
-    sx_not->pattern = MakePatternPtr<InstanceIdentifier>();
+    sx_not->negand = MakePatternPtr<InstanceIdentifier>();
         
     r_comp->members = (state_var, decls);
     r_comp->statements = (pre, sx_goto, post); 
@@ -272,14 +272,14 @@ EnsureSuperLoop::EnsureSuperLoop()
     fn->type = thread;
     fn->initialiser = over;
     over->through = s_all;
-    s_all->patterns = (sx_stuff, s_body);
+    s_all->conjuncts = (sx_stuff, s_body);
     sx_stuff->terminus = sx_goto;
     sx_stuff->recurse_restriction = sx_not;
-    sx_not->pattern = MakePatternPtr<Do>();
+    sx_not->negand = MakePatternPtr<Do>();
     s_body->members = (decls);
     s_body->statements = (pre, first_goto, post);
     pre->restriction = s_limit;
-    s_limit->pattern = MakePatternPtr<Goto>();
+    s_limit->negand = MakePatternPtr<Goto>();
     
     over->overlay = r_body;
     r_body->members = (decls);
@@ -334,10 +334,10 @@ SwitchCleanUp::SwitchCleanUp()
     s_body->members = decls;
     s_body->statements = (main, label, tail);
     main->restriction = sx_not_main;
-    sx_not_main->pattern = MakePatternPtr<Break>();
+    sx_not_main->negand = MakePatternPtr<Break>();
     tail->restriction = sx_not_tail;
-    sx_not_tail->pattern = sx_any_tail;
-    sx_any_tail->patterns = (MakePatternPtr<Break>(), MakePatternPtr<Case>());
+    sx_not_tail->negand = sx_any_tail;
+    sx_any_tail->disjuncts = (MakePatternPtr<Break>(), MakePatternPtr<Case>());
     
     r_comp->statements = (r_switch, label, tail);
     r_switch->condition = cond;
@@ -390,9 +390,9 @@ FixFallthrough::FixFallthrough()
     r_comp->members = (decls);
     r_comp->statements = (pre, case1, cb1, cb2, breakk, case2, cb2, breakk, post);
     cb1->restriction = s_not1;
-    s_not1->pattern = MakePatternPtr<Break>();
+    s_not1->negand = MakePatternPtr<Break>();
     cb2->restriction = s_not2;
-    s_not2->pattern = MakePatternPtr<Case>();
+    s_not2->negand = MakePatternPtr<Case>();
         
     Configure( SEARCH_REPLACE, s_comp, r_comp );            
 }
@@ -456,10 +456,10 @@ AddYieldFlag::AddYieldFlag()
     lr_and->operands = (l_equal, lr_not);
     lr_not->operands = (r_flag_id);
 
-    ms_all->patterns = (ms_comp, ms_not);
+    ms_all->conjuncts = (ms_comp, ms_not);
     ms_comp->members = (m_decls);
     ms_comp->statements = (m_pre, m_wait, m_post);
-    ms_not->pattern = msx_comp;
+    ms_not->negand = msx_comp;
     msx_comp->members = msx_decls;
     msx_comp->statements = (msx_pre, msx_assign, msx_post);
     msx_assign->operands = (r_flag_id, MakePatternPtr<Bool>());
@@ -500,10 +500,10 @@ AddInferredYield::AddInferredYield()
     func_comp->statements = (func_pre, loop);
     loop->body = over;
     over->through = s_all;
-    s_all->patterns = (s_comp, s_notmatch);
+    s_all->conjuncts = (s_comp, s_notmatch);
     s_comp->members = (flag_decl);
     s_comp->statements = (stmts);
-    s_notmatch->pattern = sx_comp;
+    s_notmatch->negand = sx_comp;
     sx_comp->members = (flag_decl);
     sx_comp->statements = (sx_pre, sx_if);
     sx_if->condition = sx_not;
@@ -605,7 +605,7 @@ LoopRotation::LoopRotation()
     func_comp->statements = (inits, loop);
     loop->body = over;
     over->through = s_all;
-    s_all->patterns = (s_comp_loop, s_comp_yield, s_notmatch);
+    s_all->conjuncts = (s_comp_loop, s_comp_yield, s_notmatch);
     s_comp_loop->members = (comp_loop_decls);
     // Search for a loop. Assume that a state enum value in a body means "could transition to the state" and one in
     // the condition means "acts on the state". If we see the latter with the former blow it somewhere, we call
@@ -615,9 +615,9 @@ LoopRotation::LoopRotation()
     loop_top_stuff->terminus = loop_top_equal;
     loop_top_equal->operands = (s_var_id, s_cur_enum_id);
     loop_bottom->body = loop_bottom_matchall;
-    loop_bottom_matchall->patterns = (loop_bottom_stuff_enum, loop_bottom_notmatch);
+    loop_bottom_matchall->conjuncts = (loop_bottom_stuff_enum, loop_bottom_notmatch);
     loop_bottom_stuff_enum->terminus = s_cur_enum_id;
-    loop_bottom_notmatch->pattern = loop_bottom_stuff_noyield;
+    loop_bottom_notmatch->negand = loop_bottom_stuff_noyield;
     loop_bottom_stuff_noyield->terminus = MakePatternPtr<Wait>();    
     s_comp_yield->members = (comp_yield_decls);
     
@@ -630,18 +630,18 @@ LoopRotation::LoopRotation()
     // This part is to make sure we operate on the outermost loop first - look for another loop surrounding 
     // the current one, if it does not end in a yield, then do not transform. This way the outer loop will
     // keep getting hits until the yield is at the bottom, then inner loops can have a go.
-    s_notmatch->pattern = sx_comp;
+    s_notmatch->negand = sx_comp;
     sx_comp->members = (x_comp_decls);
     sx_comp->statements = (prepre, outer_top, postpre, inner_state, prepost, outer_bottom, postpost);
     outer_top->condition = outer_top_stuff;
     outer_top_stuff->terminus = outer_top_equal;
     outer_top_equal->operands = (s_var_id, s_outer_enum_id);
     outer_bottom->body = outer_bottom_matchall;
-    outer_bottom_matchall->patterns = (outer_bottom_stuff_enum, outer_bottom_notmatch);
+    outer_bottom_matchall->conjuncts = (outer_bottom_stuff_enum, outer_bottom_notmatch);
     outer_bottom_stuff_enum->terminus = s_outer_enum_id;
-    outer_bottom_notmatch->pattern = outer_bottom_stuff_noyield;
+    outer_bottom_notmatch->negand = outer_bottom_stuff_noyield;
     outer_bottom_stuff_noyield->terminus = MakePatternPtr<Wait>();    
-    inner_state->patterns = (loop_top, loop_bottom); // outer loop can share top or bottom state with inner loop; but not both, so at least one must be here
+    inner_state->disjuncts = (loop_top, loop_bottom); // outer loop can share top or bottom state with inner loop; but not both, so at least one must be here
    
     over->overlay = r_comp;
     r_comp->members = (comp_loop_decls);

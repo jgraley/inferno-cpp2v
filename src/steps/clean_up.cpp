@@ -62,17 +62,17 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
 
     root_stuff->terminus = root_overlay;
     root_stuff->recurse_restriction = root_not;
-    root_not->pattern = root_ce;
+    root_not->negand = root_ce;
     root_ce->members = ( MakePatternPtr< Star<Declaration> >() );
     root_ce->statements = ( MakePatternPtr< Star<Statement> >() );
     root_overlay->through = s_all;
     root_overlay->overlay = r_comp;
     
-    s_all->patterns = (stuff, sx_pointeris);
+    s_all->conjuncts = (stuff, sx_pointeris);
     sx_pointeris->pointer = sx_not;
-    sx_not->pattern = sx_expr;
+    sx_not->negand = sx_expr;
     stuff->recurse_restriction = sr_not;
-    sr_not->pattern = sr_comp;
+    sr_not->negand = sr_comp;
     sr_comp->members = sr_cdecls;
     sr_comp->statements = sr_cstmts;
     
@@ -131,9 +131,9 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     MakePatternPtr<Compound> s_comp;
     MakePatternPtr< Statement > body;
 
-    all->patterns = (node, sx_not);
+    all->conjuncts = (node, sx_not);
     node->terminus = over;
-    sx_not->pattern = sx_instance;
+    sx_not->negand = sx_instance;
     sx_instance->initialiser = s_comp;
     over->through = s_comp;
     over->overlay = body;
@@ -192,7 +192,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     MakePatternPtr<InstanceIdentifier> identifier;
     MakePatternPtr<Callable> type;
     
-    l_s_orrule->patterns = (s_labelid1, s_labelid2);
+    l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
     MakePatternPtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
     
@@ -248,7 +248,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     MakePatternPtr<Callable> type;
     MakePatternPtr<Goto> s_goto, r_goto;
     
-    l_s_orrule->patterns = (s_labelid1, s_labelid2);
+    l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
     MakePatternPtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
     
@@ -329,14 +329,14 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;
     s_instance->type = type;
-    s_andrule->patterns = (stuff, sx_notrule);
+    s_andrule->conjuncts = (stuff, sx_notrule);
     s_comp->members = decls;
     s_comp->statements = (pre, s_label, post);
     s_label->identifier = labelid;
                     
-    sx_notrule->pattern = sx_stuff;
+    sx_notrule->negand = sx_stuff;
     sx_stuff->recurse_restriction = sxx_notrule;
-    sxx_notrule->pattern = sxx_label;
+    sxx_notrule->negand = sxx_label;
     sx_stuff->terminus = labelid;
     
     r_instance->initialiser = stuff;
@@ -364,9 +364,9 @@ CleanUpDeadCode::CleanUpDeadCode()
      
     s_comp->members = decls;
     s_comp->statements = ( pre, s_exit_any, s_dead_not, post );
-    s_exit_any->patterns = (MakePatternPtr<Break>(), MakePatternPtr<Continue>(), MakePatternPtr<Return>(), MakePatternPtr<Goto>());
-    s_dead_not->pattern = s_dead_any;
-    s_dead_any->patterns = (MakePatternPtr<Case>(), MakePatternPtr<Default>(), MakePatternPtr<Label>());
+    s_exit_any->disjuncts = (MakePatternPtr<Break>(), MakePatternPtr<Continue>(), MakePatternPtr<Return>(), MakePatternPtr<Goto>());
+    s_dead_not->negand = s_dead_any;
+    s_dead_any->disjuncts = (MakePatternPtr<Case>(), MakePatternPtr<Default>(), MakePatternPtr<Label>());
     r_comp->members = decls;
     r_comp->statements = ( pre, s_exit_any, post );
     
@@ -387,9 +387,9 @@ ReduceVoidStatementExpression::ReduceVoidStatementExpression()
     
     s_ce->members = (decls);
     s_ce->statements = (stmts, last);
-    last->pattern = sx_expr;
+    last->negand = sx_expr;
     sx_expr->pattern = sx_type_not;
-    sx_type_not->pattern = sx_void;
+    sx_type_not->negand = sx_void;
     r_comp->members = (decls);
     r_comp->statements = (stmts, last);
     
@@ -416,7 +416,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     MakePatternPtr<InheritanceRecord> sx_ir;     
     MakePatternPtr< Negation<Scope> > s_nscope;
     
-    s_all->patterns = (stuff1, s_nscope);
+    s_all->conjuncts = (stuff1, s_nscope);
     stuff1->terminus = over_scope;
     over_scope->through = s_scope;
     over_scope->overlay = r_scope;
@@ -425,17 +425,17 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     inst->type = nested_array;
     inst->identifier = id;
     nested_array->terminus = sx_not;
-    sx_not->pattern = sx_any;
-    sx_any->patterns = ( MakePatternPtr<Callable>(),
+    sx_not->negand = sx_any;
+    sx_any->disjuncts = ( MakePatternPtr<Callable>(),
                          getdecl );
     getdecl->pattern = sx_ir;
     sx_ir->members = MakePatternPtr< Star<Declaration> >();
     sx_ir->bases = MakePatternPtr< Star<Base> >();
-    s_nscope->pattern = s_stuff2;
+    s_nscope->negand = s_stuff2;
     s_stuff2->terminus = s_antip;
-    s_antip->patterns = (s_anynode, s_nm);
+    s_antip->conjuncts = (s_anynode, s_nm);
     s_anynode->terminus = id;
-    s_nm->pattern = inst;
+    s_nm->negand = inst;
                         
     Configure( COMPARE_REPLACE, s_all, stuff1 );
 }

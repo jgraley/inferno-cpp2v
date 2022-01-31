@@ -13,7 +13,7 @@ using namespace SYM;
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-	pq->RegisterAbnormalLink( PatternLink(this, GetPattern()) );
+	pq->RegisterAbnormalLink( PatternLink(this, GetNegand()) );
     
     auto evaluator = make_shared<BooleanEvaluator>( [this](list<bool> inputs) -> bool
     {
@@ -30,11 +30,11 @@ void NegationAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink keyer_xlink ) const
 {
     INDENT("¬");
-    ASSERT( *GetPattern() );
+    ASSERT( *GetNegand() );
     query.Reset();
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), keyer_xlink ); // Link into X, abnormal
+    query.RegisterAbnormalLink( PatternLink(this, GetNegand()), keyer_xlink ); // Link into X, abnormal
 }
 
 
@@ -75,11 +75,11 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
 	block.shape = "diamond";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetPattern()->get()), 
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetNegand()->get()), 
               list<string>{},
               list<string>{},
               phase,
-              GetPattern() );
+              GetNegand() );
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,

@@ -38,8 +38,8 @@ AutosToModule::AutosToModule()
     // TODO recurse restriction for locally declared classes
     stuff->terminus = over;
     over->through = s_all;
-    s_all->patterns = (sx_not, s_comp);
-    sx_not->pattern = sx_stuff;
+    s_all->conjuncts = (sx_not, s_comp);
+    sx_not->negand = sx_stuff;
     sx_stuff->terminus = sx_call;
     s_comp->members = (vdecls, s_var);
     s_comp->statements = (vstmts);
@@ -88,7 +88,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     over->through = s_comp;
     s_comp->members = (vdecls, var);
     s_comp->statements = (vstmts);
-    var->patterns = (tempvar, staticvar);
+    var->disjuncts = (tempvar, staticvar);
      
     over->overlay = r_comp;
     r_comp->members = (vdecls);
@@ -206,7 +206,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     m_stuff->terminus = m_return;
     m_return->return_value = m_uninit;
     m_over->through = ms_affected;
-    ms_affected->pattern = ms_if;
+    ms_affected->negand = ms_if;
     ms_if->condition = r_flag_id;
     m_over->overlay = mr_if;
     mr_if->condition = r_flag_id;
@@ -220,7 +220,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     
     MakePatternPtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_return, lr_assign);
     
-    s_all->patterns = (inst, s_stuff);
+    s_all->conjuncts = (inst, s_stuff);
     inst->type = s_callable; // TODO when functions are sorted out, set return type to void
     inst->initialiser = slavel;
     s_stuff->terminus = s_return;

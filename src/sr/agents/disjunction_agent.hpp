@@ -31,8 +31,8 @@ public:
     virtual Block GetGraphBlockInfo() const;
     
     // Interface for pattern trasformation
-    virtual void SetPatterns( CollectionInterface &ci ) = 0;
-    virtual CollectionInterface &GetPatterns() const = 0;
+    virtual void SetDisjuncts( CollectionInterface &ci ) = 0;
+    virtual CollectionInterface &GetDisjuncts() const = 0;
     virtual TreePtr<Node> CloneToEmpty() const = 0;
     
 private:
@@ -55,22 +55,22 @@ public:
     }
     
     // Patterns are an abnormal context
-    mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
+    mutable Collection<PRE_RESTRICTION> disjuncts; // TODO provide const iterators and remove mutable
 private:
-    virtual CollectionInterface &GetPatterns() const override
+    virtual CollectionInterface &GetDisjuncts() const override
     {
-        return patterns;
+        return disjuncts;
     }
     
-    virtual void SetPatterns( CollectionInterface &ci ) override
+    virtual void SetDisjuncts( CollectionInterface &ci ) override
     {
         // Note: options should not have been set yet during ptrans so 
         // only need to update patterns
-        patterns.clear();
+        disjuncts.clear();
         for( CollectionInterface::iterator pit = ci.begin(); 
              pit != ci.end(); 
              ++pit )    
-            patterns.insert( TreePtr<PRE_RESTRICTION>::DynamicCast(*pit) );      
+            disjuncts.insert( TreePtr<PRE_RESTRICTION>::DynamicCast(*pit) );      
     }
     
     virtual TreePtr<Node> CloneToEmpty() const override

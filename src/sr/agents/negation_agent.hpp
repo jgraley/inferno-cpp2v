@@ -29,7 +29,7 @@ public:
     virtual Block GetGraphBlockInfo() const;
     
 private:
-    virtual const TreePtrInterface *GetPattern() const = 0;
+    virtual const TreePtrInterface *GetNegand() const = 0;
 };
 
 
@@ -47,12 +47,12 @@ public:
     
     // Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
     // is no type-correctness limitation with *excluding* a kind of node. Use the virtual
-    // GetPattern() anyway, for consistency.
-    TreePtr<Node> pattern;
+    // GetNegand() anyway, for consistency.
+    TreePtr<Node> negand;
 private:
-    virtual const TreePtrInterface *GetPattern() const
+    virtual const TreePtrInterface *GetNegand() const
     {
-        return &pattern;
+        return &negand;
     }
 };
     

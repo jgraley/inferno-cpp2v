@@ -14,7 +14,7 @@ void SplitDisjunctions::DoPatternTransformation( const PatternKnowledge &pk )
 
 void SplitDisjunctions::MaybeSplit( DisjunctionAgent *da )
 {
-    CollectionInterface &patterns = da->GetPatterns();
+    CollectionInterface &patterns = da->GetDisjuncts();
     switch( patterns.size() )
     {
         case 0:
@@ -30,7 +30,7 @@ void SplitDisjunctions::MaybeSplit( DisjunctionAgent *da )
 
 void SplitDisjunctions::Split( DisjunctionAgent *da )
 {
-    CollectionInterface &patterns = da->GetPatterns();
+    CollectionInterface &patterns = da->GetDisjuncts();
     int size = patterns.size();
     //FTRACE("Would split ")(*da)(" with %d children", patterns.size())("\n");
     int split_point = (size+1)/2; // round up
@@ -52,7 +52,7 @@ void SplitDisjunctions::Split( DisjunctionAgent *da )
     Collection<Node> new_patterns;    
     new_patterns.insert( ReduceToNode(l_patterns, da) );
     new_patterns.insert( ReduceToNode(r_patterns, da) );    
-    da->SetPatterns( new_patterns );
+    da->SetDisjuncts( new_patterns );
 }
 
 
@@ -69,7 +69,7 @@ TreePtr<Node> SplitDisjunctions::ReduceToNode( Collection<Node> &patterns, Disju
             TreePtr<Node> new_dnode = da->CloneToEmpty();
             
             auto new_da = dynamic_cast<DisjunctionAgent *>( Agent::AsAgent( new_dnode ) );
-            new_da->SetPatterns( patterns );
+            new_da->SetDisjuncts( patterns );
             MaybeSplit(new_da);
 
             return new_dnode;

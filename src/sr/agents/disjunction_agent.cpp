@@ -16,7 +16,7 @@ void DisjunctionAgent::SCRConfigure( const SCREngine *e,
     AgentCommon::SCRConfigure(e, phase);
 
     options = make_shared< Collection<Node> >();
-    FOREACH( const TreePtrInterface &p, GetPatterns() )
+    FOREACH( const TreePtrInterface &p, GetDisjuncts() )
         options->insert( p );
 }
 
@@ -25,7 +25,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
     pq->RegisterDecision(false); // Exclusive, please
-    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
+    for( CollectionInterface::iterator pit = GetDisjuncts().begin(); pit != GetDisjuncts().end(); ++pit )                 
     {
         const TreePtrInterface *p = &*pit; 
 	    pq->RegisterNormalLink( PatternLink(this, p) );
@@ -39,16 +39,16 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                             XLink x ) const
 {
     INDENT("∨");
-    ASSERT( !GetPatterns().empty() ); // must be at least one thing!
+    ASSERT( !GetDisjuncts().empty() ); // must be at least one thing!
     
     // Check pre-restriction
     if( !IsLocalMatch( x.GetChildX().get() ) )
         throw PreRestrictionMismatch();
 
     // We register a decision that actually chooses between our agents - that
-    // is, the options for the OR operation.
+    // is, the disjuncts for the OR operation.
     ContainerInterface::iterator choice_it = query.RegisterDecision( options, false );
-    FOREACH( const TreePtrInterface &p, GetPatterns() )                 
+    FOREACH( const TreePtrInterface &p, GetDisjuncts() )                 
     {
         PatternLink plink(this, &p);
 
@@ -84,10 +84,10 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
     XLink keyer_xlink;
     keyer_xlink = hypothesis_links->at(keyer_plink);
         
-    // Loop over the options for this disjunction and collect the links 
+    // Loop over the disjuncts for this disjunction and collect the links 
     // that are not MMAX. Also take note of missing children.
     list<XLink> non_mmax_residuals;
-    FOREACH( const TreePtrInterface &p, GetPatterns() )           
+    FOREACH( const TreePtrInterface &p, GetDisjuncts() )           
     {
         PatternLink plink(this, &p);
         XLink xlink = hypothesis_links->at(plink); 
@@ -128,7 +128,7 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
     
     list< shared_ptr<BooleanExpression> > is_mmax_exprs, is_keyer_exprs;
-    FOREACH( const TreePtrInterface &p, GetPatterns() )           
+    FOREACH( const TreePtrInterface &p, GetDisjuncts() )           
     {
         PatternLink c_plink(this, &p);
         auto c_expr = MakeOver<SymbolVariable>(c_plink);
@@ -139,9 +139,9 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
     auto non_mmax_case_expr = MakeOver<BooleanConstant>(true);
     if( ReadArgs::split_disjunctions )
     {
-        ASSERT( GetPatterns().size() == 2 )
-              ("Got %d choices; to support more than 2 options, enable SplitDisjunctions; fewer than 2 not allowed", GetPatterns().size());
-        // This is actually the only part that's hard with more than 2 options
+        ASSERT( GetDisjuncts().size() == 2 )
+              ("Got %d choices; to support more than 2 disjuncts, enable SplitDisjunctions; fewer than 2 not allowed", GetDisjuncts().size());
+        // This is actually the only part that's hard with more than 2 disjuncts
         non_mmax_case_expr &= is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
     }
     else
@@ -182,7 +182,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
                            "", 
                            true,
                            {} } };
-    FOREACH( const TreePtrInterface &p, GetPatterns() )
+    FOREACH( const TreePtrInterface &p, GetDisjuncts() )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                   list<string>{},

@@ -32,7 +32,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     MakePatternPtr< Negation<Compound> > s_not;
         
     fi->type = s_any;
-    s_any->patterns = (s_func, s_proc, MakePatternPtr<Subroutine>() );
+    s_any->disjuncts = (s_func, s_proc, MakePatternPtr<Subroutine>() );
     s_proc->members = MakePatternPtr< Star<Declaration> >();
     s_func->members = MakePatternPtr< Star<Declaration> >();
     s_func->return_type = MakePatternPtr< Void >();
@@ -40,8 +40,8 @@ ExplicitiseReturn::ExplicitiseReturn()
     s_comp->members = decls;
     s_comp->statements = (pre);
     over->through = s_all;
-    s_all->patterns = (s_comp, s_not);
-    s_not->pattern = sx_comp;
+    s_all->conjuncts = (s_comp, s_not);
+    s_not->negand = sx_comp;
     sx_comp->members = sx_decls;
     sx_comp->statements = (sx_pre, sx_return);
     
@@ -67,7 +67,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     // Restrict the search to returns that have an automatic variable under them
     TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> ); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
                                                                     // use Not<GetDec<Temp>>
-    s_and->patterns = ( retval, cs_stuff );
+    s_and->conjuncts = ( retval, cs_stuff );
     MakePatternPtr< TransformOf<InstanceIdentifier> > cs_id( &GetDeclaration::instance );
     cs_stuff->terminus = cs_id;
     TreePtr<Instance> cs_instance( new Automatic );
@@ -143,7 +143,7 @@ ReturnViaTemp::ReturnViaTemp()
     cp->members = (params);  
     cp->return_type = overcp;
     overcp->through = return_type;
-    return_type->pattern = sx_void;
+    return_type->negand = sx_void;
     overi->overlay = slavel;
     r_body->members = (locals);
     r_body->statements = (statements);
@@ -431,8 +431,8 @@ GenerateStacks::GenerateStacks()
     over->overlay = r_fi;    
     s_fi->identifier = r_fi->identifier = fi_id;
     s_fi->type = r_fi->type = s_not;
-    s_not->pattern = sx_any;
-    sx_any->patterns = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
+    s_not->negand = sx_any;
+    sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
     s_fi->initialiser = s_and;   
     r_fi->initialiser = temp;   
     s_top_comp->members = ( top_decls );
@@ -440,7 +440,7 @@ GenerateStacks::GenerateStacks()
 
     // Construct limitation - restrict master search to functions that contain an automatic variable
     cs_stuff->terminus = cs_instance;
-    s_and->patterns = ( s_top_comp, cs_stuff );
+    s_and->conjuncts = ( s_top_comp, cs_stuff );
 
     // Master replace - insert index variable, inc and dec into function at top level
     // top-level decls
@@ -513,7 +513,7 @@ GenerateStacks::GenerateStacks()
 
     // Construct limitation - restrict master search to functions that contain an automatic variable
     cs_stuff->terminus = cs_instance;
-    s_and->patterns = ( s_top_comp, cs_stuff );
+    s_and->conjuncts = ( s_top_comp, cs_stuff );
 
     // Master replace - insert index variable, inc and dec into function at top level
     MakePatternPtr< SlaveSearchReplace<Statement> > r_slave( stuff, s_identifier, l_r_sub );
@@ -610,7 +610,7 @@ MergeFunctions::MergeFunctions()
     thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;
-    s_all->patterns = (s_thread_comp, s_stuff);
+    s_all->conjuncts = (s_thread_comp, s_stuff);
     s_stuff->terminus = s_call;
     s_thread_comp->members = (thread_decls);
     s_thread_comp->statements = (thread_stmts);
