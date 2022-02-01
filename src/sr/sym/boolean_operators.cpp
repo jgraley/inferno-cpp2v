@@ -217,7 +217,7 @@ shared_ptr<BooleanResultInterface> AndOperator::Evaluate( const EvalKit &kit,
     // Lower certainly dominates
     return *min_element( op_results.begin(), 
                          op_results.end(), 
-                         DereferencingCompare<std::shared_ptr<SYM::BooleanResultInterface>> );
+                         DereferencingCompare<shared_ptr<BooleanResultInterface>> );
 }
 
 
@@ -309,7 +309,7 @@ shared_ptr<BooleanResultInterface> OrOperator::Evaluate( const EvalKit &kit,
     // Higher certainly dominates
     return *max_element( op_results.begin(), 
                          op_results.end(), 
-                         DereferencingCompare<std::shared_ptr<SYM::BooleanResultInterface>> );
+                         DereferencingCompare<shared_ptr<BooleanResultInterface>> );
 }
 
 
