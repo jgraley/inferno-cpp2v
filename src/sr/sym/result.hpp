@@ -32,8 +32,6 @@ public:
     virtual bool GetAsBool() const = 0;    
     
     virtual bool operator<( const BooleanResultInterface &other ) const = 0;
-    static bool CertaintyCompare( const shared_ptr<BooleanResultInterface> &a, 
-                                  const shared_ptr<BooleanResultInterface> &b );
 };
 
 // ------------------------- BooleanResult --------------------------

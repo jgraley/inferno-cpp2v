@@ -3,14 +3,6 @@
 
 using namespace SYM;
 
-// ------------------------- BooleanResultInterface --------------------------
-
-bool BooleanResultInterface::CertaintyCompare( const shared_ptr<BooleanResultInterface> &a, 
-                                               const shared_ptr<BooleanResultInterface> &b )
-{
-    return *a < *b;
-}                                      
-
 // ------------------------- BooleanResult --------------------------
 
 BooleanResult::BooleanResult( Category cat, bool value )
