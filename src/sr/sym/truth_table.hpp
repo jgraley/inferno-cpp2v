@@ -74,6 +74,7 @@ void ForPower( int degree, vector<AXIS_TYPE> index_range, function<void(vector<A
 }
 
 
+// The value range of a bool, to be used with ForPower
 const vector<bool> index_range_bool = {false, true};
              
 // ------------------------- TruthTable --------------------------
