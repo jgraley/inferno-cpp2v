@@ -39,8 +39,7 @@ void ScatterInto( vector<VALUE_TYPE> &dest_vec, const map<int, VALUE_TYPE> &my_m
 }
 
 
-// Lexicographical increment over a vector of INDEX_TYPE. INDEX_TYPE has to
-// be incrementable, comparable, have a zero and be able to overflow by 1   
+// Lexicographical increment over a vector of int.
 bool IncrementIndices( vector<int> &indices, int index_range )
 {
     for( typename vector<int>::reverse_iterator it = indices.rbegin(); 
