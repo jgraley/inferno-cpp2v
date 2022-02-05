@@ -99,6 +99,13 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
     // Standard algorithm - first thing to try is to see if any of the clauses provide a solution
     if( !solveables.empty() )
         return FrontOf(solveables).second;
+
+    // TODO:
+    // Build an implication table, mapping bool x expr -> set<expr>
+    // (or multimap). The bools are "not" flags (NotOperator to be detected and removed, toggling flag)
+    // BooleanEqual becomes 2 entries in table: left and right
+    // To solve, search for (true, a)->b and (false, a)->c in the table SUCH THAT
+    // a indep t; b and c solveable for t.
     
     // "Special Stuff" for solving the standard clutch logic (EQUALITY_METHOD only)
     if( implies.size()==1 && 
@@ -113,13 +120,13 @@ shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable
             imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op->GetOperands().front());
         beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front()); 
                                   
-        if( imply_nequal_op && beq_equal_op &&
+        if( imply_nequal_op && beq_equal_op && 
             Expression::OrderCompare( imply_nequal_op, beq_equal_op ) == EQUAL )
         {
             // Fronts of imply and beq are negation of each other.
             shared_ptr<SymbolExpression> try_solve_b = beq_ops.back()->TrySolveFor(target);
             shared_ptr<SymbolExpression> try_solve_c = imply_ops.back()->TrySolveFor(target);
-            if( try_solve_b && try_solve_c )
+            if( try_solve_b && try_solve_c && beq_ops.front()->IsIndependentOf(target))
             {
                 return make_shared<ConditionalOperator>( beq_ops.front(),
                                                          try_solve_b,
