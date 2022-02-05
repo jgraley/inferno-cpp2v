@@ -16,7 +16,7 @@ namespace SYM
 
 // Convert a pair of equal-length vectors to a map. Keys must be unique.
 template<typename KEYS_TYPE, typename VALUES_TYPE>
-map<typename KEYS_TYPE::value_type, typename VALUES_TYPE::value_type> MakeMap( const KEYS_TYPE &keys, const VALUES_TYPE &values )
+map<typename KEYS_TYPE::value_type, typename VALUES_TYPE::value_type> ZipToMap( const KEYS_TYPE &keys, const VALUES_TYPE &values )
 {
     ASSERT( keys.size() == values.size() );
     map<typename KEYS_TYPE::value_type, typename VALUES_TYPE::value_type> my_map;
@@ -30,8 +30,7 @@ map<typename KEYS_TYPE::value_type, typename VALUES_TYPE::value_type> MakeMap( c
 }
 
 
-// Overwrite some values of a vector as dictated by a map. Key has to be size_type
-// since that's how you index a vector. dest_vec must already be big enough.
+// Overwrite some values of a vector as dictated by a map. dest_vec must already be big enough.
 template<typename VALUE_TYPE>
 void ScatterInto( vector<VALUE_TYPE> &dest_vec, const map<int, VALUE_TYPE> &my_map )
 {

@@ -48,7 +48,7 @@ void TruthTable::Set( map<int, bool> fixed_map, bool value )
     ForPower( free_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> free_indices)
     {
         // Capture the free axes and indices into our vector
-        map<int, bool> free_map = MakeMap( free_axes, free_indices );
+        map<int, bool> free_map = ZipToMap( free_axes, free_indices );
         ScatterInto( full_indices, free_map );
 
         // Apply the change
@@ -75,7 +75,7 @@ TruthTable TruthTable::GetFold( set<int> fold_axes, bool identity ) const
     ForPower( dest_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> dest_indices)
     {
         // Capture the dest axes and indices into our vector
-        map<int, bool> dest_map = MakeMap( dest_axes, dest_indices );
+        map<int, bool> dest_map = ZipToMap( dest_axes, dest_indices );
         ScatterInto( full_indices, dest_map );
 
         bool cell_total = identity;
@@ -84,7 +84,7 @@ TruthTable TruthTable::GetFold( set<int> fold_axes, bool identity ) const
         ForPower( fold_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> fold_indices)
         {
             // Capture the free axes and indices into our vector
-            map<int, bool> fold_map = MakeMap( fold_axes, fold_indices );
+            map<int, bool> fold_map = ZipToMap( fold_axes, fold_indices );
             ScatterInto( full_indices, fold_map );
 
             bool cell = cells.at( GetCellIndex(full_indices) );
