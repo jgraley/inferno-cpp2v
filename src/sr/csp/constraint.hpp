@@ -25,6 +25,7 @@ typedef SR::PatternLink VariableId;
 typedef SR::LocatedLink Assignment;
 typedef map<VariableId, Value> Assignments;
 typedef Assignments Solution;
+typedef pair<SR::PatternLink, set<SR::XLink>> Hint;
 
 
 /** Implements a systemic constraint as discussed in #107
@@ -61,8 +62,8 @@ public:
      * 
      * @return A tuple of: success (true of consistent) and an optional hint.
      */
-    virtual tuple<bool, Assignment> Test( const Assignments &assignments,
-                                          const VariableId &current_var ) = 0;        
+    virtual tuple<bool, Hint> Test( const Assignments &assignments,
+                                    const VariableId &current_var ) = 0;        
     
     string GetTrace() const;
 

@@ -299,7 +299,7 @@ RemoveVoidInstances::RemoveVoidInstances()
     // Eliminate the declaration that came from isystemc.h
     s_scope->members = (decls, s_instance);
     s_instance->type = s_any;
-    s_any->patterns = (s_callable, MakePatternPtr<Void>() ); // match void instances (pointless) or functions as below...
+    s_any->disjuncts = (s_callable, MakePatternPtr<Void>() ); // match void instances (pointless) or functions as below...
     s_callable->members = (s_params, s_void_param); // one void param is enough, but don't match no params
     s_void_param->type = MakePatternPtr<Void>();
     

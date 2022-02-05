@@ -44,7 +44,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	//s_arg_value->pattern = MakePatternPtr< Type >();
 	MakePatternPtr< Negation<Type> > s_arg_type;
 	s_arg_value->pattern = s_arg_type;
-	s_arg_type->pattern = type;
+	s_arg_type->negand = type;
 	MakePatternPtr< Star<MapOperand> > other_args;
 	s_call->operands = ( s_arg, other_args );
 

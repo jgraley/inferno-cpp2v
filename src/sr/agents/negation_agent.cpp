@@ -1,13 +1,19 @@
 #include "negation_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
+#include "sym/boolean_operators.hpp"
+#include "sym/comparison_operators.hpp"
+#include "sym/primary_expressions.hpp"
+#include "sym/symbol_operators.hpp"
+#include "sym/overloads.hpp"
 
 using namespace SR;
+using namespace SYM;
 
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-	pq->RegisterAbnormalLink( PatternLink(this, GetPattern()) );
+	pq->RegisterAbnormalLink( PatternLink(this, GetNegand()) );
     
     auto evaluator = make_shared<BooleanEvaluator>( [this](list<bool> inputs) -> bool
     {
@@ -24,12 +30,24 @@ void NegationAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                          XLink keyer_xlink ) const
 {
     INDENT("¬");
-    ASSERT( *GetPattern() );
+    ASSERT( *GetNegand() );
     query.Reset();
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( PatternLink(this, GetPattern()), keyer_xlink ); // Link into X, abnormal
+    query.RegisterAbnormalLink( PatternLink(this, GetNegand()), keyer_xlink ); // Link into X, abnormal
 }
+
+
+bool NegationAgent::ImplHasSNLQ() const
+{    
+    return true;
+}
+
+
+SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    return MakeOver<SYM::BooleanConstant>(true);
+}                                      
 
 
 void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
@@ -57,11 +75,11 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
 	block.shape = "diamond";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetPattern()->get()), 
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetNegand()->get()), 
               list<string>{},
               list<string>{},
               phase,
-              GetPattern() );
+              GetNegand() );
     block.sub_blocks = { { "pattern", 
                            "", 
                            true,

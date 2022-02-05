@@ -4,6 +4,7 @@
 #include "comparison_operators.hpp"
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
+#include "result.hpp"
 
 using namespace SYM;
 
@@ -20,12 +21,11 @@ BooleanExpressionSet PreprocessForEngine::operator()( BooleanExpressionSet in ) 
     {
         if( auto bool_const_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
-            shared_ptr<BooleanResult> r = bool_const_expr->GetValue();
-            switch(r->value)
+            switch(bool_const_expr->GetAsBool())
             {
-            case BooleanResult::TRUE:
+            case true:
                 break; // no action required
-            case BooleanResult::FALSE:
+            case false:
                 ASSERT(false)("Got a FALSE BooleanConstant clause in engine and-rule preprocessing");
                 // Of course, there IS a correct thing to do - replace the whole list with a single constant FALSE
                 return { MakeOver<BooleanConstant>(false) }; // ...like this
@@ -79,7 +79,7 @@ shared_ptr<BooleanExpression> CreateTidiedOperator<OP>::operator()( list< shared
         else if( auto bconst_expr = dynamic_pointer_cast<BooleanConstant>((shared_ptr<BooleanExpression>)bexpr) )
         {
             // Handle finding constant booleans relevent to the operator
-            if( bconst_expr->GetValue()->value == (identity ? BooleanResult::TRUE : BooleanResult::FALSE) )                
+            if( bconst_expr->GetAsBool() == identity )                
             {
                 // drop the clause - has no effect
             }

@@ -6,6 +6,8 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+#include "../sym/expression.hpp"
+#include "../sym/comparison_operators.hpp"
 
 namespace SR
 { 
@@ -31,14 +33,25 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                  
+    virtual bool ImplHasSNLQ() const;
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
     virtual Block GetGraphBlockInfo() const;
+    
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
+
+    class SubcontainerKindOfOperator : public SYM::KindOfOperator
+    {
+        using KindOfOperator::KindOfOperator; 
+        virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
+                                                                  const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+        virtual string Render() const override;
+    };
 
 public:
 };

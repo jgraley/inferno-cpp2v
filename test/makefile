@@ -1,8 +1,8 @@
 .PHONY: test minitest srtest minisrtest reptest graphtest
  
 # Slower ones first for optimial multi-core usage (whole suite time)
-CASES = sctest13 sctest11 sctest12 sctest08 sctest10 sctest02
-CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
+CASES = sctest13 sctest03 sctest11 sctest12 sctest08 sctest10 sctest02
+CASES += sctest01 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
 # Quicker ones first for exploratory (max feedback ASAP)
 #CASES =  sctest09 sctest15 sctest06 sctest07 
@@ -11,7 +11,7 @@ CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
 # Use pointeris (very quick to test) as "canary" even more so "small"
 SRCASES = small pointeris ${CASES} 
-MINICASES = sctest02 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15 sctest03
+MINICASES = sctest02 sctest03 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15
 MINISRCASES = small pointeris ${MINICASES} 
 
 # Arguments to inferno executable:

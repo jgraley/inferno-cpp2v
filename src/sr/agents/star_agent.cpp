@@ -2,9 +2,11 @@
 #include "../subcontainers.hpp" 
 #include "../search_replace.hpp" 
 #include "link.hpp"
+#include "sym/primary_expressions.hpp"
+#include "sym/result.hpp"
 
 using namespace SR;
-
+using namespace SYM;
 
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {
@@ -29,7 +31,7 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     auto x_ci = dynamic_cast<ContainerInterface *>(keyer_xlink.GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(keyer_xlink.GetChildX());
 
-    // Nodes passed to StarAgent::RunDecidedQueryMMed() must be a SubContainer, since * matches multiple things
+    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
         throw NotASubcontainerMismatch();
     
@@ -40,13 +42,6 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         if( !IsLocalMatch( ((TreePtr<Node>)xe).get() ) )
             throw PreRestrictionMismatch();
     }
-     /* For #207
-    for( XLink elt_xlink : x_ci->elts )
-    {
-        if( !IsLocalMatch( elt_xlink.GetChildX().get() ) )
-            throw PreRestrictionMismatch();
-    }
-    */
      
     if( *GetRestriction() )
     {
@@ -55,6 +50,19 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         query.RegisterMultiplicityLink( PatternLink(this, GetRestriction()), keyer_xlink ); // Links into X
     }
 }                       
+
+
+bool StarAgent::ImplHasSNLQ() const
+{
+    return true;
+}
+
+
+SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
+{
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
+}
 
 
 void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
@@ -124,5 +132,36 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
                                       { link } } );
     }
     return block;
+}
+ 
+
+shared_ptr<BooleanResultInterface> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
+                                                                           const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
+
+    if( !ra->IsDefinedAndUnique() )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+
+    auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetAsXLink().GetChildX().get());
+    auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetAsXLink().GetChildX());
+
+    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
+    if( !( x_sc && x_ci ) )
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+    
+    // Check pre-restriction
+    bool matches = true;
+    FOREACH( const TreePtrInterface &xe, *x_ci )
+        matches = matches & archetype_node->IsLocalMatch( ((TreePtr<Node>)xe).get() );            
+
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, matches );
+}                                   
+
+         
+string StarAgent::SubcontainerKindOfOperator::Render() const
+{
+    return "SubcontainerKindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
 }
 

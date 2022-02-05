@@ -1,4 +1,5 @@
 #include "lambdas.hpp"
+#include "result.hpp"
 
 using namespace SYM;
 
@@ -19,7 +20,7 @@ set<SR::PatternLink> BooleanLambda::GetRequiredVariables() const
 }
 
 
-shared_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResultInterface> BooleanLambda::Evaluate( const EvalKit &kit ) const
 {
     ASSERT( lambda );
     ASSERT( kit.hypothesis_links );
@@ -27,11 +28,11 @@ shared_ptr<BooleanResult> BooleanLambda::Evaluate( const EvalKit &kit ) const
     try
     {
         lambda(kit); // throws on mismatch
-        return make_shared<BooleanResult>(BooleanResult::TRUE);
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
     }
     catch( const ::Mismatch &e )
     {
-        return make_shared<BooleanResult>(BooleanResult::FALSE);
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
     }
 }
 

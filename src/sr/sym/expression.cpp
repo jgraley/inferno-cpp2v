@@ -1,37 +1,8 @@
 #include "expression.hpp"
+#include "primary_expressions.hpp"
+#include "result.hpp"
 
 using namespace SYM;
-
-// ------------------------- BooleanResult --------------------------
-
-BooleanResult::BooleanResult( BooleanValue value_ ) :
-    value( value_ )
-{
-}
-
-// ------------------------- SymbolResult --------------------------
-
-SymbolResult::SymbolResult() :
-    cat( UNDEFINED )
-{
-}
-
-SymbolResult::SymbolResult( BooleanCategory cat_, SR::XLink xlink_ ) :
-    cat( cat_ ),
-    xlink( xlink_ )
-{
-    switch( cat )
-    {
-    case UNDEFINED:
-        ASSERT( !xlink );
-        break;
-    case XLINK:
-        ASSERT( xlink );
-        break;
-    default:
-        ASSERTFAIL("Missing case");
-    }
-}
 
 // ------------------------- Expression --------------------------
 
@@ -51,25 +22,18 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
-shared_ptr<SymbolExpression> Expression::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
-    return nullptr;
-}
-
-
-bool Expression::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
-{
-    // When we extend to allow target to be any Expression, we'll want
-    // do do an expression compare in here (which means we need expression 
-    // compare) before the loop, and we'll remove the overload in 
-    // SymbolVariable, and possibly remove the virtual from here.
+    if( OrderCompare( this, target.get() ) == EQUAL )
+        return false; // we match the target, so not independent.
+        
     for( shared_ptr<Expression> op : GetOperands() )
     {
         if( !op->IsIndependentOf( target ) )
             return false; // an operand may not be, so we may not be.
     }
 
-    return true; // all operands are independent of target
+    return true; // all operands are independent of target.
 }
 
 
@@ -101,6 +65,12 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
 }
 
 
+string Expression::RenderWithParentheses() const
+{
+    return "(" + Render() + ")";
+}
+
+
 string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
 {
     string bare = inner->Render();
@@ -111,9 +81,9 @@ string Expression::RenderForMe( shared_ptr<const Expression> inner ) const
     // low prec expr in high prec surroundings. Also when equal to avoid
     // assuming associativity.
     if( (int)inner_prec >= (int)me_prec )
-        return "(" + bare + ")";
+        return inner->RenderWithParentheses();
     else
-        return bare;    
+        return inner->Render();    
 }
 
 
@@ -127,7 +97,63 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                              shared_ptr<BooleanExpression> to_equal ) const
+{
+    // Make sure any solution is independent of target
+    if( !to_equal->IsIndependentOf( target ) )
+        return nullptr;
+        
+    // To solve: (this given target) == to_equal
+    // So, if this===target then trivial solution: 
+    // target==to_equal and to_equal is solution wrt target
+    if( OrderCompare( this, target.get() ) == EQUAL )
+        return to_equal;
+    
+    // Well that didn't work, try for non-trivial solutions
+    return TrySolveForToEqualNT( target, to_equal );
+}
+
+
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                shared_ptr<BooleanExpression> to_equal ) const
+{
+    return nullptr;
+}
+
+
+BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<Expression> target ) const
+{
+    // Could implement this in terms of TrySolveForToEqual() but since BooleanOperator::TrySolveFor()
+    // calls PartialSolveFor() we could recurse indefinitely. So instead the rule is that
+    // callers must try and use TrySolveForToEqual() before calling PartialSolveFor()
+    return PartialSolution();
+}
+
 // ------------------------- SymbolExpression --------------------------
+
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
+                                                             shared_ptr<SymbolExpression> to_equal ) const
+{
+    // Make sure any solution is independent of target
+    if( !to_equal->IsIndependentOf( target ) )
+        return nullptr;
+        
+    // To solve: (this given target) == to_equal
+    // So, if this===target then trivial solution: 
+    // target==to_equal and to_equal is solution wrt target
+    if( OrderCompare( this, target.get() ) == EQUAL )
+        return to_equal;
+    
+    // Well that didn't work, try for non-trivial solutions
+    return TrySolveForToEqualNT( target, to_equal );
+}                                                             
+
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                               shared_ptr<SymbolExpression> to_equal ) const
+{
+    return nullptr;
+}
 
 // ------------------------- BooleanToBooleanExpression --------------------------
 
@@ -146,24 +172,24 @@ list<shared_ptr<Expression>> BooleanToBooleanExpression::GetOperands() const
 }
 
 
-shared_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResultInterface> BooleanToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<shared_ptr<BooleanResult>> op_results;
+    list<shared_ptr<BooleanResultInterface>> op_results;
     for( shared_ptr<BooleanExpression> a : GetBooleanOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, op_results );
 }
 
 
-shared_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                                const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> BooleanToBooleanExpression::Evaluate( const EvalKit &kit, 
+                                                                const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
 
 
-shared_ptr<SymbolResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
-                                                             const list<shared_ptr<SymbolResult>> &op_results ) const
+shared_ptr<SymbolResultInterface> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
+                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
@@ -185,9 +211,9 @@ list<shared_ptr<Expression>> SymbolToSymbolExpression::GetOperands() const
 }
 
 
-shared_ptr<SymbolResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResultInterface> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<shared_ptr<SymbolResult>> op_results;
+    list<shared_ptr<SymbolResultInterface>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, op_results );
@@ -204,17 +230,17 @@ list<shared_ptr<Expression>> SymbolToBooleanExpression::GetOperands() const
 }
 
 
-shared_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResultInterface> SymbolToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<shared_ptr<SymbolResult>> op_results;
+    list<shared_ptr<SymbolResultInterface>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, op_results );
 }
 
 
-shared_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                               const list<shared_ptr<SymbolResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
+                                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }

@@ -35,13 +35,13 @@ DetectUncombableSwitch::DetectUncombableSwitch()
     MakePatternPtr<SwitchTarget> target;
     MakePatternPtr<UncombableSwitch> r_uswitch;
     
-    s_all->patterns = (sx_not, s_switch);
-    sx_not->pattern = sx_uswitch;
+    s_all->conjuncts = (sx_not, s_switch);
+    sx_not->negand = sx_uswitch;
     s_switch->body = comp;
     s_switch->condition = expr;
     comp->members = decls;
     comp->statements = (pre, x_not, target, post);
-    x_not->pattern = x_break;
+    x_not->negand = x_break;
     
     r_uswitch->body = comp;
     r_uswitch->condition = expr;
@@ -64,8 +64,8 @@ MakeAllForUncombable::MakeAllForUncombable()
     MakePatternPtr<Statement> body;
     MakePatternPtr<UncombableFor> r_ufor;
     
-    s_all->patterns = (s_not, s_for);
-    s_not->pattern = sx_ufor;
+    s_all->conjuncts = (s_not, s_for);
+    s_not->negand = sx_ufor;
     s_for->initialisation = init;
     s_for->condition = test;
     s_for->increment = inc;
@@ -112,14 +112,14 @@ DetectCombableFor::DetectCombableFor()
     s_ufor->initialisation = init;
     init->operands = (loopvar, init_val);
     s_ufor->condition = test;
-    test->patterns = (gt, ge, lt, le, ne);
+    test->disjuncts = (gt, ge, lt, le, ne);
     gt->operands = (loopvar, MakePatternPtr<Integer>());
     ge->operands = (loopvar, MakePatternPtr<Integer>()); 
     lt->operands = (loopvar, MakePatternPtr<Integer>());
     le->operands = (loopvar, MakePatternPtr<Integer>());
     ne->operands = (loopvar, MakePatternPtr<Integer>());
     s_ufor->increment = inc;
-    inc->patterns = (preinc, postinc, predec, postdec, asadd, assub, assign1, assign2);
+    inc->disjuncts = (preinc, postinc, predec, postdec, asadd, assub, assign1, assign2);
     preinc->operands = (loopvar);
     postinc->operands = (loopvar);
     predec->operands = (loopvar);
@@ -131,7 +131,7 @@ DetectCombableFor::DetectCombableFor()
     assign2->operands = (loopvar, sub);
     sub->operands = (loopvar, MakePatternPtr<Integer>());
     s_ufor->body = body;
-    body->pattern = astuff;
+    body->negand = astuff;
     astuff->terminus = assignop;
     assignop->operands = (loopvar, MakePatternPtr< Star<Expression> >());
     loopvar->pattern = type;
@@ -158,7 +158,7 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
     MakePatternPtr<Statement> body;
     MakePatternPtr<UncombableBreak> r_ubreak;
     
-    s_not->pattern = sx_ubreak;
+    s_not->negand = sx_ubreak;
         
     Configure( SEARCH_REPLACE, s_not, r_ubreak );
 }
@@ -182,8 +182,8 @@ DetectCombableBreak::DetectCombableBreak()
     MakePatternPtr<UncombableBreak> s_ubreak;
     MakePatternPtr<CombableBreak> r_break;
     
-    all->patterns = (x_not, swtch);
-    x_not->pattern = uswitch;
+    all->conjuncts = (x_not, swtch);
+    x_not->negand = uswitch;
     swtch->condition = expr;
     swtch->body = comp;
     comp->members = decls;
@@ -229,7 +229,7 @@ ForToWhile::ForToWhile()
     l_stuff->recurse_restriction = l_s_not;
     l_overlay->overlay = lr_goto;
     lr_goto->destination = r_cont_labelid;
-    l_s_not->pattern = l_s_loop;
+    l_s_not->negand = l_s_loop;
     MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
     
     s_for->body = forbody;
@@ -288,13 +288,13 @@ IfToIfGoto::IfToIfGoto()
     MakePatternPtr<BuildLabelIdentifierAgent> r_labelid1("THEN"), r_labelid2("ELSE");
     MakePatternPtr<Label> r_label1, r_label2;
     
-    s_and->patterns = (s_if, l_r_not);
+    s_and->conjuncts = (s_if, l_r_not);
     s_if->condition = cond;
     s_if->body = body;
     s_if->else_body = else_body;
     
     // exclude if(x) goto y;
-    l_r_not->pattern = l_r_if;
+    l_r_not->negand = l_r_if;
     l_r_if->body = l_r_goto;
     l_r_if->else_body = l_r_nop;
     
@@ -453,7 +453,7 @@ DoToIfGoto::DoToIfGoto()
     MakePatternPtr< Negation<Statement> > l_s_not;
     MakePatternPtr< Loop > l_s_loop;
 
-    l_s_not->pattern = l_s_loop;
+    l_s_not->negand = l_s_loop;
     l_overlay->through = l_s_cont;
     l_stuff->recurse_restriction = l_s_not;
     l_overlay->overlay = l_r_goto;
@@ -494,7 +494,7 @@ BreakToGoto::BreakToGoto()
     MakePatternPtr<Label> r_label;
     MakePatternPtr<Compound> r_comp;
     
-    sx_not->pattern = sx_breakable;
+    sx_not->negand = sx_breakable;
     stuff->terminus = overlay;
     overlay->through = s_break;
     stuff->recurse_restriction = sx_not;
@@ -614,11 +614,11 @@ ExtractCallParams::ExtractCallParams()
     
     s_call->operands = (params, s_param);
     s_param->value = all;
-    all->patterns = (value, x_not);
+    all->conjuncts = (value, x_not);
     s_param->identifier = id;
     value->pattern = type;
     s_call->callee = callee;
-    x_not->pattern = x_id; // this restriction to become light-touch restriction
+    x_not->negand = x_id; // this restriction to become light-touch restriction
     
     r_ce->members = (r_temp);
     r_temp->identifier = r_temp_id;

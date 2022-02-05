@@ -57,7 +57,7 @@ public:
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
 
     /// Test an Agent given partial map of locations of base and normal links. 
-    virtual bool ImplHasNLQ() const = 0;                                              
+    virtual bool ImplHasSNLQ() const = 0;                                              
 
     /// Test an agent given given partial map of locations of keyer and residuals.  
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const = 0;                                       
@@ -97,7 +97,7 @@ public:
 	static Agent *TryAsAgent( shared_ptr<Node> node );
 	static const Agent *AsAgentConst( shared_ptr<const Node> node );
 	static const Agent *TryAsAgentConst( shared_ptr<const Node> node );
-    // Note the constness: thou shalt not try to mutate the agent via this function
+    // Note the constness: do not try to mutate the agent via this function
     virtual shared_ptr<const Node> GetPatternPtr() const = 0;
     virtual TreePtr<Node> GetArchetypeNode() const = 0;
     

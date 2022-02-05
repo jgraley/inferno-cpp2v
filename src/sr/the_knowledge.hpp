@@ -69,7 +69,8 @@ public:
         XLink my_container_front = XLink();
         XLink my_container_back = XLink();
 
-        // Successor element within my sequence (sequences only)
+        // Neighbour elements within my sequence (sequences only)
+        XLink my_sequence_predecessor = XLink();
         XLink my_sequence_successor = XLink();
 
         // Index in a depth-first walk

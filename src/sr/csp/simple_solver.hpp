@@ -102,13 +102,15 @@ private:
         SR::TheKnowledge::DepthFirstOrderedIt rev_it;
         bool go_forward;
         bool insert_mmax_next;
-        int remaining_count;        
+        int remaining_count;
+        Hint hint;  
+        set<SR::XLink>::iterator hint_iterator;        
     };
 
 #ifdef BACKJUMPING
-    typedef tuple<bool, Assignment, ConstraintSet> TestRV;
+    typedef tuple<bool, Hint, ConstraintSet> TestRV;
 #else
-    typedef tuple<bool, Assignment> TestRV;
+    typedef tuple<bool, Hint> TestRV;
 #endif
     TestRV Test( const Assignments &assigns,
                  const ConstraintSet &to_test,

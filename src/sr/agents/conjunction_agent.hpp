@@ -17,7 +17,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual Block GetGraphBlockInfo() const;
 private:
-    virtual CollectionInterface &GetPatterns() const = 0;
+    virtual CollectionInterface &GetConjuncts() const = 0;
 };
 
 
@@ -33,11 +33,11 @@ public:
         return shared_from_this();
     }
     
-    mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
+    mutable Collection<PRE_RESTRICTION> conjuncts; // TODO provide const iterators and remove mutable
 private:
-    virtual CollectionInterface &GetPatterns() const
+    virtual CollectionInterface &GetConjuncts() const
     {
-        return patterns;
+        return conjuncts;
     }
 };
 

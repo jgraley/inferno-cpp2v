@@ -20,7 +20,7 @@ TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct 
     MakePatternPtr< Stuff<Node> > stuff;
     MakePatternPtr<Uncombable> uncombable;
     
-    all->patterns = (construct, stuff);
+    all->conjuncts = (construct, stuff);
     stuff->terminus = uncombable;
     //TODO maybe restrict recursion to Statement, in case of inline functions, classes etc (though
     // we may never support these, or else lower them out in advance)

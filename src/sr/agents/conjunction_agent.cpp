@@ -9,7 +9,7 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
     // TODO don't really need iterator, so could use FOREACH, and in DQ()
-    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
+    for( CollectionInterface::iterator pit = GetConjuncts().begin(); pit != GetConjuncts().end(); ++pit )                 
     {
         const TreePtrInterface *p = &*pit; 
 	    pq->RegisterNormalLink( PatternLink(this, p) );
@@ -38,7 +38,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
                            "", 
                            true,
                            {} } };
-    FOREACH( const TreePtrInterface &p, GetPatterns() )
+    FOREACH( const TreePtrInterface &p, GetConjuncts() )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                   list<string>{},

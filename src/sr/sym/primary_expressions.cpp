@@ -1,4 +1,5 @@
 #include "primary_expressions.hpp"
+#include "result.hpp"
 
 using namespace SYM;
 
@@ -10,19 +11,19 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 }
 
 
-shared_ptr<SymbolResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResultInterface> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<SymbolResult>( SymbolResult::XLINK, xlink );
+    return make_shared<SingleSymbolResult>( ResultInterface::DEFINED, xlink );
 }
 
 
-shared_ptr<SymbolResult> SymbolConstant::GetValue() const
+shared_ptr<SymbolResultInterface> SymbolConstant::GetValue() const
 {
-    return make_shared<SymbolResult>( SymbolResult::XLINK, xlink );
+    return make_shared<SingleSymbolResult>( ResultInterface::DEFINED, xlink );
 }
 
 
-SR::XLink SymbolConstant::GetXLink() const
+SR::XLink SymbolConstant::GetAsXLink() const
 {
     return xlink;
 }
@@ -31,9 +32,7 @@ SR::XLink SymbolConstant::GetXLink() const
 Orderable::Result SymbolConstant::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SymbolConstant *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     if( xlink == c->xlink )
         return 0;
@@ -46,7 +45,7 @@ Orderable::Result SymbolConstant::OrderCompareLocal( const Orderable *candidate,
 
 string SymbolConstant::Render() const
 {
-    return xlink.GetTrace();
+    return xlink.GetName();
 }
 
 
@@ -69,18 +68,12 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 }
 
 
-shared_ptr<SymbolResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResultInterface> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     if( kit.hypothesis_links->count(plink) == 0 )
-        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+        return make_shared<SingleSymbolResult>( ResultInterface::UNDEFINED );
     else
-        return make_shared<SymbolResult>( SymbolResult::XLINK, kit.hypothesis_links->at(plink) );
-}
-
-
-bool SymbolVariable::IsIndependentOf( shared_ptr<SymbolVariable> target ) const
-{
-    return GetPatternLink() != target->GetPatternLink();      
+        return make_shared<SingleSymbolResult>( ResultInterface::DEFINED, kit.hypothesis_links->at(plink) );
 }
 
 
@@ -93,9 +86,7 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SymbolVariable *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     if( plink == c->plink )
         return 0;
@@ -108,7 +99,7 @@ Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate,
 
 string SymbolVariable::Render() const
 {
-    return "[" + plink.GetTrace() + "]";
+    return "[" + plink.GetShortName() + "]";
 }
 
 
@@ -120,29 +111,27 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 // ------------------------- BooleanConstant --------------------------
 
 BooleanConstant::BooleanConstant( bool value_ ) :
-    value( value_ ? BooleanResult::TRUE : BooleanResult::FALSE )
+    value( value_ )
 {
 }
 
 
-shared_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResultInterface> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<BooleanResult>( value );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, value );
 }
 
 
-shared_ptr<BooleanResult> BooleanConstant::GetValue() const
+bool BooleanConstant::GetAsBool() const
 {
-    return make_shared<BooleanResult>( value );
+    return value;
 }
 
 
 Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate, 
                                                       OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const BooleanConstant *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
 
     return value - c->value;
 }  
@@ -150,14 +139,7 @@ Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate
 
 string BooleanConstant::Render() const
 {
-    switch( value )
-    {
-    case BooleanResult::TRUE:
-        return "TRUE";
-    case BooleanResult::FALSE:
-        return "FALSE";
-    }
-    ASSERTFAIL("Invalid matched");
+    return value ? "TRUE" : "FALSE";
 }
 
 

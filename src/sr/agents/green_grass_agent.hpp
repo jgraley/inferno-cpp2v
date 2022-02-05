@@ -3,8 +3,8 @@
 
 #include "common/common.hpp"
 #include "colocated_agent.hpp"
-
-#define COLO_GG
+#include "../sym/expression.hpp"
+#include "../sym/comparison_operators.hpp"
 
 namespace SR
 { 
@@ -16,10 +16,31 @@ namespace SR
 class GreenGrassAgent : public virtual ColocatedAgent 
 {               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunColocatedQuery(XLink common_xlink) const;
+    virtual bool ImplHasSNLQ() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
     virtual Block GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;
+
+    class IsGreenGrassOperator : public SYM::SymbolToBooleanExpression
+    {
+    public:    
+        typedef BooleanExpression NominalType;
+        explicit IsGreenGrassOperator( const set< TreePtr<Node> > *dirty_grass,
+                                       shared_ptr<SYM::SymbolExpression> a); 
+        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
+                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+
+        virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const override;
+
+        virtual string Render() const override;
+        virtual Precedence GetPrecedence() const override;
+        
+    protected:
+        const shared_ptr<SYM::SymbolExpression> a;
+        const set< TreePtr<Node> > * const dirty_grass;
+    };
 };
 
 

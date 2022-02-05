@@ -128,7 +128,7 @@ private:
                                TreePtrInterface *p_x_singular,
 	                           const Plan::Singular &plan_sing ) const;
                                            
-    virtual bool ImplHasNLQ() const;                                            
+    virtual bool ImplHasSNLQ() const;                                            
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       
     SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const;                                       

@@ -18,9 +18,9 @@ class SymbolConstant : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit SymbolConstant( SR::XLink xlink );
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;    
-    shared_ptr<SymbolResult> GetValue() const;
-    SR::XLink GetXLink() const;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
+    shared_ptr<SymbolResultInterface> GetValue() const;
+    SR::XLink GetAsXLink() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
@@ -40,12 +40,12 @@ public:
     typedef SymbolExpression NominalType;
     explicit SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
-    virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const override;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     SR::PatternLink GetPatternLink() const;
 
-    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;
+    // Note: no TrySolveForToEqualNT() because trivial solver is sufficient
+    Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                         OrderProperty order_property ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -61,8 +61,8 @@ class BooleanConstant : public BooleanExpression
 public:    
     typedef BooleanExpression NominalType;
     explicit BooleanConstant( bool value );
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    shared_ptr<BooleanResult> GetValue() const;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    bool GetAsBool() const;    
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
@@ -71,7 +71,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const BooleanResult::BooleanValue value;
+    const bool value;
 };
 
 };

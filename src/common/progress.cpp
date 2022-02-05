@@ -121,4 +121,7 @@ const map<Progress::Stage, Progress::StageInfoBlock> Progress::stage_info =
    { Progress::TRANSFORMING,   {"T", STEPPY} },
    { Progress::RENDERING,      {"O", NON_STEPPY} } };
 
-Progress Progress::current;
+
+// MMAX is actually created at init time, so pretend that's part of step building time
+Progress Progress::current = BUILDING_STEPS;
+

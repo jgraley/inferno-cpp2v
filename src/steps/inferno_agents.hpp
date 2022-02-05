@@ -8,6 +8,7 @@
 #include "sr/agents/star_agent.hpp"
 #include "sr/cache.hpp"
 #include "sr/agents/builder_agent.hpp"
+#include "sr/sym/expression.hpp"
 
 using namespace SR;
 // TODO pollutes client namespace
@@ -109,8 +110,31 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     virtual Block GetGraphBlockInfo() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;
+    virtual bool ImplHasSNLQ() const;
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     string name;
+
+    class IdentifierByNameOperator : public SYM::SymbolToBooleanExpression
+    {
+    public:    
+        typedef BooleanExpression NominalType;
+        explicit IdentifierByNameOperator( string name,
+                                           shared_ptr<SYM::SymbolExpression> a); 
+        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
+                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+
+        virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const override;
+
+        virtual string Render() const override;
+        virtual Precedence GetPrecedence() const override;
+        
+    protected:
+        const shared_ptr<SYM::SymbolExpression> a;
+        const string name;
+    };
 };
 
 

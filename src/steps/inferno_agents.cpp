@@ -6,7 +6,11 @@
 #include "sr/scr_engine.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/link.hpp"
+#include "sr/sym/primary_expressions.hpp"
+#include "sr/sym/result.hpp"
 
+// Not pulling in SYM because it clashes with CPPTree
+//using namespace SYM;
 using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
@@ -125,7 +129,77 @@ void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &que
         TRACE(" : different\n");
     }
     throw Mismatch();  
-}                                
+}           
+                     
+
+bool IdentifierByNameAgent::ImplHasSNLQ() const
+{    
+    return true;
+}
+
+
+SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);
+    return SYM::MakeOver<IdentifierByNameOperator>(name, keyer_expr);
+}
+
+
+IdentifierByNameAgent::IdentifierByNameOperator::IdentifierByNameOperator( string name_,
+                                                                           shared_ptr<SYM::SymbolExpression> a_ ) :
+    a( a_ ),
+    name( name_ )
+{    
+}                                                
+
+
+list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IdentifierByNameOperator::GetSymbolOperands() const
+{
+    return { a };
+}
+
+
+shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IdentifierByNameOperator::Evaluate( const EvalKit &kit,
+                                                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(op_results);
+    if( !ra->IsDefinedAndUnique() )
+        return make_shared<SYM::BooleanResult>( SYM::BooleanResult::UNDEFINED );
+    
+    TreePtr<Node> base_x = ra->GetAsXLink().GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
+    if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
+    {
+        TRACE("Comparing ")(si_x->GetRender())(" with ")(name);
+        if( si_x->GetRender() == name )
+        {
+            TRACE(" : same\n");
+            return make_shared<SYM::BooleanResult>( SYM::BooleanResult::DEFINED, true );
+        }
+        TRACE(" : different\n");
+    }
+    return make_shared<SYM::BooleanResult>( SYM::BooleanResult::DEFINED, false );
+}
+
+
+Orderable::Result IdentifierByNameAgent::IdentifierByNameOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                                                      OrderProperty order_property ) const 
+{
+    auto c = GET_THAT_POINTER(candidate);
+    return name.compare(c->name);
+}  
+
+
+string IdentifierByNameAgent::IdentifierByNameOperator::Render() const
+{
+    return "IdentifierByName<\"" + name  + "\">(" + a->Render() + ")"; 
+}
+
+
+SYM::Expression::Precedence IdentifierByNameAgent::IdentifierByNameOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
 
 //---------------------------------- NestedAgent ------------------------------------    
 

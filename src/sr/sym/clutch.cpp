@@ -4,6 +4,7 @@
 #include "comparison_operators.hpp"
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
+#include "result.hpp"
 
 #define BOOL_EQUALITY_METHOD
 
@@ -19,8 +20,8 @@ ClutchRewriter::ClutchRewriter( shared_ptr<SymbolExpression> disengager_expr_ ) 
 
 shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExpression> original_expr) const
 {
-    // Implement strict clutch policy: ALL or NONE of the required vars 
-    // must be disengager. If some but not all are disengager we don't get a match.
+    // ALL or NONE of the required vars must be disengager. If some but 
+    // not all are disengager, we don't get a match.
     auto all_disengaged_expr = MakeOver<BooleanConstant>(true);
     auto all_engaged_expr = MakeOver<BooleanConstant>(true);
     list< shared_ptr<BooleanExpression> > all_disengaged_list;

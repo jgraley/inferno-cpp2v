@@ -6,6 +6,7 @@
 #include "../sym/comparison_operators.hpp"
 #include "../sym/primary_expressions.hpp"
 #include "../sym/sym_solver.hpp"
+#include "../sym/result.hpp"
 
 //#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
 //#define CHECK_HINTS
@@ -74,8 +75,8 @@ void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
 }   
 
 
-tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments,
-                                                  const VariableId &current_var )
+tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
+                                            const VariableId &current_var )
 {   
     INDENT("T");
     ASSERT(plan.consistency_expression);
@@ -86,28 +87,21 @@ tuple<bool, Assignment> SymbolicConstraint::Test( const Assignments &assignments
 #endif        
 
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
-    shared_ptr<SYM::BooleanResult> r = plan.consistency_expression->Evaluate( kit );
-    if( r && r->value == SYM::BooleanResult::TRUE )
-        return make_tuple(true, Assignment()); // Successful
+    shared_ptr<SYM::BooleanResultInterface> result = plan.consistency_expression->Evaluate( kit );
+    ASSERT( result );
+    if( result->IsDefinedAndTrue() )
+        return make_tuple(true, Hint()); // Successful
 
     if( !current_var || plan.hint_expressions.count(current_var)==0 )
-        return make_tuple(false, Assignment()); // We don't want a hint or don't have expression for one in the plan
+        return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
      
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
-    shared_ptr<SYM::SymbolResult> hint_result = hint_expression->Evaluate( kit );
-    if( !hint_result || hint_result->cat == SYM::SymbolResult::UNDEFINED )
-        return make_tuple(false, Assignment()); // effectively a failure to evaluate
+    shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
+    ASSERT( hint_result );
+    if( hint_result->GetAsSetOfXLinks().empty() )
+        return make_tuple(false, Hint()); // effectively a failure to evaluate
           
-    // Testing hint by evaluating using consistency expression with hint substituted over original value
-    SR::XLink *p_current_assignment = const_cast<SR::XLink *>(&(assignments.at(current_var)));
-    SR::XLink prev_xlink = *p_current_assignment;
-    *p_current_assignment = hint_result->xlink;
-    shared_ptr<SYM::BooleanResult> hinted_r = plan.consistency_expression->Evaluate( kit );
-    *p_current_assignment = prev_xlink; // put it back again
-    if( !hinted_r || hinted_r->value != SYM::BooleanResult::TRUE )
-        return make_tuple(false, Assignment()); // evaluated false using hint - probably inconsistent in the OTHER variables
-
-    SR::LocatedLink hint( current_var, hint_result->xlink );
+    Hint hint( current_var, hint_result->GetAsSetOfXLinks() );
     return make_tuple(false, hint);
 }
 

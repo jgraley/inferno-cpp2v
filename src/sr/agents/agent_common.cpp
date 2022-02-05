@@ -168,18 +168,11 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-bool AgentCommon::ImplHasNLQ() const
+bool AgentCommon::ImplHasSNLQ() const
 {    
     return false;
 }
 
-
-void AgentCommon::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                            const TheKnowledge *knowledge ) const
-{
-    ASSERTFAIL();
-}
-    
     
 void AgentCommon::NLQFromDQ( const SolutionMap *hypothesis_links,
                              const TheKnowledge *knowledge ) const
@@ -263,7 +256,7 @@ Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 
 Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
-    if( ImplHasNLQ() )    
+    if( ImplHasSNLQ() )    
         return SymbolicNormalLinkedQueryImpl();
 
 	// The keyer and normal children
@@ -279,14 +272,7 @@ Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 
 Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
 {
-	// The keyer and normal children
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryImpl( kit.hypothesis_links,
-							      kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQImpl()");	
+    ASSERTFAIL();
 }
 
 

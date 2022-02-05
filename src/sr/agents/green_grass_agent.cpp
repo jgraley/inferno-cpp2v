@@ -2,7 +2,8 @@
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
 #include "link.hpp"
-#include "sym/lambdas.hpp"
+#include "sym/primary_expressions.hpp"
+#include "sym/result.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -15,37 +16,23 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 }
 
 
-void GreenGrassAgent::RunColocatedQuery( XLink common_xlink ) const
-{
-    INDENT("G");
-    
-    // Restrict so that everything in the input program under here must be "green grass"
-    // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    if( master_scr_engine->GetOverallMaster()->dirty_grass.find( common_xlink.GetChildX() ) != 
-        master_scr_engine->GetOverallMaster()->dirty_grass.end() ) // TODO .count() > 0
-    {
-        TRACE(common_xlink)(" is dirty grass so rejecting\n");
-        throw Mismatch();            
-    }
-    TRACE(common_xlink)(" is green grass\n");
+bool GreenGrassAgent::ImplHasSNLQ() const
+{    
+    return true;
 }
 
 
 Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
-	set<PatternLink> clq_plinks = { keyer_plink };
-	auto clq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		if( kit.hypothesis_links->count(keyer_plink) == 1 )
-			RunColocatedQuery( kit.hypothesis_links->at(keyer_plink) ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(clq_plinks, clq_lambda, GetTrace()+".ClQ()");
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    const set< TreePtr<Node> > *dirty_grass = &master_scr_engine->GetOverallMaster()->dirty_grass;    
+    return MakeOver<IsGreenGrassOperator>(dirty_grass, keyer_expr);
 }
 
 
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
-	// The GreenGrass node appears as a triangle containing four vertical line characters,
+	// The GreenGrass node appears as a cylinder containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
 	// tired.
     Block block;
@@ -65,4 +52,65 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
                            true,
                            { link } } };
     return block;
+}
+
+
+GreenGrassAgent::IsGreenGrassOperator::IsGreenGrassOperator( const set< TreePtr<Node> > *dirty_grass_,
+                                                             shared_ptr<SymbolExpression> a_ ) :
+    a( a_ ),
+    dirty_grass( dirty_grass_ )
+{    
+}                                                
+
+
+list<shared_ptr<SymbolExpression>> GreenGrassAgent::IsGreenGrassOperator::GetSymbolOperands() const
+{
+    return { a };
+}
+
+
+shared_ptr<BooleanResultInterface> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
+                                                                           const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
+    if( !ra->IsDefinedAndUnique() )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    
+    bool res = ( dirty_grass->count( ra->GetAsXLink().GetChildX() ) == 0 ); 
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );         
+}
+
+
+Orderable::Result GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const 
+{
+    auto c = GET_THAT_POINTER(candidate);
+
+    Orderable::Result r;
+    switch( order_property )
+    {
+    case STRICT:
+        // Unique order uses address to ensure different dirty_grass sets compare differently
+        r = (int)(dirty_grass > c->dirty_grass) - (int)(dirty_grass < c->dirty_grass);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops after name check since address compare is not repeatable
+        r = Orderable::EQUAL;
+        break;
+    }
+    return r;
+}  
+
+
+string GreenGrassAgent::IsGreenGrassOperator::Render() const
+{
+    return "IsGreenGrass<" + SSPrintf("%p", dirty_grass)  + ">(" + a->Render() + ")"; 
+}
+
+
+Expression::Precedence GreenGrassAgent::IsGreenGrassOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
 }

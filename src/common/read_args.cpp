@@ -34,6 +34,7 @@ bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
 bool ReadArgs::use_csp_solver = false;
+bool ReadArgs::split_disjunctions = false;
 
 void ReadArgs::Usage(string msg)
 {
@@ -64,7 +65,8 @@ void ReadArgs::Usage(string msg)
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
-                    "-uc         Use CSP solver.\n",
+                    "-uc         Use CSP solver.\n"
+                    "-ud         Split Disjunctions into 2-choice during pattern transformations.\n",
     		        exename.c_str() );
     exit(1);
 }
@@ -220,6 +222,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             char use_option = argv[curarg][2];
             if( use_option=='c' )
                 use_csp_solver = true;
+            else if( use_option=='d' )
+                split_disjunctions = true;
             else
                 Usage("Unknown argument after -u");
         }

@@ -3,9 +3,153 @@
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
 #include "rewriters.hpp"
+#include "result.hpp"
 #include <algorithm>
 
 using namespace SYM;
+
+#define SOLVE_FROM_PARTIALS_CHECKING
+
+// ------------------------- BooleanOperator --------------------------
+
+shared_ptr<Expression> BooleanOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                              shared_ptr<BooleanExpression> to_equal ) const
+{
+    INDENT("T");
+
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+
+    PartialSolution psol = PartialSolveFor( target );
+    
+#ifdef SOLVE_FROM_PARTIALS_CHECKING
+    for( auto &ps : psol ) // all senses (true, false)
+    {
+        for( auto p : ps.second ) // all entries for the current sense
+        {
+            // NotOperators should have been removed from condition
+            ASSERT( !dynamic_pointer_cast<NotOperator>( p.first ) );
+
+            // Is a solution to a sub-expression so should not depend on target 
+            ASSERT( p.second->IsIndependentOf( target ) );                    
+        }
+    }
+#endif
+
+    // Try to solve FOR our dependent keys and substitute the solution or remove
+    for( auto &ps : psol ) // all senses (true, false)
+    {        
+//        FTRACEC("Before substitution ")(ps.first)(":\n")(ps.second)("\n");
+        while( true )
+        {
+            shared_ptr<BooleanExpression> found_dependent_key;
+            shared_ptr<Expression> found_dependent_value;
+            for( auto p : ps.second ) // all entries for the current sense            
+                if( !p.first->IsIndependentOf( target ) )                
+                    tie( found_dependent_key, found_dependent_value ) = p;
+            
+            // HAve we managed to remove all dependent keys?
+            if( !found_dependent_key )
+                break;
+                    
+            // Now safe to erase
+            ps.second.erase( found_dependent_key );
+
+            // Try to solve this expression (it's the biggest we can see) with
+            // respect to the dependent key sub-expression (i.e. a new target) 
+            // in the hopes of getting hold of an independent sub-expression
+            // that we can substitute for the key.
+//            FTRACEC("Substitution: trying to solve:\n")(Render())
+//                   ("\nwith respect to:\n")(found_dependent_key)("\n");
+            shared_ptr<Expression> solution = TrySolveForToEqual( found_dependent_key,
+                                                                  make_shared<BooleanConstant>(true) );
+            
+            if( !solution )    
+            {
+//                FTRACEC("but FAILED\n\n");
+                continue;
+            }
+            
+            auto solved_key = dynamic_pointer_cast<BooleanExpression>(solution);
+            ASSERT(solved_key)("Definitely expected a BooleanExpression\n");
+            
+//            FTRACEC("and got:\n")(solved_key)("\n\n");
+            // Note: does NOT guarantee indepedennce of target, since we solved 
+            // wrt something else (found_dependent_key). However, the while()
+            // loop won't exit until all keys are independent.
+            ps.second[solved_key] = found_dependent_value;      
+        }
+//        FTRACEC("After substitution ")(ps.first)(":\n")(ps.second)("\n");
+    }
+
+    // Try to find an a=>b & !a=>c pair and solve using a conditional
+    // TODO consider explicitly using ordering in the map (doesn't happen automatically
+    // because shared_ptr<> is in the way) so we can "find" in negative sense partials.
+    shared_ptr<BooleanExpression> cond, te, be;
+    for( pair< shared_ptr<BooleanExpression>, 
+               shared_ptr<Expression> > posp : psol[true] ) // all entries for positive sense
+    {
+        ASSERT( posp.first->IsIndependentOf( target ) ); // all dependent keys should have been removed above     
+        for( pair< shared_ptr<BooleanExpression>, 
+                   shared_ptr<Expression> > negp : psol[false] ) // all entries for negative sense
+        {
+            ASSERT( negp.first->IsIndependentOf( target ) ); // all dependent keys should have been removed above     
+            if( OrderCompare( posp.first, negp.first ) == EQUAL ) // same expression
+            {
+                // If do #477, could simplify
+                if( auto sym_pos = dynamic_pointer_cast<SymbolExpression>(posp.second) )
+                    if( auto sym_neg = dynamic_pointer_cast<SymbolExpression>(negp.second) )
+                        return make_shared<ConditionalOperator>( posp.first, sym_pos, sym_neg );
+                if( auto bool_pos = dynamic_pointer_cast<BooleanExpression>(posp.second) )
+                    if( auto bool_neg = dynamic_pointer_cast<BooleanExpression>(negp.second) )
+                        return make_shared<BooleanConditionalOperator>( posp.first, bool_pos, bool_neg );
+                // It's not an error if one is symbolic and the other boolean, but there 
+                // is no solution in such a scenario.
+            }
+        }
+    }
+    return nullptr;
+}
+
+
+void BooleanOperator::TryAddPartialSolutionFor( shared_ptr<Expression> target,
+                                                PartialSolution &psol, 
+                                                bool key_sense, 
+                                                shared_ptr<BooleanExpression> key, 
+                                                shared_ptr<BooleanExpression> val_unsolved ) const
+{
+    INDENT("A");
+//    FTRACEC("Should I add wrt target: ")(target)
+//           ("\nkey: ")(key)
+//           ("\nvalue unsolved: ")(val_unsolved)("\n");
+           
+    // Try solving value for target
+    shared_ptr<Expression> val = val_unsolved->TrySolveForToEqual( target,
+                                                                   make_shared<BooleanConstant>(true) );
+    if( !val )
+    {
+//        FTRACE("No, could not solve\n");
+        return; // couldn't solve, oh dear, never mind
+    }
+    
+    // Now feels like a good time to check solution wrt target doesn't depend on target
+    ASSERT( val->IsIndependentOf( target ) );        
+    
+    // Reduce out any "not" in the key expression, updating the sense
+    while( auto nk = dynamic_pointer_cast<NotOperator>( key ) )
+    {
+        key = OnlyElementOf( nk->GetBooleanOperands() );
+        key_sense = !key_sense;
+    }
+    
+//    FTRACEC("Yes, solved value: ")(val)("\n");
+    
+    // Add it
+    psol[key_sense][key] = val;
+}                                            
+
 
 // ------------------------- NotOperator --------------------------
 
@@ -21,21 +165,18 @@ list<shared_ptr<BooleanExpression>> NotOperator::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
-                                                 const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> NotOperator::Evaluate( const EvalKit &kit,
+                                                 const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
-    shared_ptr<BooleanResult> ra = op_results.front();
-    switch( ra->value )
-    {   
-    case BooleanResult::FALSE:
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    case BooleanResult::UNDEFINED:
-        return ra;
-    case BooleanResult::TRUE:
-        return make_shared<BooleanResult>( BooleanResult::FALSE );
-    default:
-        ASSERTFAIL("Missing case")
-    }    
+    shared_ptr<BooleanResultInterface> ra = op_results.front();
+    if( ra->IsDefinedAndUnique() ) // DEFINED
+    {
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, !ra->GetAsBool() );
+    }
+    else // UNDEFINED
+    {
+        return ra; // UNDEFINED again
+    } 
 }
 
 
@@ -70,71 +211,55 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
-                                                 const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> AndOperator::Evaluate( const EvalKit &kit,
+                                                 const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    for( const shared_ptr<BooleanResult> &r : op_results )    
-        m = min( m, r->value );
-        
-    return make_shared<BooleanResult>( m );
+    // Lower certainly dominates
+    return *min_element( op_results.begin(), 
+                         op_results.end(), 
+                         DereferencingCompare<shared_ptr<BooleanResultInterface>> );
 }
 
 
-shared_ptr<SymbolExpression> AndOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> AndOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                          shared_ptr<BooleanExpression> to_equal ) const
 {
-    set<shared_ptr<ImplicationOperator>> implies;
-    set<shared_ptr<BoolEqualOperator>> bequals;
-    map<shared_ptr<BooleanExpression>, shared_ptr<SymbolExpression>> solveables;
-    for( shared_ptr<BooleanExpression> op : sa )
-    {
-        if( auto o = dynamic_pointer_cast<ImplicationOperator>(op) )       
-            implies.insert(o);
-        if( auto o = dynamic_pointer_cast<BoolEqualOperator>(op) )       
-            bequals.insert(o);
-        if( shared_ptr<SymbolExpression> solved = op->TrySolveFor( target ) )
-            solveables[op] = solved;
-    }
-    
-    // Standard algorithm - first thing to try is to see if any of the clauses provide a solution
-    if( !solveables.empty() )
-        return FrontOf(solveables).second;
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
 
-    // TODO:
-    // Build an implication table, mapping bool x expr -> set<expr>
-    // (or multimap). The bools are "not" flags (NotOperator to be detected and removed, toggling flag)
-    // BooleanEqual becomes 2 entries in table: left and right
-    // To solve, search for (true, a)->b and (false, a)->c in the table SUCH THAT
-    // a indep t; b and c solveable for t.
+    // With AndOperator, solving via any clause solves the whole thing. So try that first.
+    for( shared_ptr<BooleanExpression> op : sa )
+        if( shared_ptr<Expression> solution = op->TrySolveForToEqual( target,
+                                                                      make_shared<BooleanConstant>(true) ) )
+            return solution;
+            
+    // Didn't work so fall back to BooleanOperator's solver which will try to do it using 
+    // partial solutions.
+    // Note: intercept pattern: with other boolean operators, BooleanOperator::TrySolveFor()
+    // is not overridden and therefore called directly. It tries to generate a solution
+    // from that operator's partial solution. Here, though, we intercept in case we could
+    // get a solution from a clause, and only resort to partials if that fails.
+    // Note: go to NT version to avoid indefinite recursion (it's OK because we're
+    // just forwarding and BooleanExpression:TSFTE() already had a go).
+    return BooleanOperator::TrySolveForToEqualNT( target, to_equal );
+}
+
+
+BooleanExpression::PartialSolution AndOperator::PartialSolveFor( shared_ptr<Expression> target ) const
+{
+    PartialSolution and_psol;
     
-    // "Special Stuff" for solving the standard clutch logic (EQUALITY_METHOD only)
-    if( implies.size()==1 && 
-        bequals.size()==1 )
+    for( shared_ptr<BooleanExpression> a : sa )
     {
-        list< shared_ptr<BooleanExpression> > imply_ops = OnlyElementOf(implies)->GetBooleanOperands();           
-        list< shared_ptr<BooleanExpression> > beq_ops = OnlyElementOf(bequals)->GetBooleanOperands(); 
-        
-        shared_ptr<EqualOperator> imply_nequal_op;
-        shared_ptr<EqualOperator> beq_equal_op;        
-        if( auto imply_not_op = dynamic_pointer_cast<NotOperator>(imply_ops.front()) )
-            imply_nequal_op = dynamic_pointer_cast<EqualOperator>(imply_not_op->GetOperands().front());
-        beq_equal_op = dynamic_pointer_cast<EqualOperator>(beq_ops.front()); 
-                                  
-        if( imply_nequal_op && beq_equal_op && 
-            Expression::OrderCompare( imply_nequal_op, beq_equal_op ) == EQUAL )
-        {
-            // Fronts of imply and beq are negation of each other.
-            shared_ptr<SymbolExpression> try_solve_b = beq_ops.back()->TrySolveFor(target);
-            shared_ptr<SymbolExpression> try_solve_c = imply_ops.back()->TrySolveFor(target);
-            if( try_solve_b && try_solve_c && beq_ops.front()->IsIndependentOf(target))
-            {
-                return make_shared<ConditionalOperator>( beq_ops.front(),
-                                                         try_solve_b,
-                                                         try_solve_c );
-            }
-        }
-    }    
-    return nullptr;
+        // Simply merge partial solutions together
+        PartialSolution a_psol = a->PartialSolveFor(target);
+        and_psol[true] = UnionOf( and_psol[true], a_psol[true] );
+        and_psol[false] = UnionOf( and_psol[false], a_psol[false] );
+    }
+
+    return and_psol;
 }
 
 
@@ -178,14 +303,28 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> OrOperator::Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
-    BooleanResult::BooleanValue m = BooleanResult::FALSE;
-    for( const shared_ptr<BooleanResult> &r : op_results )
-        m = max( m, r->value );
+    // Higher certainly dominates
+    return *max_element( op_results.begin(), 
+                         op_results.end(), 
+                         DereferencingCompare<shared_ptr<BooleanResultInterface>> );
+}
 
-    return make_shared<BooleanResult>( m );
+
+BooleanExpression::PartialSolution OrOperator::PartialSolveFor( shared_ptr<Expression> target ) const
+{
+    PartialSolution psol;
+    
+    ForAllCommutativeDistinctPairs( sa, [&](shared_ptr<BooleanExpression> a,
+                                            shared_ptr<BooleanExpression> b) 
+    {
+        TryAddPartialSolutionFor( target, psol, false, a, b );
+        TryAddPartialSolutionFor( target, psol, false, b, a );
+    } );
+
+    return psol;
 }
 
 
@@ -232,28 +371,60 @@ list<shared_ptr<BooleanExpression>> BoolEqualOperator::GetBooleanOperands() cons
 }
 
 
-shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
-                                                       const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> BoolEqualOperator::Evaluate( const EvalKit &kit,
+                                                       const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
-    shared_ptr<BooleanResult> ra = op_results.front();
-    shared_ptr<BooleanResult> rb = op_results.back();
+    shared_ptr<BooleanResultInterface> ra = op_results.front();
+    shared_ptr<BooleanResultInterface> rb = op_results.back();
     
-    if( ra->value == BooleanResult::UNDEFINED )
+    if( !ra->IsDefinedAndUnique() )
         return ra;
         
-    if( rb->value == BooleanResult::UNDEFINED )
+    if( !rb->IsDefinedAndUnique() )
         return rb;
     
-    if( ra->value == rb->value )
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );     
+    bool res = ( ra->GetAsBool() == rb->GetAsBool() );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );     
+}
+
+
+shared_ptr<Expression> BoolEqualOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                shared_ptr<BooleanExpression> to_equal ) const
+{
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+        
+    // This is already an equals operator, so very close to the semantics of
+    // TrySolveForToEqual() - we just need to try it both ways around
+    
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, b );
+    if( a_solution )
+        return a_solution;
+    
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, a );
+    if( b_solution )
+        return b_solution;
+    
+    return nullptr;
+}
+
+
+BooleanExpression::PartialSolution BoolEqualOperator::PartialSolveFor( shared_ptr<Expression> target ) const
+{
+    PartialSolution psol;
+    
+    TryAddPartialSolutionFor( target, psol, true, a, b );
+    TryAddPartialSolutionFor( target, psol, true, b, a );
+
+    return psol;
 }
 
 
 string BoolEqualOperator::Render() const
 {
-    return RenderForMe(a) + " == " + RenderForMe(b);
+    return RenderForMe(a) + " iff " + RenderForMe(b);
 }
 
 
@@ -284,25 +455,40 @@ list<shared_ptr<BooleanExpression>> ImplicationOperator::GetBooleanOperands() co
 }
 
 
-shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<BooleanResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> ImplicationOperator::Evaluate( const EvalKit &kit,
+                                                         const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
-    shared_ptr<BooleanResult> ra = op_results.front();
-    shared_ptr<BooleanResult> rb = op_results.back();
-    switch( ra->value )
-    {   
-    case BooleanResult::FALSE:
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    case BooleanResult::UNDEFINED:
-        if( rb->value == BooleanResult::TRUE )
+    shared_ptr<BooleanResultInterface> ra = op_results.front();
+    shared_ptr<BooleanResultInterface> rb = op_results.back();
+    if( ra->IsDefinedAndUnique() )
+    {
+        if( ra->GetAsBool() ) // TRUE
+        {
             return rb;
+        }
+        else // FALSE
+        {
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
+        }
+    }
+    else // UNDEFINED
+    {
+        if( rb->IsDefinedAndTrue() )
+            return rb; // TRUE again
         else
-            return ra;
-    case BooleanResult::TRUE:
-        return rb;
-    default:
-        ASSERTFAIL("Missing case")
-    }  
+            return ra; // UNDEFINED again
+    } 
+}
+
+
+BooleanExpression::PartialSolution ImplicationOperator::PartialSolveFor( shared_ptr<Expression> target ) const
+{
+    PartialSolution psol;
+    
+    TryAddPartialSolutionFor( target, psol, true, a, b );
+    //TryAddPartialSolutionFor( target, psol, true, b, a ); // would need to negate a, which we can't then solve; TBD
+
+    return psol;
 }
 
 
@@ -315,4 +501,69 @@ string ImplicationOperator::Render() const
 Expression::Precedence ImplicationOperator::GetPrecedence() const
 {
     return Precedence::IMPLICATION;
+}
+
+// ------------------------- BooleanConditionalOperator --------------------------
+
+BooleanConditionalOperator::BooleanConditionalOperator( shared_ptr<BooleanExpression> a_,
+                                                        shared_ptr<BooleanExpression> b_,
+                                                        shared_ptr<BooleanExpression> c_ ) :
+    a( a_ ),
+    b( b_ ),
+    c( c_ )
+{   
+}    
+
+
+list<shared_ptr<BooleanExpression>> BooleanConditionalOperator::GetBooleanOperands() const
+{
+    return { a, b, c };
+}
+
+
+shared_ptr<BooleanResultInterface> BooleanConditionalOperator::Evaluate( const EvalKit &kit ) const
+{
+    shared_ptr<BooleanResultInterface> ra = a->Evaluate(kit);   
+    if( ra->IsDefinedAndUnique() )
+    {
+        if( ra->GetAsBool() ) // TRUE
+        {
+            return b->Evaluate(kit);
+        }
+        else // FALSE
+        {
+            return c->Evaluate(kit);
+        }
+    }
+    else // UNDEFINED
+    {
+        shared_ptr<BooleanResultInterface> rb = b->Evaluate(kit);   
+        shared_ptr<BooleanResultInterface> rc = c->Evaluate(kit);   
+        if( *rb == *rc )
+            return rb; // not ambiguous if both options are the same
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    }
+}
+
+
+BooleanExpression::PartialSolution BooleanConditionalOperator::PartialSolveFor( shared_ptr<Expression> target ) const
+{
+    PartialSolution psol;
+    
+    TryAddPartialSolutionFor( target, psol, true, a, b );
+    TryAddPartialSolutionFor( target, psol, false, a, c ); 
+
+    return psol;
+}
+
+
+string BooleanConditionalOperator::Render() const
+{
+    return RenderForMe(a) + " ? " + RenderForMe(b) + " : " + RenderForMe(c);
+}
+
+
+Expression::Precedence BooleanConditionalOperator::GetPrecedence() const
+{
+    return Precedence::CONDITIONAL;
 }

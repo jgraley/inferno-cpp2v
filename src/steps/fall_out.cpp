@@ -42,7 +42,6 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<Switch> l_switch;     
     MakePatternPtr< Delta<Enum> > l_over_enum;     
     MakePatternPtr<Enum> ls_enum, lr_enum;     
-    MakePatternPtr< Negation<Statement> > xs_rr;
     MakePatternPtr<Static> lr_state_decl;    
     MakePatternPtr<BuildInstanceIdentifierAgent> lr_state_id("%s_STATE_%s");
     MakePatternPtr<Case> lr_case;
@@ -83,16 +82,16 @@ PlaceLabelsInArray::PlaceLabelsInArray()
             
     ll_all_over->through = ll_all;
     ll_all_over->overlay = ll_any;
-    ll_all->patterns = (ll_any, lls_not1, lls_not2); 
+    ll_all->conjuncts = (ll_any, lls_not1, lls_not2); 
     ll_any->terminus = ll_over;
     ll_over->through = ls_label_id;
     ll_over->overlay = ll_sub;
     ll_sub->operands = (r_lmap_id, lr_state_id);
-    lls_not1->pattern = lls_make;
+    lls_not1->negand = lls_make;
     lls_make->operands = (MakePatternPtr< Star<Expression> >(), 
                           ls_label_id,
                           MakePatternPtr< Star<Expression> >()); // TODO too strong, will hit (arr){LABEL} in original code
-    lls_not2->pattern = lls_label;
+    lls_not2->negand = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 
     MakePatternPtr< SlaveSearchReplace<Scope> > slavell( l_module, ll_all_over );    
@@ -107,7 +106,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lr_enum->members = (l_enum_vals, lr_state_decl);
     lr_enum->identifier = ls_enum->identifier = r_enum_id;
     l_block->restriction = l_not;
-    l_not->pattern = MakePatternPtr<Goto>();
+    l_not->negand = MakePatternPtr<Goto>();
     l_post->restriction = MakePatternPtr<If>();    
     l_dead_gotos->restriction = MakePatternPtr<Goto>();
     l_over_enum->through = ls_enum;
@@ -126,7 +125,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     ls_make->operands = (l_existing);
     lr_make->operands = (l_existing, ls_label_id);
     l_existing->restriction = l_mnot;
-    l_mnot->pattern = ls_label_id;
+    l_mnot->negand = ls_label_id;
     l_label->identifier = ls_label_id;
     l_stuff->terminus = l_overll;
     l_overll->through = l_label;
@@ -204,8 +203,8 @@ LabelTypeToEnum::LabelTypeToEnum()
 
     l_apall_over->through = l_apall;
     l_apall_over->overlay = l_apany;
-    l_apall->patterns = (l_apany, l_apnot);
-    l_apnot->pattern = lmap;
+    l_apall->conjuncts = (l_apany, l_apnot);
+    l_apnot->negand = lmap;
     l_apany->terminus = l_over;
     l_over->through = MakePatternPtr<Labeley>();
     l_over->overlay = l_enum; 
@@ -220,21 +219,21 @@ LabelTypeToEnum::LabelTypeToEnum()
     ns_goto->destination = n_dest_expr;
     nr_goto->destination = nr_sub;
     nr_sub->operands = (lmap_id, n_dest_expr);
-    n_dest_expr->pattern = nsx_sub;
+    n_dest_expr->negand = nsx_sub;
     nsx_sub->operands = (lmap_id, MakePatternPtr<Expression>());
     
     MakePatternPtr< SlaveSearchReplace<Scope> > slaven( slavem, ns_goto, nr_goto );   
     
-    all->patterns = (record, stuff_labeley, stuff_lmap);
+    all->conjuncts = (record, stuff_labeley, stuff_lmap);
     stuff_lmap->terminus = lmap;
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
     lmap_type->element = MakePatternPtr<Labeley>();
     stuff_labeley->terminus = apall;
-    apall->patterns = (apany, apnot);
+    apall->conjuncts = (apany, apnot);
     apany->terminus = labeley;
-    apnot->pattern = lmap;
+    apnot->negand = lmap;
     
     Configure( SEARCH_REPLACE, all, slaven );
 }
@@ -290,8 +289,8 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     
     record->members = ( decls );
 
-    l_apall->patterns = (l_apany, l_apnot);
-    l_apnot->pattern = lmap;
+    l_apall->conjuncts = (l_apany, l_apnot);
+    l_apnot->negand = lmap;
     l_apany->terminus = l_over;
     l_over->through = MakePatternPtr<Labeley>();
     l_over->overlay = l_enum; 
@@ -299,16 +298,16 @@ LabelInstancesToEnum::LabelInstancesToEnum()
             
     MakePatternPtr< SlaveSearchReplace<Scope> > slavel( record, l_apall );   
 
-    all->patterns = (record, stuff_labeley, stuff_lmap);
+    all->conjuncts = (record, stuff_labeley, stuff_lmap);
     stuff_lmap->terminus = lmap;
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
     lmap_type->element = MakePatternPtr<Labeley>();
     stuff_labeley->terminus = apall;
-    apall->patterns = (apany, apnot);
+    apall->conjuncts = (apany, apnot);
     apany->terminus = labeley;
-    apnot->pattern = lmap;
+    apnot->negand = lmap;
     
     Configure( SEARCH_REPLACE, all, slavel );
 }
@@ -354,10 +353,10 @@ LabelVarsToEnum::LabelVarsToEnum()
    
     MakePatternPtr< SlaveSearchReplace<Scope> > slavel( scope, l_assign );   
    
-    ms_all->patterns = (ms_anynode, msx_not, msx_not2, msx_not3);
-    msx_not2->pattern = msx_inst;
+    ms_all->conjuncts = (ms_anynode, msx_not, msx_not2, msx_not3);
+    msx_not2->negand = msx_inst;
     msx_inst->identifier = var_id;    
-    msx_not->pattern = ms_asop;
+    msx_not->negand = ms_asop;
     ms_asop->operands = (m_nested_subscript2, MakePatternPtr< Star<Expression> >() );
     m_nested_subscript2->terminus = var_id;
     m_nested_subscript2->depth = depth;
@@ -366,13 +365,13 @@ LabelVarsToEnum::LabelVarsToEnum()
     m_nested_subscript->terminus = var_id;
     m_nested_subscript->depth = depth;
     m_over->overlay = mr_sub;
-    msx_not3->pattern = msx_sub;
+    msx_not3->negand = msx_sub;
     msx_sub->operands = (lmap_id, m_nested_subscript);
     mr_sub->operands = (lmap_id, m_nested_subscript);
     
     MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_all, ms_anynode );   
    
-    s_all->patterns = (scope, s_stuff, sx_not1, lmap_stuff);
+    s_all->conjuncts = (scope, s_stuff, sx_not1, lmap_stuff);
     scope->terminus = var;
     var->type = nested_array;
     nested_array->terminus = over;
@@ -385,13 +384,13 @@ LabelVarsToEnum::LabelVarsToEnum()
     nested_subscript->depth = depth;
     s_sub->operands = (lmap_id, s_index);
     s_index->pattern = type;
-    sx_not1->pattern = sx_stuff;
+    sx_not1->negand = sx_stuff;
     sx_stuff->terminus = sx_all;
-    sx_all->patterns = (sx_asop, sx_not2);
+    sx_all->conjuncts = (sx_asop, sx_not2);
     sx_asop->operands = (nested_subscript3, MakePatternPtr< Star<Expression> >() );
     nested_subscript3->terminus = var_id;
     nested_subscript3->depth = depth;
-    sx_not2->pattern = sx_assign;
+    sx_not2->negand = sx_assign;
     sx_assign->operands = (nested_subscript2, sx_sub);
     nested_subscript2->terminus = var_id;
     nested_subscript2->depth = depth;
@@ -443,7 +442,7 @@ AddStateEnumVar::AddStateEnumVar()
     
     ls_goto->destination = ls_sub;
     ls_sub->operands = (array, lx_not);
-    lx_not->pattern = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
+    lx_not->negand = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
     
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var_id, lx_not);
@@ -487,12 +486,12 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     s_comp->statements = (pre, s_goto1, label, body, goto2, post);
     r_comp->statements = (pre, label, r_if, goto2, post);
     pre->restriction = sx_pre,
-    sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
+    sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
     s_goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
     body->restriction = sx_body;
-    sx_body->pattern = sx_uncombable; 
+    sx_body->negand = sx_uncombable; 
     goto2->destination = sub;    
     
     r_if->condition = r_equal;
@@ -525,15 +524,15 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     s_comp->statements = (pre, s_goto1, label, body1, wait, body2, goto2, post);
     r_comp->statements = (pre, label, r_if, goto2, post);
     pre->restriction = sx_pre,
-    sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
+    sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
     s_goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
     goto2->destination = sub;    
     body1->restriction = sx_body1;
-    sx_body1->pattern = sx_uncombable1;
+    sx_body1->negand = sx_uncombable1;
     body2->restriction = sx_body2;
-    sx_body2->pattern = sx_uncombable2;
+    sx_body2->negand = sx_uncombable2;
         
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
@@ -565,12 +564,12 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     s_comp->statements = (pre, goto1, label, body);
     r_comp->statements = (pre, label, r_if, goto1);
     pre->restriction = sx_pre,
-    sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
+    sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
     goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
     body->restriction = sx_body,
-    sx_body->pattern = sx_uncombable; 
+    sx_body->negand = sx_uncombable; 
     
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
@@ -608,7 +607,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     iif->condition = equal;
     equal->operands = (state_var_id, state_id);
     post->restriction = sx_post;
-    sx_post->pattern = sx_post_label;
+    sx_post->negand = sx_post_label;
         
     Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
@@ -631,15 +630,15 @@ ApplyTopPolicy::ApplyTopPolicy()
     MakePatternPtr< Negation<Statement> > sx_body1, sx_body2;
     MakePatternPtr<Uncombable> sx_uncombable1, sx_uncombable2;
        
-    s_all->patterns = (s_comp, s_stuff);
+    s_all->conjuncts = (s_comp, s_stuff);
     s_comp->members = r_comp->members = (decls);
     s_comp->statements = (body1, wait, body2, label, post);
     r_comp->statements = (label, r_if, post);
     s_stuff->terminus = gotoo;
     body1->restriction = sx_body1;
-    sx_body1->pattern = sx_uncombable1;
+    sx_body1->negand = sx_uncombable1;
     body2->restriction = sx_body2;
-    sx_body2->pattern = sx_uncombable2;
+    sx_body2->negand = sx_uncombable2;
     
     r_if->condition = r_equal;
     r_equal->operands = (r_delta_count, r_zero);
@@ -666,8 +665,8 @@ EnsureResetYield::EnsureResetYield()
     s_comp->statements = (pre, gotoo, post);
     r_comp->statements = (pre, r_yield, gotoo, post);
     pre->restriction = sx_not;
-    sx_not->pattern = sx_any;
-    sx_any->patterns = (MakePatternPtr<Goto>(), MakePatternPtr<Label>(), MakePatternPtr<Wait>() );
+    sx_not->negand = sx_any;
+    sx_any->disjuncts = (MakePatternPtr<Goto>(), MakePatternPtr<Label>(), MakePatternPtr<Wait>() );
         
     Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
@@ -697,7 +696,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
                                          ? TreePtr<Statement>(s_ifgoto) 
                                          : TreePtr<Statement>(s_goto) );
     body->restriction = sx_not;
-    sx_not->pattern = MakePatternPtr<Label>(); // so s_label is the only one - all gotos must go to it.
+    sx_not->negand = MakePatternPtr<Label>(); // so s_label is the only one - all gotos must go to it.
     s_ifgoto->condition = cond;
     s_ifgoto->body = s_goto;
     s_ifgoto->else_body = MakePatternPtr<Nop>();

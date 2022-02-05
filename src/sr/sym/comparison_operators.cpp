@@ -1,6 +1,7 @@
 #include "comparison_operators.hpp"
 #include "boolean_operators.hpp"
 #include "primary_expressions.hpp"
+#include "result.hpp"
 
 using namespace SYM;
 
@@ -20,53 +21,46 @@ list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
-                                                   const list<shared_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
+                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
-    for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
+        if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
+    shared_ptr<SymbolResultInterface> ra = op_results.front();
+    shared_ptr<SymbolResultInterface> rb = op_results.back();
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
-    if( ra->xlink == rb->xlink )
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );        
+    bool res = ( ra->GetAsXLink() == rb->GetAsXLink() );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );   
 }
 
 
-shared_ptr<SymbolExpression> EqualOperator::TrySolveFor( shared_ptr<SymbolVariable> target ) const
+shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                            shared_ptr<BooleanExpression> to_equal ) const
 {
-    shared_ptr<SymbolExpression> dep_op, indep_op;
-    for( shared_ptr<SymbolExpression> op : list<shared_ptr<SymbolExpression>>{a, b} )
-    {
-        if( op->IsIndependentOf( target ) )
-            indep_op = op;
-        else
-            dep_op = op;                  
-    }
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+        
+    // This is already an equals operator, so very close to the semantics of
+    // TrySolveForToEqual() - we just need to try it both ways around
     
-    if( !indep_op || !dep_op )
-        return nullptr; // need at least one
-                
-    // TODO should be "can dep_op be solved to equal indep_op wrt target"? See #466
-    if( auto dep_sv = dynamic_pointer_cast<SymbolVariable>( dep_op ) ) 
-    {
-        // We already know dep_op is not independent of target. If it's also a 
-        // SymbolVariable then it must be the target.        
-        ASSERT( dep_sv->GetPatternLink()==target->GetPatternLink() );
-        return indep_op;
-    }
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, b );
+    if( a_solution )
+        return a_solution;
+    
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, a );
+    if( b_solution )
+        return b_solution;
     
     return nullptr;
 }
-
 
 
 string EqualOperator::Render() const
@@ -111,28 +105,26 @@ list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() 
 }
 
 
-shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
-                                                             const list<shared_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const EvalKit &kit,
+                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
-    for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
+        if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
+    shared_ptr<SymbolResultInterface> ra = op_results.front();
+    shared_ptr<SymbolResultInterface> rb = op_results.back();
 
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
-    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->xlink) );   
-    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->xlink) );   
+    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->GetAsXLink()) );   
+    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->GetAsXLink()) );   
     SR::TheKnowledge::IndexType index_a = nugget_a.depth_first_index;
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
-    if( EvalBoolFromIndexes( index_a, index_b ) )
-        return make_shared<BooleanResult>(BooleanResult::TRUE);
-    else
-        return make_shared<BooleanResult>(BooleanResult::FALSE);   
+    bool res = EvalBoolFromIndexes( index_a, index_b );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );  
 }
 
 
@@ -236,27 +228,27 @@ list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
-                                                     const list<shared_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResultInterface> AllDiffOperator::Evaluate( const EvalKit &kit,
+                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
+        if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
     // Note: could be done faster using a set<XLink>
-    BooleanResult::BooleanValue m = BooleanResult::TRUE;
-    ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResult> ra,
-                                                    shared_ptr<SymbolResult> rb) 
+    bool m = true;
+    ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResultInterface> ra,
+                                                    shared_ptr<SymbolResultInterface> rb) 
     {    
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model (cf IndexComparisonOperator).
-        if( ra->xlink == rb->xlink )
+        if( ra->GetAsXLink() == rb->GetAsXLink() )
         {
-            m = BooleanResult::FALSE;
+            m = false;
         }
     } );
-    return make_shared<BooleanResult>( m );   
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, m );   
 }
 
 
@@ -290,25 +282,23 @@ list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
-                                                    const list<shared_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResultInterface> KindOfOperator::Evaluate( const EvalKit &kit,
+                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
-    if( ra->cat == SymbolResult::UNDEFINED )
+    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
+    if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
     
-    bool matches = archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() );
-    return make_shared<BooleanResult>( matches ? BooleanResult::TRUE : BooleanResult::FALSE );
+    bool matches = archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, matches );
 }
 
 
 Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const KindOfOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
     return OrderCompare(archetype_node.get(), 
                         c->archetype_node.get(), 
@@ -318,10 +308,7 @@ Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate,
 
 string KindOfOperator::Render() const
 {
-    string name = archetype_node->GetTypeName();
-
-    // Not using RenderForMe() because we always want () here
-    return "KindOf<" + name + ">(" + a->Render() + ")"; 
+    return "KindOf<" + archetype_node->GetTypeName() + ">" + a->RenderWithParentheses(); 
 }
 
 
@@ -351,26 +338,26 @@ list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperand
 }
 
 
-shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
-                                                                 const list<shared_ptr<SymbolResult>> &op_results ) const
+shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
+                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResult> ra = OnlyElementOf(op_results);
+    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
 
     // Propagate undefined case
-    if( ra->cat == SymbolResult::UNDEFINED )
+    if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !archetype_node->IsLocalMatch( ra->xlink.GetChildX().get() ) )
-        return make_shared<BooleanResult>(BooleanResult::FALSE); 
+    if( !archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() ) )
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->GetAsXLink().GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
@@ -378,19 +365,15 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
     ASSERT( p_x_col )("item_index didn't lead to a collection");
     
     // Check that the size is as required
-    if( p_x_col->size() == size )
-        return make_shared<BooleanResult>(BooleanResult::TRUE);
-    else
-        return make_shared<BooleanResult>(BooleanResult::FALSE);
+    bool res = ( p_x_col->size() == size );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );
 }
 
 
 Orderable::Result ChildCollectionSizeOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                   OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const ChildCollectionSizeOperator *>(candidate);    
-    ASSERT(c);
+    auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
     Result r1 = OrderCompare(archetype_node.get(), 
                              c->archetype_node.get(), 
@@ -416,9 +399,8 @@ string ChildCollectionSizeOperator::Render() const
            to_string(item_index) + 
            ":col size=" +
            to_string(size) + 
-           ">(" + 
-           a->Render() + 
-           ")"; 
+           ">" + 
+           a->RenderWithParentheses(); 
 }
 
 
@@ -443,30 +425,27 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
-                                                        const list<shared_ptr<SymbolResult>> &op_results ) const 
+shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &kit,
+                                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    for( shared_ptr<SymbolResult> ra : op_results )
-        if( ra->cat == SymbolResult::UNDEFINED )
+    for( shared_ptr<SymbolResultInterface> ra : op_results )
+        if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
 
-    shared_ptr<SymbolResult> ra = op_results.front();
-    shared_ptr<SymbolResult> rb = op_results.back();
+    shared_ptr<SymbolResultInterface> ra = op_results.front();
+    shared_ptr<SymbolResultInterface> rb = op_results.back();
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
-    if( equivalence_relation.Compare(ra->xlink, rb->xlink) == EQUAL  )
-        return make_shared<BooleanResult>( BooleanResult::TRUE );
-    else
-        return make_shared<BooleanResult>( BooleanResult::FALSE );    
-
+    bool res = ( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL );
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );    
 }
 
 
 string EquivalentOperator::Render() const
 {
-    return "Equivalent(" + a->Render() + ", " + b->Render() + ")";
+    return RenderForMe(a) + " ≡ " + RenderForMe(b);
 }
 
 
@@ -494,22 +473,28 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 }
 
 
-shared_ptr<SymbolResult> ConditionalOperator::Evaluate( const EvalKit &kit ) const
+shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
-    shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
-    switch( ra->value )
-    {   
-    case BooleanResult::FALSE:
-        return c->Evaluate(kit);
-    case BooleanResult::UNDEFINED:
-        // TODO could evaluate both, and see if they're defined and equal
-        // to each other and then return either of them.
-        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
-    case BooleanResult::TRUE:
-        return b->Evaluate(kit);
-    default:
-        ASSERTFAIL("Missing case")
-    }  
+    shared_ptr<BooleanResultInterface> ra = a->Evaluate(kit);   
+    if( ra->IsDefinedAndUnique() )
+    {
+        if( ra->GetAsBool() ) // TRUE
+        {
+            return b->Evaluate(kit);
+        }
+        else // FALSE
+        {
+            return c->Evaluate(kit);
+        }
+    }
+    else // UNDEFINED
+    {
+        shared_ptr<SymbolResultInterface> rb = b->Evaluate(kit);   
+        shared_ptr<SymbolResultInterface> rc = c->Evaluate(kit);   
+        if( *rb == *rc )
+            return rb; // not ambiguous if both options are the same
+        return make_shared<SingleSymbolResult>( ResultInterface::UNDEFINED );
+    }
 }
 
 

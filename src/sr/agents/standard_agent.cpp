@@ -6,7 +6,6 @@
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
-#include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/comparison_operators.hpp"
 #include "sym/primary_expressions.hpp"
@@ -413,7 +412,7 @@ void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
 
 // ---------------------------- Normal Linked Queries ----------------------------------                                               
 
-bool StandardAgent::ImplHasNLQ() const
+bool StandardAgent::ImplHasSNLQ() const
 {    
     return true;
 }
@@ -551,6 +550,7 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
     // Get the members of x corresponding to pattern's class
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
+    ASSERT( keyer_xlink != XLink::MMAX_Link );
     vector< Itemiser::Element * > x_memb = Itemise( keyer_xlink.GetChildX().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )

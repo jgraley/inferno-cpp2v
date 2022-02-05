@@ -42,51 +42,6 @@ void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-void DefaultMMAXAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const
-{
-    exception_ptr eptr;
-    try
-    {
-        // This function must not "protect" client agents from eg partial queries.        
-        RunNormalLinkedQueryMMed( hypothesis_links, knowledge );
-    }
-    catch( ::Mismatch & )
-    {
-        eptr = current_exception();
-    }
-    
-    bool all_non_mmax = true;
-    bool all_mmax = true;
-    for( PatternLink plink : keyer_and_normal_plinks ) 
-    {
-        if( hypothesis_links->count(plink) > 0 )
-        {
-            if( hypothesis_links->at(plink) == XLink::MMAX_Link )
-                all_non_mmax = false;
-            else
-                all_mmax = false;                    
-        }
-    }   
-
-    if( all_mmax )
-        return; // Done: all are MMAX            
-    
-    if( !all_non_mmax )
-        throw MMAXPropagationMismatch(); // Mismatch: mixed MMAX and non-MMAX
-    
-    if (eptr)
-       std::rethrow_exception(eptr);
-}
-
-
-void DefaultMMAXAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const                                      
-{                      
-    ASSERTFAIL("Please implement RunNormalLinkedQueryMMed()\n");
-}                     
-
-
 SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
 {    
     auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
@@ -94,18 +49,6 @@ SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImp
     shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
     return mmax_rewriter.ApplyDistributed( original_expr );
 }
-
-                               
-SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryMMed() const                                      
-{                      
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryMMed( kit.hypothesis_links,
-						    	  kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQMMed()");	
-}                     
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
@@ -120,31 +63,6 @@ void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
 }
 
 
-void PreRestrictedAgent::RunNormalLinkedQueryMMed( const SolutionMap *hypothesis_links,
-                                                   const TheKnowledge *knowledge ) const
-{
-    // This function must not "protect" client agents from eg partial queries. 
-    RunNormalLinkedQueryPRed( hypothesis_links, knowledge );
-
-    // Baseless query strategy: don't check pre-restriction
-    bool based = (hypothesis_links->count(keyer_plink) == 1);
-    if( based )
-    { 
-        // Check pre-restriction
-        XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-        if( !IsPreRestrictionMatch(keyer_xlink) )
-            throw PreRestrictionMismatch();
-    }
-}
-
-                               
-void PreRestrictedAgent::RunNormalLinkedQueryPRed( const SolutionMap *hypothesis_links,
-                                                   const TheKnowledge *knowledge ) const                                      
-{                      
-    ASSERTFAIL("Please implement RunNormalLinkedQueryPRed()\n");
-}                     
-
-
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
 {
     return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
@@ -153,13 +71,7 @@ SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryM
                                
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {                      
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		RunNormalLinkedQueryPRed( kit.hypothesis_links,
-						    	  kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQPRed()");	
+	ASSERTFAIL("Override me or turn off ImplHasSNLQ()\n");
 }                     
 
 //---------------------------------- TeleportAgent ------------------------------------    
@@ -232,6 +144,13 @@ void SearchLeafAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                            XLink keyer_xlink ) const
 {
 }
+
+
+SYM::Over<SYM::BooleanExpression> SearchLeafAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    return MakeOver<SYM::BooleanConstant>(true);
+}                                      
+
 
 //---------------------------------- SpecialBase ------------------------------------    
 

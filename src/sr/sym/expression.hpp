@@ -3,7 +3,6 @@
 
 #include "common/common.hpp"
 #include "common/orderable.hpp"
-
 #include "../link.hpp"
 
 #include <exception>
@@ -16,45 +15,9 @@ namespace SR
 namespace SYM
 { 
 
-class SymbolVariable;
 class SymbolExpression;
-
-// ------------------------- Result --------------------------
-
-class Result
-{
-};
-
-// ------------------------- BooleanResult --------------------------
-
-class BooleanResult : public Result
-{
-public:
-    enum BooleanValue
-    {
-        FALSE,
-        UNDEFINED,
-        TRUE
-    };    
-    BooleanResult( BooleanValue value );
-    BooleanValue value;
-};
-
-// ------------------------- SymbolResult --------------------------
-
-class SymbolResult : public Result
-{
-public:
-    enum BooleanCategory
-    {
-        UNDEFINED,
-        XLINK
-    };    
-    SymbolResult();
-    SymbolResult( BooleanCategory cat, SR::XLink xlink=SR::XLink() );
-    BooleanCategory cat; 
-    SR::XLink xlink;
-};
+class SymbolResultInterface;
+class BooleanResultInterface;
 
 // ------------------------- Expression --------------------------
 
@@ -89,12 +52,11 @@ public:
         CONDITIONAL,
         COMMA 
     };    
-        
+            
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
-    virtual shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolVariable> target ) const;
-    virtual bool IsIndependentOf( shared_ptr<SymbolVariable> target ) const;
     
+    bool IsIndependentOf( shared_ptr<Expression> target ) const;
     using Orderable::OrderCompare;
     static Orderable::Result OrderCompare( shared_ptr<const Expression> l, 
                                            shared_ptr<const Expression> r, 
@@ -103,6 +65,7 @@ public:
                                                     OrderProperty order_property ) const override;
 
     virtual string Render() const = 0;    
+    string RenderWithParentheses() const;
     string GetTrace() const; // used for debug
     
 protected:    
@@ -116,7 +79,25 @@ protected:
 class BooleanExpression : public Expression
 {    
 public:
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
+    // Value must be independent of target it is part of a solution. 
+    // Key does not have this requirement, but it must not be NotOperator.
+    typedef map< shared_ptr<BooleanExpression>, 
+                 shared_ptr<Expression> > PartialSolutionForSense;
+    
+    // key is the sense of value.key: false if there would have been an odd 
+    // number of NotOperator, otherwise true. Note: use [] to access this - 
+    // doing so will make sure an empty PartialSolutionForSense is created.
+    typedef map<bool, PartialSolutionForSense> PartialSolution;
+
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const = 0;
+    
+    shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
+                                               shared_ptr<BooleanExpression> to_equal ) const;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<BooleanExpression> to_equal ) const;
+
+    // Not a "try" because always "succeeds" (even though the map amy be empty)
+    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 };
 
 // ------------------------- SymbolExpression --------------------------
@@ -125,7 +106,12 @@ public:
 class SymbolExpression : public Expression
 {    
 public:
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const = 0;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
+    
+    shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
+                                               shared_ptr<SymbolExpression> to_equal ) const;
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                         shared_ptr<SymbolExpression> to_equal ) const;
 };
 
 // ------------------------- BooleanToBooleanExpression --------------------------
@@ -136,9 +122,9 @@ class BooleanToBooleanExpression : public BooleanExpression
 public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const final override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit, 
+                                                const list<shared_ptr<BooleanResultInterface>> &op_results ) const;
 };
 
 // ------------------------- SymbolToBooleanExpression --------------------------
@@ -150,9 +136,9 @@ public:
     // If you want 0 operands and a boolean result, use BooleanExpression as the base
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const = 0;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                const list<shared_ptr<SymbolResult>> &op_results ) const;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit, 
+                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const;
 };
 
 // ------------------------- SymbolToSymbolExpression --------------------------
@@ -163,9 +149,9 @@ class SymbolToSymbolExpression : public SymbolExpression
 public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit ) const override;
-    virtual shared_ptr<SymbolResult> Evaluate( const EvalKit &kit, 
-                                               const list<shared_ptr<SymbolResult>> &op_results ) const;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit, 
+                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const;
 };
 
 };
