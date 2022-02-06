@@ -84,13 +84,34 @@ class TruthTable
 public:
     explicit TruthTable( int degree, bool initval=false );
 
-    bool Get( vector<bool> full_indices );
-    void Set( vector<bool> full_indices, bool value );
-    void Set( map<int, bool> fixed_map, bool value );
+    // Set a single cell value given a full fector of indices    
+    void Set( vector<bool> full_indices, bool new_value );
 
+    // Set all cells satisfying the supplied indices. 
+    void SetSlice( map<int, bool> fixed_map, bool new_value );
+
+    // Set all cells satisfying the supplied indices. new_values
+    // must have all remaining axes.   
+    void SetSlice( map<int, bool> fixed_map, const TruthTable &new_values );
+
+    // Increase the degree by additional_degree, replicating
+    // existing cell values. In-place.
+    void Extend( int additional_degree );
+
+    // Get a single cell value given a full fector of indices
+    bool Get( vector<bool> full_indices ) const;
+
+    // Get a slice of a truth table in which the fold_axes have
+    TruthTable GetSlice( map<int, bool> fixed_map ) const; 
+
+    // Get a folded down truth table in which the fold_axes have
+    // been removed and the values combined together based on
     // identity=true will OR; =false will AND
-    TruthTable GetFold( set<int> fold_axes, bool identity ) const; 
+    TruthTable GetFolded( set<int> fold_axes, bool identity ) const; 
 
+    // Ordering
+    bool operator<( const TruthTable &other ) const;
+     
 private:
     int GetCellIndex( vector<bool> full_indices ) const;
 
