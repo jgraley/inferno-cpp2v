@@ -77,13 +77,12 @@ void TruthTable::SetSlice( map<int, bool> fixed_map, const TruthTable &new_value
 }
 
 
-void TruthTable::Extend( int additional_degree )
+void TruthTable::Extend( int new_degree )
 {
-    int new_degree = degree + additional_degree;
     int new_ncells = 1 << new_degree;
     cells.resize(new_ncells);
 
-    for( int i=0; i<additional_degree; i++ )
+    for( int axis=degree; axis<new_degree; axis++ )
     {
         int ncells = 1 << degree;
         copy( cells.begin(),
@@ -163,9 +162,9 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
 
             bool cell = cells.at( GetCellIndex(full_indices) );
             if( identity )
-                cell_total = cell_total || cell;
+                cell_total = cell_total && cell;
             else
-                cell_total = cell_total && cell;            
+                cell_total = cell_total || cell;            
         } );
 
         dest.Set( dest_indices, cell_total );
@@ -175,16 +174,16 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
 }
 
 
-vector<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
+set<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
 {
-    vector<vector<bool>> indices_vec;
+    set<vector<bool>> indices_set;
     
     ForPower( degree, index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> indices)
     {
         if( Get(indices) == value )
-            indices_vec.push_back( indices );
+            indices_set.insert( indices );
     } );
-    return indices_vec;
+    return indices_set;
 }
 
 
@@ -204,6 +203,36 @@ int TruthTable::GetCellIndex( vector<bool> full_indices ) const
     return cindex;
 }
 
+// ------------------------- unit tests --------------------------
 
+void SYM::TestTruthTable()
+{
+    // 4-D truth table incorporates literals found in CSP equation
+    TruthTable t( 4, true );
+
+    // Filled in by analysis but could be repeated evaluation
+    t.SetSlice( {{0, false}, {2, false}}, false ); // (1) np1 => p3 aka p1 || p3
+    t.SetSlice( {{1, false}, {2, false}}, false ); // (3) np2 => p3 aka p2 || p3
+    t.SetSlice( {{1, false}, {3, false}}, false ); // (4) np2 => p4 aka p2 || p4
+    t.SetSlice( {{3, false}, {0, false}}, false ); // (7) np4 => p1 aka p4 || p1
+
+    // Extend to include extrapolated literal
+    t.Extend(5);
+
+    // Filled in by analysis involving extrapolated literal
+    t.SetSlice( {{0, true}, {2, true}, {4, false}}, false ); // (T1) Transitive Equal p1 p3 p5
+    t.SetSlice( {{0, true}, {2, false}, {4, true}}, false ); // (T1) Transitive Equal p1 p3 p5
+    t.SetSlice( {{0, false}, {2, true}, {4, true}}, false ); // (T1) Transitive Equal p1 p3 p5
+
+    // Fold out extrapolated literal with OR-rule
+    TruthTable t2 = t.GetFolded({4}, false); 
+
+    // Extract remaining possibles using OR-rule
+    set<vector<bool>> iv = t2.GetIndicesOfValue( false );
+
+    ASSERT( iv == set<vector<bool>>({{true, true, true, true},
+                                     {false, false, true, true},
+                                     {true, true, false, false} }) )(iv);
+}
 
 

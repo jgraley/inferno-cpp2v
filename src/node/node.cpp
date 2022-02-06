@@ -13,6 +13,7 @@ struct MyNode : Node
 	Sequence<Node> s;
 };
 
+
 void GenericsTest()
 {
 	TRACE();

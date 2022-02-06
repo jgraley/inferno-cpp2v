@@ -33,7 +33,7 @@ PARSE_MODULES = $(PARSE)/identifier_tracker $(PARSE)/rc_hold
 RENDER_MODULES = $(RENDER)/sort_decls $(RENDER)/graph $(RENDER)/render $(RENDER)/uniquify_identifiers $(RENDER)/doc_graphs
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/slave_test $(STEPS)/lower_control_flow 
 STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out
-MAIN_MODULES = $(MAIN)/inferno
+MAIN_MODULES = $(MAIN)/inferno $(MAIN)/unit_test
 
 ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(SR_PTRANS_MODULES) $(SR_CSP_MODULES) $(SR_AGENTS_MODULES) $(SR_SYM_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 
 

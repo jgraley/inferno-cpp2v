@@ -20,12 +20,11 @@
 #include "steps/systemc_detection.hpp"
 #include "steps/to_sc_method.hpp"
 #include "render/doc_graphs.hpp"
+#include "unit_test.hpp"
 
 #include <cstdlib>
 
 using namespace Steps;
-
-void SelfTest();
 
 // Build a vector of transformations, in the order that we will run them
 // (ordered by hand for now, until the auto sequencer is ready)
@@ -497,13 +496,6 @@ int main( int argc, char *argv[] )
     Inferno inferno;
     inferno.Run();
     return EXIT_SUCCESS;
-}
-
-
-void SelfTest()
-{
-    CommonTest();
-    GenericsTest();
 }
 
 // TODO Make Filter a functor. 
