@@ -109,6 +109,9 @@ public:
     // identity=true will OR; =false will AND
     TruthTable GetFolded( set<int> fold_axes, bool identity ) const; 
 
+    // Find values matching given value and return their indices
+    vector<vector<bool>> GetIndicesOfValue( bool value ) const;
+
     // Ordering
     bool operator<( const TruthTable &other ) const;
      

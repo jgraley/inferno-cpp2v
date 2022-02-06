@@ -175,6 +175,19 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
 }
 
 
+vector<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
+{
+    vector<vector<bool>> indices_vec;
+    
+    ForPower( degree, index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> indices)
+    {
+        if( Get(indices) == value )
+            indices_vec.push_back( indices );
+    } );
+    return indices_vec;
+}
+
+
 bool TruthTable::operator<( const TruthTable &other ) const
 {
     // This gets us a lexigographical compare of the underlying data
