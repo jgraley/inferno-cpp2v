@@ -52,6 +52,10 @@ public:
     // Ordering
     bool operator<( const TruthTable &other ) const;
      
+    // Draw a nice picture. column_axes along the top, 
+    // others down the side
+    string Render( set<int> column_axes ) const; 
+     
 private:
     int GetCellIndex( vector<bool> full_indices ) const;
 

@@ -290,6 +290,16 @@ list<typename T::value_type> ToList( const T&c )
 
 
 template<typename T>
+vector<typename T::value_type> ToVector( const T&c )
+{
+    vector<typename T::value_type> v;
+    for( typename T::value_type x : c )
+        v.push_back(x);  // freezes the set ordering
+    return v;
+}
+
+
+template<typename T>
 const typename T::value_type &OnlyElementOf( const T&c )
 {
     ASSERT( c.size()==1 );

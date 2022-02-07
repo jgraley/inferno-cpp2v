@@ -142,13 +142,12 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
     ASSERT( dest_axes.size() + fold_axes.size() == degree );
     TruthTable dest( dest_axes.size() );
 
-    vector<bool> full_indices(degree);
-
     // For all values of (bool)^(dest axis count)
     ForPower( dest_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> dest_indices)
     {
         // Capture the dest axes and indices into our vector
         map<int, bool> dest_map = ZipToMap( dest_axes, dest_indices );
+        vector<bool> full_indices(degree);
         ScatterInto( full_indices, dest_map );
 
         bool cell_total = identity;
@@ -192,6 +191,120 @@ bool TruthTable::operator<( const TruthTable &other ) const
     // This gets us a lexigographical compare of the underlying data
     return cells < other.cells;
 }
+
+
+string Render( set<int> column_axes ) const
+{
+    ASSERT( column_axes.size() <= degree );
+    
+    int str_cell_size = 3;
+    string label_fmt = SSPrintf("P\%0%dd", str_cell_size-2); // remember the ¬
+    
+    // Determine what the row axes must be
+    vector<int> row_axes;
+    for( int i=0; i<degree; i++ )
+        if( column_axes.count(i) == 0 )
+            row_axes.push_back(i);
+    ASSERT( row_axes.size() + column_axes.size() == degree );
+
+    vector<vector<string>> render_table_cells;
+
+    // For all values of (bool)^(dest axis count)
+    ForPower( row_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> row_indices)
+    {
+        // Capture the dest axes and indices into our vector
+        map<int, bool> row_map = ZipToMap( row_axes, row_indices );
+        vector<bool> full_indices(degree);
+        ScatterInto( full_indices, row_map );
+        
+        vector<string> render_row_cells;
+
+        // For all values of (bool)^(fold axis count)
+        ForPower( column_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> column_indices)
+        {
+            // Capture the free axes and indices into our vector
+            map<int, bool> column_map = ZipToMap( column_axes, column_indices );
+            ScatterInto( full_indices, column_map );
+
+            bool cell = cells.at( GetCellIndex(full_indices) );
+            string str_cell = " "; // Align with the "P" in labels
+            if( cell )
+                str_cell += "✔"; // Warning: .size() won't be what it looks like!!!!!
+            else
+                str_cell += "✘"; // And here!!!
+            str_cell += string(str_cell_size-2);
+            render_row_cells.push_back( str_cell );
+        } );
+        
+        render_table_cells.push_back(row);
+    } );
+    
+    // Fill in 2-d blocks of items for the labels (in general, each 
+    // of the two rendered axes row, col may have many truth table axes
+    // and so multiple layers of labels may be needed
+    auto labels_lambda = [&](vector<int> layers)
+    {
+        vector<vector<string>> render_my_labels;
+        for( int layer=0; layer<layers.size(); layer++ )
+        {
+            vector<string> render_layer_labels;
+            int len = 1 << layers.size(); // The size must be 2^num layers to get all combos in
+            for( i=0; i<len; i++ )
+            {
+                string str_label;
+                if( (i & (1<<layer))==0 ) 
+                    str_label += "¬";
+                else
+                    str_label += " ";                
+                str_label += SSPrintf(label_fmt.c_str(), layers[layer]);
+                render_layer_labels.push_back(str_label);
+            }
+            render_my_labels.push_back(render_layer_labels);
+        }
+        return render_my_labels;
+    };    
+    render_row_labels = labels_lambda( row_axes );
+    render_column_labels = labels_lambda( ToVector(column_axes) );
+    
+    // Cross-check everything fits together and then determine size of render
+    ASSERT( render_table_cells.size() == render_row_labels[0].size() );
+    ASSERT( render_table_cells[0].size() == render_column_labels[0].size() );
+    int num_rows = render_column_labels.size() + render_row_labels[0].size();
+    int num_columns = render_row_labels.size() + render_column_labels[0].size();
+    
+    // Join the labels to the table padding dead space with empty strings
+    vector<vector<string>> render_table;
+    for( int row=0; row<render_column_labels.size(); row++ )
+    {
+        vector<string> render_row;
+        for( int col=0; col<render_row_labels.size(); col++ )
+            render_row.push_back("");
+        for( int col=0; col<render_column_labels[0].size(); col++ )
+            render_row.push_back(render_column_labels[row][col]);      
+        render_table.push_back(render_row);
+    }
+    for( int row=0; row<render_row_labels[0].size(); row++ )
+    {
+        vector<string> render_row;
+        for( int col=0; col<render_row_labels.size(); col++ )
+            render_row.push_back(render_row_labels[col][row]);
+        for( int col=0; col<render_column_labels[0].size(); col++ )
+            render_row.push_back(render_table_cells[row][col]);            
+        render_table.push_back(render_row);
+    }
+    
+    // Combine into a single string with spacing and newlines
+    string str_table;
+    for( int row=0; row<render_table.size(); row++ )
+    {
+        for( int col=0; col<render_row_labels.size(); col++ )    
+            str_table += item + " ";    
+        str_table += "\n";
+    }
+    
+    return s;
+}
+
 
 
 int TruthTable::GetCellIndex( vector<bool> full_indices ) const
