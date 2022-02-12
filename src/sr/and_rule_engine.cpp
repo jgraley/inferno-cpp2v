@@ -20,6 +20,7 @@
 #include "render/graph.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/rewriters.hpp"
+#include "sym/expression_analysis.hpp"
 
 #include <list>
  
@@ -394,7 +395,10 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
 
 
 void AndRuleEngine::Plan::SymbolicRewrites()
-{    
+{
+	for( shared_ptr<SYM::BooleanExpression> expr : expressions_from_agents )
+		SYM::PredicateAnalysis::CheckRegularPredicateForm( expr );
+		
     //TRACE("expressions_from_agents:\n")(expressions_from_agents)("\n");
     expressions_split = SYM::PreprocessForEngine()(expressions_from_agents);
     //TRACE("expressions_split:\n")(expressions_split)("\n");
@@ -435,7 +439,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
     }        
      
     for( auto bexpr : expressions_for_current_solve )
-    {    
+    {		
         // Constraint will require these variables
         set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
         
@@ -448,6 +452,9 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         // Tidily AND-together p.second, which is the set of expressions for the constraint
         list<shared_ptr<SYM::BooleanExpression>> bexpr_list = ToList(p.second);        
         shared_ptr<SYM::BooleanExpression> bexpr = SYM::CreateTidiedOperator<SYM::AndOperator>(true)(bexpr_list);
+
+		SYM::PredicateAnalysis::CheckRegularPredicateForm( bexpr );
+
         auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
         constraints_list.push_back(c);    
     }        
