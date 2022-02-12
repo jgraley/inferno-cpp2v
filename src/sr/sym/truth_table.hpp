@@ -50,11 +50,12 @@ public:
     set<vector<bool>> GetIndicesOfValue( bool value ) const;
 
     // Ordering
+    bool operator==( const TruthTable &other ) const;
     bool operator<( const TruthTable &other ) const;
      
     // Draw a nice picture. column_axes along the top, 
     // others down the side
-    string Render( set<int> column_axes ) const; 
+    string Render( set<int> column_axes, string label_var_name, int counting_based ) const; 
      
 private:
     int GetCellIndex( vector<bool> full_indices ) const;
