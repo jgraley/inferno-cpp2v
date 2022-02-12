@@ -395,8 +395,8 @@ static void TestTruthTableBase()
 static void TestTruthTableDefaultMMAX()
 {
     // This test tries out the MMAX logic for a default MMAX agent (at the time of writing) (harder case)
-    // Sat expression is ((x0==M) iff (x1==M)) && (x1!=M => x1==f(X0)).
-    // Setting predicates p1:x0==M, p2:x1==M, p3:x1=f(X0)
+    // Sat expression is ((x0==M) iff (x1==M)) && (x1!=M => x1==f(x0)).
+    // Setting predicates p1:x0==M, p2:x1==M, p3:x1=f(x0),
     // we get predicate equation (p1 iff p2) && (!p2 => p3).
     // Each clause gives an equation that we can rule out
     // (but this last step is not necessary; we can get the info we need from repeated evaluation)
@@ -431,6 +431,41 @@ static void TestTruthTableDefaultMMAX()
     ASSERT( iv == set<vector<bool>>({{false, false, true}, // not submerged MMAX case, f() applies
                                      {true, true, true},   // submerged MMAX case, don't care f()                           
                                      {true, true, false} }) )(iv); // submerged MMAX case, still don't care f()
+}
+
+
+static void TestTruthTableCoupling()
+{
+    // This test tries out the MMAX logic for a 2-coupling (at the time of writing)
+    // Sat expression is ((x0==M) || (x1==M)) || (x0~~x1)).
+    // Setting predicates p1:x0==M, p2:x1==M, p3:x0~~x1,
+    // we get predicate equation (p1 || p2 || p3).
+    
+    // 3-D truth table incorporates predicates p1 to p3
+    TruthTable t( 3, true );
+    TRACE("Initial truth table\n")( "\n"+t.Render({1, 2}, "p", 1) );
+
+    // Filled in by brute force (repeated evaluation of the predicate equation)
+    t.Set( {false, false, false}, false ); 
+    t.Set( {false, false, true}, true ); 
+    t.Set( {false, true, false}, true ); 
+    t.Set( {false, true, true}, true ); 
+    t.Set( {true, false, false}, true ); 
+    t.Set( {true, false, true}, true ); 
+    t.Set( {true, true, false}, true ); 
+    t.Set( {true, true, true}, true ); 
+    TRACE("Direct-restricted (after brute force)\n")( "\n"+t.Render({1, 2}, "p", 1) );
+        
+    // Let's try solving for the case where x0 != M. Thus, p1 is false
+    TruthTable ts = t.GetSlice( {{0, false}} );    
+
+    // Extract remaining possibles 
+    set<vector<bool>> iv = ts.GetIndicesOfValue( true );
+    TRACE("Possible {p2, p3}\n")(iv)("\n");
+    
+    ASSERT( iv == set<vector<bool>>({{false, true}, // x1 not MMAX; x1 equivalent to x0
+                                     {true, false}, // x1 is MMAX                           
+                                     {true, true} }) )(iv); // ax is MMAX and equivalent to x0 (will become empty set) 
 }
 
 
@@ -490,5 +525,6 @@ void SYM::TestTruthTable()
 {
     TestTruthTableBase();
     TestTruthTableDefaultMMAX();
+    TestTruthTableCoupling();
     TestTruthTableDisjunction();
 }
