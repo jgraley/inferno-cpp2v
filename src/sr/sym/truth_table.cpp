@@ -403,13 +403,13 @@ static void TestTruthTableDefaultMMAX()
     
     // 3-D truth table incorporates predicates p1 to p3
     TruthTable t_analytic( 3, true );
-    TRACE("Initial truth table\n")( "\n"+t_analytic.Render({1, 2}, "p", 1) );
+    TRACE("Constructed truth table\n")( "\n"+t_analytic.Render({1, 2}, "p", 1) );
 
     // Filled in by analysis of predicate expression
     t_analytic.SetSlice( {{0, false}, {1, true}}, false ); // (p1 iff p2)
     t_analytic.SetSlice( {{0, true}, {1, false}}, false ); // (p1 iff p2) other way
     t_analytic.SetSlice( {{1, false}, {2, false}}, false ); // !p2 => p3 aka p2 || p3
-    TRACE("Direct-restricted (after clauses)\n")( "\n"+t_analytic.Render({1, 2}, "p", 1) );
+    TRACE("Initial truth table (after clauses)\n")( "\n"+t_analytic.Render({1, 2}, "p", 1) );
     
     // Filled in by brute force (repeated evaluation of the predicate equation)
     TruthTable t_brute( 3, true );
@@ -421,7 +421,7 @@ static void TestTruthTableDefaultMMAX()
     t_brute.Set( {true, false, true}, false ); 
     t_brute.Set( {true, true, false}, true ); 
     t_brute.Set( {true, true, true}, true ); 
-    TRACE("Direct-restricted (after brute force)\n")( "\n"+t_brute.Render({1, 2}, "p", 1) );
+    TRACE("Initial truth table (after brute force)\n")( "\n"+t_brute.Render({1, 2}, "p", 1) );
     
     ASSERT( t_analytic == t_brute );
     
@@ -443,7 +443,7 @@ static void TestTruthTableCoupling()
     
     // 3-D truth table incorporates predicates p1 to p3
     TruthTable t( 3, true );
-    TRACE("Initial truth table\n")( "\n"+t.Render({1, 2}, "p", 1) );
+    TRACE("Constructed truth table\n")( "\n"+t.Render({1, 2}, "p", 1) );
 
     // Filled in by brute force (repeated evaluation of the predicate equation)
     t.Set( {false, false, false}, false ); 
@@ -454,7 +454,12 @@ static void TestTruthTableCoupling()
     t.Set( {true, false, true}, true ); 
     t.Set( {true, true, false}, true ); 
     t.Set( {true, true, true}, true ); 
-    TRACE("Direct-restricted (after brute force)\n")( "\n"+t.Render({1, 2}, "p", 1) );
+    TRACE("Initial truth table (after brute force)\n")( "\n"+t.Render({1, 2}, "p", 1) );
+
+    // TODO imagine a property like x~~M iff x==M ("M is singleton under equivalence")
+    // and works for both x0 and x1 (say p4 and p5)
+    // Then transitive on ~~ giving p4 && p5 => p3 and rotations.
+    // p5 && p3 => p4 would rule out spurious {true, true} result below
         
     // Let's try solving for the case where x0 != M. Thus, p1 is false
     TruthTable ts = t.GetSlice( {{0, false}} );    
@@ -480,14 +485,14 @@ static void TestTruthTableDisjunction()
     
     // 4-D truth table incorporates predicates p1 to p4
     TruthTable t( 4, true );
-    TRACE("Initial truth table\n")( "\n"+t.Render({0, 2}, "p", 1) );
+    TRACE("Constructed truth table\n")( "\n"+t.Render({0, 2}, "p", 1) );
 
     // Filled in by analysis but could be repeated evaluation of the predicate equation
     t.SetSlice( {{0, false}, {2, false}}, false ); // (1) !p1 => p3 aka p1 || p3
     t.SetSlice( {{1, false}, {2, false}}, false ); // (3) !p2 => p3 aka p2 || p3
     t.SetSlice( {{1, false}, {3, false}}, false ); // (4) !p2 => p4 aka p2 || p4
     t.SetSlice( {{3, false}, {0, false}}, false ); // (7) !p4 => p1 aka p4 || p1
-    TRACE("Direct-restricted (after (1) (3) (4) (7))\n")( "\n"+t.Render({0, 2}, "p", 1) );
+    TRACE("Initial truth table (after (1) (3) (4) (7))\n")( "\n"+t.Render({0, 2}, "p", 1) );
     
     // (Too lazy to code up the brute force version here)
 
