@@ -107,26 +107,40 @@ bool SymbolResult::operator==( const ResultInterface &other ) const
 
 // ------------------------- SymbolSetResult --------------------------
 
-SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_ ) :
-    xlinks( xlinks_ )
+SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
+    xlinks( xlinks_ ),
+    complement_flag( complement_flag_ )
 {
+}
+
+
+static shared_ptr<SymbolSetResult> Create( shared_ptr<SymbolResultInterface> other )
+{
+    if( auto ssr = dynamic_pointer_cast<SymbolSetResult>(other) )
+        return ssr;
+    else if( auto sr = dynamic_pointer_cast<SymbolResult>(other) )
+        return make_shared<SymbolSetResult>( other->GetAsSetOfXLinks() );
+    else
+        ASSERTFAIL();
 }
 
 
 bool SymbolSetResult::IsDefinedAndUnique() const
 {
-    return xlinks.size() == 1;
+    return !complement_flag && xlinks.size() == 1;
 }
 
 
 SR::XLink SymbolSetResult::GetAsXLink() const
 {
+    ASSERT( !complement_flag )("Is complement so not unique");
     return OnlyElementOf(xlinks);
 }
 
 
 set<SR::XLink> SymbolSetResult::GetAsSetOfXLinks() const
 {
+    ASSERT( !complement_flag )("Refusing to extensionalise a complement set");
     return xlinks;
 }
 
@@ -134,5 +148,12 @@ set<SR::XLink> SymbolSetResult::GetAsSetOfXLinks() const
 bool SymbolSetResult::operator==( const ResultInterface &other ) const
 {
     auto o = dynamic_cast<const SymbolSetResult *>(&other);
-    return o && xlinks == o->xlinks;
+    return o && xlinks == o->xlinks && complement_flag==o->complement_flag;
 }
+
+
+shared_ptr<SymbolSetResult> SymbolSetResult::GetComplement() const
+{
+    return make_shared<SymbolSetResult>(xlinks, !complement_flag);
+}
+

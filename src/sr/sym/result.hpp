@@ -96,15 +96,19 @@ private:
 class SymbolSetResult : public SymbolResultInterface
 {
 public:
-    SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>() );
+    SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
+    static shared_ptr<SymbolSetResult> Create( shared_ptr<SymbolResultInterface> other );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
     set<SR::XLink> GetAsSetOfXLinks() const override;    
-    bool operator==( const ResultInterface &other ) const override;    
+    bool operator==( const ResultInterface &other ) const override;
+
+    shared_ptr<SymbolSetResult> GetComplement() const;
 
 private:    
     set<SR::XLink> xlinks;
+    bool complement_flag;
 };
 
 };
