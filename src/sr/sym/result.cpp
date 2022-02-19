@@ -157,3 +157,78 @@ shared_ptr<SymbolSetResult> SymbolSetResult::GetComplement() const
     return make_shared<SymbolSetResult>(xlinks, !complement_flag);
 }
 
+
+shared_ptr<SymbolSetResult> SymbolSetResult::GetUnion( list<shared_ptr<SymbolSetResult>> ops )
+{
+    int n = ops.size();
+    int n_comp = 0;
+    for( shared_ptr<SymbolSetResult> op : ops )
+        n_comp += op->complement_flag ? 1 : 0;
+
+    if( n_comp > 0 )
+        return DeMorgan( IntersectionCore, ops );
+    else
+        return UnionCore( ops );
+}
+
+
+shared_ptr<SymbolSetResult> SymbolSetResult::GetIntersection( list<shared_ptr<SymbolSetResult>> ops )
+{
+    int n = ops.size();
+    int n_comp = 0;
+    for( shared_ptr<SymbolSetResult> op : ops )
+        n_comp += op->complement_flag ? 1 : 0;
+
+    if( n_comp == n )
+        return DeMorgan( UnionCore, ops );
+    else
+        return IntersectionCore( ops );
+}
+
+
+shared_ptr<SymbolSetResult> SymbolSetResult::DeMorgan( function<shared_ptr<SymbolSetResult>( list<shared_ptr<SymbolSetResult>> )> lambda,
+                                                       list<shared_ptr<SymbolSetResult>> ops )
+{
+    list<shared_ptr<SymbolSetResult>> cops;
+    for( shared_ptr<SymbolSetResult> op : ops )
+        cops.push_back( op->GetComplement() );
+
+    shared_ptr<SymbolSetResult> cres = lambda(cops);
+
+    return cres->GetComplement();
+}                                                       
+
+
+shared_ptr<SymbolSetResult> SymbolSetResult::UnionCore( list<shared_ptr<SymbolSetResult>> ops )
+{
+    set<SR::XLink> result_xlinks;
+    for( shared_ptr<SymbolSetResult> op : ops )
+    {
+        ASSERT( !op->complement_flag )("UnionCore requires no complements");
+        result_xlinks = UnionOf( result_xlinks, op->xlinks );
+    }
+    return make_shared<SymbolSetResult>( result_xlinks );   
+}
+
+
+shared_ptr<SymbolSetResult> SymbolSetResult::IntersectionCore( list<shared_ptr<SymbolSetResult>> ops )
+{
+    shared_ptr<SymbolSetResult> non_comp_op;
+    for( shared_ptr<SymbolSetResult> op : ops )
+        if( !op->complement_flag )
+            non_comp_op = op;
+    ASSERT( non_comp_op )("IntersectionCore requires at least one non-complement");
+
+    // DifferenceOf() is the key to combining complemented with non-complimented
+    set<SR::XLink> result_xlinks = non_comp_op->xlinks;
+    for( shared_ptr<SymbolSetResult> op : ops )
+    {
+        if( op == non_comp_op )
+            continue; // got this one already
+        if( op->complement_flag )
+            result_xlinks = DifferenceOf( result_xlinks, op->xlinks );
+        else
+            result_xlinks = IntersectionOf( result_xlinks, op->xlinks );            
+    }
+    return make_shared<SymbolSetResult>( result_xlinks );
+}

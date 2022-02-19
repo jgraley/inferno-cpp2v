@@ -105,8 +105,15 @@ public:
     bool operator==( const ResultInterface &other ) const override;
 
     shared_ptr<SymbolSetResult> GetComplement() const;
+    static shared_ptr<SymbolSetResult> GetUnion( list<shared_ptr<SymbolSetResult>> ops );
+    static shared_ptr<SymbolSetResult> GetIntersection( list<shared_ptr<SymbolSetResult>> ops );
 
 private:    
+    static shared_ptr<SymbolSetResult> DeMorgan( function<shared_ptr<SymbolSetResult>( list<shared_ptr<SymbolSetResult>> )> lambda,
+                                                 list<shared_ptr<SymbolSetResult>> ops );
+    static shared_ptr<SymbolSetResult> UnionCore( list<shared_ptr<SymbolSetResult>> ops );
+    static shared_ptr<SymbolSetResult> IntersectionCore( list<shared_ptr<SymbolSetResult>> ops );
+
     set<SR::XLink> xlinks;
     bool complement_flag;
 };
