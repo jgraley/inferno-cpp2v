@@ -61,9 +61,9 @@ bool BooleanResult::operator<( const BooleanResultInterface &other ) const
     return certainty < o->certainty;
 }
 
-// ------------------------- SingleSymbolResult --------------------------
+// ------------------------- SymbolResult --------------------------
 
-SingleSymbolResult::SingleSymbolResult( Category cat, SR::XLink xlink_ )
+SymbolResult::SymbolResult( Category cat, SR::XLink xlink_ )
 {
     switch( cat )
     {
@@ -80,59 +80,59 @@ SingleSymbolResult::SingleSymbolResult( Category cat, SR::XLink xlink_ )
 }
 
 
-bool SingleSymbolResult::IsDefinedAndUnique() const
+bool SymbolResult::IsDefinedAndUnique() const
 {
     return (bool)xlink;
 }
 
 
-SR::XLink SingleSymbolResult::GetAsXLink() const
+SR::XLink SymbolResult::GetAsXLink() const
 {
     ASSERT( xlink );
     return xlink;
 }
 
 
-set<SR::XLink> SingleSymbolResult::GetAsSetOfXLinks() const
+set<SR::XLink> SymbolResult::GetAsSetOfXLinks() const
 {
     return xlink ? set<SR::XLink>{ xlink } : set<SR::XLink>{};
 }
 
 
-bool SingleSymbolResult::operator==( const ResultInterface &other ) const
+bool SymbolResult::operator==( const ResultInterface &other ) const
 {
-    auto o = dynamic_cast<const SingleSymbolResult *>(&other);
+    auto o = dynamic_cast<const SymbolResult *>(&other);
     return o && xlink == o->xlink;
 }
 
-// ------------------------- MultiSymbolResult --------------------------
+// ------------------------- SymbolSetResult --------------------------
 
-MultiSymbolResult::MultiSymbolResult( set<SR::XLink> xlinks_ ) :
+SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_ ) :
     xlinks( xlinks_ )
 {
 }
 
 
-bool MultiSymbolResult::IsDefinedAndUnique() const
+bool SymbolSetResult::IsDefinedAndUnique() const
 {
     return xlinks.size() == 1;
 }
 
 
-SR::XLink MultiSymbolResult::GetAsXLink() const
+SR::XLink SymbolSetResult::GetAsXLink() const
 {
     return OnlyElementOf(xlinks);
 }
 
 
-set<SR::XLink> MultiSymbolResult::GetAsSetOfXLinks() const
+set<SR::XLink> SymbolSetResult::GetAsSetOfXLinks() const
 {
     return xlinks;
 }
 
 
-bool MultiSymbolResult::operator==( const ResultInterface &other ) const
+bool SymbolSetResult::operator==( const ResultInterface &other ) const
 {
-    auto o = dynamic_cast<const MultiSymbolResult *>(&other);
+    auto o = dynamic_cast<const SymbolSetResult *>(&other);
     return o && xlinks == o->xlinks;
 }

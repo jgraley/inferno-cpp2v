@@ -75,12 +75,12 @@ public:
      
 };
 
-// ------------------------- SingleSymbolResult --------------------------
+// ------------------------- SymbolResult --------------------------
 
-class SingleSymbolResult : public SymbolResultInterface
+class SymbolResult : public SymbolResultInterface
 {
 public:
-    SingleSymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
+    SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
@@ -91,12 +91,12 @@ private:
     SR::XLink xlink;
 };
 
-// ------------------------- MultiSymbolResult --------------------------
+// ------------------------- SymbolSetResult --------------------------
 
-class MultiSymbolResult : public SymbolResultInterface
+class SymbolSetResult : public SymbolResultInterface
 {
 public:
-    MultiSymbolResult( set<SR::XLink> xlinks = set<SR::XLink>() );
+    SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>() );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
