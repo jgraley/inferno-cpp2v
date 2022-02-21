@@ -13,18 +13,44 @@
 namespace SYM
 { 
 
+// ------------------------- PredicateOperator --------------------------
+
+class PredicateOperator : public SymbolToBooleanExpression
+{
+    class EvalKitWithPredicateOverrides : Expression::EvalKit
+    {
+    public:
+        typedef map< const PredicateOperator *, 
+                     shared_ptr<BooleanResultInterface> > Overrides;
+                     
+        EvalKitWithPredicateOverrides( const SR::SolutionMap *hypothesis_links, 
+                                       const SR::TheKnowledge *knowledge,
+                                       const Overrides *overrides );
+        
+        
+        const Overrides *overrides;
+    };
+    
+    shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+                                                 
+    // After Override version - only called if no override was specified
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+                                                           const list<shared_ptr<SymbolResultInterface>> &op_results ) const = 0;                                                    
+};
+
 // ------------------------- EqualOperator --------------------------
 
 // EqualOperator is in fact a more general "AllSame" operator, which 
 // seems to make natural sense.
-class EqualOperator : public SymbolToBooleanExpression
+class EqualOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit EqualOperator( shared_ptr<SymbolExpression> a, 
                             shared_ptr<SymbolExpression> b );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
@@ -47,14 +73,14 @@ Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpress
 
 // ------------------------- IndexComparisonOperator --------------------------
 
-class IndexComparisonOperator : public SymbolToBooleanExpression
+class IndexComparisonOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const = 0;
@@ -115,13 +141,13 @@ Over<BooleanExpression> operator<=( Over<SymbolExpression> a, Over<SymbolExpress
 
 // ------------------------- AllDiffOperator --------------------------
 
-class AllDiffOperator : public SymbolToBooleanExpression
+class AllDiffOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit AllDiffOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -132,14 +158,14 @@ private:
 
 // ------------------------- KindOfOperator --------------------------
 
-class KindOfOperator : public SymbolToBooleanExpression
+class KindOfOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit KindOfOperator( TreePtr<Node> archetype_node,
                              shared_ptr<SymbolExpression> a); 
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -155,7 +181,7 @@ protected:
 
 // ------------------------- ChildCollectionSizeOperator --------------------------
 
-class ChildCollectionSizeOperator : public SymbolToBooleanExpression
+class ChildCollectionSizeOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
@@ -164,7 +190,7 @@ public:
                                           shared_ptr<SymbolExpression> a,
                                           int size );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -182,14 +208,14 @@ private:
 
 // ------------------------- EquivalentOperator --------------------------
 
-class EquivalentOperator : public SymbolToBooleanExpression
+class EquivalentOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit EquivalentOperator( shared_ptr<SymbolExpression> a, 
                                  shared_ptr<SymbolExpression> b );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
