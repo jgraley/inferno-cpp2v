@@ -1,5 +1,5 @@
-#ifndef COMPARISON_OPERATORS_HPP
-#define COMPARISON_OPERATORS_HPP
+#ifndef PREDICATE_OPERATORS_HPP
+#define PREDICATE_OPERATORS_HPP
 
 #include "expression.hpp"
 #include "overloads.hpp"

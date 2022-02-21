@@ -5,7 +5,7 @@
 #include "link.hpp"
 #include "the_knowledge.hpp"
 #include "sym/boolean_operators.hpp"
-#include "sym/comparison_operators.hpp"
+#include "sym/predicate_operators.hpp"
 #include "sym/primary_expressions.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/overloads.hpp"

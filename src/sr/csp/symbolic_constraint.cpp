@@ -3,7 +3,7 @@
 #include "query.hpp"
 #include "agents/agent.hpp"
 #include "link.hpp"
-#include "../sym/comparison_operators.hpp"
+#include "../sym/predicate_operators.hpp"
 #include "../sym/primary_expressions.hpp"
 #include "../sym/sym_solver.hpp"
 #include "../sym/result.hpp"

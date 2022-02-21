@@ -3,7 +3,7 @@
 #include "link.hpp"
 #include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
-#include "sym/comparison_operators.hpp"
+#include "sym/predicate_operators.hpp"
 #include "sym/primary_expressions.hpp"
 
 using namespace SR;

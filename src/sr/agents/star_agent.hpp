@@ -7,7 +7,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "../sym/expression.hpp"
-#include "../sym/comparison_operators.hpp"
+#include "../sym/predicate_operators.hpp"
 
 namespace SR
 { 

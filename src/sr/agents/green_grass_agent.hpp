@@ -4,7 +4,7 @@
 #include "common/common.hpp"
 #include "colocated_agent.hpp"
 #include "../sym/expression.hpp"
-#include "../sym/comparison_operators.hpp"
+#include "../sym/predicate_operators.hpp"
 
 namespace SR
 { 

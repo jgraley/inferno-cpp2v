@@ -1,5 +1,5 @@
 #include "boolean_operators.hpp"
-#include "comparison_operators.hpp"
+#include "predicate_operators.hpp"
 #include "conditional_operators.hpp"
 #include "symbol_operators.hpp"
 #include "primary_expressions.hpp"
