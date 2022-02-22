@@ -7,25 +7,49 @@ using namespace SYM;
 
 // ------------------------- PredicateOperator --------------------------
 
-PredicateOperator::EvalKitWithPredicateOverrides::EvalKitWithPredicateOverrides( const SR::SolutionMap *hypothesis_links, 
-                                                                                 const SR::TheKnowledge *knowledge,
-                                                                                 const Overrides *overrides_ ) :
-    Expression::EvalKit( hypothesis_links, knowledge ),
-    overrides( overrides_ )
+void PredicateOperator::SetForceResult( weak_ptr<BooleanResultInterface> force_result_ )
 {
+    force_result = force_result_;
 }
-    
+
+
+void PredicateOperator::SetForceRender( weak_ptr<string> force_render_ )
+{
+    force_render = force_render_;
+}
+
 
 shared_ptr<BooleanResultInterface> PredicateOperator::Evaluate( const EvalKit &kit,
                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
-    // Apply overrides where specified
-    if( auto pkit_po = dynamic_cast<const EvalKitWithPredicateOverrides *>(&kit) )
-        if( pkit_po->overrides && pkit_po->overrides->count(this) )
-            return pkit_po->overrides->at(this);
+    // Apply forces where specified
+    shared_ptr<BooleanResultInterface> locked_result = force_result.lock();
+    if( locked_result )
+        return locked_result;
 
-    return EvaluateAO( kit, op_results );
+    return EvaluateNF( kit, op_results );
 }                                             
+
+
+string PredicateOperator::Render() const 
+{
+    shared_ptr<string> locked_render = force_render.lock();
+    if( locked_render )
+        return *locked_render;
+
+    return RenderNF();
+}
+
+
+Expression::Precedence PredicateOperator::GetPrecedence() const
+{
+    shared_ptr<string> locked_render = force_render.lock();
+    if( locked_render )
+        return Precedence::LITERAL;
+
+    return GetPrecedenceNF();
+}
+
 
 // ------------------------- EqualOperator --------------------------
 
@@ -43,7 +67,7 @@ list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResultInterface> EqualOperator::EvaluateAO( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> EqualOperator::EvaluateNF( const EvalKit &kit,
                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
@@ -85,14 +109,14 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 }
 
 
-string EqualOperator::Render() const
+string EqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " == " + RenderForMe(b);
 
 }
 
 
-Expression::Precedence EqualOperator::GetPrecedence() const
+Expression::Precedence EqualOperator::GetPrecedenceNF() const
 {
     return Precedence::COMPARE;
 }
@@ -127,7 +151,7 @@ list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() 
 }
 
 
-shared_ptr<BooleanResultInterface> IndexComparisonOperator::EvaluateAO( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> IndexComparisonOperator::EvaluateNF( const EvalKit &kit,
                                                              const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
@@ -150,7 +174,7 @@ shared_ptr<BooleanResultInterface> IndexComparisonOperator::EvaluateAO( const Ev
 }
 
 
-Expression::Precedence IndexComparisonOperator::GetPrecedence() const
+Expression::Precedence IndexComparisonOperator::GetPrecedenceNF() const
 {
     return Precedence::COMPARE;
 }
@@ -164,7 +188,7 @@ bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
-string GreaterOperator::Render() const
+string GreaterOperator::RenderNF() const
 {
     return RenderForMe(a) + " > " + RenderForMe(b);
 }
@@ -184,7 +208,7 @@ bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
-string LessOperator::Render() const
+string LessOperator::RenderNF() const
 {
     return RenderForMe(a) + " < " + RenderForMe(b);
 }
@@ -204,7 +228,7 @@ bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType in
 }                    
             
                                   
-string GreaterOrEqualOperator::Render() const
+string GreaterOrEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " >= " + RenderForMe(b);
 }
@@ -224,7 +248,7 @@ bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index
 }                    
             
                                   
-string LessOrEqualOperator::Render() const
+string LessOrEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " <= " + RenderForMe(b);
 }
@@ -250,7 +274,7 @@ list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResultInterface> AllDiffOperator::EvaluateAO( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> AllDiffOperator::EvaluateNF( const EvalKit &kit,
                                                      const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
@@ -274,7 +298,7 @@ shared_ptr<BooleanResultInterface> AllDiffOperator::EvaluateAO( const EvalKit &k
 }
 
 
-string AllDiffOperator::Render() const
+string AllDiffOperator::RenderNF() const
 {
     list<string> ls;
     for( shared_ptr<SymbolExpression> a : sa )
@@ -283,7 +307,7 @@ string AllDiffOperator::Render() const
 }
 
 
-Expression::Precedence AllDiffOperator::GetPrecedence() const
+Expression::Precedence AllDiffOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
@@ -304,7 +328,7 @@ list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResultInterface> KindOfOperator::EvaluateAO( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> KindOfOperator::EvaluateNF( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -328,13 +352,13 @@ Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate,
 }  
 
 
-string KindOfOperator::Render() const
+string KindOfOperator::RenderNF() const
 {
     return "KindOf<" + archetype_node->GetTypeName() + ">" + a->RenderWithParentheses(); 
 }
 
 
-Expression::Precedence KindOfOperator::GetPrecedence() const
+Expression::Precedence KindOfOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
@@ -360,7 +384,7 @@ list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperand
 }
 
 
-shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::EvaluateAO( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::EvaluateNF( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -410,7 +434,7 @@ Orderable::Result ChildCollectionSizeOperator::OrderCompareLocal( const Orderabl
 }  
 
 
-string ChildCollectionSizeOperator::Render() const
+string ChildCollectionSizeOperator::RenderNF() const
 {
     string name = archetype_node->GetTypeName();
 
@@ -426,7 +450,7 @@ string ChildCollectionSizeOperator::Render() const
 }
 
 
-Expression::Precedence ChildCollectionSizeOperator::GetPrecedence() const
+Expression::Precedence ChildCollectionSizeOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
@@ -447,7 +471,7 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResultInterface> EquivalentOperator::EvaluateAO( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> EquivalentOperator::EvaluateNF( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
@@ -465,13 +489,13 @@ shared_ptr<BooleanResultInterface> EquivalentOperator::EvaluateAO( const EvalKit
 }
 
 
-string EquivalentOperator::Render() const
+string EquivalentOperator::RenderNF() const
 {
     return RenderForMe(a) + " ≡ " + RenderForMe(b);
 }
 
 
-Expression::Precedence EquivalentOperator::GetPrecedence() const
+Expression::Precedence EquivalentOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

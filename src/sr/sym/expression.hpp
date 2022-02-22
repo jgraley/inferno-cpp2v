@@ -28,13 +28,8 @@ public:
      * The information we need to evaluate a symbolic expression (but
      * not to manipulate it).
      */
-    class EvalKit
+    struct EvalKit
     {
-    public: 
-        EvalKit( const SR::SolutionMap *hypothesis_links_, 
-                 const SR::TheKnowledge *knowledge_ );
-        virtual ~EvalKit(); 
-        
         const SR::SolutionMap *hypothesis_links;
         const SR::TheKnowledge *knowledge;
     };

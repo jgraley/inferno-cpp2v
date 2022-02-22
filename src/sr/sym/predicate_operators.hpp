@@ -17,26 +17,26 @@ namespace SYM
 
 class PredicateOperator : public SymbolToBooleanExpression
 {
-    class EvalKitWithPredicateOverrides : Expression::EvalKit
-    {
-    public:
-        typedef map< const PredicateOperator *, 
-                     shared_ptr<BooleanResultInterface> > Overrides;
-                     
-        EvalKitWithPredicateOverrides( const SR::SolutionMap *hypothesis_links, 
-                                       const SR::TheKnowledge *knowledge,
-                                       const Overrides *overrides );
-        
-        
-        const Overrides *overrides;
-    };
-    
+public:    
+    // Stored as week pointer so that force is undone when weak pointer expires. Sort of RAII-at-a-distance.
+    void SetForceResult( weak_ptr<BooleanResultInterface> force_result );
+    void SetForceRender( weak_ptr<string> force_render ); // Note: precedence goes to LITERAL
+
     shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
-                                                 
-    // After Override version - only called if no override was specified
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+        
+    // After forced version - only called if no override was specified
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const = 0;                                                    
+    virtual string RenderNF() const = 0;    
+    virtual Precedence GetPrecedenceNF() const = 0;
+
+    
+private:    
+    weak_ptr<BooleanResultInterface> force_result;
+    weak_ptr<string> force_render;
 };
 
 // ------------------------- EqualOperator --------------------------
@@ -50,14 +50,14 @@ public:
     explicit EqualOperator( shared_ptr<SymbolExpression> a, 
                             shared_ptr<SymbolExpression> b );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;
 
-    virtual string Render() const override;
-    virtual Precedence GetPrecedence() const override;
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
     
 private:
     const shared_ptr<SymbolExpression> a;
@@ -80,11 +80,11 @@ public:
     explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const = 0;
-    virtual Precedence GetPrecedence() const override;
+    virtual Precedence GetPrecedenceNF() const override;
     
 protected:
     const shared_ptr<SymbolExpression> a;
@@ -98,7 +98,7 @@ class GreaterOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-    virtual string Render() const override;
+    virtual string RenderNF() const override;
 };
 
 Over<BooleanExpression> operator>( Over<SymbolExpression> a, Over<SymbolExpression> b );
@@ -110,7 +110,7 @@ class LessOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-    virtual string Render() const override;
+    virtual string RenderNF() const override;
 };
 
 Over<BooleanExpression> operator<( Over<SymbolExpression> a, Over<SymbolExpression> b );
@@ -122,7 +122,7 @@ class GreaterOrEqualOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-    virtual string Render() const override;
+    virtual string RenderNF() const override;
 };
 
 Over<BooleanExpression> operator>=( Over<SymbolExpression> a, Over<SymbolExpression> b );
@@ -134,7 +134,7 @@ class LessOrEqualOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-    virtual string Render() const override;
+    virtual string RenderNF() const override;
 };
 
 Over<BooleanExpression> operator<=( Over<SymbolExpression> a, Over<SymbolExpression> b );
@@ -147,10 +147,10 @@ public:
     typedef BooleanExpression NominalType;
     explicit AllDiffOperator( list< shared_ptr<SymbolExpression> > sa );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
-    virtual string Render() const override;
-    virtual Precedence GetPrecedence() const override;
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
     
 private:
     const list< shared_ptr<SymbolExpression> > sa;
@@ -165,14 +165,14 @@ public:
     explicit KindOfOperator( TreePtr<Node> archetype_node,
                              shared_ptr<SymbolExpression> a); 
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
 
-    virtual string Render() const override;
-    virtual Precedence GetPrecedence() const override;
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
     
 protected:
     const shared_ptr<SymbolExpression> a;
@@ -190,14 +190,14 @@ public:
                                           shared_ptr<SymbolExpression> a,
                                           int size );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;                                                
 
-    virtual string Render() const override;
-    virtual Precedence GetPrecedence() const override;
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
     
 private:
     const TreePtr<Node> archetype_node;
@@ -215,10 +215,10 @@ public:
     explicit EquivalentOperator( shared_ptr<SymbolExpression> a, 
                                  shared_ptr<SymbolExpression> b );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> EvaluateAO( const EvalKit &kit,
+    virtual shared_ptr<BooleanResultInterface> EvaluateNF( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
-    virtual string Render() const override;
-    virtual Precedence GetPrecedence() const override;
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
     
 private:
     const shared_ptr<SymbolExpression> a;

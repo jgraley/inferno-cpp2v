@@ -6,19 +6,6 @@ using namespace SYM;
 
 // ------------------------- Expression --------------------------
 
-Expression::EvalKit::EvalKit( const SR::SolutionMap *hypothesis_links_, 
-                              const SR::TheKnowledge *knowledge_ ) :
-    hypothesis_links(hypothesis_links_),
-    knowledge(knowledge_)
-{
-}
-
-
-Expression::EvalKit::~EvalKit()
-{
-}
-
-
 list<shared_ptr<Expression>> Expression::GetOperands() const
 {
     return {};
