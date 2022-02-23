@@ -1,5 +1,6 @@
 #include "common/common.hpp"
 #include "common/orderable.hpp"
+#include "predicate_operators.hpp"
 
 #include "expression_analysis.hpp"
 
@@ -7,31 +8,36 @@ using namespace SYM;
 
 // -------------------------- ExpressionWalker ----------------------------    
 
-ExpressionWalker::ExpressionWalker( const Lambda &lambda_ ) :
+ExpressionWalker::ExpressionWalker( bool include_root_, const Lambda &lambda_ ) :
+    include_root( include_root_ ),
     lambda( lambda_ )
 {
 }
 
 
-void ExpressionWalker::operator()(shared_ptr<Expression> expr)
+void ExpressionWalker::operator()( shared_ptr<Expression> expr, bool is_root )
 {
-    bool cont = lambda( expr );
-    if( !cont )
-        return;
+    if( include_root || !is_root )
+    {
+        bool cont = lambda( expr );
+        if( !cont )
+            return;
+    }
 
     list<shared_ptr<Expression>> ops = expr->GetOperands();
     for( shared_ptr<Expression> op : ops )
-        operator()(op);
+        operator()(op, false);
 }
 
 // -------------------------- PredicateAnalysis ----------------------------    
 
 void PredicateAnalysis::CheckRegularPredicateForm( shared_ptr<Expression> expr )
 {
-    ExpressionWalker w( [&](shared_ptr<Expression> expr) -> bool
+    ExpressionWalker w( true, [&](shared_ptr<Expression> expr) -> bool
     {
         auto sym_expr = dynamic_pointer_cast<SymbolExpression>(expr);
         auto bool_expr = dynamic_pointer_cast<BooleanExpression>(expr);
+        auto pred_expr = dynamic_pointer_cast<PredicateOperator>(expr);
         list<shared_ptr<Expression>> ops = expr->GetOperands();
         bool got_bool_ops = false;
         bool got_sym_ops = false;
@@ -40,11 +46,19 @@ void PredicateAnalysis::CheckRegularPredicateForm( shared_ptr<Expression> expr )
             got_bool_ops = got_bool_ops || dynamic_pointer_cast<BooleanExpression>(op);
             got_sym_ops = got_sym_ops || dynamic_pointer_cast<SymbolExpression>(op);
         }
+        
         // no boolean operand to an expression that returns a symbol (anti-predicate) 
         ASSERT( !(sym_expr && got_bool_ops) );           
         
-        // malformed predicate has bool operands
-        ASSERT( !(bool_expr && got_sym_ops && got_bool_ops) );           
+        if( pred_expr ) // Check validity of predicates
+        {
+            ASSERT( bool_expr ); // Predicates must return boolean
+            ASSERT( !got_bool_ops ); // and can only have symbolic operands
+            ASSERT( got_sym_ops ); // would be odd if no ops - I can only think of constants, which we can leave in the bool region
+            
+            CheckNoPredicatesUnder(pred_expr); // no predicates underneath
+            return false; // No need to recurse since we just did that
+        }
         
         return true;
     } );
@@ -53,25 +67,27 @@ void PredicateAnalysis::CheckRegularPredicateForm( shared_ptr<Expression> expr )
 }
 
 
-list<shared_ptr<BooleanExpression>> PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
+void PredicateAnalysis::CheckNoPredicatesUnder( shared_ptr<Expression> expr )
 {
-    list<shared_ptr<BooleanExpression>> preds;
-    
-    ExpressionWalker w( [&](shared_ptr<Expression> expr) -> bool
+    ExpressionWalker w( false, [&](shared_ptr<Expression> expr) -> bool
     {
-        auto bool_expr = dynamic_pointer_cast<BooleanExpression>(expr);
-        list<shared_ptr<Expression>> ops = expr->GetOperands();
-        bool got_bool_ops = false;
-        bool got_sym_ops = false;
-        for( shared_ptr<Expression> op : ops )
-        {            
-            got_bool_ops = got_bool_ops || dynamic_pointer_cast<BooleanExpression>(op);
-            got_sym_ops = got_sym_ops || dynamic_pointer_cast<SymbolExpression>(op);
-        }
+        ASSERT( !dynamic_pointer_cast<PredicateOperator>(expr) );
+        return true;
+    } );
 
-        if( bool_expr && got_sym_ops && !got_bool_ops )
+    w(expr);
+}
+
+
+list<shared_ptr<PredicateOperator>> PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
+{
+    list<shared_ptr<PredicateOperator>> preds;
+    
+    ExpressionWalker w( true, [&](shared_ptr<Expression> expr) -> bool
+    {
+        if( auto pred_expr = dynamic_pointer_cast<PredicateOperator>(expr) )
         {
-            preds.push_back(bool_expr);
+            preds.push_back(pred_expr);
             return false; // no need to recurse into predicate
         }
         else
