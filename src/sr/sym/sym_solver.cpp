@@ -32,20 +32,27 @@ shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<SymbolExpression> t
 
 // -------------------------- TruthTableSolver ----------------------------    
 
-TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> expr_ ) :
-    expr( expr_ )
+TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> equation_ ) :
+    equation( equation_ )
 {
 }
 
 
 void TruthTableSolver::PreSolve()
 {
-    predicates = PredicateAnalysis::GetPredicates( expr );
-    // Could de-duplicate?
+    string s;
+    s += "Presolve equation: " + equation->Render() + "\n\n";
     
+    predicates = PredicateAnalysis::GetPredicates( equation );
+    // Could de-duplicate? Yes, do but be careful of the forcing - they may not be different (use a std::set for equal ones)
+    s += RenderPredicates()+"\n";
+
     truth_table = make_unique<TruthTable>( predicates.size(), true );
     
     PopulateInitial();
+    
+    s += truth_table->Render( {}, label_var_name, counting_based )+"\n";
+    FTRACE(s);
 }
 
 
@@ -67,10 +74,28 @@ void TruthTableSolver::PopulateInitial()
         for( int j=0; j<indices.size(); j++ )
             predicates[j]->SetForceResult( vr[j] );       
             
-        shared_ptr<BooleanResultInterface> eval_result = expr->Evaluate(kit);
+        shared_ptr<BooleanResultInterface> eval_result = equation->Evaluate(kit);
         
         // Rule out any evaluations that come out false
         if( !eval_result->IsDefinedAndTrue() )
             truth_table->Set( indices, false );
     }
+}
+
+
+string TruthTableSolver::PredicateName(int j)
+{
+    return label_var_name + to_string(j+counting_based);
+}
+
+
+string TruthTableSolver::RenderPredicates()
+{
+    string s;
+    for( int j=0; j<predicates.size(); j++ )
+    {
+        //predicates[j]->SetForceRender( PredicateName(j) ); // want to use later...
+        s += PredicateName(j) + " := " + predicates[j]->Render() + "\n";
+    }
+    return s;
 }

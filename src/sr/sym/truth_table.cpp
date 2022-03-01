@@ -278,10 +278,14 @@ string TruthTable::Render( set<int> column_axes, string label_var_name, int coun
     vector<vector<string>> render_column_labels = labels_lambda( ToVector(column_axes) );
     
     // Cross-check everything fits together and then determine size of render
-    ASSERT( render_table_cells.size() == render_row_labels.at(0).size() );
-    ASSERT( render_table_cells.at(0).size() == render_column_labels.at(0).size() );
-    int num_rows = render_column_labels.size() + render_row_labels.at(0).size();
-    int num_columns = render_row_labels.size() + render_column_labels.at(0).size();
+    int rows_size = 1 << row_axes.size();
+    int columns_size = 1 << column_axes.size();
+    ASSERT( rows_size >= 1 );
+    ASSERT( columns_size >= 1 );
+    ASSERT( render_table_cells.size() == rows_size );
+    ASSERT( render_table_cells.at(0).size() == columns_size );
+    int num_rows = render_column_labels.size() + rows_size;
+    int num_columns = render_row_labels.size() + columns_size;
     
     // Join the labels to the table padding dead space with empty strings
     vector<vector<string>> render_figure;
@@ -290,16 +294,16 @@ string TruthTable::Render( set<int> column_axes, string label_var_name, int coun
         vector<string> render_row;
         for( int col=0; col<render_row_labels.size(); col++ )
             render_row.push_back( string(render_cell_size, ' ') );
-        for( int col=0; col<render_column_labels.at(0).size(); col++ )
+        for( int col=0; col<columns_size; col++ )
             render_row.push_back(render_column_labels.at(row).at(col));      
         render_figure.push_back(render_row);
     }
-    for( int row=0; row<render_row_labels.at(0).size(); row++ )
+    for( int row=0; row<rows_size; row++ )
     {
         vector<string> render_row;
         for( int col=0; col<render_row_labels.size(); col++ )
             render_row.push_back(render_row_labels.at(col).at(row));
-        for( int col=0; col<render_column_labels.at(0).size(); col++ )
+        for( int col=0; col<columns_size; col++ )
             render_row.push_back(render_table_cells.at(row).at(col));            
         render_figure.push_back(render_row);
     }

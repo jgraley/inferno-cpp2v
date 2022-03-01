@@ -27,13 +27,19 @@ private:
 class TruthTableSolver
 {
 public:
-    TruthTableSolver( shared_ptr<BooleanExpression> expr );
+    TruthTableSolver( shared_ptr<BooleanExpression> equation );
     void PreSolve();
     
 private:
     void PopulateInitial();
 
-    const shared_ptr<BooleanExpression> expr;
+    // Logging
+    string PredicateName(int i);
+    string RenderPredicates();
+
+    const string label_var_name = "p";
+    const int counting_based = 1;
+    const shared_ptr<BooleanExpression> equation;
     vector<shared_ptr<PredicateOperator>> predicates;
     unique_ptr<TruthTable> truth_table;
 };
