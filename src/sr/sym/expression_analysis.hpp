@@ -36,7 +36,7 @@ class PredicateAnalysis
 public:    
     static void CheckRegularPredicateForm( shared_ptr<Expression> expr );
     static void CheckNoPredicatesUnder( shared_ptr<Expression> expr );
-    static list<shared_ptr<PredicateOperator>> GetPredicates( shared_ptr<Expression> expr );
+    static vector<shared_ptr<PredicateOperator>> GetPredicates( shared_ptr<Expression> expr );
 };
    
 };

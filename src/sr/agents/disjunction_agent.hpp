@@ -18,6 +18,9 @@ public:
     class NoOptionsMatchedMismatch : public Mismatch {};
     class TakenOptionMismatch : public Mismatch {};
     class MMAXRequiredOnUntakenOptionMismatch : public Mismatch {};
+    
+    // Only to prevent crash when hypothesis_links is empty eg during truth table pre-solve
+    class IncompleteQuery : public Mismatch {}; 
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,

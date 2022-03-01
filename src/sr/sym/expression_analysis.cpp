@@ -79,9 +79,9 @@ void PredicateAnalysis::CheckNoPredicatesUnder( shared_ptr<Expression> expr )
 }
 
 
-list<shared_ptr<PredicateOperator>> PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
+vector<shared_ptr<PredicateOperator>> PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
 {
-    list<shared_ptr<PredicateOperator>> preds;
+    vector<shared_ptr<PredicateOperator>> preds;
     
     ExpressionWalker w( true, [&](shared_ptr<Expression> expr) -> bool
     {

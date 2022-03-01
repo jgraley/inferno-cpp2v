@@ -81,6 +81,8 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
 { 
     // Only handles the case where keyer is not MMAX and pre-restriction already handled
     INDENT("∨");
+    if( hypothesis_links->count(keyer_plink)==0 )
+        throw IncompleteQuery();
     XLink keyer_xlink;
     keyer_xlink = hypothesis_links->at(keyer_plink);
         
@@ -90,6 +92,8 @@ void DisjunctionAgent::RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_l
     FOREACH( const TreePtrInterface &p, GetDisjuncts() )           
     {
         PatternLink plink(this, &p);
+        if( hypothesis_links->count(plink)==0 )
+            throw IncompleteQuery();
         XLink xlink = hypothesis_links->at(plink); 
         ASSERT( xlink );
         if( xlink != XLink::MMAX_Link )

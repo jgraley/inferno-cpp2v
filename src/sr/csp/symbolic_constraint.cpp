@@ -42,10 +42,14 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     TRACE("Trying to solve:\n")(consistency_expression->Render())("\n")
          ("For variables:\n")(variables)("\n");
             
+    SYM::SymSolver my_solver(consistency_expression);
+    SYM::TruthTableSolver my_tt_solver(consistency_expression);
+    my_tt_solver.PreSolve();
+    
     for( VariableId v : variables )
     {
         auto v_expr = make_shared<SYM::SymbolVariable>(v);
-        shared_ptr<SYM::SymbolExpression> he = SYM::SymSolver(v_expr).TrySolve(consistency_expression);
+        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolve(v_expr);
         if( he )
         {
             TRACEC("Solved for variable: ")(v)
