@@ -79,15 +79,26 @@ void PredicateAnalysis::CheckNoPredicatesUnder( shared_ptr<Expression> expr )
 }
 
 
-vector<shared_ptr<PredicateOperator>> PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
+struct ExpressionOrderComparer {
+    bool operator()( const shared_ptr<const Expression> &a, 
+                     const shared_ptr<const Expression> &b )
+    {
+        Orderable::Result r = Expression::OrderCompare( a, b );
+        return r < Orderable::EQUAL;
+    }                                      
+};
+
+
+vector< set<shared_ptr<PredicateOperator>> > PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
 {
-    vector<shared_ptr<PredicateOperator>> preds;
+    set<shared_ptr<PredicateOperator>> preds_unique_by_ptr;
     
+    // Get all the predicate objects just once, eliding multiple parents (i.e. unique by shared_ptr value)
     ExpressionWalker w( true, [&](shared_ptr<Expression> expr) -> bool
     {
         if( auto pred_expr = dynamic_pointer_cast<PredicateOperator>(expr) )
         {
-            preds.push_back(pred_expr);
+            preds_unique_by_ptr.insert(pred_expr);
             return false; // no need to recurse into predicate
         }
         else
@@ -97,6 +108,19 @@ vector<shared_ptr<PredicateOperator>> PredicateAnalysis::GetPredicates( shared_p
     } );
 
     w(expr);
+    
+    // Move into a data structure that can differentiate by expression equality 
+    map< shared_ptr<PredicateOperator>, 
+         set<shared_ptr<PredicateOperator>>, 
+         ExpressionOrderComparer > preds_grouped_by_equality;
+    for( shared_ptr<PredicateOperator> pred : preds_unique_by_ptr )
+        preds_grouped_by_equality[pred].insert(pred);
+    
+    // Move into vector as required by caller
+    vector< set<shared_ptr<PredicateOperator>> > preds;
+    for( auto p : preds_grouped_by_equality )
+        preds.push_back( p.second );
+    
     return preds;
 }
 

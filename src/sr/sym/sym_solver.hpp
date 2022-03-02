@@ -35,12 +35,12 @@ private:
 
     // Logging
     string PredicateName(int i);
-    string RenderPredicates();
+    string RenderPredicatesAndPredEquation();
 
     const string label_var_name = "p";
     const int counting_based = 1;
     const shared_ptr<BooleanExpression> equation;
-    vector<shared_ptr<PredicateOperator>> predicates;
+    vector<set<shared_ptr<PredicateOperator>>> predicates;
     unique_ptr<TruthTable> truth_table;
 };
 

@@ -45,7 +45,7 @@ void TruthTableSolver::PreSolve()
     
     predicates = PredicateAnalysis::GetPredicates( equation );
     // Could de-duplicate? Yes, do but be careful of the forcing - they may not be different (use a std::set for equal ones)
-    s += RenderPredicates()+"\n";
+    s += RenderPredicatesAndPredEquation()+"\n";
 
     truth_table = make_unique<TruthTable>( predicates.size(), true );
     
@@ -66,13 +66,15 @@ void TruthTableSolver::PopulateInitial()
     
     for( vector<bool> indices : all_indices )
     {
+        ASSERT( indices.size() == predicates.size() );
         vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
         
         for( bool b : indices )
             vr.push_back( make_shared<BooleanResult>(ResultInterface::DEFINED, b) );
         
-        for( int j=0; j<indices.size(); j++ )
-            predicates[j]->SetForceResult( vr[j] );       
+        for( int j=0; j<predicates.size(); j++ )
+            for( shared_ptr<PredicateOperator> pred : predicates[j] )
+                pred->SetForceResult( vr[j] );       
             
         shared_ptr<BooleanResultInterface> eval_result = equation->Evaluate(kit);
         
@@ -89,13 +91,19 @@ string TruthTableSolver::PredicateName(int j)
 }
 
 
-string TruthTableSolver::RenderPredicates()
+string TruthTableSolver::RenderPredicatesAndPredEquation()
 {
     string s;
+    vector<shared_ptr<string>> pred_names(predicates.size());
     for( int j=0; j<predicates.size(); j++ )
     {
-        //predicates[j]->SetForceRender( PredicateName(j) ); // want to use later...
-        s += PredicateName(j) + " := " + predicates[j]->Render() + "\n";
+        string name = PredicateName(j);
+        s += name + " := " + (*(predicates[j].begin()))->Render() + "\n";
+
+        pred_names[j] = make_shared<string>(name);
+        for( shared_ptr<PredicateOperator> pred : predicates[j] )
+            pred->SetForceRender( pred_names[j] ); // want to use later...
     }
+    s += "so that we require " + equation->Render() + "\n";
     return s;
 }
