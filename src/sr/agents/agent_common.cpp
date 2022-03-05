@@ -258,7 +258,7 @@ Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
     if( ImplHasSNLQ() )    
         return SymbolicNormalLinkedQueryImpl();
-
+    //ASSERT(false);
 	// The keyer and normal children
 	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
 	auto nlq_lambda = [this](const Expression::EvalKit &kit)

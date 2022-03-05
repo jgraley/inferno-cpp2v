@@ -1,7 +1,7 @@
 #ifndef INFERNO_AGENTS_HPP
 #define INFERNO_AGENTS_HPP
 
-#include "sr/agents/agent_intermediates.hpp"
+#include "sr/agents/teleport_agent.hpp"
 #include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
 #include "tree/sctree.hpp"

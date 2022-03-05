@@ -2,7 +2,7 @@
 #define POINTER_IS_AGENT_HPP
 
 #include "../search_replace.hpp"
-#include "agent_intermediates.hpp"
+#include "teleport_agent.hpp"
 #include "../cache.hpp"
 
 namespace SR
