@@ -26,8 +26,8 @@ public:
 
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
 
-    string Render() const override;
-    Precedence GetPrecedence() const override;
+    string Render() const override final;
+    Precedence GetPrecedence() const override final;
         
     // Methods to use if not forced
     virtual string RenderNF() const = 0;    

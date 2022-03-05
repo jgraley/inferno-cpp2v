@@ -160,7 +160,7 @@ shared_ptr<BooleanResultInterface> StarAgent::SubcontainerKindOfOperator::Evalua
 }                                   
 
          
-string StarAgent::SubcontainerKindOfOperator::Render() const
+string StarAgent::SubcontainerKindOfOperator::RenderNF() const
 {
     return "SubcontainerKindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
 }
