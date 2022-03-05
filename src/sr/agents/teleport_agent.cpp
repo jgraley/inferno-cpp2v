@@ -29,24 +29,21 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 {
     INDENT("T");
     
-    auto op = [&](XLink keyer_xlink) -> map<PatternLink, XLink>
+    auto op = [&](XLink keyer_xlink) -> LocatedLink
     {
         LocatedLink tp_link = RunTeleportQuery( keyer_xlink );
         if( !tp_link )
-            return {};
+            return tp_link;
         
         // We will uniquify the link against the domain and then cache it against keyer_xlink
         LocatedLink ude_link( (PatternLink)tp_link, master_scr_engine->UniquifyDomainExtension(tp_link) ); 
                    
-        return { ude_link };
+        return ude_link;
     };
     
-    map<PatternLink, XLink> cached_links = cache( keyer_xlink, op );
-    for( LocatedLink cached_link : cached_links )
-    {   
-        ASSERT( cached_link );
+    LocatedLink cached_link = cache( keyer_xlink, op );
+    if( cached_link )
         query.RegisterNormalLink( (PatternLink)cached_link, (XLink)cached_link );
-    }    
 }                                    
 
 

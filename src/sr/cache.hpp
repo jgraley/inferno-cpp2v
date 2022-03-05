@@ -22,7 +22,7 @@ class LocatedLink;
 class CacheByLocation
 {
 public:       
-    typedef map<PatternLink, XLink> Value;
+    typedef LocatedLink Value;
     typedef XLink Key;
     typedef function<Value(Key key)> CannonicalOperation;
 
