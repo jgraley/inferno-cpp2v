@@ -23,7 +23,7 @@ public:
     class TransformationFailedMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const;                
+    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                
     virtual Block GetGraphBlockInfo() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;

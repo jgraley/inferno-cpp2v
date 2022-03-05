@@ -595,6 +595,8 @@ const CompareReplace * SCREngine::GetOverallMaster() const
 
 XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 {
+    ASSERT( xlink );
+    
     // Don't worry about generated nodes that are already in 
     // the X tree (they had to have been found there after a
     // search). 

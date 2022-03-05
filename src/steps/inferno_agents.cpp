@@ -233,9 +233,9 @@ void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }
 
     
-map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
+LocatedLink NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
-    map<PatternLink, XLink> tp_links;
+    LocatedLink tp_link;
     
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -249,10 +249,10 @@ map<PatternLink, XLink> NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
 
         TreePtr<Node> cur_depth( new SpecificString(s) );
         XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
-        tp_links[PatternLink(this, &depth)] = new_xlink;
+        tp_link = LocatedLink(PatternLink(this, &depth), new_xlink);
     }
     
-    return tp_links;
+    return tp_link;
 }    
 
 

@@ -15,7 +15,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
+LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
     TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
     if( keyer_xlink.GetChildX() == context )
@@ -24,7 +24,7 @@ map<PatternLink, XLink> PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) co
         // (in this case wit.GetNodePointerInParent() would return NULL)
         TreePtr<Node> node( new Node );
         XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct        
-        return { { PatternLink(this, GetPointer()), tp_xlink } };
+        return LocatedLink(PatternLink(this, GetPointer()), tp_xlink);
     }
     
     // Do a walk over context (the whole x tree)

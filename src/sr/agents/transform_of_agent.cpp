@@ -12,7 +12,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
+LocatedLink TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
@@ -22,7 +22,7 @@ map<PatternLink, XLink> TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) 
     {
         ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
         XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
-        return { { PatternLink(this, &pattern), tp_xlink } };
+        return LocatedLink(PatternLink(this, &pattern), tp_xlink);
     }
     else
     {

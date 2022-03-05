@@ -31,14 +31,14 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
     
     auto op = [&](XLink keyer_xlink) -> map<PatternLink, XLink>
     {
-        map<PatternLink, XLink> tp_links = RunTeleportQuery( keyer_xlink );
+        LocatedLink tp_link = RunTeleportQuery( keyer_xlink );
+        if( !tp_link )
+            return {};
         
         // We will uniquify the link against the domain and then cache it against keyer_xlink
-        
-        for( pair<PatternLink, XLink> p : tp_links )
-            p.second = master_scr_engine->UniquifyDomainExtension(p.second); // in-place
+        LocatedLink ude_link( (PatternLink)tp_link, master_scr_engine->UniquifyDomainExtension(tp_link) ); 
                    
-        return tp_links;
+        return { ude_link };
     };
     
     map<PatternLink, XLink> cached_links = cache( keyer_xlink, op );

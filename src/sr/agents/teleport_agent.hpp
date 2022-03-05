@@ -15,7 +15,7 @@ class TeleportAgent : public PreRestrictedAgent
 public:    
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                  
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }
+    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }
     
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks );
 

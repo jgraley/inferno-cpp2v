@@ -194,7 +194,7 @@ struct NestedAgent : public virtual TeleportAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                  
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const;                
+    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
     virtual Block GetGraphBlockInfo() const;

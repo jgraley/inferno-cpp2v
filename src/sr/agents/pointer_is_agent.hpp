@@ -17,7 +17,7 @@ class PointerIsAgent : public virtual TeleportAgent
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual map<PatternLink, XLink> RunTeleportQuery( XLink keyer_xlink ) const;
+    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;
                  
     virtual Block GetGraphBlockInfo() const;
 private:
