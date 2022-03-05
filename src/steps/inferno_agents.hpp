@@ -110,7 +110,6 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     virtual Block GetGraphBlockInfo() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;
-    virtual bool ImplHasSNLQ() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     string name;
@@ -192,7 +191,6 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 struct NestedAgent : public virtual TeleportAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual bool ImplHasSNLQ() const { return true; }
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                

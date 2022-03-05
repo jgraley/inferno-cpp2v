@@ -59,12 +59,6 @@ void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &quer
 }
 
 
-bool SearchContainerAgent::ImplHasSNLQ() const
-{
-    return true;
-}
-
-
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink, 
                                                       TreePtr<Node> key_node ) 
 {

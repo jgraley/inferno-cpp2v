@@ -22,7 +22,6 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                  
-    virtual bool ImplHasSNLQ() const;
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const = 0;

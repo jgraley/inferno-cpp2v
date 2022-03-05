@@ -52,12 +52,6 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }                       
 
 
-bool StarAgent::ImplHasSNLQ() const
-{
-    return true;
-}
-
-
 SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
 {
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);

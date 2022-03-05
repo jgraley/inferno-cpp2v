@@ -25,8 +25,6 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                
 
-    virtual bool ImplHasSNLQ() const { return true; }
-
     virtual Block GetGraphBlockInfo() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;

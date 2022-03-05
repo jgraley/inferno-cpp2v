@@ -55,10 +55,7 @@ public:
                                   XLink keyer_xlink ) const = 0;     
     
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
-
-    /// Test an Agent given partial map of locations of base and normal links. 
-    virtual bool ImplHasSNLQ() const = 0;                                              
-
+                                         
     /// Test an agent given given partial map of locations of keyer and residuals.  
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const = 0;                                       
 

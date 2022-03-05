@@ -26,7 +26,6 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                    
                                                                
-    virtual bool ImplHasSNLQ() const;                                                                                     
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
 
     virtual Block GetGraphBlockInfo() const;

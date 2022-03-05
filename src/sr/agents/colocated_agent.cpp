@@ -25,12 +25,6 @@ void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-bool ColocatedAgent::ImplHasSNLQ() const
-{    
-    return true;
-}
-
-
 Over<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
 	Over<BooleanExpression> my_expr = SYM::MakeOver<SYM::BooleanConstant>(true);

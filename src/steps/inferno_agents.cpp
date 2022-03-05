@@ -134,12 +134,6 @@ void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &que
 }           
                      
 
-bool IdentifierByNameAgent::ImplHasSNLQ() const
-{    
-    return true;
-}
-
-
 SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
 {
     auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);

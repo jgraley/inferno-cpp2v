@@ -71,12 +71,6 @@ void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-bool DisjunctionAgent::ImplHasSNLQ() const
-{    
-    return true;
-}
-
-
 SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImpl() const
 {
     auto mmax_expr = MakeOver<SymbolConstant>(XLink::MMAX_Link);

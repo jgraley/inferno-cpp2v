@@ -38,12 +38,6 @@ void NegationAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }
 
 
-bool NegationAgent::ImplHasSNLQ() const
-{    
-    return true;
-}
-
-
 SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
 {
     return MakeOver<SYM::BooleanConstant>(true);

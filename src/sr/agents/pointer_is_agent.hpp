@@ -20,9 +20,7 @@ public:
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;
                  
     virtual Block GetGraphBlockInfo() const;
-
-    virtual bool ImplHasSNLQ() const { return true; }
-                                                
+                                           
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
 };

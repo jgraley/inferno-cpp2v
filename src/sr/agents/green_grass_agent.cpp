@@ -16,12 +16,6 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 }
 
 
-bool GreenGrassAgent::ImplHasSNLQ() const
-{    
-    return true;
-}
-
-
 Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);

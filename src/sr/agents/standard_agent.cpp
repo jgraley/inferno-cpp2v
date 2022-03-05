@@ -410,13 +410,6 @@ void StandardAgent::DecidedQuerySingular( DecidedQueryAgentInterface &query,
     query.RegisterNormalLink(sing_plink, sing_xlink); // Link into X
 }
 
-// ---------------------------- Normal Linked Queries ----------------------------------                                               
-
-bool StandardAgent::ImplHasSNLQ() const
-{    
-    return true;
-}
-
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
 Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const

@@ -166,51 +166,6 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 
     RunDecidedQueryImpl( query, keyer_xlink );
 }                             
-
-
-bool AgentCommon::ImplHasSNLQ() const
-{    
-    return false;
-}
-
-    
-void AgentCommon::NLQFromDQ( const SolutionMap *hypothesis_links,
-                             const TheKnowledge *knowledge ) const
-{    
-    TRACE("common DNLQ: ")(*this)(" at ")(keyer_plink)("\n");
-    
-    
-    // Can't do baseless query using DQ
-    if( hypothesis_links->count(keyer_plink)==0 )
-        return;
-    
-    auto query = CreateDecidedQuery();
-    RunDecidedQueryImpl( *query, hypothesis_links->at(keyer_plink) );
-    
-    // The query now has populated links, which should be full
-    // (otherwise RunDecidedQuery() should have thrown). We loop 
-    // over both and check that they refer to the same x nodes
-    // we were passed. Mismatch will throw, same as in DQ.
-    auto actual_links = query->GetNormalLinks();
-    TRACE("Actual   ")(actual_links)("\n");
-    ASSERT( actual_links.size() == pattern_query->GetNormalLinks().size() );
-    
-    for( LocatedLink alink : actual_links )
-    {
-        auto plink = (PatternLink)alink;
-        if(hypothesis_links->count(plink)==0)
-            continue; // partial query support
-            
-        LocatedLink rlink( plink, hypothesis_links->at(plink) );
-        ASSERT( alink.GetChildAgent() == rlink.GetChildAgent() );                
-        if( (XLink)alink == XLink::MMAX_Link )
-            continue; // only happens when agent pushes out MMAX, as with DisjunctionAgent
-            
-        // Compare by location
-        if( (XLink)alink != (XLink)rlink ) 
-            throw NLQFromDQLinkMismatch();               
-    }            
-}                           
                                 
     
 void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
@@ -256,17 +211,7 @@ Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 
 Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
 {
-    if( ImplHasSNLQ() )    
-        return SymbolicNormalLinkedQueryImpl();
-    ASSERT(false);
-	// The keyer and normal children
-	set<PatternLink> nlq_plinks = ToSetSolo( keyer_and_normal_plinks );
-	auto nlq_lambda = [this](const Expression::EvalKit &kit)
-	{
-		NLQFromDQ( kit.hypothesis_links,
-                   kit.knowledge ); // throws on mismatch   
-	};
-	return MakeOver<BooleanLambda>(nlq_plinks, nlq_lambda, GetTrace()+".NLQFromDQ()");	             
+    return SymbolicNormalLinkedQueryImpl();            
 }
 
 

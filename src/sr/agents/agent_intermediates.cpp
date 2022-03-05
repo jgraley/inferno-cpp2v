@@ -71,7 +71,7 @@ SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryM
                                
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {                      
-	ASSERTFAIL("Override me or turn off ImplHasSNLQ()\n");
+	ASSERTFAIL("Override me\n");
 }                     
 
 //---------------------------------- SearchLeafAgent ------------------------------------    
