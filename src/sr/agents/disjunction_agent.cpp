@@ -36,41 +36,6 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-void DisjunctionAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                            XLink x ) const
-{
-    INDENT("∨");
-    ASSERT( !GetDisjuncts().empty() ); // must be at least one thing!
-    
-    // Check pre-restriction
-    if( !IsLocalMatch( x.GetChildX().get() ) )
-        throw PreRestrictionMismatch();
-
-    // We register a decision that actually chooses between our agents - that
-    // is, the disjuncts for the OR operation.
-    ContainerInterface::iterator choice_it = query.RegisterDecision( options, false );
-    FOREACH( const TreePtrInterface &p, GetDisjuncts() )                 
-    {
-        PatternLink plink(this, &p);
-
-        // Context is normal because all patterns must match
-        if( *plink.GetPatternPtr() == *choice_it ) // Is this the pattern that was chosen?
-        {
-            // Yes, so supply the "real" x for this link. We'll really
-            // test x against this pattern.
-            query.RegisterNormalLink( plink, x ); // Link into X
-        }
-        else
-        {
-            // No, so just make sure this link matches (overall AND-rule
-            // applies, reducing the outcome to that of the normal 
-            // link registered above).
-            query.RegisterNormalLink( plink, XLink::MMAX_Link ); // Link into MMAX
-        }
-    }
-}
-
-
 SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImpl() const
 {
     auto mmax_expr = MakeOver<SymbolConstant>(XLink::MMAX_Link);

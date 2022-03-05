@@ -115,25 +115,6 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 }
 
 
-void IdentifierByNameAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                                 XLink keyer_xlink ) const                
-{
-    string newname = name; 
-    TreePtr<Node> base_x = keyer_xlink.GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
-    if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
-    {
-        TRACE("Comparing ")(si_x->GetRender())(" with ")(newname);
-        if( si_x->GetRender() == newname )
-        {
-            TRACE(" : same\n");
-            return;
-        }
-        TRACE(" : different\n");
-    }
-    throw Mismatch();  
-}           
-                     
-
 SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
 {
     auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);

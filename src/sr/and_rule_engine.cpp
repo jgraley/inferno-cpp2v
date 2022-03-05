@@ -617,7 +617,7 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 
         // Run the compare implementation to get the links based on the choices
         TRACE("RunDecidedQuery() with ")(link)("\n");     
-        agent->RunDecidedQuery( *query, link );
+        //agent->RunDecidedQuery( *query, link );
         TRACE("Normal ")(query->GetNormalLinks())("\n")
              ("Abormal ")(query->GetAbnormalLinks())("\n")
              ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  

@@ -30,9 +30,7 @@ public:
     class PreRestrictionMismatch : public Mismatch {};
     class NotASubcontainerMismatch : public Mismatch {};
 
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                  
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

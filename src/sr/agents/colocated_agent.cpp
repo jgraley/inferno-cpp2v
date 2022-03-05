@@ -9,22 +9,6 @@
 using namespace SR;
 using namespace SYM;
 
-void ColocatedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                          XLink keyer_xlink ) const
-{     
-    if( keyer_xlink != XLink::MMAX_Link )
-    {
-        if( !IsLocalMatch( keyer_xlink.GetChildX().get() ) ) 
-            throw PreRestrictionMismatch();
-
-        RunColocatedQuery(keyer_xlink);
-    }
-    
-    for( PatternLink plink : pattern_query->GetNormalLinks() )                 
-        query.RegisterNormalLink( plink, keyer_xlink ); // Link into X
-}    
-
-
 Over<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
 	Over<BooleanExpression> my_expr = SYM::MakeOver<SYM::BooleanConstant>(true);

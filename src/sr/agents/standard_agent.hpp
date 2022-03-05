@@ -112,22 +112,7 @@ public:
     void IncrPatternQuerySingular( const Plan::Singular &plan_sing, 
                                    shared_ptr<PatternQuery> &pattern_query ) const;
 
-private:
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                  
-    void DecidedQuerySequence( DecidedQueryAgentInterface &query,
-                               XLink keyer_xlink,
-                               SequenceInterface *x_seq,
-    	                       const Plan::Sequence &plan_seq ) const;
-    void DecidedQueryCollection( DecidedQueryAgentInterface &query,
-                                 XLink keyer_xlink,
-                                 CollectionInterface *x_col,
-    		                     const Plan::Collection &plan_col ) const;
-    void DecidedQuerySingular( DecidedQueryAgentInterface &query,
-                               XLink keyer_xlink,
-                               TreePtrInterface *p_x_singular,
-	                           const Plan::Singular &plan_sing ) const;
-                                           
+private:        
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       
     SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const;                                       

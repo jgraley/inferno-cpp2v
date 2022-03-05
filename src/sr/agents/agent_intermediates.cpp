@@ -24,24 +24,6 @@ using namespace SYM;
 
 //---------------------------------- DefaultMMAXAgent ------------------------------------    
 
-void DefaultMMAXAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                            XLink keyer_xlink ) const
-{
-    if( keyer_xlink == XLink::MMAX_Link )
-    {
-        // Magic Match Anything node: all normal children also match anything
-        // This is just to keep normal-domain solver happy, so we 
-        // only need normals. 
-        for( PatternLink plink : pattern_query->GetNormalLinks() )       
-            query.RegisterNormalLink( plink, keyer_xlink );
-    }   
-    else
-    {
-        RunDecidedQueryMMed( query, keyer_xlink );
-    }
-}
-
-
 SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
 {    
     auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
@@ -51,17 +33,6 @@ SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImp
 }
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
-
-void PreRestrictedAgent::RunDecidedQueryMMed( DecidedQueryAgentInterface &query,
-                                              XLink keyer_xlink ) const
-{
-    // Check pre-restriction
-    if( !IsPreRestrictionMatch(keyer_xlink) )
-        throw PreRestrictionMismatch();
-            
-    RunDecidedQueryPRed( query, keyer_xlink );
-}
-
 
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
 {
@@ -79,12 +50,6 @@ SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryP
 shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
 { 
     return make_shared<PatternQuery>(this);
-}
-
-
-void SearchLeafAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                           XLink keyer_xlink ) const
-{
 }
 
 

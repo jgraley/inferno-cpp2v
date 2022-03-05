@@ -29,11 +29,7 @@ public:
     virtual list<PatternLink> GetChildren() const override;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                                                
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink keyer_xlink ) const;       
-                                                                                        
+                                  
     virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       

@@ -147,25 +147,6 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
     
     return make_shared<DecidedQuery>( pattern_query );
 }
-    
-    
-void AgentCommon::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                       XLink keyer_xlink ) const
-{
-    ASSERTFAIL();
-}                                       
-
-
-void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                   XLink keyer_xlink ) const
-{
-    // Admin stuff every DQ has to do
-    query.last_activity = DecidedQueryCommon::QUERY;   
-    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    query.Reset(); 
-
-    RunDecidedQueryImpl( query, keyer_xlink );
-}                             
                                 
     
 void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const

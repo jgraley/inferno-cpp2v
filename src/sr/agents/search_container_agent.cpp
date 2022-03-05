@@ -29,36 +29,6 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 }
 
 
-void SearchContainerAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                                XLink keyer_xlink ) const
-{
-    INDENT("#");
-    ASSERT( this );
-    ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    
-    // Get an interface to the container we will search
-    // TODO what is keeping pwx alive after this function exits? Are the iterators 
-    // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
-    // facade for the iterators and can be abandoned safely?
-    shared_ptr<ContainerInterface> pwx = GetContainerInterface( keyer_xlink );
-    
-    if( pwx->empty() )
-    {
-        throw Mismatch();     // The search container is empty, thus terminus could never be matched
-    }
-
-    // Get choice from conjecture about where we are in the walk
-	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    XLink terminus_xlink = GetXLinkFromIterator(keyer_xlink, thistime);
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(terminus_xlink)("\n");
-
-    query.RegisterNormalLink( PatternLink(this, &terminus), terminus_xlink ); // Link into X
-
-    // Let subclasses implement further restrictions
-    DecidedQueryRestrictions( query, thistime, keyer_xlink );
-}
-
-
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink, 
                                                       TreePtr<Node> key_node ) 
 {

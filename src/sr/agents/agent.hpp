@@ -50,10 +50,6 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     
-    /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  XLink keyer_xlink ) const = 0;     
-    
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
                                          
     /// Test an agent given given partial map of locations of keyer and residuals.  

@@ -16,9 +16,7 @@ class NegationAgent : public virtual PreRestrictedAgent
 public:
     class LocationMismatch : public Agent::Mismatch {};
 
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
 
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
 

@@ -20,18 +20,26 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 }
 
 
-// NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
-// stuff has to be done explicitly in here.
-void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                     XLink keyer_xlink ) const
+SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
 {
+    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
+}
+
+
+void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
+                                          const SolutionMap *hypothesis_links,
+                                          const TheKnowledge *knowledge ) const
+{ 
+    // This agent has no normal links, so just do this to populate query
+    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     INDENT("*");
     ASSERT(keyer_xlink);
                 
     auto x_ci = dynamic_cast<ContainerInterface *>(keyer_xlink.GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(keyer_xlink.GetChildX());
 
-    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
+    // Nodes must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
         throw NotASubcontainerMismatch();
     
@@ -49,23 +57,6 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         // Apply pattern restriction - will be at least as strict as pre-restriction
         query.RegisterMultiplicityLink( PatternLink(this, GetRestriction()), keyer_xlink ); // Links into X
     }
-}                       
-
-
-SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
-{
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
-}
-
-
-void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                          const SolutionMap *hypothesis_links,
-                                          const TheKnowledge *knowledge ) const
-{ 
-    // This agent has no normal links, so just do this to populate query
-    XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-    RunDecidedQueryImpl( query, keyer_xlink ); 
 }
 
 
@@ -141,7 +132,7 @@ shared_ptr<BooleanResultInterface> StarAgent::SubcontainerKindOfOperator::Evalua
     auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetAsXLink().GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetAsXLink().GetChildX());
 
-    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
+    // Nodes must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
         return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
     

@@ -18,10 +18,7 @@ class ColocatedAgent : public virtual AgentCommon
 public:
     class PreRestrictionMismatch : public Mismatch {};
     class ColocationMismatch : public Mismatch {};
-
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;         
-                                                                                     
+                                                 
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
     virtual void RunColocatedQuery(XLink common_xlink) const;

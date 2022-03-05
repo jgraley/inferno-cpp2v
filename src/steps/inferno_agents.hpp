@@ -108,8 +108,6 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     string name;

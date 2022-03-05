@@ -22,9 +22,7 @@ public:
     // Only to prevent crash when hypothesis_links is empty eg during truth table pre-solve
     class IncompleteQuery : public Mismatch {}; 
 
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                                    
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                                
                                                                
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
 
