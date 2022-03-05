@@ -20,10 +20,14 @@ public:
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;
                  
     virtual Block GetGraphBlockInfo() const;
+
+    virtual bool ImplHasSNLQ() const { return true; }
+                                                
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
 };
 	
+    
 template<class PRE_RESTRICTION>
 class PointerIs : public Special<PRE_RESTRICTION>,
                   public PointerIsAgent

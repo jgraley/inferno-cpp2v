@@ -16,6 +16,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/primary_expressions.hpp"
 #include "sym/clutch.hpp"
+#include "sym/result.hpp"
 
 #include <stdexcept>
 
@@ -47,6 +48,18 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
 }                                    
 
 
+SYM::Over<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed() const                                      
+{             
+    shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
+    PatternLink child_plink = OnlyElementOf( my_pq->GetNormalLinks() );
+    
+    SYM::Over<SYM::SymbolExpression> keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    SYM::Over<SYM::SymbolExpression> child_expr = MakeOver<SymbolVariable>(child_plink);
+    
+    return MakeOver<TeleportOperator>( this, keyer_expr ) == child_expr;
+}                     
+
+
 set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks )
 {
     set<XLink> extra_xlinks;
@@ -76,4 +89,81 @@ void TeleportAgent::Reset()
     AgentCommon::Reset();
     cache.Reset();
 }
+
+
+TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *tpa_,
+                                                   shared_ptr<SymbolExpression> keyer_ ) :
+    tpa( tpa_ ),
+    keyer( keyer_ )
+{    
+}                                                
+
+
+list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOperands() const
+{
+    return { keyer };
+}
+
+
+shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
+                                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
+    if( !keyer_result->IsDefinedAndUnique() )
+        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+    XLink keyer_xlink = keyer_result->GetAsXLink();
+    
+    auto op = [&](XLink keyer_xlink) -> LocatedLink
+    {
+        LocatedLink tp_link = tpa->RunTeleportQuery( keyer_xlink );
+        if( !tp_link )
+            return tp_link;
+        
+        // We will uniquify the link against the domain and then cache it against keyer_xlink
+        LocatedLink ude_link( (PatternLink)tp_link, tpa->master_scr_engine->UniquifyDomainExtension(tp_link) );                    
+        return ude_link;
+    };
+    
+    LocatedLink cached_link = tpa->cache( keyer_xlink, op );        
+    if( (XLink)cached_link )
+        return make_shared<SymbolResult>( ResultInterface::DEFINED, (XLink)cached_link );
+    else 
+        return make_shared<SymbolResult>( ResultInterface::UNDEFINED );
+}
+
+
+Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                                      OrderProperty order_property ) const 
+{
+    auto c = GET_THAT_POINTER(candidate);
+
+    Orderable::Result r;
+    switch( order_property )
+    {
+    case STRICT:
+        // Unique order uses address to ensure different dirty_grass sets compare differently
+        r = (int)(tpa > c->tpa) - (int)(tpa < c->tpa);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops after name check since address compare is not repeatable
+        r = Orderable::EQUAL;
+        break;
+    }
+    return r;
+}  
+
+
+string TeleportAgent::TeleportOperator::Render() const
+{
+    return "Teleport<" + tpa->GetName() + ">(" + keyer->Render() + ")"; 
+}
+
+
+Expression::Precedence TeleportAgent::TeleportOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
+}
+
 

@@ -28,7 +28,7 @@ LocatedLink TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
     {
         // Transformation returned nullptr, probably because the candidate was incompatible
         // with the transformation - a search MISS.
-        throw TransformationFailedMismatch();  
+        return LocatedLink();  
     }
 }
 

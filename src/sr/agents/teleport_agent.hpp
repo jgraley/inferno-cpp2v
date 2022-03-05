@@ -15,6 +15,8 @@ class TeleportAgent : public PreRestrictedAgent
 public:    
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const;                  
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }
     
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks );
@@ -23,6 +25,27 @@ public:
 
 private:
     mutable CacheByLocation cache;    
+
+    class TeleportOperator : public SYM::SymbolToSymbolExpression
+    {
+    public:    
+        typedef SymbolExpression NominalType;
+        explicit TeleportOperator( const TeleportAgent *tpa,
+                                   shared_ptr<SymbolExpression> keyer ); 
+        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        virtual shared_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                                 const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+
+        virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const override;
+
+        virtual string Render() const override;
+        virtual Precedence GetPrecedence() const override;
+        
+    protected:
+        const TeleportAgent *tpa;
+        shared_ptr<SymbolExpression> keyer;
+    };
 };
 
 };
