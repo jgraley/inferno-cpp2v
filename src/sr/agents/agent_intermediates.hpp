@@ -41,6 +41,7 @@ class SearchLeafAgent : public PreRestrictedAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const override;
     virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
                                       XLink keyer_xlink ) const override;                  
+    virtual bool ImplHasSNLQ() const { return true; }
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
 };
 
