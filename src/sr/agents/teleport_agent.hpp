@@ -30,7 +30,7 @@ private:
     {
     public:    
         typedef SymbolExpression NominalType;
-        explicit TeleportOperator( const TeleportAgent *tpa,
+        explicit TeleportOperator( const TeleportAgent *agent,
                                    shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual shared_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
@@ -43,7 +43,7 @@ private:
         virtual Precedence GetPrecedence() const override;
         
     protected:
-        const TeleportAgent *tpa;
+        const TeleportAgent *agent;
         shared_ptr<SymbolExpression> keyer;
     };
 };

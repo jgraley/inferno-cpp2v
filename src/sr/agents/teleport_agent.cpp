@@ -91,9 +91,9 @@ void TeleportAgent::Reset()
 }
 
 
-TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *tpa_,
+TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *agent_,
                                                    shared_ptr<SymbolExpression> keyer_ ) :
-    tpa( tpa_ ),
+    agent( agent_ ),
     keyer( keyer_ )
 {    
 }                                                
@@ -116,16 +116,16 @@ shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     
     auto op = [&](XLink keyer_xlink) -> LocatedLink
     {
-        LocatedLink tp_link = tpa->RunTeleportQuery( keyer_xlink );
+        LocatedLink tp_link = agent->RunTeleportQuery( keyer_xlink );
         if( !tp_link )
             return tp_link;
         
         // We will uniquify the link against the domain and then cache it against keyer_xlink
-        LocatedLink ude_link( (PatternLink)tp_link, tpa->master_scr_engine->UniquifyDomainExtension(tp_link) );                    
+        LocatedLink ude_link( (PatternLink)tp_link, agent->master_scr_engine->UniquifyDomainExtension(tp_link) );                    
         return ude_link;
     };
     
-    LocatedLink cached_link = tpa->cache( keyer_xlink, op );        
+    LocatedLink cached_link = agent->cache( keyer_xlink, op );        
     if( (XLink)cached_link )
         return make_shared<SymbolResult>( ResultInterface::DEFINED, (XLink)cached_link );
     else 
@@ -143,7 +143,7 @@ Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orde
     {
     case STRICT:
         // Unique order uses address to ensure different dirty_grass sets compare differently
-        r = (int)(tpa > c->tpa) - (int)(tpa < c->tpa);
+        r = (int)(agent > c->agent) - (int)(agent < c->agent);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:
@@ -157,7 +157,7 @@ Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orde
 
 string TeleportAgent::TeleportOperator::Render() const
 {
-    return "Teleport<" + tpa->GetName() + ">(" + keyer->Render() + ")"; 
+    return "Teleport<" + agent->GetName() + ">(" + keyer->Render() + ")"; 
 }
 
 

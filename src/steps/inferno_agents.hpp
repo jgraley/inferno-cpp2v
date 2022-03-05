@@ -191,16 +191,39 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 /// reach the terminus.
 struct NestedAgent : public virtual TeleportAgent
 {
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual void RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                      XLink keyer_xlink ) const;                  
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
+    virtual bool ImplHasSNLQ() const { return true; }
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                
+
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
     virtual Block GetGraphBlockInfo() const;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;      
+
+    class NestingOperator : public SYM::SymbolToSymbolExpression
+    {
+    public:    
+        typedef SymbolExpression NominalType;
+        explicit NestingOperator( const NestedAgent *agent,
+                                  shared_ptr<SymbolExpression> keyer ); 
+        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        virtual shared_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                                 const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+
+        virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                     OrderProperty order_property ) const override;
+
+        virtual string Render() const override;
+        virtual Precedence GetPrecedence() const override;
+        
+    protected:
+        const NestedAgent *agent;
+        shared_ptr<SymbolExpression> keyer;
+    };
 };
 
 

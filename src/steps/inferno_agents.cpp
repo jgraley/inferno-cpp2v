@@ -8,6 +8,8 @@
 #include "sr/link.hpp"
 #include "sr/sym/primary_expressions.hpp"
 #include "sr/sym/result.hpp"
+#include "sr/sym/overloads.hpp"
+#include "sr/sym/boolean_operators.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;
@@ -212,27 +214,24 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
     return pq;
 }
 
+    
+SYM::Over<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() const                                      
+{                 
+    shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
+    PatternLink child_plink = my_pq->GetNormalLinks().front();
+    
+    SYM::Over<SYM::SymbolExpression> keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);
+    SYM::Over<SYM::SymbolExpression> child_expr = SYM::MakeOver<SYM::SymbolVariable>(child_plink);
+    
+    SYM::Over<SYM::BooleanExpression> expr = SYM::MakeOver<NestingOperator>( this, keyer_expr ) == child_expr;
+    
+    if( depth )
+        expr &= TeleportAgent::SymbolicNormalLinkedQueryPRed();
+        
+    return expr;
+}                     
 
-void NestedAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                       XLink keyer_xlink ) const                          
-{
-    INDENT("N");
-    
-    // Do the teleporty bit
-    TeleportAgent::RunDecidedQueryPRed(query, keyer_xlink);    
-    
-    string s;
-    // Keep advancing until we get nullptr, and remember the last non-null position
-    int i = 0;
-    XLink xlink = keyer_xlink;
-    while( XLink next_xlink = Advance(xlink, &s) )
-        xlink = next_xlink;
-            
-    // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( PatternLink(this, &terminus), xlink ); // Link into X
-}
 
-    
 LocatedLink NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
     LocatedLink tp_link;
@@ -289,6 +288,74 @@ Graphable::Block NestedAgent::GetGraphBlockInfo() const
                                       { link } } );
     }
     return block;
+}
+
+
+NestedAgent::NestingOperator::NestingOperator( const NestedAgent *agent_,
+                                               shared_ptr<SymbolExpression> keyer_ ) :
+    agent( agent_ ),
+    keyer( keyer_ )
+{    
+}                                                
+
+
+list<shared_ptr<SYM::SymbolExpression>> NestedAgent::NestingOperator::GetSymbolOperands() const
+{
+    return { keyer };
+}
+
+
+shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( const EvalKit &kit,
+                                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+{
+    ASSERT( op_results.size()==1 );        
+    shared_ptr<SYM::SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
+    if( !keyer_result->IsDefinedAndUnique() )
+        return make_shared<SYM::SymbolResult>( SYM::SymbolResult::UNDEFINED );
+    XLink keyer_xlink = keyer_result->GetAsXLink();
+    
+    // Keep advancing until we get nullptr, and remember the last non-null position
+    string s;
+    int i = 0;
+    XLink xlink = keyer_xlink;
+    while( XLink next_xlink = agent->Advance(xlink, &s) )
+        xlink = next_xlink;
+        
+    return make_shared<SYM::SymbolResult>( SYM::ResultInterface::DEFINED, xlink );        
+}
+
+
+Orderable::Result NestedAgent::NestingOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                                      OrderProperty order_property ) const 
+{
+    auto c = GET_THAT_POINTER(candidate);
+
+    Orderable::Result r;
+    switch( order_property )
+    {
+    case STRICT:
+        // Unique order uses address to ensure different dirty_grass sets compare differently
+        r = (int)(agent > c->agent) - (int)(agent < c->agent);
+        // Note: just subtracting could overflow
+        break;
+    case REPEATABLE:
+        // Repeatable ordering stops after name check since address compare is not repeatable
+        r = Orderable::EQUAL;
+        break;
+    }
+    return r;
+}  
+
+
+string NestedAgent::NestingOperator::Render() const
+{
+    return "Nesting<" + agent->GetName() + ">(" + keyer->Render() + ")"; 
+}
+
+
+SYM::Expression::Precedence NestedAgent::NestingOperator::GetPrecedence() const
+{
+    return Precedence::PREFIX;
 }
 
 //---------------------------------- NestedArrayAgent ------------------------------------    
