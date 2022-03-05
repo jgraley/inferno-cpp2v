@@ -26,9 +26,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       XLink x ) const;                                    
                                                                
-    virtual bool ImplHasSNLQ() const;
-    virtual void RunNormalLinkedQueryImpl( const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                                                                        
+    virtual bool ImplHasSNLQ() const;                                                                                     
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
 
     virtual Block GetGraphBlockInfo() const;
@@ -42,6 +40,24 @@ private:
     virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
     shared_ptr< Collection<Node> > options;
+
+    class NonMMAXOperator : public SYM::SymbolToBooleanExpression
+    {
+    public:    
+        typedef BooleanExpression NominalType;
+        explicit NonMMAXOperator( shared_ptr<SYM::SymbolExpression> keyer,
+                                  list<shared_ptr<SYM::SymbolExpression>> disjuncts  ); 
+        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
+                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+
+        virtual string Render() const override;
+        virtual Precedence GetPrecedence() const override;
+        
+    protected:
+        shared_ptr<SYM::SymbolExpression> keyer;
+        list<shared_ptr<SYM::SymbolExpression>> disjuncts;
+    };
 };
 
 

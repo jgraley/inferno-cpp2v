@@ -52,7 +52,7 @@ void TruthTableSolver::PreSolve()
     PopulateInitial();
     
     s += truth_table->Render( {}, label_var_name, counting_based )+"\n";
-    FTRACE(s);
+    //FTRACE(s);
 }
 
 
