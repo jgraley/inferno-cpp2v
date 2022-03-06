@@ -18,11 +18,8 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
-                                         XLink keyer_xlink ) const
+LocatedLink TeleportAgent::TeleportUniqueAndCache( XLink keyer_xlink ) const
 {
-    INDENT("T");
-    
     auto op = [&](XLink keyer_xlink) -> LocatedLink
     {
         LocatedLink tp_link = RunTeleportQuery( keyer_xlink );
@@ -35,9 +32,7 @@ void TeleportAgent::RunDecidedQueryPRed( DecidedQueryAgentInterface &query,
         return ude_link;
     };
     
-    LocatedLink cached_link = cache( keyer_xlink, op );
-    if( cached_link )
-        query.RegisterNormalLink( (PatternLink)cached_link, (XLink)cached_link );
+    return cache( keyer_xlink, op );
 }                                    
 
 
@@ -65,11 +60,9 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &keyer_
 
         try
         {
-            shared_ptr<DecidedQuery> query = CreateDecidedQuery();
-            RunDecidedQueryPRed( *query, keyer_xlink );
-           
-            for( LocatedLink extra_link : query->GetNormalLinks() )
-                extra_xlinks.insert( (XLink)extra_link );
+            LocatedLink cached_link = TeleportUniqueAndCache( keyer_xlink );
+            if( cached_link )
+                extra_xlinks.insert( (XLink)cached_link );
         }
         catch( ::Mismatch & ) {}
     }
@@ -106,19 +99,7 @@ shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     if( !keyer_result->IsDefinedAndUnique() )
         return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
     XLink keyer_xlink = keyer_result->GetAsXLink();
-    
-    auto op = [&](XLink keyer_xlink) -> LocatedLink
-    {
-        LocatedLink tp_link = agent->RunTeleportQuery( keyer_xlink );
-        if( !tp_link )
-            return tp_link;
-        
-        // We will uniquify the link against the domain and then cache it against keyer_xlink
-        LocatedLink ude_link( (PatternLink)tp_link, agent->master_scr_engine->UniquifyDomainExtension(tp_link) );                    
-        return ude_link;
-    };
-    
-    LocatedLink cached_link = agent->cache( keyer_xlink, op );        
+    LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink );        
     if( (XLink)cached_link )
         return make_shared<SymbolResult>( ResultInterface::DEFINED, (XLink)cached_link );
     else 
