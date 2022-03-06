@@ -61,7 +61,7 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
     }
     else
     {
-        non_mmax_case_expr = MakeOver<NonMMAXOperator>( keyer_expr, disjunct_exprs );
+        non_mmax_case_expr = MakeOver<NonMMAXCaseOperator>( keyer_expr, disjunct_exprs );
     }
         
     non_mmax_case_expr &= SymbolicPreRestriction(); // Don't forget the pre-restriction, applies in non-MMAX-keyer case
@@ -105,7 +105,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 }
 
 
-DisjunctionAgent::NonMMAXOperator::NonMMAXOperator( shared_ptr<SYM::SymbolExpression> keyer_,
+DisjunctionAgent::NonMMAXCaseOperator::NonMMAXCaseOperator( shared_ptr<SYM::SymbolExpression> keyer_,
                                                     list<shared_ptr<SYM::SymbolExpression>> disjuncts_ ) :
     keyer( keyer_ ),
     disjuncts( disjuncts_ )
@@ -113,7 +113,7 @@ DisjunctionAgent::NonMMAXOperator::NonMMAXOperator( shared_ptr<SYM::SymbolExpres
 }                                                
 
 
-list<shared_ptr<SymbolExpression>> DisjunctionAgent::NonMMAXOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> DisjunctionAgent::NonMMAXCaseOperator::GetSymbolOperands() const
 {
     list<shared_ptr<SymbolExpression>> l{ keyer };
     l = l + disjuncts;
@@ -121,7 +121,7 @@ list<shared_ptr<SymbolExpression>> DisjunctionAgent::NonMMAXOperator::GetSymbolO
 }
 
 
-shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXCaseOperator::Evaluate( const EvalKit &kit,
                                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()>=1 );        
@@ -169,16 +169,16 @@ shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXOperator::Evaluate( 
 }
 
 
-string DisjunctionAgent::NonMMAXOperator::Render() const
+string DisjunctionAgent::NonMMAXCaseOperator::RenderNF() const
 {
     list<string> ls;
     for( shared_ptr<SymbolExpression> d : disjuncts )
         ls.push_back( RenderForMe(d) );
-    return "NonMMAX(" + keyer->Render() + ": " + Join(ls, ", ") + ")"; 
+    return "DisjunctionNonMMAXCase(" + keyer->Render() + ": " + Join(ls, ", ") + ")"; 
 }
 
 
-Expression::Precedence DisjunctionAgent::NonMMAXOperator::GetPrecedence() const
+Expression::Precedence DisjunctionAgent::NonMMAXCaseOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

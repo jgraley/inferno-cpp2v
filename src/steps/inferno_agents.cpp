@@ -118,11 +118,11 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
 {
     auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);
-    return SYM::MakeOver<IdentifierByNameOperator>(name, keyer_expr);
+    return SYM::MakeOver<IsIdentifierNamedOperator>(name, keyer_expr);
 }
 
 
-IdentifierByNameAgent::IdentifierByNameOperator::IdentifierByNameOperator( string name_,
+IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( string name_,
                                                                            shared_ptr<SYM::SymbolExpression> a_ ) :
     a( a_ ),
     name( name_ )
@@ -130,13 +130,13 @@ IdentifierByNameAgent::IdentifierByNameOperator::IdentifierByNameOperator( strin
 }                                                
 
 
-list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IdentifierByNameOperator::GetSymbolOperands() const
+list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IsIdentifierNamedOperator::GetSymbolOperands() const
 {
     return { a };
 }
 
 
-shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IdentifierByNameOperator::Evaluate( const EvalKit &kit,
+shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
                                                                                           const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -159,7 +159,7 @@ shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IdentifierByNameO
 }
 
 
-Orderable::Result IdentifierByNameAgent::IdentifierByNameOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Result IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                                       OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -167,13 +167,13 @@ Orderable::Result IdentifierByNameAgent::IdentifierByNameOperator::OrderCompareL
 }  
 
 
-string IdentifierByNameAgent::IdentifierByNameOperator::Render() const
+string IdentifierByNameAgent::IsIdentifierNamedOperator::RenderNF() const
 {
-    return "IdentifierByName<\"" + name  + "\">(" + a->Render() + ")"; 
+    return "IsIdentifierNamed<\"" + name  + "\">(" + a->Render() + ")"; 
 }
 
 
-SYM::Expression::Precedence IdentifierByNameAgent::IdentifierByNameOperator::GetPrecedence() const
+SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

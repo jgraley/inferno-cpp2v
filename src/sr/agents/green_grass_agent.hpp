@@ -20,7 +20,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
     virtual Block GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;
 
-    class IsGreenGrassOperator : public SYM::SymbolToBooleanExpression
+    class IsGreenGrassOperator : public SYM::PredicateOperator
     {
     public:    
         typedef BooleanExpression NominalType;
@@ -33,8 +33,8 @@ class GreenGrassAgent : public virtual ColocatedAgent
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;
 
-        virtual string Render() const override;
-        virtual Precedence GetPrecedence() const override;
+        virtual string RenderNF() const override;
+        virtual Precedence GetPrecedenceNF() const override;
         
     protected:
         const shared_ptr<SYM::SymbolExpression> a;

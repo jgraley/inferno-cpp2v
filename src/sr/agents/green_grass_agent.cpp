@@ -98,13 +98,13 @@ Orderable::Result GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( cons
 }  
 
 
-string GreenGrassAgent::IsGreenGrassOperator::Render() const
+string GreenGrassAgent::IsGreenGrassOperator::RenderNF() const
 {
     return "IsGreenGrass<" + SSPrintf("%p", dirty_grass)  + ">(" + a->Render() + ")"; 
 }
 
 
-Expression::Precedence GreenGrassAgent::IsGreenGrassOperator::GetPrecedence() const
+Expression::Precedence GreenGrassAgent::IsGreenGrassOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

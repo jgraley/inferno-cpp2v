@@ -5,6 +5,7 @@
 #include "../search_replace.hpp"
 #include "../boolean_evaluator.hpp"
 #include "standard_agent.hpp"
+#include "../sym/predicate_operators.hpp"
 
 namespace SR
 {
@@ -38,18 +39,18 @@ private:
                                Phase phase );
     shared_ptr< Collection<Node> > options;
 
-    class NonMMAXOperator : public SYM::SymbolToBooleanExpression
+    class NonMMAXCaseOperator : public SYM::PredicateOperator
     {
     public:    
         typedef BooleanExpression NominalType;
-        explicit NonMMAXOperator( shared_ptr<SYM::SymbolExpression> keyer,
+        explicit NonMMAXCaseOperator( shared_ptr<SYM::SymbolExpression> keyer,
                                   list<shared_ptr<SYM::SymbolExpression>> disjuncts  ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
-        virtual string Render() const override;
-        virtual Precedence GetPrecedence() const override;
+        virtual string RenderNF() const override;
+        virtual Precedence GetPrecedenceNF() const override;
         
     protected:
         shared_ptr<SYM::SymbolExpression> keyer;

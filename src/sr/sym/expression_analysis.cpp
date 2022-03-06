@@ -31,7 +31,7 @@ void ExpressionWalker::operator()( shared_ptr<Expression> expr, bool is_root )
 
 // -------------------------- PredicateAnalysis ----------------------------    
 
-void PredicateAnalysis::CheckRegularPredicateForm( shared_ptr<Expression> expr )
+void PredicateAnalysis::CheckRegularPredicateForm( shared_ptr<Expression> main_expr )
 {
     ExpressionWalker w( true, [&](shared_ptr<Expression> expr) -> bool
     {
@@ -59,11 +59,18 @@ void PredicateAnalysis::CheckRegularPredicateForm( shared_ptr<Expression> expr )
             CheckNoPredicatesUnder(pred_expr); // no predicates underneath
             return false; // No need to recurse since we just did that
         }
+        else
+        {
+            // Check 2 things:
+            // 1. symbol-to-boolean should be a predicate
+            // 2. since we don't recurse under preds, we should never meet symbol-to-symbol
+            ASSERT( !got_sym_ops )(expr->Render())("\nin\n")(main_expr->Render());           
+        }
         
         return true;
     } );
 
-    w(expr);
+    w(main_expr);
 }
 
 

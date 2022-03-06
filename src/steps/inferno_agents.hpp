@@ -112,11 +112,11 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
 
     string name;
 
-    class IdentifierByNameOperator : public SYM::SymbolToBooleanExpression
+    class IsIdentifierNamedOperator : public SYM::PredicateOperator
     {
     public:    
         typedef BooleanExpression NominalType;
-        explicit IdentifierByNameOperator( string name,
+        explicit IsIdentifierNamedOperator( string name,
                                            shared_ptr<SYM::SymbolExpression> a); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
@@ -125,8 +125,8 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;
 
-        virtual string Render() const override;
-        virtual Precedence GetPrecedence() const override;
+        virtual string RenderNF() const override;
+        virtual Precedence GetPrecedenceNF() const override;
         
     protected:
         const shared_ptr<SYM::SymbolExpression> a;
