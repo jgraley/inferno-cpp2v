@@ -42,7 +42,6 @@ public:
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
-    static bool use_csp_solver;
     static bool split_disjunctions;
     
 private:

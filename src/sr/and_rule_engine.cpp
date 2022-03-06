@@ -138,9 +138,6 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     solver->Dump();    
     solver->CheckPlan();   
 
-    // For old solver only...
-    conj = make_shared<Conjecture>(my_normal_agents, root_agent);       
-
     // ------------------ Configure subordinates ---------------------
     // Do this last to keep all the rest of the planning trace/dumps
     // all together in the same pre-order sequence instead of mixed pre 
@@ -571,61 +568,6 @@ void AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
 }
 
 
-void AndRuleEngine::CompareLinks( Agent *agent,
-                                  shared_ptr<const DecidedQuery> query ) 
-{    
-    // Couplings require links in the same order as during planning (i.e. 
-    // pattern query order) so that keyers act before restricters (I think...)
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    for( PatternLink plink : pq->GetNormalLinks() )    
-    {
-        LocatedLink link( plink, query->GetNormalLinks().at(plink) );
-
-#ifdef CHECK_EVERYTHING_IS_IN_DOMAIN    
-        ASSERT( knowledge->domain.count(link) > 0 )(link)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
-#endif
-
-        TRACE("Comparing normal link ")(link)("\n");
-        ASSERT( link.GetChildX() );
-                             
-        DecidedCompare(link);      
-    }
-}
-
-
-void AndRuleEngine::DecidedCompare( LocatedLink link )  
-{
-    INDENT("D");
-    ASSERT( link.GetChildAgent() ); // Pattern must not be nullptr
-    ASSERT( link.GetChildX() ); // Target must not be nullptr
-     
-    InsertSolo( basic_solution, link );        
-    SolutionMap combined_solution = UnionOfSolo( *master_solution,
-                                                 basic_solution );
-    Agent * const agent = link.GetChildAgent();
-    
-    // NOTE: Probable bug in couplings algo, see #315
-    if( plan.coupling_residual_links.count( (PatternLink)link ) > 0 ||
-        plan.my_master_boundary_links.count( (PatternLink)link ) > 0 )
-    {
-        agent->RunCouplingQuery( &combined_solution );
-    }
-    else
-    {                                 
-        // Obtain the query state from the conjecture
-        shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
-
-        // Run the compare implementation to get the links based on the choices
-        TRACE("RunDecidedQuery() with ")(link)("\n");     
-        //agent->RunDecidedQuery( *query, link );
-        TRACE("Normal ")(query->GetNormalLinks())("\n")
-             ("Abormal ")(query->GetAbnormalLinks())("\n")
-             ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
-        CompareLinks( agent, query );
-    }
-}
-
-
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
                                            const SolutionMap *solution_for_subordinates, 
                                            const SolutionMap *solution_for_evaluators ) 
@@ -804,7 +746,6 @@ void AndRuleEngine::RegenerationPass()
 }
 
 
-// This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( XLink root_xlink,
                              const SolutionMap *master_solution_,
                              const TheKnowledge *knowledge_ )
@@ -825,10 +766,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
         ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
                      
-    if( ReadArgs::use_csp_solver )
-        StartCSPSolver( root_xlink );
-    else
-        plan.conj->Start();
+    StartCSPSolver( root_xlink );
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -837,20 +775,10 @@ void AndRuleEngine::Compare( XLink root_xlink,
     {
         basic_solution.clear();
         // Get a solution from the solver
-        if( ReadArgs::use_csp_solver )        
-            GetNextCSPSolution(root_link);        
+        GetNextCSPSolution(root_link);        
 
         try
         {
-            if( !ReadArgs::use_csp_solver )
-            {
-                // Try out the current conjecture. This will call RegisterDecision() once for each decision;
-                // RegisterDecision() will return the current choice for that decision, if absent it will
-                // add the decision and choose the first choice, if the decision reaches the end it
-                // will remove the decision.    
-                DecidedCompare( root_link );       
-            }
-
             // Is the solution complete? 
             for( auto plink : plan.my_normal_links )
             {            
@@ -860,29 +788,13 @@ void AndRuleEngine::Compare( XLink root_xlink,
         }
         catch( const ::Mismatch& e )
         {                
-            if( ReadArgs::use_csp_solver )
-            {
-                TRACE(e)(" after recursion, trying next solution\n");
-                continue; // Get another solution from the solver
-            }
-            else
-            {
-                TRACE(e)(" after recursion, trying increment conjecture\n");
-                if( plan.conj->Increment() )
-                    continue; // Conjecture would like us to try again with new choices
-                    
-                plan.conj->Reset();
-                // We didn't match and we've run out of choices, so we're done.              
-                throw NoSolution();
-            }
+            TRACE(e)(" after recursion, trying next solution\n");
+            continue; // Get another solution from the solver
         }
         // We got a match so we're done. 
         TRACE("AndRuleEngine hit\n");
         break; // Success
     }
-    
-    if( !ReadArgs::use_csp_solver )
-        plan.conj->Reset();
     
     // By now, we succeeded and slave_keys is the right set of keys
 }
