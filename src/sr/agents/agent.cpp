@@ -11,7 +11,6 @@
 #include "tree/cpptree.hpp"
 
 #include "transform_of_agent.hpp"
-#include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/primary_expressions.hpp"

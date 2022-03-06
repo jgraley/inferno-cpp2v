@@ -1,7 +1,6 @@
 #include "colocated_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
-#include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/primary_expressions.hpp"

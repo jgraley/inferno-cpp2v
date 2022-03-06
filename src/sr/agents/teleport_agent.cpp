@@ -1,21 +1,14 @@
 #include "teleport_agent.hpp"
 
-#include "search_replace.hpp"
-#include "conjecture.hpp"
-#include "common/hit_count.hpp"
-#include "scr_engine.hpp"
-#include "and_rule_engine.hpp"
 #include "link.hpp"
 
 // Temporary
 #include "tree/cpptree.hpp"
 
 #include "transform_of_agent.hpp"
-#include "sym/lambdas.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/primary_expressions.hpp"
-#include "sym/clutch.hpp"
 #include "sym/result.hpp"
 
 #include <stdexcept>
