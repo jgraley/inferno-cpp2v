@@ -32,6 +32,7 @@ public:
     
 private:
     void PopulateInitial();
+    void ConstrainUsingDerived();
 
     // Logging
     string PredicateName(int i);

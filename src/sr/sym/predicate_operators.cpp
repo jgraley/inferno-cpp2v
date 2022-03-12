@@ -27,7 +27,20 @@ shared_ptr<BooleanResultInterface> PredicateOperator::Evaluate( const EvalKit &k
         return locked_result;
 
     return Parent::Evaluate( kit );
-}                                             
+}
+
+
+shared_ptr<PredicateOperator> PredicateOperator::TryDerive( shared_ptr<PredicateOperator> other ) const
+{
+    return nullptr;
+}
+
+
+shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                                shared_ptr<SymbolExpression> with ) const
+{
+    return nullptr;
+}                                                                
 
 
 string PredicateOperator::Render() const 
@@ -67,7 +80,7 @@ list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
-                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
     for( shared_ptr<SymbolResultInterface> ra : op_results )
@@ -106,6 +119,28 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
     
     return nullptr;
 }
+
+
+shared_ptr<PredicateOperator> EqualOperator::TryDerive( shared_ptr<PredicateOperator> other ) const
+{
+    shared_ptr<PredicateOperator> sub = other->TrySubstitute( a, b );
+    if( sub )
+        return sub;
+
+    sub = other->TrySubstitute( b, a );
+    return sub;        
+}
+
+
+shared_ptr<PredicateOperator> EqualOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                            shared_ptr<SymbolExpression> with ) const
+{
+    if( OrderCompare( over, a ) == EQUAL )
+        return make_shared<EqualOperator>( with, b );
+    if( OrderCompare( over, b ) == EQUAL )
+        return make_shared<EqualOperator>( a, with );
+    return nullptr;
+}                                                                
 
 
 string EqualOperator::RenderNF() const
@@ -471,7 +506,7 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 
 
 shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &kit,
-                                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
@@ -486,6 +521,17 @@ shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &
     bool res = ( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL );
     return make_shared<BooleanResult>( BooleanResult::DEFINED, res );    
 }
+
+
+shared_ptr<PredicateOperator> EquivalentOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                                 shared_ptr<SymbolExpression> with ) const
+{
+    if( OrderCompare( over, a ) == EQUAL )
+        return make_shared<EquivalentOperator>( with, b );
+    if( OrderCompare( over, b ) == EQUAL )
+        return make_shared<EquivalentOperator>( a, with );
+    return nullptr;
+}                                                                
 
 
 string EquivalentOperator::RenderNF() const

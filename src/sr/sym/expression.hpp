@@ -63,6 +63,10 @@ public:
                                            OrderProperty order_property = STRICT );    
     virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const override;
+    struct OrderComparer {
+        bool operator()( const shared_ptr<const Expression> &a, 
+                         const shared_ptr<const Expression> &b );
+    };
 
     virtual string Render() const = 0;    
     string RenderWithParentheses() const;

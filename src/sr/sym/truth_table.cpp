@@ -15,6 +15,14 @@ TruthTable::TruthTable( int degree_, bool initval ) :
 }
 
 
+TruthTable &TruthTable::operator=( const TruthTable &other )
+{
+    degree = other.degree;
+    cells = other.cells;
+    return *this;
+}
+
+
 void TruthTable::Set( vector<bool> full_indices, bool new_value )
 {
     cells.at( GetCellIndex(full_indices) ) = new_value;

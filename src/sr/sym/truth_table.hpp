@@ -20,8 +20,9 @@ class TruthTable
 {
 public:
     explicit TruthTable( int degree, bool initval=false );
+    TruthTable &operator=( const TruthTable &other );
 
-    // Set a single cell value given a full fector of indices    
+    // Set a single cell value given a full vector of indices    
     void Set( vector<bool> full_indices, bool new_value );
 
     // Set all cells satisfying the supplied indices. 

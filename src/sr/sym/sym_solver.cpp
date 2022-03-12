@@ -44,15 +44,19 @@ void TruthTableSolver::PreSolve()
     s += "Presolve equation: " + equation->Render() + "\n\n";
     
     predicates = PredicateAnalysis::GetPredicates( equation );
-    // Could de-duplicate? Yes, do but be careful of the forcing - they may not be different (use a std::set for equal ones)
     s += RenderPredicatesAndPredEquation()+"\n";
 
     truth_table = make_unique<TruthTable>( predicates.size(), true );
     
     PopulateInitial();
-    
+
     s += truth_table->Render( {}, label_var_name, counting_based )+"\n";
-    //FTRACE(s);
+    FTRACE(s);
+
+    ConstrainUsingDerived();
+    
+    s = truth_table->Render( {}, label_var_name, counting_based )+"\n";
+    FTRACE(s);
 }
 
 
@@ -83,6 +87,63 @@ void TruthTableSolver::PopulateInitial()
             truth_table->Set( indices, false );
     }
 }
+
+
+void TruthTableSolver::ConstrainUsingDerived()
+{
+    typedef set<int> InitialPreds;
+    typedef shared_ptr<PredicateOperator> DerivedPred;
+    map<DerivedPred, set<InitialPreds>, Expression::OrderComparer> predmap;
+    
+    for( int i=0; i<predicates.size(); i++ )
+    {
+        for( int j=0; j<predicates.size(); j++ )
+        {
+            if( i==j )
+                continue;
+
+            auto pi = FrontOf(predicates[i]);
+            auto pj = FrontOf(predicates[j]);
+            
+            // See whether a predicate can be derived from this pair 
+            shared_ptr<PredicateOperator> pop = pi->TryDerive( pj );
+            if( pop )
+            {
+                set<InitialPreds> &sip = predmap[pop];
+                sip.insert( { i, j } );
+            }
+        }
+    }
+
+    vector<pair<InitialPreds, DerivedPred>> derived_predicates;
+    for( auto p : predmap )
+    {
+        FTRACE("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
+        if( p.second.size() > 1 )
+        {
+            pair<InitialPreds, DerivedPred> pp = make_pair(FrontOf(p.second), p.first);
+            derived_predicates.push_back( pp );
+        }
+    }
+
+    truth_table->Extend( predicates.size() + derived_predicates.size() ); 
+
+    set<int> fold_axes;
+    for( int k0=0; k0<derived_predicates.size(); k0++ )
+    {
+        int k = predicates.size() + k0;
+        set<int>::iterator it = derived_predicates[k0].first.begin();
+        int i = *(it++);
+        int j = *(it++);
+        ASSERT( it == derived_predicates[k0].first.end() );
+        truth_table->SetSlice( {{i, true}, {j, true}, {k, false}}, false );
+
+        fold_axes.insert(k);
+    }
+
+    *truth_table = truth_table->GetFolded( fold_axes, false );
+}
+
 
 
 string TruthTableSolver::PredicateName(int j)

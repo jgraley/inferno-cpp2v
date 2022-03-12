@@ -26,13 +26,15 @@ public:
 
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
 
+    virtual shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const;
+    virtual shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                         shared_ptr<SymbolExpression> with ) const;
     string Render() const override final;
     Precedence GetPrecedence() const override final;
         
     // Methods to use if not forced
     virtual string RenderNF() const = 0;    
     virtual Precedence GetPrecedenceNF() const = 0;
-
     
 private:    
     weak_ptr<BooleanResultInterface> force_result;
@@ -49,15 +51,18 @@ public:
     typedef BooleanExpression NominalType;
     explicit EqualOperator( shared_ptr<SymbolExpression> a, 
                             shared_ptr<SymbolExpression> b );
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
+                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+    shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;
-
-    virtual string RenderNF() const override;
-    virtual Precedence GetPrecedenceNF() const override;
+    shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const override;
+    shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                 shared_ptr<SymbolExpression> with ) const override;
+                                                         
+    string RenderNF() const override;
+    Precedence GetPrecedenceNF() const override;
     
 private:
     const shared_ptr<SymbolExpression> a;
@@ -217,6 +222,8 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+    shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                 shared_ptr<SymbolExpression> with ) const override;
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
     

@@ -65,6 +65,14 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
 }
 
 
+bool Expression::OrderComparer::operator()( const shared_ptr<const Expression> &a, 
+                                            const shared_ptr<const Expression> &b )
+{
+    Orderable::Result r = Expression::OrderCompare( a, b );
+    return r < Orderable::EQUAL;
+}                                      
+
+
 string Expression::RenderWithParentheses() const
 {
     return "(" + Render() + ")";

@@ -245,12 +245,32 @@ void ForOverlappingAdjacentPairs( const T &container,
 template<typename T>
 void ForAllCommutativeDistinctPairs( const T &container, 
                                      function<void(const typename T::value_type &first, 
-                                                   const typename T::value_type &second)> func) 
+                                                   const typename T::value_type &second)> func ) 
 {
 	for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
     {
         // Starting at oit gets us "Commutative"
         for( typename T::const_iterator iit=oit; iit != container.end(); ++iit )
+        {
+            if( oit != iit ) // Gets us "Distinct"
+                func( *iit, *oit );
+ 		}
+	}
+}
+
+
+// Acting on a container such as [1, 2, 3], will call func with 
+// (1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2), i.e. n(n-1) iterations.
+// No iterations if size() is 0 or 1.
+template<typename T>
+void ForAllDistinctPairs( const T &container, 
+                          function<void(const typename T::value_type &first, 
+                                        const typename T::value_type &second)> func ) 
+{
+	for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
+    {
+        // Starting at oit gets us "Commutative"
+        for( typename T::const_iterator iit=container.begin(); iit != container.end(); ++iit )
         {
             if( oit != iit ) // Gets us "Distinct"
                 func( *iit, *oit );

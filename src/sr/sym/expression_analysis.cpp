@@ -86,16 +86,6 @@ void PredicateAnalysis::CheckNoPredicatesUnder( shared_ptr<Expression> expr )
 }
 
 
-struct ExpressionOrderComparer {
-    bool operator()( const shared_ptr<const Expression> &a, 
-                     const shared_ptr<const Expression> &b )
-    {
-        Orderable::Result r = Expression::OrderCompare( a, b );
-        return r < Orderable::EQUAL;
-    }                                      
-};
-
-
 vector< set<shared_ptr<PredicateOperator>> > PredicateAnalysis::GetPredicates( shared_ptr<Expression> expr )
 {
     set<shared_ptr<PredicateOperator>> preds_unique_by_ptr;
@@ -119,7 +109,7 @@ vector< set<shared_ptr<PredicateOperator>> > PredicateAnalysis::GetPredicates( s
     // Move into a data structure that can differentiate by expression equality 
     map< shared_ptr<PredicateOperator>, 
          set<shared_ptr<PredicateOperator>>, 
-         ExpressionOrderComparer > preds_grouped_by_equality;
+         Expression::OrderComparer > preds_grouped_by_equality;
     for( shared_ptr<PredicateOperator> pred : preds_unique_by_ptr )
         preds_grouped_by_equality[pred].insert(pred);
     
