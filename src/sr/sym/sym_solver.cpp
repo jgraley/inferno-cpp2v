@@ -51,12 +51,12 @@ void TruthTableSolver::PreSolve()
     PopulateInitial();
 
     s += truth_table->Render( {}, label_var_name, counting_based )+"\n";
-    FTRACE(s);
+    TRACE(s);
 
     ConstrainUsingDerived();
     
     s = truth_table->Render( {}, label_var_name, counting_based )+"\n";
-    FTRACE(s);
+    TRACE(s);
 }
 
 
@@ -118,7 +118,7 @@ void TruthTableSolver::ConstrainUsingDerived()
     vector<pair<InitialPreds, DerivedPred>> derived_predicates;
     for( auto p : predmap )
     {
-        FTRACE("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
+        TRACE("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
         if( p.second.size() > 1 )
         {
             pair<InitialPreds, DerivedPred> pp = make_pair(FrontOf(p.second), p.first);

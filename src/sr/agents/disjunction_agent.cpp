@@ -129,43 +129,24 @@ shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXCaseOperator::Evalua
     list<shared_ptr<SymbolResultInterface>> disjunct_results = op_results;
     disjunct_results.pop_front();
     
-    list<XLink> non_mmax_disjuncts;
+    if( !keyer_result->IsDefinedAndUnique() )
+        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+    XLink keyer_xlink = keyer_result->GetAsXLink();
+
+    int num_keyer_disjuncts = 0;
     for( shared_ptr<SymbolResultInterface> dr : disjunct_results )
     {
         if( !dr->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
         XLink xlink = dr->GetAsXLink(); 
-        if( xlink != XLink::MMAX_Link )
-            non_mmax_disjuncts.push_back( xlink );
+        if( xlink != XLink::MMAX_Link && xlink != keyer_xlink )
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+        num_keyer_disjuncts += (xlink == keyer_xlink);
     }
 
     // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
     // It should be 1.
-    switch( non_mmax_disjuncts.size() )
-    {
-    case 0:
-        // All were MMAX
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
-        break;        
-        
-    case 1:
-        {
-            // This is the correct number of non-MMAX. If we have a base, check against it.
-            if( !keyer_result->IsDefinedAndUnique() )
-                return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
-            XLink keyer_xlink = keyer_result->GetAsXLink();
-
-            XLink taken_option_x_link = OnlyElementOf(non_mmax_disjuncts);
-            bool r = ( taken_option_x_link == keyer_xlink );
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, r );
-            break;        
-        }
-        
-    default: // 2 or more
-        // It's never OK to have more than one non-MMAX (strict MMAX rules).
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
-        break;
-    }
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, num_keyer_disjuncts==1 );
 }
 
 
