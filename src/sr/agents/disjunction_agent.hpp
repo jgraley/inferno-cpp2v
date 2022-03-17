@@ -39,11 +39,11 @@ private:
                                Phase phase );
     shared_ptr< Collection<Node> > options;
 
-    class NonMMAXCaseOperator : public SYM::PredicateOperator
+    class WideMainOperator : public SYM::PredicateOperator
     {
     public:    
         typedef BooleanExpression NominalType;
-        explicit NonMMAXCaseOperator( shared_ptr<SYM::SymbolExpression> keyer,
+        explicit WideMainOperator( shared_ptr<SYM::SymbolExpression> keyer,
                                   list<shared_ptr<SYM::SymbolExpression>> disjuncts  ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,

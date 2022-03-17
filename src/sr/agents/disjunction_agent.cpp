@@ -50,25 +50,21 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
         is_mmax_exprs.push_back( disjunct_expr==mmax_expr );
         is_keyer_exprs.push_back( disjunct_expr==keyer_expr );
     }
-          
-    Over<BooleanExpression> non_mmax_case_expr;
+           
+    Over<BooleanExpression> main_expr;
     if( ReadArgs::split_disjunctions )
     {
         ASSERT( GetDisjuncts().size() == 2 )
               ("Got %d choices; to support more than 2 disjuncts, enable SplitDisjunctions; fewer than 2 not allowed", GetDisjuncts().size());
-        // This is actually the only part that's hard with more than 2 disjuncts
-        non_mmax_case_expr = is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
+        main_expr = is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
     }
     else
     {
-        non_mmax_case_expr = MakeOver<NonMMAXCaseOperator>( keyer_expr, disjunct_exprs );
+        main_expr = MakeOver<WideMainOperator>( keyer_expr, disjunct_exprs );
     }
-        
-    non_mmax_case_expr &= SymbolicPreRestriction(); // Don't forget the pre-restriction, applies in non-MMAX-keyer case
-    
-    return MakeOver<BooleanConditionalOperator>( keyer_expr == mmax_expr, 
-                                                 MakeOver<AndOperator>( is_mmax_exprs ),
-                                                 non_mmax_case_expr );
+    // Don't forget the pre-restriction, applies in non-MMAX-keyer case
+    main_expr &= SymbolicPreRestriction() | keyer_expr==mmax_expr; 
+    return main_expr;
 }
 
 
@@ -105,7 +101,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 }
 
 
-DisjunctionAgent::NonMMAXCaseOperator::NonMMAXCaseOperator( shared_ptr<SYM::SymbolExpression> keyer_,
+DisjunctionAgent::WideMainOperator::WideMainOperator( shared_ptr<SYM::SymbolExpression> keyer_,
                                                     list<shared_ptr<SYM::SymbolExpression>> disjuncts_ ) :
     keyer( keyer_ ),
     disjuncts( disjuncts_ )
@@ -113,7 +109,7 @@ DisjunctionAgent::NonMMAXCaseOperator::NonMMAXCaseOperator( shared_ptr<SYM::Symb
 }                                                
 
 
-list<shared_ptr<SymbolExpression>> DisjunctionAgent::NonMMAXCaseOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> DisjunctionAgent::WideMainOperator::GetSymbolOperands() const
 {
     list<shared_ptr<SymbolExpression>> l{ keyer };
     l = l + disjuncts;
@@ -121,7 +117,7 @@ list<shared_ptr<SymbolExpression>> DisjunctionAgent::NonMMAXCaseOperator::GetSym
 }
 
 
-shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXCaseOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResultInterface> DisjunctionAgent::WideMainOperator::Evaluate( const EvalKit &kit,
                                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()>=1 );        
@@ -134,6 +130,8 @@ shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXCaseOperator::Evalua
     XLink keyer_xlink = keyer_result->GetAsXLink();
 
     int num_keyer_disjuncts = 0;
+    int num_mmax_disjuncts = 0;
+    int num_disjuncts = 0;
     for( shared_ptr<SymbolResultInterface> dr : disjunct_results )
     {
         if( !dr->IsDefinedAndUnique() )
@@ -142,15 +140,22 @@ shared_ptr<BooleanResultInterface> DisjunctionAgent::NonMMAXCaseOperator::Evalua
         if( xlink != XLink::MMAX_Link && xlink != keyer_xlink )
             return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
         num_keyer_disjuncts += (xlink == keyer_xlink);
+        num_mmax_disjuncts += (xlink == XLink::MMAX_Link);
+        num_disjuncts++;
     }
 
     // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
     // It should be 1.
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, num_keyer_disjuncts==1 );
+    bool ok_keyer_mmax = (num_keyer_disjuncts==num_disjuncts && 
+                          num_mmax_disjuncts==num_disjuncts);
+    bool ok_keyer_non_mmax = (num_keyer_disjuncts==1 && 
+                              num_mmax_disjuncts==num_disjuncts-1);
+                          
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, ok_keyer_mmax || ok_keyer_non_mmax );
 }
 
 
-string DisjunctionAgent::NonMMAXCaseOperator::RenderNF() const
+string DisjunctionAgent::WideMainOperator::RenderNF() const
 {
     list<string> ls;
     for( shared_ptr<SymbolExpression> d : disjuncts )
@@ -159,7 +164,7 @@ string DisjunctionAgent::NonMMAXCaseOperator::RenderNF() const
 }
 
 
-Expression::Precedence DisjunctionAgent::NonMMAXCaseOperator::GetPrecedenceNF() const
+Expression::Precedence DisjunctionAgent::WideMainOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
