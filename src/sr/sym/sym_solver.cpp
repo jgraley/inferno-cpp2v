@@ -125,7 +125,8 @@ void TruthTableSolver::ConstrainUsingDerived()
             derived_predicates.push_back( pp );
         }
     }
-
+#if 0
+    TRACE("Extending truth table from %d by %d\n", predicates.size(), derived_predicates.size());
     truth_table->Extend( predicates.size() + derived_predicates.size() ); 
 
     set<int> fold_axes;
@@ -142,6 +143,7 @@ void TruthTableSolver::ConstrainUsingDerived()
     }
 
     *truth_table = truth_table->GetFolded( fold_axes, false );
+#endif    
 }
 
 

@@ -60,7 +60,11 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
     }
     else
     {
+#if 0
+        main_expr = MakeOver<WideMainBoolOperator>( is_keyer_exprs, is_mmax_exprs );
+#else
         main_expr = MakeOver<WideMainOperator>( keyer_expr, disjunct_exprs );
+#endif
     }
     // Don't forget the pre-restriction, applies in non-MMAX-keyer case
     main_expr &= SymbolicPreRestriction() | keyer_expr==mmax_expr; 
@@ -136,16 +140,16 @@ shared_ptr<BooleanResultInterface> DisjunctionAgent::WideMainOperator::Evaluate(
     {
         if( !dr->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+
         XLink xlink = dr->GetAsXLink(); 
         if( xlink != XLink::MMAX_Link && xlink != keyer_xlink )
             return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+
         num_keyer_disjuncts += (xlink == keyer_xlink);
         num_mmax_disjuncts += (xlink == XLink::MMAX_Link);
         num_disjuncts++;
     }
 
-    // Choose a checking strategy based on the number of non-MMAX residuals we saw. 
-    // It should be 1.
     bool ok_keyer_mmax = (num_keyer_disjuncts==num_disjuncts && 
                           num_mmax_disjuncts==num_disjuncts);
     bool ok_keyer_non_mmax = (num_keyer_disjuncts==1 && 
@@ -160,11 +164,89 @@ string DisjunctionAgent::WideMainOperator::RenderNF() const
     list<string> ls;
     for( shared_ptr<SymbolExpression> d : disjuncts )
         ls.push_back( RenderForMe(d) );
-    return "DisjunctionNonMMAXCase(" + keyer->Render() + ": " + Join(ls, ", ") + ")"; 
+    return "DisjunctionWideMain(" + keyer->Render() + ": " + Join(ls, ", ") + ")"; 
 }
 
 
 Expression::Precedence DisjunctionAgent::WideMainOperator::GetPrecedenceNF() const
+{
+    return Precedence::PREFIX;
+}
+
+
+
+
+
+
+
+DisjunctionAgent::WideMainBoolOperator::WideMainBoolOperator( list<shared_ptr<SYM::BooleanExpression>> is_keyer_disjuncts_,
+                                                              list<shared_ptr<SYM::BooleanExpression>> is_mmax_disjuncts_ ) :
+    num_disjuncts( is_keyer_disjuncts_.size() ),
+    is_keyer_disjuncts( is_keyer_disjuncts_ ),
+    is_mmax_disjuncts( is_mmax_disjuncts_ )
+{    
+}                                                
+
+
+list<shared_ptr<BooleanExpression>> DisjunctionAgent::WideMainBoolOperator::GetBooleanOperands() const
+{
+    list<shared_ptr<BooleanExpression>> l;
+    l = l + is_keyer_disjuncts;
+    l = l + is_mmax_disjuncts;
+    return l;
+}
+
+
+shared_ptr<BooleanResultInterface> DisjunctionAgent::WideMainBoolOperator::Evaluate( const EvalKit &kit,
+                                                                                     const list<shared_ptr<BooleanResultInterface>> &op_results ) const 
+{
+    ASSERT( op_results.size() == num_disjuncts*2 ); 
+    typedef pair<shared_ptr<BooleanResultInterface>, shared_ptr<BooleanResultInterface>> ResultPair;
+    list<ResultPair> zipped_results;
+    list<shared_ptr<BooleanResultInterface>>::const_iterator keyer_it = op_results.begin(), mmax_it = op_results.begin();
+    for( int i=0; i<num_disjuncts; i++ )
+        mmax_it++; // move mit to the MMAX results    
+    for( int i=0; i<num_disjuncts; i++ )    
+        zipped_results.push_back( make_pair(*keyer_it++, *mmax_it++) );
+    ASSERT( mmax_it == op_results.end() );
+    
+    int num_keyer_disjuncts = 0;
+    int num_mmax_disjuncts = 0;
+    for( const ResultPair &p : zipped_results )
+    {
+        if( !p.first->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        if( !p.second->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+            
+        if( !p.first->GetAsBool() && !p.second->GetAsBool() )
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+
+        num_mmax_disjuncts += p.first->GetAsBool() ? 1 : 0;
+        num_keyer_disjuncts += p.second->GetAsBool() ? 1 : 0;    
+    }
+
+    bool ok_keyer_mmax = (num_keyer_disjuncts==num_disjuncts && 
+                          num_mmax_disjuncts==num_disjuncts);
+    bool ok_keyer_non_mmax = (num_keyer_disjuncts==1 && 
+                              num_mmax_disjuncts==num_disjuncts-1);
+                          
+    return make_shared<BooleanResult>( BooleanResult::DEFINED, ok_keyer_mmax || ok_keyer_non_mmax );
+}
+
+
+string DisjunctionAgent::WideMainBoolOperator::Render() const
+{
+    list<string> kls, mls;
+    for( shared_ptr<Expression> d : is_keyer_disjuncts )
+        kls.push_back( RenderForMe(d) );
+    for( shared_ptr<Expression> d : is_mmax_disjuncts )
+        mls.push_back( RenderForMe(d) );
+    return "DisjunctionWideMainBool(" + Join(kls, ", ") + ": " + Join(mls, ", ") + ")"; 
+}
+
+
+Expression::Precedence DisjunctionAgent::WideMainBoolOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }

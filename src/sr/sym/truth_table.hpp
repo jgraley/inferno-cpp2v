@@ -59,7 +59,8 @@ public:
     string Render( set<int> column_axes, string label_var_name, int counting_based ) const; 
      
 private:
-    int GetCellIndex( vector<bool> full_indices ) const;
+    typedef vector<bool>::size_type SizeType;
+    SizeType GetCellIndex( vector<bool> full_indices ) const;
 
     int degree;
     vector<bool> cells;

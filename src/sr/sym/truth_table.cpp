@@ -10,7 +10,7 @@ using namespace SYM;
 TruthTable::TruthTable( int degree_, bool initval ) :
     degree( degree_ )
 {
-    int ncells = 1 << degree;
+    SizeType ncells = (SizeType)1 << degree;
     cells.resize(ncells, initval);
 }
 
@@ -88,17 +88,18 @@ void TruthTable::SetSlice( map<int, bool> fixed_map, const TruthTable &new_value
 
 void TruthTable::Extend( int new_degree )
 {
-    int new_ncells = 1 << new_degree;
+    SizeType new_ncells = (SizeType)1 << new_degree;
     cells.resize(new_ncells);
 
     for( int axis=degree; axis<new_degree; axis++ )
     {
-        int ncells = 1 << degree;
+        SizeType ncells = (SizeType)1 << axis;
         copy( cells.begin(),
               cells.begin()+ncells,
               cells.begin()+ncells );
-        degree++;                  
     }
+    
+    degree = new_degree;
 }
 
 
@@ -330,12 +331,12 @@ string TruthTable::Render( set<int> column_axes, string label_var_name, int coun
 
 
 
-int TruthTable::GetCellIndex( vector<bool> full_indices ) const
+TruthTable::SizeType TruthTable::GetCellIndex( vector<bool> full_indices ) const
 {
     ASSERT( full_indices.size() == degree );
-    int cindex = 0;
+    SizeType cindex = 0;
     for( int j=0; j<full_indices.size(); j++ )
-        cindex |= (full_indices.at(j)?1:0) << j;
+        cindex |= (SizeType)(full_indices.at(j)?1:0) << j;
     return cindex;
 }
 
