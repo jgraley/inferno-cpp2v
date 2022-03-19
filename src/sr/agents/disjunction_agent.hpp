@@ -38,24 +38,6 @@ private:
     virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
     shared_ptr< Collection<Node> > options;
-
-    class WideMainOperator : public SYM::PredicateOperator
-    {
-    public:    
-        typedef BooleanExpression NominalType;
-        explicit WideMainOperator( shared_ptr<SYM::SymbolExpression> keyer,
-                                  list<shared_ptr<SYM::SymbolExpression>> disjuncts  ); 
-        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
-        virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
-
-        virtual string RenderNF() const override;
-        virtual Precedence GetPrecedenceNF() const override;
-        
-    protected:
-        shared_ptr<SYM::SymbolExpression> keyer;
-        list<shared_ptr<SYM::SymbolExpression>> disjuncts;
-    };
     
     class WideMainBoolOperator : public SYM::BooleanToBooleanExpression
     {

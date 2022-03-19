@@ -60,11 +60,7 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
     }
     else
     {
-#if 1
         main_expr = MakeOver<WideMainBoolOperator>( is_keyer_exprs, is_mmax_exprs );
-#else
-        main_expr = MakeOver<WideMainOperator>( keyer_expr, disjunct_exprs );
-#endif
     }
     // Don't forget the pre-restriction, applies in non-MMAX-keyer case
     main_expr &= SymbolicPreRestriction() | keyer_expr==mmax_expr; 
@@ -103,80 +99,6 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 
     return block;
 }
-
-
-DisjunctionAgent::WideMainOperator::WideMainOperator( shared_ptr<SYM::SymbolExpression> keyer_,
-                                                    list<shared_ptr<SYM::SymbolExpression>> disjuncts_ ) :
-    keyer( keyer_ ),
-    disjuncts( disjuncts_ )
-{    
-}                                                
-
-
-list<shared_ptr<SymbolExpression>> DisjunctionAgent::WideMainOperator::GetSymbolOperands() const
-{
-    list<shared_ptr<SymbolExpression>> l{ keyer };
-    l = l + disjuncts;
-    return l;
-}
-
-
-shared_ptr<BooleanResultInterface> DisjunctionAgent::WideMainOperator::Evaluate( const EvalKit &kit,
-                                                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
-{
-    ASSERT( op_results.size()>=1 );        
-    shared_ptr<SymbolResultInterface> keyer_result = op_results.front();
-    list<shared_ptr<SymbolResultInterface>> disjunct_results = op_results;
-    disjunct_results.pop_front();
-    
-    if( !keyer_result->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
-    XLink keyer_xlink = keyer_result->GetAsXLink();
-
-    int num_keyer_disjuncts = 0;
-    int num_mmax_disjuncts = 0;
-    int num_disjuncts = 0;
-    for( shared_ptr<SymbolResultInterface> dr : disjunct_results )
-    {
-        if( !dr->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
-
-        XLink xlink = dr->GetAsXLink(); 
-        if( xlink != XLink::MMAX_Link && xlink != keyer_xlink )
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
-
-        num_keyer_disjuncts += (xlink == keyer_xlink);
-        num_mmax_disjuncts += (xlink == XLink::MMAX_Link);
-        num_disjuncts++;
-    }
-
-    bool ok_keyer_mmax = (num_keyer_disjuncts==num_disjuncts && 
-                          num_mmax_disjuncts==num_disjuncts);
-    bool ok_keyer_non_mmax = (num_keyer_disjuncts==1 && 
-                              num_mmax_disjuncts==num_disjuncts-1);
-                          
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, ok_keyer_mmax || ok_keyer_non_mmax );
-}
-
-
-string DisjunctionAgent::WideMainOperator::RenderNF() const
-{
-    list<string> ls;
-    for( shared_ptr<SymbolExpression> d : disjuncts )
-        ls.push_back( RenderForMe(d) );
-    return "DisjunctionWideMain(" + keyer->Render() + ": " + Join(ls, ", ") + ")"; 
-}
-
-
-Expression::Precedence DisjunctionAgent::WideMainOperator::GetPrecedenceNF() const
-{
-    return Precedence::PREFIX;
-}
-
-
-
-
-
 
 
 DisjunctionAgent::WideMainBoolOperator::WideMainBoolOperator( list<shared_ptr<SYM::BooleanExpression>> is_keyer_disjuncts_,
