@@ -60,7 +60,7 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImp
     }
     else
     {
-#if 0
+#if 1
         main_expr = MakeOver<WideMainBoolOperator>( is_keyer_exprs, is_mmax_exprs );
 #else
         main_expr = MakeOver<WideMainOperator>( keyer_expr, disjunct_exprs );
@@ -222,8 +222,8 @@ shared_ptr<BooleanResultInterface> DisjunctionAgent::WideMainBoolOperator::Evalu
         if( !p.first->GetAsBool() && !p.second->GetAsBool() )
             return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
 
-        num_mmax_disjuncts += p.first->GetAsBool() ? 1 : 0;
-        num_keyer_disjuncts += p.second->GetAsBool() ? 1 : 0;    
+        num_keyer_disjuncts += p.first->GetAsBool() ? 1 : 0;
+        num_mmax_disjuncts += p.second->GetAsBool() ? 1 : 0;    
     }
 
     bool ok_keyer_mmax = (num_keyer_disjuncts==num_disjuncts && 
