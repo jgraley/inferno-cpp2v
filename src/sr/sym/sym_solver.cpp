@@ -96,10 +96,6 @@ void TruthTableSolver::ConstrainUsingDerived()
     for( int i=0; i<predicates.size(); i++ )
         pred_to_index[FrontOf(predicates[i])] = i;
 
-// Confusing compiler error on pred_to_index.count(pop)==0
-#if 1
-
-
     typedef set<int> InitialPreds;
     typedef shared_ptr<PredicateOperator> DerivedPred;
     map<DerivedPred, set<InitialPreds>, Expression::OrderComparer> predmap;
@@ -177,7 +173,6 @@ void TruthTableSolver::ConstrainUsingDerived()
         }
         *truth_table = truth_table->GetFolded( fold_axes, false );
     }
-#endif    
 }
 
 
