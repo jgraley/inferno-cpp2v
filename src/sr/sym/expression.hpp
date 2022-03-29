@@ -65,7 +65,7 @@ public:
                                                     OrderProperty order_property ) const override;
     struct OrderComparer {
         bool operator()( const shared_ptr<const Expression> &a, 
-                         const shared_ptr<const Expression> &b );
+                         const shared_ptr<const Expression> &b ) const;
     };
 
     virtual string Render() const = 0;    
