@@ -126,8 +126,8 @@ string Trace(tuple<TYPES...> const & t)
 }
 
 
-template<typename T>
-string Trace(const vector<T> &l) 
+template<typename T, class A>
+string Trace(const vector<T, A> &l) 
 {
     list<string> elts;
     for( auto x : l )
@@ -136,8 +136,8 @@ string Trace(const vector<T> &l)
 }
 
 
-template<typename T>
-string Trace(const list<T> &l) 
+template<typename T, class A>
+string Trace(const list<T, A> &l) 
 {
     list<string> elts;
     for( auto x : l )
@@ -146,8 +146,8 @@ string Trace(const list<T> &l)
 }
 
 
-template<typename T>
-string Trace(const set<T> &s) 
+template<typename T, class C, class A>
+string Trace(const set<T, C, A> &s) 
 {
     list<string> elts;
     for( auto x : s )
@@ -156,8 +156,8 @@ string Trace(const set<T> &s)
 }
 
 
-template<typename TK, typename TV>
-string Trace(const map<TK, TV> &m) 
+template<typename TK, typename TV, class C, class A>
+string Trace(const map<TK, TV, C, A> &m) 
 {
     list<string> elts;
     for( auto p : m )
@@ -166,8 +166,8 @@ string Trace(const map<TK, TV> &m)
 }
 
 
-template<typename T>
-string Trace(const multiset<T> &s) 
+template<typename T, class C, class A>
+string Trace(const multiset<T, C, A> &s) 
 {
     list<string> elts;
     for( auto x : s )
@@ -176,8 +176,8 @@ string Trace(const multiset<T> &s)
 }
 
 
-template<typename TK, typename TV>
-string Trace(const multimap<TK, TV> &m) 
+template<typename TK, typename TV, class C, class A>
+string Trace(const multimap<TK, TV, C, A> &m) 
 {
     list<string> elts;
     for( auto p : m )
@@ -186,8 +186,8 @@ string Trace(const multimap<TK, TV> &m)
 }
 
 
-template<typename T>
-string Trace(const unordered_set<T> &s) 
+template<typename T, class H, class K, class A>
+string Trace(const unordered_set<T, H, K, A> &s) 
 {
     list<string> elts;
     for( auto x : s )
@@ -196,8 +196,8 @@ string Trace(const unordered_set<T> &s)
 }
 
 
-template<typename TK, typename TV>
-string Trace(const unordered_map<TK, TV> &m) 
+template<typename TK, typename TV, class H, class K, class A>
+string Trace(const unordered_map<TK, TV, H, K, A> &m) 
 {
     list<string> elts;
     for( auto p : m )
@@ -206,8 +206,8 @@ string Trace(const unordered_map<TK, TV> &m)
 }
 
 
-template<typename T>
-string Trace(const unordered_multiset<T> &s) 
+template<typename T, class H, class K, class A>
+string Trace(const unordered_multiset<T, H, K, A> &s) 
 {
     list<string> elts;
     for( auto x : s )
@@ -216,8 +216,8 @@ string Trace(const unordered_multiset<T> &s)
 }
 
 
-template<typename TK, typename TV>
-string Trace(const unordered_multimap<TK, TV> &m) 
+template<typename TK, typename TV, class H, class K, class A>
+string Trace(const unordered_multimap<TK, TV, H, K, A> &m) 
 {
     list<string> elts;
     for( auto p : m )

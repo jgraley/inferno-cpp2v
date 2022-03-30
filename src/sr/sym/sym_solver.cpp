@@ -155,7 +155,8 @@ void TruthTableSolver::ConstrainUsingDerived()
             if( pop )
             {
 #if 0 // ASSERT failing
-                ASSERT( pred_to_index.count(pop)==1 );
+                if( should_expand )
+                    ASSERT( pred_to_index.count(pop)==1 )("Should have expanded the truth table to include all extrapolations\npop=")( pop )("\npred_to_index=\n")( pred_to_index );
                 int k = pred_to_index.at(pop);
                 truth_table->SetSlice( {{i, true}, {j, true}, {k, false}}, false );
 #endif                
