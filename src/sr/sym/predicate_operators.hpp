@@ -54,6 +54,7 @@ public:
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+    bool IsCommutative() const override;
 
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;

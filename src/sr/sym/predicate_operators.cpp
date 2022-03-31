@@ -98,6 +98,12 @@ shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
+bool EqualOperator::IsCommutative() const
+{
+    return true;
+}
+
+
 shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                             shared_ptr<BooleanExpression> to_equal ) const
 {

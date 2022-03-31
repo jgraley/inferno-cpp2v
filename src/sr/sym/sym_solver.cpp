@@ -96,9 +96,11 @@ void TruthTableSolver::ConstrainUsingDerived()
     for( int i=0; i<predicates.size(); i++ )
         pred_to_index[FrontOf(predicates[i])] = i;
 
-    typedef set<int> InitialPreds;
+    // Get all the extrapolations into maps, keyed by expression equality
+    typedef set<int> InitialPredIndices;
     typedef shared_ptr<PredicateOperator> DerivedPred;
-    map<DerivedPred, set<InitialPreds>, Expression::OrderComparer> predmap;
+    map<DerivedPred, set<InitialPredIndices>, Expression::OrderComparer> derived_pred_to_init_indices;
+    map<DerivedPred, set<DerivedPred>, Expression::OrderComparer> derived_pred_to_equal_derived_preds;
     for( int i=0; i<predicates.size(); i++ )
     {
         for( int j=0; j<predicates.size(); j++ )
@@ -110,56 +112,69 @@ void TruthTableSolver::ConstrainUsingDerived()
             auto pj = FrontOf(predicates[j]);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pop = pi->TryDerive( pj );
-            if( pop && pred_to_index.count(pop)==0 )
+            shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
+            if( pk && pred_to_index.count(pk)==0 ) // is this an extrapolation?
             {
-                set<InitialPreds> &sip = predmap[pop];
-                sip.insert( { i, j } );
+                // derived_pred_to_init_indices will unique-ize on equality of pk 
+                set<InitialPredIndices> &init_indices_for_k = derived_pred_to_init_indices[pk];
+                init_indices_for_k.insert( { i, j } );
+                
+                set<DerivedPred> &derived_preds_for_k = derived_pred_to_equal_derived_preds[pk];
+                derived_preds_for_k.insert( pk );
             }
         }
     }
 
-    vector<pair<InitialPreds, DerivedPred>> derived_predicates;
-    for( auto p : predmap )
+    // Get them into vectors, which establishes indices (k) for them
+    vector<pair<InitialPredIndices, DerivedPred>> init_indices_and_derived_preds;
+    vector<set<DerivedPred>> derived_preds;
+    for( auto p : derived_pred_to_init_indices )
     {
         TRACE("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
         if( p.second.size() > 1 )
         {
-            pair<InitialPreds, DerivedPred> pp = make_pair(FrontOf(p.second), p.first);
-            derived_predicates.push_back( pp );
+            pair<InitialPredIndices, DerivedPred> ii_and_dp = make_pair(FrontOf(p.second), p.first);
+            init_indices_and_derived_preds.push_back( ii_and_dp );
+            
+            derived_preds.push_back( derived_pred_to_equal_derived_preds.at(p.first) );
         }
     }
     
-    bool should_expand = (predicates.size()+derived_predicates.size() <= 10);
+    bool should_expand = (predicates.size()+derived_preds.size() <= 10);
+    
+    vector<set<shared_ptr<PredicateOperator>>> extended_preds = predicates;
     if( should_expand )
     {
-        TRACE("Extending truth table from %d by %d\n", predicates.size(), derived_predicates.size());
-        truth_table->Extend( predicates.size() + derived_predicates.size() ); 
+        TRACE("Extending truth table from %d by %d\n", predicates.size(), derived_preds.size());
+        truth_table->Extend( predicates.size() + derived_preds.size() ); 
+        extended_preds = extended_preds + derived_preds;
     }
     
     pred_to_index.clear();
-    for( int i=0; i<predicates.size(); i++ )
-        pred_to_index[FrontOf(predicates[i])] = i;
-    for( int i=0; i<predicates.size(); i++ )
+    for( int i=0; i<extended_preds.size(); i++ )
+        pred_to_index[FrontOf(extended_preds[i])] = i;
+    for( int i=0; i<extended_preds.size(); i++ )
     {
-        for( int j=0; j<predicates.size(); j++ )
+        for( int j=0; j<extended_preds.size(); j++ )
         {
             if( i==j )
                 continue;
 
-            auto pi = FrontOf(predicates[i]);
-            auto pj = FrontOf(predicates[j]);
+            auto pi = FrontOf(extended_preds[i]);
+            auto pj = FrontOf(extended_preds[j]);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pop = pi->TryDerive( pj );
-            if( pop )
+            shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
+            if( pk ) // There is an extrapolation
             {
-#if 0 // ASSERT failing
-                if( should_expand )
-                    ASSERT( pred_to_index.count(pop)==1 )("Should have expanded the truth table to include all extrapolations\npop=")( pop )("\npred_to_index=\n")( pred_to_index );
-                int k = pred_to_index.at(pop);
-                truth_table->SetSlice( {{i, true}, {j, true}, {k, false}}, false );
-#endif                
+                bool is_interpolation = (pred_to_index.count(pk)==1);
+                if( is_interpolation ) // The extrapolation is an interpolation
+                {
+                    int k = pred_to_index.at(pk);
+                    // Disallow all combinations that break the implication that Pi ∧ Pj => Pk
+                    TRACE("Enforcing interpolation: %s ∧ %s => %s\n", PredicateName(i).c_str(), PredicateName(j).c_str(), PredicateName(k).c_str() );  
+                    truth_table->SetSlice( {{i, true}, {j, true}, {k, false}}, false );
+                }
             }
         }
     }
@@ -167,7 +182,7 @@ void TruthTableSolver::ConstrainUsingDerived()
     if( should_expand )
     {
         set<int> fold_axes;
-        for( int k0=0; k0<derived_predicates.size(); k0++ )
+        for( int k0=0; k0<init_indices_and_derived_preds.size(); k0++ )
         {
             int k = predicates.size() + k0;
             fold_axes.insert(k);

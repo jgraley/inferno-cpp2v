@@ -63,10 +63,15 @@ public:
                                            OrderProperty order_property = STRICT );    
     virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const override;
-    struct OrderComparer {
+    struct OrderComparer : public Traceable 
+    {
         bool operator()( const shared_ptr<const Expression> &a, 
                          const shared_ptr<const Expression> &b ) const;
     };
+    
+    // Fore more than 2 operands, this would mean "any permutation of operands
+    // gives same result". Should not affect unary/primary. Default is false.
+    virtual bool IsCommutative() const;
 
     virtual string Render() const = 0;    
     string RenderWithParentheses() const;

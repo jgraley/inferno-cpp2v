@@ -103,6 +103,12 @@ void TruthTable::Extend( int new_degree )
 }
 
 
+int TruthTable::GetDegree() const
+{
+    return degree;
+}
+
+
 bool TruthTable::Get( vector<bool> full_indices ) const
 {
     return cells.at( GetCellIndex(full_indices) );

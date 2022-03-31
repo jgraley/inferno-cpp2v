@@ -197,6 +197,15 @@ list<T> operator+( list<T> l, list<T> r ) // Just like in Python!
     return l;
 }
 
+
+template< typename T >
+vector<T> operator+( vector<T> l, vector<T> r ) // Just like in Python!
+{
+    l.insert(l.end(), r.begin(), r.end());
+    return l;
+}
+
+
 template<typename T>
 class ScopedAssign
 {

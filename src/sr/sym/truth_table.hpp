@@ -36,6 +36,8 @@ public:
     // existing cell values. In-place.
     void Extend( int new_degree );
 
+    int GetDegree() const;
+
     // Get a single cell value given a full fector of indices
     bool Get( vector<bool> full_indices ) const;
 
