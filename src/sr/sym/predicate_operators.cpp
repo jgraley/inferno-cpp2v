@@ -338,6 +338,12 @@ shared_ptr<BooleanResultInterface> AllDiffOperator::Evaluate( const EvalKit &kit
 }
 
 
+bool AllDiffOperator::IsCommutative() const
+{
+    return true; 
+}
+
+
 string AllDiffOperator::RenderNF() const
 {
     list<string> ls;
@@ -526,6 +532,12 @@ shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &
     // within the full arrowhead model (cf IndexComparisonOperator).
     bool res = ( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL );
     return make_shared<BooleanResult>( BooleanResult::DEFINED, res );    
+}
+
+
+bool EquivalentOperator::IsCommutative() const
+{
+    return true;
 }
 
 

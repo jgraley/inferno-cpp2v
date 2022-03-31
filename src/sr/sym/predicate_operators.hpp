@@ -79,6 +79,7 @@ Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpress
 
 // ------------------------- IndexComparisonOperator --------------------------
 
+// Use depth-first index from the knowledge to effect inequalities
 class IndexComparisonOperator : public PredicateOperator
 {
 public:    
@@ -155,6 +156,7 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+    bool IsCommutative() const override;
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
     
@@ -223,6 +225,7 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+    bool IsCommutative() const override;
     shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
                                                  shared_ptr<SymbolExpression> with ) const override;
     virtual string RenderNF() const override;

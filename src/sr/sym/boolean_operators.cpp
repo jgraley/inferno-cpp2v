@@ -213,12 +213,18 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 
 
 shared_ptr<BooleanResultInterface> AndOperator::Evaluate( const EvalKit &kit,
-                                                 const list<shared_ptr<BooleanResultInterface>> &op_results ) const
+                                                          const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
     // Lower certainly dominates
     return *min_element( op_results.begin(), 
                          op_results.end(), 
                          DereferencingCompare<shared_ptr<BooleanResultInterface>> );
+}
+
+
+bool AndOperator::IsCommutative() const
+{
+    return true;
 }
 
 
@@ -305,12 +311,18 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 
 
 shared_ptr<BooleanResultInterface> OrOperator::Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResultInterface>> &op_results ) const
+                                                         const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
     // Higher certainly dominates
     return *max_element( op_results.begin(), 
                          op_results.end(), 
                          DereferencingCompare<shared_ptr<BooleanResultInterface>> );
+}
+
+
+bool OrOperator::IsCommutative() const
+{
+    return true;
 }
 
 
@@ -373,7 +385,7 @@ list<shared_ptr<BooleanExpression>> BoolEqualOperator::GetBooleanOperands() cons
 
 
 shared_ptr<BooleanResultInterface> BoolEqualOperator::Evaluate( const EvalKit &kit,
-                                                       const list<shared_ptr<BooleanResultInterface>> &op_results ) const
+                                                                const list<shared_ptr<BooleanResultInterface>> &op_results ) const
 {
     shared_ptr<BooleanResultInterface> ra = op_results.front();
     shared_ptr<BooleanResultInterface> rb = op_results.back();
@@ -386,6 +398,12 @@ shared_ptr<BooleanResultInterface> BoolEqualOperator::Evaluate( const EvalKit &k
     
     bool res = ( ra->GetAsBool() == rb->GetAsBool() );
     return make_shared<BooleanResult>( BooleanResult::DEFINED, res );     
+}
+
+
+bool BoolEqualOperator::IsCommutative() const
+{
+    return true;
 }
 
 

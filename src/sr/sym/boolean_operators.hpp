@@ -57,6 +57,7 @@ public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResultInterface>> &op_results ) const override;
+    bool IsCommutative() const override;
 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;
@@ -81,6 +82,7 @@ public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResultInterface>> &op_results ) const override;
+    bool IsCommutative() const override;
 
     virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
@@ -104,6 +106,7 @@ public:
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<BooleanResultInterface>> &op_results ) const override;
+    bool IsCommutative() const override;
 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;

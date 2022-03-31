@@ -140,7 +140,10 @@ void TruthTableSolver::ConstrainUsingDerived()
         }
     }
     
-    bool should_expand = (predicates.size()+derived_preds.size() <= 10);
+    // Policy for extending the truth table. Don't make one with degree more than 10
+    // also obviously don't bother if there are no extensions.
+    bool should_expand = derived_preds.size() > 0 &&
+                         (predicates.size()+derived_preds.size() <= 10);
     
     vector<set<shared_ptr<PredicateOperator>>> extended_preds = predicates;
     if( should_expand )
