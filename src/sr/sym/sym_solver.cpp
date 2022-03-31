@@ -126,15 +126,15 @@ void TruthTableSolver::ConstrainUsingDerived()
     }
 
     // Get them into vectors, which establishes indices (k) for them
-    vector<pair<InitialPredIndices, DerivedPred>> init_indices_and_derived_preds;
+    //vector<pair<InitialPredIndices, DerivedPred>> init_indices_and_derived_preds;
     vector<set<DerivedPred>> derived_preds;
     for( auto p : derived_pred_to_init_indices )
     {
         TRACE("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
         if( p.second.size() > 1 )
         {
-            pair<InitialPredIndices, DerivedPred> ii_and_dp = make_pair(FrontOf(p.second), p.first);
-            init_indices_and_derived_preds.push_back( ii_and_dp );
+            //pair<InitialPredIndices, DerivedPred> ii_and_dp = make_pair(FrontOf(p.second), p.first);
+            //init_indices_and_derived_preds.push_back( ii_and_dp );
             
             derived_preds.push_back( derived_pred_to_equal_derived_preds.at(p.first) );
         }
@@ -185,7 +185,7 @@ void TruthTableSolver::ConstrainUsingDerived()
     if( should_expand )
     {
         set<int> fold_axes;
-        for( int k0=0; k0<init_indices_and_derived_preds.size(); k0++ )
+        for( int k0=0; k0<derived_preds.size(); k0++ )
         {
             int k = predicates.size() + k0;
             fold_axes.insert(k);

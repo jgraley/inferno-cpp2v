@@ -57,35 +57,23 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
     
     if( IsCommutative() )
     {
-        //INDENT("C");
         // Commutative
-        //TRACE("Make set lo\n");
         set<shared_ptr<Expression>, OrderComparer> lo;
         for( shared_ptr<Expression> e : ll )     
-        {
-            //TRACEC("%p\n", e.get());
             lo.insert( e );
-        }
 
-        //TRACE("Make set ro\n");
         set<shared_ptr<Expression>, OrderComparer> ro;
         for( shared_ptr<Expression> e : rl )      
-        {
-            //TRACEC("%p\n", e.get());
             ro.insert( e );
-        }
             
-        //TRACE("Determine r1\n");
         int r1 = (int)lexicographical_compare(lo.begin(), lo.end(), 
 					                          ro.begin(), ro.end(),
                                               OrderComparer()); 
 
-        //TRACE("Determine r2\n");
         int r2 = (int)lexicographical_compare(ro.begin(), ro.end(), 
 					                          lo.begin(), lo.end(),
                                               OrderComparer()); 
 
-        //TRACE("Commutative compare\n")(lo)("\nwith\n")(ro)("\nand got %d - %d\n", r1, r2);
         return r1 - r2;
     }
     else
@@ -105,9 +93,7 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
 bool Expression::OrderComparer::operator()( const shared_ptr<const Expression> &a, 
                                             const shared_ptr<const Expression> &b ) const
 {
-    //INDENT("E");
     Orderable::Result r = Expression::OrderCompare( a, b );
-    //TRACE("Compare entry points %p %p: \n", a.get(), b.get())(a)("\nwith\n")(b)("\nand got %d\n", (int)r);
     return r < Orderable::EQUAL;
 }                                      
 

@@ -115,6 +115,15 @@ Orderable::Result SimpleCompare::Compare( CollectionInterface &x, CollectionInte
     Ordering xo = GetOrdering(x);
     Ordering yo = GetOrdering(y);
 
+    int r1 = (int)lexicographical_compare( xo.begin(), xo.end(), 
+                                           yo.begin(), yo.end(),
+                                           *this ); 
+
+    int r2 = (int)lexicographical_compare( yo.begin(), yo.end(), 
+                                           xo.begin(), xo.end(),
+                                           *this ); 
+
+    return r1 - r2;
     // Compare them (will use SimpleCompare)
     return (int)(xo > yo) - (int)(xo < yo);
 }
