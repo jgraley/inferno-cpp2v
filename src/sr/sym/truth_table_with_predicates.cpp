@@ -17,13 +17,47 @@ class TruthTable;
              
 // ------------------------- TruthTableWithPredicates --------------------------
 
-TruthTableWithPredicates::TruthTableWithPredicates( vector<EqualPredicateSet> predicates_, bool initval ) :
+TruthTableWithPredicates::TruthTableWithPredicates( vector<EqualPredicateSet> predicates_, 
+                                                    bool initval, 
+                                                    string label_var_name_, 
+                                                    int counting_based ) :
+    label_var_name( label_var_name_ ),
+    render_cell_size( render_index_size+label_var_name.size()+1 ),  // +1 for the ¬ 
+    label_fmt( SSPrintf("%s%%0%dd", label_var_name.c_str(), render_cell_size-2) ),
     predicates( predicates_ ),
-    truth_table( make_unique<TruthTable>( predicates.size(), initval ) )
+    truth_table( make_shared<TruthTable>( predicates.size(), initval ) ),
+    next_pred_num( counting_based )
 {    
     UpdatePredToIndex();
+
+    for( int i=0; i<GetDegree(); i++ )
+        pred_labels.push_back( SSPrintf(label_fmt.c_str(), next_pred_num++) );    
 }
  
+ 
+TruthTableWithPredicates::TruthTableWithPredicates( const TruthTableWithPredicates &other ) :
+    label_var_name( other.label_var_name ),
+    render_cell_size( other.render_cell_size ),
+    label_fmt( other.label_fmt ),
+    predicates( other.predicates ),
+    truth_table( make_shared<TruthTable>(*other.truth_table) ),
+    pred_to_index( other.pred_to_index ),
+    pred_labels( other.pred_labels ),
+    next_pred_num( other.next_pred_num )
+{
+}
+
+
+TruthTableWithPredicates &TruthTableWithPredicates::operator=( const TruthTableWithPredicates &other )
+{
+    predicates = other.predicates;
+    truth_table = make_shared<TruthTable>(*other.truth_table);
+    pred_to_index = other.pred_to_index;
+    pred_labels = other.pred_labels;
+    next_pred_num = other.next_pred_num;
+    return *this;
+}
+
 
 int TruthTableWithPredicates::GetDegree() const
 {
@@ -50,19 +84,26 @@ void TruthTableWithPredicates::Extend( vector<EqualPredicateSet> new_predicates 
     truth_table->Extend( GetDegree() + new_predicates.size() ); 
     predicates = predicates + new_predicates;
     UpdatePredToIndex();
+    for( int i=0; i<new_predicates.size(); i++ )
+        pred_labels.push_back( SSPrintf(label_fmt.c_str(), next_pred_num++) );    
 }
 
 
 TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes, bool identity ) const
 {
     vector<EqualPredicateSet> new_predicates;
+    vector<string> new_pred_labels;
     for( int axis=0; axis<GetDegree(); axis++ )    
         if( fold_axes.count(axis) == 0 ) // this is NOT one of the fold axes
+        {
             new_predicates.push_back( predicates.at(axis) );
+            new_pred_labels.push_back( pred_labels.at(axis) );
+        }
 
-    auto new_tt = make_unique<TruthTable>( truth_table->GetFolded( fold_axes, identity ) );
+    auto new_tt = make_shared<TruthTable>( truth_table->GetFolded( fold_axes, identity ) );
 
-    return TruthTableWithPredicates( new_predicates, move(new_tt) );
+    return TruthTableWithPredicates( new_predicates, new_tt, 
+                                     label_var_name, render_cell_size, label_fmt, new_pred_labels, next_pred_num );
 }
 
     
@@ -79,23 +120,30 @@ int TruthTableWithPredicates::PredToIndex( shared_ptr<PredicateOperator> pred ) 
 }
 
 
-string TruthTableWithPredicates::Render( set<int> column_axes, string label_var_name, int counting_based ) const
-{
+string TruthTableWithPredicates::Render( set<int> column_axes ) const
+{    
     string s;
     for( int axis=0; axis<GetDegree(); axis++ )
-    {
-        string name = label_var_name + to_string(axis+counting_based);
-        s += name + " := " + GetFrontPredicate(axis)->Render() + "\n";
-    }
-    s += truth_table->Render( column_axes, label_var_name, counting_based );
+        s += pred_labels.at(axis) + " := " + GetFrontPredicate(axis)->Render() + "\n";
+    s += truth_table->Render( column_axes, pred_labels, render_cell_size );
     return s;
 }
 
 
 TruthTableWithPredicates::TruthTableWithPredicates( const vector<EqualPredicateSet> &predicates_, 
-                                                    unique_ptr<TruthTable> truth_table_ ) :
+                                                    shared_ptr<TruthTable> truth_table_, 
+                                                    string label_var_name_, 
+                                                    int render_cell_size_,
+                                                    string label_fmt_,
+                                                    vector<string> pred_labels_, 
+                                                    int next_pred_num_ ) :
+    label_var_name( label_var_name_ ),
+    render_cell_size( render_cell_size_ ),
+    label_fmt( label_fmt_ ),
     predicates( predicates_ ),
-    truth_table( move(truth_table_) )                                                        
+    truth_table( truth_table_ ),
+    pred_labels( pred_labels_ ),
+    next_pred_num( next_pred_num_ )
 {
     UpdatePredToIndex();
 }

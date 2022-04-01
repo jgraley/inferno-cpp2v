@@ -20,6 +20,7 @@ class TruthTable
 {
 public:
     explicit TruthTable( int degree, bool initval );
+    TruthTable( const TruthTable &other );
     TruthTable &operator=( const TruthTable &other );
 
     // Set a single cell value given a full vector of indices    
@@ -58,7 +59,7 @@ public:
      
     // Draw a nice picture. column_axes along the top, 
     // others down the side
-    string Render( set<int> column_axes, string label_var_name, int counting_based ) const; 
+    string Render( set<int> column_axes, vector<string> pred_labels, int render_cell_size ) const; 
      
 private:
     typedef vector<bool>::size_type SizeType;

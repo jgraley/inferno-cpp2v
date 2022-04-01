@@ -15,6 +15,13 @@ TruthTable::TruthTable( int degree_, bool initval ) :
 }
 
 
+TruthTable::TruthTable( const TruthTable &other ) :
+    degree( other.degree ),
+    cells( other.cells )
+{
+}
+
+
 TruthTable &TruthTable::operator=( const TruthTable &other )
 {
     degree = other.degree;
@@ -216,20 +223,20 @@ bool TruthTable::operator<( const TruthTable &other ) const
 }
 
 
-string TruthTable::Render( set<int> column_axes, string label_var_name, int counting_based ) const
+string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int render_cell_size ) const
 {
     ASSERT( column_axes.size() <= degree );
-    
-    int render_index_size = 1; // 1 digit
-    int render_cell_size = render_index_size+label_var_name.size()+1;  // +1 for the ¬
-    string label_fmt = SSPrintf("%s%%0%dd", label_var_name.c_str(), render_cell_size-2); 
+    ASSERT( render_cell_size >= 2 );
+    for( int i : column_axes )
+        ASSERT( i>=0 && i<degree )("axis out of range\n")(column_axes)("\ndegree=%d\n", degree);
     
     // Determine what the row axes must be
     vector<int> row_axes;
     for( int i=0; i<degree; i++ )
         if( column_axes.count(i) == 0 )
             row_axes.push_back(i);
-    ASSERT( row_axes.size() + column_axes.size() == degree );
+    ASSERT( row_axes.size() + column_axes.size() == degree )
+          ("row_axes=\n")(row_axes)("\ncolumn_axes=\n")(column_axes)("\ndegree=%d\n", degree);
 
     vector<vector<string>> render_table_cells;
 
@@ -279,10 +286,10 @@ string TruthTable::Render( set<int> column_axes, string label_var_name, int coun
             {
                 string str_label;
                 if( (i & (1<<layer))==0 ) 
-                    str_label += "¬";
-                else
-                    str_label += " ";                
-                str_label += SSPrintf(label_fmt.c_str(), layers.at(layer)+counting_based);
+                    str_label += "¬";           
+                str_label += pred_labels.at( layers.at(layer) );
+                if( str_label.size() < render_cell_size )
+                    str_label = string(render_cell_size-str_label.size(), ' ') + str_label;
                 render_layer_labels.push_back(str_label);
             }
             render_my_labels.push_back(render_layer_labels);
@@ -350,11 +357,14 @@ TruthTable::SizeType TruthTable::GetCellIndex( vector<bool> full_indices ) const
 
 static void TestTruthTableBase()
 {
+    vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
+    int render_cell_size = 3;
+    
     // First test checks for consistency between simple Set()
     // and the renders, and looks for various kinds of swaps.
     TruthTable t( 4, true );
     t.Set( {true, true, false, false}, false );
-    string r = t.Render({0, 2}, "p", 1);    
+    string r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
@@ -363,7 +373,7 @@ static void TestTruthTableBase()
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✔   ✔   ✔  \n" );
     t.Set( {true, true, false, true}, false );
-    r = t.Render({0, 2}, "p", 1);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{true, true, false, true} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
@@ -372,7 +382,7 @@ static void TestTruthTableBase()
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✘   ✔   ✔  \n" );
     t.Set( {true, true, true, false}, false );
-    r = t.Render({0, 2}, "p", 1);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{true, true, true, false} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
@@ -381,7 +391,7 @@ static void TestTruthTableBase()
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✘   ✔   ✔  \n" );
     t.Set( {false, false, false, false}, false );
-    r = t.Render({0, 2}, "p", 1);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{false, false, false, false} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
@@ -390,7 +400,7 @@ static void TestTruthTableBase()
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✘   ✔   ✔  \n" );
     t.Set( {false, true, false, true}, false );
-    r = t.Render({0, 2}, "p", 1);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{false, true, false, true} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
@@ -400,7 +410,7 @@ static void TestTruthTableBase()
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
     // now undo the first one
     t.Set( {true, true, false, false}, true );
-    r = t.Render({0, 2}, "p", 1);    
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to true\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
@@ -413,6 +423,9 @@ static void TestTruthTableBase()
 
 static void TestTruthTableDefaultMMAX()
 {
+    vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
+    int render_cell_size = 3;
+
     // This test tries out the MMAX logic for a default MMAX agent (at the time of writing) (harder case)
     // Sat expression is ((x0==M) iff (x1==M)) && (x1!=M => x1==f(x0)).
     // Setting predicates p1:x0==M, p2:x1==M, p3:x1=f(x0),
@@ -422,13 +435,13 @@ static void TestTruthTableDefaultMMAX()
     
     // 3-D truth table incorporates predicates p1 to p3
     TruthTable t_analytic( 3, true );
-    TRACE("Constructed truth table\n")( "\n"+t_analytic.Render({1, 2}, "p", 1) );
+    TRACE("Constructed truth table\n")( "\n"+t_analytic.Render({1, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis of predicate expression
     t_analytic.SetSlice( {{0, false}, {1, true}}, false ); // (p1 iff p2)
     t_analytic.SetSlice( {{0, true}, {1, false}}, false ); // (p1 iff p2) other way
     t_analytic.SetSlice( {{1, false}, {2, false}}, false ); // !p2 => p3 aka p2 || p3
-    TRACE("Initial truth table (after clauses)\n")( "\n"+t_analytic.Render({1, 2}, "p", 1) );
+    TRACE("Initial truth table (after clauses)\n")( "\n"+t_analytic.Render({1, 2}, pred_labels, render_cell_size) );
     
     // Filled in by brute force (repeated evaluation of the predicate equation)
     TruthTable t_brute( 3, true );
@@ -440,7 +453,7 @@ static void TestTruthTableDefaultMMAX()
     t_brute.Set( {true, false, true}, false ); 
     t_brute.Set( {true, true, false}, true ); 
     t_brute.Set( {true, true, true}, true ); 
-    TRACE("Initial truth table (after brute force)\n")( "\n"+t_brute.Render({1, 2}, "p", 1) );
+    TRACE("Initial truth table (after brute force)\n")( "\n"+t_brute.Render({1, 2}, pred_labels, render_cell_size) );
     
     ASSERT( t_analytic == t_brute );
     
@@ -455,6 +468,9 @@ static void TestTruthTableDefaultMMAX()
 
 static void TestTruthTableCoupling()
 {
+    vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
+    int render_cell_size = 3;
+
     // This test tries out the MMAX logic for a 2-coupling (at the time of writing)
     // Sat expression is ((x0==M) || (x1==M)) || (x0~~x1)).
     // Setting predicates p1:x0==M, p2:x1==M, p3:x0~~x1,
@@ -462,7 +478,7 @@ static void TestTruthTableCoupling()
     
     // 3-D truth table incorporates predicates p1 to p3
     TruthTable t( 3, true );
-    TRACE("Constructed truth table\n")( "\n"+t.Render({1, 2}, "p", 1) );
+    TRACE("Constructed truth table\n")( "\n"+t.Render({1, 2}, pred_labels, render_cell_size) );
 
     // Filled in by brute force (repeated evaluation of the predicate equation)
     t.Set( {false, false, false}, false ); 
@@ -473,7 +489,7 @@ static void TestTruthTableCoupling()
     t.Set( {true, false, true}, true ); 
     t.Set( {true, true, false}, true ); 
     t.Set( {true, true, true}, true ); 
-    TRACE("Initial truth table (after brute force)\n")( "\n"+t.Render({1, 2}, "p", 1) );
+    TRACE("Initial truth table (after brute force)\n")( "\n"+t.Render({1, 2}, pred_labels, render_cell_size) );
 
     // TODO imagine a property like x~~M iff x==M ("M is singleton under equivalence")
     // and works for both x0 and x1 (say p4 and p5)
@@ -495,6 +511,9 @@ static void TestTruthTableCoupling()
 
 static void TestTruthTableDisjunction()
 {
+    vector<string> pred_labels = {"p1", "p2", "p3", "p4", "p5"};
+    int render_cell_size = 3;
+
     // This test tries out the logic for a binary Disjunction agent (at the time of writing)
     // Sat expression is (x1==x0 && x2==M) || (x1==M && x2=x0).
     // Setting predicates p1:=x1==x0, p2:=x2==M, p3:=x1==M, p4:x2==x0
@@ -504,14 +523,14 @@ static void TestTruthTableDisjunction()
     
     // 4-D truth table incorporates predicates p1 to p4
     TruthTable t( 4, true );
-    TRACE("Constructed truth table\n")( "\n"+t.Render({0, 2}, "p", 1) );
+    TRACE("Constructed truth table\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis but could be repeated evaluation of the predicate equation
     t.SetSlice( {{0, false}, {2, false}}, false ); // (1) !p1 => p3 aka p1 || p3
     t.SetSlice( {{1, false}, {2, false}}, false ); // (3) !p2 => p3 aka p2 || p3
     t.SetSlice( {{1, false}, {3, false}}, false ); // (4) !p2 => p4 aka p2 || p4
     t.SetSlice( {{3, false}, {0, false}}, false ); // (7) !p4 => p1 aka p4 || p1
-    TRACE("Initial truth table (after (1) (3) (4) (7))\n")( "\n"+t.Render({0, 2}, "p", 1) );
+    TRACE("Initial truth table (after (1) (3) (4) (7))\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
     
     // (Too lazy to code up the brute force version here)
 
@@ -519,7 +538,7 @@ static void TestTruthTableDisjunction()
     // (we would find this by searching for transitives or substitutions among p1 to p4)
     t.Extend(5);
 
-    TRACE("Extended truth table\n")( "\n"+t.Render({0, 2}, "p", 1) );
+    TRACE("Extended truth table\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis including extrapolated predicate, searching for transitives/substitutions
     t.SetSlice( {{0, true}, {2, true}, {4, false}}, false ); // (T1a) Transitive Equal p1 && p3 => p5 aka !p1 || !p3 || p5
@@ -529,12 +548,12 @@ static void TestTruthTableDisjunction()
     t.SetSlice( {{1, true}, {3, false}, {4, true}}, false ); // (T2b) Transitive Equal p5 && p2 => p4 aka !p5 || !p2 || p4
     t.SetSlice( {{1, false}, {3, true}, {4, true}}, false ); // (T2c) Transitive Equal p4 && p5 => p2 aka !p4 || !p5 || p2
 
-    TRACE("Extrapolate-restricted (after (T1) (T2))\n")( "\n"+t.Render({0, 2}, "p", 1) );
+    TRACE("Extrapolate-restricted (after (T1) (T2))\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Fold out extrapolated literal with OR-rule (because we don't care if it's true OR false)
     TruthTable t2 = t.GetFolded({4}, false); 
 
-    TRACE("Folded back\n")( "\n"+t2.Render({0, 2}, "p", 1) );
+    TRACE("Folded back\n")( "\n"+t2.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Extract remaining possibles 
     set<vector<bool>> iv = t2.GetIndicesOfValue( true );

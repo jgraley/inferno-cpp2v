@@ -47,8 +47,11 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     my_tt_solver.PreSolve();
     
     for( VariableId v : variables )
-    {
+    {        
         auto v_expr = make_shared<SYM::SymbolVariable>(v);
+        
+        my_tt_solver.TrySolveFor(v_expr); // Just for the logs, for now
+        
         shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolve(v_expr);
         if( he )
         {

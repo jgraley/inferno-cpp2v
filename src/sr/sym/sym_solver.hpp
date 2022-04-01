@@ -30,6 +30,7 @@ class TruthTableSolver
 public:
     TruthTableSolver( shared_ptr<BooleanExpression> equation );
     void PreSolve();
+    shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target ) const;
     
 private:
     void PopulateInitial();
