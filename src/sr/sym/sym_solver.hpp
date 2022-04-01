@@ -3,6 +3,7 @@
 
 #include "expression.hpp"
 #include "truth_table.hpp"
+#include "truth_table_with_predicates.hpp"
 
 namespace SYM
 {         
@@ -41,8 +42,7 @@ private:
     const string label_var_name = "p";
     const int counting_based = 1;
     const shared_ptr<BooleanExpression> equation;
-    vector<set<shared_ptr<PredicateOperator>>> predicates;
-    unique_ptr<TruthTable> truth_table;
+    unique_ptr<TruthTableWithPredicates> ttwp;
 };
 
 

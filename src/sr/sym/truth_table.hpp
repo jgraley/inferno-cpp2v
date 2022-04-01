@@ -19,7 +19,7 @@ namespace SYM
 class TruthTable
 {
 public:
-    explicit TruthTable( int degree, bool initval=false );
+    explicit TruthTable( int degree, bool initval );
     TruthTable &operator=( const TruthTable &other );
 
     // Set a single cell value given a full vector of indices    

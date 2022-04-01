@@ -125,7 +125,7 @@ TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
         if( fixed_map.count(i) == 0 )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + fixed_map.size() == degree );
-    TruthTable dest( dest_axes.size() );
+    TruthTable dest( dest_axes.size(), false );
 
     // Capture the fixed axes and indices into our vector
     vector<bool> full_indices(degree);
@@ -156,7 +156,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
         if( fold_axes.count(i) == 0 )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + fold_axes.size() == degree );
-    TruthTable dest( dest_axes.size() );
+    TruthTable dest( dest_axes.size(), false );
 
     // For all values of (bool)^(dest axis count)
     ForPower( dest_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> dest_indices)

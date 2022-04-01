@@ -183,7 +183,7 @@ shared_ptr<BooleanResultInterface> NotOperator::Evaluate( const EvalKit &kit,
 
 string NotOperator::Render() const
 {
-    return "~"+RenderForMe(a);
+    return "¬"+RenderForMe(a);
 }
 
 
