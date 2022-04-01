@@ -37,7 +37,7 @@ private:
 
     // Logging
     string PredicateName(int i);
-    string RenderPredicatesAndPredEquation();
+    string RenderEquationInTermsOfPreds();
 
     const string label_var_name = "p";
     const int counting_based = 1;

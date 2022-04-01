@@ -47,16 +47,16 @@ void TruthTableSolver::PreSolve()
     auto predicates = PredicateAnalysis::GetPredicates( equation );
     ttwp = make_unique<TruthTableWithPredicates>( predicates, true );
 
-    s += RenderPredicatesAndPredEquation()+"\n";
+    s += RenderEquationInTermsOfPreds()+"\n";
     
     PopulateInitial();
 
-    s += ttwp->GetTruthTable().Render( {}, label_var_name, counting_based )+"\n";
+    s += ttwp->Render( {}, label_var_name, counting_based )+"\n";
     TRACE(s);
 
     ConstrainUsingDerived();
     
-    s = ttwp->GetTruthTable().Render( {}, label_var_name, counting_based )+"\n";
+    s = ttwp->Render( {}, label_var_name, counting_based )+"\n";
     TRACE(s);
 }
 
@@ -78,7 +78,7 @@ void TruthTableSolver::PopulateInitial()
             vr.push_back( make_shared<BooleanResult>(ResultInterface::DEFINED, b) );
         
         for( int j=0; j<ttwp->GetDegree(); j++ )
-            for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicates()[j] )
+            for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
                 pred->SetForceResult( vr[j] );       
             
         shared_ptr<BooleanResultInterface> eval_result = equation->Evaluate(kit);
@@ -92,11 +92,6 @@ void TruthTableSolver::PopulateInitial()
 
 void TruthTableSolver::ConstrainUsingDerived()
 {
-    // Make a map from predicate to index
-    map<shared_ptr<PredicateOperator>, int, Expression::OrderComparer> pred_to_index;
-    for( int i=0; i<ttwp->GetDegree(); i++ )
-        pred_to_index[ttwp->GetFrontPredicate(i)] = i;
-
     // Get all the extrapolations into maps, keyed by expression equality
     typedef set<int> InitialPredIndices;
     typedef shared_ptr<PredicateOperator> DerivedPred;
@@ -114,7 +109,7 @@ void TruthTableSolver::ConstrainUsingDerived()
             
             // See whether a predicate can be derived from this pair 
             shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
-            if( pk && pred_to_index.count(pk)==0 ) // is this an extrapolation?
+            if( pk && !ttwp->PredExists(pk) ) // is this an extrapolation?
             {
                 // derived_pred_to_init_indices will unique-ize on equality of pk 
                 set<InitialPredIndices> &init_indices_for_k = derived_pred_to_init_indices[pk];
@@ -147,14 +142,9 @@ void TruthTableSolver::ConstrainUsingDerived()
     bool should_expand = derived_preds.size() > 0 &&
                          (original_degree+derived_preds.size() <= 10);
     
-    if( should_expand )
-    {
+    if( should_expand )    
         ttwp->Extend( derived_preds ); 
-    }
     
-    pred_to_index.clear();
-    for( int i=0; i<ttwp->GetDegree(); i++ )
-        pred_to_index[ttwp->GetFrontPredicate(i)] = i;
     for( int i=0; i<ttwp->GetDegree(); i++ )
     {
         for( int j=0; j<ttwp->GetDegree(); j++ )
@@ -169,10 +159,10 @@ void TruthTableSolver::ConstrainUsingDerived()
             shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
             if( pk ) // There is an extrapolation
             {
-                bool is_interpolation = (pred_to_index.count(pk)==1);
+                bool is_interpolation = ttwp->PredExists(pk);
                 if( is_interpolation ) // The extrapolation is an interpolation
                 {
-                    int k = pred_to_index.at(pk);
+                    int k = ttwp->PredToIndex(pk);
                     // Disallow all combinations that break the implication that Pi ∧ Pj => Pk
                     TRACE("Enforcing interpolation: %s ∧ %s => %s\n", PredicateName(i).c_str(), PredicateName(j).c_str(), PredicateName(k).c_str() );  
                     ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, false );
@@ -198,19 +188,16 @@ string TruthTableSolver::PredicateName(int j)
 }
 
 
-string TruthTableSolver::RenderPredicatesAndPredEquation()
+string TruthTableSolver::RenderEquationInTermsOfPreds()
 {
     string s;
     vector<shared_ptr<string>> pred_names(ttwp->GetDegree());
     for( int j=0; j<ttwp->GetDegree(); j++ )
     {
-        string name = PredicateName(j);
-        s += name + " := " + (*(ttwp->GetPredicates()[j].begin()))->Render() + "\n";
-
-        pred_names[j] = make_shared<string>(name);
-        for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicates()[j] )
+        pred_names[j] = make_shared<string>(PredicateName(j));
+        for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
             pred->SetForceRender( pred_names[j] ); // want to use later...
     }
-    s += "so that we require " + equation->Render() + "\n";
+    s += "We require " + equation->Render() + "\n";
     return s;
 }

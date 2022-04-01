@@ -21,6 +21,7 @@ TruthTableWithPredicates::TruthTableWithPredicates( vector<EqualPredicateSet> pr
     predicates( predicates_ ),
     truth_table( make_unique<TruthTable>( predicates.size(), initval ) )
 {    
+    UpdatePredToIndex();
 }
  
 
@@ -33,7 +34,13 @@ int TruthTableWithPredicates::GetDegree() const
     
 shared_ptr<PredicateOperator> TruthTableWithPredicates::GetFrontPredicate( int axis ) const
 {
-    return FrontOf( predicates[axis] );
+    return FrontOf( predicates.at(axis) );
+}
+    
+    
+TruthTableWithPredicates::EqualPredicateSet TruthTableWithPredicates::GetPredicateSet( int axis ) const
+{
+    return predicates.at(axis);
 }
     
     
@@ -42,6 +49,7 @@ void TruthTableWithPredicates::Extend( vector<EqualPredicateSet> new_predicates 
     TRACE("Extending truth table from %d by %d\n", GetDegree(), new_predicates.size());
     truth_table->Extend( GetDegree() + new_predicates.size() ); 
     predicates = predicates + new_predicates;
+    UpdatePredToIndex();
 }
 
 
@@ -58,12 +66,48 @@ TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes
 }
 
     
+bool TruthTableWithPredicates::PredExists( shared_ptr<PredicateOperator> pred ) const
+{
+    return pred_to_index.count( pred ) == 1;
+}
+
+
+int TruthTableWithPredicates::PredToIndex( shared_ptr<PredicateOperator> pred ) const
+{
+    ASSERT( PredExists(pred) );
+    return pred_to_index.at( pred );
+}
+
+
+string TruthTableWithPredicates::Render( set<int> column_axes, string label_var_name, int counting_based ) const
+{
+    string s;
+    for( int axis=0; axis<GetDegree(); axis++ )
+    {
+        string name = label_var_name + to_string(axis+counting_based);
+        s += name + " := " + GetFrontPredicate(axis)->Render() + "\n";
+    }
+    s += truth_table->Render( column_axes, label_var_name, counting_based );
+    return s;
+}
+
+
 TruthTableWithPredicates::TruthTableWithPredicates( const vector<EqualPredicateSet> &predicates_, 
                                                     unique_ptr<TruthTable> truth_table_ ) :
     predicates( predicates_ ),
     truth_table( move(truth_table_) )                                                        
 {
+    UpdatePredToIndex();
 }
+
+
+void TruthTableWithPredicates::UpdatePredToIndex()
+{
+    pred_to_index.clear();
+    for( int i=0; i<GetDegree(); i++ )
+        pred_to_index[GetFrontPredicate(i)] = i;
+}
+
   
     
     
