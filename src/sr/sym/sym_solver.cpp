@@ -6,8 +6,9 @@
 #include "primary_expressions.hpp"
 #include "expression_analysis.hpp"
 #include "result.hpp"
-#include "truth_table.hpp"
 #include "truth_table_with_predicates.hpp"
+#include "conditional_operators.hpp"
+#include "set_operators.hpp"
 
 using namespace SYM;
 
@@ -19,7 +20,7 @@ SymSolver::SymSolver( shared_ptr<BooleanExpression> equation_ ) :
 }
 
 
-shared_ptr<SymbolExpression> SymSolver::TrySolve( shared_ptr<SymbolExpression> target ) const
+shared_ptr<SymbolExpression> SymSolver::TrySolveFor( shared_ptr<SymbolExpression> target ) const
 {
     shared_ptr<Expression> solution = equation->TrySolveForToEqual( target,
                                                                     make_shared<BooleanConstant>(true) );
@@ -63,7 +64,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     TRACE("Solve equation: ")(equation->Render())(" for ")(target->Render())("\n");
     ASSERT( ttwp )("You need to have done a PreSolve() first\n");
 
-    set<int> independent_axes, solveable_axes, dead_axes;
+    set<int> dead_axes;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
@@ -79,20 +80,68 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
         TRACEC("Folding out dead axes:\n")(dead_axes)("\n");
     TruthTableWithPredicates my_ttwp( ttwp->GetFolded( dead_axes, false ) );
     
+    vector<int> independent_axes, solveable_axes;
     for( int axis=0; axis<my_ttwp.GetDegree(); axis++ )
     {
         auto pred = my_ttwp.GetFrontPredicate(axis);
         if( pred->IsIndependentOf(target) )
-            independent_axes.insert(axis);
+            independent_axes.push_back(axis);
         else if( pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) ) )
-            solveable_axes.insert(axis);
+            solveable_axes.push_back(axis);
         else
             ASSERTFAIL("Shoud not be any dead axes left");
     }
 
-    TRACEC(my_ttwp.Render( solveable_axes ))("\n");
-    
-    return nullptr;
+    TRACEC(my_ttwp.Render( ToSet(solveable_axes) ))("\n");
+
+    vector<shared_ptr<BooleanExpression>> controls;
+    for( int ia : independent_axes )
+    {
+        controls.push_back( my_ttwp.GetFrontPredicate(ia) );
+    }
+
+    vector<shared_ptr<SymbolExpression>> options;
+    ForPower( independent_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> independent_indices)
+    {
+        map<int, bool> m;
+        for( int i=0; i<independent_axes.size(); i++ )
+            m[independent_axes.at(i)] = independent_indices.at(i);
+
+        TruthTableWithPredicates slice_ttwp( my_ttwp.GetSlice( m ) ); 
+        TRACEC("slice_ttwp ")(slice_ttwp.Render({}))("\n");
+        
+        set<vector<bool>> svb = slice_ttwp.GetTruthTable().GetIndicesOfValue( true );
+        TRACEC("SVB ")(svb)("\n");
+
+        list< shared_ptr<SymbolExpression> > to_union;
+        for( vector<bool> term : svb )
+        {
+            list< shared_ptr<SymbolExpression> > to_intersection;
+            for( int axis=0; axis<term.size(); axis++ )
+            {
+                auto pred = slice_ttwp.GetFrontPredicate(axis);
+                shared_ptr<Expression> eclause = pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) );
+                if( eclause )
+                {
+                    auto clause = dynamic_pointer_cast<SymbolExpression>( eclause );
+                    ASSERT( clause );
+                    if( term.at(axis)==false )
+                        clause = make_shared<ComplementOperator>(clause);
+                    to_intersection.push_back( clause );
+                }
+            }
+             
+            to_union.push_back( make_shared<IntersectionOperator>( to_intersection ) );
+        }
+
+        options.push_back( make_shared<UnionOperator>( to_union ) );
+    } );
+
+    auto solution = make_shared<MultiConditionalOperator>( controls, options );
+
+    TRACEC("solution is ")(solution)("\n");
+
+    return solution;
 }
 
 

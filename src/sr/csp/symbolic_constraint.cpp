@@ -50,9 +50,9 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     {        
         auto v_expr = make_shared<SYM::SymbolVariable>(v);
         
-        my_tt_solver.TrySolveFor(v_expr); // Just for the logs, for now
+        //my_tt_solver.TrySolveFor(v_expr); // Just for the logs, for now
         
-        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolve(v_expr);
+        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(v_expr);
         if( he )
         {
             TRACEC("Solved for variable: ")(v)
@@ -105,10 +105,12 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
     shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
     ASSERT( hint_result );
-    if( hint_result->GetAsSetOfXLinks().empty() )
+    set<SR::XLink> hint_links;
+    bool ok = hint_result->TryGetAsSetOfXLinks(hint_links);
+    if( !ok || hint_links.empty() )
         return make_tuple(false, Hint()); // effectively a failure to evaluate
           
-    Hint hint( current_var, hint_result->GetAsSetOfXLinks() );
+    Hint hint( current_var, hint_links );
     return make_tuple(false, hint);
 }
 

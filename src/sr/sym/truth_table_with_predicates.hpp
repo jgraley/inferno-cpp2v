@@ -32,6 +32,7 @@ public:
     shared_ptr<PredicateOperator> GetFrontPredicate( int axis ) const;
     EqualPredicateSet GetPredicateSet( int axis ) const;
     void Extend( vector<EqualPredicateSet> new_predicates );
+    TruthTableWithPredicates GetSlice( map<int, bool> fixed_map ) const; 
     TruthTableWithPredicates GetFolded( set<int> fold_axes, bool identity ) const;
     bool PredExists( shared_ptr<PredicateOperator> pred ) const;
     int PredToIndex( shared_ptr<PredicateOperator> pred ) const;

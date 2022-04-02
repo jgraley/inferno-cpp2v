@@ -73,19 +73,13 @@ string RemoveOuterTemplate( string s )
 
 bool IncrementIndices( vector<int> &indices, int index_range )
 {
-    //TRACE("Starting with ")(indices)(" range=")(index_range)("\n");    
-    for( typename vector<int>::iterator it = indices.begin(); 
-         it != indices.end();
-         ++it )
+    for( int &i : indices )
     {
-        (*it)++;
-        if( *it==index_range )
-            *it = 0; // need to borrow so iterate again
+        i++;
+        if( i==index_range )
+            i = 0; // need to carry so iterate again
         else
-        {
-            //TRACE(indices)("\n");
             return false; // OK - did not wrap
-        }
     }
     return true; // wrapped
 }

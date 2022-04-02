@@ -21,7 +21,7 @@ shared_ptr<SymbolResultInterface> ComplementOperator::Evaluate( const EvalKit &k
                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    shared_ptr<SymbolSetResult> asr =  SymbolSetResult::Create( ar );
+    shared_ptr<SymbolSetResult> asr = SymbolSetResult::Create( ar );
     return asr->GetComplement();
 }
 

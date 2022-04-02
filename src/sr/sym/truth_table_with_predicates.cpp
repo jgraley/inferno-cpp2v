@@ -89,17 +89,40 @@ void TruthTableWithPredicates::Extend( vector<EqualPredicateSet> new_predicates 
 }
 
 
+TruthTableWithPredicates TruthTableWithPredicates::GetSlice( map<int, bool> fixed_map ) const
+{
+    vector<EqualPredicateSet> new_predicates;
+    vector<string> new_pred_labels;
+    for( int axis=0; axis<GetDegree(); axis++ )
+    {  
+        if( fixed_map.count(axis) == 0 ) // this is NOT one of the fixed axes
+        {
+            new_predicates.push_back( predicates.at(axis) );
+            new_pred_labels.push_back( pred_labels.at(axis) );
+        }
+    }
+
+    auto new_tt = make_shared<TruthTable>( truth_table->GetSlice( fixed_map ) );
+
+    return TruthTableWithPredicates( label_var_name, render_cell_size, label_fmt, 
+                                     new_predicates, new_tt, 
+                                     new_pred_labels, next_pred_num );
+}
+
+
 TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes, bool identity ) const
 {
     vector<EqualPredicateSet> new_predicates;
     vector<string> new_pred_labels;
-    for( int axis=0; axis<GetDegree(); axis++ )    
+    for( int axis=0; axis<GetDegree(); axis++ )
+    {  
         if( fold_axes.count(axis) == 0 ) // this is NOT one of the fold axes
         {
             new_predicates.push_back( predicates.at(axis) );
             new_pred_labels.push_back( pred_labels.at(axis) );
         }
-
+    }
+    
     auto new_tt = make_shared<TruthTable>( truth_table->GetFolded( fold_axes, identity ) );
 
     return TruthTableWithPredicates( label_var_name, render_cell_size, label_fmt, 

@@ -93,9 +93,10 @@ SR::XLink SymbolResult::GetAsXLink() const
 }
 
 
-set<SR::XLink> SymbolResult::GetAsSetOfXLinks() const
+bool SymbolResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {
-    return xlink ? set<SR::XLink>{ xlink } : set<SR::XLink>{};
+    links = xlink ? set<SR::XLink>{ xlink } : set<SR::XLink>{};
+    return true;
 }
 
 
@@ -114,14 +115,23 @@ SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_, bool complement_flag_ 
 }
 
 
-static shared_ptr<SymbolSetResult> Create( shared_ptr<SymbolResultInterface> other )
+shared_ptr<SymbolSetResult> SymbolSetResult::Create( shared_ptr<SymbolResultInterface> other )
 {
     if( auto ssr = dynamic_pointer_cast<SymbolSetResult>(other) )
+    {
         return ssr;
+    }
     else if( auto sr = dynamic_pointer_cast<SymbolResult>(other) )
-        return make_shared<SymbolSetResult>( other->GetAsSetOfXLinks() );
+    {
+        set<SR::XLink> links;
+        bool ok = other->TryGetAsSetOfXLinks( links );
+        ASSERT(ok);
+        return make_shared<SymbolSetResult>( links );
+    }
     else
+    {
         ASSERTFAIL();
+    }
 }
 
 
@@ -138,10 +148,12 @@ SR::XLink SymbolSetResult::GetAsXLink() const
 }
 
 
-set<SR::XLink> SymbolSetResult::GetAsSetOfXLinks() const
+bool SymbolSetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {
-    ASSERT( !complement_flag )("Refusing to extensionalise a complement set");
-    return xlinks;
+    if( !complement_flag ) // Refusing to extensionalise a complement set
+        return false;
+    links = xlinks;
+    return true;
 }
 
 

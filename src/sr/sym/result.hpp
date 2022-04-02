@@ -71,7 +71,7 @@ class SymbolResultInterface : public ResultInterface
 {
 public:
     virtual SR::XLink GetAsXLink() const = 0;   
-    virtual set<SR::XLink> GetAsSetOfXLinks() const = 0;
+    virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;
      
 };
 
@@ -84,7 +84,7 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
-    set<SR::XLink> GetAsSetOfXLinks() const override;    
+    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const ResultInterface &other ) const override;    
 
 private:    
@@ -101,7 +101,7 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
-    set<SR::XLink> GetAsSetOfXLinks() const override;    
+    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const ResultInterface &other ) const override;
 
     shared_ptr<SymbolSetResult> GetComplement() const;
