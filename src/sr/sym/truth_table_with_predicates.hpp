@@ -41,16 +41,16 @@ public:
     TruthTable &GetTruthTable() { return *truth_table; }
     
 private:    
-    explicit TruthTableWithPredicates( const vector<EqualPredicateSet> &predicates, 
-                                       shared_ptr<TruthTable> truth_table, 
-                                       string label_var_name, 
+    explicit TruthTableWithPredicates( string label_var_name, 
                                        int render_cell_size,
                                        string label_fmt,
+                                       const vector<EqualPredicateSet> &predicates, 
+                                       shared_ptr<TruthTable> truth_table, 
                                        vector<string> pred_labels, 
                                        int next_pred_num );    
     void UpdatePredToIndex();
 
-    const int render_index_size = 1; // 1 digit
+    const int render_index_size = 2; // 2 digit
     const string label_var_name;
     const int render_cell_size;
     const string label_fmt;
@@ -59,7 +59,6 @@ private:
     map<shared_ptr<PredicateOperator>, int, Expression::OrderComparer> pred_to_index;
     vector<string> pred_labels;
     int next_pred_num;
-
 };
 
 };

@@ -102,8 +102,9 @@ TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes
 
     auto new_tt = make_shared<TruthTable>( truth_table->GetFolded( fold_axes, identity ) );
 
-    return TruthTableWithPredicates( new_predicates, new_tt, 
-                                     label_var_name, render_cell_size, label_fmt, new_pred_labels, next_pred_num );
+    return TruthTableWithPredicates( label_var_name, render_cell_size, label_fmt, 
+                                     new_predicates, new_tt, 
+                                     new_pred_labels, next_pred_num );
 }
 
     
@@ -130,11 +131,11 @@ string TruthTableWithPredicates::Render( set<int> column_axes ) const
 }
 
 
-TruthTableWithPredicates::TruthTableWithPredicates( const vector<EqualPredicateSet> &predicates_, 
-                                                    shared_ptr<TruthTable> truth_table_, 
-                                                    string label_var_name_, 
+TruthTableWithPredicates::TruthTableWithPredicates( string label_var_name_, 
                                                     int render_cell_size_,
                                                     string label_fmt_,
+                                                    const vector<EqualPredicateSet> &predicates_, 
+                                                    shared_ptr<TruthTable> truth_table_, 
                                                     vector<string> pred_labels_, 
                                                     int next_pred_num_ ) :
     label_var_name( label_var_name_ ),
