@@ -20,6 +20,11 @@ SymSolver::SymSolver( shared_ptr<BooleanExpression> equation_ ) :
 }
 
 
+void SymSolver::PreSolve()
+{
+}
+
+
 shared_ptr<SymbolExpression> SymSolver::TrySolveFor( shared_ptr<SymbolExpression> target ) const
 {
     shared_ptr<Expression> solution = equation->TrySolveForToEqual( target,

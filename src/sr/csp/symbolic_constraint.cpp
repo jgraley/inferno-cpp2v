@@ -43,8 +43,8 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
          ("For variables:\n")(variables)("\n");
             
     SYM::SymSolver my_solver(consistency_expression);
-    SYM::TruthTableSolver my_tt_solver(consistency_expression);
-    my_tt_solver.PreSolve();
+    //SYM::TruthTableSolver my_solver(consistency_expression);
+    my_solver.PreSolve();
     
     for( VariableId v : variables )
     {        

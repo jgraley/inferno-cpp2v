@@ -17,6 +17,7 @@ class SymSolver
 {
 public:
     explicit SymSolver( shared_ptr<BooleanExpression> equation );
+    void PreSolve();
     shared_ptr<SymbolExpression> TrySolveFor(shared_ptr<SymbolExpression> target) const;
 
 private:
