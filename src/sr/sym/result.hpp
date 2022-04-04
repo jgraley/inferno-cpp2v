@@ -9,7 +9,7 @@ namespace SYM
 
 // ------------------------- ResultInterface --------------------------
 
-class ResultInterface
+class ResultInterface : public Traceable
 {
 public:
     enum Category
@@ -52,6 +52,8 @@ public:
     // which is bigger than false.
     bool operator<( const BooleanResultInterface &other ) const override;
 
+    string GetTrace() const override;
+    
 private:
     // Certainty combines category and boolean value into a single
     // value which posesses a certainty ordering property
@@ -86,6 +88,8 @@ public:
     SR::XLink GetAsXLink() const override;    
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const ResultInterface &other ) const override;    
+    
+    string GetTrace() const override;
 
 private:    
     SR::XLink xlink;
@@ -107,6 +111,8 @@ public:
     shared_ptr<SymbolSetResult> GetComplement() const;
     static shared_ptr<SymbolSetResult> GetUnion( list<shared_ptr<SymbolSetResult>> ops );
     static shared_ptr<SymbolSetResult> GetIntersection( list<shared_ptr<SymbolSetResult>> ops );
+
+    string GetTrace() const override;
 
 private:    
     static shared_ptr<SymbolSetResult> DeMorgan( function<shared_ptr<SymbolSetResult>( list<shared_ptr<SymbolSetResult>> )> lambda,

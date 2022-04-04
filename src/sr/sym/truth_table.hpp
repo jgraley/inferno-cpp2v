@@ -42,7 +42,9 @@ public:
     // Get a single cell value given a full fector of indices
     bool Get( vector<bool> full_indices ) const;
 
-    // Get a slice of a truth table in which the fold_axes have
+    // Get a slice of a truth table in which axes indicated
+    // by fixed_map's keys have been reduced away as specified by 
+    // fixed_map's values.
     TruthTable GetSlice( map<int, bool> fixed_map ) const; 
 
     // Get a folded down truth table in which the fold_axes have

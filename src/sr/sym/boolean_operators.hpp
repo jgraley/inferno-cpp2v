@@ -167,6 +167,27 @@ private:
     const shared_ptr<BooleanExpression> c;
 };
 
+// ------------------------- MultiBooleanConditionalOperator --------------------------
+
+class MultiBooleanConditionalOperator : public BooleanToBooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    // Controls evaluated and then taken as a little-endian binary nuber which
+    // indexes into options - this option is then evaluated and returned. No smart
+    // handling of undefined controls yet.
+    explicit MultiBooleanConditionalOperator( vector<shared_ptr<BooleanExpression>> controls,
+                                              vector<shared_ptr<BooleanExpression>> options );
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
+    virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const vector<shared_ptr<BooleanExpression>> controls;
+    const vector<shared_ptr<BooleanExpression>> options;
+};
+
 };
 
 #endif // include guard

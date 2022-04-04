@@ -586,3 +586,67 @@ Expression::Precedence BooleanConditionalOperator::GetPrecedence() const
 {
     return Precedence::CONDITIONAL;
 }
+
+// ------------------------- MultiBooleanConditionalOperator --------------------------
+
+MultiBooleanConditionalOperator::MultiBooleanConditionalOperator( vector<shared_ptr<BooleanExpression>> controls_,
+                                                                  vector<shared_ptr<BooleanExpression>> options_ ) :
+    controls( controls_ ),
+    options( options_ )
+{
+    ASSERT( options.size() == 1<<controls.size() );
+}
+
+    
+list<shared_ptr<BooleanExpression>> MultiBooleanConditionalOperator::GetBooleanOperands() const
+{
+    list<shared_ptr<BooleanExpression>> ops;
+    for( shared_ptr<BooleanExpression> c : controls )
+        ops.push_back( c );
+    for( shared_ptr<BooleanExpression> o : options )
+        ops.push_back( o );
+
+    return ops;
+}
+
+
+shared_ptr<BooleanResultInterface> MultiBooleanConditionalOperator::Evaluate( const EvalKit &kit ) const
+{
+    unsigned int int_control = 0;
+    for( int i=0; i<controls.size(); i++ )
+    {
+        shared_ptr<BooleanResultInterface> r = controls[i]->Evaluate(kit);
+        
+        // Abort if any controls evaluate undefined (TODO could do better)
+        if( !r->IsDefinedAndUnique() )
+            return make_shared<BooleanResult>( ResultInterface::UNDEFINED );
+            
+        int_control |= (int)r->GetAsBool() << i;
+    }
+    
+    return options[int_control]->Evaluate(kit);
+}
+
+
+string MultiBooleanConditionalOperator::Render() const
+{
+    list<string> str_controls;
+    for( shared_ptr<BooleanExpression> c : controls )
+        str_controls.push_back( c->Render() );
+        
+    list<string> str_options;
+    for( shared_ptr<BooleanExpression> o : options )
+        str_options.push_back( o->Render() );
+        
+    return Join(str_controls, ", ", "[", "]") + 
+           "?:" + 
+           Join(str_options, ", ", "[", "]");
+}
+
+
+Expression::Precedence MultiBooleanConditionalOperator::GetPrecedence() const
+{
+    return Precedence::CONDITIONAL;
+}
+
+

@@ -19,6 +19,7 @@ public:
     explicit SymSolver( shared_ptr<BooleanExpression> equation );
     void PreSolve();
     shared_ptr<SymbolExpression> TrySolveFor(shared_ptr<SymbolExpression> target) const;
+    shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
 
 private:
     const shared_ptr<BooleanExpression> equation;
@@ -32,6 +33,7 @@ public:
     TruthTableSolver( shared_ptr<BooleanExpression> equation );
     void PreSolve();
     shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target ) const;
+    shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
     
 private:
     void PopulateInitial();

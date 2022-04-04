@@ -42,9 +42,13 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     TRACE("Trying to solve:\n")(consistency_expression->Render())("\n")
          ("For variables:\n")(variables)("\n");
             
+    // Old solver
     SYM::SymSolver my_solver(consistency_expression);
-    //SYM::TruthTableSolver my_solver(consistency_expression);
-    my_solver.PreSolve();
+    
+    // Truth-table solver
+    SYM::TruthTableSolver my_tt_solver(consistency_expression);
+    my_tt_solver.PreSolve();    
+    alt_expression_for_testing = my_tt_solver.GetAltEquationForTesting();
     
     for( VariableId v : variables )
     {        
@@ -96,6 +100,15 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
     shared_ptr<SYM::BooleanResultInterface> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
+    if( plan.alt_expression_for_testing )
+    {
+        // If solver gave us an alternative expression, evaluate it and compare 
+        // with result from original. This allows to test parts of the solver.
+        shared_ptr<SYM::BooleanResultInterface> alt_result = plan.alt_expression_for_testing->Evaluate( kit );
+        ASSERT( alt_result );
+        ASSERT( *alt_result == *result )(*alt_result)(" != ")(*result);
+    }
+    
     if( result->IsDefinedAndTrue() )
         return make_tuple(true, Hint()); // Successful
 

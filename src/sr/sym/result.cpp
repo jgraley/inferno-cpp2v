@@ -61,6 +61,22 @@ bool BooleanResult::operator<( const BooleanResultInterface &other ) const
     return certainty < o->certainty;
 }
 
+
+string BooleanResult::GetTrace() const
+{
+    switch( certainty )
+    {
+    case Certainty::FALSE:
+        return "FALSE";
+    case Certainty::UNDEFINED:
+        return "UNDEFINED";
+    case Certainty::TRUE:
+        return "TRUE";
+    }
+    return "CORRUPTED!!";
+}
+
+
 // ------------------------- SymbolResult --------------------------
 
 SymbolResult::SymbolResult( Category cat, SR::XLink xlink_ )
@@ -106,6 +122,15 @@ bool SymbolResult::operator==( const ResultInterface &other ) const
     return o && xlink == o->xlink;
 }
 
+
+string SymbolResult::GetTrace() const
+{
+    if( xlink )
+        return "DEFINED:"+Trace(xlink);
+    else
+        return "UNDEFINED";
+}
+
 // ------------------------- SymbolSetResult --------------------------
 
 SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
@@ -125,12 +150,12 @@ shared_ptr<SymbolSetResult> SymbolSetResult::Create( shared_ptr<SymbolResultInte
     {
         set<SR::XLink> links;
         bool ok = other->TryGetAsSetOfXLinks( links );
-        ASSERT(ok);
+        ASSERTS(ok);
         return make_shared<SymbolSetResult>( links );
     }
     else
     {
-        ASSERTFAIL();
+        ASSERTFAILS();
     }
 }
 
@@ -216,7 +241,7 @@ shared_ptr<SymbolSetResult> SymbolSetResult::UnionCore( list<shared_ptr<SymbolSe
     set<SR::XLink> result_xlinks;
     for( shared_ptr<SymbolSetResult> op : ops )
     {
-        ASSERT( !op->complement_flag )("UnionCore requires no complements");
+        ASSERTS( !op->complement_flag )("UnionCore requires no complements");
         result_xlinks = UnionOf( result_xlinks, op->xlinks );
     }
     return make_shared<SymbolSetResult>( result_xlinks );   
@@ -229,7 +254,7 @@ shared_ptr<SymbolSetResult> SymbolSetResult::IntersectionCore( list<shared_ptr<S
     for( shared_ptr<SymbolSetResult> op : ops )
         if( !op->complement_flag )
             non_comp_op = op;
-    ASSERT( non_comp_op )("IntersectionCore requires at least one non-complement");
+    ASSERTS( non_comp_op )("IntersectionCore requires at least one non-complement");
 
     // DifferenceOf() is the key to combining complemented with non-complimented
     set<SR::XLink> result_xlinks = non_comp_op->xlinks;
@@ -244,3 +269,14 @@ shared_ptr<SymbolSetResult> SymbolSetResult::IntersectionCore( list<shared_ptr<S
     }
     return make_shared<SymbolSetResult>( result_xlinks );
 }
+
+
+string SymbolSetResult::GetTrace() const
+{
+    string s;
+    if( complement_flag )
+        s += "ç";
+    s += Trace(xlinks);
+    return s;
+}
+

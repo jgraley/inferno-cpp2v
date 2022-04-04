@@ -37,6 +37,13 @@ shared_ptr<SymbolExpression> SymSolver::TrySolveFor( shared_ptr<SymbolExpression
     return sym_solution;
 }
 
+
+shared_ptr<BooleanExpression> SymSolver::GetAltEquationForTesting() const
+{
+    return nullptr; // feature not supported
+}
+
+
 // -------------------------- TruthTableSolver ----------------------------    
 
 TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> equation_ ) :
@@ -145,6 +152,29 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     auto solution = make_shared<MultiConditionalOperator>( controls, options );
 
     TRACEC("solution is ")(solution)("\n");
+
+    return solution;
+}
+
+
+shared_ptr<BooleanExpression> TruthTableSolver::GetAltEquationForTesting() const
+{
+    vector<shared_ptr<BooleanExpression>> controls;
+    for( int ia=0; ia<ttwp->GetDegree(); ia++ )
+    {
+        controls.push_back( ttwp->GetFrontPredicate(ia) );
+    }
+
+    vector<shared_ptr<BooleanExpression>> options;
+    ForPower( ttwp->GetDegree(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> indices)
+    {
+        bool cell_value = ttwp->GetTruthTable().Get( indices );      
+        options.push_back( make_shared<BooleanConstant>(cell_value) );
+    } );
+
+    auto solution = make_shared<MultiBooleanConditionalOperator>( controls, options );
+
+    TRACEC("alternative expression is ")(solution)("\n");
 
     return solution;
 }
