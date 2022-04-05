@@ -104,9 +104,9 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     {
         // If solver gave us an alternative expression, evaluate it and compare 
         // with result from original. This allows to test parts of the solver.
-        shared_ptr<SYM::BooleanResultInterface> alt_result = plan.alt_expression_for_testing->Evaluate( kit );
-        ASSERT( alt_result );
-        ASSERT( *alt_result == *result )(*alt_result)(" != ")(*result);
+        //shared_ptr<SYM::BooleanResultInterface> alt_result = plan.alt_expression_for_testing->Evaluate( kit );
+        //ASSERT( alt_result );
+        //ASSERT( *alt_result == *result )(*alt_result)(" != ")(*result);
     }
     
     if( result->IsDefinedAndTrue() )

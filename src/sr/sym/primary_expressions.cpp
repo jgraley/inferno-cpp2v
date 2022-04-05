@@ -70,10 +70,11 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 
 shared_ptr<SymbolResultInterface> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
-    if( kit.hypothesis_links->count(plink) == 0 )
-        return make_shared<SymbolResult>( ResultInterface::UNDEFINED );
-    else
-        return make_shared<SymbolResult>( ResultInterface::DEFINED, kit.hypothesis_links->at(plink) );
+    // This is an ERROR. You could perfectly easily have called GetRequiredVariables(),
+    // done a quick set difference and KNOWN that it would come to this.
+    ASSERT( kit.hypothesis_links->count(plink) > 0 );
+    
+    return make_shared<SymbolResult>( ResultInterface::DEFINED, kit.hypothesis_links->at(plink) );
 }
 
 
