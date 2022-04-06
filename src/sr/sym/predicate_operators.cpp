@@ -83,9 +83,12 @@ shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
+    // IEEE 754 Equals results in false if an operand is NaS. Not-equals has 
+    // no operator class of it's own and is implemented as ¬(==) so will 
+    // return true as required.
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -195,9 +198,10 @@ shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const Eval
                                                              const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
+    // IEEE 754 All inequalities result in false if an operand is NaS
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -378,9 +382,11 @@ shared_ptr<BooleanResultInterface> KindOfOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
+    // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
+    // NaS. Possibly like a < ?
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
     
     bool matches = archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() );
     return make_shared<BooleanResult>( BooleanResult::DEFINED, matches );
@@ -438,9 +444,10 @@ shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const 
     // Evaluate operand and ensure we got an XLink
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
 
-    // Propagate undefined case
+    // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
+    // NaS. So like ==
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
@@ -520,6 +527,8 @@ list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
 shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
+    // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propogates 
+    // NaS. So like ==
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
