@@ -47,6 +47,7 @@ private:
         shared_ptr<SYM::BooleanExpression> consistency_expression;        
         set<VariableId> variables;
         map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions;
+        map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions_tt;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;        
     } plan;
 

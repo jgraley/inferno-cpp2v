@@ -25,7 +25,7 @@ typedef SR::PatternLink VariableId;
 typedef SR::LocatedLink Assignment;
 typedef map<VariableId, Value> Assignments;
 typedef Assignments Solution;
-typedef pair<SR::PatternLink, set<SR::XLink>> Hint;
+typedef pair<SR::PatternLink, vector<set<SR::XLink>>> Hint;
 
 
 /** Implements a systemic constraint as discussed in #107

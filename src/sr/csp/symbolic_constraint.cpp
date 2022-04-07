@@ -9,8 +9,7 @@
 #include "../sym/result.hpp"
 
 //#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
-//#define CHECK_HINTS
-#define REJECT_OFF_END_HINT
+
 
 using namespace CSP;
 
@@ -57,11 +56,18 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
         //my_tt_solver.TrySolveFor(v_expr); // Just for the logs, for now
         
         shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(v_expr);
+        shared_ptr<SYM::SymbolExpression> hett = my_tt_solver.TrySolveFor(v_expr);
         if( he )
         {
-            TRACEC("Solved for variable: ")(v)
+            TRACEC("Solved old style for variable: ")(v)
                   ("\nSolution:\n")(he->Render())("\n");
             hint_expressions[v] = he; // only store good ones in the map            
+        }
+        if( hett )
+        {
+            TRACEC("Solved truth-table style for variable: ")(v)
+                  ("\nSolution:\n")(he->Render())("\n");
+            hint_expressions_tt[v] = hett; // only store good ones in the map            
         }
     }
 }
@@ -111,19 +117,26 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     
     if( result->IsDefinedAndTrue() )
         return make_tuple(true, Hint()); // Successful
-
-    if( !current_var || plan.hint_expressions.count(current_var)==0 )
+      
+    if( !current_var || plan.hint_expressions_tt.count(current_var)==0 )
         return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
-     
-    shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
-    shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
-    ASSERT( hint_result );
-    set<SR::XLink> hint_links;
-    bool ok = hint_result->TryGetAsSetOfXLinks(hint_links);
-    if( !ok || hint_links.empty() )
-        return make_tuple(false, Hint()); // effectively a failure to evaluate
+
+#if 1
+    // We seem to need this before TT solver gets a test pass. It seems to mean, "If 
+    // the old solver didn't like the equation, we can't trust the TT solver with it"
+    if( plan.hint_expressions.count(current_var)==0 )
+        return make_tuple(false, Hint()); 
+#endif 
+
+    shared_ptr<SYM::SymbolExpression> hint_expression_tt = plan.hint_expressions_tt.at(current_var);
+    shared_ptr<SYM::SymbolResultInterface> hint_result_tt = hint_expression_tt->Evaluate( kit );
+    ASSERT( hint_result_tt );
+    set<SR::XLink> hint_links_tt;
+    bool ok_tt = hint_result_tt->TryGetAsSetOfXLinks(hint_links_tt);
+    if( !ok_tt || hint_links_tt.empty() )
+        return make_tuple(false, Hint(current_var, {})); // effectively a failure to evaluate
           
-    Hint hint( current_var, hint_links );
+    Hint hint( current_var, {hint_links_tt} );
     return make_tuple(false, hint);
 }
 

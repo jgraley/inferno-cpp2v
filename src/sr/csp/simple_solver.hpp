@@ -93,7 +93,9 @@ private:
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
         bool tried_hint;    
-        function<Value()> values_generator;    
+        function<Value()> values_generator;  
+        bool got_tt_hint;
+        set<Value> tt_hint;
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
 #endif
