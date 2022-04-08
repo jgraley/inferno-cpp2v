@@ -353,20 +353,26 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #endif
 
 #ifdef TAKE_HINTS
-        if( ok && tried_hint && got_tt_hint )
+        if( ok && got_tt_hint )
         {
-            ASSERT( tt_hint.count(value) > 0 )("Value: ")(value)("\nHint set:\n")(tt_hint); 
+            ASSERT( !tt_hint.empty() );
+            ASSERT( tt_hint.count(value) > 0 )("Confirmed consistent value: ")(value)("\nTT hint set:\n")(tt_hint); 
         }
         // TODO take multiple hints see #462
-        if( !ok && !new_hint.second.empty() && !tried_hint ) // hint now guaranteed to be for current variable
+        
+        if( !ok && new_hint.second.size() == 2 && !tried_hint )
+        {
+            got_tt_hint = true;
+            tt_hint = new_hint.second.at(1);
+            ASSERT( !tt_hint.empty() );
+            tried_hint = true;
+        }
+        if( !ok && new_hint.second.size() == 1 && !tried_hint ) // hint now guaranteed to be for current variable
         {
             hint = new_hint;
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
             hint_iterator = hint.second.at(0).begin();
-            got_tt_hint = hint.second.size() >= 2;
-            if( got_tt_hint )
-                tt_hint = hint.second.at(1);
             values_generator = [this]() -> Value
             {
                 if( hint_iterator != hint.second.at(0).end() )

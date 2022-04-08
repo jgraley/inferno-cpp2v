@@ -121,13 +121,6 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     if( !current_var || plan.hint_expressions_tt.count(current_var)==0 )
         return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
 
-#if 1
-    // We seem to need this before TT solver gets a test pass. It seems to mean, "If 
-    // the old solver didn't like the equation, we can't trust the TT solver with it"
-    if( plan.hint_expressions.count(current_var)==0 )
-        return make_tuple(false, Hint()); 
-#endif 
-
     shared_ptr<SYM::SymbolExpression> hint_expression_tt = plan.hint_expressions_tt.at(current_var);
     shared_ptr<SYM::SymbolResultInterface> hint_result_tt = hint_expression_tt->Evaluate( kit );
     ASSERT( hint_result_tt );
@@ -136,6 +129,26 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     if( !ok_tt || hint_links_tt.empty() )
         return make_tuple(false, Hint(current_var, {})); // effectively a failure to evaluate
           
+#if 0
+    // We seem to need this before TT solver gets a test pass. It seems to mean, "If 
+    // the old solver didn't like the equation, we can't trust the TT solver with it"
+    if( plan.hint_expressions.count(current_var)==0 )
+    {
+        FTRACE("\n\nConsistentcy equation\n")
+              (plan.consistency_expression)
+              ("\nCurrent variable: ")(current_var)
+              ("\nTT solver gave\n")
+              (plan.hint_expressions_tt.at(current_var))
+              ("\nCurrent assignments are:\n")
+              (assignments)
+              ("\nHint result: ")(hint_result_tt)
+              ("\nTryGetAsSetOfXLinks() result: ")(ok_tt)
+              ("\nHint links:\n")
+              (hint_links_tt)("\n");
+        return make_tuple(false, Hint( current_var, {hint_links_tt, hint_links_tt} )); 
+    }
+#endif 
+
     Hint hint( current_var, {hint_links_tt} );
     return make_tuple(false, hint);
 }

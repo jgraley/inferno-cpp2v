@@ -95,8 +95,11 @@ shared_ptr<SymbolResultInterface> MultiConditionalOperator::Evaluate( const Eval
             
         int_control |= (int)r->GetAsBool() << i;
     }
-    
-    return options[int_control]->Evaluate(kit);
+        
+    shared_ptr<SymbolResultInterface> result = options[int_control]->Evaluate(kit);
+    //FTRACE("Option %d is:", int_control)(options[int_control])("\n")
+    //      ("Evaluates to:")(result)("\n");
+    return result;
 }
 
 

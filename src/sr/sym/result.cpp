@@ -175,7 +175,7 @@ SR::XLink SymbolSetResult::GetAsXLink() const
 
 bool SymbolSetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {
-    if( !complement_flag ) // Refusing to extensionalise a complement set
+    if( complement_flag ) // Refusing to extensionalise a complement set
         return false;
     links = xlinks;
     return true;
