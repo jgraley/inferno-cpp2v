@@ -353,20 +353,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #endif
 
 #ifdef TAKE_HINTS
-        if( ok && got_tt_hint )
-        {
-            ASSERT( !tt_hint.empty() );
-            ASSERT( tt_hint.count(value) > 0 )("Confirmed consistent value: ")(value)("\nTT hint set:\n")(tt_hint); 
-        }
         // TODO take multiple hints see #462
-        
-        if( !ok && new_hint.second.size() == 2 && !tried_hint )
-        {
-            got_tt_hint = true;
-            tt_hint = new_hint.second.at(1);
-            ASSERT( !tt_hint.empty() );
-            tried_hint = true;
-        }
         if( !ok && new_hint.second.size() == 1 && !tried_hint ) // hint now guaranteed to be for current variable
         {
             hint = new_hint;

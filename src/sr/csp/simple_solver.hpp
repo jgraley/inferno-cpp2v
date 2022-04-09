@@ -94,8 +94,6 @@ private:
         const VariableId current_var;
         bool tried_hint;    
         function<Value()> values_generator;  
-        bool got_tt_hint = false;
-        set<Value> tt_hint;
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
 #endif

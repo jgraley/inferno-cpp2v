@@ -118,6 +118,7 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     if( result->IsDefinedAndTrue() )
         return make_tuple(true, Hint()); // Successful
       
+#if 0
     if( !current_var || plan.hint_expressions_tt.count(current_var)==0 )
         return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
 
@@ -129,27 +130,22 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
     if( !ok_tt || hint_links_tt.empty() )
         return make_tuple(false, Hint(current_var, {})); // effectively a failure to evaluate
           
-#if 0
-    // We seem to need this before TT solver gets a test pass. It seems to mean, "If 
-    // the old solver didn't like the equation, we can't trust the TT solver with it"
-    if( plan.hint_expressions.count(current_var)==0 )
-    {
-        FTRACE("\n\nConsistentcy equation\n")
-              (plan.consistency_expression)
-              ("\nCurrent variable: ")(current_var)
-              ("\nTT solver gave\n")
-              (plan.hint_expressions_tt.at(current_var))
-              ("\nCurrent assignments are:\n")
-              (assignments)
-              ("\nHint result: ")(hint_result_tt)
-              ("\nTryGetAsSetOfXLinks() result: ")(ok_tt)
-              ("\nHint links:\n")
-              (hint_links_tt)("\n");
-        return make_tuple(false, Hint( current_var, {hint_links_tt, hint_links_tt} )); 
-    }
-#endif 
-
     Hint hint( current_var, {hint_links_tt} );
+#else
+    if( !current_var || plan.hint_expressions.count(current_var)==0 )
+        return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
+
+    shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
+    shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
+    ASSERT( hint_result );
+    set<SR::XLink> hint_links;
+    bool ok = hint_result->TryGetAsSetOfXLinks(hint_links);
+    if( !ok || hint_links.empty() )
+        return make_tuple(false, Hint(current_var, {})); // effectively a failure to evaluate
+          
+    Hint hint( current_var, {hint_links} );
+#endif
+    
     return make_tuple(false, hint);
 }
 
