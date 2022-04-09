@@ -112,9 +112,9 @@ private:
 #else
     typedef tuple<bool, Hint> TestRV;
 #endif
-    TestRV Test( const Assignments &assigns,
-                 const ConstraintSet &to_test,
-                 const VariableId &current_var ) const;
+    TestRV ConsistencyCheck( const Assignments &assigns,
+                             const ConstraintSet &to_test,
+                             const VariableId &current_var ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;

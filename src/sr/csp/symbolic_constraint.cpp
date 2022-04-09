@@ -9,7 +9,7 @@
 #include "../sym/result.hpp"
 
 //#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
-
+#define COMPARE_HINTS
 
 using namespace CSP;
 
@@ -92,8 +92,7 @@ void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
 }   
 
 
-tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
-                                            const VariableId &current_var )
+bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
 {   
     INDENT("T");
     ASSERT(plan.consistency_expression);
@@ -115,38 +114,46 @@ tuple<bool, Hint> SymbolicConstraint::Test( const Assignments &assignments,
         ASSERT( *alt_result == *result )(*alt_result)(" != ")(*result);
     }
     
-    if( result->IsDefinedAndTrue() )
-        return make_tuple(true, Hint()); // Successful
-      
-#if 0
-    if( !current_var || plan.hint_expressions_tt.count(current_var)==0 )
-        return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
+    return result->IsDefinedAndTrue(); 
+}
 
-    shared_ptr<SYM::SymbolExpression> hint_expression_tt = plan.hint_expressions_tt.at(current_var);
-    shared_ptr<SYM::SymbolResultInterface> hint_result_tt = hint_expression_tt->Evaluate( kit );
-    ASSERT( hint_result_tt );
+
+pair<bool, set<Value>> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
+                                                               const VariableId &var ) const
+{                                 
+    ASSERT( var );
+    SYM::Expression::EvalKit kit { &assignments, knowledge };    
     set<SR::XLink> hint_links_tt;
-    bool ok_tt = hint_result_tt->TryGetAsSetOfXLinks(hint_links_tt);
-    if( !ok_tt || hint_links_tt.empty() )
-        return make_tuple(false, Hint(current_var, {})); // effectively a failure to evaluate
-          
-    Hint hint( current_var, {hint_links_tt} );
-#else
-    if( !current_var || plan.hint_expressions.count(current_var)==0 )
-        return make_tuple(false, Hint()); // We don't want a hint or don't have expression for one in the plan
+    bool ok_tt = false;
+    if( plan.hint_expressions_tt.count(var)>0 )
+    {
+        shared_ptr<SYM::SymbolExpression> hint_expression_tt = plan.hint_expressions_tt.at(var);
+        shared_ptr<SYM::SymbolResultInterface> hint_result_tt = hint_expression_tt->Evaluate( kit );
+        ASSERT( hint_result_tt );
+        ok_tt = hint_result_tt->TryGetAsSetOfXLinks(hint_links_tt);
+    }
 
-    shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(current_var);
-    shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
-    ASSERT( hint_result );
     set<SR::XLink> hint_links;
-    bool ok = hint_result->TryGetAsSetOfXLinks(hint_links);
-    if( !ok || hint_links.empty() )
-        return make_tuple(false, Hint(current_var, {})); // effectively a failure to evaluate
-          
-    Hint hint( current_var, {hint_links} );
+    bool ok = false;
+    if( plan.hint_expressions.count(var)>0 )
+    {
+
+        shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(var);
+        shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
+        ASSERT( hint_result );
+        ok = hint_result->TryGetAsSetOfXLinks(hint_links);
+    }
+#ifdef COMPARE_HINTS    
+    if( ok )
+    {
+        ASSERT( ok_tt );
+        ASSERT( hint_links_tt.size() <= hint_links.size() );
+    }
 #endif
     
-    return make_tuple(false, hint);
+    if( !ok_tt )
+        return make_pair(false, set<Value>()); // effectively a failure to evaluate         
+    return make_pair(true, hint_links_tt);
 }
 
 

@@ -148,7 +148,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     // (=free variables), so fully forced constraints will be tested. From here on we can test only 
     // constraints affected by changed assignments.
     TRACE("testing\n");
-    auto t = Test( assignments, plan.fully_forced_constraint_set, VariableId() );
+    auto t = ConsistencyCheck( assignments, plan.fully_forced_constraint_set, VariableId() );
     TRACE("tested\n");
     
     if( !get<0>(t) )
@@ -349,7 +349,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         tie(ok, new_hint, unsatisfied) = solver.Test( assignments, constraints_to_test, current_var );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok, new_hint) = solver.Test( assignments, constraints_to_test, current_var );        
+        tie(ok, new_hint) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
 #endif
 
 #ifdef TAKE_HINTS
@@ -359,10 +359,10 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
             hint = new_hint;
             TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
-            hint_iterator = hint.second.at(0).begin();
+            hint_iterator = hint.second.begin();
             values_generator = [this]() -> Value
             {
-                if( hint_iterator != hint.second.at(0).end() )
+                if( hint_iterator != hint.second.end() )
                 {                     
                     Value v = *hint_iterator;
                     hint_iterator++;
@@ -400,9 +400,9 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 }
 
 
-SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assignments,
-                                         const ConstraintSet &to_test,
-                                         const VariableId &current_var ) const 
+SimpleSolver::TestRV SimpleSolver::ConsistencyCheck( const Assignments &assignments,
+                                                     const ConstraintSet &to_test,
+                                                     const VariableId &current_var ) const 
 {
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
@@ -411,13 +411,18 @@ SimpleSolver::TestRV SimpleSolver::Test( const Assignments &assignments,
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
-        Hint chint;
         bool my_matched;
-        tie(my_matched, chint) = c->Test(assignments, current_var); 
+        my_matched = c->IsConsistent(assignments); 
         if( !my_matched )
         {            
-            if( chint.first && !hint.first ) // could have a hint            
-                hint = chint; // pick the first
+            if( current_var )
+            {
+                bool hint_ok;
+                set<Value> hs;
+                tie(hint_ok, hs) = c->GetSuggestedValues( assignments, current_var );
+                if( hint_ok && !hint.first ) // first sucecessful hint
+                    hint = Hint( current_var, hs ); // pick the first
+            }
             matched = false;
 #ifdef BACKJUMPING
             unsatisfied.insert( c );

@@ -53,9 +53,9 @@ private:
 
     const set<VariableId> &GetVariables() const override;
     virtual void Start( const SR::TheKnowledge *knowledge_ );    
-    tuple<bool, Hint> Test( const Assignments &assignments,
-                            const VariableId &current_var ) override;
-            
+    bool IsConsistent( const Assignments &assignments ) const override;
+    pair<bool, set<Value>> GetSuggestedValues( const Assignments &assignments,
+                                               const VariableId &var ) const override;               
     const SR::TheKnowledge *knowledge;
     
     void Dump() const;

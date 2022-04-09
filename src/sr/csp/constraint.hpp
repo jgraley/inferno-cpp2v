@@ -25,7 +25,7 @@ typedef SR::PatternLink VariableId;
 typedef SR::LocatedLink Assignment;
 typedef map<VariableId, Value> Assignments;
 typedef Assignments Solution;
-typedef pair<SR::PatternLink, vector<set<SR::XLink>>> Hint;
+typedef pair<SR::PatternLink, set<SR::XLink>> Hint;
 
 
 /** Implements a systemic constraint as discussed in #107
@@ -60,10 +60,25 @@ public:
      * @note All required variables should be present. Variables not used 
      * by this constraint are ignored.
      * 
-     * @return A tuple of: success (true of consistent) and an optional hint.
+     * @return True if consistent.
      */
-    virtual tuple<bool, Hint> Test( const Assignments &assignments,
-                                    const VariableId &current_var ) = 0;        
+    virtual bool IsConsistent( const Assignments &assignments ) const = 0;        
+    
+    /**
+     * Get a set of values for a given variable that contains all satisfying values. 
+     * 
+     * @param assignments [in] a partial assignment of free and forced 
+     * varaibles for this constraint. 
+     * 
+     * @param var [in] the variables to get suggested values for. Must be a free
+     * variable of this constraint.
+     * 
+     * @return a pair of: boolean indcating success, set of suggested values
+     * 
+     * @note the returned set is allowed to contain inconsistent values. 
+     */
+    virtual pair<bool, set<Value>> GetSuggestedValues( const Assignments &assignments,
+                                                       const VariableId &var ) const = 0;        
     
     string GetTrace() const;
 
