@@ -266,6 +266,12 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
 }
 
        
+SimpleSolver::ValueSelector::~ValueSelector()
+{
+    assignments.erase(current_var);
+}
+
+
 void SimpleSolver::ValueSelector::SetupDefaultGenerator()
 {
     Value start_val = knowledge->depth_first_ordered_domain.front();   
@@ -312,9 +318,26 @@ void SimpleSolver::ValueSelector::SetupDefaultGenerator()
 }
 
 
-SimpleSolver::ValueSelector::~ValueSelector()
+void SimpleSolver::ValueSelector::SetupSuggestionGenerator( set<Value> s )
 {
-    assignments.erase(current_var);
+    suggested = s;
+    TRACE("At ")(current_var)(", got suggestion ")(suggested)(" - rewriting queue\n"); 
+    // Taking hint means new generator that only reveals the hint
+    suggestion_iterator = suggested.begin();
+    values_generator = [this]() -> Value
+    {
+        if( suggestion_iterator != suggested.end() )
+        {                     
+            Value v = *suggestion_iterator;
+            suggestion_iterator++;
+            return v;
+        }
+        else
+        {
+            return Value();
+        }
+    };
+    suggestion_ok = true;
 }
 
 
@@ -350,24 +373,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         // TODO take multiple hints see #462
         if( !ok && sok && !suggestion_ok ) // hint now guaranteed to be for current variable
         {
-            suggested = s;
-            TRACE("At ")(current_var)(", got suggestion ")(suggested)(" - rewriting queue\n"); 
-            // Taking hint means new generator that only reveals the hint
-            suggestion_iterator = suggested.begin();
-            values_generator = [this]() -> Value
-            {
-                if( suggestion_iterator != suggested.end() )
-                {                     
-                    Value v = *suggestion_iterator;
-                    suggestion_iterator++;
-                    return v;
-                }
-                else
-                {
-                    return Value();
-                }
-            };
-            suggestion_ok = true;
+            SetupSuggestionGenerator(s);
         }
 #endif
        

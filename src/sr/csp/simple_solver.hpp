@@ -77,9 +77,9 @@ private:
                        const SR::TheKnowledge *knowledge,
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
-        void SetupDefaultGenerator();
-        //void SetupSuggestionGenerator();
         ~ValueSelector();
+        void SetupDefaultGenerator();
+        void SetupSuggestionGenerator( set<Value> s );
 #ifdef BACKJUMPING
         typedef pair<Value, ConstraintSet> SelectNextValueRV;
 #else
