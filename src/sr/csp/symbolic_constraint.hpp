@@ -46,16 +46,15 @@ private:
         SymbolicConstraint * const algo;
         shared_ptr<SYM::BooleanExpression> consistency_expression;        
         set<VariableId> variables;
-        map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions;
-        map<VariableId, shared_ptr<SYM::SymbolExpression>> hint_expressions_tt;
+        map<VariableId, shared_ptr<SYM::SymbolExpression>> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;        
     } plan;
 
     const set<VariableId> &GetVariables() const override;
     virtual void Start( const SR::TheKnowledge *knowledge_ );    
     bool IsConsistent( const Assignments &assignments ) const override;
-    pair<bool, set<Value>> GetSuggestedValues( const Assignments &assignments,
-                                               const VariableId &var ) const override;               
+    shared_ptr<SYM::SymbolSetResult> GetSuggestedValues( const Assignments &assignments,
+                                                         const VariableId &var ) const override;               
     const SR::TheKnowledge *knowledge;
     
     void Dump() const;

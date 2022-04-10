@@ -3,6 +3,7 @@
 #include "query.hpp"
 #include "agents/agent.hpp"
 #include "the_knowledge.hpp"
+#include "../sym/result.hpp"
 
 #include <algorithm>
 
@@ -262,31 +263,32 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
-    bool suggestion_ok = false;
-    set<Value> suggested; 
+    bool rok = false;
+    shared_ptr<SYM::SymbolSetResult> result; 
     for( shared_ptr<Constraint> c : constraints_to_test )
     {                               
         if( current_var )
         {
-            bool sok;
-            set<Value> s;
-            tie(sok, s) = c->GetSuggestedValues( assignments, current_var );
-            if( !sok )
-                continue;
-            if( !suggestion_ok ) // first successful hint
+            shared_ptr<SYM::SymbolSetResult> r = c->GetSuggestedValues( assignments, current_var );
+            if( !rok ) // first successful hint
             {
-                suggestion_ok = true;
-                suggested = s;
+                result = r;
+                rok = true;
             }
-            else
+            else // subsequent hit should obtain intersection
             {
-                suggested = IntersectionOf(suggested, s);
+                result = SYM::SymbolSetResult::GetIntersection({result, r});
             }
         }
     }
+
+    set<Value> s;
+    bool sok = false;
+    if( rok )
+        sok = result->TryGetAsSetOfXLinks(s);
        
-    if( suggestion_ok )
-        SetupSuggestionGenerator( suggested );
+    if( rok && sok )
+        SetupSuggestionGenerator( s );
     else
         SetupDefaultGenerator();
 }

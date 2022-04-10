@@ -42,14 +42,11 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
 {
     TRACE("Trying to solve:\n")(consistency_expression->Render())("\n")
          ("For variables:\n")(variables)("\n");
-            
-    // Old solver
-    SYM::SymSolver my_solver(consistency_expression);
-    
+   
     // Truth-table solver
-    SYM::TruthTableSolver my_tt_solver(consistency_expression);
-    my_tt_solver.PreSolve();    
-    alt_expression_for_testing = my_tt_solver.GetAltEquationForTesting();
+    SYM::TruthTableSolver my_solver(consistency_expression);
+    my_solver.PreSolve();    
+    //alt_expression_for_testing = my_solver.GetAltEquationForTesting();
     
     for( VariableId v : variables )
     {        
@@ -58,18 +55,11 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
         //my_tt_solver.TrySolveFor(v_expr); // Just for the logs, for now
         
         shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(v_expr);
-        shared_ptr<SYM::SymbolExpression> hett = my_tt_solver.TrySolveFor(v_expr);
         if( he )
         {
             TRACEC("Solved old style for variable: ")(v)
                   ("\nSolution:\n")(he->Render())("\n");
-            hint_expressions[v] = he; // only store good ones in the map            
-        }
-        if( hett )
-        {
-            TRACEC("Solved truth-table style for variable: ")(v)
-                  ("\nSolution:\n")(he->Render())("\n");
-            hint_expressions_tt[v] = hett; // only store good ones in the map            
+            suggestion_expressions[v] = he; // only store good ones in the map            
         }
     }
 }
@@ -120,49 +110,35 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
 }
 
 
-pair<bool, set<Value>> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
-                                                               const VariableId &var ) const
+shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
+                                                                               const VariableId &var ) const
 {                                 
     ASSERT( var );
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
-    set<Value> hint_links_tt;
-    bool ok_tt = false;
-    if( plan.hint_expressions_tt.count(var)>0 )
-    {
-        shared_ptr<SYM::SymbolExpression> hint_expression_tt = plan.hint_expressions_tt.at(var);
-        shared_ptr<SYM::SymbolResultInterface> hint_result_tt = hint_expression_tt->Evaluate( kit );
-        ASSERT( hint_result_tt );
-        ok_tt = hint_result_tt->TryGetAsSetOfXLinks(hint_links_tt);
-    }
 
-    set<Value> hint_links;
     bool ok = false;
-    if( plan.hint_expressions.count(var)>0 )
-    {
-        shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(var);
-        shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
-        ASSERT( hint_result );
-        ok = hint_result->TryGetAsSetOfXLinks(hint_links);
-    }
-#ifdef COMPARE_HINTS    
-    if( ok )
-    {
-        ASSERT( ok_tt );
-        ASSERT( hint_links_tt.size() <= hint_links.size() );
-    }
-#endif
+    if( !plan.suggestion_expressions.count(var)>0 )
+        return nullptr;
+        
+    shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(var);
+    shared_ptr<SYM::SymbolResultInterface> hr = hint_expression->Evaluate( kit );
+    ASSERT( hr );
+    shared_ptr<SYM::SymbolSetResult> hint_result = dynamic_pointer_cast<SYM::SymbolSetResult>(hr);
+    ASSERT( hint_result );
+    set<Value> hint_links;
+    ok = hint_result->TryGetAsSetOfXLinks(hint_links);
+
     gsv_n++;
-    if( !ok_tt )
+    if( !ok )
     {
         gsv_nfail++;
-        return make_pair(false, set<Value>()); // effectively a failure to evaluate         
+        return hint_result; // effectively a failure to evaluate         
     }
-    //ASSERT( !hint_links_tt.empty() )(var)("\n")(plan.hint_expressions_tt.at(var));
-    if( hint_links_tt.empty() )
+    if( hint_links.empty() )
         gsv_nempty++;
     else
-        gsv_tot += hint_links_tt.size();
-    return make_pair(true, hint_links_tt);
+        gsv_tot += hint_links.size();
+    return hint_result;
 }
 
 
@@ -171,7 +147,7 @@ void SymbolicConstraint::Dump() const
     TRACE("Degree: ")(plan.variables.size())("\n"); // keep this - useful for quickly checking the degrees
     TRACEC("Variables: ")(plan.variables)("\n");
     TRACEC("Consistency expression: ")(plan.consistency_expression->Render())("\n");
-    for( auto p : plan.hint_expressions )
+    for( auto p : plan.suggestion_expressions )
         TRACEC("Hint expression for ")(p.first)(" is ")(p.second->Render())("\n");
 }      
 

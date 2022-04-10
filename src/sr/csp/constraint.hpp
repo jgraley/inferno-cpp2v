@@ -18,6 +18,11 @@ class Agent;
 class TheKnowledge;
 };
 
+namespace SYM
+{
+class SymbolSetResult;
+};
+
 namespace CSP
 { 
 typedef SR::XLink Value;
@@ -73,12 +78,12 @@ public:
      * @param var [in] the variables to get suggested values for. Must be a free
      * variable of this constraint.
      * 
-     * @return a pair of: boolean indcating success, set of suggested values
+     * @return A symbolic result which, as a set, should contain all suggested values
      * 
      * @note the returned set is allowed to contain inconsistent values. 
      */
-    virtual pair<bool, set<Value>> GetSuggestedValues( const Assignments &assignments,
-                                                       const VariableId &var ) const = 0;        
+    virtual shared_ptr<SYM::SymbolSetResult> GetSuggestedValues( const Assignments &assignments,
+                                                                 const VariableId &var ) const = 0;        
     
     string GetTrace() const;
 
