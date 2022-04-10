@@ -6,7 +6,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
-#include "the_knowledge.hpp"
+#include "../the_knowledge.hpp"
 
 #include <chrono>
 #include <functional>
@@ -109,6 +109,15 @@ private:
         bool suggestion_ok = false;
         set<Value> suggested; 
         set<Value>::iterator suggestion_iterator;               
+
+    public:
+        static void DumpGSV();
+        
+    private:
+        static uint64_t gsv_n;
+        static uint64_t gsv_nfail;
+        static uint64_t gsv_nempty;
+        static uint64_t gsv_tot;    
     };
 
 #ifdef BACKJUMPING
@@ -136,6 +145,8 @@ private:
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;
+public:
+    static void DumpGSV();
 };
 
 };

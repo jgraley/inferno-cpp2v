@@ -21,7 +21,7 @@
 #include "steps/to_sc_method.hpp"
 #include "render/doc_graphs.hpp"
 #include "unit_test.hpp"
-#include "sr/csp/symbolic_constraint.hpp"
+#include "sr/csp/simple_solver.hpp"
 
 #include <cstdlib>
 
@@ -496,7 +496,7 @@ int main( int argc, char *argv[] )
     
     Inferno inferno;
     inferno.Run();
-    CSP::SymbolicConstraint::DumpGSV();
+    CSP::SimpleSolver::DumpGSV();
     return EXIT_SUCCESS;
 }
 

@@ -125,19 +125,6 @@ shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const A
     ASSERT( hr );
     shared_ptr<SYM::SymbolSetResult> hint_result = dynamic_pointer_cast<SYM::SymbolSetResult>(hr);
     ASSERT( hint_result );
-    set<Value> hint_links;
-    ok = hint_result->TryGetAsSetOfXLinks(hint_links);
-
-    gsv_n++;
-    if( !ok )
-    {
-        gsv_nfail++;
-        return hint_result; // effectively a failure to evaluate         
-    }
-    if( hint_links.empty() )
-        gsv_nempty++;
-    else
-        gsv_tot += hint_links.size();
     return hint_result;
 }
 
@@ -152,16 +139,3 @@ void SymbolicConstraint::Dump() const
 }      
 
 
-void SymbolicConstraint::DumpGSV()
-{
-    FTRACES("GetSuggestedValues dump\n");
-    FTRACEC("Failure to extensionalise: %f%%\n", 100.0*gsv_nfail/gsv_n);
-    FTRACEC("Empty set: %f%%\n", 100.0*gsv_nempty/gsv_n);
-    FTRACEC("Average size of successful, non-empty: %f\n", 1.0*gsv_tot/(gsv_n-gsv_nfail-gsv_nempty));
-}
-
-
-uint64_t SymbolicConstraint::gsv_n = 0;
-uint64_t SymbolicConstraint::gsv_nfail = 0;
-uint64_t SymbolicConstraint::gsv_nempty = 0;
-uint64_t SymbolicConstraint::gsv_tot = 0;

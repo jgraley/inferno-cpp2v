@@ -58,15 +58,6 @@ private:
     const SR::TheKnowledge *knowledge;
     
     void Dump() const;
-    
-public:
-    static void DumpGSV();
-    
-private:
-    static uint64_t gsv_n;
-    static uint64_t gsv_nfail;
-    static uint64_t gsv_nempty;
-    static uint64_t gsv_tot;
 };
 
 };

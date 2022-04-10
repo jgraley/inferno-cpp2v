@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #define TRACK_BEST_ASSIGNMENT
+#define GATHER_GSV
 
 using namespace CSP;
 
@@ -276,6 +277,16 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     ASSERT( result );
     bool sok = result->TryGetAsSetOfXLinks(s);
        
+#ifdef GATHER_GSV
+    gsv_n++;
+    if( !sok )
+        gsv_nfail++;
+    else if( s.empty() )
+        gsv_nempty++;
+    else
+        gsv_tot += s.size();
+#endif       
+              
     if( sok )
         SetupSuggestionGenerator( s );
     else
@@ -408,6 +419,21 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 }
 
 
+void SimpleSolver::ValueSelector::DumpGSV()
+{
+    FTRACES("Suggestions dump\n");
+    FTRACEC("Failure to extensionalise: %f%%\n", 100.0*gsv_nfail/gsv_n);
+    FTRACEC("Empty set: %f%%\n", 100.0*gsv_nempty/gsv_n);
+    FTRACEC("Average size of successful, non-empty: %f\n", 1.0*gsv_tot/(gsv_n-gsv_nfail-gsv_nempty));
+}
+
+
+uint64_t SimpleSolver::ValueSelector::gsv_n = 0;
+uint64_t SimpleSolver::ValueSelector::gsv_nfail = 0;
+uint64_t SimpleSolver::ValueSelector::gsv_nempty = 0;
+uint64_t SimpleSolver::ValueSelector::gsv_tot = 0;
+
+
 SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignments,
                                                    const ConstraintSet &to_test,
                                                    const VariableId &current_var ) const 
@@ -530,4 +556,10 @@ void SimpleSolver::Dump() const
     for( shared_ptr<Constraint> c : plan.constraints )    
         c->Dump();   
     TRACEC("%d free variables:\n", plan.free_variables.size())(plan.free_variables)("\n");        
+}
+
+
+void SimpleSolver::DumpGSV()
+{
+    SimpleSolver::ValueSelector::DumpGSV();
 }
