@@ -1,7 +1,7 @@
 #ifndef CONSTRAINT_HPP
 #define CONSTRAINT_HPP
 
-#include "query.hpp"
+//#include "query.hpp"
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"

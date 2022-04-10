@@ -8,6 +8,8 @@
 #include "../sym/sym_solver.hpp"
 #include "../sym/result.hpp"
 
+#include <inttypes.h> 
+
 //#define CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
 #define COMPARE_HINTS
 
@@ -123,7 +125,7 @@ pair<bool, set<Value>> SymbolicConstraint::GetSuggestedValues( const Assignments
 {                                 
     ASSERT( var );
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
-    set<SR::XLink> hint_links_tt;
+    set<Value> hint_links_tt;
     bool ok_tt = false;
     if( plan.hint_expressions_tt.count(var)>0 )
     {
@@ -133,11 +135,10 @@ pair<bool, set<Value>> SymbolicConstraint::GetSuggestedValues( const Assignments
         ok_tt = hint_result_tt->TryGetAsSetOfXLinks(hint_links_tt);
     }
 
-    set<SR::XLink> hint_links;
+    set<Value> hint_links;
     bool ok = false;
     if( plan.hint_expressions.count(var)>0 )
     {
-
         shared_ptr<SYM::SymbolExpression> hint_expression = plan.hint_expressions.at(var);
         shared_ptr<SYM::SymbolResultInterface> hint_result = hint_expression->Evaluate( kit );
         ASSERT( hint_result );
@@ -150,9 +151,17 @@ pair<bool, set<Value>> SymbolicConstraint::GetSuggestedValues( const Assignments
         ASSERT( hint_links_tt.size() <= hint_links.size() );
     }
 #endif
-    
+    gsv_n++;
     if( !ok_tt )
+    {
+        gsv_nfail++;
         return make_pair(false, set<Value>()); // effectively a failure to evaluate         
+    }
+    //ASSERT( !hint_links_tt.empty() )(var)("\n")(plan.hint_expressions_tt.at(var));
+    if( hint_links_tt.empty() )
+        gsv_nempty++;
+    else
+        gsv_tot += hint_links_tt.size();
     return make_pair(true, hint_links_tt);
 }
 
@@ -165,3 +174,18 @@ void SymbolicConstraint::Dump() const
     for( auto p : plan.hint_expressions )
         TRACEC("Hint expression for ")(p.first)(" is ")(p.second->Render())("\n");
 }      
+
+
+void SymbolicConstraint::DumpGSV()
+{
+    FTRACES("GetSuggestedValues dump\n");
+    FTRACEC("Failure to extensionalise: %f%%\n", 100.0*gsv_nfail/gsv_n);
+    FTRACEC("Empty set: %f%%\n", 100.0*gsv_nempty/gsv_n);
+    FTRACEC("Average size of successful, non-empty: %f\n", 1.0*gsv_tot/(gsv_n-gsv_nfail-gsv_nempty));
+}
+
+
+uint64_t SymbolicConstraint::gsv_n = 0;
+uint64_t SymbolicConstraint::gsv_nfail = 0;
+uint64_t SymbolicConstraint::gsv_nempty = 0;
+uint64_t SymbolicConstraint::gsv_tot = 0;
