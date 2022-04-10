@@ -272,13 +272,9 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     }
 
     set<Value> s;
-    bool sok = false;
-    if( !rl.empty() )
-    {
-        shared_ptr<SYM::SymbolSetResult> result = SYM::SymbolSetResult::GetIntersection(rl);
-        ASSERT( result );
-        sok = result->TryGetAsSetOfXLinks(s);
-    }
+    shared_ptr<SYM::SymbolSetResult> result = SYM::SymbolSetResult::GetIntersection(rl);
+    ASSERT( result );
+    bool sok = result->TryGetAsSetOfXLinks(s);
        
     if( sok )
         SetupSuggestionGenerator( s );
