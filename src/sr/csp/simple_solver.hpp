@@ -94,6 +94,8 @@ private:
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
+        const ConstraintSet &constraints_to_test;
+        
         function<Value()> values_generator;  
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     

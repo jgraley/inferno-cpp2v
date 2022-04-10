@@ -11,7 +11,6 @@
 using namespace CSP;
 
 // BACKJUMPING moved to header
-#define TAKE_HINTS
 
 SimpleSolver::Plan::Plan( SimpleSolver *algo_,
                           const list< shared_ptr<Constraint> > &constraints_, 
@@ -23,7 +22,7 @@ SimpleSolver::Plan::Plan( SimpleSolver *algo_,
     forced_variables(forced_variables_)
 {
     DeduceVariables();
-}
+} 
 
 
 void SimpleSolver::Plan::DeduceVariables()
@@ -256,13 +255,40 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     current_it( current_it_ ),
-    current_var( *current_it )
+    current_var( *current_it ),
+    constraints_to_test( solver_plan.completed_constraints.at(current_var) )
 {
     //ASSERT( current_it != solver_plan.free_variables.end() );
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
-    SetupDefaultGenerator();
+    bool suggestion_ok = false;
+    set<Value> suggested; 
+    for( shared_ptr<Constraint> c : constraints_to_test )
+    {                               
+        if( current_var )
+        {
+            bool sok;
+            set<Value> s;
+            tie(sok, s) = c->GetSuggestedValues( assignments, current_var );
+            if( !sok )
+                continue;
+            if( !suggestion_ok ) // first successful hint
+            {
+                suggestion_ok = true;
+                suggested = s;
+            }
+            else
+            {
+                suggested = IntersectionOf(suggested, s);
+            }
+        }
+    }
+       
+    if( suggestion_ok )
+        SetupSuggestionGenerator( suggested );
+    else
+        SetupDefaultGenerator();
 }
 
        
@@ -359,7 +385,6 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
               ("\ncompleted_constraints:\n")(solver_plan.completed_constraints)
               ("\ncurrent_var: ")(current_var);
-        const ConstraintSet &constraints_to_test = solver_plan.completed_constraints.at(current_var);
         Hint new_hint;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
@@ -368,15 +393,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #else
         tie(ok, sok, s) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
 #endif
-
-#ifdef TAKE_HINTS
-        // TODO take multiple hints see #462
-        if( !ok && sok && !suggestion_ok ) // hint now guaranteed to be for current variable
-        {
-            SetupSuggestionGenerator(s);
-        }
-#endif
-       
+   
 #ifdef BACKJUMPING
         all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
 #endif       
@@ -416,19 +433,6 @@ SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignment
         my_matched = c->IsConsistent(assignments); 
         if( !my_matched )
         {            
-#ifdef TAKE_HINTS
-            if( current_var )
-            {
-                bool sok;
-                set<Value> s;
-                tie(sok, s) = c->GetSuggestedValues( assignments, current_var );
-                if( sok && !suggestion_ok ) // first successful hint
-                {
-                    suggestion_ok = true;
-                    suggested = s;
-                }
-            }
-#endif
             matched = false;
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
