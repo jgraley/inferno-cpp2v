@@ -263,31 +263,24 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
-    bool rok = false;
-    shared_ptr<SYM::SymbolSetResult> result; 
+    list<shared_ptr<SYM::SymbolSetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_test )
     {                               
-        if( current_var )
-        {
-            shared_ptr<SYM::SymbolSetResult> r = c->GetSuggestedValues( assignments, current_var );
-            if( !rok ) // first successful hint
-            {
-                result = r;
-                rok = true;
-            }
-            else // subsequent hit should obtain intersection
-            {
-                result = SYM::SymbolSetResult::GetIntersection({result, r});
-            }
-        }
+        shared_ptr<SYM::SymbolSetResult> r = c->GetSuggestedValues( assignments, current_var );
+        ASSERT( r );
+        rl.push_back(r);
     }
 
     set<Value> s;
     bool sok = false;
-    if( rok )
+    if( !rl.empty() )
+    {
+        shared_ptr<SYM::SymbolSetResult> result = SYM::SymbolSetResult::GetIntersection(rl);
+        ASSERT( result );
         sok = result->TryGetAsSetOfXLinks(s);
+    }
        
-    if( rok && sok )
+    if( sok )
         SetupSuggestionGenerator( s );
     else
         SetupDefaultGenerator();
