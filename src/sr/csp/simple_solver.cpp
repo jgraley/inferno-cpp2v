@@ -12,7 +12,6 @@ using namespace CSP;
 
 // BACKJUMPING moved to header
 #define TAKE_HINTS
-#define DYNAMIC_START_VALUE
 
 SimpleSolver::Plan::Plan( SimpleSolver *algo_,
                           const list< shared_ptr<Constraint> > &constraints_, 
@@ -257,27 +256,21 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     current_it( current_it_ ),
-    current_var( *current_it ),
-    tried_hint( false )
+    current_var( *current_it )
 {
     //ASSERT( current_it != solver_plan.free_variables.end() );
     ASSERT( assignments.count(current_var) == 0 );
     INDENT("V");
        
-    Value start_val = knowledge->depth_first_ordered_domain.front();
-    
-#ifdef DYNAMIC_START_VALUE    
-    if( current_it!=solver_plan.free_variables.begin() )
-    {
-        list<VariableId>::const_iterator prev_it = current_it;
-        --prev_it; 
-        start_val = assignments.at(*prev_it);   
-    }
-#endif
-    
-    const SR::TheKnowledge::Nugget &nugget( knowledge->GetNugget(start_val) );        
+    SetupDefaultGenerator();
+}
 
-    fwd_it = rev_it = nugget.depth_first_ordered_it;
+       
+void SimpleSolver::ValueSelector::SetupDefaultGenerator()
+{
+    Value start_val = knowledge->depth_first_ordered_domain.front();   
+    const SR::TheKnowledge::Nugget &start_nugget( knowledge->GetNugget(start_val) );        
+    fwd_it = rev_it = start_nugget.depth_first_ordered_it;
     
     // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
     go_forward = true;
@@ -336,7 +329,8 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
             break;
         assignments[current_var] = value;
         
-        bool ok;        
+        bool ok, sok;
+        set<Value> s;        
         ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
               ("\nfree_variables")(solver_plan.free_variables)
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
@@ -346,26 +340,26 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         Hint new_hint;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
-        tie(ok, new_hint, unsatisfied) = solver.Test( assignments, constraints_to_test, current_var );        
+        tie(ok, sok, s, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok, new_hint) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
+        tie(ok, sok, s) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
 #endif
 
 #ifdef TAKE_HINTS
         // TODO take multiple hints see #462
-        if( !ok && new_hint.second.size() == 1 && !tried_hint ) // hint now guaranteed to be for current variable
+        if( !ok && sok && !suggestion_ok ) // hint now guaranteed to be for current variable
         {
-            hint = new_hint;
-            TRACE("At ")(current_var)(", got hint ")(hint)(" - rewriting queue\n"); 
+            suggested = s;
+            TRACE("At ")(current_var)(", got suggestion ")(suggested)(" - rewriting queue\n"); 
             // Taking hint means new generator that only reveals the hint
-            hint_iterator = hint.second.begin();
+            suggestion_iterator = suggested.begin();
             values_generator = [this]() -> Value
             {
-                if( hint_iterator != hint.second.end() )
+                if( suggestion_iterator != suggested.end() )
                 {                     
-                    Value v = *hint_iterator;
-                    hint_iterator++;
+                    Value v = *suggestion_iterator;
+                    suggestion_iterator++;
                     return v;
                 }
                 else
@@ -373,7 +367,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
                     return Value();
                 }
             };
-            tried_hint = true;
+            suggestion_ok = true;
         }
 #endif
        
@@ -400,14 +394,15 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 }
 
 
-SimpleSolver::TestRV SimpleSolver::ConsistencyCheck( const Assignments &assignments,
-                                                     const ConstraintSet &to_test,
-                                                     const VariableId &current_var ) const 
+SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignments,
+                                                   const ConstraintSet &to_test,
+                                                   const VariableId &current_var ) const 
 {
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
 #endif
-    Hint hint;
+    bool suggestion_ok = false;
+    set<Value> suggested; 
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
@@ -415,14 +410,19 @@ SimpleSolver::TestRV SimpleSolver::ConsistencyCheck( const Assignments &assignme
         my_matched = c->IsConsistent(assignments); 
         if( !my_matched )
         {            
+#ifdef TAKE_HINTS
             if( current_var )
             {
-                bool hint_ok;
-                set<Value> hs;
-                tie(hint_ok, hs) = c->GetSuggestedValues( assignments, current_var );
-                if( hint_ok && !hint.first ) // first sucecessful hint
-                    hint = Hint( current_var, hs ); // pick the first
+                bool sok;
+                set<Value> s;
+                tie(sok, s) = c->GetSuggestedValues( assignments, current_var );
+                if( sok && !suggestion_ok ) // first successful hint
+                {
+                    suggestion_ok = true;
+                    suggested = s;
+                }
             }
+#endif
             matched = false;
 #ifdef BACKJUMPING
             unsatisfied.insert( c );
@@ -432,9 +432,9 @@ SimpleSolver::TestRV SimpleSolver::ConsistencyCheck( const Assignments &assignme
         }
     } 
 #ifdef BACKJUMPING
-    return make_tuple( matched, hint, unsatisfied );
+    return make_tuple( matched, suggestion_ok, suggested, unsatisfied );
 #else                       
-    return make_tuple( matched, hint );
+    return make_tuple( matched, suggestion_ok, suggested );
 #endif                       
 }
 

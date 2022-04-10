@@ -77,6 +77,8 @@ private:
                        const SR::TheKnowledge *knowledge,
                        Assignments &assignments,
                        list<VariableId>::const_iterator current_it );
+        void SetupDefaultGenerator();
+        //void SetupSuggestionGenerator();
         ~ValueSelector();
 #ifdef BACKJUMPING
         typedef pair<Value, ConstraintSet> SelectNextValueRV;
@@ -92,7 +94,6 @@ private:
         Assignments &assignments;
         const list<VariableId>::const_iterator current_it;
         const VariableId current_var;
-        bool tried_hint;    
         function<Value()> values_generator;  
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
@@ -103,18 +104,19 @@ private:
         bool go_forward;
         bool insert_mmax_next;
         int remaining_count;
-        Hint hint;  
-        set<SR::XLink>::iterator hint_iterator;        
+        bool suggestion_ok = false;
+        set<Value> suggested; 
+        set<Value>::iterator suggestion_iterator;               
     };
 
 #ifdef BACKJUMPING
-    typedef tuple<bool, Hint, ConstraintSet> TestRV;
+    typedef tuple<bool, bool, set<Value>, ConstraintSet> CCRV;
 #else
-    typedef tuple<bool, Hint> TestRV;
+    typedef tuple<bool, bool, set<Value>> CCRV;
 #endif
-    TestRV ConsistencyCheck( const Assignments &assigns,
-                             const ConstraintSet &to_test,
-                             const VariableId &current_var ) const;
+    CCRV ConsistencyCheck( const Assignments &assigns,
+                           const ConstraintSet &to_test,
+                           const VariableId &current_var ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;
