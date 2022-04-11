@@ -13,12 +13,12 @@ class PredicateOperator;
 
 // ------------------------- SymSolver --------------------------
 
-class SymSolver
+class SymSolver 
 {
 public:
     explicit SymSolver( shared_ptr<BooleanExpression> equation );
     void PreSolve();
-    shared_ptr<SymbolExpression> TrySolveFor(shared_ptr<SymbolExpression> target) const;
+    shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target ) const;
     shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
 
 private:
@@ -30,9 +30,13 @@ private:
 class TruthTableSolver
 {
 public:
+    typedef set<shared_ptr<SymbolVariable>, Expression::OrderComparer> GivenSymbolSet;
+
     TruthTableSolver( shared_ptr<BooleanExpression> equation );
+    
     void PreSolve();
-    shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target ) const;
+    shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target,
+                                              const GivenSymbolSet &givens ) const;
     shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
     
 private:

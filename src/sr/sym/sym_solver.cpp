@@ -71,82 +71,108 @@ void TruthTableSolver::PreSolve()
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExpression> target ) const
+shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExpression> target,
+                                                            const GivenSymbolSet &givens ) const
 {
     TRACE("Solve equation: ")(equation->Render())(" for ")(target->Render())("\n");
     ASSERT( ttwp )("You need to have done a PreSolve() first\n");
 
+    set<shared_ptr<PredicateOperator>> evaluatable_preds, solveable_preds;
+
+    // Categorise the preds
     set<int> dead_axes;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
         if( pred->IsIndependentOf(target) )
-            {}
+            evaluatable_preds.insert( pred );
         else if( pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) ) )
-            {}
-        else
-            dead_axes.insert(axis);
+            solveable_preds.insert( pred );
     }
     
+    // Get axis numbers for dead axes (neither evaluatable nor solveable) and fold them out
+    for( int axis=0; axis<ttwp->GetDegree(); axis++ )
+    {
+        auto pred = ttwp->GetFrontPredicate(axis);
+        if( evaluatable_preds.count(pred)==0 && solveable_preds.count(pred)==0 )
+            dead_axes.insert(axis);
+    }    
     if( !dead_axes.empty() )
         TRACEC("Folding out dead axes:\n")(dead_axes)("\n");
-    TruthTableWithPredicates my_ttwp( ttwp->GetFolded( dead_axes, false ) );
+    TruthTableWithPredicates folded_ttwp( ttwp->GetFolded( dead_axes, false ) );
     
-    vector<int> independent_axes, solveable_axes;
-    for( int axis=0; axis<my_ttwp.GetDegree(); axis++ )
+    // Get axis numbers for the evaluatable 
+    vector<int> evaluatable_axes, solveable_axes;
+    for( int axis=0; axis<folded_ttwp.GetDegree(); axis++ )
     {
-        auto pred = my_ttwp.GetFrontPredicate(axis);
-        if( pred->IsIndependentOf(target) )
-            independent_axes.push_back(axis);
-        else if( pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) ) )
+        auto pred = folded_ttwp.GetFrontPredicate(axis);
+        if( evaluatable_preds.count(pred) )
+            evaluatable_axes.push_back(axis);
+        if( solveable_preds.count(pred) ) 
             solveable_axes.push_back(axis);
-        else
-            ASSERTFAIL("Shoud not be any dead axes left");
     }
+    TRACEC(folded_ttwp.Render( ToSet(solveable_axes) ))("\n");
 
-    TRACEC(my_ttwp.Render( ToSet(solveable_axes) ))("\n");
-
+    // Controls in the multiplexor will be the evauators
     vector<shared_ptr<BooleanExpression>> controls;
-    for( int ia : independent_axes )
+    for( int axis : evaluatable_axes )
     {
-        controls.push_back( my_ttwp.GetFrontPredicate(ia) );
+        auto pred = folded_ttwp.GetFrontPredicate(axis);
+        controls.push_back( pred );
     }
 
-    vector<shared_ptr<SymbolExpression>> options;
-    ForPower( independent_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> independent_indices)
+    // Solve the soveables into a map opf solutions
+    map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> solution_map;
+    for( int axis : solveable_axes )
     {
-        map<int, bool> m;
-        for( int i=0; i<independent_axes.size(); i++ )
-            m[independent_axes.at(i)] = independent_indices.at(i);
-
-        TruthTableWithPredicates slice_ttwp( my_ttwp.GetSlice( m ) ); 
-        TRACEC("slice_ttwp ")(slice_ttwp.Render({}))("\n");
+        auto pred = folded_ttwp.GetFrontPredicate(axis);
+        shared_ptr<Expression> esolution = pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) );
+        if( !esolution )   // NULL means failed to solve
+            continue;
         
-        set<vector<bool>> svb = slice_ttwp.GetTruthTable().GetIndicesOfValue( true );
-        TRACEC("SVB ")(svb)("\n");
+        auto solution = dynamic_pointer_cast<SymbolExpression>( esolution );
+        ASSERT( solution );  
+        solution_map[pred] = solution;
+    }
 
-        list< shared_ptr<SymbolExpression> > to_union;
-        for( vector<bool> term : svb )
+    // Make up the clauses using set operations on the solutions 
+    vector<shared_ptr<SymbolExpression>> options;
+    ForPower( evaluatable_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> evaluatable_indices)
+    {
+        map<int, bool> evaluatable_indices_map;
+        for( int i=0; i<evaluatable_axes.size(); i++ )
+            evaluatable_indices_map[evaluatable_axes.at(i)] = evaluatable_indices.at(i);
+        TruthTableWithPredicates evaluated_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
+        TRACEC("evaluated_ttwp ")(evaluated_ttwp.Render({}))("\n");
+        
+        set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( true );
+        TRACEC("Permitted terms ")(permitted_terms)("\n");
+
+        // Build a union of terms that were not ruled out
+        list< shared_ptr<SymbolExpression> > terms;
+        for( vector<bool> term : permitted_terms )
         {
-            list< shared_ptr<SymbolExpression> > to_intersection;
+            // Build an intersection of clauses corresponding to solveables
+            list< shared_ptr<SymbolExpression> > clauses;
             for( int axis=0; axis<term.size(); axis++ )
             {
-                auto pred = slice_ttwp.GetFrontPredicate(axis);
-                shared_ptr<Expression> eclause = pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) );
-                if( eclause )
-                {
-                    auto clause = dynamic_pointer_cast<SymbolExpression>( eclause );
-                    ASSERT( clause );
-                    if( term.at(axis)==false )
-                        clause = make_shared<ComplementOperator>(clause);
-                    to_intersection.push_back( clause );
-                }
+                auto pred = evaluated_ttwp.GetFrontPredicate(axis);
+                if( solution_map.count(pred) == 0 )
+                    continue; // skip where solve failed
+                shared_ptr<SymbolExpression> clause = solution_map.at(pred);
+                
+                // Needed to solve for false. Rather than redo the solve, we can 
+                // just complement the solution set.
+                if( term.at(axis)==false )
+                    clause = make_shared<ComplementOperator>(clause);
+                    
+                clauses.push_back( clause );
             }
              
-            to_union.push_back( make_shared<IntersectionOperator>( to_intersection ) );
+            terms.push_back( make_shared<IntersectionOperator>( clauses ) );
         }
 
-        options.push_back( make_shared<UnionOperator>( to_union ) );
+        options.push_back( make_shared<UnionOperator>( terms ) );
     } );
 
     auto solution = make_shared<MultiConditionalOperator>( controls, options );

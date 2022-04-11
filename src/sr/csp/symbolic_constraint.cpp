@@ -46,15 +46,19 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     // Truth-table solver
     SYM::TruthTableSolver my_solver(consistency_expression);
     my_solver.PreSolve();    
-    //alt_expression_for_testing = my_solver.GetAltEquationForTesting();
     
     for( VariableId v : variables )
     {        
         auto v_expr = make_shared<SYM::SymbolVariable>(v);
         
-        //my_tt_solver.TrySolveFor(v_expr); // Just for the logs, for now
-        
-        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(v_expr);
+        // Set up givens to be all other vars affecting this contraint.
+        // TODO: solve for every subset of other vars #502.
+        SYM::TruthTableSolver::GivenSymbolSet givens;
+        for( VariableId vg : variables )
+            if( vg != v )
+                givens.insert( make_shared<SYM::SymbolVariable>(vg) );
+                
+        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(v_expr, givens);
         if( he )
         {
             TRACEC("Solved old style for variable: ")(v)
@@ -111,7 +115,7 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
 
 
 shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
-                                                                               const VariableId &var ) const
+                                                                         const VariableId &var ) const
 {                                 
     ASSERT( var );
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
