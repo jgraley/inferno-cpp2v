@@ -76,21 +76,35 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
 {
     TRACE("Solve equation: ")(equation->Render())(" for ")(target->Render())("\n");
     ASSERT( ttwp )("You need to have done a PreSolve() first\n");
+    
+    // Sanity: givens are all required by equation
+    ASSERT( DifferenceOf(givens, equation->GetRequiredVariables()).empty() );
+    
+    // Sanity: target symbol is required by equation
+    ASSERT( DifferenceOf(target->GetRequiredVariables(), equation->GetRequiredVariables()).empty() );
 
-    set<shared_ptr<PredicateOperator>> evaluatable_preds, solveable_preds;
+    // Sanity: target symbol is not a given
+    ASSERT( IntersectionOf(target->GetRequiredVariables(), givens).empty() );
 
     // Categorise the preds
-    set<int> dead_axes;
+    set<shared_ptr<PredicateOperator>> evaluatable_preds, solveable_preds;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
+        if( !DifferenceOf(pred->GetRequiredVariables(), givens).empty() )
+            continue; // this predicate has required vars that are not given: exclude 
+                      // from analysis (will become dead, and will get folded)
+        
         if( pred->IsIndependentOf(target) )
             evaluatable_preds.insert( pred );
         else if( pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) ) )
             solveable_preds.insert( pred );
     }
     
-    // Get axis numbers for dead axes (neither evaluatable nor solveable) and fold them out
+    // Get axis numbers for dead axes and fold them out. Dead axes include 
+    // - ones that are neither evaulatable nor solvable, i.e. they contain the target but solving failed
+    // - as well as ones that refer to symbol variables that were not in the "given" set
+    set<int> dead_axes;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);

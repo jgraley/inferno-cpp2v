@@ -30,11 +30,20 @@ private:
 class TruthTableSolver
 {
 public:
-    typedef set<shared_ptr<SymbolVariable>, Expression::OrderComparer> GivenSymbolSet;
+    typedef set<SR::PatternLink> GivenSymbolSet;
 
     TruthTableSolver( shared_ptr<BooleanExpression> equation );
     
     void PreSolve();
+    
+    /** 
+     * Attempt to solve our equation in a specified way, according to args.
+     * 
+     * @param target The expression to solve for, probably needs to be a SymbolVariable
+     * @param givens A set of PatternLinks indicating which variables should be assumed evaluatable in the solution
+     * 
+     * @return solution expression or NULL
+     */
     shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target,
                                               const GivenSymbolSet &givens ) const;
     shared_ptr<BooleanExpression> GetAltEquationForTesting() const;

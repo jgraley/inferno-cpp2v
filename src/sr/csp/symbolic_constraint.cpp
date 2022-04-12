@@ -49,16 +49,14 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     
     for( VariableId v : variables )
     {        
-        auto v_expr = make_shared<SYM::SymbolVariable>(v);
+        auto target = make_shared<SYM::SymbolVariable>(v);
         
         // Set up givens to be all other vars affecting this contraint.
         // TODO: solve for every subset of other vars #502.
-        SYM::TruthTableSolver::GivenSymbolSet givens;
-        for( VariableId vg : variables )
-            if( vg != v )
-                givens.insert( make_shared<SYM::SymbolVariable>(vg) );
+        SYM::TruthTableSolver::GivenSymbolSet givens = variables;           
+        givens.erase(v);
                 
-        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(v_expr, givens);
+        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, givens);
         if( he )
         {
             TRACEC("Solved old style for variable: ")(v)
