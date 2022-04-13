@@ -86,12 +86,14 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     // Sanity: target symbol is not a given
     ASSERT( IntersectionOf(target->GetRequiredVariables(), givens).empty() );
 
+    GivenSymbolSet givens_and_target = UnionOf( givens, target->GetRequiredVariables() );
+
     // Categorise the preds
     set<shared_ptr<PredicateOperator>> evaluatable_preds, solveable_preds;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
-        if( !DifferenceOf(pred->GetRequiredVariables(), givens).empty() )
+        if( !DifferenceOf(pred->GetRequiredVariables(), givens_and_target).empty() )
             continue; // this predicate has required vars that are not given: exclude 
                       // from analysis (will become dead, and will get folded)
         
