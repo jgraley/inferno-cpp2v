@@ -258,6 +258,11 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     assignments( assignments_ ),
     current_it( current_it_ ),
     current_var( *current_it ),
+#if 1    
+    constraints_to_query( solver_plan.affected_constraints.at(current_var) ),
+#else    
+    constraints_to_query( solver_plan.completed_constraints.at(current_var) ),
+#endif
     constraints_to_test( solver_plan.completed_constraints.at(current_var) )
 {
     //ASSERT( current_it != solver_plan.free_variables.end() );
@@ -265,7 +270,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
     INDENT("V");
        
     list<shared_ptr<SYM::SymbolSetResult>> rl; 
-    for( shared_ptr<Constraint> c : constraints_to_test )
+    for( shared_ptr<Constraint> c : constraints_to_query )
     {                               
         shared_ptr<SYM::SymbolSetResult> r = c->GetSuggestedValues( assignments, current_var );
         ASSERT( r );

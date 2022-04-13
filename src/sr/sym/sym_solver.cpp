@@ -94,8 +94,8 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     {
         auto pred = ttwp->GetFrontPredicate(axis);
         if( !DifferenceOf(pred->GetRequiredVariables(), givens_and_target).empty() )
-            continue; // this predicate has required vars that are not given: exclude 
-                      // from analysis (will become dead, and will get folded)
+            continue; // this predicate has required vars that are not given/target: exclude 
+                      // from analysis (axis will become dead, and will get folded)
         
         if( pred->IsIndependentOf(target) )
             evaluatable_preds.insert( pred );

@@ -40,8 +40,7 @@ void SymbolicConstraint::Plan::DetermineVariables()
 
 void SymbolicConstraint::Plan::DetermineHintExpressions()
 {
-    TRACE("Trying to solve:\n")(consistency_expression->Render())("\n")
-         ("For variables:\n")(variables)("\n");
+    TRACE("Trying to solve:\n")(consistency_expression->Render())("\n");
    
     // Truth-table solver
     SYM::TruthTableSolver my_solver(consistency_expression);
@@ -50,24 +49,36 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     for( VariableId v : variables )
     {        
         auto target = make_shared<SYM::SymbolVariable>(v);
+        TRACEC("Solving for variable: ")(v)("\n");
         
-        // Set up givens to be all other vars affecting this contraint.
-        // TODO: solve for every subset of other vars #502.
         SYM::TruthTableSolver::GivenSymbolSet other_vars = variables;           
         other_vars.erase(v);
-        auto givens = other_vars; // temporary
-        //list<VariableId> other_vars_list = ToList( other_vars );
-        //ForPower( other_vars_list.size(), index_range_bool, [*](vector<bool> indices)
-        //{
-        //});
-                
-        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, givens);
+#if 1
+        vector<VariableId> other_vars_vec = ToVector( other_vars );
+        ForPower<bool>( other_vars_vec.size(), index_range_bool, [&](vector<bool> indices)
+        {
+            SYM::TruthTableSolver::GivenSymbolSet givens;
+            for( int i=0; i<other_vars_vec.size(); i++ )            
+                if( indices.at(i) )
+                    givens.insert( other_vars_vec[i] );
+            
+            shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, givens);
+            if( he )
+            {
+                TRACEC("Given:\n")(givens)
+                      ("\nSolution:\n")(he->Render())("\n");
+                suggestion_expressions[v][givens] = he; // only store good ones in the map            
+            }            
+        });  
+#else
+        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, other_vars);
         if( he )
         {
-            TRACEC("Solved old style for variable: ")(v)
+            TRACEC("Given:\n")(other_vars)
                   ("\nSolution:\n")(he->Render())("\n");
-            suggestion_expressions[v][givens] = he; // only store good ones in the map            
+            suggestion_expressions[v][other_vars] = he; // only store good ones in the map            
         }
+#endif                      
     }
 }
 
@@ -123,9 +134,16 @@ shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const A
     ASSERT( var );
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
 
-    bool ok = false;
-    SYM::TruthTableSolver::GivenSymbolSet givens = plan.variables;           
+    SYM::TruthTableSolver::GivenSymbolSet givens;
+#if 1
+    for( VariableId v : plan.variables )            
+        if( v != var && assignments.count(v) > 0 )
+            givens.insert( v );
+#else
+    givens = plan.variables;           
     givens.erase(var);
+#endif
+
     if( plan.suggestion_expressions.count(var)==0 ||
         plan.suggestion_expressions.at(var).count(givens)==0 )
         return nullptr;
