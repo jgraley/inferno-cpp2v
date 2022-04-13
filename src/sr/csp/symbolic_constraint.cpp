@@ -46,22 +46,27 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     // Truth-table solver
     SYM::TruthTableSolver my_solver(consistency_expression);
     my_solver.PreSolve();    
-    
+        
     for( VariableId v : variables )
     {        
         auto target = make_shared<SYM::SymbolVariable>(v);
         
         // Set up givens to be all other vars affecting this contraint.
         // TODO: solve for every subset of other vars #502.
-        SYM::TruthTableSolver::GivenSymbolSet givens = variables;           
-        givens.erase(v);
+        SYM::TruthTableSolver::GivenSymbolSet other_vars = variables;           
+        other_vars.erase(v);
+        auto givens = other_vars; // temporary
+        //list<VariableId> other_vars_list = ToList( other_vars );
+        //ForPower( other_vars_list.size(), index_range_bool, [*](vector<bool> indices)
+        //{
+        //});
                 
         shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, givens);
         if( he )
         {
             TRACEC("Solved old style for variable: ")(v)
                   ("\nSolution:\n")(he->Render())("\n");
-            suggestion_expressions[v] = he; // only store good ones in the map            
+            suggestion_expressions[v][givens] = he; // only store good ones in the map            
         }
     }
 }
@@ -119,10 +124,13 @@ shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const A
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
 
     bool ok = false;
-    if( !plan.suggestion_expressions.count(var)>0 )
+    SYM::TruthTableSolver::GivenSymbolSet givens = plan.variables;           
+    givens.erase(var);
+    if( plan.suggestion_expressions.count(var)==0 ||
+        plan.suggestion_expressions.at(var).count(givens)==0 )
         return nullptr;
         
-    shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(var);
+    shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(var).at(givens);
     shared_ptr<SYM::SymbolResultInterface> hr = hint_expression->Evaluate( kit );
     ASSERT( hr );
     shared_ptr<SYM::SymbolSetResult> hint_result = dynamic_pointer_cast<SYM::SymbolSetResult>(hr);
@@ -137,7 +145,11 @@ void SymbolicConstraint::Dump() const
     TRACEC("Variables: ")(plan.variables)("\n");
     TRACEC("Consistency expression: ")(plan.consistency_expression->Render())("\n");
     for( auto p : plan.suggestion_expressions )
-        TRACEC("Hint expression for ")(p.first)(" is ")(p.second->Render())("\n");
+    {
+        TRACEC("Suggestion expression for target ")(p.first)(":\n");
+        for( auto pp : p.second )
+            TRACEC("Given ")(pp.first)(" is ")(pp.second->Render())("\n");
+    }
 }      
 
 

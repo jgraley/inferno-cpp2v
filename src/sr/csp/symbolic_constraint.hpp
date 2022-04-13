@@ -46,10 +46,8 @@ private:
         SymbolicConstraint * const algo;
         shared_ptr<SYM::BooleanExpression> consistency_expression;        
         set<VariableId> variables;
-//        typedef map< set<VariableId>, shared_ptr<SYM::SymbolExpression>> GivensToExpression;
- //       map<VariableId, GivensToExpression> suggestion_expressions;
-        
-        map<VariableId, shared_ptr<SYM::SymbolExpression>> suggestion_expressions;
+        typedef map< set<VariableId>, shared_ptr<SYM::SymbolExpression>> GivensToExpression;
+        map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;        
     } plan;
 
