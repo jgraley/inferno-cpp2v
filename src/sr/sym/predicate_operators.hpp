@@ -26,6 +26,8 @@ public:
     void SetForceResult( weak_ptr<BooleanResultInterface> force_result );
     void SetForceRender( weak_ptr<string> force_render ); // Note: precedence goes to LITERAL
 
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const final;
+    virtual list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() = 0;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
 
     virtual shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const;
@@ -55,7 +57,7 @@ public:
                             shared_ptr<SymbolExpression> b );
     EqualOperator *Clone() const override;
 
-    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
@@ -70,8 +72,8 @@ public:
     Precedence GetPrecedenceNF() const override;
     
 private:
-    const shared_ptr<SymbolExpression> a;
-    const shared_ptr<SymbolExpression> b;
+    shared_ptr<SymbolExpression> a;
+    shared_ptr<SymbolExpression> b;
 };
 
 
@@ -90,7 +92,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
@@ -98,8 +100,8 @@ public:
     virtual Precedence GetPrecedenceNF() const override;
     
 protected:
-    const shared_ptr<SymbolExpression> a;
-    const shared_ptr<SymbolExpression> b;
+    shared_ptr<SymbolExpression> a;
+    shared_ptr<SymbolExpression> b;
 };
 
 // ------------------------- GreaterOperator --------------------------
@@ -167,7 +169,7 @@ public:
     explicit AllDiffOperator( list< shared_ptr<SymbolExpression> > sa );
     AllDiffOperator *Clone() const override;
 
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
@@ -175,7 +177,7 @@ public:
     virtual Precedence GetPrecedenceNF() const override;
     
 private:
-    const list< shared_ptr<SymbolExpression> > sa;
+    list< shared_ptr<SymbolExpression> > sa;
 };
 
 // ------------------------- KindOfOperator --------------------------
@@ -188,7 +190,7 @@ public:
                              shared_ptr<SymbolExpression> a); 
     KindOfOperator *Clone() const override;
 
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
@@ -199,7 +201,7 @@ public:
     virtual Precedence GetPrecedenceNF() const override;
     
 protected:
-    const shared_ptr<SymbolExpression> a;
+    shared_ptr<SymbolExpression> a;
     const TreePtr<Node> archetype_node;
 };
 
@@ -215,7 +217,7 @@ public:
                                           int size );
     ChildCollectionSizeOperator *Clone() const override;
 
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
 
@@ -228,7 +230,7 @@ public:
 private:
     const TreePtr<Node> archetype_node;
     const int item_index;
-    const shared_ptr<SymbolExpression> a;
+    shared_ptr<SymbolExpression> a;
     const int size;
 };
 
@@ -242,7 +244,7 @@ public:
                                  shared_ptr<SymbolExpression> b );
     EquivalentOperator *Clone() const override;
 
-    virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
@@ -252,8 +254,8 @@ public:
     virtual Precedence GetPrecedenceNF() const override;
     
 private:
-    const shared_ptr<SymbolExpression> a;
-    const shared_ptr<SymbolExpression> b;
+    shared_ptr<SymbolExpression> a;
+    shared_ptr<SymbolExpression> b;
     SR::EquivalenceRelation equivalence_relation;
 };
 

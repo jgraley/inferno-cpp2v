@@ -28,7 +28,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
                                        shared_ptr<SYM::SymbolExpression> a); 
         IsGreenGrassOperator *Clone() const override;
                                        
-        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
         virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
@@ -39,7 +39,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
         virtual Precedence GetPrecedenceNF() const override;
         
     protected:
-        const shared_ptr<SYM::SymbolExpression> a;
+        shared_ptr<SYM::SymbolExpression> a;
         const set< TreePtr<Node> > * const dirty_grass;
     };
 };

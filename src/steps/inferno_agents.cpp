@@ -136,9 +136,9 @@ IdentifierByNameAgent::IsIdentifierNamedOperator *IdentifierByNameAgent::IsIdent
 }
 
 
-list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IsIdentifierNamedOperator::GetSymbolOperands() const
+list<shared_ptr<SYM::SymbolExpression> *> IdentifierByNameAgent::IsIdentifierNamedOperator::GetSymbolOperandPointers()
 {
-    return { a };
+    return { &a };
 }
 
 

@@ -120,7 +120,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
                                             shared_ptr<SYM::SymbolExpression> a); 
         IsIdentifierNamedOperator *Clone() const override;
                                                    
-        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
+        list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
         virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
@@ -131,7 +131,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
         virtual Precedence GetPrecedenceNF() const override;
         
     protected:
-        const shared_ptr<SYM::SymbolExpression> a;
+        shared_ptr<SYM::SymbolExpression> a;
         const string name;
     };
 };

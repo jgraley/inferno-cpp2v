@@ -19,6 +19,17 @@ void PredicateOperator::SetForceRender( weak_ptr<string> force_render_ )
 }
 
 
+list<shared_ptr<SymbolExpression>> PredicateOperator::GetSymbolOperands() const
+{
+    // Casting away the const because we don't modify *p
+    list<shared_ptr<SymbolExpression> *> lp = const_cast<PredicateOperator *>(this)->GetSymbolOperandPointers();
+    list<shared_ptr<SymbolExpression>> l;
+    for( shared_ptr<SymbolExpression> *p : lp )
+        l.push_back( *p );
+    return l;
+}
+
+
 shared_ptr<BooleanResultInterface> PredicateOperator::Evaluate( const EvalKit &kit ) const
 {
     // Apply forces where specified
@@ -79,9 +90,9 @@ EqualOperator *EqualOperator::Clone() const
 }
     
 
-list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
 {
-    return {a, b};
+    return {&a, &b};
 }
 
 
@@ -194,9 +205,9 @@ IndexComparisonOperator::IndexComparisonOperator( shared_ptr<SymbolExpression> a
 }    
     
 
-list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPointers()
 {
-    return {a, b};
+    return {&a, &b};
 }
 
 
@@ -348,9 +359,12 @@ AllDiffOperator *AllDiffOperator::Clone() const
 }
     
 
-list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
 {
-    return sa;
+    list<shared_ptr<SymbolExpression> *> lp;
+    for( shared_ptr<SymbolExpression> &r : sa )
+        lp.push_back( &r );
+    return lp;
 }
 
 
@@ -414,9 +428,9 @@ KindOfOperator *KindOfOperator::Clone() const
 }
     
 
-list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression> *> KindOfOperator::GetSymbolOperandPointers()
 {
-    return { a };
+    return { &a };
 }
 
 
@@ -478,9 +492,9 @@ ChildCollectionSizeOperator *ChildCollectionSizeOperator::Clone() const
 }
     
 
-list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression> *> ChildCollectionSizeOperator::GetSymbolOperandPointers()
 {
-    return {a};
+    return { &a };
 }
 
 
@@ -572,9 +586,9 @@ EquivalentOperator *EquivalentOperator::Clone() const
 }
     
 
-list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression> *> EquivalentOperator::GetSymbolOperandPointers()
 {
-    return {a, b};
+    return { &a, &b };
 }
 
 

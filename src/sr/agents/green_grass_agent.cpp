@@ -63,9 +63,9 @@ GreenGrassAgent::IsGreenGrassOperator *GreenGrassAgent::IsGreenGrassOperator::Cl
 }
     
 
-list<shared_ptr<SymbolExpression>> GreenGrassAgent::IsGreenGrassOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression> *> GreenGrassAgent::IsGreenGrassOperator::GetSymbolOperandPointers()
 {
-    return { a };
+    return { &a };
 }
 
 
