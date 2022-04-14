@@ -50,7 +50,14 @@ shared_ptr<PredicateOperator> PredicateOperator::TryDerive( shared_ptr<Predicate
 shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
                                                                 shared_ptr<SymbolExpression> with ) const
 {
-    return nullptr;
+    shared_ptr<PredicateOperator> p = Clone();
+    
+    list<shared_ptr<SymbolExpression> *> sop = p->GetSymbolOperandPointers();
+    for( shared_ptr<SymbolExpression> *s : sop )
+        if( *s == over )
+            *s = with;
+            
+    return p;
 }                                                                
 
 
