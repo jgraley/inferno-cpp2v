@@ -162,12 +162,14 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 
 shared_ptr<PredicateOperator> EqualOperator::TryDerive( shared_ptr<PredicateOperator> other ) const
 {
-    shared_ptr<PredicateOperator> sub = other->TrySubstitute( a, b );
-    if( sub )
+    // Try both ways round
+    if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( a, b ) )
         return sub;
 
-    sub = other->TrySubstitute( b, a );
-    return sub;        
+    if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( b, a ) )
+        return sub;        
+        
+    return nullptr;
 }
 
 
