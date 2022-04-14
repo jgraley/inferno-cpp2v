@@ -57,6 +57,12 @@ GreenGrassAgent::IsGreenGrassOperator::IsGreenGrassOperator( const set< TreePtr<
 }                                                
 
 
+GreenGrassAgent::IsGreenGrassOperator *GreenGrassAgent::IsGreenGrassOperator::Clone() const
+{
+    return new IsGreenGrassOperator( dirty_grass, a );
+}
+    
+
 list<shared_ptr<SymbolExpression>> GreenGrassAgent::IsGreenGrassOperator::GetSymbolOperands() const
 {
     return { a };
@@ -64,7 +70,7 @@ list<shared_ptr<SymbolExpression>> GreenGrassAgent::IsGreenGrassOperator::GetSym
 
 
 shared_ptr<BooleanResultInterface> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
-                                                                           const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);

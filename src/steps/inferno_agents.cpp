@@ -123,11 +123,17 @@ SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 
 
 IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( string name_,
-                                                                           shared_ptr<SYM::SymbolExpression> a_ ) :
+                                                                             shared_ptr<SYM::SymbolExpression> a_ ) :
     a( a_ ),
     name( name_ )
 {    
 }                                                
+
+
+IdentifierByNameAgent::IsIdentifierNamedOperator *IdentifierByNameAgent::IsIdentifierNamedOperator::Clone() const
+{
+    return new IsIdentifierNamedOperator( name, a );
+}
 
 
 list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IsIdentifierNamedOperator::GetSymbolOperands() const
@@ -137,7 +143,7 @@ list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::IsIdentifierNamed
 
 
 shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+                                                                                                    const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(op_results);

@@ -72,6 +72,12 @@ EqualOperator::EqualOperator( shared_ptr<SymbolExpression> a_,
 {
 }    
     
+    
+EqualOperator *EqualOperator::Clone() const
+{
+    return new EqualOperator( a, b );
+}
+    
 
 list<shared_ptr<SymbolExpression>> EqualOperator::GetSymbolOperands() const
 {
@@ -195,7 +201,7 @@ list<shared_ptr<SymbolExpression>> IndexComparisonOperator::GetSymbolOperands() 
 
 
 shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const EvalKit &kit,
-                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                                      const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
     // IEEE 754 All inequalities result in false if an operand is NaS
@@ -225,6 +231,12 @@ Expression::Precedence IndexComparisonOperator::GetPrecedenceNF() const
 
 // ------------------------- GreaterOperator --------------------------
 
+GreaterOperator *GreaterOperator::Clone() const
+{
+    return new GreaterOperator( a, b );
+}
+    
+
 bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                            SR::TheKnowledge::IndexType index_b ) const
 {
@@ -244,6 +256,12 @@ Over<BooleanExpression> SYM::operator>( Over<SymbolExpression> a, Over<SymbolExp
 }
 
 // ------------------------- LessOperator --------------------------
+
+LessOperator *LessOperator::Clone() const
+{
+    return new LessOperator( a, b );
+}
+    
 
 bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                         SR::TheKnowledge::IndexType index_b ) const
@@ -265,6 +283,12 @@ Over<BooleanExpression> SYM::operator<( Over<SymbolExpression> a, Over<SymbolExp
 
 // ------------------------- GreaterOrEqualOperator --------------------------
 
+GreaterOrEqualOperator *GreaterOrEqualOperator::Clone() const
+{
+    return new GreaterOrEqualOperator( a, b );
+}
+    
+
 bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                                   SR::TheKnowledge::IndexType index_b ) const
 {
@@ -284,6 +308,12 @@ Over<BooleanExpression> SYM::operator>=( Over<SymbolExpression> a, Over<SymbolEx
 }
 
 // ------------------------- LessOrEqualOperator --------------------------
+
+LessOrEqualOperator *LessOrEqualOperator::Clone() const
+{
+    return new LessOrEqualOperator( a, b );
+}
+    
 
 bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                                SR::TheKnowledge::IndexType index_b ) const
@@ -310,6 +340,12 @@ AllDiffOperator::AllDiffOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
 {
     ASSERT( sa.size() >= 2 );
 }    
+    
+
+AllDiffOperator *AllDiffOperator::Clone() const
+{
+    return new AllDiffOperator( sa );
+}
     
 
 list<shared_ptr<SymbolExpression>> AllDiffOperator::GetSymbolOperands() const
@@ -372,6 +408,12 @@ KindOfOperator::KindOfOperator( TreePtr<Node> archetype_node_,
 }                                                
 
 
+KindOfOperator *KindOfOperator::Clone() const
+{
+    return new KindOfOperator( archetype_node, a );
+}
+    
+
 list<shared_ptr<SymbolExpression>> KindOfOperator::GetSymbolOperands() const
 {
     return { a };
@@ -429,6 +471,12 @@ ChildCollectionSizeOperator::ChildCollectionSizeOperator( TreePtr<Node> archetyp
     ASSERT( item_index >= 0 );
 }    
 
+
+ChildCollectionSizeOperator *ChildCollectionSizeOperator::Clone() const
+{
+    return new ChildCollectionSizeOperator( archetype_node, item_index, a, size );
+}
+    
 
 list<shared_ptr<SymbolExpression>> ChildCollectionSizeOperator::GetSymbolOperands() const
 {
@@ -516,6 +564,12 @@ EquivalentOperator::EquivalentOperator( shared_ptr<SymbolExpression> a_,
     b(b_)
 {
 }    
+    
+
+EquivalentOperator *EquivalentOperator::Clone() const
+{
+    return new EquivalentOperator( a, b );
+}
     
 
 list<shared_ptr<SymbolExpression>> EquivalentOperator::GetSymbolOperands() const

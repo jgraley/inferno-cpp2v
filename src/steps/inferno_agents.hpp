@@ -117,7 +117,9 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     public:    
         typedef BooleanExpression NominalType;
         explicit IsIdentifierNamedOperator( string name,
-                                           shared_ptr<SYM::SymbolExpression> a); 
+                                            shared_ptr<SYM::SymbolExpression> a); 
+        IsIdentifierNamedOperator *Clone() const override;
+                                                   
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
