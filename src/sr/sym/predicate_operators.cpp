@@ -50,14 +50,20 @@ shared_ptr<PredicateOperator> PredicateOperator::TryDerive( shared_ptr<Predicate
 shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
                                                                 shared_ptr<SymbolExpression> with ) const
 {
-    shared_ptr<PredicateOperator> p = Clone();
+#if 1
+    auto p = shared_ptr<PredicateOperator>(Clone());
     
     list<shared_ptr<SymbolExpression> *> sop = p->GetSymbolOperandPointers();
     for( shared_ptr<SymbolExpression> *s : sop )
-        if( *s == over )
+    {
+        if( OrderCompare( over, *s ) == EQUAL )
+        {
             *s = with;
-            
-    return p;
+            return p;
+        }
+    }
+#endif            
+    return nullptr;
 }                                                                
 
 
@@ -163,17 +169,6 @@ shared_ptr<PredicateOperator> EqualOperator::TryDerive( shared_ptr<PredicateOper
     sub = other->TrySubstitute( b, a );
     return sub;        
 }
-
-
-shared_ptr<PredicateOperator> EqualOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
-                                                            shared_ptr<SymbolExpression> with ) const
-{
-    if( OrderCompare( over, a ) == EQUAL )
-        return make_shared<EqualOperator>( with, b );
-    if( OrderCompare( over, b ) == EQUAL )
-        return make_shared<EqualOperator>( a, with );
-    return nullptr;
-}                                                                
 
 
 string EqualOperator::RenderNF() const
@@ -623,17 +618,6 @@ bool EquivalentOperator::IsCommutative() const
 {
     return true;
 }
-
-
-shared_ptr<PredicateOperator> EquivalentOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
-                                                                 shared_ptr<SymbolExpression> with ) const
-{
-    if( OrderCompare( over, a ) == EQUAL )
-        return make_shared<EquivalentOperator>( with, b );
-    if( OrderCompare( over, b ) == EQUAL )
-        return make_shared<EquivalentOperator>( a, with );
-    return nullptr;
-}                                                                
 
 
 string EquivalentOperator::RenderNF() const

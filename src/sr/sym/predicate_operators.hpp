@@ -31,8 +31,8 @@ public:
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit ) const override;
 
     virtual shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const;
-    virtual shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
-                                                         shared_ptr<SymbolExpression> with ) const;
+    shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
+                                                 shared_ptr<SymbolExpression> with ) const;
     string Render() const override final;
     Precedence GetPrecedence() const override final;
         
@@ -65,8 +65,6 @@ public:
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;
     shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const override;
-    shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
-                                                 shared_ptr<SymbolExpression> with ) const override;
                                                          
     string RenderNF() const override;
     Precedence GetPrecedenceNF() const override;
@@ -248,8 +246,6 @@ public:
     virtual shared_ptr<BooleanResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
-    shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
-                                                 shared_ptr<SymbolExpression> with ) const override;
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
     
