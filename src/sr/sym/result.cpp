@@ -5,75 +5,53 @@ using namespace SYM;
 
 // ------------------------- BooleanResult --------------------------
 
-BooleanResult::BooleanResult( Category cat, bool value )
+BooleanResult::BooleanResult( bool value_ ) :
+    value( value_ )
 {
-    switch( cat )
-    {
-    case UNDEFINED:
-        ASSERT( !value );
-        certainty = Certainty::UNDEFINED;
-        break;
-    case DEFINED:        
-        certainty = value ? Certainty::TRUE : Certainty::FALSE;
-        break;
-    default:
-        ASSERTFAIL("Missing case");
-    }
 }
 
 
 bool BooleanResult::IsDefinedAndUnique() const
 {
-    return certainty != Certainty::UNDEFINED;
+    return true;
 }
 
 
 bool BooleanResult::IsDefinedAndTrue() const
 {
-    return certainty == Certainty::TRUE;
+    return value;
 }
 
 
 bool BooleanResult::IsDefinedAndFalse() const
 {
-    return certainty == Certainty::FALSE;
+    return !value;
 }
 
    
 bool BooleanResult::GetAsBool() const
 {
-    ASSERT( IsDefinedAndUnique() );
-    return certainty == Certainty::TRUE;
+    return value;
 }
 
 
 bool BooleanResult::operator==( const ResultInterface &other ) const
 {
-    auto o = dynamic_cast<const BooleanResult *>(&other);
-    return o && certainty == o->certainty;
+    auto o = GET_THAT_POINTER(&other);
+    return value == o->value;
 }
 
 
 bool BooleanResult::operator<( const BooleanResultInterface &other ) const
 {
-    auto o = dynamic_cast<const BooleanResult *>(&other);
-    ASSERT(o);
-    return certainty < o->certainty;
+    auto o = GET_THAT_POINTER(&other);
+    return (int)value < (int)(o->value);
 }
 
 
 string BooleanResult::GetTrace() const
 {
-    switch( certainty )
-    {
-    case Certainty::FALSE:
-        return "FALSE";
-    case Certainty::UNDEFINED:
-        return "UNDEFINED";
-    case Certainty::TRUE:
-        return "TRUE";
-    }
-    return "CORRUPTED!!";
+    return Trace(value);
 }
 
 

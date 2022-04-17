@@ -39,7 +39,7 @@ public:
 class BooleanResult : public BooleanResultInterface
 {
 public:
-    BooleanResult( Category cat, bool value = false );
+    explicit BooleanResult( bool value = false );
 
     bool IsDefinedAndUnique() const override;    
     bool IsDefinedAndTrue() const override;    
@@ -55,16 +55,7 @@ public:
     string GetTrace() const override;
     
 private:
-    // Certainty combines category and boolean value into a single
-    // value which posesses a certainty ordering property
-    enum class Certainty
-    {
-        FALSE,
-        UNDEFINED,
-        TRUE
-    };    
-
-    Certainty certainty;
+    bool value;
 };
 
 // ------------------------- SymbolResultInterface --------------------------
@@ -82,7 +73,7 @@ public:
 class SymbolResult : public SymbolResultInterface
 {
 public:
-    SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
+    explicit SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
@@ -100,7 +91,7 @@ private:
 class SymbolSetResult : public SymbolResultInterface
 {
 public:
-    SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
+    explicit SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
     static shared_ptr<SymbolSetResult> Create( shared_ptr<SymbolResultInterface> other );
     
     bool IsDefinedAndUnique() const override;    

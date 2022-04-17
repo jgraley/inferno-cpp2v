@@ -117,7 +117,7 @@ shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
     // return true as required.
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+            return make_shared<BooleanResult>( false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -126,7 +126,7 @@ shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
     bool res = ( ra->GetAsXLink() == rb->GetAsXLink() );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );   
+    return make_shared<BooleanResult>( res );   
 }
 
 
@@ -221,7 +221,7 @@ shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const Eval
     // IEEE 754 All inequalities result in false if an operand is NaS
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+            return make_shared<BooleanResult>( false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -234,7 +234,7 @@ shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const Eval
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
     bool res = EvalBoolFromIndexes( index_a, index_b );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );  
+    return make_shared<BooleanResult>( res );  
 }
 
 
@@ -376,7 +376,7 @@ shared_ptr<BooleanResultInterface> AllDiffOperator::Evaluate( const EvalKit &kit
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+            return make_shared<BooleanResult>( false );
     
     // Note: could be done faster using a set<XLink>
     bool m = true;
@@ -391,7 +391,7 @@ shared_ptr<BooleanResultInterface> AllDiffOperator::Evaluate( const EvalKit &kit
             m = false;
         }
     } );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, m );   
+    return make_shared<BooleanResult>( m );   
 }
 
 
@@ -445,10 +445,10 @@ shared_ptr<BooleanResultInterface> KindOfOperator::Evaluate( const EvalKit &kit,
     // NaS. Possibly like a < ?
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+        return make_shared<BooleanResult>( false );
     
     bool matches = archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, matches );
+    return make_shared<BooleanResult>( matches );
 }
 
 
@@ -512,12 +512,12 @@ shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const 
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false );
+        return make_shared<BooleanResult>( false );
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
     if( !archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() ) )
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, false ); 
+        return make_shared<BooleanResult>( false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -530,7 +530,7 @@ shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const 
     
     // Check that the size is as required
     bool res = ( p_x_col->size() == size );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );
+    return make_shared<BooleanResult>( res );
 }
 
 
@@ -602,7 +602,7 @@ shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &
     // NaS. So like ==
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+            return make_shared<BooleanResult>( false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -611,7 +611,7 @@ shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
     bool res = ( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );    
+    return make_shared<BooleanResult>( res );    
 }
 
 

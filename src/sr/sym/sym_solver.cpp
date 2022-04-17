@@ -247,7 +247,7 @@ void TruthTableSolver::ConstrainByEvaluating()
         // apply until these go out of scope. 
         vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
         for( bool b : indices )
-            vr.push_back( make_shared<BooleanResult>(ResultInterface::DEFINED, b) );
+            vr.push_back( make_shared<BooleanResult>(b) );
         
         // Forces must be set up on *all* the predicates that may be reached
         // while evaluating the expression, even if they are equal.

@@ -119,7 +119,7 @@ BooleanConstant::BooleanConstant( bool value_ ) :
 
 shared_ptr<BooleanResultInterface> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, value );
+    return make_shared<BooleanResult>( value );
 }
 
 

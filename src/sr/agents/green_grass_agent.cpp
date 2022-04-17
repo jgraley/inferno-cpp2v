@@ -75,10 +75,10 @@ shared_ptr<BooleanResultInterface> GreenGrassAgent::IsGreenGrassOperator::Evalua
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        return make_shared<BooleanResult>( false );
     
     bool res = ( dirty_grass->count( ra->GetAsXLink().GetChildX() ) == 0 ); 
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );         
+    return make_shared<BooleanResult>( res );         
 }
 
 

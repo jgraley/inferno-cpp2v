@@ -172,7 +172,7 @@ shared_ptr<BooleanResultInterface> NotOperator::Evaluate( const EvalKit &kit,
     shared_ptr<BooleanResultInterface> ra = op_results.front();
     if( ra->IsDefinedAndUnique() ) // DEFINED
     {
-        return make_shared<BooleanResult>( BooleanResult::DEFINED, !ra->GetAsBool() );
+        return make_shared<BooleanResult>( !ra->GetAsBool() );
     }
     else // UNDEFINED
     {
@@ -397,7 +397,7 @@ shared_ptr<BooleanResultInterface> BoolEqualOperator::Evaluate( const EvalKit &k
         return rb;
     
     bool res = ( ra->GetAsBool() == rb->GetAsBool() );
-    return make_shared<BooleanResult>( BooleanResult::DEFINED, res );     
+    return make_shared<BooleanResult>( res );     
 }
 
 
@@ -487,7 +487,7 @@ shared_ptr<BooleanResultInterface> ImplicationOperator::Evaluate( const EvalKit 
         }
         else // FALSE
         {
-            return make_shared<BooleanResult>( BooleanResult::DEFINED, true );
+            return make_shared<BooleanResult>( true );
         }
     }
     else // UNDEFINED
@@ -560,7 +560,7 @@ shared_ptr<BooleanResultInterface> BooleanConditionalOperator::Evaluate( const E
         shared_ptr<BooleanResultInterface> rc = c->Evaluate(kit);   
         if( *rb == *rc )
             return rb; // not ambiguous if both options are the same
-        return make_shared<BooleanResult>( BooleanResult::UNDEFINED );
+        return make_shared<BooleanResult>( false );
     }
 }
 
@@ -619,7 +619,7 @@ shared_ptr<BooleanResultInterface> MultiBooleanConditionalOperator::Evaluate( co
         
         // Abort if any controls evaluate undefined (TODO could do better)
         if( !r->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( ResultInterface::UNDEFINED );
+            return make_shared<BooleanResult>( false );
             
         int_control |= (int)r->GetAsBool() << i;
     }
