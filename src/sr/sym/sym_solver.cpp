@@ -238,6 +238,8 @@ void TruthTableSolver::PopulateInitial()
         for( bool b : indices )
             vr.push_back( make_shared<BooleanResult>(ResultInterface::DEFINED, b) );
         
+        // Forces must be set up on *all* the predicates that may be reached
+        // while evaluating the expression, even if they are equal.
         for( int j=0; j<ttwp->GetDegree(); j++ )
             for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
                 pred->SetForceResult( vr[j] );       
@@ -254,10 +256,13 @@ void TruthTableSolver::PopulateInitial()
 void TruthTableSolver::ConstrainUsingDerived()
 {
     // Get all the extrapolations into maps, keyed by expression equality
+    typedef TruthTableWithPredicates::EqualPredicateSet EqualPredicateSet;
     typedef set<int> InitialPredIndices;
     typedef shared_ptr<PredicateOperator> DerivedPred;
+
+    // These derived_pred_to_... maps will unique-ize on equality of Pk 
     map<DerivedPred, set<InitialPredIndices>, Expression::OrderComparer> derived_pred_to_init_indices;
-    map<DerivedPred, set<DerivedPred>, Expression::OrderComparer> derived_pred_to_equal_derived_preds;
+    map<DerivedPred, EqualPredicateSet, Expression::OrderComparer> derived_pred_to_derived_equal_pred_set;
     for( int i=0; i<ttwp->GetDegree(); i++ )
     {
         for( int j=0; j<ttwp->GetDegree(); j++ )
@@ -270,25 +275,28 @@ void TruthTableSolver::ConstrainUsingDerived()
             
             // See whether a predicate can be derived from this pair 
             shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
-            if( pk && !ttwp->PredExists(pk) ) // is this an extrapolation?
+            if( pk && !ttwp->PredExists(pk) ) // There is a derivation Pk and it's an extrapolation
             {
-                // derived_pred_to_init_indices will unique-ize on equality of pk 
+                // Record the initial predicates for the extrapolation in an un-ordered way
                 set<InitialPredIndices> &init_indices_for_k = derived_pred_to_init_indices[pk];
                 init_indices_for_k.insert( { i, j } );
                 
-                set<DerivedPred> &derived_preds_for_k = derived_pred_to_equal_derived_preds[pk];
+                // Remember all the derivations separately even if equal
+                EqualPredicateSet &derived_preds_for_k = derived_pred_to_derived_equal_pred_set[pk];
                 derived_preds_for_k.insert( pk );
             }
         }
     }
 
-    // Get them into vectors, which establishes indices (k) for them
+    // Get them into vectors, which establishes indices (k) for them. Also filter down to 
+    // derivations reached from at least two different sets of initial pred - these are 
+    // expected to be the "useful" ones.
     vector<set<DerivedPred>> derived_preds;
     for( auto p : derived_pred_to_init_indices )
     {
         TRACEC("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
-        if( p.second.size() > 1 )
-            derived_preds.push_back( derived_pred_to_equal_derived_preds.at(p.first) );
+        if( p.second.size() >= 2 )
+            derived_preds.push_back( derived_pred_to_derived_equal_pred_set.at(p.first) );
     }
     
     // Policy for extending the truth table. Don't make one with degree more than 10
@@ -297,9 +305,13 @@ void TruthTableSolver::ConstrainUsingDerived()
     bool should_extend = derived_preds.size() > 0 &&
                          (original_degree+derived_preds.size() <= 10);
     
+    // Maybe expand the truth table to include extrapolations
     if( should_extend )    
         ttwp->Extend( derived_preds ); 
     
+    // Search all pairs of predicates Pi, Pk for derivations, which should
+    // all now be interpolations if we expanded the truth table. If we didn't
+    // then we'll now only work with interpolations and ignore extrapolations.
     for( int i=0; i<ttwp->GetDegree(); i++ )
     {
         for( int j=0; j<ttwp->GetDegree(); j++ )
@@ -312,20 +324,20 @@ void TruthTableSolver::ConstrainUsingDerived()
             
             // See whether a predicate can be derived from this pair 
             shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
-            if( pk ) // There is an extrapolation
+            if( pk && ttwp->PredExists(pk) ) // There is a derivation Pk and it's an interpolation
             {
-                bool is_interpolation = ttwp->PredExists(pk);
-                if( is_interpolation ) // The extrapolation is an interpolation
-                {
-                    int k = ttwp->PredToIndex(pk);
-                    // Disallow all combinations that break the implication that Pi ∧ Pj => Pk
-                    TRACEC("Enforcing interpolation: %s ∧ %s => %s\n", PredicateName(i).c_str(), PredicateName(j).c_str(), PredicateName(k).c_str() );  
-                    ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, false );
-                }
+                int k = ttwp->PredToIndex(pk);
+                // Disallow all combinations that contradict the implication Pi ∧ Pj => Pk
+                TRACEC("Enforcing interpolation: %s ∧ %s => %s\n", 
+                       PredicateName(i).c_str(), 
+                       PredicateName(j).c_str(), 
+                       PredicateName(k).c_str() );  
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, false );
             }
         }
     }
 
+    // Maybe fold the truth table to simplify out the extrapolations
     if( should_extend )
     {
         set<int> fold_axes;
