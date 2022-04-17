@@ -53,7 +53,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
         
         SYM::TruthTableSolver::GivenSymbolSet other_vars = variables;           
         other_vars.erase(v);
-#if 1
+
         vector<VariableId> other_vars_vec = ToVector( other_vars );
         ForPower<bool>( other_vars_vec.size(), index_range_bool, [&](vector<bool> indices)
         {
@@ -69,16 +69,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
                       ("\nSolution:\n")(he->Render())("\n");
                 suggestion_expressions[v][givens] = he; // only store good ones in the map            
             }            
-        });  
-#else
-        shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, other_vars);
-        if( he )
-        {
-            TRACEC("Given:\n")(other_vars)
-                  ("\nSolution:\n")(he->Render())("\n");
-            suggestion_expressions[v][other_vars] = he; // only store good ones in the map            
-        }
-#endif                      
+        });                       
     }
 }
 
@@ -135,14 +126,9 @@ shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const A
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
 
     SYM::TruthTableSolver::GivenSymbolSet givens;
-#if 1
     for( VariableId v : plan.variables )            
         if( v != var && assignments.count(v) > 0 )
             givens.insert( v );
-#else
-    givens = plan.variables;           
-    givens.erase(var);
-#endif
 
     if( plan.suggestion_expressions.count(var)==0 ||
         plan.suggestion_expressions.at(var).count(givens)==0 )
