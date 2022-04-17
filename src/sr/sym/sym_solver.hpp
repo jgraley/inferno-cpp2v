@@ -49,12 +49,12 @@ public:
     shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
     
 private:
-    void PopulateInitial();
+    void ConstrainByEvaluating();
     void ConstrainUsingDerived();
 
     // Logging
     string PredicateName(int i);
-    string RenderEquationInTermsOfPreds();
+    string RenderEquationInTermsOfPredNames();
 
     const string label_var_name = "p";
     const int counting_based = 1;

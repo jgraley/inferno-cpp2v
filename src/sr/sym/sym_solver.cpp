@@ -54,19 +54,25 @@ TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> equation_ ) :
 
 void TruthTableSolver::PreSolve()
 {
+    // Pre-solve need only be done once for a given equation (i.e. once
+    // on a given instance of this class) and then any number of solves and/or
+    // get alt equation may be performed.
     TRACE("Presolve equation: ")(equation->Render())("\n");
     
+    // Find the predicates and create a truth table of them
     auto predicates = PredicateAnalysis::GetPredicates( equation );
     ttwp = make_unique<TruthTableWithPredicates>( predicates, true, label_var_name, counting_based );
-
-    TRACEC(RenderEquationInTermsOfPreds())("\n");
+    TRACEC(RenderEquationInTermsOfPredNames())("\n");
     
-    PopulateInitial();
-
+    // Constrain (set cells to false) by evaluating our equation while the predicates 
+    // are all forced to evaluate true or false according to the truth table indices.
+    ConstrainByEvaluating();
     TRACEC(ttwp->Render( {} ))("\n");
 
+    // Constrain by searching for derivations of the predicates using rules like
+    // substitution or transitivity. Extend the truth table to include derived predicates,
+    // constrain according to their rules and fold back down.
     ConstrainUsingDerived();
-    
     TRACEC(ttwp->Render( {} ))("\n");
 }
 
@@ -94,7 +100,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     {
         auto pred = ttwp->GetFrontPredicate(axis);
         if( !DifferenceOf(pred->GetRequiredVariables(), givens_and_target).empty() )
-            continue; // this predicate has required vars that are not given/target: exclude 
+            continue; // this predicate has required vars that are neither given nor target: exclude 
                       // from analysis (axis will become dead, and will get folded)
         
         if( pred->IsIndependentOf(target) )
@@ -105,7 +111,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     
     // Get axis numbers for dead axes and fold them out. Dead axes include 
     // - ones that are neither evaulatable nor solvable, i.e. they contain the target but solving failed
-    // - as well as ones that refer to symbol variables that were not in the "given" set
+    // - as well as ones that refer to symbol variables that were not target or in the "given" set
     set<int> dead_axes;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
@@ -117,7 +123,8 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
         TRACEC("Folding out dead axes:\n")(dead_axes)("\n");
     TruthTableWithPredicates folded_ttwp( ttwp->GetFolded( dead_axes, false ) );
     
-    // Get axis numbers for the evaluatable 
+    // Get axis numbers for the evaluatables and solveables, now that we've finished 
+    // folding, which changes them. 
     vector<int> evaluatable_axes, solveable_axes;
     for( int axis=0; axis<folded_ttwp.GetDegree(); axis++ )
     {
@@ -129,15 +136,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
     }
     TRACEC(folded_ttwp.Render( ToSet(solveable_axes) ))("\n");
 
-    // Controls in the multiplexor will be the evauators
-    vector<shared_ptr<BooleanExpression>> controls;
-    for( int axis : evaluatable_axes )
-    {
-        auto pred = folded_ttwp.GetFrontPredicate(axis);
-        controls.push_back( pred );
-    }
-
-    // Solve the soveables into a map opf solutions
+    // Solve the soveables into a map of solutions
     map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> solution_map;
     for( int axis : solveable_axes )
     {
@@ -151,7 +150,15 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
         solution_map[pred] = solution;
     }
 
-    // Make up the clauses using set operations on the solutions 
+    // We'll make a big multiplexor aka symbolic conditional. Controls will be the evaluatables.
+    vector<shared_ptr<BooleanExpression>> controls;
+    for( int axis : evaluatable_axes )
+    {
+        auto pred = folded_ttwp.GetFrontPredicate(axis);
+        controls.push_back( pred );
+    }
+
+    // Make up the options for the big multiplexor using set operations on the solutions
     vector<shared_ptr<SymbolExpression>> options;
     ForPower( evaluatable_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> evaluatable_indices)
     {
@@ -201,12 +208,15 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
 
 shared_ptr<BooleanExpression> TruthTableSolver::GetAltEquationForTesting() const
 {
+    // We can create an equation after pre-solve using the truth table 
+    // which shouldevaluate the same as the origninal expression, for use as a test.
+    
+    // We'll make a big consitional. Controls are the predicates.
     vector<shared_ptr<BooleanExpression>> controls;
     for( int ia=0; ia<ttwp->GetDegree(); ia++ )
-    {
         controls.push_back( ttwp->GetFrontPredicate(ia) );
-    }
 
+    // Options are bool constants taken from the cells of the truth table
     vector<shared_ptr<BooleanExpression>> options;
     ForPower( ttwp->GetDegree(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> indices)
     {
@@ -222,19 +232,20 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltEquationForTesting() const
 }
 
 
-void TruthTableSolver::PopulateInitial()
+void TruthTableSolver::ConstrainByEvaluating()
 {
-    // Gets them all because they're all true atm
-    set<vector<bool>> all_indices = ttwp->GetTruthTable().GetIndicesOfValue(true);
     const SR::SolutionMap sm{};
     const SR::TheKnowledge tk{};
     Expression::EvalKit kit { &sm, &tk }; 
     
-    for( vector<bool> indices : all_indices )
+    // Walk the truth table
+    ForPower<bool>( ttwp->GetDegree(), index_range_bool, [&](vector<bool> indices)
     {
         ASSERT( indices.size() == ttwp->GetDegree() );
-        vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
         
+        // Set up the shared_ptr<BooleanResult>s for the forcing. The forces 
+        // apply until these go out of scope. 
+        vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
         for( bool b : indices )
             vr.push_back( make_shared<BooleanResult>(ResultInterface::DEFINED, b) );
         
@@ -244,12 +255,13 @@ void TruthTableSolver::PopulateInitial()
             for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
                 pred->SetForceResult( vr[j] );       
             
+        // Evaluate to find out what the boolean connectives do with forced preds
         shared_ptr<BooleanResultInterface> eval_result = equation->Evaluate(kit);
         
         // Rule out any evaluations that come out false
         if( !eval_result->IsDefinedAndTrue() )
             ttwp->GetTruthTable().Set( indices, false );
-    }
+    } );
 }
 
 
@@ -257,12 +269,11 @@ void TruthTableSolver::ConstrainUsingDerived()
 {
     // Get all the extrapolations into maps, keyed by expression equality
     typedef TruthTableWithPredicates::EqualPredicateSet EqualPredicateSet;
-    typedef set<int> InitialPredIndices;
     typedef shared_ptr<PredicateOperator> DerivedPred;
 
     // These derived_pred_to_... maps will unique-ize on equality of Pk 
-    map<DerivedPred, set<InitialPredIndices>, Expression::OrderComparer> derived_pred_to_init_indices;
-    map<DerivedPred, EqualPredicateSet, Expression::OrderComparer> derived_pred_to_derived_equal_pred_set;
+    map<shared_ptr<PredicateOperator>, set<set<int>>, Expression::OrderComparer> derived_pred_to_init_indices;
+    map<shared_ptr<PredicateOperator>, EqualPredicateSet, Expression::OrderComparer> derived_pred_to_derived_equal_pred_set;
     for( int i=0; i<ttwp->GetDegree(); i++ )
     {
         for( int j=0; j<ttwp->GetDegree(); j++ )
@@ -278,12 +289,10 @@ void TruthTableSolver::ConstrainUsingDerived()
             if( pk && !ttwp->PredExists(pk) ) // There is a derivation Pk and it's an extrapolation
             {
                 // Record the initial predicates for the extrapolation in an un-ordered way
-                set<InitialPredIndices> &init_indices_for_k = derived_pred_to_init_indices[pk];
-                init_indices_for_k.insert( { i, j } );
+                derived_pred_to_init_indices[pk].insert( { i, j } );
                 
                 // Remember all the derivations separately even if equal
-                EqualPredicateSet &derived_preds_for_k = derived_pred_to_derived_equal_pred_set[pk];
-                derived_preds_for_k.insert( pk );
+                derived_pred_to_derived_equal_pred_set[pk].insert( pk );
             }
         }
     }
@@ -291,7 +300,7 @@ void TruthTableSolver::ConstrainUsingDerived()
     // Get them into vectors, which establishes indices (k) for them. Also filter down to 
     // derivations reached from at least two different sets of initial pred - these are 
     // expected to be the "useful" ones.
-    vector<set<DerivedPred>> derived_preds;
+    vector<EqualPredicateSet> derived_preds;
     for( auto p : derived_pred_to_init_indices )
     {
         TRACEC("Derived predicate ")(p.first->Render())(" appears %d times\n", p.second.size());
@@ -355,7 +364,7 @@ string TruthTableSolver::PredicateName(int j)
 }
 
 
-string TruthTableSolver::RenderEquationInTermsOfPreds()
+string TruthTableSolver::RenderEquationInTermsOfPredNames()
 {
     string s;
     vector<shared_ptr<string>> pred_names(ttwp->GetDegree());
