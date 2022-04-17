@@ -53,7 +53,7 @@ void TruthTable::SetSlice( map<int, bool> fixed_map, bool new_value )
     ScatterInto( full_indices, fixed_map );
 
     // For all values of (bool)^(free axis count)
-    ForPower( free_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> free_indices)
+    ForPower<bool>( free_axes.size(), index_range_bool, [&](vector<bool> free_indices)
     {
         // Capture the free axes and indices into our vector
         map<int, bool> free_map = ZipToMap( free_axes, free_indices );
@@ -81,7 +81,7 @@ void TruthTable::SetSlice( map<int, bool> fixed_map, const TruthTable &new_value
     ScatterInto( full_indices, fixed_map );
 
     // For all values of (bool)^(free axis count)
-    ForPower( free_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> free_indices)
+    ForPower<bool>( free_axes.size(), index_range_bool, [&](vector<bool> free_indices)
     {
         // Capture the free axes and indices into our vector
         map<int, bool> free_map = ZipToMap( free_axes, free_indices );
@@ -138,8 +138,8 @@ TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
     vector<bool> full_indices(degree);
     ScatterInto( full_indices, fixed_map );
 
-    // For all values of (bool)^(free axis count)
-    ForPower( dest_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> dest_indices)
+    // For all values of (bool)^(dest axis count)
+    ForPower<bool>( dest_axes.size(), index_range_bool, [&](vector<bool> dest_indices)
     {
         // Capture the free axes and indices into our vector
         map<int, bool> dest_map = ZipToMap( dest_axes, dest_indices );
@@ -166,7 +166,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
     TruthTable dest( dest_axes.size(), false );
 
     // For all values of (bool)^(dest axis count)
-    ForPower( dest_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> dest_indices)
+    ForPower<bool>( dest_axes.size(), index_range_bool, [&](vector<bool> dest_indices)
     {
         // Capture the dest axes and indices into our vector
         map<int, bool> dest_map = ZipToMap( dest_axes, dest_indices );
@@ -176,7 +176,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
         bool cell_total = identity;
 
         // For all values of (bool)^(fold axis count)
-        ForPower( fold_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> fold_indices)
+        ForPower<bool>( fold_axes.size(), index_range_bool, [&](vector<bool> fold_indices)
         {
             // Capture the free axes and indices into our vector
             map<int, bool> fold_map = ZipToMap( fold_axes, fold_indices );
@@ -200,7 +200,7 @@ set<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
 {
     set<vector<bool>> indices_set;
     
-    ForPower( degree, index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> indices)
+    ForPower<bool>( degree, index_range_bool, [&](vector<bool> indices)
     {
         if( Get(indices) == value )
             indices_set.insert( indices );
@@ -240,8 +240,8 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int
 
     vector<vector<string>> render_table_cells;
 
-    // For all values of (bool)^(dest axis count)
-    ForPower( row_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> row_indices)
+    // For all values of (bool)^(row axis count)
+    ForPower<bool>( row_axes.size(), index_range_bool, [&](vector<bool> row_indices)
     {
         // Capture the dest axes and indices into our vector
         map<int, bool> row_map = ZipToMap( row_axes, row_indices );
@@ -250,8 +250,8 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int
         
         vector<string> render_row_cells;
 
-        // For all values of (bool)^(fold axis count)
-        ForPower( column_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> column_indices)
+        // For all values of (bool)^(column axis count)
+        ForPower<bool>( column_axes.size(), index_range_bool, [&](vector<bool> column_indices)
         {
             // Capture the free axes and indices into our vector
             map<int, bool> column_map = ZipToMap( column_axes, column_indices );

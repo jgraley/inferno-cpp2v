@@ -160,7 +160,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
 
     // Make up the options for the big multiplexor using set operations on the solutions
     vector<shared_ptr<SymbolExpression>> options;
-    ForPower( evaluatable_axes.size(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> evaluatable_indices)
+    ForPower<bool>( evaluatable_axes.size(), index_range_bool, [&](vector<bool> evaluatable_indices)
     {
         map<int, bool> evaluatable_indices_map;
         for( int i=0; i<evaluatable_axes.size(); i++ )
@@ -218,7 +218,7 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltEquationForTesting() const
 
     // Options are bool constants taken from the cells of the truth table
     vector<shared_ptr<BooleanExpression>> options;
-    ForPower( ttwp->GetDegree(), index_range_bool, (function<void(vector<bool>)>)[&](vector<bool> indices)
+    ForPower<bool>( ttwp->GetDegree(), index_range_bool, [&](vector<bool> indices)
     {
         bool cell_value = ttwp->GetTruthTable().Get( indices );      
         options.push_back( make_shared<BooleanConstant>(cell_value) );
