@@ -37,8 +37,7 @@ PatternTransformationVector VNTransformation::GetAllPatternTrans()
     ptv.push_back( make_shared<SearchToCompare>() );
     
     // Transformations to make life easier for the solver
-    if( ReadArgs::split_disjunctions )
-        ptv.push_back( make_shared<SplitDisjunctions>() );
+    ptv.push_back( make_shared<SplitDisjunctions>() );
     return ptv;
 }
 

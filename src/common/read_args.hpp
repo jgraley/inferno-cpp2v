@@ -42,7 +42,6 @@ public:
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
-    static bool split_disjunctions;
     
 private:
     void ParseQuitAfter(std::string arg);

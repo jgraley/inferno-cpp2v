@@ -33,7 +33,6 @@ bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::split_disjunctions = false;
 
 void ReadArgs::Usage(string msg)
 {
@@ -219,10 +218,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         else if( option=='u' )
         {
             char use_option = argv[curarg][2];
-            if( use_option=='d' )
-                split_disjunctions = true;
-            else
-                Usage("Unknown argument after -u");
+            Usage("Unknown argument after -u");
         }
         else 
         {
