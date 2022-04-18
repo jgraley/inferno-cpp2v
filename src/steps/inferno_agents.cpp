@@ -142,7 +142,7 @@ list<shared_ptr<SYM::SymbolExpression> *> IdentifierByNameAgent::IsIdentifierNam
 }
 
 
-shared_ptr<SYM::BooleanResultInterface> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
+shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
                                                                                                     const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        

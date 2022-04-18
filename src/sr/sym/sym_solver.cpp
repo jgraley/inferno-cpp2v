@@ -256,7 +256,7 @@ void TruthTableSolver::ConstrainByEvaluating()
                 pred->SetForceResult( vr[j] );       
             
         // Evaluate to find out what the boolean connectives do with forced preds
-        shared_ptr<BooleanResultInterface> eval_result = equation->Evaluate(kit);
+        shared_ptr<BooleanResult> eval_result = equation->Evaluate(kit);
         
         // Rule out any evaluations that come out false
         if( !eval_result->IsDefinedAndTrue() )

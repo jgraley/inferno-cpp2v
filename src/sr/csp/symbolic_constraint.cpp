@@ -104,13 +104,13 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
 #endif        
 
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
-    shared_ptr<SYM::BooleanResultInterface> result = plan.consistency_expression->Evaluate( kit );
+    shared_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
     if( plan.alt_expression_for_testing )
     {
         // Test that the truth table solver's version of the sat equation
         // agrees with the original sat equation
-        shared_ptr<SYM::BooleanResultInterface> alt_result = plan.alt_expression_for_testing->Evaluate( kit );
+        shared_ptr<SYM::BooleanResult> alt_result = plan.alt_expression_for_testing->Evaluate( kit );
         ASSERT( alt_result );
         ASSERT( *alt_result == *result )(*alt_result)(" != ")(*result);
     }

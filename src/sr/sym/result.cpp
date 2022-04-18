@@ -35,14 +35,14 @@ bool BooleanResult::GetAsBool() const
 }
 
 
-bool BooleanResult::operator==( const BooleanResultInterface &other ) const
+bool BooleanResult::operator==( const BooleanResult &other ) const
 {
     auto o = GET_THAT_POINTER(&other);
     return value == o->value;
 }
 
 
-bool BooleanResult::operator<( const BooleanResultInterface &other ) const
+bool BooleanResult::operator<( const BooleanResult &other ) const
 {
     auto o = GET_THAT_POINTER(&other);
     return (int)value < (int)(o->value);

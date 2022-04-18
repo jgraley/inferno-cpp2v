@@ -7,7 +7,7 @@ using namespace SYM;
 
 // ------------------------- PredicateOperator --------------------------
 
-void PredicateOperator::SetForceResult( weak_ptr<BooleanResultInterface> force_result_ )
+void PredicateOperator::SetForceResult( weak_ptr<BooleanResult> force_result_ )
 {
     force_result = force_result_;
 }
@@ -30,10 +30,10 @@ list<shared_ptr<SymbolExpression>> PredicateOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResultInterface> PredicateOperator::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> PredicateOperator::Evaluate( const EvalKit &kit ) const
 {
     // Apply forces where specified
-    shared_ptr<BooleanResultInterface> locked_result = force_result.lock();
+    shared_ptr<BooleanResult> locked_result = force_result.lock();
     if( locked_result )
         return locked_result;
 
@@ -108,7 +108,7 @@ list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
 }
 
 
-shared_ptr<BooleanResultInterface> EqualOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
@@ -214,7 +214,7 @@ list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPo
 }
 
 
-shared_ptr<BooleanResultInterface> IndexComparisonOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
                                                                       const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
@@ -371,7 +371,7 @@ list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
 }
 
 
-shared_ptr<BooleanResultInterface> AllDiffOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
                                                      const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
@@ -437,7 +437,7 @@ list<shared_ptr<SymbolExpression> *> KindOfOperator::GetSymbolOperandPointers()
 }
 
 
-shared_ptr<BooleanResultInterface> KindOfOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -501,7 +501,7 @@ list<shared_ptr<SymbolExpression> *> ChildCollectionSizeOperator::GetSymbolOpera
 }
 
 
-shared_ptr<BooleanResultInterface> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -595,7 +595,7 @@ list<shared_ptr<SymbolExpression> *> EquivalentOperator::GetSymbolOperandPointer
 }
 
 
-shared_ptr<BooleanResultInterface> EquivalentOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propogates 

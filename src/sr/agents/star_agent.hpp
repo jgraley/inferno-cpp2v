@@ -45,7 +45,7 @@ private:
     class SubcontainerKindOfOperator : public SYM::KindOfOperator
     {
         using KindOfOperator::KindOfOperator; 
-        virtual shared_ptr<SYM::BooleanResultInterface> Evaluate( const EvalKit &kit,
+        virtual shared_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
                                                                   const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
         virtual string RenderNF() const override;
     };

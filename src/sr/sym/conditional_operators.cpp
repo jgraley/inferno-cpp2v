@@ -25,7 +25,7 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 
 shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
-    shared_ptr<BooleanResultInterface> r_control = control->Evaluate(kit);   
+    shared_ptr<BooleanResult> r_control = control->Evaluate(kit);   
     if( r_control->IsDefinedAndUnique() )
     {
         if( r_control->GetAsBool() ) // TRUE
@@ -87,7 +87,7 @@ shared_ptr<SymbolResultInterface> MultiConditionalOperator::Evaluate( const Eval
     unsigned int int_control = 0;
     for( int i=0; i<controls.size(); i++ )
     {
-        shared_ptr<BooleanResultInterface> r = controls[i]->Evaluate(kit);
+        shared_ptr<BooleanResult> r = controls[i]->Evaluate(kit);
         
         // Abort if any controls evaluate undefined (TODO could do better)
         if( !r->IsDefinedAndUnique() )

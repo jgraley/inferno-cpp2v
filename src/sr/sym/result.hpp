@@ -7,37 +7,23 @@
 namespace SYM
 { 
 
-// ------------------------- BooleanResultInterface --------------------------
-
-class BooleanResultInterface : public Traceable
-{
-public:
-    virtual bool IsDefinedAndTrue() const = 0;    
-    virtual bool IsDefinedAndFalse() const = 0;    
-    virtual bool GetAsBool() const = 0;    
-    
-    virtual bool IsDefinedAndUnique() const = 0;
-    virtual bool operator==( const BooleanResultInterface &other ) const = 0;    
-    virtual bool operator<( const BooleanResultInterface &other ) const = 0;
-};
-
 // ------------------------- BooleanResult --------------------------
 
-class BooleanResult : public BooleanResultInterface
+class BooleanResult : public Traceable
 {
 public:
     explicit BooleanResult( bool value = false );
 
     bool IsDefinedAndUnique() const;    
-    bool IsDefinedAndTrue() const override;    
-    bool IsDefinedAndFalse() const override;    
-    bool GetAsBool() const override;    
-    bool operator==( const BooleanResultInterface &other ) const;    
+    bool IsDefinedAndTrue() const;    
+    bool IsDefinedAndFalse() const;    
+    bool GetAsBool() const;    
+    bool operator==( const BooleanResult &other ) const;    
     
     // Present a "certainty" ordering to simplify eval with dominance
     // effect in And and Or operators. True is bigger than undefined, 
     // which is bigger than false.
-    bool operator<( const BooleanResultInterface &other ) const override;
+    bool operator<( const BooleanResult &other ) const;
 
     string GetTrace() const override;
     
