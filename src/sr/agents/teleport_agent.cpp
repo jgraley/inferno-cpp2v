@@ -101,9 +101,9 @@ shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     XLink keyer_xlink = keyer_result->GetAsXLink();
     LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink );        
     if( (XLink)cached_link )
-        return make_shared<SymbolResult>( ResultInterface::DEFINED, (XLink)cached_link );
+        return make_shared<SymbolResult>( SymbolResultInterface::DEFINED, (XLink)cached_link );
     else 
-        return make_shared<SymbolResult>( ResultInterface::UNDEFINED );
+        return make_shared<SymbolResult>( SymbolResultInterface::UNDEFINED );
 }
 
 

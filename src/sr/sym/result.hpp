@@ -7,30 +7,17 @@
 namespace SYM
 { 
 
-// ------------------------- ResultInterface --------------------------
-
-class ResultInterface : public Traceable
-{
-public:
-    enum Category
-    {
-        UNDEFINED,
-        DEFINED
-    };    
-
-    virtual bool IsDefinedAndUnique() const = 0;
-    virtual bool operator==( const ResultInterface &other ) const = 0;    
-};
-
 // ------------------------- BooleanResultInterface --------------------------
 
-class BooleanResultInterface : public ResultInterface
+class BooleanResultInterface : public Traceable
 {
 public:
     virtual bool IsDefinedAndTrue() const = 0;    
     virtual bool IsDefinedAndFalse() const = 0;    
     virtual bool GetAsBool() const = 0;    
     
+    virtual bool IsDefinedAndUnique() const = 0;
+    virtual bool operator==( const BooleanResultInterface &other ) const = 0;    
     virtual bool operator<( const BooleanResultInterface &other ) const = 0;
 };
 
@@ -41,11 +28,11 @@ class BooleanResult : public BooleanResultInterface
 public:
     explicit BooleanResult( bool value = false );
 
-    bool IsDefinedAndUnique() const override;    
+    bool IsDefinedAndUnique() const;    
     bool IsDefinedAndTrue() const override;    
     bool IsDefinedAndFalse() const override;    
     bool GetAsBool() const override;    
-    bool operator==( const ResultInterface &other ) const override;    
+    bool operator==( const BooleanResultInterface &other ) const;    
     
     // Present a "certainty" ordering to simplify eval with dominance
     // effect in And and Or operators. True is bigger than undefined, 
@@ -60,12 +47,20 @@ private:
 
 // ------------------------- SymbolResultInterface --------------------------
 
-class SymbolResultInterface : public ResultInterface
+class SymbolResultInterface : public Traceable
 {
 public:
+    enum Category
+    {
+        UNDEFINED,
+        DEFINED
+    };    
+
     virtual SR::XLink GetAsXLink() const = 0;   
     virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;
      
+    virtual bool IsDefinedAndUnique() const = 0;
+    virtual bool operator==( const SymbolResultInterface &other ) const = 0;    
 };
 
 // ------------------------- SymbolResult --------------------------
@@ -78,7 +73,7 @@ public:
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const ResultInterface &other ) const override;    
+    bool operator==( const SymbolResultInterface &other ) const override;    
     
     string GetTrace() const override;
 
@@ -97,7 +92,7 @@ public:
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const ResultInterface &other ) const override;
+    bool operator==( const SymbolResultInterface &other ) const override;
 
     shared_ptr<SymbolSetResult> GetComplement() const;
     static shared_ptr<SymbolSetResult> GetUnion( list<shared_ptr<SymbolSetResult>> ops );

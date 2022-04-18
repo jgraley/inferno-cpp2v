@@ -35,7 +35,7 @@ bool BooleanResult::GetAsBool() const
 }
 
 
-bool BooleanResult::operator==( const ResultInterface &other ) const
+bool BooleanResult::operator==( const BooleanResultInterface &other ) const
 {
     auto o = GET_THAT_POINTER(&other);
     return value == o->value;
@@ -94,9 +94,9 @@ bool SymbolResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool SymbolResult::operator==( const ResultInterface &other ) const
+bool SymbolResult::operator==( const SymbolResultInterface &other ) const
 {
-    auto o = dynamic_cast<const SymbolResult *>(&other);
+    auto o = GET_THAT_POINTER(&other);
     return o && xlink == o->xlink;
 }
 
@@ -160,9 +160,9 @@ bool SymbolSetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool SymbolSetResult::operator==( const ResultInterface &other ) const
+bool SymbolSetResult::operator==( const SymbolResultInterface &other ) const
 {
-    auto o = dynamic_cast<const SymbolSetResult *>(&other);
+    auto o = GET_THAT_POINTER(&other);
     return o && xlinks == o->xlinks && complement_flag==o->complement_flag;
 }
 

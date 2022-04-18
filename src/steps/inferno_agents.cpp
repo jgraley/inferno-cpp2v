@@ -302,7 +302,7 @@ shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
     while( XLink next_xlink = agent->Advance(xlink, &s) )
         xlink = next_xlink;
         
-    return make_shared<SYM::SymbolResult>( SYM::ResultInterface::DEFINED, xlink );        
+    return make_shared<SYM::SymbolResult>( SYM::SymbolResultInterface::DEFINED, xlink );        
 }
 
 
