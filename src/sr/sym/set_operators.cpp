@@ -21,7 +21,7 @@ shared_ptr<SymbolResultInterface> ComplementOperator::Evaluate( const EvalKit &k
                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    shared_ptr<SymbolSetResult> asr = SymbolSetResult::Create( ar );
+    shared_ptr<SymbolSetResult> asr = make_shared<SymbolSetResult>( ar );
     return asr->GetComplement();
 }
 
@@ -56,7 +56,7 @@ shared_ptr<SymbolResultInterface> UnionOperator::Evaluate( const EvalKit &kit,
 {
     list<shared_ptr<SymbolSetResult>> ssrs;
     for( shared_ptr<SymbolResultInterface> ar : op_results )       
-        ssrs.push_back( SymbolSetResult::Create( ar ) );
+        ssrs.push_back( make_shared<SymbolSetResult>( ar ) );
     return SymbolSetResult::GetUnion( ssrs );
 }
 
@@ -96,7 +96,7 @@ shared_ptr<SymbolResultInterface> IntersectionOperator::Evaluate( const EvalKit 
 {
     list<shared_ptr<SymbolSetResult>> ssrs;
     for( shared_ptr<SymbolResultInterface> ar : op_results )       
-        ssrs.push_back( SymbolSetResult::Create( ar ) );
+        ssrs.push_back( make_shared<SymbolSetResult>( ar ) );
     return SymbolSetResult::GetIntersection( ssrs );
 }
 

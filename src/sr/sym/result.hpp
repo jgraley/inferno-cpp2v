@@ -73,7 +73,7 @@ class SymbolSetResult : public SymbolResultInterface
 {
 public:
     explicit SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
-    static shared_ptr<SymbolSetResult> Create( shared_ptr<SymbolResultInterface> other );
+    explicit SymbolSetResult( shared_ptr<SymbolResultInterface> other );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    

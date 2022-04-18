@@ -115,18 +115,19 @@ SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_, bool complement_flag_ 
 }
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::Create( shared_ptr<SymbolResultInterface> other )
+SymbolSetResult::SymbolSetResult( shared_ptr<SymbolResultInterface> other )
 {
     if( auto ssr = dynamic_pointer_cast<SymbolSetResult>(other) )
     {
-        return ssr;
+        xlinks = ssr->xlinks;
+        complement_flag = ssr->complement_flag;
     }
     else if( auto sr = dynamic_pointer_cast<SymbolResult>(other) )
     {
         set<SR::XLink> links;
-        bool ok = other->TryGetAsSetOfXLinks( links );
+        bool ok = other->TryGetAsSetOfXLinks( xlinks );
         ASSERTS(ok);
-        return make_shared<SymbolSetResult>( links );
+        complement_flag = false;
     }
     else
     {
