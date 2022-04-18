@@ -97,13 +97,13 @@ shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
     if( !keyer_result->IsDefinedAndUnique() )
-        return make_shared<SymbolResult>( SymbolResult::UNDEFINED );
+        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetAsXLink();
     LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink );        
     if( (XLink)cached_link )
-        return make_shared<SymbolResult>( SymbolResultInterface::DEFINED, (XLink)cached_link );
+        return make_shared<SymbolResult>( (XLink)cached_link );
     else 
-        return make_shared<SymbolResult>( SymbolResultInterface::UNDEFINED );
+        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
 }
 
 

@@ -57,20 +57,17 @@ string BooleanResult::GetTrace() const
 
 // ------------------------- SymbolResult --------------------------
 
-SymbolResult::SymbolResult( Category cat, SR::XLink xlink_ )
+SymbolResult::SymbolResult( SR::XLink xlink_ ) :
+    xlink( xlink_ )
 {
-    switch( cat )
-    {
-    case UNDEFINED:
-        ASSERT( !xlink_ );
-        break;
-    case DEFINED:
-        ASSERT( xlink_ );
-        xlink = xlink_;
-        break;
-    default:
-        ASSERTFAIL("Missing case");
-    }
+    ASSERT( xlink_ )("Not allowed to construct with NULL; use other constructor instead");
+}
+
+
+SymbolResult::SymbolResult( Category cat ) :
+    xlink()
+{
+    ASSERT( cat==NOT_A_SYMBOL )("Can only pass in NOT_A_SYMBOL; use other constructor instead");
 }
 
 
@@ -104,9 +101,9 @@ bool SymbolResult::operator==( const SymbolResultInterface &other ) const
 string SymbolResult::GetTrace() const
 {
     if( xlink )
-        return "DEFINED:"+Trace(xlink);
+        return Trace(xlink);
     else
-        return "UNDEFINED";
+        return "NOT_A_SYMBOL";
 }
 
 // ------------------------- SymbolSetResult --------------------------

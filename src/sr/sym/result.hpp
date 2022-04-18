@@ -36,12 +36,6 @@ private:
 class SymbolResultInterface : public Traceable
 {
 public:
-    enum Category
-    {
-        UNDEFINED,
-        DEFINED
-    };    
-
     virtual SR::XLink GetAsXLink() const = 0;   
     virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;
      
@@ -54,7 +48,13 @@ public:
 class SymbolResult : public SymbolResultInterface
 {
 public:
-    explicit SymbolResult( Category cat, SR::XLink xlink=SR::XLink() );
+    enum Category
+    {
+        NOT_A_SYMBOL
+    };    
+
+    explicit SymbolResult( SR::XLink xlink );
+    explicit SymbolResult( Category cat );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetAsXLink() const override;    

@@ -43,7 +43,7 @@ shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &
         shared_ptr<SymbolResultInterface> r_option_false = option_false->Evaluate(kit);   
         if( *r_option_true == *r_option_false )
             return r_option_true; // not ambiguous if both options are the same
-        return make_shared<SymbolResult>( SymbolResultInterface::UNDEFINED );
+        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     }
 }
 
@@ -91,7 +91,7 @@ shared_ptr<SymbolResultInterface> MultiConditionalOperator::Evaluate( const Eval
         
         // Abort if any controls evaluate undefined (TODO could do better)
         if( !r->IsDefinedAndUnique() )
-            return make_shared<SymbolResult>( SymbolResultInterface::UNDEFINED );
+            return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
             
         int_control |= (int)r->GetAsBool() << i;
     }

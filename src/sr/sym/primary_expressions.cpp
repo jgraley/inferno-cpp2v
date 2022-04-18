@@ -13,13 +13,13 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 
 shared_ptr<SymbolResultInterface> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<SymbolResult>( SymbolResultInterface::DEFINED, xlink );
+    return make_shared<SymbolResult>( xlink );
 }
 
 
 shared_ptr<SymbolResultInterface> SymbolConstant::GetValue() const
 {
-    return make_shared<SymbolResult>( SymbolResultInterface::DEFINED, xlink );
+    return make_shared<SymbolResult>( xlink );
 }
 
 
@@ -74,7 +74,7 @@ shared_ptr<SymbolResultInterface> SymbolVariable::Evaluate( const EvalKit &kit )
     // done a quick set difference and KNOWN that it would come to this.
     ASSERT( kit.hypothesis_links->count(plink) > 0 );
     
-    return make_shared<SymbolResult>( SymbolResultInterface::DEFINED, kit.hypothesis_links->at(plink) );
+    return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
 }
 
 

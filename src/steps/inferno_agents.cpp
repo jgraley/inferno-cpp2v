@@ -292,7 +292,7 @@ shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
     ASSERT( op_results.size()==1 );        
     shared_ptr<SYM::SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
     if( !keyer_result->IsDefinedAndUnique() )
-        return make_shared<SYM::SymbolResult>( SYM::SymbolResult::UNDEFINED );
+        return make_shared<SYM::SymbolResult>( SYM::SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetAsXLink();
     
     // Keep advancing until we get nullptr, and remember the last non-null position
@@ -302,7 +302,7 @@ shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
     while( XLink next_xlink = agent->Advance(xlink, &s) )
         xlink = next_xlink;
         
-    return make_shared<SYM::SymbolResult>( SYM::SymbolResultInterface::DEFINED, xlink );        
+    return make_shared<SYM::SymbolResult>( xlink );        
 }
 
 
