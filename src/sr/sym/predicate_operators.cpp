@@ -41,8 +41,46 @@ shared_ptr<BooleanResult> PredicateOperator::Evaluate( const EvalKit &kit ) cons
 }
 
 
-shared_ptr<PredicateOperator> PredicateOperator::TryDerive( shared_ptr<PredicateOperator> other ) const
+shared_ptr<PredicateOperator> PredicateOperator::TryDeriveWith( shared_ptr<PredicateOperator> other ) const
 {
+    // Try to substitute one variable with another 
+    if( IsCanSubstituteFrom() ) 
+    {
+        list<shared_ptr<SymbolExpression>> my_ops = GetSymbolOperands();
+        ASSERT( my_ops.size() == 2 );
+
+        // Try both ways round. 
+        if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( my_ops.front(), my_ops.back() ) )
+            return sub;
+
+        if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( my_ops.back(), my_ops.front() ) )
+            return sub;        
+            
+        return nullptr;
+    }
+    
+    // Derive the implications of transitive operators
+    Transitivity t = GetTransitivityWith( other );
+    if( t!=NONE )
+    {
+        list<shared_ptr<SymbolExpression>> my_ops = GetSymbolOperands();
+        ASSERT( my_ops.size() == 2 );
+        list<shared_ptr<SymbolExpression>> other_ops = other->GetSymbolOperands();
+        ASSERT( other_ops.size() == 2 );
+        if( (t==FORWARD || t==BIDIRECTIONAL) && OrderCompare(my_ops.back(), other_ops.front())==EQUAL )
+        {
+            shared_ptr<PredicateOperator> pnew = TrySubstitute( my_ops.back(), other_ops.back() );    
+            ASSERT( pnew );
+            return pnew;
+        }
+        if( (t==REVERSE || t==BIDIRECTIONAL) && OrderCompare(my_ops.back(), other_ops.back())==EQUAL )
+        {
+            shared_ptr<PredicateOperator> pnew = TrySubstitute( my_ops.back(), other_ops.front() );    
+            ASSERT( pnew );
+            return pnew;
+        }
+    }
+    
     return nullptr;
 }
 
@@ -64,6 +102,18 @@ shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<Symbo
             
     return nullptr;
 }                                                                
+
+
+PredicateOperator::Transitivity PredicateOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    return NONE;
+}
+
+
+bool PredicateOperator::IsCanSubstituteFrom() const
+{
+    return false;
+}
 
 
 string PredicateOperator::Render() const 
@@ -109,7 +159,7 @@ list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
 
 
 shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
-                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
     // IEEE 754 Equals results in false if an operand is NaS. Not-equals has 
@@ -159,16 +209,9 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 }
 
 
-shared_ptr<PredicateOperator> EqualOperator::TryDerive( shared_ptr<PredicateOperator> other ) const
+bool EqualOperator::IsCanSubstituteFrom() const
 {
-    // Try both ways round
-    if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( a, b ) )
-        return sub;
-
-    if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( b, a ) )
-        return sub;        
-        
-    return nullptr;
+    return true;
 }
 
 
@@ -258,6 +301,18 @@ bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
+PredicateOperator::Transitivity GreaterOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other))
+        return FORWARD;
+
+    if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other))
+        return REVERSE;
+        
+    return NONE;
+}
+
+
 string GreaterOperator::RenderNF() const
 {
     return RenderForMe(a) + " > " + RenderForMe(b);
@@ -284,6 +339,18 @@ bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
+PredicateOperator::Transitivity LessOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other))
+        return FORWARD;
+    
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other))
+        return REVERSE;
+    
+    return NONE;
+}
+
+
 string LessOperator::RenderNF() const
 {
     return RenderForMe(a) + " < " + RenderForMe(b);
@@ -310,6 +377,18 @@ bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType in
 }                    
             
                                   
+PredicateOperator::Transitivity GreaterOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+        return FORWARD;
+
+    if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
+        return REVERSE;
+        
+    return NONE;
+}
+
+
 string GreaterOrEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " >= " + RenderForMe(b);
@@ -336,6 +415,18 @@ bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index
 }                    
             
                                   
+PredicateOperator::Transitivity LessOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
+        return FORWARD;
+    
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+        return REVERSE;
+    
+    return NONE;
+}
+
+
 string LessOrEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " <= " + RenderForMe(b);
@@ -596,7 +687,7 @@ list<shared_ptr<SymbolExpression> *> EquivalentOperator::GetSymbolOperandPointer
 
 
 shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
-                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propogates 
     // NaS. So like ==
@@ -618,6 +709,12 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
 bool EquivalentOperator::IsCommutative() const
 {
     return true;
+}
+
+
+PredicateOperator::Transitivity EquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    return (bool)dynamic_pointer_cast<EquivalentOperator>(other) ? BIDIRECTIONAL : NONE;
 }
 
 

@@ -285,7 +285,7 @@ void TruthTableSolver::ConstrainUsingDerived()
             auto pj = ttwp->GetFrontPredicate(j);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
+            shared_ptr<PredicateOperator> pk = pi->TryDeriveWith( pj );
             if( pk && !ttwp->PredExists(pk) ) // There is a derivation Pk and it's an extrapolation
             {
                 // Record the initial predicates for the extrapolation in an un-ordered way
@@ -332,7 +332,7 @@ void TruthTableSolver::ConstrainUsingDerived()
             auto pj = ttwp->GetFrontPredicate(j);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pk = pi->TryDerive( pj );
+            shared_ptr<PredicateOperator> pk = pi->TryDeriveWith( pj );
             if( pk && ttwp->PredExists(pk) ) // There is a derivation Pk and it's an interpolation
             {
                 int k = ttwp->PredToIndex(pk);

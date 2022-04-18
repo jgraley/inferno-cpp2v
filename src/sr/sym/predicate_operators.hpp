@@ -19,7 +19,14 @@ class PredicateOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef SymbolToBooleanExpression Parent;
-    
+    enum Transitivity
+    {
+        NONE,
+        FORWARD,      // S1 ✕ S2 ∧ S2 ⚬ S3 = S1 ✕ S3
+        REVERSE,      // S1 ✕ S2 ∧ S3 ⚬ S2 = S1 ✕ S3
+        BIDIRECTIONAL // Either of the above is true
+    };
+        
     virtual PredicateOperator *Clone() const = 0;
     
     // Stored as weak pointer so that force is undone when weak pointer expires. Sort of RAII-at-a-distance.
@@ -30,9 +37,13 @@ public:
     virtual list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() = 0;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
 
-    virtual shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const;
+    shared_ptr<PredicateOperator> TryDeriveWith( shared_ptr<PredicateOperator> other ) const;
+    
     shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
                                                  shared_ptr<SymbolExpression> with ) const;
+    virtual Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const;
+    virtual bool IsCanSubstituteFrom() const;
+
     string Render() const override final;
     Precedence GetPrecedence() const override final;
         
@@ -59,13 +70,13 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
 
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const override;
-    shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> other ) const override;
-                                                         
+    virtual bool IsCanSubstituteFrom() const;
+
     string RenderNF() const override;
     Precedence GetPrecedenceNF() const override;
     
@@ -111,6 +122,7 @@ class GreaterOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     virtual string RenderNF() const override;
 };
 
@@ -125,6 +137,7 @@ class LessOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     virtual string RenderNF() const override;
 };
 
@@ -139,6 +152,7 @@ class GreaterOrEqualOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     virtual string RenderNF() const override;
 };
 
@@ -153,6 +167,7 @@ class LessOrEqualOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     virtual string RenderNF() const override;
 };
 
@@ -246,6 +261,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
+    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
+    
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
     

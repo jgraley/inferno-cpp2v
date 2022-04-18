@@ -496,7 +496,7 @@ int main( int argc, char *argv[] )
     
     Inferno inferno;
     inferno.Run();
-    CSP::SimpleSolver::DumpGSV();
+    //CSP::SimpleSolver::DumpGSV();
     return EXIT_SUCCESS;
 }
 
