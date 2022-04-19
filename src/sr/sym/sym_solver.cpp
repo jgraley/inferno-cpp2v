@@ -223,7 +223,7 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltEquationForTesting() const
         options.push_back( make_shared<BooleanConstant>(cell_value) );
     } );
 
-    auto solution = make_shared<MultiBooleanConditionalOperator>( controls, options );
+    auto solution = make_shared<Multiplexor>( controls, options );
 
     TRACEC("alternative expression is ")(solution)("\n");
 

@@ -164,13 +164,13 @@ private:
     const shared_ptr<BooleanExpression> b;
 };
 
-// ------------------------- BooleanConditionalOperator --------------------------
+// ------------------------- Uniplexor --------------------------
 
-class BooleanConditionalOperator : public BooleanOperator
+class Uniplexor : public BooleanOperator
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit BooleanConditionalOperator( shared_ptr<BooleanExpression> a_,
+    explicit Uniplexor( shared_ptr<BooleanExpression> a_,
                                          shared_ptr<BooleanExpression> b_,
                                          shared_ptr<BooleanExpression> c_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
@@ -187,16 +187,16 @@ private:
     const shared_ptr<BooleanExpression> c;
 };
 
-// ------------------------- MultiBooleanConditionalOperator --------------------------
+// ------------------------- Multiplexor --------------------------
 
-class MultiBooleanConditionalOperator : public BooleanToBooleanExpression
+class Multiplexor : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     // Controls evaluated and then taken as a little-endian binary nuber which
     // indexes into options - this option is then evaluated and returned. No smart
     // handling of undefined controls yet.
-    explicit MultiBooleanConditionalOperator( vector<shared_ptr<BooleanExpression>> controls,
+    explicit Multiplexor( vector<shared_ptr<BooleanExpression>> controls,
                                               vector<shared_ptr<BooleanExpression>> options );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;

@@ -144,7 +144,7 @@ shared_ptr<Expression> BooleanOperator::TrySolveForToEqualNT( shared_ptr<Express
                         return make_shared<ConditionalOperator>( posp.first, sym_pos, sym_neg );
                 if( auto bool_pos = dynamic_pointer_cast<BooleanExpression>(posp.second) )
                     if( auto bool_neg = dynamic_pointer_cast<BooleanExpression>(negp.second) )
-                        return make_shared<BooleanConditionalOperator>( posp.first, bool_pos, bool_neg );
+                        return make_shared<Uniplexor>( posp.first, bool_pos, bool_neg );
                 // It's not an error if one is symbolic and the other boolean, but there 
                 // is no solution in such a scenario.
             }
@@ -561,11 +561,11 @@ Expression::Precedence ImplicationOperator::GetPrecedence() const
     return Precedence::IMPLICATION;
 }
 
-// ------------------------- BooleanConditionalOperator --------------------------
+// ------------------------- Uniplexor --------------------------
 
-BooleanConditionalOperator::BooleanConditionalOperator( shared_ptr<BooleanExpression> a_,
-                                                        shared_ptr<BooleanExpression> b_,
-                                                        shared_ptr<BooleanExpression> c_ ) :
+Uniplexor::Uniplexor( shared_ptr<BooleanExpression> a_,
+                      shared_ptr<BooleanExpression> b_,
+                      shared_ptr<BooleanExpression> c_ ) :
     a( a_ ),
     b( b_ ),
     c( c_ )
@@ -573,13 +573,13 @@ BooleanConditionalOperator::BooleanConditionalOperator( shared_ptr<BooleanExpres
 }    
 
 
-list<shared_ptr<BooleanExpression>> BooleanConditionalOperator::GetBooleanOperands() const
+list<shared_ptr<BooleanExpression>> Uniplexor::GetBooleanOperands() const
 {
     return { a, b, c };
 }
 
 
-shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> Uniplexor::Evaluate( const EvalKit &kit ) const
 {
     shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
     if( ra->IsDefinedAndUnique() )
@@ -604,7 +604,7 @@ shared_ptr<BooleanResult> BooleanConditionalOperator::Evaluate( const EvalKit &k
 }
 
 
-BooleanExpression::PartialSolution BooleanConditionalOperator::PartialSolveFor( shared_ptr<Expression> target ) const
+BooleanExpression::PartialSolution Uniplexor::PartialSolveFor( shared_ptr<Expression> target ) const
 {
     PartialSolution psol;
     
@@ -615,21 +615,21 @@ BooleanExpression::PartialSolution BooleanConditionalOperator::PartialSolveFor( 
 }
 
 
-string BooleanConditionalOperator::Render() const
+string Uniplexor::Render() const
 {
     return RenderForMe(a) + " ? " + RenderForMe(b) + " : " + RenderForMe(c);
 }
 
 
-Expression::Precedence BooleanConditionalOperator::GetPrecedence() const
+Expression::Precedence Uniplexor::GetPrecedence() const
 {
     return Precedence::CONDITIONAL;
 }
 
-// ------------------------- MultiBooleanConditionalOperator --------------------------
+// ------------------------- Multiplexor --------------------------
 
-MultiBooleanConditionalOperator::MultiBooleanConditionalOperator( vector<shared_ptr<BooleanExpression>> controls_,
-                                                                  vector<shared_ptr<BooleanExpression>> options_ ) :
+Multiplexor::Multiplexor( vector<shared_ptr<BooleanExpression>> controls_,
+                          vector<shared_ptr<BooleanExpression>> options_ ) :
     controls( controls_ ),
     options( options_ )
 {
@@ -637,7 +637,7 @@ MultiBooleanConditionalOperator::MultiBooleanConditionalOperator( vector<shared_
 }
 
     
-list<shared_ptr<BooleanExpression>> MultiBooleanConditionalOperator::GetBooleanOperands() const
+list<shared_ptr<BooleanExpression>> Multiplexor::GetBooleanOperands() const
 {
     list<shared_ptr<BooleanExpression>> ops;
     for( shared_ptr<BooleanExpression> c : controls )
@@ -649,7 +649,7 @@ list<shared_ptr<BooleanExpression>> MultiBooleanConditionalOperator::GetBooleanO
 }
 
 
-shared_ptr<BooleanResult> MultiBooleanConditionalOperator::Evaluate( const EvalKit &kit ) const
+shared_ptr<BooleanResult> Multiplexor::Evaluate( const EvalKit &kit ) const
 {
     unsigned int int_control = 0;
     for( int i=0; i<controls.size(); i++ )
@@ -667,7 +667,7 @@ shared_ptr<BooleanResult> MultiBooleanConditionalOperator::Evaluate( const EvalK
 }
 
 
-string MultiBooleanConditionalOperator::Render() const
+string Multiplexor::Render() const
 {
     list<string> str_controls;
     for( shared_ptr<BooleanExpression> c : controls )
@@ -683,7 +683,7 @@ string MultiBooleanConditionalOperator::Render() const
 }
 
 
-Expression::Precedence MultiBooleanConditionalOperator::GetPrecedence() const
+Expression::Precedence Multiplexor::GetPrecedence() const
 {
     return Precedence::CONDITIONAL;
 }
