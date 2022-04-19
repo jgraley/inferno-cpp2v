@@ -4,7 +4,7 @@
 #include "agents/agent.hpp"
 #include "link.hpp"
 #include "../sym/predicate_operators.hpp"
-#include "../sym/primary_expressions.hpp"
+#include "../sym/symbol_operators.hpp"
 #include "../sym/sym_solver.hpp"
 #include "../sym/result.hpp"
 

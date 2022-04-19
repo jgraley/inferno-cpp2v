@@ -2,7 +2,7 @@
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
 #include "link.hpp"
-#include "sym/primary_expressions.hpp"
+#include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
 
 using namespace SR;

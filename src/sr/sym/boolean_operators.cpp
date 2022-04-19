@@ -2,7 +2,6 @@
 #include "predicate_operators.hpp"
 #include "conditional_operators.hpp"
 #include "symbol_operators.hpp"
-#include "primary_expressions.hpp"
 #include "rewriters.hpp"
 #include "result.hpp"
 #include <algorithm>
@@ -10,6 +9,46 @@
 using namespace SYM;
 
 #define SOLVE_FROM_PARTIALS_CHECKING
+
+// ------------------------- BooleanConstant --------------------------
+
+BooleanConstant::BooleanConstant( bool value_ ) :
+    value( value_ )
+{
+}
+
+
+shared_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
+{
+    return make_shared<BooleanResult>( value );
+}
+
+
+bool BooleanConstant::GetAsBool() const
+{
+    return value;
+}
+
+
+Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate, 
+                                                      OrderProperty order_property ) const 
+{
+    auto c = GET_THAT_POINTER(candidate);
+
+    return value - c->value;
+}  
+
+
+string BooleanConstant::Render() const
+{
+    return value ? "TRUE" : "FALSE";
+}
+
+
+Expression::Precedence BooleanConstant::GetPrecedence() const
+{
+    return Precedence::LITERAL;
+}
 
 // ------------------------- BooleanOperator --------------------------
 

@@ -8,7 +8,7 @@
 #include "transform_of_agent.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
-#include "sym/primary_expressions.hpp"
+#include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
 
 #include <stdexcept>

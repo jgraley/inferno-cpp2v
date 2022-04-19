@@ -3,7 +3,6 @@
 #include "boolean_operators.hpp"
 #include "predicate_operators.hpp"
 #include "symbol_operators.hpp"
-#include "primary_expressions.hpp"
 #include "expression_analysis.hpp"
 #include "result.hpp"
 #include "truth_table_with_predicates.hpp"

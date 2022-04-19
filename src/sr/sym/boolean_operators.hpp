@@ -10,6 +10,26 @@
 namespace SYM
 { 
 
+// ------------------------- BooleanConstant --------------------------
+
+class BooleanConstant : public BooleanExpression
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit BooleanConstant( bool value );
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    bool GetAsBool() const;    
+
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const override;
+
+    virtual string Render() const override;
+    virtual Precedence GetPrecedence() const override;
+    
+private:
+    const bool value;
+};
+
 // ------------------------- BooleanOperator --------------------------
 
 class BooleanOperator : public BooleanToBooleanExpression

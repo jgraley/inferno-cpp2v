@@ -6,10 +6,10 @@
 #include "sr/scr_engine.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/link.hpp"
-#include "sr/sym/primary_expressions.hpp"
 #include "sr/sym/result.hpp"
 #include "sr/sym/overloads.hpp"
 #include "sr/sym/boolean_operators.hpp"
+#include "sr/sym/symbol_operators.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;
