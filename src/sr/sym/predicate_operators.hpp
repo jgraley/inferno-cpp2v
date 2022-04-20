@@ -36,8 +36,6 @@ public:
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const final;
     virtual list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() = 0;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-
-    shared_ptr<PredicateOperator> TryDeriveWith( shared_ptr<PredicateOperator> other ) const;
     
     shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
                                                  shared_ptr<SymbolExpression> with ) const;

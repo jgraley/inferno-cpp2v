@@ -40,50 +40,6 @@ shared_ptr<BooleanResult> PredicateOperator::Evaluate( const EvalKit &kit ) cons
 }
 
 
-shared_ptr<PredicateOperator> PredicateOperator::TryDeriveWith( shared_ptr<PredicateOperator> other ) const
-{
-    // Try to substitute one variable with another 
-    if( IsCanSubstituteFrom() ) 
-    {
-        list<shared_ptr<SymbolExpression>> my_ops = GetSymbolOperands();
-        ASSERT( my_ops.size() == 2 );
-
-        // Try both ways round. 
-        if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( my_ops.front(), my_ops.back() ) )
-            return sub;
-
-        if( shared_ptr<PredicateOperator> sub = other->TrySubstitute( my_ops.back(), my_ops.front() ) )
-            return sub;        
-            
-        return nullptr;
-    }
-    
-    // Derive the implications of transitive operators
-    Transitivity t = GetTransitivityWith( other );
-    if( t!=NONE )
-    {
-        list<shared_ptr<SymbolExpression>> my_ops = GetSymbolOperands();
-        ASSERT( my_ops.size() == 2 );
-        list<shared_ptr<SymbolExpression>> other_ops = other->GetSymbolOperands();
-        ASSERT( other_ops.size() == 2 );
-        if( (t==FORWARD || t==BIDIRECTIONAL) && OrderCompare(my_ops.back(), other_ops.front())==EQUAL )
-        {
-            shared_ptr<PredicateOperator> pnew = TrySubstitute( my_ops.back(), other_ops.back() );    
-            ASSERT( pnew );
-            return pnew;
-        }
-        if( (t==REVERSE || t==BIDIRECTIONAL) && OrderCompare(my_ops.back(), other_ops.back())==EQUAL )
-        {
-            shared_ptr<PredicateOperator> pnew = TrySubstitute( my_ops.back(), other_ops.front() );    
-            ASSERT( pnew );
-            return pnew;
-        }
-    }
-    
-    return nullptr;
-}
-
-
 shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
                                                                 shared_ptr<SymbolExpression> with ) const
 {

@@ -252,7 +252,7 @@ void TruthTableSolver::ConstrainUsingDerived()
             auto pj = ttwp->GetFrontPredicate(j);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pk = pi->TryDeriveWith( pj );
+            shared_ptr<PredicateOperator> pk = TryDerive( pi, pj );
             if( pk && !ttwp->PredExists(pk) ) // There is a derivation Pk and it's an extrapolation
             {
                 // Record the initial predicates for the extrapolation in an un-ordered way
@@ -299,7 +299,7 @@ void TruthTableSolver::ConstrainUsingDerived()
             auto pj = ttwp->GetFrontPredicate(j);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pk = pi->TryDeriveWith( pj );
+            shared_ptr<PredicateOperator> pk = TryDerive( pi, pj );
             if( pk && ttwp->PredExists(pk) ) // There is a derivation Pk and it's an interpolation
             {
                 int k = ttwp->PredToIndex(pk);
@@ -324,6 +324,58 @@ void TruthTableSolver::ConstrainUsingDerived()
     }
 }
 
+
+shared_ptr<PredicateOperator> TruthTableSolver::TryDerive( shared_ptr<PredicateOperator> pi, 
+                                                           shared_ptr<PredicateOperator> pj )
+{
+    // Try to substitute one variable with another 
+    if( pi->IsCanSubstituteFrom() ) 
+    {
+        list<shared_ptr<SymbolExpression>> ops_i = pi->GetSymbolOperands();
+        ASSERT( ops_i.size() == 2 );
+
+        // Try both ways round. 
+        if( shared_ptr<PredicateOperator> pk = pj->TrySubstitute( ops_i.front(), ops_i.back() ) )
+            return pk;
+
+        if( shared_ptr<PredicateOperator> pk = pj->TrySubstitute( ops_i.back(), ops_i.front() ) )
+            return pk;        
+            
+        return nullptr;
+    }
+    
+    // Derive the implications of transitive operators
+    PredicateOperator::Transitivity tij = pi->GetTransitivityWith( pj );
+    if( tij != PredicateOperator::NONE )
+    {
+        // Operators must be sized right if transitivity is announced
+        list<shared_ptr<SymbolExpression>> ops_i = pi->GetSymbolOperands();
+        ASSERT( ops_i.size() == 2 );
+        list<shared_ptr<SymbolExpression>> ops_j = pj->GetSymbolOperands();
+        ASSERT( ops_j.size() == 2 );
+
+        // Try forward case (as usually found in textbooks)
+        if( (tij==PredicateOperator::FORWARD || tij==PredicateOperator::BIDIRECTIONAL) && 
+            Expression::OrderCompare(ops_i.back(), ops_j.front())==Orderable::EQUAL )
+        {
+            shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.back(), ops_j.back() );    
+            ASSERT( pk );
+            return pk;
+        }
+        
+        // Try reverse case, where the second pred (pj) is commuted
+        if( (tij==PredicateOperator::REVERSE || tij==PredicateOperator::BIDIRECTIONAL) && 
+            Expression::OrderCompare(ops_i.back(), ops_j.back())==Orderable::EQUAL )
+        {
+            shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.back(), ops_j.front() );    
+            ASSERT( pk );
+            return pk;
+        }
+    }
+    
+    return nullptr;
+}
+                                                               
 
 string TruthTableSolver::PredicateName(int j)
 {
