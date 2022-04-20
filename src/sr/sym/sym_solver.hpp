@@ -11,20 +11,6 @@ namespace SYM
 class SymbolVariable;
 class PredicateOperator;
 
-// ------------------------- SymSolver --------------------------
-
-class SymSolver 
-{
-public:
-    explicit SymSolver( shared_ptr<BooleanExpression> equation );
-    void PreSolve();
-    shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target ) const;
-    shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
-
-private:
-    const shared_ptr<BooleanExpression> equation;
-};
-
 // -------------------------- TruthTableSolver ----------------------------    
 
 class TruthTableSolver

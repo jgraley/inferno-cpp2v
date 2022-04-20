@@ -11,38 +11,6 @@
 
 using namespace SYM;
 
-// ------------------------- SymSolver --------------------------
-
-SymSolver::SymSolver( shared_ptr<BooleanExpression> equation_ ) :
-    equation( equation_ )
-{
-}
-
-
-void SymSolver::PreSolve()
-{
-}
-
-
-shared_ptr<SymbolExpression> SymSolver::TrySolveFor( shared_ptr<SymbolExpression> target ) const
-{
-    shared_ptr<Expression> solution = equation->TrySolveForToEqual( target,
-                                                                    make_shared<BooleanConstant>(true) );
-    if( !solution )
-        return nullptr;
-    
-    auto sym_solution = dynamic_pointer_cast<SymbolExpression>(solution);
-    ASSERT( sym_solution )(solution->Render()); // target is shared_ptr<SymbolicExpression> so should get symbol as solution
-    return sym_solution;
-}
-
-
-shared_ptr<BooleanExpression> SymSolver::GetAltEquationForTesting() const
-{
-    return nullptr; // feature not supported
-}
-
-
 // -------------------------- TruthTableSolver ----------------------------    
 
 TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> equation_ ) :
