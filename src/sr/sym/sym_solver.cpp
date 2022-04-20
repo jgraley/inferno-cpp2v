@@ -329,7 +329,7 @@ shared_ptr<PredicateOperator> TruthTableSolver::TryDerive( shared_ptr<PredicateO
                                                            shared_ptr<PredicateOperator> pj )
 {
     // Try to substitute one variable with another 
-    if( pi->IsCanSubstituteFrom() ) 
+    if( pi->IsCanSubstituteFrom() ) // basically EqualsOperator
     {
         list<shared_ptr<SymbolExpression>> ops_i = pi->GetSymbolOperands();
         ASSERT( ops_i.size() == 2 );
