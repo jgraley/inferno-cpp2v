@@ -30,24 +30,6 @@ private:
     const bool value;
 };
 
-// ------------------------- BooleanOperator --------------------------
-
-class BooleanOperator : public BooleanToBooleanExpression
-{
-protected:
-    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
-                                                         shared_ptr<BooleanExpression> to_equal ) const override;
-    
-    // Helper function for various bool nodes that generate implications. Tries to 
-    // add them to psol if they meet the required conditions, solves for value and
-    // normalises nots.
-    void TryAddPartialSolutionFor( shared_ptr<Expression> target,
-                                   PartialSolution &psol, 
-                                   bool key_sense, 
-                                   shared_ptr<BooleanExpression> key, 
-                                   shared_ptr<BooleanExpression> val_unsolved ) const;
-};
-
 // ------------------------- NotOperator --------------------------
 
 class NotOperator : public BooleanToBooleanExpression
@@ -57,7 +39,7 @@ public:
     explicit NotOperator( shared_ptr<BooleanExpression> a );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -69,19 +51,15 @@ Over<BooleanExpression> operator~( Over<BooleanExpression> a );
 
 // ------------------------- AndOperator --------------------------
 
-class AndOperator : public BooleanOperator
+class AndOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
     bool IsCommutative() const override;
-
-    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
-                                                         shared_ptr<BooleanExpression> to_equal ) const override;
-    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -94,17 +72,15 @@ Over<BooleanExpression> operator&( Over<BooleanExpression> a, Over<BooleanExpres
 
 // ------------------------- OrOperator --------------------------
 
-class OrOperator : public BooleanOperator
+class OrOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
     bool IsCommutative() const override;
-
-    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -117,7 +93,7 @@ Over<BooleanExpression> operator|( Over<BooleanExpression> a, Over<BooleanExpres
 
 // ------------------------- BoolEqualOperator --------------------------
 
-class BoolEqualOperator : public BooleanOperator
+class BoolEqualOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
@@ -125,12 +101,8 @@ public:
                                 shared_ptr<BooleanExpression> b );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
     bool IsCommutative() const override;
-
-    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
-                                                         shared_ptr<BooleanExpression> to_equal ) const override;
-    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -144,7 +116,7 @@ Over<BooleanExpression> operator==( Over<BooleanExpression> a, Over<BooleanExpre
 
 // ------------------------- ImplicationOperator --------------------------
 
-class ImplicationOperator : public BooleanOperator
+class ImplicationOperator : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
@@ -152,9 +124,7 @@ public:
                                   shared_ptr<BooleanExpression> b_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const override;
-
-    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
+                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -166,17 +136,15 @@ private:
 
 // ------------------------- Uniplexor --------------------------
 
-class Uniplexor : public BooleanOperator
+class Uniplexor : public BooleanToBooleanExpression
 {
 public:    
     typedef BooleanExpression NominalType;
     explicit Uniplexor( shared_ptr<BooleanExpression> a_,
                                          shared_ptr<BooleanExpression> b_,
                                          shared_ptr<BooleanExpression> c_ );
-    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
-
-    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -197,9 +165,9 @@ public:
     // indexes into options - this option is then evaluated and returned. No smart
     // handling of undefined controls yet.
     explicit Multiplexor( vector<shared_ptr<BooleanExpression>> controls,
-                                              vector<shared_ptr<BooleanExpression>> options );
-    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+                          vector<shared_ptr<BooleanExpression>> options );
+    virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
+    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

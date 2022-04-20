@@ -159,15 +159,6 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( shared_ptr<Expre
     return nullptr;
 }
 
-
-BooleanExpression::PartialSolution BooleanExpression::PartialSolveFor( shared_ptr<Expression> target ) const
-{
-    // Could implement this in terms of TrySolveForToEqual() but since BooleanOperator::TrySolveFor()
-    // calls PartialSolveFor() we could recurse indefinitely. So instead the rule is that
-    // callers must try and use TrySolveForToEqual() before calling PartialSolveFor()
-    return PartialSolution();
-}
-
 // ------------------------- SymbolExpression --------------------------
 
 shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( shared_ptr<Expression> target, 

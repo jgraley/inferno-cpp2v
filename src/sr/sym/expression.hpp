@@ -104,9 +104,6 @@ public:
                                                shared_ptr<BooleanExpression> to_equal ) const;
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const;
-
-    // Not a "try" because always "succeeds" (even though the map amy be empty)
-    virtual PartialSolution PartialSolveFor( shared_ptr<Expression> target ) const;    
 };
 
 // ------------------------- SymbolExpression --------------------------
