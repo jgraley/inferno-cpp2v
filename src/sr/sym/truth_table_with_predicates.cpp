@@ -179,7 +179,3 @@ void TruthTableWithPredicates::UpdatePredToIndex()
     for( int i=0; i<GetDegree(); i++ )
         pred_to_index[GetFrontPredicate(i)] = i;
 }
-
-  
-    
-    
