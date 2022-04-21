@@ -288,20 +288,20 @@ void ForAllDistinctPairs( const T &container,
 }
 
 
-template<typename T>
-set<typename T::value_type> ToSet( const T&c )
+template<typename T, class COMPARE = less<typename T::value_type>>
+set<typename T::value_type, COMPARE> ToSet( const T&c )
 {
-    set<typename T::value_type> s;
+    set<typename T::value_type, COMPARE> s;
     for( typename T::value_type x : c )
         s.insert(x);  // later takes priority
     return s;
 }
 
 
-template<typename T>
-set<typename T::value_type> ToSetSolo( const T&c )
+template<typename T, class COMPARE = less<typename T::value_type>>
+set<typename T::value_type, COMPARE> ToSetSolo( const T&c )
 {
-    set<typename T::value_type> s;
+    set<typename T::value_type, COMPARE> s;
     for( typename T::value_type x : c )
         InsertSolo(s, x);
     return s;

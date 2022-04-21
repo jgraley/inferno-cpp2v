@@ -252,7 +252,7 @@ void TruthTableSolver::ConstrainUsingDerived()
             auto pj = ttwp->GetFrontPredicate(j);
             
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pk = TryDerive( pi, pj );
+            shared_ptr<PredicateOperator> pk = TryDerivePredicate( pi, pj );
             if( pk && !ttwp->PredExists(pk) ) // There is a derivation Pk and it's an extrapolation
             {
                 // Record the initial predicates for the extrapolation in an un-ordered way
@@ -266,7 +266,7 @@ void TruthTableSolver::ConstrainUsingDerived()
 
     // Get them into vectors, which establishes indices (k) for them. Also filter down to 
     // derivations reached from at least two different sets of initial pred - these are 
-    // expected to be the "useful" ones.
+    // expected to be the "useful" ones. TODO what about chains of 3, 4 etc?
     vector<EqualPredicateSet> derived_preds;
     for( auto p : derived_pred_to_init_indices )
     {
@@ -295,11 +295,32 @@ void TruthTableSolver::ConstrainUsingDerived()
             if( i==j )
                 continue;
 
+            // Now we see all distinct pairs (TODO why not use ForAllDistinctPairs()?)
             auto pi = ttwp->GetFrontPredicate(i);
             auto pj = ttwp->GetFrontPredicate(j);
             
+            // See whether a relationship can be derived from this pair 
+            Relationship rij = TryDeriveRelationship( pi, pj );
+            switch( rij )
+            {
+            case Relationship::NONE:
+                break; // nothing to do
+            case Relationship::CONTRADICTS:
+                TRACEC("Enforcing interpolation: %s ∧ %s => FALSE\n", 
+                       PredicateName(i).c_str(), 
+                       PredicateName(j).c_str() );  
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}}, false );
+                break;
+            case Relationship::IMPLIES:
+                TRACEC("Enforcing interpolation: %s => %s\n", 
+                       PredicateName(i).c_str(), 
+                       PredicateName(j).c_str() );  
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, false}}, false );
+                break;
+            }
+
             // See whether a predicate can be derived from this pair 
-            shared_ptr<PredicateOperator> pk = TryDerive( pi, pj );
+            shared_ptr<PredicateOperator> pk = TryDerivePredicate( pi, pj );
             if( pk && ttwp->PredExists(pk) ) // There is a derivation Pk and it's an interpolation
             {
                 int k = ttwp->PredToIndex(pk);
@@ -325,9 +346,57 @@ void TruthTableSolver::ConstrainUsingDerived()
 }
 
 
-shared_ptr<PredicateOperator> TruthTableSolver::TryDerive( shared_ptr<PredicateOperator> pi, 
-                                                           shared_ptr<PredicateOperator> pj )
+Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperator> pi, 
+                                                      shared_ptr<PredicateOperator> pj ) const
 {
+    ASSERT( Expression::OrderCompare(pi, pj)!=Orderable::EQUAL ); // caller doesn't pass us equal preds
+    if( pi->IsCommutative() || pj->IsCommutative() )
+    {
+        // Use this un-ordered version if either pred is commutative. Consider > and ==: they
+        // contradict regardless of operand order to >.
+        
+        // Note that taking sets of operands can contract on eg S1 ⚬ S1, but I think
+        // the relationship deduction is the same (but most predicates like that are effectively consts)
+        auto set_ops_i = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( pi->GetSymbolOperands() );
+        auto set_ops_j = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( pj->GetSymbolOperands() );
+        auto set_ops_common = IntersectionOf( set_ops_i, set_ops_j );
+        
+        // We want the operands common to both i and j to be either all of i's operands or all of j's
+        // This is fine for the common 2-op vs 2-op case, but consider also
+        // - some preds like TypeOfOperator are 1-op, but can still have relationships with each other (#510)
+        // - AllDiffOperator is an n-op, but EqualOperator (2-op) contradicts any pair of its operands    
+        if( set_ops_common.size() < min(set_ops_i.size(), set_ops_j.size()) )
+            return Relationship::NONE;
+            
+        TRACE("Checking for relationship between ")(pi->Render())(" and ")(pj->Render())(" (unordered)\n");
+    }
+    else 
+    {
+        // Use this order-respecting version if both preds are non-commutative.
+        auto ops_i = pi->GetSymbolOperands();
+        auto ops_j = pj->GetSymbolOperands();
+        
+        // We need identical lists of identical operands
+        // TODO: we should be able to do something if Pj's operands are 
+        // reversed. Maybe need a GetCommute() on non-commutative preds.
+        if( lexicographical_compare( ops_i.begin(), ops_i.end(), 
+					                 ops_j.begin(), ops_j.end(),
+                                     Expression::OrderComparer() ) != 0 )
+            return Relationship::NONE;
+
+        TRACE("Checking for relationship between ")(pi->Render())(" and ")(pj->Render())(" (ordered)\n");
+    }
+            
+    return pi->GetRelationshipWith( pj );    
+}
+                                                      
+
+
+shared_ptr<PredicateOperator> TruthTableSolver::TryDerivePredicate( shared_ptr<PredicateOperator> pi, 
+                                                                    shared_ptr<PredicateOperator> pj ) const
+{
+    ASSERT( Expression::OrderCompare(pi, pj)!=Orderable::EQUAL ); // caller doesn't pass us equal preds
+    
     // Try to substitute one variable with another 
     if( pi->IsCanSubstituteFrom() ) // basically EqualsOperator
     {
@@ -345,8 +414,8 @@ shared_ptr<PredicateOperator> TruthTableSolver::TryDerive( shared_ptr<PredicateO
     }
     
     // Derive the implications of transitive operators
-    PredicateOperator::Transitivity tij = pi->GetTransitivityWith( pj );
-    if( tij != PredicateOperator::NONE )
+    Transitivity tij = pi->GetTransitivityWith( pj );
+    if( tij != Transitivity::NONE )
     {
         // Operators must be sized right if transitivity is announced
         list<shared_ptr<SymbolExpression>> ops_i = pi->GetSymbolOperands();
@@ -355,21 +424,37 @@ shared_ptr<PredicateOperator> TruthTableSolver::TryDerive( shared_ptr<PredicateO
         ASSERT( ops_j.size() == 2 );
 
         // Try forward case (as usually found in textbooks)
-        if( (tij==PredicateOperator::FORWARD || tij==PredicateOperator::BIDIRECTIONAL) && 
-            Expression::OrderCompare(ops_i.back(), ops_j.front())==Orderable::EQUAL )
+        if( (tij==Transitivity::FORWARD || tij==Transitivity::BIDIRECTIONAL) )
         {
-            shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.back(), ops_j.back() );    
-            ASSERT( pk );
-            return pk;
+            if( Expression::OrderCompare(ops_i.back(), ops_j.front())==Orderable::EQUAL )
+            {
+                shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.back(), ops_j.back() );    
+                ASSERT( pk );
+                return pk;
+            }
+            if( Expression::OrderCompare(ops_i.front(), ops_j.back())==Orderable::EQUAL )
+            {
+                shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.front(), ops_j.front() );    
+                ASSERT( pk );
+                return pk;
+            }
         }
         
         // Try reverse case, where the second pred (pj) is commuted
-        if( (tij==PredicateOperator::REVERSE || tij==PredicateOperator::BIDIRECTIONAL) && 
-            Expression::OrderCompare(ops_i.back(), ops_j.back())==Orderable::EQUAL )
+        if( (tij==Transitivity::REVERSE || tij==Transitivity::BIDIRECTIONAL) )
         {
-            shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.back(), ops_j.front() );    
-            ASSERT( pk );
-            return pk;
+            if( Expression::OrderCompare(ops_i.back(), ops_j.back())==Orderable::EQUAL )
+            {
+                shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.back(), ops_j.front() );    
+                ASSERT( pk );
+                return pk;
+            } 
+            if( Expression::OrderCompare(ops_i.front(), ops_j.front())==Orderable::EQUAL )
+            {
+                shared_ptr<PredicateOperator> pk = pi->TrySubstitute( ops_i.front(), ops_j.back() );    
+                ASSERT( pk );
+                return pk;
+            }
         }
     }
     

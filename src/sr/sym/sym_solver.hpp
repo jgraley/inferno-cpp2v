@@ -37,8 +37,11 @@ public:
 private:
     void ConstrainByEvaluating();
     void ConstrainUsingDerived();
-    static shared_ptr<PredicateOperator> TryDerive( shared_ptr<PredicateOperator> pi, 
-                                                    shared_ptr<PredicateOperator> pj );
+
+    Relationship TryDeriveRelationship( shared_ptr<PredicateOperator> pi, 
+                                        shared_ptr<PredicateOperator> pj ) const;
+    shared_ptr<PredicateOperator> TryDerivePredicate( shared_ptr<PredicateOperator> pi, 
+                                                      shared_ptr<PredicateOperator> pj ) const;
 
     // Logging
     string PredicateName(int i);

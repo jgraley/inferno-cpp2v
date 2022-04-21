@@ -59,9 +59,15 @@ shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<Symbo
 }                                                                
 
 
-PredicateOperator::Transitivity PredicateOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Relationship PredicateOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    return NONE;
+    return Relationship::NONE;
+}
+
+
+Transitivity PredicateOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    return Transitivity::NONE;
 }
 
 
@@ -164,6 +170,19 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 }
 
 
+Relationship EqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || 
+        dynamic_pointer_cast<LessOrEqualOperator>(other) ||
+        dynamic_pointer_cast<EquivalentOperator>(other))
+        return Relationship::IMPLIES;
+    
+    // Note: CONTRADICTS and TAUTOLOGY are symmetrical could be determined by either predicate - 
+    // we choose to let the most "specialised" one do those, to reduce making long lists here.
+    return Relationship::NONE; 
+}
+
+
 bool EqualOperator::IsCanSubstituteFrom() const
 {
     return true;
@@ -256,15 +275,29 @@ bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
-PredicateOperator::Transitivity GreaterOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Relationship GreaterOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other))
-        return FORWARD;
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+        return Relationship::IMPLIES;
+    
+    if( dynamic_pointer_cast<EqualOperator>(other) ||
+        dynamic_pointer_cast<LessOperator>(other) ||
+        dynamic_pointer_cast<LessOrEqualOperator>(other) )
+        return Relationship::CONTRADICTS;
+    
+    return Relationship::NONE; 
+}
 
-    if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other))
-        return REVERSE;
+
+Transitivity GreaterOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other) )
+        return Transitivity::FORWARD;
+
+    if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other) )
+        return Transitivity::REVERSE;
         
-    return NONE;
+    return Transitivity::NONE;
 }
 
 
@@ -294,15 +327,29 @@ bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
-PredicateOperator::Transitivity LessOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Relationship LessOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
+        return Relationship::IMPLIES;
+    
+    if( dynamic_pointer_cast<EqualOperator>(other) ||
+        dynamic_pointer_cast<GreaterOperator>(other) ||
+        dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+        return Relationship::CONTRADICTS;
+    
+    return Relationship::NONE; 
+}
+
+
+Transitivity LessOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other))
-        return FORWARD;
+        return Transitivity::FORWARD;
     
     if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other))
-        return REVERSE;
+        return Transitivity::REVERSE;
     
-    return NONE;
+    return Transitivity::NONE;
 }
 
 
@@ -332,15 +379,24 @@ bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType in
 }                    
             
                                   
-PredicateOperator::Transitivity GreaterOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Relationship GreaterOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<LessOperator>(other) )
+        return Relationship::CONTRADICTS;
+    
+    return Relationship::NONE; 
+}
+
+
+Transitivity GreaterOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
-        return FORWARD;
+        return Transitivity::FORWARD;
 
     if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
-        return REVERSE;
+        return Transitivity::REVERSE;
         
-    return NONE;
+    return Transitivity::NONE;
 }
 
 
@@ -370,15 +426,24 @@ bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index
 }                    
             
                                   
-PredicateOperator::Transitivity LessOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Relationship LessOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<GreaterOperator>(other) )
+        return Relationship::CONTRADICTS;
+    
+    return Relationship::NONE; 
+}
+
+
+Transitivity LessOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
-        return FORWARD;
+        return Transitivity::FORWARD;
     
     if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
-        return REVERSE;
+        return Transitivity::REVERSE;
     
-    return NONE;
+    return Transitivity::NONE;
 }
 
 
@@ -444,6 +509,15 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
 bool AllDiffOperator::IsCommutative() const
 {
     return true; 
+}
+
+
+Relationship AllDiffOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( dynamic_pointer_cast<EqualOperator>(other) )
+        return Relationship::CONTRADICTS;
+    
+    return Relationship::NONE; 
 }
 
 
@@ -667,9 +741,9 @@ bool EquivalentOperator::IsCommutative() const
 }
 
 
-PredicateOperator::Transitivity EquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity EquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    return (bool)dynamic_pointer_cast<EquivalentOperator>(other) ? BIDIRECTIONAL : NONE;
+    return (bool)dynamic_pointer_cast<EquivalentOperator>(other) ? Transitivity::BIDIRECTIONAL : Transitivity::NONE;
 }
 
 

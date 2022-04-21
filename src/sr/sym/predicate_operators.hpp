@@ -13,20 +13,31 @@
 namespace SYM
 { 
 
+// ----------------------------- enums -------------------------------
+
+enum class Relationship
+{
+    NONE,
+    CONTRADICTS, // Pi ∧ Pj is false  (symmetrical)
+    IMPLIES        // Pi => Pj          (asymmetrical)
+};
+
+
+enum class Transitivity
+{
+    NONE,
+    FORWARD,      // S1 ✕ S2 ∧ S2 ⚬ S3 = S1 ✕ S3
+    REVERSE,      // S1 ✕ S2 ∧ S3 ⚬ S2 = S1 ✕ S3
+    BIDIRECTIONAL // Either of the above is true
+};
+
 // ------------------------- PredicateOperator --------------------------
 
 class PredicateOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef SymbolToBooleanExpression Parent;
-    enum Transitivity
-    {
-        NONE,
-        FORWARD,      // S1 ✕ S2 ∧ S2 ⚬ S3 = S1 ✕ S3
-        REVERSE,      // S1 ✕ S2 ∧ S3 ⚬ S2 = S1 ✕ S3
-        BIDIRECTIONAL // Either of the above is true
-    };
-        
+            
     virtual PredicateOperator *Clone() const = 0;
     
     // Stored as weak pointer so that force is undone when weak pointer expires. Sort of RAII-at-a-distance.
@@ -39,6 +50,7 @@ public:
     
     shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
                                                  shared_ptr<SymbolExpression> with ) const;
+    virtual Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const;
     virtual Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const;
     virtual bool IsCanSubstituteFrom() const;
 
@@ -72,8 +84,9 @@ public:
     bool IsCommutative() const override;
 
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
-                                                         shared_ptr<BooleanExpression> to_equal ) const override;
-    virtual bool IsCanSubstituteFrom() const;
+                                                 shared_ptr<BooleanExpression> to_equal ) const override;
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
+    bool IsCanSubstituteFrom() const override;
 
     string RenderNF() const override;
     Precedence GetPrecedenceNF() const override;
@@ -120,7 +133,10 @@ class GreaterOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+                                      
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
+    
     virtual string RenderNF() const override;
 };
 
@@ -135,7 +151,10 @@ class LessOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+                                      
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
+    
     virtual string RenderNF() const override;
 };
 
@@ -150,7 +169,10 @@ class GreaterOrEqualOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+                                      
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
+    
     virtual string RenderNF() const override;
 };
 
@@ -165,7 +187,10 @@ class LessOrEqualOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+                                      
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
+    
     virtual string RenderNF() const override;
 };
 
@@ -184,6 +209,8 @@ public:
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
+    
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
     
@@ -207,6 +234,9 @@ public:
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
+
+    // TODO non-overlapping categories, might be easier with lace-ability, see #510
+    //Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
 
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
@@ -258,6 +288,7 @@ public:
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
+    
     bool IsCommutative() const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     
