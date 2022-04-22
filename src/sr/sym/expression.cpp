@@ -23,7 +23,7 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 
 bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
-    if( OrderCompare( this, target.get() ) == EQUAL )
+    if( OrderCompareEqual( this, target.get() ) )
         return false; // we match the target, so not independent.
         
     for( shared_ptr<Expression> op : GetOperands() )
@@ -41,6 +41,14 @@ Orderable::Result Expression::OrderCompare( shared_ptr<const Expression> l,
                                             OrderProperty order_property )
 {
     return OrderCompare( l.get(), r.get(), order_property );
+}
+
+
+bool Expression::OrderCompareEqual( shared_ptr<const Expression> l, 
+                                    shared_ptr<const Expression> r, 
+                                    OrderProperty order_property )
+{
+    return OrderCompareEqual( l.get(), r.get(), order_property );
 }
 
 
@@ -145,7 +153,7 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( shared_ptr<Express
     // To solve: (this given target) == to_equal
     // So, if this===target then trivial solution: 
     // target==to_equal and to_equal is solution wrt target
-    if( OrderCompare( this, target.get() ) == EQUAL )
+    if( OrderCompareEqual( this, target.get() ) )
         return to_equal;
     
     // Well that didn't work, try for non-trivial solutions
@@ -171,7 +179,7 @@ shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( shared_ptr<Expressi
     // To solve: (this given target) == to_equal
     // So, if this===target then trivial solution: 
     // target==to_equal and to_equal is solution wrt target
-    if( OrderCompare( this, target.get() ) == EQUAL )
+    if( OrderCompareEqual( this, target.get() ) )
         return to_equal;
     
     // Well that didn't work, try for non-trivial solutions

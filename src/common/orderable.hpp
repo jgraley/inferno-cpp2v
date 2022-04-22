@@ -26,6 +26,9 @@ public:
                                                  OrderProperty order_property ) const;
     virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const;
+    static bool OrderCompareEqual( const Orderable *l, 
+                                   const Orderable *r, 
+                                   OrderProperty order_property = STRICT );
 };
 
 #endif

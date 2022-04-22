@@ -329,6 +329,18 @@ vector<typename T::value_type> ToVector( const T&c )
 
 
 template<typename T>
+pair<typename T::value_type, typename T::value_type> ToPair( const T&c )
+{
+    ASSERT( c.size() == 2 );
+    typename T::const_iterator it = c.begin();
+    typename T::const_iterator it_first = it;
+    it++;
+    typename T::const_iterator it_second = it;
+    return make_pair( *it_first, *it_second );
+}
+
+
+template<typename T>
 const typename T::value_type &OnlyElementOf( const T&c )
 {
     ASSERT( c.size()==1 );

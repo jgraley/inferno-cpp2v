@@ -42,7 +42,9 @@ private:
                                         shared_ptr<PredicateOperator> pj ) const;
     shared_ptr<PredicateOperator> TryDerivePredicate( shared_ptr<PredicateOperator> pi, 
                                                       shared_ptr<PredicateOperator> pj ) const;
-
+    shared_ptr<PredicateOperator> Substitute( shared_ptr<PredicateOperator> pred,
+                                              shared_ptr<SymbolExpression> over,
+                                              shared_ptr<SymbolExpression> with ) const;
     // Logging
     string PredicateName(int i);
     string RenderEquationInTermsOfPredNames();

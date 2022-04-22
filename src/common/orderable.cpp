@@ -39,3 +39,12 @@ Orderable::Result Orderable::OrderCompareChildren( const Orderable *candidate,
     // (i.e. local ordering only is required)
     return EQUAL; 
 }
+
+
+bool Orderable::OrderCompareEqual( const Orderable *l, 
+                                   const Orderable *r, 
+                                   OrderProperty order_property )
+{
+    return OrderCompare( l, r, order_property ) == EQUAL;
+}                                   
+
