@@ -338,6 +338,12 @@ Inferno::Plan::Plan(Inferno *algo_) :
         generate_pattern_graphs)
         return;
 
+    if( ReadArgs::infile=="" )
+    {
+        fprintf(stderr, "No input file provided so performing planning only. -h for help.\n");     
+        goto FINAL_TRACE;
+    }
+
     stages.push_back( stage_parse_X );   
     if( ShouldIQuitAfter(stage_parse_X) ) 
         goto FINAL_RENDER; // Now input has been parsed, we always want to render even if quitting early.    
@@ -347,12 +353,14 @@ Inferno::Plan::Plan(Inferno *algo_) :
         goto FINAL_RENDER;
         
     FINAL_RENDER:
-    if( ReadArgs::trace_hits )
-        stages.push_back( stage_dump_hits );
-    else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
+    if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
         stages.push_back( stage_X_graph );
     else if( !ReadArgs::output_all )   
         stages.push_back( stage_render_X );          
+        
+    FINAL_TRACE:
+    if( ReadArgs::trace_hits )
+        stages.push_back( stage_dump_hits );
 }
 
 
