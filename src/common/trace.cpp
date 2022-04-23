@@ -290,11 +290,9 @@ void Tracer::MaybePrintBanner()
 {
     if( require_banner && (strcmp(file, "") != 0 || line != 0 || instance != "" || strcmp(function, "") != 0) )
     {
-        string indot;
-        if( instance != "" && instance.substr(instance. size()-2) != "::" )
-            indot = instance+".";
+        string i_f = JoinInstanceFunction( instance, function );
         PrintPrefix();
-        clog << SSPrintf("---- %s:%d in %s%s()", file, line, indot.c_str(), function) << endl;
+        clog << SSPrintf("---- %s:%d in %s", file, line, i_f.c_str()) << endl;
         require_banner = false;
     }    
 }

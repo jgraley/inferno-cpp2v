@@ -205,9 +205,18 @@ TreePtr<Node> CompareReplace::GetReplacePattern()
 }
 
 
+string CompareReplace::GetTrace() const
+{
+    string s = Traceable::GetName();
+    return s;
+}
+
+
 SearchReplace::SearchReplace() :
     CompareReplace( true )                              
 {
 }
+
+
 
 

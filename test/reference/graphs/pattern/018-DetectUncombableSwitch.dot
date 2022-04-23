@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-246 ----------
-"CR#B-246" [
+// -------- block CR#B-248 ----------
+"CR#B-248" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-233 ----------
-"#B-233" [
+// -------- block #B-235 ----------
+"#B-235" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -46,8 +46,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-234 ----------
-"#B-234" [
+// -------- block #B-236 ----------
+"#B-236" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -60,8 +60,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-235 ----------
-"#B-235" [
+// -------- block #B-237 ----------
+"#B-237" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -72,8 +72,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-236 ----------
-"#B-236" [
+// -------- block #B-238 ----------
+"#B-238" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -86,8 +86,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-238 ----------
-"#B-238" [
+// -------- block #B-240 ----------
+"#B-240" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -103,23 +103,9 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-239 ----------
-"#B-239" [
+// -------- block #B-241 ----------
+"#B-241" [
     fillcolor = "/set28/1"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "circle"
-    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
-    style = "filled"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-240 ----------
-"#B-240" [
-    fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
     shape = "circle"
@@ -136,6 +122,20 @@ edge [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
+    shape = "circle"
+    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-244 ----------
+"#B-244" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
     shape = "diamond"
     label = <<FONT COLOR="black" POINT-SIZE="20">¬</FONT>>
     style = "filled"
@@ -145,8 +145,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-243 ----------
-"#B-243" [
+// -------- block #B-245 ----------
+"#B-245" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -157,8 +157,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-244 ----------
-"#B-244" [
+// -------- block #B-246 ----------
+"#B-246" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -169,8 +169,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-241 ----------
-"#B-241" [
+// -------- block #B-243 ----------
+"#B-243" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -183,8 +183,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-237 ----------
-"#B-237" [
+// -------- block #B-239 ----------
+"#B-239" [
     fillcolor = "/set28/6"
     fontsize = "12"
     fontcolor = grey40
@@ -195,8 +195,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-245 ----------
-"#B-245" [
+// -------- block #B-247 ----------
+"#B-247" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -209,78 +209,78 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-246":port0 -> "#B-233" [
+"CR#B-248":port0 -> "#B-235" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-246":port1 -> "#B-245" [
+"CR#B-248":port1 -> "#B-247" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-233":port1 -> "#B-234" [
+"#B-235":port1 -> "#B-236" [
     color = black
     fontcolor = black
 ];
 
-"#B-233":port1 -> "#B-236" [
+"#B-235":port1 -> "#B-238" [
     color = black
     fontcolor = black
 ];
 
-"#B-234" -> "#B-235" [
+"#B-236" -> "#B-237" [
     color = black
     fontcolor = black
 ];
 
-"#B-236":port0 -> "#B-238" [
+"#B-238":port0 -> "#B-240" [
     color = black
     fontcolor = black
 ];
 
-"#B-236":port1 -> "#B-237" [
+"#B-238":port1 -> "#B-239" [
     color = black
     fontcolor = black
 ];
 
-"#B-238":port0 -> "#B-239" [
+"#B-240":port0 -> "#B-241" [
     color = black
     fontcolor = black
 ];
 
-"#B-238":port1 -> "#B-240" [
+"#B-240":port1 -> "#B-242" [
     color = black
     fontcolor = black
 ];
 
-"#B-238":port2 -> "#B-242" [
+"#B-240":port2 -> "#B-244" [
     color = black
     fontcolor = black
 ];
 
-"#B-238":port3 -> "#B-244" [
+"#B-240":port3 -> "#B-246" [
     color = black
     fontcolor = black
 ];
 
-"#B-238":port4 -> "#B-241" [
+"#B-240":port4 -> "#B-243" [
     color = black
     fontcolor = black
 ];
 
-"#B-242" -> "#B-243" [
+"#B-244" -> "#B-245" [
     color = black
     fontcolor = black
 ];
 
-"#B-245":port0 -> "#B-238" [
+"#B-247":port0 -> "#B-240" [
     color = black
     fontcolor = black
 ];
 
-"#B-245":port1 -> "#B-237" [
+"#B-247":port1 -> "#B-239" [
     color = black
     fontcolor = black
 ];

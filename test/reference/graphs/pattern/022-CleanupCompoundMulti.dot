@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-311 ----------
-"CR#B-311" [
+// -------- block CR#B-313 ----------
+"CR#B-313" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-304 ----------
-"#B-304" [
+// -------- block #B-306 ----------
+"#B-306" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -48,50 +48,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-310 ----------
-"#B-310" [
-    fillcolor = "/set28/1"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "circle"
-    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
-    style = "filled"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-306 ----------
-"#B-306" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "circle"
-    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
-    style = "filled"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-303 ----------
-"#B-303" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{.}</FONT></TD></TR>
-     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-309 ----------
-"#B-309" [
+// -------- block #B-312 ----------
+"#B-312" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -118,8 +76,36 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-307 ----------
-"#B-307" [
+// -------- block #B-305 ----------
+"#B-305" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Compound</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Declaration</FONT></TD><TD PORT="port0"><FONT COLOR="black" POINT-SIZE="12">{.}</FONT></TD></TR>
+     <TR><TD><FONT COLOR="black" POINT-SIZE="12">Statement</FONT></TD><TD PORT="port1"><FONT COLOR="black" POINT-SIZE="12">[0]</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-311 ----------
+"#B-311" [
+    fillcolor = "/set28/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "circle"
+    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-310 ----------
+"#B-310" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -132,8 +118,22 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-305 ----------
-"#B-305" [
+// -------- block #B-309 ----------
+"#B-309" [
+    fillcolor = "/set28/2"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "circle"
+    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-307 ----------
+"#B-307" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -148,68 +148,68 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-311":port0 -> "#B-304" [
+"CR#B-313":port0 -> "#B-306" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-311":port1 -> "#B-305" [
+"CR#B-313":port1 -> "#B-307" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-304":port0 -> "#B-310" [
+"#B-306":port0 -> "#B-312" [
     color = black
     fontcolor = black
 ];
 
-"#B-304":port1 -> "#B-306" [
+"#B-306":port1 -> "#B-308" [
     color = black
     fontcolor = black
 ];
 
-"#B-304":port2 -> "#B-303" [
+"#B-306":port2 -> "#B-305" [
     color = black
     fontcolor = black
 ];
 
-"#B-304":port3 -> "#B-307" [
+"#B-306":port3 -> "#B-309" [
     color = black
     fontcolor = black
 ];
 
-"#B-303":port0 -> "#B-309" [
+"#B-305":port0 -> "#B-311" [
     color = black
     fontcolor = black
 ];
 
-"#B-303":port1 -> "#B-308" [
+"#B-305":port1 -> "#B-310" [
     color = black
     fontcolor = black
 ];
 
-"#B-305":port0 -> "#B-309" [
+"#B-307":port0 -> "#B-311" [
     color = black
     fontcolor = black
 ];
 
-"#B-305":port0 -> "#B-310" [
+"#B-307":port0 -> "#B-312" [
     color = black
     fontcolor = black
 ];
 
-"#B-305":port1 -> "#B-306" [
+"#B-307":port1 -> "#B-308" [
     color = black
     fontcolor = black
 ];
 
-"#B-305":port2 -> "#B-308" [
+"#B-307":port2 -> "#B-310" [
     color = black
     fontcolor = black
 ];
 
-"#B-305":port3 -> "#B-307" [
+"#B-307":port3 -> "#B-309" [
     color = black
     fontcolor = black
 ];

@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-938 ----------
-"CR#B-938" [
+// -------- block CR#B-940 ----------
+"CR#B-940" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-932 ----------
-"#B-932" [
+// -------- block #B-934 ----------
+"#B-934" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -48,9 +48,23 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-935 ----------
-"#B-935" [
+// -------- block #B-937 ----------
+"#B-937" [
     fillcolor = "/set28/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "circle"
+    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
+    style = "filled"
+    penwidth = 0.0
+    fixedsize = true
+    width = 0.4
+    height = 0.4
+];
+
+// -------- block #B-938 ----------
+"#B-938" [
+    fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
     shape = "circle"
@@ -67,20 +81,6 @@ edge [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
-    shape = "circle"
-    label = <<FONT COLOR="black" POINT-SIZE="20">*</FONT>>
-    style = "filled"
-    penwidth = 0.0
-    fixedsize = true
-    width = 0.4
-    height = 0.4
-];
-
-// -------- block #B-934 ----------
-"#B-934" [
-    fillcolor = "/set28/2"
-    fontsize = "12"
-    fontcolor = grey40
     shape = "plaintext"
     label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
      <TR><TD><FONT COLOR="black" POINT-SIZE="15">Nop</FONT></TD></TR>
@@ -88,8 +88,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-937 ----------
-"#B-937" [
+// -------- block #B-939 ----------
+"#B-939" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -102,8 +102,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-933 ----------
-"#B-933" [
+// -------- block #B-935 ----------
+"#B-935" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -117,48 +117,48 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-938":port0 -> "#B-932" [
+"CR#B-940":port0 -> "#B-934" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-938":port1 -> "#B-933" [
+"CR#B-940":port1 -> "#B-935" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-932":port0 -> "#B-935" [
+"#B-934":port0 -> "#B-937" [
     color = black
     fontcolor = black
 ];
 
-"#B-932":port1 -> "#B-936" [
+"#B-934":port1 -> "#B-938" [
     color = black
     fontcolor = black
 ];
 
-"#B-932":port2 -> "#B-934" [
+"#B-934":port2 -> "#B-936" [
     color = black
     fontcolor = black
 ];
 
-"#B-932":port3 -> "#B-937" [
+"#B-934":port3 -> "#B-939" [
     color = black
     fontcolor = black
 ];
 
-"#B-933":port0 -> "#B-935" [
+"#B-935":port0 -> "#B-937" [
     color = black
     fontcolor = black
 ];
 
-"#B-933":port1 -> "#B-936" [
+"#B-935":port1 -> "#B-938" [
     color = black
     fontcolor = black
 ];
 
-"#B-933":port2 -> "#B-937" [
+"#B-935":port2 -> "#B-939" [
     color = black
     fontcolor = black
 ];

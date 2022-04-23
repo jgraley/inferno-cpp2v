@@ -61,7 +61,8 @@ public:
         //   (at least) one level back from that.
         XLink parent_xlink = XLink();
         
-        // Last of the descendents in depth first order
+        // Last of the descendents in depth first order. If no 
+        // descendents, it will be the current node. 
         XLink last_descendant_xlink = XLink();
         
         // First element of container of which I'm a member. 

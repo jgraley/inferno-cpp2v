@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-14 ----------
-"CR#B-14" [
+// -------- block CR#B-16 ----------
+"CR#B-16" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -32,8 +32,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-13 ----------
-"#B-13" [
+// -------- block #B-15 ----------
+"#B-15" [
     fillcolor = "/set19/1"
     fontsize = "12"
     fontcolor = grey40
@@ -44,8 +44,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-11 ----------
-"#B-11" [
+// -------- block #B-13 ----------
+"#B-13" [
     fillcolor = "/set19/3"
     fontsize = "12"
     fontcolor = grey40
@@ -58,8 +58,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-12 ----------
-"#B-12" [
+// -------- block #B-14 ----------
+"#B-14" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -74,30 +74,6 @@ edge [
     color = black
 ];
 
-// -------- block #B-8 ----------
-"#B-8" [
-    fillcolor = "/set19/1"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
-// -------- block #B-9 ----------
-"#B-9" [
-    fillcolor = "/set19/1"
-    fontsize = "12"
-    fontcolor = grey40
-    shape = "plaintext"
-    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
-     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
-    </TABLE>>
-    style = "rounded,filled"
-];
-
 // -------- block #B-10 ----------
 "#B-10" [
     fillcolor = "/set19/1"
@@ -110,38 +86,62 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-14":port0 -> "#B-13" [
+// -------- block #B-11 ----------
+"#B-11" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+// -------- block #B-12 ----------
+"#B-12" [
+    fillcolor = "/set19/1"
+    fontsize = "12"
+    fontcolor = grey40
+    shape = "plaintext"
+    label = <<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+     <TR><TD><FONT COLOR="black" POINT-SIZE="15">Something</FONT></TD></TR>
+    </TABLE>>
+    style = "rounded,filled"
+];
+
+"CR#B-16":port0 -> "#B-15" [
     color = black
     fontcolor = black
 ];
 
-"CR#B-14":port1 -> "#B-11" [
+"CR#B-16":port1 -> "#B-13" [
     style="dashed"
     color = black
     fontcolor = black
 ];
 
-"#B-11":port0 -> "#B-12" [
+"#B-13":port0 -> "#B-14" [
     color = black
     fontcolor = black
 ];
 
-"#B-11":port1 -> "#B-10" [
+"#B-13":port1 -> "#B-12" [
     color = black
     fontcolor = black
 ];
 
-"#B-12":port0 -> "#B-8" [
+"#B-14":port0 -> "#B-10" [
     color = black
     fontcolor = black
 ];
 
-"#B-12":port1 -> "#B-9" [
+"#B-14":port1 -> "#B-11" [
     color = black
     fontcolor = black
 ];
 
-"#B-12":port2 -> "#B-10" [
+"#B-14":port2 -> "#B-12" [
     style="dashed"
     color = black
     fontcolor = black

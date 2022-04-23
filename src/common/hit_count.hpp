@@ -13,22 +13,22 @@ class HitCount
 public:    
     struct Category
     {
-        string file;     // source file the HIT is in
-        string function; // function the HIT is in
-        unsigned line;   // line the HIT is on
         Progress progress;   // current stage/step number
-        const Traceable *instance;  // "this" pointer of the function, differentiates between master and slaves        
+        string file;     // source file the HIT is in
+        unsigned line;   // line the HIT is on
+        string function; // function the HIT is in
+        string instance;  // trace string representing the instance        
         string prefix;
     };
         
-    void Hit( string file, unsigned line, string function, const Traceable *caller_this, string prefix="" )
+    void Hit( string file, unsigned line, string function, string instance, string prefix="" )
     {
         Category c;
-        c.file = file;
-        c.function = function;
-        c.line = line;
         c.progress = Progress::GetCurrent();
-        c.instance = caller_this;        
+        c.file = file;
+        c.line = line;
+        c.instance = instance;        
+        c.function = function;
         c.prefix = prefix;
         int count=0;
         if( counter.count( c ) > 0 )        
@@ -53,8 +53,10 @@ private:
 
 extern bool operator<( const HitCount::Category &l, const HitCount::Category &r );
 
-#define HIT do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this ); } while(false)
-#define HITP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this, P ); } while(false)
+#define HIT do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, GetTrace() ); } while(false)
+#define HITP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, GetTrace(), P ); } while(false)
+#define HITS do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, "" ); } while(false)
+#define HITSP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, "", P ); } while(false)
 
 #endif
 

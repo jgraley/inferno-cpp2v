@@ -47,4 +47,6 @@ void CommonTest();
 
 string Join( const list<string> &v, string sep=" ", string pre="", string post="" );
 
+string JoinInstanceFunction( string instance, string function );
+
 #endif

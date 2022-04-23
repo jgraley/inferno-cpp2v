@@ -23,10 +23,10 @@ subgraph "clusterAnd#R9-0" {
     style = "filled"
     color = antiquewhite2
     fontsize = "15"
-    // -------- block And#R9-0/#B-76 ----------
-    "And#R9-0/#B-76" [
+    // -------- block And#R9-0/#B-78 ----------
+    "And#R9-0/#B-78" [
         fillcolor = "/set28/6"
-        xlabel = "#B-76"
+        xlabel = "#B-78"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -36,10 +36,10 @@ subgraph "clusterAnd#R9-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R9-0/#B-77 ----------
-    "And#R9-0/#B-77" [
+    // -------- block And#R9-0/#B-79 ----------
+    "And#R9-0/#B-79" [
         fillcolor = "/set28/6"
-        xlabel = "#B-77"
+        xlabel = "#B-79"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -51,10 +51,10 @@ subgraph "clusterAnd#R9-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R9-0/#B-78 ----------
-    "And#R9-0/#B-78" [
+    // -------- block And#R9-0/#B-80 ----------
+    "And#R9-0/#B-80" [
         fillcolor = "/set28/8"
-        xlabel = "#B-78"
+        xlabel = "#B-80"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -66,10 +66,10 @@ subgraph "clusterAnd#R9-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R9-0/#B-79 ----------
-    "And#R9-0/#B-79" [
+    // -------- block And#R9-0/#B-81 ----------
+    "And#R9-0/#B-81" [
         fillcolor = "/set28/5"
-        xlabel = "#B-79"
+        xlabel = "#B-81"
         fontsize = "12"
         fontcolor = grey40
         shape = "plaintext"
@@ -80,10 +80,10 @@ subgraph "clusterAnd#R9-0" {
         style = "rounded,filled"
     ];
     
-    // -------- block And#R9-0/#B-80 ----------
-    "And#R9-0/#B-80" [
+    // -------- block And#R9-0/#B-82 ----------
+    "And#R9-0/#B-82" [
         fillcolor = "/set28/5"
-        xlabel = "#B-80"
+        xlabel = "#B-82"
         fontsize = "12"
         fontcolor = grey40
         shape = "trapezium"
@@ -122,41 +122,41 @@ subgraph "clusterAnd#R9-0" {
     
 }
 
-"And#R9-0/#B-77":port0 -> "And#R9-0/#B-78" [
+"And#R9-0/#B-79":port0 -> "And#R9-0/#B-80" [
     arrowhead="normalnonebox"
-    label = "#0"
+    label = "#0-&gt;#B-80"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R9-0/#B-77":port1 -> "And#R9-0/#B-79" [
+"And#R9-0/#B-79":port1 -> "And#R9-0/#B-81" [
     arrowhead="normalnonebox"
-    label = "#0"
+    label = "#0-&gt;#B-81"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R9-0/#B-78":port0 -> "And#R9-0/#B-80" [
+"And#R9-0/#B-80":port0 -> "And#R9-0/#B-82" [
     arrowhead="normalnonebox"
-    label = "#0"
+    label = "#0-&gt;#B-82"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R9-0/#B-78":port1 -> "And#R9-0/#B-76" [
+"And#R9-0/#B-80":port1 -> "And#R9-0/#B-78" [
     arrowhead="normalnonebox"
-    label = "#0"
+    label = "#0-&gt;#B-78"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"And#R9-0/#X9-4" -> "And#R9-0/#B-77" [
+"And#R9-0/#X9-4" -> "And#R9-0/#B-79" [
     arrowhead="normalnonebox"
-    label = "#1"
+    label = "#1-&gt;#B-79"
     decorate = true
     color = black
     fontcolor = black
@@ -164,7 +164,7 @@ subgraph "clusterAnd#R9-0" {
 
 "And#R9-0/#X9-5" -> "And#R9-0/#X9-4" [
     arrowhead="normalnonebox"
-    label = "#22"
+    label = "#3-&gt;#X9-4"
     decorate = true
     color = black
     fontcolor = black
@@ -214,10 +214,10 @@ subgraph "clusterAnd#R9-0" {
     height = 0.4
 ];
 
-// -------- block #B-77 ----------
-"#B-77" [
+// -------- block #B-79 ----------
+"#B-79" [
     fillcolor = "/set28/6"
-    xlabel = "#B-77"
+    xlabel = "#B-79"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -229,10 +229,10 @@ subgraph "clusterAnd#R9-0" {
     style = "rounded,filled"
 ];
 
-// -------- block #B-78 ----------
-"#B-78" [
+// -------- block #B-80 ----------
+"#B-80" [
     fillcolor = "/set28/8"
-    xlabel = "#B-78"
+    xlabel = "#B-80"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -244,10 +244,10 @@ subgraph "clusterAnd#R9-0" {
     style = "rounded,filled"
 ];
 
-// -------- block #B-80 ----------
-"#B-80" [
+// -------- block #B-82 ----------
+"#B-82" [
     fillcolor = "/set28/5"
-    xlabel = "#B-80"
+    xlabel = "#B-82"
     fontsize = "12"
     fontcolor = grey40
     shape = "trapezium"
@@ -256,10 +256,10 @@ subgraph "clusterAnd#R9-0" {
     penwidth = 0.0
 ];
 
-// -------- block #B-76 ----------
-"#B-76" [
+// -------- block #B-78 ----------
+"#B-78" [
     fillcolor = "/set28/6"
-    xlabel = "#B-76"
+    xlabel = "#B-78"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -269,10 +269,10 @@ subgraph "clusterAnd#R9-0" {
     style = "rounded,filled"
 ];
 
-// -------- block #B-79 ----------
-"#B-79" [
+// -------- block #B-81 ----------
+"#B-81" [
     fillcolor = "/set28/5"
-    xlabel = "#B-79"
+    xlabel = "#B-81"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -283,10 +283,10 @@ subgraph "clusterAnd#R9-0" {
     style = "rounded,filled"
 ];
 
-// -------- block #B-75 ----------
-"#B-75" [
+// -------- block #B-77 ----------
+"#B-77" [
     fillcolor = "/set28/2"
-    xlabel = "#B-75"
+    xlabel = "#B-77"
     fontsize = "12"
     fontcolor = grey40
     shape = "plaintext"
@@ -305,58 +305,58 @@ subgraph "clusterAnd#R9-0" {
 ];
 
 "#X9-5" -> "#X9-4" [
-    label = "#22"
+    label = "#3-&gt;#X9-4"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#X9-4" -> "#B-79" [
+    label = "#1-&gt;#B-79"
     decorate = true
     color = black
     fontcolor = black
 ];
 
 "#X9-4" -> "#B-77" [
-    label = "#1"
+    style="dashed"
+    label = "#1-&gt;#B-77"
     decorate = true
     color = black
     fontcolor = black
 ];
 
-"#X9-4" -> "#B-75" [
-    style="dashed"
-    label = "#1"
+"#B-79":port0 -> "#B-80" [
+    label = "#0-&gt;#B-80"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#B-79":port1 -> "#B-81" [
+    label = "#0-&gt;#B-81"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#B-80":port0 -> "#B-82" [
+    label = "#0-&gt;#B-82"
+    decorate = true
+    color = black
+    fontcolor = black
+];
+
+"#B-80":port1 -> "#B-78" [
+    label = "#0-&gt;#B-78"
     decorate = true
     color = black
     fontcolor = black
 ];
 
 "#B-77":port0 -> "#B-78" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"#B-77":port1 -> "#B-79" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"#B-78":port0 -> "#B-80" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"#B-78":port1 -> "#B-76" [
-    label = "#0"
-    decorate = true
-    color = black
-    fontcolor = black
-];
-
-"#B-75":port0 -> "#B-76" [
     style="dashed"
-    label = "#1"
+    label = "#1-&gt;#B-78"
     decorate = true
     color = black
     fontcolor = black

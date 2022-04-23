@@ -124,3 +124,11 @@ string Join( const list<string> &ls, string sep, string pre, string post )
     return s;
 } 
 
+
+string JoinInstanceFunction( string instance, string function )
+{
+    string indot;
+    if( instance != "" && instance.substr(instance. size()-2) != "::" )
+        indot = instance+".";
+    return SSPrintf("%s%s()", indot.c_str(), function.c_str());
+}

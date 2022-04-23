@@ -78,6 +78,7 @@ public:
     SCREngine *GetRootEngine();
     TreePtr<Node> GetSearchComparePattern();
     TreePtr<Node> GetReplacePattern();
+    string GetTrace() const;
     
     TreePtr<Node> *pcontext;   
 private:

@@ -13,12 +13,6 @@ bool operator<( const HitCount::Category &l, const HitCount::Category &r )
                 return l.progress < r.progress;
             break;
             
-            case 'I':
-            case 'N':
-            if( l.instance != r.instance )
-                return l.instance < r.instance;
-            break;
-            
             case 'F':
             if( l.file != r.file )
                 return l.file < r.file;
@@ -27,6 +21,11 @@ bool operator<( const HitCount::Category &l, const HitCount::Category &r )
             case 'L':
             if( l.line != r.line )
                 return l.line < r.line;
+            break;
+            
+            case 'I':
+            if( l.instance != r.instance )
+                return l.instance < r.instance;
             break;
             
             case 'M':
@@ -53,8 +52,7 @@ void HitCount::Usage()
             "Letters after -th correspond to fields displayed in the dump.\n"
             "Fields specified first take precidence. Letters are:\n\n"
             "S step number\n"
-            "A instance address\n"
-            "N instance name\n"
+            "I instance name\n"
             "F source file name\n"
             "L line number in source\n"
             "M function/method name\n"
@@ -72,43 +70,55 @@ void HitCount::Check()
 
 void HitCount::Dump()
 {
+    string fmt = ReadArgs::hits_format;
+    int fs = fmt.size();
     FOREACH( pc p, counter )
     {
-        for( int i=0; i<ReadArgs::hits_format.size(); i++ )
+        for( int i=0; i<fs; i++ )
         {
-            switch( ReadArgs::hits_format[i] )
+            if( fmt.substr(i, 2)=="FL" )
             {
-                case 'S':
-                printf("At %s", p.first.progress.GetPrefix().c_str() );                   
-                break;
-                
-                case 'I':
-                printf("%s", p.first.instance->GetTrace().c_str() );                   
-                break;
-                
-                case 'N':
-                printf("%s", p.first.instance->GetName().c_str() );                   
-                break;
+                printf("%s:%d", p.first.file.c_str(), p.first.line );
+                i++;
+            }
+            else if( fmt.substr(i, 2)=="IM" )
+            {
+                string i_f = JoinInstanceFunction(p.first.instance, p.first.function);
+                printf("%s", i_f.c_str());
+                i++;
+            }
+            else
+            {
+                switch( fmt[i] )
+                {
+                    case 'S':
+                    printf("At %s", p.first.progress.GetPrefix().c_str() );                   
+                    break;
+                    
+                    case 'F':
+                    printf("%s", p.first.file.c_str() );
+                    break;
+                    
+                    case 'L':
+                    printf("%d", p.first.line );         
+                    break;
+                    
+                    case 'I':
+                    printf("%s", p.first.instance.c_str() );                   
+                    break;
 
-                case 'F':
-                printf("%s", p.first.file.c_str() );
-                break;
-                
-                case 'L':
-                printf(":%d", p.first.line );         
-                break;
-                
-                case 'M':
-                printf("in %s", p.first.function.c_str() );    
-                break;
-                
-                case 'P':
-                printf("%s", p.first.prefix.c_str() );                   
-                break;
-                                
-                default:
-                Usage();
-                break;
+                    case 'M':
+                    printf("in %s", p.first.function.c_str() );    
+                    break;
+                    
+                    case 'P':
+                    printf("%s", p.first.prefix.c_str() );                   
+                    break;
+                                    
+                    default:
+                    Usage();
+                    break;
+                }
             }
             printf(" ");            
         }

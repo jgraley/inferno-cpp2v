@@ -108,7 +108,8 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     nugget.depth_first_ordered_it = it;
     nugget.depth_first_index = current_index++;  
         
-    // Keep track of the lask added on the way in
+    // Keep track of the last added on the way in.
+    // AddChildren() may recuse back here and update last_link.
     last_xlink = xlink;
         
     // Recurse into our child nodes

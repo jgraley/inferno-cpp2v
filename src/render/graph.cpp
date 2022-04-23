@@ -558,8 +558,13 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
             }
             
             // Auto-determination of link trace string
-            if( link->pptr && my_block.node )            
-                my_link->trace_labels.push_back( PatternLink( my_block.node, link->pptr ).GetShortName() );        
+            if( link->pptr && my_block.node )   
+            {
+                if( pspecial )         
+                    my_link->trace_labels.push_back( PatternLink( my_block.node, link->pptr ).GetShortName() );        
+                else
+                    my_link->trace_labels.push_back( XLink( my_block.node, link->pptr ).GetShortName() );        
+            }
             
             link = my_link;
         }

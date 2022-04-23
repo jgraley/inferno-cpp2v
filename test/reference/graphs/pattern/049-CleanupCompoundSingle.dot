@@ -17,8 +17,8 @@ edge [
 ];
 
 // -------------------- transformation figure --------------------
-// -------- block CR#B-931 ----------
-"CR#B-931" [
+// -------- block CR#B-933 ----------
+"CR#B-933" [
     fillcolor = antiquewhite1
     fontsize = "12"
     fontcolor = grey40
@@ -31,8 +31,8 @@ edge [
     color = black
 ];
 
-// -------- block #B-924 ----------
-"#B-924" [
+// -------- block #B-926 ----------
+"#B-926" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -45,8 +45,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-927 ----------
-"#B-927" [
+// -------- block #B-929 ----------
+"#B-929" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -59,8 +59,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-928 ----------
-"#B-928" [
+// -------- block #B-930 ----------
+"#B-930" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -74,8 +74,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-929 ----------
-"#B-929" [
+// -------- block #B-931 ----------
+"#B-931" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -88,8 +88,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-930 ----------
-"#B-930" [
+// -------- block #B-932 ----------
+"#B-932" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -100,8 +100,8 @@ edge [
     style = "rounded,filled"
 ];
 
-// -------- block #B-925 ----------
-"#B-925" [
+// -------- block #B-927 ----------
+"#B-927" [
     fillcolor = "/set28/2"
     fontsize = "12"
     fontcolor = grey40
@@ -114,8 +114,8 @@ edge [
     height = 0.4
 ];
 
-// -------- block #B-926 ----------
-"#B-926" [
+// -------- block #B-928 ----------
+"#B-928" [
     fillcolor = "/set28/1"
     fontsize = "12"
     fontcolor = grey40
@@ -127,17 +127,38 @@ edge [
     style = "rounded,filled"
 ];
 
-"CR#B-931":port0 -> "#B-924" [
+"CR#B-933":port0 -> "#B-926" [
     color = black
     fontcolor = black
 ];
 
-"#B-924":port1 -> "#B-927" [
+"#B-926":port1 -> "#B-929" [
     color = black
     fontcolor = black
 ];
 
-"#B-924":port1 -> "#B-925" [
+"#B-926":port1 -> "#B-927" [
+    color = black
+    fontcolor = black
+];
+
+"#B-929" -> "#B-930" [
+    color = black
+    fontcolor = black
+];
+
+"#B-930":port1 -> "#B-931" [
+    color = black
+    fontcolor = black
+];
+
+"#B-930":port2 -> "#B-932" [
+    style="dashed"
+    color = black
+    fontcolor = black
+];
+
+"#B-931":port1 -> "#B-932" [
     color = black
     fontcolor = black
 ];
@@ -147,28 +168,7 @@ edge [
     fontcolor = black
 ];
 
-"#B-928":port1 -> "#B-929" [
-    color = black
-    fontcolor = black
-];
-
-"#B-928":port2 -> "#B-930" [
-    style="dashed"
-    color = black
-    fontcolor = black
-];
-
-"#B-929":port1 -> "#B-930" [
-    color = black
-    fontcolor = black
-];
-
-"#B-925" -> "#B-926" [
-    color = black
-    fontcolor = black
-];
-
-"#B-926":port0 -> "#B-929" [
+"#B-928":port0 -> "#B-931" [
     color = black
     fontcolor = black
 ];
