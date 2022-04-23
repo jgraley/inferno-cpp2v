@@ -112,9 +112,9 @@ string MultiConditionalOperator::Render() const
     for( shared_ptr<SymbolExpression> o : options )
         str_options.push_back( o->Render() );
         
-    return Join(str_controls, ", ", "[", "]") + 
-           "?:" + 
-           Join(str_options, ", ", "[", "]");
+    return Join(str_controls, ", ") + 
+           " ?: " + 
+           Join(str_options, ", ");
 }
 
 

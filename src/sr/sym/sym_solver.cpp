@@ -165,7 +165,11 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
         options.push_back( make_shared<UnionOperator>( terms ) );
     } );
 
-    auto solution = make_shared<MultiConditionalOperator>( controls, options );
+    shared_ptr<SymbolExpression> solution;
+    if( controls.empty() )
+        solution = options.at(0);
+    else
+        solution = make_shared<MultiConditionalOperator>( controls, options );
 
     TRACEC("solution is ")(solution)("\n");
 
