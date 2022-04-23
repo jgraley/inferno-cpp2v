@@ -141,11 +141,110 @@ shared_ptr<SymbolResultInterface> AllGreaterOperator::Evaluate( const EvalKit &k
 
 string AllGreaterOperator::Render() const
 {
-    return "{>=" + RenderForMe(a) + "}";
+    return "{>" + RenderForMe(a) + "}";
 }
 
 
 Expression::Precedence AllGreaterOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}
+
+// ------------------------- AllLessOperator --------------------------
+
+AllLessOperator::AllLessOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}
+
+    
+list<shared_ptr<SymbolExpression>> AllLessOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<SymbolResultInterface> AllLessOperator::Evaluate( const EvalKit &kit,
+                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+{
+    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
+    return make_shared<SymbolRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), false );
+}
+
+
+string AllLessOperator::Render() const
+{
+    return "{<" + RenderForMe(a) + "}";
+}
+
+
+Expression::Precedence AllLessOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}
+
+// ------------------------- AllGreaterOrEqualOperator --------------------------
+
+AllGreaterOrEqualOperator::AllGreaterOrEqualOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}
+
+    
+list<shared_ptr<SymbolExpression>> AllGreaterOrEqualOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<SymbolResultInterface> AllGreaterOrEqualOperator::Evaluate( const EvalKit &kit,
+                                                                       const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+{
+    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
+    return make_shared<SymbolRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, SR::XLink(), false );
+}
+
+
+string AllGreaterOrEqualOperator::Render() const
+{
+    return "{>=" + RenderForMe(a) + "}";
+}
+
+
+Expression::Precedence AllGreaterOrEqualOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}
+
+// ------------------------- AllLessOrEqualOperator --------------------------
+
+AllLessOrEqualOperator::AllLessOrEqualOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}
+
+    
+list<shared_ptr<SymbolExpression>> AllLessOrEqualOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<SymbolResultInterface> AllLessOrEqualOperator::Evaluate( const EvalKit &kit,
+                                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+{
+    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
+    return make_shared<SymbolRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), true );
+}
+
+
+string AllLessOrEqualOperator::Render() const
+{
+    return "{<=" + RenderForMe(a) + "}";
+}
+
+
+Expression::Precedence AllLessOrEqualOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
 }

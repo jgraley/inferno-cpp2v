@@ -84,9 +84,55 @@ private:
 };
 
 // ------------------------- AllLessOperator --------------------------
+
+class AllLessOperator : public SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllLessOperator( shared_ptr<SymbolExpression> a );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<SymbolExpression> a;
+};
+
 // ------------------------- AllGreaterOrEqualOperator --------------------------
+
+class AllGreaterOrEqualOperator : public SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllGreaterOrEqualOperator( shared_ptr<SymbolExpression> a );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<SymbolExpression> a;
+};
+
 // ------------------------- AllLessOrEqualOperator --------------------------
 
+class AllLessOrEqualOperator : public SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllLessOrEqualOperator( shared_ptr<SymbolExpression> a );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<SymbolExpression> a;
+};
 
 };
 
