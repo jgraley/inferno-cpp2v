@@ -117,4 +117,35 @@ Expression::Precedence IntersectionOperator::GetPrecedence() const
     return Precedence::OR;
 }
 
+// ------------------------- AllGreaterOperator --------------------------
 
+AllGreaterOperator::AllGreaterOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}
+
+    
+list<shared_ptr<SymbolExpression>> AllGreaterOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<SymbolResultInterface> AllGreaterOperator::Evaluate( const EvalKit &kit,
+                                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+{
+    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
+    return make_shared<SymbolRangeResult>( kit.knowledge, ar->GetOnlyXLink(), false, SR::XLink(), false );
+}
+
+
+string AllGreaterOperator::Render() const
+{
+    return "{>=" + RenderForMe(a) + "}";
+}
+
+
+Expression::Precedence AllGreaterOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}

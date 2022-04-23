@@ -136,7 +136,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
-    bool res = ( ra->GetAsXLink() == rb->GetAsXLink() );
+    bool res = ( ra->GetOnlyXLink() == rb->GetOnlyXLink() );
     return make_shared<BooleanResult>( res );   
 }
 
@@ -245,8 +245,8 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
-    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->GetAsXLink()) );   
-    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->GetAsXLink()) );   
+    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->GetOnlyXLink()) );   
+    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->GetOnlyXLink()) );   
     SR::TheKnowledge::IndexType index_a = nugget_a.depth_first_index;
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
@@ -497,7 +497,7 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
         // within the full arrowhead model (cf IndexComparisonOperator).
-        if( ra->GetAsXLink() == rb->GetAsXLink() )
+        if( ra->GetOnlyXLink() == rb->GetOnlyXLink() )
         {
             m = false;
         }
@@ -567,7 +567,7 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
     if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( false );
     
-    bool matches = archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() );
+    bool matches = archetype_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() );
     return make_shared<BooleanResult>( matches );
 }
 
@@ -636,12 +636,12 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !archetype_node->IsLocalMatch( ra->GetAsXLink().GetChildX().get() ) )
+    if( !archetype_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() ) )
         return make_shared<BooleanResult>( false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->GetAsXLink().GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->GetOnlyXLink().GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
@@ -730,7 +730,7 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
-    bool res = ( equivalence_relation.Compare(ra->GetAsXLink(), rb->GetAsXLink()) == EQUAL );
+    bool res = ( equivalence_relation.Compare(ra->GetOnlyXLink(), rb->GetOnlyXLink()) == EQUAL );
     return make_shared<BooleanResult>( res );    
 }
 

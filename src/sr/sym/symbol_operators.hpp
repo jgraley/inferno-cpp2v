@@ -20,7 +20,7 @@ public:
     explicit SymbolConstant( SR::XLink xlink );
     virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
     shared_ptr<SymbolResultInterface> GetValue() const;
-    SR::XLink GetAsXLink() const;
+    SR::XLink GetOnlyXLink() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;

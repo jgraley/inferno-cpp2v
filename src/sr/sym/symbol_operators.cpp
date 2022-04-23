@@ -27,7 +27,7 @@ shared_ptr<SymbolResultInterface> SymbolConstant::GetValue() const
 }
 
 
-SR::XLink SymbolConstant::GetAsXLink() const
+SR::XLink SymbolConstant::GetOnlyXLink() const
 {
     return xlink;
 }
@@ -142,16 +142,16 @@ shared_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalK
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
-    if( !archetype_node->IsLocalMatch( ar->GetAsXLink().GetChildX().get() ) )
+    if( !archetype_node->IsLocalMatch( ar->GetOnlyXLink().GetChildX().get() ) )
         return make_shared<SymbolResult>(SymbolResult::NOT_A_SYMBOL); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ar->GetAsXLink().GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ar->GetOnlyXLink().GetChildX().get() );   
     ASSERT( item_index < keyer_itemised.size() );     
     
     // Extract the item indicated by item_index. 
-    return EvalFromItem( ar->GetAsXLink(), keyer_itemised[item_index] );
+    return EvalFromItem( ar->GetOnlyXLink(), keyer_itemised[item_index] );
 }
 
 
@@ -320,8 +320,8 @@ shared_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const Eva
     if( !ar->IsDefinedAndUnique() )
         return ar;
         
-    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->GetAsXLink()) );   
-    SR::XLink result_xlink = EvalXLinkFromNugget( ar->GetAsXLink(), nugget );
+    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->GetOnlyXLink()) );   
+    SR::XLink result_xlink = EvalXLinkFromNugget( ar->GetOnlyXLink(), nugget );
     if( result_xlink ) 
         return make_shared<SymbolResult>( result_xlink );
     else
@@ -478,7 +478,7 @@ shared_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
-    TreePtr<Node> parent_node = ar->GetAsXLink().GetChildX();
+    TreePtr<Node> parent_node = ar->GetOnlyXLink().GetChildX();
     FlattenNode flat( parent_node );
 
     set<SR::XLink> child_xlinks;

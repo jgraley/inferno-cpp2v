@@ -76,7 +76,7 @@ bool SymbolResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink SymbolResult::GetAsXLink() const
+SR::XLink SymbolResult::GetOnlyXLink() const
 {
     ASSERT( xlink );
     return xlink;
@@ -141,7 +141,7 @@ bool SymbolSetResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink SymbolSetResult::GetAsXLink() const
+SR::XLink SymbolSetResult::GetOnlyXLink() const
 {
     ASSERT( !complement_flag )("Is complement so not unique");
     return OnlyElementOf(xlinks);
@@ -255,3 +255,50 @@ string SymbolSetResult::GetTrace() const
     return s;
 }
 
+// ------------------------- SymbolRangeResult --------------------------
+
+SymbolRangeResult::SymbolRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+    knowledge( knowledge_ ),
+    lower( lower_ ),
+    lower_incl( lower_incl_ ),
+    upper( upper_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+bool SymbolRangeResult::IsDefinedAndUnique() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+SR::XLink SymbolRangeResult::GetOnlyXLink() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+bool SymbolRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+bool SymbolRangeResult::operator==( const SymbolResultInterface &other ) const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+string SymbolRangeResult::GetTrace() const
+{
+    list<string> restrictions;
+    
+    if( lower )
+        restrictions.push_back( string(lower_incl?">=":">") + lower.GetTrace() );
+    if( upper )
+        restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
+        
+    return Join(restrictions, " & ", "{", "}");
+}

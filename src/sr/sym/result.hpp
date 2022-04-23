@@ -4,6 +4,11 @@
 #include "common/common.hpp"
 #include "../link.hpp"
 
+namespace SR
+{
+    class TheKnowledge;
+}
+
 namespace SYM
 { 
 
@@ -36,10 +41,9 @@ private:
 class SymbolResultInterface : public Traceable
 {
 public:
-    virtual SR::XLink GetAsXLink() const = 0;   
-    virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;
-     
     virtual bool IsDefinedAndUnique() const = 0;
+    virtual SR::XLink GetOnlyXLink() const = 0;   
+    virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;     
     virtual bool operator==( const SymbolResultInterface &other ) const = 0;    
 };
 
@@ -57,7 +61,7 @@ public:
     explicit SymbolResult( Category cat );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetAsXLink() const override;    
+    SR::XLink GetOnlyXLink() const override;    
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;    
     
@@ -73,10 +77,12 @@ class SymbolSetResult : public SymbolResultInterface
 {
 public:
     explicit SymbolSetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
+    
+    // Use this to force other or unknown symbol results to extensionalise
     explicit SymbolSetResult( shared_ptr<SymbolResultInterface> other );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetAsXLink() const override;    
+    SR::XLink GetOnlyXLink() const override;    
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;
 
@@ -95,6 +101,32 @@ private:
     set<SR::XLink> xlinks;
     bool complement_flag;
 };
+
+// ------------------------- SymbolRangeResult --------------------------
+
+class SymbolRangeResult : public SymbolResultInterface
+{
+public:
+    // lower or upper can be null to exclude that limit
+    SymbolRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    
+    bool IsDefinedAndUnique() const override;    
+    SR::XLink GetOnlyXLink() const override;    
+    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolResultInterface &other ) const override;
+
+    //shared_ptr<SymbolSetResult> GetComplement() const;
+    //static shared_ptr<SymbolSetResult> GetUnion( list<shared_ptr<SymbolSetResult>> ops );
+    //static shared_ptr<SymbolSetResult> GetIntersection( list<shared_ptr<SymbolSetResult>> ops );
+
+    string GetTrace() const override;
+
+private:    
+    const SR::TheKnowledge *knowledge;
+    SR::XLink lower, upper;
+    bool lower_incl, upper_incl;
+};
+
 
 };
 

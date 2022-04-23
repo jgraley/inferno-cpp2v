@@ -66,6 +66,28 @@ private:
     const list< shared_ptr<SymbolExpression> > sa;
 };
 
+// ------------------------- AllGreaterOperator --------------------------
+
+class AllGreaterOperator : public SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllGreaterOperator( shared_ptr<SymbolExpression> a );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    const shared_ptr<SymbolExpression> a;
+};
+
+// ------------------------- AllLessOperator --------------------------
+// ------------------------- AllGreaterOrEqualOperator --------------------------
+// ------------------------- AllLessOrEqualOperator --------------------------
+
+
 };
 
 #endif // include guard

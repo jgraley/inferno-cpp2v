@@ -129,8 +129,8 @@ shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const
     if( !ra->IsDefinedAndUnique() )
         return make_shared<BooleanResult>( false );
 
-    auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetAsXLink().GetChildX().get());
-    auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetAsXLink().GetChildX());
+    auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetOnlyXLink().GetChildX().get());
+    auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetOnlyXLink().GetChildX());
 
     // Nodes must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )

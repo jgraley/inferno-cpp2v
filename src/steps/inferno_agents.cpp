@@ -150,7 +150,7 @@ shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
     if( !ra->IsDefinedAndUnique() )
         return make_shared<SYM::BooleanResult>( false );
     
-    TreePtr<Node> base_x = ra->GetAsXLink().GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
+    TreePtr<Node> base_x = ra->GetOnlyXLink().GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
         TRACE("Comparing ")(si_x->GetRender())(" with ")(name);
@@ -293,7 +293,7 @@ shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
     shared_ptr<SYM::SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
     if( !keyer_result->IsDefinedAndUnique() )
         return make_shared<SYM::SymbolResult>( SYM::SymbolResult::NOT_A_SYMBOL );
-    XLink keyer_xlink = keyer_result->GetAsXLink();
+    XLink keyer_xlink = keyer_result->GetOnlyXLink();
     
     // Keep advancing until we get nullptr, and remember the last non-null position
     string s;

@@ -98,7 +98,7 @@ shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     shared_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
     if( !keyer_result->IsDefinedAndUnique() )
         return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
-    XLink keyer_xlink = keyer_result->GetAsXLink();
+    XLink keyer_xlink = keyer_result->GetOnlyXLink();
     LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink );        
     if( (XLink)cached_link )
         return make_shared<SymbolResult>( (XLink)cached_link );
