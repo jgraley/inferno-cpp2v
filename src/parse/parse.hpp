@@ -47,8 +47,7 @@ public:
 	Parse(string i) :
 		infile(i)
 	{
-        if( infile=="" )
-            ASSERTFAIL("No input file provided; use -h for help");
+        ASSERT( infile!="" );
 	}
 
 	void operator()(TreePtr<Node> context, TreePtr<Node> *proot)
