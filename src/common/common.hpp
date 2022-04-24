@@ -50,9 +50,8 @@ template< typename S1, typename S2 >
 inline S1 UnionOf( const S1 &s1, const S2 &s2 )
 {
     S1 result;
-    result = s1;
-    for( auto x : s2 )
-        result.insert(x);
+    set_union( s1.begin(), s1.end(), s2.begin(), s2.end(),
+               std::inserter(result, result.begin()) );    
     return result; 
 }
 
@@ -63,12 +62,9 @@ template< typename S1, typename S2 >
 inline S1 UnionOfSolo( const S1 &s1, const S2 &s2 )
 {
     S1 result;
-    result = s1;
-    for( auto x : s2 )
-    {
-        auto p = result.insert(x);
-        ASSERT( p.second );
-    }
+    set_union( s1.begin(), s1.end(), s2.begin(), s2.end(),
+               std::inserter(result, result.begin()) );    
+    ASSERT( result.size() == s1.size() + s2.size() )("Solo rule");
     return result; 
 }
 
@@ -79,68 +75,34 @@ template< typename S1, typename S2 >
 inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 {
     S1 result;
-    for( auto x : s2 )
-        if( s1.count(x) > 0 )
-            result.insert(x);                     
+    set_intersection( s1.begin(), s1.end(), s2.begin(), s2.end(),
+                      std::inserter(result, result.begin()) );    
     return result; 
 }
 
 
 // Intersect set with complement, any compatible associative 
 // containers, ordered or otherwise.
-template< typename T1, typename T2 >
-inline set<T1> DifferenceOf( const set<T1> &s1, const set<T2> &s2 )
+template< typename S1, typename S2 >
+inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 {
-    set<T1> result;
-    result = s1;
-    for( auto x : s2 )
-        result.erase(x);                 
-    return result; // There, much nicer!
-}    
-
-
-// Intersect set with complement, any compatible associative 
-// containers, ordered or otherwise.
-template< typename T1, typename T2 >
-inline map<T1, T2> DifferenceOf( const map<T1, T2> &s1, const map<T1, T2> &s2 )
-{
-    map<T1, T2> result;
-    result = s1;
-    for( auto x : s2 )
-        result.erase(x.first); // this .first is why we need separate version for map     
-    return result; // There, much nicer!
+    S1 result;
+    set_difference( s1.begin(), s1.end(), s2.begin(), s2.end(),
+                    std::inserter(result, result.begin()) );    
+    return result; 
 }    
 
 
 // Intersect set with complement, any compatible associative 
 // containers, ordered or otherwise. s2 must be subset of s1.
-template< typename T1, typename T2 >
-inline set<T1> DifferenceOfSolo( const set<T1> &s1, const set<T2> &s2 )
+template< typename S1, typename S2 >
+inline S1 DifferenceOfSolo( const S1 &s1, const S2 &s2 )
 {
-    set<T1> result;
-    result = s1;
-    for( auto x : s2 )
-    {
-        int n = result.erase(x);                 
-        ASSERT( n > 0 );
-    }
-    return result; // There, much nicer!
-}    
-
-
-// Intersect set with complement, any compatible associative 
-// containers, ordered or otherwise. s2 must be subset of s1.
-template< typename T1, typename T2 >
-inline map<T1, T2> DifferenceOfSolo( const map<T1, T2> &s1, const map<T1, T2> &s2 )
-{
-    map<T1, T2> result;
-    result = s1;
-    for( auto x : s2 )
-    {
-        int n = result.erase(x.first); // this .first is why we need separate version for map                      
-        ASSERT( n > 0 );
-    }
-    return result; // There, much nicer!
+    S1 result;
+    set_difference( s1.begin(), s1.end(), s2.begin(), s2.end(),
+                    std::inserter(result, result.begin()) );    
+    ASSERT( result.size() == s1.size() - s2.size() )("Solo rule");
+    return result; 
 }    
 
 
@@ -165,10 +127,11 @@ inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
 }
 
 
+// Is c1 a subset of c2
 template< typename C1, typename C2 >
 inline bool IsSubset( const C1 &c1, const C2 &c2 )
 {
-    return DifferenceOf( c1, c2 ).empty();
+    return includes( c2.begin(), c2.end(), c1.begin(), c1.end() );
 }
 
 
