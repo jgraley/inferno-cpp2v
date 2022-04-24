@@ -1,5 +1,6 @@
 #include "predicate_operators.hpp"
 #include "boolean_operators.hpp"
+#include "set_operators.hpp"
 #include "result.hpp"
 
 using namespace SYM;
@@ -255,6 +256,28 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 }
 
 
+shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                      shared_ptr<BooleanExpression> to_equal ) const
+{
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+        
+    auto ranges = GetRanges();
+    
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, ranges.first );
+    if( a_solution )
+        return a_solution;
+    
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, ranges.second );
+    if( b_solution )
+        return b_solution;
+    
+    return nullptr;
+}
+
+
 Expression::Precedence IndexComparisonOperator::GetPrecedenceNF() const
 {
     return Precedence::COMPARE;
@@ -273,8 +296,15 @@ bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 {
     return index_a > index_b;
 }                    
-            
-                                  
+                                        
+
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GreaterOperator::GetRanges() const
+{
+    return make_pair( make_shared<AllGreaterOperator>(b),
+                      make_shared<AllLessOperator>(a) );
+}
+
+
 Relationship GreaterOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
@@ -327,6 +357,13 @@ bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
 }                    
             
                                   
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> LessOperator::GetRanges() const
+{
+    return make_pair( make_shared<AllLessOperator>(b),
+                      make_shared<AllGreaterOperator>(a) );
+}
+
+
 Relationship LessOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
@@ -379,6 +416,13 @@ bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType in
 }                    
             
                                   
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GreaterOrEqualOperator::GetRanges() const
+{
+    return make_pair( make_shared<AllGreaterOrEqualOperator>(b),
+                      make_shared<AllLessOrEqualOperator>(a) );
+}
+
+
 Relationship GreaterOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<LessOperator>(other) )
@@ -426,6 +470,13 @@ bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index
 }                    
             
                                   
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> LessOrEqualOperator::GetRanges() const
+{
+    return make_pair( make_shared<AllLessOrEqualOperator>(b),
+                      make_shared<AllGreaterOrEqualOperator>(a) );
+}
+
+
 Relationship LessOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
     if( dynamic_pointer_cast<GreaterOperator>(other) )

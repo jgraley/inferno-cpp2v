@@ -115,6 +115,9 @@ public:
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
+    shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                 shared_ptr<BooleanExpression> to_equal ) const override;
+    virtual pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GetRanges() const = 0;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const = 0;
     virtual Precedence GetPrecedenceNF() const override;
@@ -133,6 +136,7 @@ class GreaterOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
+    pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GetRanges() const override;
                                       
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
@@ -151,7 +155,8 @@ class LessOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-                                      
+    pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GetRanges() const override;
+
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     
@@ -169,7 +174,8 @@ class GreaterOrEqualOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-                                      
+    pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GetRanges() const override;
+
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     
@@ -187,7 +193,8 @@ class LessOrEqualOperator : public IndexComparisonOperator
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
-                                      
+    pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GetRanges() const override;
+
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     

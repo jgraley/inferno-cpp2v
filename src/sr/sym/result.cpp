@@ -1,4 +1,5 @@
 #include "result.hpp"
+#include "the_knowledge.hpp"
 
 using namespace SYM;
 
@@ -121,7 +122,7 @@ SymbolSetResult::SymbolSetResult( shared_ptr<SymbolResultInterface> other )
         xlinks = ssr->xlinks;
         complement_flag = ssr->complement_flag;
     }
-    else if( auto sr = dynamic_pointer_cast<SymbolResult>(other) )
+    else if( auto sr = dynamic_pointer_cast<SymbolResultInterface>(other) )
     {
         set<SR::XLink> links;
         bool ok = other->TryGetAsSetOfXLinks( xlinks );
@@ -130,7 +131,7 @@ SymbolSetResult::SymbolSetResult( shared_ptr<SymbolResultInterface> other )
     }
     else
     {
-        ASSERTFAILS();
+        ASSERTS(false)("Don't know how to make a SymbolSetResult out of ")(*other);
     }
 }
 
@@ -280,8 +281,33 @@ SR::XLink SymbolRangeResult::GetOnlyXLink() const
 
 
 bool SymbolRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
-{
-    ASSERTFAIL("TODO");
+{ 
+    SR::TheKnowledge::DepthFirstOrderedIt it_lower, it_upper;
+    
+    if( lower )
+    {
+        it_lower = knowledge->GetNugget(lower).depth_first_ordered_it;
+        if( !lower_incl )
+            ++it_lower;
+    }
+    else
+    {
+        it_lower = knowledge->depth_first_ordered_domain.begin();
+    }
+    
+    if( upper )
+    {
+        it_upper = knowledge->GetNugget(upper).depth_first_ordered_it;
+        if( upper_incl && it_upper != knowledge->depth_first_ordered_domain.end() )
+            ++it_upper;
+    }
+    else
+    {
+        it_upper = knowledge->depth_first_ordered_domain.end();
+    }
+    
+    links = set<SR::XLink>( it_lower, it_upper );
+    return true;
 }
 
 
