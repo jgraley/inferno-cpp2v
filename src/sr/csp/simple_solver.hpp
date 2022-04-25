@@ -79,7 +79,7 @@ private:
                        list<VariableId>::const_iterator current_it );
         ~ValueSelector();
         void SetupDefaultGenerator();
-        void SetupSuggestionGenerator( set<Value> s );
+        void SetupSuggestionGenerator( shared_ptr<set<Value>> s );
 #ifdef BACKJUMPING
         typedef pair<Value, ConstraintSet> SelectNextValueRV;
 #else
@@ -101,15 +101,9 @@ private:
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
 #endif
-        // For the lambda...
-        SR::TheKnowledge::DepthFirstOrderedIt fwd_it;
-        SR::TheKnowledge::DepthFirstOrderedIt rev_it;
-        bool go_forward;
-        bool insert_mmax_next;
-        int remaining_count;
         bool suggestion_ok = false;
+        // For the lambda...
         set<Value> suggested; 
-        set<Value>::iterator suggestion_iterator;               
 
     public:
         static void DumpGSV();

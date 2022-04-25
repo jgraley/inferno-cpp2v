@@ -273,19 +273,19 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
         rl.push_back(r);
     }
 
-    set<Value> s;
+    auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
     shared_ptr<SYM::SymbolSetResult> result = SYM::SymbolSetResult::GetIntersection(rl);
     ASSERT( result );
-    bool sok = result->TryGetAsSetOfXLinks(s);
+    bool sok = result->TryGetAsSetOfXLinks(*s);
        
 #ifdef GATHER_GSV
     gsv_n++;
     if( !sok )
         gsv_nfail++;
-    else if( s.empty() )
+    else if( s->empty() )
         gsv_nempty++;
     else
-        gsv_tot += s.size();
+        gsv_tot += s->size();
 #endif       
               
     if( sok )
@@ -303,59 +303,31 @@ SimpleSolver::ValueSelector::~ValueSelector()
 
 void SimpleSolver::ValueSelector::SetupDefaultGenerator()
 {
-    Value start_val = knowledge->depth_first_ordered_domain.front();   
-    const SR::TheKnowledge::Nugget &start_nugget( knowledge->GetNugget(start_val) );        
-    fwd_it = rev_it = start_nugget.depth_first_ordered_it;
-    
-    // Forward/backward ordering starting at value of previous variable, prioritizing MMAX.
-    go_forward = true;
-    insert_mmax_next = knowledge->unordered_domain.count(SR::XLink::MMAX_Link);
-    remaining_count = knowledge->depth_first_ordered_domain.size();
-    
-    values_generator = [this]() -> Value
+    SR::TheKnowledge::DepthFirstOrderedIt fwd_it = knowledge->depth_first_ordered_domain.begin();     
+    values_generator = [=]() mutable -> Value
     {
-        Value v;
-        if( remaining_count == 0 )
-        {
-            v = Value();
-        }
-        else if( insert_mmax_next )
-        {
-            v = SR::XLink::MMAX_Link; 
-            insert_mmax_next = false;
-        }
-        else
-        {
-            do
-            {
-                if( go_forward )
-                {
-                    v = *fwd_it;
-                    AdvanceWithWrap( knowledge->depth_first_ordered_domain, fwd_it, 1 );
-                }
-                else
-                {
-                    AdvanceWithWrap( knowledge->depth_first_ordered_domain, rev_it, -1 );
-                    v = *rev_it;
-                }
-                go_forward = !go_forward;
-            } while( v == SR::XLink::MMAX_Link );
-        }                            
-        remaining_count--;      
+        if( fwd_it==knowledge->depth_first_ordered_domain.end() )        
+            return Value();
+        
+        Value v = *fwd_it;
+        ++fwd_it;
         return v;          
     };
 }
 
 
-void SimpleSolver::ValueSelector::SetupSuggestionGenerator( set<Value> s )
+void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value>> suggested )
 {
-    suggested = s;
-    TRACE("At ")(current_var)(", got suggestion ")(suggested)(" - rewriting queue\n"); 
+     // Use of shared_ptr here allows the lambda to keep suggested
+     // alive without copying it. Even if we could deal with the slowness of a copy, 
+     // we'd still get a crash because the initial suggestion_iterator would be
+     // invalid for the copy. Could be unique_ptr in C++14 when we can move-capture
+    TRACE("At ")(current_var)(", got suggestion ")(*suggested)(" - rewriting queue\n"); 
     // Taking hint means new generator that only reveals the hint
-    suggestion_iterator = suggested.begin();
-    values_generator = [this]() -> Value
+    set<Value>::iterator suggestion_iterator = suggested->begin();
+    values_generator = [=]() mutable -> Value
     {
-        if( suggestion_iterator != suggested.end() )
+        if( suggestion_iterator != suggested->end() )
         {                     
             Value v = *suggestion_iterator;
             suggestion_iterator++;
