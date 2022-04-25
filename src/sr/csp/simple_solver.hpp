@@ -98,9 +98,6 @@ private:
         const ConstraintSet &constraints_to_test;
         
         function<Value()> values_generator;  
-#ifdef BACKJUMPING
-        ConstraintSet all_unsatisfied;     
-#endif
 
     public:
         static void DumpGSV();

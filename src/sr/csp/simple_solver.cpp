@@ -345,6 +345,11 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(current_var)("\n");
+
+#ifdef BACKJUMPING
+    ConstraintSet all_unsatisfied;     
+#endif
+
     while(1)
     {       
         Value value = values_generator();
