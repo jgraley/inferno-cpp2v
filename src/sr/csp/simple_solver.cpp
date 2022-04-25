@@ -234,7 +234,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 TRACEC("Reporting solution\n");
                 // Engine wants free assignments only, don't annoy it.
                 Assignments free_assignments = DifferenceOfSolo( assignments, 
-                                                                forced_assignments );
+                                                                 forced_assignments );
                 holder->ReportSolution( free_assignments );
                 TRACE("SS%d finished reporting solution\n");
                 --current_it;
@@ -338,7 +338,6 @@ void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value
             return Value();
         }
     };
-    suggestion_ok = true;
 }
 
 
@@ -353,8 +352,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
             break;
         assignments[current_var] = value;
         
-        bool ok, sok;
-        set<Value> s;        
+        bool ok;
         ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
               ("\nfree_variables")(solver_plan.free_variables)
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
@@ -363,10 +361,10 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         Hint new_hint;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
-        tie(ok, sok, s, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
+        tie(ok, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok, sok, s) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
+        tie(ok) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
 #endif
    
 #ifdef BACKJUMPING
@@ -414,14 +412,10 @@ SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignment
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
 #endif
-    bool suggestion_ok = false;
-    set<Value> suggested; 
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
-        bool my_matched;
-        my_matched = c->IsConsistent(assignments); 
-        if( !my_matched )
+        if( !c->IsConsistent(assignments) )
         {            
             matched = false;
 #ifdef BACKJUMPING
@@ -432,9 +426,9 @@ SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignment
         }
     } 
 #ifdef BACKJUMPING
-    return make_tuple( matched, suggestion_ok, suggested, unsatisfied );
+    return make_tuple( matched, unsatisfied );
 #else                       
-    return make_tuple( matched, suggestion_ok, suggested );
+    return make_tuple( matched );
 #endif                       
 }
 

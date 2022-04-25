@@ -101,8 +101,7 @@ private:
 #ifdef BACKJUMPING
         ConstraintSet all_unsatisfied;     
 #endif
-        bool suggestion_ok = false;
-        
+
     public:
         static void DumpGSV();
         
@@ -114,9 +113,9 @@ private:
     };
 
 #ifdef BACKJUMPING
-    typedef tuple<bool, bool, set<Value>, ConstraintSet> CCRV;
+    typedef tuple<bool, ConstraintSet> CCRV;
 #else
-    typedef tuple<bool, bool, set<Value>> CCRV;
+    typedef tuple<bool> CCRV;
 #endif
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test,
