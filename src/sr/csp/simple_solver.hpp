@@ -102,9 +102,7 @@ private:
         ConstraintSet all_unsatisfied;     
 #endif
         bool suggestion_ok = false;
-        // For the lambda...
-        set<Value> suggested; 
-
+        
     public:
         static void DumpGSV();
         
