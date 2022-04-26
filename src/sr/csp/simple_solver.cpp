@@ -10,6 +10,11 @@
 #define TRACK_BEST_ASSIGNMENT
 #define GATHER_GSV
 
+// Define this to check we don't get as far as trying to make a values generator
+// for an empty set (eg because the residual of the domain after forward-checking 
+// wa empty).
+//#define CHECK_NONEMPTY_RESIDUAL
+
 using namespace CSP;
 
 // BACKJUMPING moved to header
@@ -185,6 +190,9 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
         make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );
     TRACEC("Made selector for ")(*current_it)("\n");
 
+#ifdef BACKJUMPING
+    conflicted_count = 0;
+#endif
     while(true)
     {
         Value value;
@@ -198,8 +206,10 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
         if( !value ) // no consistent value
         {
 #ifdef BACKJUMPING
-            TRACEC("Inconsistent. Unsatisfied constraints: ")(unsatisfied)("\n");
-            set<VariableId> possibly_conflicted_vars = GetAllAffected(unsatisfied);
+            ConstraintSet suspect = plan.affected_constraints.at(*current_it); // Was: unsatisfied
+
+            TRACEC("Inconsistent. Possible conflicted constraints: ")(suspect)("\n");
+            set<VariableId> possibly_conflicted_vars = GetAllAffected(suspect);
             TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
 #endif
             bool backjump = false;
@@ -214,14 +224,21 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 TRACEC("Back to ")(*current_it)("\n");
                 
 #ifdef BACKJUMPING
-                backjump = (possibly_conflicted_vars.count(*current_it) == 0);
+                backjump = ( possibly_conflicted_vars.count(*current_it) == 0 &&
+                             conflicted_count==0 );
 #endif                
                 if( backjump )
                     TRACEC("Backjump over ")(*current_it)("\n");
             } while( backjump ); // backjump into possibly_conflicted_vars
+#ifdef BACKJUMPING
+            conflicted_count++;
+#endif
         }        
         else
         {
+#ifdef BACKJUMPING
+            conflicted_count = 0;
+#endif
             ++current_it; // try advance
             if( current_it != plan.free_variables.end() ) // new variable
             {
@@ -318,6 +335,9 @@ void SimpleSolver::ValueSelector::SetupDefaultGenerator()
 
 void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value>> suggested )
 {
+#ifdef CHECK_NONEMPTY_RESIDUAL
+    ASSERT( !suggested->empty() );
+#endif
      // Use of shared_ptr here allows the lambda to keep suggested
      // alive without copying it. Even if we could deal with the slowness of a copy, 
      // we'd still get a crash because the initial suggestion_iterator would be
@@ -349,6 +369,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #ifdef BACKJUMPING
     ConstraintSet all_unsatisfied;     
 #endif
+    int values_tried_count = 0;
 
     while(1)
     {       
@@ -357,13 +378,13 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
             break;
         assignments[current_var] = value;
         
-        bool ok;
         ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
               ("\nfree_variables")(solver_plan.free_variables)
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
               ("\ncompleted_constraints:\n")(solver_plan.completed_constraints)
               ("\ncurrent_var: ")(current_var);
-        Hint new_hint;
+              
+        bool ok;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
         tie(ok, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
@@ -371,7 +392,8 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #else
         tie(ok) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
 #endif
-   
+
+        values_tried_count++;
 #ifdef BACKJUMPING
         all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
 #endif       
@@ -386,8 +408,13 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         }
     }
     TRACEC("No (more) values found\n");
+#ifdef CHECK_NONEMPTY_RESIDUAL
+    ASSERT( values_tried_count > 0 ); // Note: could fire if domain is empty
+#endif
 #ifdef BACKJUMPING
-    ASSERT( !all_unsatisfied.empty() ); // Note: could fire if domain is empty
+#ifdef CHECK_NONEMPTY_RESIDUAL
+    ASSERT( !all_unsatisfied.empty() ); 
+#endif
     return make_pair(Value(), all_unsatisfied);
 #else
     return Value();
@@ -431,6 +458,10 @@ SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignment
         }
     } 
 #ifdef BACKJUMPING
+#ifdef CHECK_NONEMPTY_RESIDUAL
+    if( !matched )
+        ASSERT( !unsatisfied.empty() );
+#endif        
     return make_tuple( matched, unsatisfied );
 #else                       
     return make_tuple( matched );

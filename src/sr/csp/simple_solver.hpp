@@ -132,6 +132,10 @@ private:
     Assignments forced_assignments;
     Assignments assignments;
     
+#ifdef BACKJUMPING
+    int conflicted_count;
+#endif    
+    
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;
 public:
