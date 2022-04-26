@@ -40,7 +40,7 @@ public:
 
     virtual void Start( const Assignments &forces,
                         const SR::TheKnowledge *knowledge );
-    virtual void Run( ReportageObserver *holder );
+    virtual void Run( const SolutionReportFunction &solution_report_function );
 
 private:
     typedef set<shared_ptr<Constraint>> ConstraintSet;
@@ -124,7 +124,7 @@ private:
     void Dump() const;
 
     // Structural
-    ReportageObserver *holder;    
+    const SolutionReportFunction *solution_report_function;
         
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;

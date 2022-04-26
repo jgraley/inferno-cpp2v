@@ -25,8 +25,7 @@ class Solver;
 
 /** A simple back-tracking solver
  */
-class SolverHolder : private Solver::ReportageObserver,
-                     public Traceable
+class SolverHolder : public Traceable
 {
 public:
     /**

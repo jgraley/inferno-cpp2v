@@ -37,10 +37,11 @@ void SolverHolder::Start( const Assignments &forces,
     auto lambda = [&](Coroutine::push_type& sink_)
     {        
         sink = &sink_;
-        (*sink)( {} ); // Yield so we don't do "real work" until GetNextSolution()
+        (*sink)( {} ); // Yield so we don't do "real work" until GetNextSolution(), rule #393
         try
         {            
-            solver->Run( this );
+            auto lambda = ([&](const Solution &solution){ReportSolution(solution);});
+            solver->Run( (const Solver::SolutionReportFunction&)lambda );
         }
         catch(const exception& e)
         {

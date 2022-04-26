@@ -7,12 +7,12 @@
 
 #include <algorithm>
 
-#define TRACK_BEST_ASSIGNMENT
+// Gather stats on the successiness of simple forward checking
 #define GATHER_GSV
 
 // Define this to check we don't get as far as trying to make a values generator
 // for an empty set (eg because the residual of the domain after forward-checking 
-// wa empty).
+// was empty).
 //#define CHECK_NONEMPTY_RESIDUAL
 
 using namespace CSP;
@@ -117,7 +117,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints,
                             const list<VariableId> &free_variables, 
                             const list<VariableId> &forced_variables ) :
     plan( this, constraints, free_variables, forced_variables ),
-    holder(nullptr)
+    solution_report_function(nullptr)
 {
 }
                         
@@ -143,11 +143,11 @@ void SimpleSolver::Start( const Assignments &forces,
 }
 
     
-void SimpleSolver::Run( ReportageObserver *holder_ )
+void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_ )
 {
-    ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
-    ScopedAssign<ReportageObserver *> sa(holder, holder_);
-    ASSERT( holder );
+    ASSERT(solution_report_function==nullptr)("Something bad like overlapped Run() calls happened.");
+    ScopedAssign<const SolutionReportFunction*> sa2(solution_report_function, &solution_report_function_);
+    ASSERT( solution_report_function );
 
     // Do a test with the fully forced constraints (i.e. all vars are forced) with no assignments 
     // (=free variables), so fully forced constraints will be tested. From here on we can test only 
@@ -166,7 +166,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     {
         TRACE("Simple solver matched on forced variables and no frees\n");  
         // No free vars, so we've got a solution
-        holder->ReportSolution( Assignments{} );
+        (*solution_report_function)( Assignments{} );
     }
     else
     {                
@@ -252,7 +252,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 // Engine wants free assignments only, don't annoy it.
                 Assignments free_assignments = DifferenceOfSolo( assignments, 
                                                                  forced_assignments );
-                holder->ReportSolution( free_assignments );
+                (*solution_report_function)( free_assignments );
                 TRACE("SS%d finished reporting solution\n");
                 --current_it;
                 TRACEC("Back to ")(*current_it)("\n");                
@@ -371,11 +371,8 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #endif
     int values_tried_count = 0;
 
-    while(1)
+    while( Value value = values_generator() )
     {       
-        Value value = values_generator();
-        if( !value )
-            break;
         assignments[current_var] = value;
         
         ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )

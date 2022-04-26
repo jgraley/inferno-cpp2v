@@ -6,6 +6,8 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
+#include <functional>
+
 namespace SR
 {
 class TheKnowledge;
@@ -30,20 +32,9 @@ class Solver : public Traceable,
 public:
 
     /**
-     * Interface presented to Solver objects for discovered solution reportage.
+     * Function supplied to Solver objects for discovered solution reportage.
      */    
-    class ReportageObserver
-    {
-    public:
-        /**
-         * Report that a single solution has been found. 
-         * 
-         * @param values [in] values that solve the CSP, organised into a list for each constraint. Each list is ordered as per `Constraint::GetVariables()`.
-         * 
-         * @param side_info [in] side-information as required by the `AndRuleEngine` in order to make use of the solution.
-         */
-        virtual void ReportSolution( const Solution &solution ) = 0;
-    }; 
+    typedef function<void(const Solution &solution)> SolutionReportFunction;
     
     /** Create a solver object.
      * 
@@ -72,7 +63,7 @@ public:
      * 
      * @param holder [inout] solutions reported to this object via `ReportSolution()`
      */
-    virtual void Run( ReportageObserver *holder ) = 0;
+    virtual void Run( const SolutionReportFunction &solution_report_function ) = 0;
 
     string GetTrace() const;
 
