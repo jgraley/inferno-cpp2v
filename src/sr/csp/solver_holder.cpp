@@ -36,12 +36,17 @@ void SolverHolder::Start( const Assignments &forces,
     
     auto lambda = [&](Coroutine::push_type& sink_)
     {        
+        auto solution_report_lambda = [&](const Solution &solution)
+        { 
+            ReportSolution(solution); 
+        };
+
         sink = &sink_;
         (*sink)( {} ); // Yield so we don't do "real work" until GetNextSolution(), rule #393
+        
         try
         {            
-            auto lambda = ([&](const Solution &solution){ReportSolution(solution);});
-            solver->Run( (const Solver::SolutionReportFunction&)lambda );
+            solver->Run( solution_report_lambda );
         }
         catch(const exception& e)
         {

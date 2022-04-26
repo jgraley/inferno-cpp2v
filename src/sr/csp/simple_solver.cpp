@@ -117,7 +117,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints,
                             const list<VariableId> &free_variables, 
                             const list<VariableId> &forced_variables ) :
     plan( this, constraints, free_variables, forced_variables ),
-    solution_report_function(nullptr)
+    solution_report_function()
 {
 }
                         
@@ -145,8 +145,8 @@ void SimpleSolver::Start( const Assignments &forces,
     
 void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_ )
 {
-    ASSERT(solution_report_function==nullptr)("Something bad like overlapped Run() calls happened.");
-    ScopedAssign<const SolutionReportFunction*> sa2(solution_report_function, &solution_report_function_);
+    ASSERT( !solution_report_function )("Something bad like overlapped Run() calls happened.");
+    ScopedAssign<SolutionReportFunction> sa2(solution_report_function, solution_report_function_);
     ASSERT( solution_report_function );
 
     // Do a test with the fully forced constraints (i.e. all vars are forced) with no assignments 
@@ -166,7 +166,7 @@ void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_ 
     {
         TRACE("Simple solver matched on forced variables and no frees\n");  
         // No free vars, so we've got a solution
-        (*solution_report_function)( Assignments{} );
+        solution_report_function( Assignments{} );
     }
     else
     {                
@@ -252,7 +252,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 // Engine wants free assignments only, don't annoy it.
                 Assignments free_assignments = DifferenceOfSolo( assignments, 
                                                                  forced_assignments );
-                (*solution_report_function)( free_assignments );
+                solution_report_function( free_assignments );
                 TRACE("SS%d finished reporting solution\n");
                 --current_it;
                 TRACEC("Back to ")(*current_it)("\n");                

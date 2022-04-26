@@ -124,7 +124,7 @@ private:
     void Dump() const;
 
     // Structural
-    const SolutionReportFunction *solution_report_function;
+    SolutionReportFunction solution_report_function;
         
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
