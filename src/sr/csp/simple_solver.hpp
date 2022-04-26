@@ -115,8 +115,7 @@ private:
     typedef tuple<bool> CCRV;
 #endif
     CCRV ConsistencyCheck( const Assignments &assigns,
-                           const ConstraintSet &to_test,
-                           const VariableId &current_var ) const;
+                           const ConstraintSet &to_test ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;

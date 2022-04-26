@@ -153,7 +153,7 @@ void SimpleSolver::Run( ReportageObserver *holder_ )
     // (=free variables), so fully forced constraints will be tested. From here on we can test only 
     // constraints affected by changed assignments.
     TRACE("testing\n");
-    auto t = ConsistencyCheck( assignments, plan.fully_forced_constraint_set, VariableId() );
+    auto t = ConsistencyCheck( assignments, plan.fully_forced_constraint_set );
     TRACE("tested\n");
     
     if( !get<0>(t) )
@@ -387,10 +387,10 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
         bool ok;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
-        tie(ok, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
+        tie(ok, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test );        
         ASSERT( ok || !unsatisfied.empty() );
 #else
-        tie(ok) = solver.ConsistencyCheck( assignments, constraints_to_test, current_var );        
+        tie(ok) = solver.ConsistencyCheck( assignments, constraints_to_test );        
 #endif
 
         values_tried_count++;
@@ -438,8 +438,7 @@ uint64_t SimpleSolver::ValueSelector::gsv_tot = 0;
 
 
 SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignments,
-                                                   const ConstraintSet &to_test,
-                                                   const VariableId &current_var ) const 
+                                                   const ConstraintSet &to_test ) const 
 {
 #ifdef BACKJUMPING
     ConstraintSet unsatisfied;
