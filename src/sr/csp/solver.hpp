@@ -59,9 +59,9 @@ public:
                       
     /**
      * Run the solver to exhaustion (i.e. it will discover all the
-     * solutions). Solutions will be reported back to the supplied holder class.
+     * solutions). Solutions will be reported using the supplied function.
      * 
-     * @param holder [inout] solutions reported to this object via `ReportSolution()`
+     * @param solution_report_function [inout] solutions reported by calling this.
      */
     virtual void Run( const SolutionReportFunction &solution_report_function ) = 0;
 
