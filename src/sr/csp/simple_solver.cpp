@@ -235,6 +235,12 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 if( backjump )
                     TRACEC("Backjump over ")(*current_it)("\n");
             } while( backjump ); // backjump into possibly_conflicted_vars
+            
+            // Current assignments are belived to be a no-good set so reject
+            // them (for a test harness to check).
+            if( rejection_report_function )
+                rejection_report_function( assignments );
+            
 #ifdef BACKJUMPING
             conflicted_count++;
 #endif
