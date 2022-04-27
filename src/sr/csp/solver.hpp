@@ -36,6 +36,11 @@ public:
      */    
     typedef function<void(const Solution &solution)> SolutionReportFunction;
     
+    /**
+     * Function supplied to Solver objects for rejected partial assignment reportage.
+     */    
+    typedef function<void(const Assignment &solution)> RejectionReportFunction;
+    
     /** Create a solver object.
      * 
      * It is anticipated that implementations will accept a 
@@ -61,9 +66,12 @@ public:
      * Run the solver to exhaustion (i.e. it will discover all the
      * solutions). Solutions will be reported using the supplied function.
      * 
-     * @param solution_report_function [inout] solutions reported by calling this.
+     * @param solution_report_function [inout] solutions reported by calling this (required).
+     * 
+     * @param rejection_report_function [inout] rejections reported by calling this (optional).
      */
-    virtual void Run( const SolutionReportFunction &solution_report_function ) = 0;
+    virtual void Run( const SolutionReportFunction &solution_report_function,
+                      const RejectionReportFunction &rejection_report_function ) = 0;
 
     string GetTrace() const;
 

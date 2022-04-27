@@ -46,7 +46,7 @@ void SolverHolder::Start( const Assignments &forces,
         
         try
         {            
-            solver->Run( solution_report_lambda );
+            solver->Run( solution_report_lambda, Solver::RejectionReportFunction() );
         }
         catch(const exception& e)
         {

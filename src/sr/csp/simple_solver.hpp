@@ -40,7 +40,8 @@ public:
 
     virtual void Start( const Assignments &forces,
                         const SR::TheKnowledge *knowledge );
-    virtual void Run( const SolutionReportFunction &solution_report_function );
+    virtual void Run( const SolutionReportFunction &solution_report_function,
+                      const RejectionReportFunction &rejection_report_function );
 
 private:
     typedef set<shared_ptr<Constraint>> ConstraintSet;
@@ -125,7 +126,8 @@ private:
 
     // Structural
     SolutionReportFunction solution_report_function;
-        
+    RejectionReportFunction rejection_report_function;
+    
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
     Assignments forced_assignments;

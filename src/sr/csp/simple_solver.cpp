@@ -117,7 +117,8 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints,
                             const list<VariableId> &free_variables, 
                             const list<VariableId> &forced_variables ) :
     plan( this, constraints, free_variables, forced_variables ),
-    solution_report_function()
+    solution_report_function(),
+    rejection_report_function()
 {
 }
                         
@@ -143,11 +144,15 @@ void SimpleSolver::Start( const Assignments &forces,
 }
 
     
-void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_ )
+void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_,
+                        const RejectionReportFunction &rejection_report_function_ )
 {
     ASSERT( !solution_report_function )("Something bad like overlapped Run() calls happened.");
-    ScopedAssign<SolutionReportFunction> sa2(solution_report_function, solution_report_function_);
+    ASSERT( !rejection_report_function )("Something bad like overlapped Run() calls happened.");
+    ScopedAssign<SolutionReportFunction> sa1(solution_report_function, solution_report_function_);
+    ScopedAssign<RejectionReportFunction> sa2(rejection_report_function, rejection_report_function_);
     ASSERT( solution_report_function );
+    // Don't assert on rejection_report_function - it's optional
 
     // Do a test with the fully forced constraints (i.e. all vars are forced) with no assignments 
     // (=free variables), so fully forced constraints will be tested. From here on we can test only 
