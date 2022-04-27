@@ -183,17 +183,17 @@ void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_,
 }
 
 
-void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
+void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
 {     
     TRACE("SS%d solving...\n");
     TRACEC("Free vars ")(plan.free_variables)("\n");
-    TRACEC("Starting at ")(*current_it)("\n");
+    TRACEC("Starting at ")(*current_var_it)("\n");
     
     // Selector for first variable
     map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     value_selectors[plan.free_variables.front()] = 
-        make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );
-    TRACEC("Made selector for ")(*current_it)("\n");
+        make_shared<ValueSelector>( plan, *this, knowledge, assignments, *current_var_it );
+    TRACEC("Made selector for ")(*current_var_it)("\n");
 
 #ifdef BACKJUMPING
     conflicted_count = 0;
@@ -203,15 +203,15 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
         Value value;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;
-        tie(value, unsatisfied) = value_selectors.at(*current_it)->SelectNextValue();        
+        tie(value, unsatisfied) = value_selectors.at(*current_var_it)->SelectNextValue();        
 #else        
-        value = value_selectors.at(*current_it)->SelectNextValue();        
+        value = value_selectors.at(*current_var_it)->SelectNextValue();        
 #endif
 
         if( !value ) // no consistent value
         {
 #ifdef BACKJUMPING
-            ConstraintSet suspect = plan.affected_constraints.at(*current_it); // Was: unsatisfied
+            ConstraintSet suspect = plan.affected_constraints.at(*current_var_it); // Was: unsatisfied
 
             TRACEC("Inconsistent. Possible conflicted constraints: ")(suspect)("\n");
             set<VariableId> possibly_conflicted_vars = GetAllAffected(suspect);
@@ -220,20 +220,20 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
             bool backjump = false;
             do
             {
-                value_selectors.erase(*current_it);            
-                TRACEC("Killed selector for ")(*current_it)("\n");
+                value_selectors.erase(*current_var_it);            
+                TRACEC("Killed selector for ")(*current_var_it)("\n");
                 
-                if( current_it == plan.free_variables.begin() )
+                if( current_var_it == plan.free_variables.begin() )
                     goto CEASE; // no more solutions
-                --current_it; 
-                TRACEC("Back to ")(*current_it)("\n");
+                --current_var_it; 
+                TRACEC("Back to ")(*current_var_it)("\n");
                 
 #ifdef BACKJUMPING
-                backjump = ( possibly_conflicted_vars.count(*current_it) == 0 &&
+                backjump = ( possibly_conflicted_vars.count(*current_var_it) == 0 &&
                              conflicted_count==0 );
 #endif                
                 if( backjump )
-                    TRACEC("Backjump over ")(*current_it)("\n");
+                    TRACEC("Backjump over ")(*current_var_it)("\n");
             } while( backjump ); // backjump into possibly_conflicted_vars
             
             // Current assignments are belived to be a no-good set so reject
@@ -250,12 +250,12 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
 #ifdef BACKJUMPING
             conflicted_count = 0;
 #endif
-            ++current_it; // try advance
-            if( current_it != plan.free_variables.end() ) // new variable
+            ++current_var_it; // try advance
+            if( current_var_it != plan.free_variables.end() ) // new variable
             {
-                value_selectors[*current_it] = 
-                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
-                TRACEC("Advanced to and made selector for ")(*current_it)("\n");
+                value_selectors[*current_var_it] = 
+                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, *current_var_it );     
+                TRACEC("Advanced to and made selector for ")(*current_var_it)("\n");
             }
             else // complete
             {
@@ -265,8 +265,8 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                                                                  forced_assignments );
                 solution_report_function( free_assignments );
                 TRACE("SS%d finished reporting solution\n");
-                --current_it;
-                TRACEC("Back to ")(*current_it)("\n");                
+                --current_var_it;
+                TRACEC("Back to ")(*current_var_it)("\n");                
             }                    
         }
     }        
@@ -279,24 +279,23 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
                                             const SimpleSolver &solver_,
                                             const SR::TheKnowledge *knowledge_,
                                             Assignments &assignments_,
-                                            list<VariableId>::const_iterator current_it_ ) :
+                                            VariableId var ) :
     solver_plan( solver_plan_ ),
     solver( solver_ ),
     knowledge( knowledge_ ),
     assignments( assignments_ ),
-    current_it( current_it_ ),
-    current_var( *current_it ),
-    constraints_to_query( solver_plan.affected_constraints.at(current_var) ),
-    constraints_to_test( solver_plan.completed_constraints.at(current_var) )
+    my_var( var ),
+    constraints_to_query( solver_plan.affected_constraints.at(my_var) ),
+    constraints_to_test( solver_plan.completed_constraints.at(my_var) )
 {
-    //ASSERT( current_it != solver_plan.free_variables.end() );
-    ASSERT( assignments.count(current_var) == 0 );
+    //ASSERT( current_var_it != solver_plan.free_variables.end() );
+    ASSERT( assignments.count(my_var) == 0 );
     INDENT("V");
        
     list<shared_ptr<SYM::SymbolSetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_query )
     {                               
-        shared_ptr<SYM::SymbolSetResult> r = c->GetSuggestedValues( assignments, current_var );
+        shared_ptr<SYM::SymbolSetResult> r = c->GetSuggestedValues( assignments, my_var );
         ASSERT( r );
         rl.push_back(r);
     }
@@ -325,7 +324,7 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
        
 SimpleSolver::ValueSelector::~ValueSelector()
 {
-    assignments.erase(current_var);
+    assignments.erase(my_var);
 }
 
 
@@ -353,7 +352,7 @@ void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value
      // alive without copying it. Even if we could deal with the slowness of a copy, 
      // we'd still get a crash because the initial suggestion_iterator would be
      // invalid for the copy. Could be unique_ptr in C++14 when we can move-capture
-    TRACE("At ")(current_var)(", got suggestion ")(*suggested)(" - rewriting queue\n"); 
+    TRACE("At ")(my_var)(", got suggestion ")(*suggested)(" - rewriting queue\n"); 
     // Taking hint means new generator that only reveals the hint
     set<Value>::iterator suggestion_iterator = suggested->begin();
     values_generator = [=]() mutable -> Value
@@ -375,7 +374,7 @@ void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value
 SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::SelectNextValue()
 {
     INDENT("N");    
-    TRACE("Finding value for variable ")(current_var)("\n");
+    TRACE("Finding value for variable ")(my_var)("\n");
 
 #ifdef BACKJUMPING
     ConstraintSet all_unsatisfied;     
@@ -384,13 +383,13 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 
     while( Value value = values_generator() )
     {       
-        assignments[current_var] = value;
+        assignments[my_var] = value;
         
-        ASSERT( solver_plan.completed_constraints.count(current_var) == 1 )
+        ASSERT( solver_plan.completed_constraints.count(my_var) == 1 )
               ("\nfree_variables")(solver_plan.free_variables)
               ("\naffected_constraints:\n")(solver_plan.affected_constraints)
               ("\ncompleted_constraints:\n")(solver_plan.completed_constraints)
-              ("\ncurrent_var: ")(current_var);
+              ("\ncurrent_var: ")(my_var);
               
         bool ok;
 #ifdef BACKJUMPING

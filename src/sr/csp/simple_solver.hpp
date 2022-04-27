@@ -68,7 +68,7 @@ private:
         map<VariableId, ConstraintSet> completed_constraints; // depends on var ordering
     } plan;
 
-    void Solve( list<VariableId>::const_iterator current_it );
+    void Solve( list<VariableId>::const_iterator current_var_it );
 
     class ValueSelector : public Traceable
     {
@@ -77,7 +77,7 @@ private:
                        const SimpleSolver &solver,
                        const SR::TheKnowledge *knowledge,
                        Assignments &assignments,
-                       list<VariableId>::const_iterator current_it );
+                       VariableId var );
         ~ValueSelector();
         void SetupDefaultGenerator();
         void SetupSuggestionGenerator( shared_ptr<set<Value>> s );
@@ -93,8 +93,7 @@ private:
         const SimpleSolver &solver;
         const SR::TheKnowledge * const knowledge;
         Assignments &assignments;
-        const list<VariableId>::const_iterator current_it;
-        const VariableId current_var;
+        const VariableId my_var;
         const ConstraintSet &constraints_to_query;
         const ConstraintSet &constraints_to_test;
         
