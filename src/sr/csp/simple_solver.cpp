@@ -217,12 +217,12 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
             set<VariableId> possibly_conflicted_vars = GetAllAffected(suspect);
             TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
 #endif
-            value_selectors.erase(*current_it);
-            TRACEC("Killed selector for ")(*current_it)("\n");
-
             bool backjump = false;
             do
             {
+                value_selectors.erase(*current_it);            
+                TRACEC("Killed selector for ")(*current_it)("\n");
+                
                 if( current_it == plan.free_variables.begin() )
                     goto CEASE; // no more solutions
                 --current_it; 
@@ -231,9 +231,9 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
 #ifdef BACKJUMPING
                 backjump = ( possibly_conflicted_vars.count(*current_it) == 0 &&
                              conflicted_count==0 );
+#endif                
                 if( backjump )
                     TRACEC("Backjump over ")(*current_it)("\n");
-#endif                
             } while( backjump ); // backjump into possibly_conflicted_vars
 #ifdef BACKJUMPING
             conflicted_count++;
@@ -245,7 +245,13 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
             conflicted_count = 0;
 #endif
             ++current_it; // try advance
-            if( current_it == plan.free_variables.end() ) // complete
+            if( current_it != plan.free_variables.end() ) // new variable
+            {
+                value_selectors[*current_it] = 
+                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
+                TRACEC("Advanced to and made selector for ")(*current_it)("\n");
+            }
+            else // complete
             {
                 TRACEC("Reporting solution\n");
                 // Engine wants free assignments only, don't annoy it.
@@ -256,18 +262,6 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 --current_it;
                 TRACEC("Back to ")(*current_it)("\n");                
             }                    
-#ifdef BACKJUMPING
-            else if( value_selectors.count(*current_it) > 0 )
-            {
-                // No action, returning to a var we jumped earlier, it's search does not need to be reset
-            }
-#endif
-            else // new variable
-            {
-                value_selectors[*current_it] = 
-                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
-                TRACEC("Advanced to and made selector for ")(*current_it)("\n");
-            }
         }
     }        
     CEASE:
