@@ -245,13 +245,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
             conflicted_count = 0;
 #endif
             ++current_it; // try advance
-            if( current_it != plan.free_variables.end() ) // new variable
-            {
-                value_selectors[*current_it] = 
-                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
-                TRACEC("Advanced to and made selector for ")(*current_it)("\n");
-            }
-            else // complete
+            if( current_it == plan.free_variables.end() ) // complete
             {
                 TRACEC("Reporting solution\n");
                 // Engine wants free assignments only, don't annoy it.
@@ -262,6 +256,18 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_it )
                 --current_it;
                 TRACEC("Back to ")(*current_it)("\n");                
             }                    
+#ifdef BACKJUMPING
+            else if( value_selectors.count(*current_it) > 0 )
+            {
+                // No action, returning to a var we jumped earlier, it's search does not need to be reset
+            }
+#endif
+            else // new variable
+            {
+                value_selectors[*current_it] = 
+                    make_shared<ValueSelector>( plan, *this, knowledge, assignments, current_it );     
+                TRACEC("Advanced to and made selector for ")(*current_it)("\n");
+            }
         }
     }        
     CEASE:
