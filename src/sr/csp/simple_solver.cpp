@@ -371,7 +371,13 @@ void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value
 }
 
 
-SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::SelectNextValue()
+Value SimpleSolver::ValueSelector::GetNextValue()
+{
+    return values_generator();
+}
+
+
+SimpleSolver::SelectNextValueRV SimpleSolver::ValueSelector::SelectNextValue()
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(my_var)("\n");
@@ -381,7 +387,7 @@ SimpleSolver::ValueSelector::SelectNextValueRV SimpleSolver::ValueSelector::Sele
 #endif
     int values_tried_count = 0;
 
-    while( Value value = values_generator() )
+    while( Value value = GetNextValue() )
     {       
         assignments[my_var] = value;
         

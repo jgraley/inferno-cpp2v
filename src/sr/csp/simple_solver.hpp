@@ -24,6 +24,14 @@ class SolverHolder;
 class SimpleSolver : public Solver
 {
 public:
+#ifdef BACKJUMPING
+    typedef pair<Value, ConstraintSet> SelectNextValueRV;
+    typedef tuple<bool, ConstraintSet> CCRV;
+#else
+    typedef Value SelectNextValueRV;
+    typedef tuple<bool> CCRV;
+#endif
+
     /**
      * Create a simple backtracking CSP solver. We require constraints at construct time and 
      * can only solve the problme implied by them. Optionally, for this solver class only, 
@@ -81,11 +89,7 @@ private:
         ~ValueSelector();
         void SetupDefaultGenerator();
         void SetupSuggestionGenerator( shared_ptr<set<Value>> s );
-#ifdef BACKJUMPING
-        typedef pair<Value, ConstraintSet> SelectNextValueRV;
-#else
-        typedef Value SelectNextValueRV;
-#endif
+        Value GetNextValue();
         SelectNextValueRV SelectNextValue();
         
     private:
@@ -109,11 +113,6 @@ private:
         static uint64_t gsv_tot;    
     };
 
-#ifdef BACKJUMPING
-    typedef tuple<bool, ConstraintSet> CCRV;
-#else
-    typedef tuple<bool> CCRV;
-#endif
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test ) const;
     void ShowBestAssignment();
