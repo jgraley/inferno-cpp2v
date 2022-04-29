@@ -77,6 +77,7 @@ private:
     } plan;
 
     void Solve( list<VariableId>::const_iterator current_var_it );
+    SelectNextValueRV SelectNextValue( VariableId my_var );
 
     class ValueSelector : public Traceable
     {
@@ -90,7 +91,6 @@ private:
         void SetupDefaultGenerator();
         void SetupSuggestionGenerator( shared_ptr<set<Value>> s );
         Value GetNextValue();
-        SelectNextValueRV SelectNextValue();
         
     private:
         const Plan &solver_plan;
@@ -130,6 +130,7 @@ private:
     const SR::TheKnowledge *knowledge;
     Assignments forced_assignments;
     Assignments assignments;
+    map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     
 #ifdef BACKJUMPING
     int conflicted_count;

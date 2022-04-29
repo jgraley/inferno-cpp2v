@@ -189,8 +189,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
     TRACEC("Free vars ")(plan.free_variables)("\n");
     TRACEC("Starting at ")(*current_var_it)("\n");
     
-    // Selector for first variable
-    map< VariableId, shared_ptr<ValueSelector> > value_selectors;
+    // Selector for first variable    
     value_selectors[plan.free_variables.front()] = 
         make_shared<ValueSelector>( plan, *this, knowledge, assignments, *current_var_it );
     TRACEC("Made selector for ")(*current_var_it)("\n");
@@ -203,9 +202,9 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
         Value value;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;
-        tie(value, unsatisfied) = value_selectors.at(*current_var_it)->SelectNextValue();        
+        tie(value, unsatisfied) = SelectNextValue(*current_var_it);        
 #else        
-        value = value_selectors.at(*current_var_it)->SelectNextValue();        
+        value = SelectNextValue(*current_var_it);        
 #endif
 
         if( !value ) // no consistent value
@@ -272,6 +271,66 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
     }        
     CEASE:
     TRACEC("Finished solving\n");
+}
+
+
+SimpleSolver::SelectNextValueRV SimpleSolver::SelectNextValue( VariableId my_var )
+{
+    INDENT("N");    
+    TRACE("Finding value for variable ")(my_var)("\n");
+
+    const ConstraintSet &constraints_to_test = plan.completed_constraints.at(my_var);
+
+#ifdef BACKJUMPING
+    ConstraintSet all_unsatisfied;     
+#endif
+    int values_tried_count = 0;
+
+    while( Value value = value_selectors.at(my_var)->GetNextValue() )
+    {       
+        assignments[my_var] = value;
+        
+        ASSERT( plan.completed_constraints.count(my_var) == 1 )
+              ("\nfree_variables")(plan.free_variables)
+              ("\naffected_constraints:\n")(plan.affected_constraints)
+              ("\ncompleted_constraints:\n")(plan.completed_constraints)
+              ("\ncurrent_var: ")(my_var);
+              
+        bool ok;
+#ifdef BACKJUMPING
+        ConstraintSet unsatisfied;     
+        tie(ok, unsatisfied) = ConsistencyCheck( assignments, constraints_to_test );        
+        ASSERT( ok || !unsatisfied.empty() );
+#else
+        tie(ok) = ConsistencyCheck( assignments, constraints_to_test );        
+#endif
+
+        values_tried_count++;
+#ifdef BACKJUMPING
+        all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
+#endif       
+        if( ok )
+        {
+            TRACEC("Value is ")(value)("\n");
+#ifdef BACKJUMPING
+            return make_pair(value, all_unsatisfied);
+#else
+            return value;
+#endif
+        }
+    }
+    TRACEC("No (more) values found\n");
+#ifdef CHECK_NONEMPTY_RESIDUAL
+    ASSERT( values_tried_count > 0 ); // Note: could fire if domain is empty
+#endif
+#ifdef BACKJUMPING
+#ifdef CHECK_NONEMPTY_RESIDUAL
+    ASSERT( !all_unsatisfied.empty() ); 
+#endif
+    return make_pair(Value(), all_unsatisfied);
+#else
+    return Value();
+#endif
 }
 
 
@@ -373,65 +432,8 @@ void SimpleSolver::ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value
 
 Value SimpleSolver::ValueSelector::GetNextValue()
 {
+    // Use the lambda
     return values_generator();
-}
-
-
-SimpleSolver::SelectNextValueRV SimpleSolver::ValueSelector::SelectNextValue()
-{
-    INDENT("N");    
-    TRACE("Finding value for variable ")(my_var)("\n");
-
-#ifdef BACKJUMPING
-    ConstraintSet all_unsatisfied;     
-#endif
-    int values_tried_count = 0;
-
-    while( Value value = GetNextValue() )
-    {       
-        assignments[my_var] = value;
-        
-        ASSERT( solver_plan.completed_constraints.count(my_var) == 1 )
-              ("\nfree_variables")(solver_plan.free_variables)
-              ("\naffected_constraints:\n")(solver_plan.affected_constraints)
-              ("\ncompleted_constraints:\n")(solver_plan.completed_constraints)
-              ("\ncurrent_var: ")(my_var);
-              
-        bool ok;
-#ifdef BACKJUMPING
-        ConstraintSet unsatisfied;     
-        tie(ok, unsatisfied) = solver.ConsistencyCheck( assignments, constraints_to_test );        
-        ASSERT( ok || !unsatisfied.empty() );
-#else
-        tie(ok) = solver.ConsistencyCheck( assignments, constraints_to_test );        
-#endif
-
-        values_tried_count++;
-#ifdef BACKJUMPING
-        all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
-#endif       
-        if( ok )
-        {
-            TRACEC("Value is ")(value)("\n");
-#ifdef BACKJUMPING
-            return make_pair(value, all_unsatisfied);
-#else
-            return value;
-#endif
-        }
-    }
-    TRACEC("No (more) values found\n");
-#ifdef CHECK_NONEMPTY_RESIDUAL
-    ASSERT( values_tried_count > 0 ); // Note: could fire if domain is empty
-#endif
-#ifdef BACKJUMPING
-#ifdef CHECK_NONEMPTY_RESIDUAL
-    ASSERT( !all_unsatisfied.empty() ); 
-#endif
-    return make_pair(Value(), all_unsatisfied);
-#else
-    return Value();
-#endif
 }
 
 
