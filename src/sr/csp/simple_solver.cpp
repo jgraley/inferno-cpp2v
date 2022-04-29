@@ -202,9 +202,9 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
         Value value;
 #ifdef BACKJUMPING
         ConstraintSet unsatisfied;
-        tie(value, unsatisfied) = SelectNextValue(*current_var_it);        
+        tie(value, unsatisfied) = TryFindNextConsistentValue(*current_var_it);        
 #else        
-        value = SelectNextValue(*current_var_it);        
+        value = TryFindNextConsistentValue(*current_var_it);        
 #endif
 
         if( !value ) // no consistent value
@@ -274,7 +274,7 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
 }
 
 
-SimpleSolver::SelectNextValueRV SimpleSolver::SelectNextValue( VariableId my_var )
+SimpleSolver::SelectNextValueRV SimpleSolver::TryFindNextConsistentValue( VariableId my_var )
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(my_var)("\n");
@@ -340,12 +340,10 @@ SimpleSolver::ValueSelector::ValueSelector( const Plan &solver_plan_,
                                             Assignments &assignments_,
                                             VariableId var ) :
     solver_plan( solver_plan_ ),
-    solver( solver_ ),
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     my_var( var ),
-    constraints_to_query( solver_plan.affected_constraints.at(my_var) ),
-    constraints_to_test( solver_plan.completed_constraints.at(my_var) )
+    constraints_to_query( solver_plan.affected_constraints.at(my_var) )
 {
     //ASSERT( current_var_it != solver_plan.free_variables.end() );
     ASSERT( assignments.count(my_var) == 0 );

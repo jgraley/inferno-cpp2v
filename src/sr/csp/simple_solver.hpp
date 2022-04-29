@@ -77,7 +77,7 @@ private:
     } plan;
 
     void Solve( list<VariableId>::const_iterator current_var_it );
-    SelectNextValueRV SelectNextValue( VariableId my_var );
+    SelectNextValueRV TryFindNextConsistentValue( VariableId my_var );
 
     class ValueSelector : public Traceable
     {
@@ -94,12 +94,10 @@ private:
         
     private:
         const Plan &solver_plan;
-        const SimpleSolver &solver;
         const SR::TheKnowledge * const knowledge;
         Assignments &assignments;
         const VariableId my_var;
         const ConstraintSet &constraints_to_query;
-        const ConstraintSet &constraints_to_test;
         
         function<Value()> values_generator;  
 
