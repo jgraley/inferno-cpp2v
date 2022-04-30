@@ -1,4 +1,4 @@
-#include "simple_solver.hpp"
+#include "reference_solver.hpp"
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"
@@ -19,7 +19,7 @@ using namespace CSP;
 
 // BACKJUMPING moved to header
 
-SimpleSolver::Plan::Plan( SimpleSolver *algo_,
+ReferenceSolver::Plan::Plan( ReferenceSolver *algo_,
                           const list< shared_ptr<Constraint> > &constraints_, 
                           const list<VariableId> &free_variables_, 
                           const list<VariableId> &forced_variables_ ) :
@@ -32,7 +32,7 @@ SimpleSolver::Plan::Plan( SimpleSolver *algo_,
 } 
 
 
-void SimpleSolver::Plan::DeduceVariables()
+void ReferenceSolver::Plan::DeduceVariables()
 {   
     set<VariableId> free_variables_set;
     completed_constraints.clear();
@@ -107,13 +107,13 @@ void SimpleSolver::Plan::DeduceVariables()
 }
 
 
-string SimpleSolver::Plan::GetTrace() const 
+string ReferenceSolver::Plan::GetTrace() const 
 {
     return algo->GetName() + ".plan";
 }
 
 
-SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
+ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
                             const list<VariableId> &free_variables, 
                             const list<VariableId> &forced_variables ) :
     plan( this, constraints, free_variables, forced_variables ),
@@ -123,7 +123,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints,
 }
                         
 
-void SimpleSolver::Start( const Assignments &forces,
+void ReferenceSolver::Start( const Assignments &forces,
                           const SR::TheKnowledge *knowledge_ )
 {
     TRACE("Simple solver begins\n");
@@ -144,7 +144,7 @@ void SimpleSolver::Start( const Assignments &forces,
 }
 
     
-void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_,
+void ReferenceSolver::Run( const SolutionReportFunction &solution_report_function_,
                         const RejectionReportFunction &rejection_report_function_ )
 {
     ASSERT( !solution_report_function )("Something bad like overlapped Run() calls happened.");
@@ -164,6 +164,10 @@ void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_,
     if( !get<0>(t) )
     {
         TRACE("Simple solver mismatched on forced variables only\n");
+        // Current assignments are believed to be a no-good set so reject
+        // them (for a test harness to check).
+        if( rejection_report_function )
+            rejection_report_function( Assignments{} );
         return; // We failed with no assignments, so we cannot match - no solutions will be reported
     }
     
@@ -176,14 +180,15 @@ void SimpleSolver::Run( const SolutionReportFunction &solution_report_function_,
     else
     {                
         TRACE("Simple solver matched on forced variables; solving for frees\n");  
-        Solve( plan.free_variables.begin() );    
+        current_var_it = plan.free_variables.begin(); 
+        Solve();    
     }
 
     TRACE("Simple solver ends\n");    
 }
 
 
-void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
+void ReferenceSolver::Solve()
 {     
     TRACE("SS%d solving...\n");
     TRACEC("Free vars ")(plan.free_variables)("\n");
@@ -200,73 +205,24 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
     while(true)
     {
         Value value;
-#ifdef BACKJUMPING
         ConstraintSet unsatisfied;
         tie(value, unsatisfied) = TryFindNextConsistentValue(*current_var_it);        
-#else        
-        value = TryFindNextConsistentValue(*current_var_it);        
-#endif
 
         if( !value ) // no consistent value
         {
-#ifdef BACKJUMPING
-            ConstraintSet suspect = plan.affected_constraints.at(*current_var_it); // Was: unsatisfied
-
-            TRACEC("Inconsistent. Possible conflicted constraints: ")(suspect)("\n");
-            set<VariableId> possibly_conflicted_vars = GetAllAffected(suspect);
-            TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
-#endif
-            bool backjump = false;
-            do
-            {
-                value_selectors.erase(*current_var_it);            
-                TRACEC("Killed selector for ")(*current_var_it)("\n");
-                
-                if( current_var_it == plan.free_variables.begin() )
-                    goto CEASE; // no more solutions
-                --current_var_it; 
-                TRACEC("Back to ")(*current_var_it)("\n");
-                
-#ifdef BACKJUMPING
-                backjump = ( possibly_conflicted_vars.count(*current_var_it) == 0 &&
-                             conflicted_count==0 );
-#endif                
-                if( backjump )
-                    TRACEC("Backjump over ")(*current_var_it)("\n");
-            } while( backjump ); // backjump into possibly_conflicted_vars
-            
-            // Current assignments are belived to be a no-good set so reject
+            bool cease = AssignUnsuccessful();
+          
+            // Current assignments are believed to be a no-good set so reject
             // them (for a test harness to check).
             if( rejection_report_function )
                 rejection_report_function( assignments );
-            
-#ifdef BACKJUMPING
-            conflicted_count++;
-#endif
+
+            if( cease )
+                goto CEASE;
         }        
         else
         {
-#ifdef BACKJUMPING
-            conflicted_count = 0;
-#endif
-            ++current_var_it; // try advance
-            if( current_var_it != plan.free_variables.end() ) // new variable
-            {
-                value_selectors[*current_var_it] = 
-                    make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );     
-                TRACEC("Advanced to and made selector for ")(*current_var_it)("\n");
-            }
-            else // complete
-            {
-                TRACEC("Reporting solution\n");
-                // Engine wants free assignments only, don't annoy it.
-                Assignments free_assignments = DifferenceOfSolo( assignments, 
-                                                                 forced_assignments );
-                solution_report_function( free_assignments );
-                TRACE("SS%d finished reporting solution\n");
-                --current_var_it;
-                TRACEC("Back to ")(*current_var_it)("\n");                
-            }                    
+            AssignSuccessful();
         }
     }        
     CEASE:
@@ -274,16 +230,75 @@ void SimpleSolver::Solve( list<VariableId>::const_iterator current_var_it )
 }
 
 
-SimpleSolver::SelectNextValueRV SimpleSolver::TryFindNextConsistentValue( VariableId my_var )
+void ReferenceSolver::AssignSuccessful()
+{
+#ifdef BACKJUMPING
+    conflicted_count = 0;
+#endif
+    ++current_var_it; // try advance
+    if( current_var_it != plan.free_variables.end() ) // new variable
+    {
+        value_selectors[*current_var_it] = 
+            make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );     
+        TRACEC("Advanced to and made selector for ")(*current_var_it)("\n");
+    }
+    else // complete
+    {
+        TRACEC("Reporting solution\n");
+        // Engine wants free assignments only, don't annoy it.
+        Assignments free_assignments = DifferenceOfSolo( assignments, 
+                                                         forced_assignments );
+        solution_report_function( free_assignments );
+        TRACE("SS%d finished reporting solution\n");
+        --current_var_it;
+        TRACEC("Back to ")(*current_var_it)("\n");                
+    }                    
+}
+
+
+bool ReferenceSolver::AssignUnsuccessful()
+{
+#ifdef BACKJUMPING
+    ConstraintSet suspect = plan.affected_constraints.at(*current_var_it); // Was: unsatisfied
+
+    TRACEC("Inconsistent. Possible conflicted constraints: ")(suspect)("\n");
+    set<VariableId> possibly_conflicted_vars = GetAllAffected(suspect);
+    TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
+#endif
+    bool backjump = false;
+    do
+    {
+        value_selectors.erase(*current_var_it);            
+        TRACEC("Killed selector for ")(*current_var_it)("\n");
+        
+        if( current_var_it == plan.free_variables.begin() )
+            return true; // no more solutions
+        --current_var_it; 
+        TRACEC("Back to ")(*current_var_it)("\n");
+        
+#ifdef BACKJUMPING
+        backjump = ( possibly_conflicted_vars.count(*current_var_it) == 0 &&
+                     conflicted_count==0 );
+#endif                
+        if( backjump )
+            TRACEC("Backjump over ")(*current_var_it)("\n");
+    } while( backjump ); // backjump into possibly_conflicted_vars
+        
+#ifdef BACKJUMPING
+    conflicted_count++;
+#endif
+    return false;
+}
+
+
+ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( VariableId my_var )
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(my_var)("\n");
 
     const ConstraintSet &constraints_to_test = plan.completed_constraints.at(my_var);
 
-#ifdef BACKJUMPING
     ConstraintSet all_unsatisfied;     
-#endif
     int values_tried_count = 0;
 
     while( Value value = value_selectors.at(my_var)->GetNextValue() )
@@ -297,75 +312,49 @@ SimpleSolver::SelectNextValueRV SimpleSolver::TryFindNextConsistentValue( Variab
               ("\ncurrent_var: ")(my_var);
               
         bool ok;
-#ifdef BACKJUMPING
         ConstraintSet unsatisfied;     
         tie(ok, unsatisfied) = ConsistencyCheck( assignments, constraints_to_test );        
         ASSERT( ok || !unsatisfied.empty() );
-#else
-        tie(ok) = ConsistencyCheck( assignments, constraints_to_test );        
-#endif
 
         values_tried_count++;
-#ifdef BACKJUMPING
-        all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);
-#endif       
+        all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);      
         if( ok )
         {
             TRACEC("Value is ")(value)("\n");
-#ifdef BACKJUMPING
             return make_pair(value, all_unsatisfied);
-#else
-            return value;
-#endif
         }
     }
     TRACEC("No (more) values found\n");
 #ifdef CHECK_NONEMPTY_RESIDUAL
     ASSERT( values_tried_count > 0 ); // Note: could fire if domain is empty
-#endif
-#ifdef BACKJUMPING
-#ifdef CHECK_NONEMPTY_RESIDUAL
     ASSERT( !all_unsatisfied.empty() ); 
 #endif
     return make_pair(Value(), all_unsatisfied);
-#else
-    return Value();
-#endif
 }
 
 
-SimpleSolver::CCRV SimpleSolver::ConsistencyCheck( const Assignments &assignments,
+ReferenceSolver::CCRV ReferenceSolver::ConsistencyCheck( const Assignments &assignments,
                                                    const ConstraintSet &to_test ) const 
 {
-#ifdef BACKJUMPING
     ConstraintSet unsatisfied;
-#endif
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
         if( !c->IsConsistent(assignments) )
         {            
             matched = false;
-#ifdef BACKJUMPING
             unsatisfied.insert( c );
-#else
-            break;
-#endif
         }
     } 
-#ifdef BACKJUMPING
 #ifdef CHECK_NONEMPTY_RESIDUAL
     if( !matched )
         ASSERT( !unsatisfied.empty() );
 #endif        
-    return make_tuple( matched, unsatisfied );
-#else                       
-    return make_tuple( matched );
-#endif                       
+    return make_tuple( matched, unsatisfied );                      
 }
 
 
-void SimpleSolver::ShowBestAssignment()
+void ReferenceSolver::ShowBestAssignment()
 {
     Assignments &assignments_to_show = assignments;
     INDENT("B");
@@ -403,7 +392,7 @@ void SimpleSolver::ShowBestAssignment()
 }
 
 
-void SimpleSolver::TimedOperations()
+void ReferenceSolver::TimedOperations()
 {
     auto now = chrono::steady_clock::now();
     auto since = now - last_report;
@@ -416,7 +405,7 @@ void SimpleSolver::TimedOperations()
 }
 
 
-void SimpleSolver::CheckPlan() const
+void ReferenceSolver::CheckPlan() const
 {
     set<VariableId> variables_used;
     for( shared_ptr<Constraint> c : plan.constraints )
@@ -440,7 +429,7 @@ void SimpleSolver::CheckPlan() const
 }
 
 
-set<VariableId> SimpleSolver::GetAllAffected( ConstraintSet constraints )
+set<VariableId> ReferenceSolver::GetAllAffected( ConstraintSet constraints )
 {
     set<VariableId> all_vars;
     for( shared_ptr<Constraint> c : constraints )
@@ -449,7 +438,7 @@ set<VariableId> SimpleSolver::GetAllAffected( ConstraintSet constraints )
 } 
 
 
-void SimpleSolver::Dump() const
+void ReferenceSolver::Dump() const
 {
     TRACE("%d constraints:\n", plan.constraints.size());
     for( shared_ptr<Constraint> c : plan.constraints )    
@@ -458,7 +447,7 @@ void SimpleSolver::Dump() const
 }
 
 
-void SimpleSolver::DumpGSV()
+void ReferenceSolver::DumpGSV()
 {
     ValueSelector::DumpGSV();
 }

@@ -1,4 +1,4 @@
-#include "simple_solver.hpp"
+#include "reference_solver.hpp"
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"

@@ -21,7 +21,7 @@
 #include "steps/to_sc_method.hpp"
 #include "render/doc_graphs.hpp"
 #include "unit_test.hpp"
-#include "sr/csp/simple_solver.hpp"
+#include "sr/csp/reference_solver.hpp"
 
 #include <cstdlib>
 
@@ -504,7 +504,7 @@ int main( int argc, char *argv[] )
     
     Inferno inferno;
     inferno.Run();
-    //CSP::SimpleSolver::DumpGSV();
+    //CSP::ReferenceSolver::DumpGSV();
     return EXIT_SUCCESS;
 }
 

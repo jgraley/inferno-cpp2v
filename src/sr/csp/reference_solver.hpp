@@ -1,5 +1,5 @@
-#ifndef SIMPLE_SOLVER_HPP
-#define SIMPLE_SOLVER_HPP
+#ifndef REFERENCE_SOLVER_HPP
+#define REFERENCE_SOLVER_HPP
 
 #include "constraint.hpp"
 #include "solver.hpp"
@@ -22,16 +22,11 @@ class SolverHolder;
 
 /** A simple back-tracking solver
  */
-class SimpleSolver : public Solver
+class ReferenceSolver : public Solver
 {
 public:
-#ifdef BACKJUMPING
-    typedef pair<Value, ConstraintSet> SelectNextValueRV;
     typedef tuple<bool, ConstraintSet> CCRV;
-#else
-    typedef Value SelectNextValueRV;
-    typedef tuple<bool> CCRV;
-#endif
+    typedef pair<Value, ConstraintSet> SelectNextValueRV;
 
     /**
      * Create a simple backtracking CSP solver. We require constraints at construct time and 
@@ -43,7 +38,7 @@ public:
      * 
      * @param [input] if non-null, the variables to use. Must be the same set that we would deduce from querying the constraints, but in any order.
      */
-    SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
+    ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
                   const list<VariableId> &free_variables, 
                   const list<VariableId> &forced_variables );
 
@@ -55,14 +50,14 @@ public:
 private:
     const struct Plan : public virtual Traceable
     {
-        Plan( SimpleSolver *algo,
+        Plan( ReferenceSolver *algo,
               const list< shared_ptr<Constraint> > &constraints, 
               const list<VariableId> &free_variables, 
               const list<VariableId> &forced_variables );
         void DeduceVariables();
         string GetTrace() const; // used for debug
     
-        SimpleSolver * const algo;
+        ReferenceSolver * const algo;
         const list< shared_ptr<Constraint> > constraints;
         const list<VariableId> free_variables;
         const list<VariableId> forced_variables;
@@ -75,9 +70,10 @@ private:
         map<VariableId, ConstraintSet> completed_constraints; // depends on var ordering
     } plan;
 
-    void Solve( list<VariableId>::const_iterator current_var_it );
+    void Solve();
+    void AssignSuccessful();    
+    bool AssignUnsuccessful();    
     SelectNextValueRV TryFindNextConsistentValue( VariableId my_var );
-
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test ) const;
     void ShowBestAssignment();
@@ -94,6 +90,8 @@ private:
     // Used during solve - depends on pattern and x
     const SR::TheKnowledge *knowledge;
     Assignments forced_assignments;
+        
+    list<VariableId>::const_iterator current_var_it;
     Assignments assignments;
     map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     
