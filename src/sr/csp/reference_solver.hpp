@@ -12,8 +12,6 @@
 #include <chrono>
 #include <functional>
 
-//#define BACKJUMPING
-
 namespace CSP
 { 
     
@@ -39,15 +37,16 @@ public:
      * @param [input] if non-null, the variables to use. Must be the same set that we would deduce from querying the constraints, but in any order.
      */
     ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
-                  const list<VariableId> &free_variables, 
-                  const list<VariableId> &forced_variables );
+                     const list<VariableId> &free_variables, 
+                     const list<VariableId> &forced_variables );
+    ~ReferenceSolver();
 
     virtual void Start( const Assignments &forces,
                         const SR::TheKnowledge *knowledge );
     virtual void Run( const SolutionReportFunction &solution_report_function,
                       const RejectionReportFunction &rejection_report_function );
 
-private:
+protected:
     const struct Plan : public virtual Traceable
     {
         Plan( ReferenceSolver *algo,
@@ -70,9 +69,9 @@ private:
         map<VariableId, ConstraintSet> completed_constraints; // depends on var ordering
     } plan;
 
-    void Solve();
-    void AssignSuccessful();    
-    bool AssignUnsuccessful();    
+    virtual void Solve();
+    virtual void AssignSuccessful();    
+    virtual bool AssignUnsuccessful();    
     SelectNextValueRV TryFindNextConsistentValue( VariableId my_var );
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test ) const;
@@ -94,10 +93,6 @@ private:
     list<VariableId>::const_iterator current_var_it;
     Assignments assignments;
     map< VariableId, shared_ptr<ValueSelector> > value_selectors;
-    
-#ifdef BACKJUMPING
-    int conflicted_count;
-#endif    
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;

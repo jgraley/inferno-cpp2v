@@ -11,8 +11,6 @@
 #include <chrono>
 #include <functional>
 
-//#define BACKJUMPING
-
 namespace CSP
 { 
     

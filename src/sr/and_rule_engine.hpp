@@ -89,8 +89,6 @@ public:
         // CSP solver stuff
         void DeduceCSPVariables();
         void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
-        void CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list );
-
         void Dump();
 
         string GetTrace() const; // used for debug

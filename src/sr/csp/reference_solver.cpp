@@ -17,12 +17,10 @@
 
 using namespace CSP;
 
-// BACKJUMPING moved to header
-
 ReferenceSolver::Plan::Plan( ReferenceSolver *algo_,
-                          const list< shared_ptr<Constraint> > &constraints_, 
-                          const list<VariableId> &free_variables_, 
-                          const list<VariableId> &forced_variables_ ) :
+                             const list< shared_ptr<Constraint> > &constraints_, 
+                             const list<VariableId> &free_variables_, 
+                             const list<VariableId> &forced_variables_ ) :
     algo( algo_ ), 
     constraints(constraints_),
     free_variables(free_variables_),
@@ -30,6 +28,11 @@ ReferenceSolver::Plan::Plan( ReferenceSolver *algo_,
 {
     DeduceVariables();
 } 
+
+
+ReferenceSolver::~ReferenceSolver()
+{
+}
 
 
 void ReferenceSolver::Plan::DeduceVariables()
@@ -145,7 +148,7 @@ void ReferenceSolver::Start( const Assignments &forces,
 
     
 void ReferenceSolver::Run( const SolutionReportFunction &solution_report_function_,
-                        const RejectionReportFunction &rejection_report_function_ )
+                           const RejectionReportFunction &rejection_report_function_ )
 {
     ASSERT( !solution_report_function )("Something bad like overlapped Run() calls happened.");
     ASSERT( !rejection_report_function )("Something bad like overlapped Run() calls happened.");
@@ -199,9 +202,6 @@ void ReferenceSolver::Solve()
         make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );
     TRACEC("Made selector for ")(*current_var_it)("\n");
 
-#ifdef BACKJUMPING
-    conflicted_count = 0;
-#endif
     while(true)
     {
         Value value;
@@ -232,9 +232,6 @@ void ReferenceSolver::Solve()
 
 void ReferenceSolver::AssignSuccessful()
 {
-#ifdef BACKJUMPING
-    conflicted_count = 0;
-#endif
     ++current_var_it; // try advance
     if( current_var_it != plan.free_variables.end() ) // new variable
     {
@@ -258,35 +255,15 @@ void ReferenceSolver::AssignSuccessful()
 
 bool ReferenceSolver::AssignUnsuccessful()
 {
-#ifdef BACKJUMPING
-    ConstraintSet suspect = plan.affected_constraints.at(*current_var_it); // Was: unsatisfied
-
-    TRACEC("Inconsistent. Possible conflicted constraints: ")(suspect)("\n");
-    set<VariableId> possibly_conflicted_vars = GetAllAffected(suspect);
-    TRACEC("Possible conflicted variables: ")(possibly_conflicted_vars)("\n");
-#endif
-    bool backjump = false;
-    do
-    {
-        value_selectors.erase(*current_var_it);            
-        TRACEC("Killed selector for ")(*current_var_it)("\n");
+    value_selectors.erase(*current_var_it);            
+    TRACEC("Killed selector for ")(*current_var_it)("\n");
+    
+    if( current_var_it == plan.free_variables.begin() )
+        return true; // no more solutions
         
-        if( current_var_it == plan.free_variables.begin() )
-            return true; // no more solutions
-        --current_var_it; 
-        TRACEC("Back to ")(*current_var_it)("\n");
-        
-#ifdef BACKJUMPING
-        backjump = ( possibly_conflicted_vars.count(*current_var_it) == 0 &&
-                     conflicted_count==0 );
-#endif                
-        if( backjump )
-            TRACEC("Backjump over ")(*current_var_it)("\n");
-    } while( backjump ); // backjump into possibly_conflicted_vars
-        
-#ifdef BACKJUMPING
-    conflicted_count++;
-#endif
+    --current_var_it; 
+    TRACEC("Back to ")(*current_var_it)("\n");
+                      
     return false;
 }
 

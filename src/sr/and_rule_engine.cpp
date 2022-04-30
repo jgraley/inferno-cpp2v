@@ -2,7 +2,9 @@
 
 #include "csp/symbolic_constraint.hpp"
 #include "csp/reference_solver.hpp"
+#include "csp/backjumping_solver.hpp"
 #include "csp/solver_holder.hpp"
+#include "csp/solver_factory.hpp"
 #include "scr_engine.hpp"
 #include "search_replace.hpp"
 #include "conjecture.hpp"
@@ -129,10 +131,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateMasterCouplingSymbolics();    
     SymbolicRewrites();
     
-    // ------------------ Set up CSP/old solver ---------------------   
+    // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list);
-    CreateCSPSolver(constraints_list);
+    solver = CreateSolverAndHolder( constraints_list, 
+                                    free_normal_links_ordered, 
+                                    forced_normal_links_ordered );    
+                                    
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
     solver->Dump();    
@@ -455,15 +460,6 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
         constraints_list.push_back(c);    
     }        
-}
-
-
-void AndRuleEngine::Plan::CreateCSPSolver( const list< shared_ptr<CSP::Constraint> > &constraints_list )
-{       
-    auto salg = make_shared<CSP::ReferenceSolver>( constraints_list, 
-                                                free_normal_links_ordered, 
-                                                forced_normal_links_ordered );
-    solver = make_shared<CSP::SolverHolder>(salg);
 }
 
 
