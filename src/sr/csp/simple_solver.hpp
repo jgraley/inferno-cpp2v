@@ -7,6 +7,7 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 #include "../the_knowledge.hpp"
+#include "value_selector.hpp"
 
 #include <chrono>
 #include <functional>
@@ -18,7 +19,7 @@ namespace CSP
     
 class Agent;
 class SolverHolder;
-    
+
 /** A simple back-tracking solver
  */
 class SimpleSolver : public Solver
@@ -52,8 +53,6 @@ public:
                       const RejectionReportFunction &rejection_report_function );
 
 private:
-    typedef set<shared_ptr<Constraint>> ConstraintSet;
-
     const struct Plan : public virtual Traceable
     {
         Plan( SimpleSolver *algo,
@@ -78,38 +77,6 @@ private:
 
     void Solve( list<VariableId>::const_iterator current_var_it );
     SelectNextValueRV TryFindNextConsistentValue( VariableId my_var );
-
-    class ValueSelector : public Traceable
-    {
-    public:
-        ValueSelector( const Plan &solver_plan,
-                       const SimpleSolver &solver,
-                       const SR::TheKnowledge *knowledge,
-                       Assignments &assignments,
-                       VariableId var );
-        ~ValueSelector();
-        void SetupDefaultGenerator();
-        void SetupSuggestionGenerator( shared_ptr<set<Value>> s );
-        Value GetNextValue();
-        
-    private:
-        const Plan &solver_plan;
-        const SR::TheKnowledge * const knowledge;
-        Assignments &assignments;
-        const VariableId my_var;
-        const ConstraintSet &constraints_to_query;
-        
-        function<Value()> values_generator;  
-
-    public:
-        static void DumpGSV();
-        
-    private:
-        static uint64_t gsv_n;
-        static uint64_t gsv_nfail;
-        static uint64_t gsv_nempty;
-        static uint64_t gsv_tot;    
-    };
 
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test ) const;
