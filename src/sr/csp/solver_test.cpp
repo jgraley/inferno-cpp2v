@@ -2,8 +2,62 @@
 
 using namespace CSP;
 
-SolverTest::SolverTest( const list< shared_ptr<Constraint> > &constraints, 
-                        const list<VariableId> &free_variables, 
-                        const list<VariableId> &forced_variables )
+SolverTest::SolverTest( shared_ptr<Solver> reference_solver_,
+                        shared_ptr<Solver> solver_under_test_ ) :
+    reference_solver( reference_solver_ ),
+    solver_under_test( solver_under_test_ )
 {
+}
+
+void SolverTest::Start( const Assignments &forces,
+                        const SR::TheKnowledge *knowledge )
+{
+    reference_solver->Start(forces, knowledge);
+    solver_under_test->Start(forces, knowledge);
+}
+
+
+void SolverTest::Run( const SolutionReportFunction &solution_report_function,
+                      const RejectionReportFunction &rejection_report_function )
+{
+    // Get a set of solutions from the reference solver
+    set<Solution> reference_solutions;
+    auto reference_srl = [&](const Solution &solution)
+    { 
+        solution_report_function( solution );
+        reference_solutions.insert( solution );
+    };
+    reference_solver->Run( reference_srl, RejectionReportFunction() );
+    
+    // Run solver-under-test and check both solutions and rejections
+    int nsol = 0;
+    auto under_test_srl = [&](const Solution &solution)
+    { 
+        ASSERT( reference_solutions.count( solution ) > 0 );
+        nsol++;
+    };
+    auto under_test_rrl = [&](const Assignments &assigns)
+    { 
+        for( const Solution &s : reference_solutions )
+        {
+            ASSERT( !IsSubset( assigns, s ) );
+        }
+    };
+    solver_under_test->Run( under_test_srl, under_test_rrl );
+    ASSERT( nsol == reference_solutions.size() )(nsol)(" != ")(reference_solutions.size());
+    FTRACEC("OK");
+}
+
+          
+void SolverTest::Dump() const
+{
+    reference_solver->Dump();
+    solver_under_test->Dump();
+}
+
+
+void SolverTest::CheckPlan() const
+{
+    reference_solver->Dump();
+    solver_under_test->Dump();
 }

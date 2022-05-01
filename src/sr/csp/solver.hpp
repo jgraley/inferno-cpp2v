@@ -39,7 +39,7 @@ public:
     /**
      * Function supplied to Solver objects for rejected partial assignment reportage.
      */    
-    typedef function<void(const Assignments &solution)> RejectionReportFunction;
+    typedef function<void(const Assignments &assigns)> RejectionReportFunction;
     
     /** Create a solver object.
      * 
