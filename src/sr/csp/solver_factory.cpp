@@ -19,5 +19,6 @@ shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr
                                                    free_variables, 
                                                    forced_variables );
 #endif
+
     return make_shared<CSP::SolverHolder>(salg);
 }                                                       
