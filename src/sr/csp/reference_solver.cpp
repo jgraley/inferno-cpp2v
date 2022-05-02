@@ -408,7 +408,7 @@ void ReferenceSolver::CheckPlan() const
 }
 
 
-set<VariableId> ReferenceSolver::GetAllAffected( ConstraintSet constraints )
+set<VariableId> ReferenceSolver::GetAffectedVariables( ConstraintSet constraints )
 {
     set<VariableId> all_vars;
     for( shared_ptr<Constraint> c : constraints )

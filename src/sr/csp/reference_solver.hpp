@@ -78,7 +78,7 @@ protected:
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;
-    set<VariableId> GetAllAffected( ConstraintSet constraints );
+    set<VariableId> GetAffectedVariables( ConstraintSet constraints );
 
     void Dump() const;
 
