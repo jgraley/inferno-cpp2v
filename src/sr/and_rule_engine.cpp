@@ -541,7 +541,8 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
         master_and_root_links[link] = XLink::CreateDistinct(keynode);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
-
+    
+    TRACE("Starting solver\n");
     plan.solver->Start( master_and_root_links, knowledge );
 }
 

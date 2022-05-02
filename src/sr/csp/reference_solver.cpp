@@ -200,6 +200,7 @@ void ReferenceSolver::Solve()
     // Selector for first variable    
     value_selectors[plan.free_variables.front()] = 
         make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );
+    success_count[plan.free_variables.front()] = 0;
     TRACEC("Made selector for ")(*current_var_it)("\n");
 
     while(true)
@@ -232,11 +233,13 @@ void ReferenceSolver::Solve()
 
 void ReferenceSolver::AssignSuccessful()
 {
+    success_count.at(*current_var_it)++;
     ++current_var_it; // try advance
     if( current_var_it != plan.free_variables.end() ) // new variable
     {
         value_selectors[*current_var_it] = 
             make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );     
+        success_count[*current_var_it] = 0;
         TRACEC("Advanced to and made selector for ")(*current_var_it)("\n");
     }
     else // complete
@@ -246,7 +249,6 @@ void ReferenceSolver::AssignSuccessful()
         Assignments free_assignments = DifferenceOfSolo( assignments, 
                                                          forced_assignments );
         solution_report_function( free_assignments );
-        TRACE("SS%d finished reporting solution\n");
         --current_var_it;
         TRACEC("Back to ")(*current_var_it)("\n");                
     }                    

@@ -93,6 +93,7 @@ protected:
     list<VariableId>::const_iterator current_var_it;
     Assignments assignments;
     map< VariableId, shared_ptr<ValueSelector> > value_selectors;
+    map< VariableId, int > success_count;
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;

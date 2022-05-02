@@ -15,6 +15,7 @@ shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr
                                                      free_variables, 
                                                      forced_variables );
 
+#if 0
     auto refalg = make_shared<CSP::ReferenceSolver>( constraints, 
                                                      free_variables, 
                                                      forced_variables );
@@ -22,4 +23,7 @@ shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr
     auto testalg = make_shared<CSP::SolverTest>( refalg, salg );
 
     return make_shared<CSP::SolverHolder>( testalg );
+#else
+    return make_shared<CSP::SolverHolder>( salg );
+#endif    
 }                                                       

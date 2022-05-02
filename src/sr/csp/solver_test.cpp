@@ -21,20 +21,21 @@ void SolverTest::Run( const SolutionReportFunction &solution_report_function,
                       const RejectionReportFunction &rejection_report_function )
 {
     // Get a set of solutions from the reference solver
-    set<Solution> reference_solutions;
+    TRACE("############ RUNNING REFERENCE SOLVER #############\n");
+    set<Solution> reference_solutions, under_test_solutions;
     auto reference_srl = [&](const Solution &solution)
-    { 
-        solution_report_function( solution );
+    {         
         reference_solutions.insert( solution );
     };
     reference_solver->Run( reference_srl, RejectionReportFunction() );
     
     // Run solver-under-test and check both solutions and rejections
+    TRACE("############ RUNNING SOLVER UNDER TEST #############\n");
     int nsol = 0;
     auto under_test_srl = [&](const Solution &solution)
     { 
         ASSERT( reference_solutions.count( solution ) > 0 );
-        nsol++;
+        under_test_solutions.insert( solution );
     };
     auto under_test_rrl = [&](const Assignments &assigns)
     { 
@@ -44,8 +45,21 @@ void SolverTest::Run( const SolutionReportFunction &solution_report_function,
         }
     };
     solver_under_test->Run( under_test_srl, under_test_rrl );
-    ASSERT( nsol == reference_solutions.size() )(nsol)(" != ")(reference_solutions.size());
-    FTRACEC("OK");
+    
+    if( under_test_solutions.size() != reference_solutions.size() )
+    {
+        TRACE("############ DUMP REFERENCE SOLVER #############\n");
+        reference_solver->Dump();
+    }
+    ASSERT( under_test_solutions.size() == reference_solutions.size() )
+          ("\n############ UNDER TEST SOLUTIONS #############\n")(under_test_solutions)
+          ("\n############ REFERENCE SOLUTIONS #############\n")(reference_solutions);
+    
+    // Wait till we've passed before reporting solutions, because it generates logging
+    for( const Solution &s : reference_solutions )
+    {
+        solution_report_function( s );
+    }
 }
 
           
