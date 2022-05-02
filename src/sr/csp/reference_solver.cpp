@@ -190,6 +190,7 @@ void ReferenceSolver::Run( const SolutionReportFunction &solution_report_functio
     {                
         TRACE("Simple solver matched on forced variables; solving for frees\n");  
         current_var_it = plan.free_variables.begin(); 
+        current_var_index = 0;
         Solve();    
     }
 
@@ -201,19 +202,19 @@ void ReferenceSolver::Solve()
 {     
     TRACE("SS%d solving...\n");
     TRACEC("Free vars ")(plan.free_variables)("\n");
-    TRACEC("Starting at ")(*current_var_it)("\n");
+    TRACEC("Starting at X")(current_var_index)("\n");
     
     // Selector for first variable    
-    value_selectors[plan.free_variables.front()] = 
-        make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, plan.free_variables_to_indices.at(*current_var_it) );
-    success_count[plan.free_variables.front()] = 0;
-    TRACEC("Made selector for ")(*current_var_it)("\n");
+    value_selectors[0] = 
+        make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, current_var_index );
+    success_count[0] = 0;
+    TRACEC("Made selector for X")(current_var_index)("\n");
 
     while(true)
     {
         Value value;
         ConstraintSet unsatisfied;
-        tie(value, unsatisfied) = TryFindNextConsistentValue(*current_var_it, plan.free_variables_to_indices.at(*current_var_it));        
+        tie(value, unsatisfied) = TryFindNextConsistentValue(current_var_index);        
 
         if( !value ) // no consistent value
         {
@@ -239,14 +240,15 @@ void ReferenceSolver::Solve()
 
 void ReferenceSolver::AssignSuccessful()
 {
-    success_count.at(*current_var_it)++;
+    success_count.at(current_var_index)++;
     ++current_var_it; // try advance
-    if( current_var_it != plan.free_variables.end() ) // new variable
+    current_var_index++;
+    if( current_var_index < plan.free_variables.size() ) // new variable
     {
-        value_selectors[*current_var_it] = 
-            make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, plan.free_variables_to_indices.at(*current_var_it) );     
-        success_count[*current_var_it] = 0;
-        TRACEC("Advanced to and made selector for ")(*current_var_it)("\n");
+        value_selectors[current_var_index] = 
+            make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, current_var_index );     
+        success_count[current_var_index] = 0;
+        TRACEC("Advanced to and made selector for X")(current_var_index)("\n");
     }
     else // complete
     {
@@ -256,39 +258,41 @@ void ReferenceSolver::AssignSuccessful()
                                                          forced_assignments );
         solution_report_function( free_assignments );
         --current_var_it;
-        TRACEC("Back to ")(*current_var_it)("\n");                
+        current_var_index--;
+        TRACEC("Back to X")(current_var_index)("\n");                
     }                    
 }
 
 
 bool ReferenceSolver::AssignUnsuccessful()
 {
-    value_selectors.erase(*current_var_it);            
-    TRACEC("Killed selector for ")(*current_var_it)("\n");
+    value_selectors.erase(current_var_index);            
+    TRACEC("Killed selector for X")(current_var_index)("\n");
     
-    if( current_var_it == plan.free_variables.begin() )
+    if( current_var_index == 0 )
         return true; // no more solutions
         
-    --current_var_it; 
-    TRACEC("Back to ")(*current_var_it)("\n");
+    --current_var_it;
+    current_var_index--; 
+    TRACEC("Back to X")(current_var_index)("\n");
                       
     return false;
 }
 
 
-ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( VariableId my_var, int my_var_index )
+ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( int my_var_index )
 {
     INDENT("N");    
-    TRACE("Finding value for variable ")(my_var)("\n");
+    TRACE("Finding value for variable X")(my_var_index)("\n");
     
     const ConstraintSet &constraints_to_test = plan.completed_constraints.at(my_var_index);
 
     ConstraintSet all_unsatisfied;     
     int values_tried_count = 0;
 
-    while( Value value = value_selectors.at(my_var)->GetNextValue() )
+    while( Value value = value_selectors.at(my_var_index)->GetNextValue() )
     {       
-        assignments[my_var] = value;
+        assignments[plan.free_variables.at(my_var_index)] = value;
               
         bool ok;
         ConstraintSet unsatisfied;     

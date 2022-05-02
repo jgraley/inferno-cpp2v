@@ -73,7 +73,7 @@ protected:
     virtual void Solve();
     virtual void AssignSuccessful();    
     virtual bool AssignUnsuccessful();    
-    SelectNextValueRV TryFindNextConsistentValue( VariableId my_var, int my_var_index );
+    SelectNextValueRV TryFindNextConsistentValue( int my_var_index );
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test ) const;
     void ShowBestAssignment();
@@ -92,12 +92,14 @@ protected:
     Assignments forced_assignments;
         
     vector<VariableId>::const_iterator current_var_it;
+    int current_var_index;
     Assignments assignments;
-    map< VariableId, shared_ptr<ValueSelector> > value_selectors;
-    map< VariableId, int > success_count;
+    map< int, shared_ptr<ValueSelector> > value_selectors;
+    map< int, int > success_count;
     
     // Timed reports
     chrono::time_point<chrono::steady_clock> last_report;
+    
 public:
     static void DumpGSV();
 };
