@@ -135,8 +135,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list);
     solver = CreateSolverAndHolder( constraints_list, 
-                                    free_normal_links_ordered, 
-                                    forced_normal_links_ordered );    
+                                    ToVector(free_normal_links_ordered), 
+                                    ToVector(forced_normal_links_ordered) );    
                                     
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.

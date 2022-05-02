@@ -19,8 +19,8 @@ using namespace CSP;
 
 ReferenceSolver::Plan::Plan( ReferenceSolver *algo_,
                              const list< shared_ptr<Constraint> > &constraints_, 
-                             const list<VariableId> &free_variables_, 
-                             const list<VariableId> &forced_variables_ ) :
+                             const vector<VariableId> &free_variables_, 
+                             const vector<VariableId> &forced_variables_ ) :
     algo( algo_ ), 
     constraints(constraints_),
     free_variables(free_variables_),
@@ -117,8 +117,8 @@ string ReferenceSolver::Plan::GetTrace() const
 
 
 ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
-                            const list<VariableId> &free_variables, 
-                            const list<VariableId> &forced_variables ) :
+                                  const vector<VariableId> &free_variables, 
+                                  const vector<VariableId> &forced_variables ) :
     plan( this, constraints, free_variables, forced_variables ),
     solution_report_function(),
     rejection_report_function()
@@ -127,7 +127,7 @@ ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constrai
                         
 
 void ReferenceSolver::Start( const Assignments &forces,
-                          const SR::TheKnowledge *knowledge_ )
+                             const SR::TheKnowledge *knowledge_ )
 {
     TRACE("Simple solver begins\n");
     INDENT("S");

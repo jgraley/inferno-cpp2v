@@ -37,8 +37,8 @@ public:
      * @param [input] if non-null, the variables to use. Must be the same set that we would deduce from querying the constraints, but in any order.
      */
     ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
-                     const list<VariableId> &free_variables, 
-                     const list<VariableId> &forced_variables );
+                     const vector<VariableId> &free_variables, 
+                     const vector<VariableId> &forced_variables );
     ~ReferenceSolver();
 
     virtual void Start( const Assignments &forces,
@@ -51,15 +51,15 @@ protected:
     {
         Plan( ReferenceSolver *algo,
               const list< shared_ptr<Constraint> > &constraints, 
-              const list<VariableId> &free_variables, 
-              const list<VariableId> &forced_variables );
+              const vector<VariableId> &free_variables, 
+              const vector<VariableId> &forced_variables );
         void DeduceVariables();
         string GetTrace() const; // used for debug
     
         ReferenceSolver * const algo;
         const list< shared_ptr<Constraint> > constraints;
-        const list<VariableId> free_variables;
-        const list<VariableId> forced_variables;
+        const vector<VariableId> free_variables;
+        const vector<VariableId> forced_variables;
         
         ConstraintSet constraint_set;
         ConstraintSet fully_forced_constraint_set;
@@ -90,7 +90,7 @@ protected:
     const SR::TheKnowledge *knowledge;
     Assignments forced_assignments;
         
-    list<VariableId>::const_iterator current_var_it;
+    vector<VariableId>::const_iterator current_var_it;
     Assignments assignments;
     map< VariableId, shared_ptr<ValueSelector> > value_selectors;
     map< VariableId, int > success_count;
