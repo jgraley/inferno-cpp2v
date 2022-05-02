@@ -56,7 +56,7 @@ void ReferenceSolver::Plan::DeduceVariables()
     affected_constraints.resize( free_variables.size() );
     fully_forced_constraint_set.clear();
  
-    set<VariableId> free_variables_used_by_constraints; // For a cross-check
+    set<int> free_variables_used_by_constraints; // For a cross-check
     //TRACE("Constraints:\n")(constraints)("\n");
     for( shared_ptr<Constraint> c : constraints )
     {
@@ -73,11 +73,11 @@ void ReferenceSolver::Plan::DeduceVariables()
                 c_free_var_indices.insert( free_variables_to_indices.at(v) );
             }
         }        
-        for( VariableId v : c_free_vars )
+        for( int i : c_free_var_indices )
         {
-            affected_constraints[free_variables_to_indices.at(v)].insert(c);
-            if( free_variables_used_by_constraints.count(v) == 0 )
-                free_variables_used_by_constraints.insert( v );
+            affected_constraints[i].insert(c);
+            if( free_variables_used_by_constraints.count(i) == 0 )
+                free_variables_used_by_constraints.insert(i);
         }
                         
         if( c_free_vars.empty() )
@@ -87,18 +87,17 @@ void ReferenceSolver::Plan::DeduceVariables()
         else
         {
             // Which variables complete this contraint
-            set<VariableId> cumulative_free_vars;
-            for( VariableId v : free_variables )            
+            set<int> cumulative_free_vars;
+            for( int i=0; i<free_variables.size(); i++ )      
             {
-                int v_index = free_variables_to_indices.at(v);
-                cumulative_free_vars.insert(v);
+                cumulative_free_vars.insert(i);
                 bool got_all_c_free_vars = true;
-                for( VariableId v : c_free_vars )
-                    if( cumulative_free_vars.count(v) == 0 )
+                for( int j : c_free_var_indices )
+                    if( cumulative_free_vars.count(j) == 0 )
                         got_all_c_free_vars = false;
                 if( got_all_c_free_vars )
                 {
-                    completed_constraints.at(v_index).insert(c);
+                    completed_constraints.at(i).insert(c);
                     break; // we're done - don't insert c for any more vars
                 }
             }
@@ -110,8 +109,8 @@ void ReferenceSolver::Plan::DeduceVariables()
     TRACE("Variables supplied by engine: cross-checking\n");
     // Ensure that every free variable supplied to our constructor is
     // used by at least one constraint.
-    for( VariableId v : free_variables )
-        ASSERT( free_variables_used_by_constraints.count(v) == 1 )
+    for( int i=0; i<free_variables.size(); i++ )
+        ASSERT( free_variables_used_by_constraints.count(i) == 1 )
               ("free_variables:\n")(free_variables)
               ("\nfree_variables_used_by_constraints:\n")(free_variables_used_by_constraints); 
 }
