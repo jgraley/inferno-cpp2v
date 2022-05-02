@@ -189,7 +189,6 @@ void ReferenceSolver::Run( const SolutionReportFunction &solution_report_functio
     else
     {                
         TRACE("Simple solver matched on forced variables; solving for frees\n");  
-        current_var_it = plan.free_variables.begin(); 
         current_var_index = 0;
         Solve();    
     }
@@ -206,7 +205,10 @@ void ReferenceSolver::Solve()
     
     // Selector for first variable    
     value_selectors[0] = 
-        make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, current_var_index );
+        make_shared<ValueSelector>( plan.affected_constraints.at(current_var_index), 
+                                    knowledge, 
+                                    assignments, 
+                                    plan.free_variables.at(current_var_index) );
     success_count[0] = 0;
     TRACEC("Made selector for X")(current_var_index)("\n");
 
@@ -241,12 +243,14 @@ void ReferenceSolver::Solve()
 void ReferenceSolver::AssignSuccessful()
 {
     success_count.at(current_var_index)++;
-    ++current_var_it; // try advance
     current_var_index++;
     if( current_var_index < plan.free_variables.size() ) // new variable
     {
         value_selectors[current_var_index] = 
-            make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, current_var_index );     
+            make_shared<ValueSelector>( plan.affected_constraints.at(current_var_index), 
+                                        knowledge, 
+                                        assignments, 
+                                        plan.free_variables.at(current_var_index) );     
         success_count[current_var_index] = 0;
         TRACEC("Advanced to and made selector for X")(current_var_index)("\n");
     }
@@ -257,7 +261,6 @@ void ReferenceSolver::AssignSuccessful()
         Assignments free_assignments = DifferenceOfSolo( assignments, 
                                                          forced_assignments );
         solution_report_function( free_assignments );
-        --current_var_it;
         current_var_index--;
         TRACEC("Back to X")(current_var_index)("\n");                
     }                    
@@ -266,13 +269,13 @@ void ReferenceSolver::AssignSuccessful()
 
 bool ReferenceSolver::AssignUnsuccessful()
 {
-    value_selectors.erase(current_var_index);            
+    value_selectors.erase(current_var_index);   
+    assignments.erase( plan.free_variables.at(current_var_index) );         
     TRACEC("Killed selector for X")(current_var_index)("\n");
     
     if( current_var_index == 0 )
         return true; // no more solutions
         
-    --current_var_it;
     current_var_index--; 
     TRACEC("Back to X")(current_var_index)("\n");
                       

@@ -91,7 +91,6 @@ protected:
     const SR::TheKnowledge *knowledge;
     Assignments forced_assignments;
         
-    vector<VariableId>::const_iterator current_var_it;
     int current_var_index;
     Assignments assignments;
     map< int, shared_ptr<ValueSelector> > value_selectors;

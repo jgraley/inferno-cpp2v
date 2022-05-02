@@ -17,17 +17,15 @@
 
 using namespace CSP;
 
-ValueSelector::ValueSelector( const vector<ConstraintSet> &affected_constraints,
+ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_, 
                               const SR::TheKnowledge *knowledge_,
                               Assignments &assignments_,
-                              VariableId var,
-                              int var_index ) :
+                              VariableId var ) :
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     my_var( var ),
-    constraints_to_query( affected_constraints.at(var_index) )
+    constraints_to_query( constraints_to_query_ )
 {
-    ASSERT( assignments.count(my_var) == 0 );
     INDENT("V");
        
     list<shared_ptr<SYM::SymbolSetResult>> rl; 
@@ -62,7 +60,6 @@ ValueSelector::ValueSelector( const vector<ConstraintSet> &affected_constraints,
        
 ValueSelector::~ValueSelector()
 {
-    assignments.erase(my_var);
 }
 
 

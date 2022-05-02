@@ -21,11 +21,10 @@ typedef set<shared_ptr<Constraint>> ConstraintSet;
 class ValueSelector : public Traceable
 {
 public:
-    ValueSelector( const vector<ConstraintSet> &affected_constraints,
+    ValueSelector( const ConstraintSet &constraints_to_query,
                    const SR::TheKnowledge *knowledge_,
                    Assignments &assignments_,
-                   VariableId var,
-                   int var_index );
+                   VariableId var );
     ~ValueSelector();
     void SetupDefaultGenerator();
     void SetupSuggestionGenerator( shared_ptr<set<Value>> s );
