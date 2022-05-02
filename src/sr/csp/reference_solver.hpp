@@ -61,24 +61,25 @@ protected:
         const vector<VariableId> free_variables;
         const vector<VariableId> forced_variables;
         
+        map<VariableId, int> free_variables_to_indices;
         ConstraintSet constraint_set;
         ConstraintSet fully_forced_constraint_set;
-        map< shared_ptr<Constraint>, set<VariableId> > free_vars_for_constraint;
+        map< shared_ptr<Constraint>, set<int> > free_var_indices_for_constraint;
 
-        map<VariableId, ConstraintSet> affected_constraints; // does not depend on var ordering
-        map<VariableId, ConstraintSet> completed_constraints; // depends on var ordering
+        vector<ConstraintSet> affected_constraints; // does not depend on var ordering
+        vector<ConstraintSet> completed_constraints; // depends on var ordering
     } plan;
 
     virtual void Solve();
     virtual void AssignSuccessful();    
     virtual bool AssignUnsuccessful();    
-    SelectNextValueRV TryFindNextConsistentValue( VariableId my_var );
+    SelectNextValueRV TryFindNextConsistentValue( VariableId my_var, int my_var_index );
     CCRV ConsistencyCheck( const Assignments &assigns,
                            const ConstraintSet &to_test ) const;
     void ShowBestAssignment();
     void TimedOperations();
     void CheckPlan() const;
-    set<VariableId> GetAffectedVariables( ConstraintSet constraints );
+    set<int> GetAffectedVariableIndices( ConstraintSet constraints );
 
     void Dump() const;
 

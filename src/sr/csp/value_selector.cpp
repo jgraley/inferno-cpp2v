@@ -17,14 +17,15 @@
 
 using namespace CSP;
 
-ValueSelector::ValueSelector( const map<VariableId, ConstraintSet> &affected_constraints,
+ValueSelector::ValueSelector( const vector<ConstraintSet> &affected_constraints,
                               const SR::TheKnowledge *knowledge_,
                               Assignments &assignments_,
-                              VariableId var ) :
+                              VariableId var,
+                              int var_index ) :
     knowledge( knowledge_ ),
     assignments( assignments_ ),
     my_var( var ),
-    constraints_to_query( affected_constraints.at(my_var) )
+    constraints_to_query( affected_constraints.at(var_index) )
 {
     ASSERT( assignments.count(my_var) == 0 );
     INDENT("V");

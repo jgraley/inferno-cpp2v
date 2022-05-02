@@ -38,11 +38,12 @@ ReferenceSolver::~ReferenceSolver()
 void ReferenceSolver::Plan::DeduceVariables()
 {   
     set<VariableId> free_variables_set;
-    completed_constraints.clear();
-    for( VariableId v : free_variables )   
+    free_variables_to_indices.clear();
+    for( int i=0; i<free_variables.size(); i++ )   
     {    
+        const VariableId &v = free_variables.at(i);
         InsertSolo(free_variables_set, v); // Checks that elements of the list are unique
-        (void)completed_constraints[v]; // ensure there is a ConstraintSet for every var even if empty
+        free_variables_to_indices[v] = i;
     }
 
     set<VariableId> forced_variables_set;
@@ -51,7 +52,8 @@ void ReferenceSolver::Plan::DeduceVariables()
 
     ASSERT( IntersectionOf( free_variables_set, forced_variables_set ).empty() );
  
-    affected_constraints.clear();
+    completed_constraints.resize( free_variables.size() );
+    affected_constraints.resize( free_variables.size() );
     fully_forced_constraint_set.clear();
  
     set<VariableId> free_variables_used_by_constraints; // For a cross-check
@@ -62,14 +64,18 @@ void ReferenceSolver::Plan::DeduceVariables()
         
         set<VariableId> c_vars = c->GetVariables();
         set<VariableId> c_free_vars;
+        set<int> c_free_var_indices;
         for( VariableId v : c_vars )
         {
             if( free_variables_set.count(v) == 1 )
+            {
                 c_free_vars.insert(v);
+                c_free_var_indices.insert( free_variables_to_indices.at(v) );
+            }
         }        
         for( VariableId v : c_free_vars )
         {
-            affected_constraints[v].insert(c);
+            affected_constraints[free_variables_to_indices.at(v)].insert(c);
             if( free_variables_used_by_constraints.count(v) == 0 )
                 free_variables_used_by_constraints.insert( v );
         }
@@ -82,8 +88,9 @@ void ReferenceSolver::Plan::DeduceVariables()
         {
             // Which variables complete this contraint
             set<VariableId> cumulative_free_vars;
-            for( VariableId v : free_variables )
+            for( VariableId v : free_variables )            
             {
+                int v_index = free_variables_to_indices.at(v);
                 cumulative_free_vars.insert(v);
                 bool got_all_c_free_vars = true;
                 for( VariableId v : c_free_vars )
@@ -91,13 +98,13 @@ void ReferenceSolver::Plan::DeduceVariables()
                         got_all_c_free_vars = false;
                 if( got_all_c_free_vars )
                 {
-                    completed_constraints.at(v).insert(c);
+                    completed_constraints.at(v_index).insert(c);
                     break; // we're done - don't insert c for any more vars
                 }
             }
         }
         
-        free_vars_for_constraint[c] = c_free_vars;
+        free_var_indices_for_constraint[c] = c_free_var_indices;
     }
     
     TRACE("Variables supplied by engine: cross-checking\n");
@@ -199,7 +206,7 @@ void ReferenceSolver::Solve()
     
     // Selector for first variable    
     value_selectors[plan.free_variables.front()] = 
-        make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );
+        make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, plan.free_variables_to_indices.at(*current_var_it) );
     success_count[plan.free_variables.front()] = 0;
     TRACEC("Made selector for ")(*current_var_it)("\n");
 
@@ -207,7 +214,7 @@ void ReferenceSolver::Solve()
     {
         Value value;
         ConstraintSet unsatisfied;
-        tie(value, unsatisfied) = TryFindNextConsistentValue(*current_var_it);        
+        tie(value, unsatisfied) = TryFindNextConsistentValue(*current_var_it, plan.free_variables_to_indices.at(*current_var_it));        
 
         if( !value ) // no consistent value
         {
@@ -238,7 +245,7 @@ void ReferenceSolver::AssignSuccessful()
     if( current_var_it != plan.free_variables.end() ) // new variable
     {
         value_selectors[*current_var_it] = 
-            make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it );     
+            make_shared<ValueSelector>( plan.affected_constraints, knowledge, assignments, *current_var_it, plan.free_variables_to_indices.at(*current_var_it) );     
         success_count[*current_var_it] = 0;
         TRACEC("Advanced to and made selector for ")(*current_var_it)("\n");
     }
@@ -270,12 +277,12 @@ bool ReferenceSolver::AssignUnsuccessful()
 }
 
 
-ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( VariableId my_var )
+ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( VariableId my_var, int my_var_index )
 {
     INDENT("N");    
     TRACE("Finding value for variable ")(my_var)("\n");
-
-    const ConstraintSet &constraints_to_test = plan.completed_constraints.at(my_var);
+    
+    const ConstraintSet &constraints_to_test = plan.completed_constraints.at(my_var_index);
 
     ConstraintSet all_unsatisfied;     
     int values_tried_count = 0;
@@ -283,12 +290,6 @@ ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( 
     while( Value value = value_selectors.at(my_var)->GetNextValue() )
     {       
         assignments[my_var] = value;
-        
-        ASSERT( plan.completed_constraints.count(my_var) == 1 )
-              ("\nfree_variables")(plan.free_variables)
-              ("\naffected_constraints:\n")(plan.affected_constraints)
-              ("\ncompleted_constraints:\n")(plan.completed_constraints)
-              ("\ncurrent_var: ")(my_var);
               
         bool ok;
         ConstraintSet unsatisfied;     
@@ -389,14 +390,10 @@ void ReferenceSolver::CheckPlan() const
     set<VariableId> variables_used;
     for( shared_ptr<Constraint> c : plan.constraints )
     {
-        set<VariableId> cfv = plan.free_vars_for_constraint.at(c);
-        for( VariableId v : cfv )
+        set<int> cfv = plan.free_var_indices_for_constraint.at(c);
+        for( int i : cfv )
         {
-            ASSERT( find( plan.free_variables.begin(), plan.free_variables.end(), v ) != plan.free_variables.end() )
-                  ("Planning error: ")(c)(" is missing variables\n")
-                  ("expecting ")(cfv)("\n")
-                  ("provided ")(plan.free_variables)("\n");
-            variables_used.insert( v );
+            variables_used.insert( plan.free_variables.at(i) );
         }
     }
     for( VariableId v : plan.free_variables )
@@ -408,12 +405,12 @@ void ReferenceSolver::CheckPlan() const
 }
 
 
-set<VariableId> ReferenceSolver::GetAffectedVariables( ConstraintSet constraints )
+set<int> ReferenceSolver::GetAffectedVariableIndices( ConstraintSet constraints )
 {
-    set<VariableId> all_vars;
+    set<int> all_var_indices;
     for( shared_ptr<Constraint> c : constraints )
-        all_vars = UnionOf(all_vars, plan.free_vars_for_constraint.at(c));
-    return all_vars;            
+        all_var_indices = UnionOf(all_var_indices, plan.free_var_indices_for_constraint.at(c));
+    return all_var_indices;            
 } 
 
 
