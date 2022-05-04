@@ -21,7 +21,7 @@ shared_ptr<SymbolResultInterface> ComplementOperator::Evaluate( const EvalKit &k
                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    shared_ptr<SymbolSetResult> asr = make_shared<SymbolSetResult>( ar );
+    shared_ptr<SetResult> asr = make_shared<SetResult>( ar );
     return asr->GetComplement();
 }
 
@@ -54,10 +54,10 @@ list<shared_ptr<SymbolExpression>> UnionOperator::GetSymbolOperands() const
 shared_ptr<SymbolResultInterface> UnionOperator::Evaluate( const EvalKit &kit,
                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
-    list<shared_ptr<SymbolSetResult>> ssrs;
+    list<shared_ptr<SetResult>> ssrs;
     for( shared_ptr<SymbolResultInterface> ar : op_results )       
-        ssrs.push_back( make_shared<SymbolSetResult>( ar ) );
-    return SymbolSetResult::GetUnion( ssrs );
+        ssrs.push_back( make_shared<SetResult>( ar ) );
+    return SetResult::GetUnion( ssrs );
 }
 
 
@@ -94,10 +94,10 @@ list<shared_ptr<SymbolExpression>> IntersectionOperator::GetSymbolOperands() con
 shared_ptr<SymbolResultInterface> IntersectionOperator::Evaluate( const EvalKit &kit,
                                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
-    list<shared_ptr<SymbolSetResult>> ssrs;
+    list<shared_ptr<SetResult>> ssrs;
     for( shared_ptr<SymbolResultInterface> ar : op_results )       
-        ssrs.push_back( make_shared<SymbolSetResult>( ar ) );
-    return SymbolSetResult::GetIntersection( ssrs );
+        ssrs.push_back( make_shared<SetResult>( ar ) );
+    return SetResult::GetIntersection( ssrs );
 }
 
 
@@ -135,7 +135,7 @@ shared_ptr<SymbolResultInterface> AllGreaterOperator::Evaluate( const EvalKit &k
                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<SymbolRangeResult>( kit.knowledge, ar->GetOnlyXLink(), false, SR::XLink(), false );
+    return make_shared<RangeResult>( kit.knowledge, ar->GetOnlyXLink(), false, SR::XLink(), false );
 }
 
 
@@ -168,7 +168,7 @@ shared_ptr<SymbolResultInterface> AllLessOperator::Evaluate( const EvalKit &kit,
                                                              const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<SymbolRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), false );
+    return make_shared<RangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), false );
 }
 
 
@@ -201,7 +201,7 @@ shared_ptr<SymbolResultInterface> AllGreaterOrEqualOperator::Evaluate( const Eva
                                                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<SymbolRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, SR::XLink(), false );
+    return make_shared<RangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, SR::XLink(), false );
 }
 
 
@@ -234,7 +234,7 @@ shared_ptr<SymbolResultInterface> AllLessOrEqualOperator::Evaluate( const EvalKi
                                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
     shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<SymbolRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), true );
+    return make_shared<RangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), true );
 }
 
 
@@ -245,6 +245,39 @@ string AllLessOrEqualOperator::Render() const
 
 
 Expression::Precedence AllLessOrEqualOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}
+
+// ------------------------- AllEquivalentOperator --------------------------
+
+AllEquivalentOperator::AllEquivalentOperator( shared_ptr<SymbolExpression> a_ ) :
+    a( a_ )
+{
+}
+
+    
+list<shared_ptr<SymbolExpression>> AllEquivalentOperator::GetSymbolOperands() const
+{
+    return {a};
+}
+
+
+shared_ptr<SymbolResultInterface> AllEquivalentOperator::Evaluate( const EvalKit &kit,
+                                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+{
+    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
+    return make_shared<EquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );
+}
+
+
+string AllEquivalentOperator::Render() const
+{
+    return "{≡" + RenderForMe(a) + "}";
+}
+
+
+Expression::Precedence AllEquivalentOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
 }

@@ -233,7 +233,7 @@ list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPo
 
 
 shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
-                                                                      const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
     // IEEE 754 All inequalities result in false if an operand is NaS
@@ -769,7 +769,7 @@ list<shared_ptr<SymbolExpression> *> EquivalentOperator::GetSymbolOperandPointer
 shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propogates 
+    // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
@@ -783,6 +783,31 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
     // within the full arrowhead model (cf IndexComparisonOperator).
     bool res = ( equivalence_relation.Compare(ra->GetOnlyXLink(), rb->GetOnlyXLink()) == EQUAL );
     return make_shared<BooleanResult>( res );    
+}
+
+
+shared_ptr<Expression> EquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                                 shared_ptr<BooleanExpression> to_equal ) const
+{
+#if 1
+    return nullptr;
+#endif    
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+        
+    shared_ptr<SymbolExpression> rb = make_shared<AllGreaterOperator>(b);
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, rb );
+    if( a_solution )
+        return a_solution;
+    
+    shared_ptr<SymbolExpression> ra = make_shared<AllGreaterOperator>(a);   
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, ra );
+    if( b_solution )
+        return b_solution;
+    
+    return nullptr;
 }
 
 

@@ -112,7 +112,7 @@ public:
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;
     
-    // Child-to-parent map
+    // Child-to-nugget-of-knowledge map
     unordered_map<XLink, Nugget> nuggets;
 
 private:    

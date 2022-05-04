@@ -1,5 +1,6 @@
 #include "result.hpp"
-#include "the_knowledge.hpp"
+
+#include "common/orderable.hpp"
 
 using namespace SYM;
 
@@ -106,18 +107,18 @@ string SymbolResult::GetTrace() const
         return "NOT_A_SYMBOL";
 }
 
-// ------------------------- SymbolSetResult --------------------------
+// ------------------------- SetResult --------------------------
 
-SymbolSetResult::SymbolSetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
+SetResult::SetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
     xlinks( xlinks_ ),
     complement_flag( complement_flag_ )
 {
 }
 
 
-SymbolSetResult::SymbolSetResult( shared_ptr<SymbolResultInterface> other )
+SetResult::SetResult( shared_ptr<SymbolResultInterface> other )
 {
-    if( auto ssr = dynamic_pointer_cast<SymbolSetResult>(other) )
+    if( auto ssr = dynamic_pointer_cast<SetResult>(other) )
     {
         xlinks = ssr->xlinks;
         complement_flag = ssr->complement_flag;
@@ -131,25 +132,25 @@ SymbolSetResult::SymbolSetResult( shared_ptr<SymbolResultInterface> other )
     }
     else
     {
-        ASSERTS(false)("Don't know how to make a SymbolSetResult out of ")(*other);
+        ASSERTS(false)("Don't know how to make a SetResult out of ")(*other);
     }
 }
 
 
-bool SymbolSetResult::IsDefinedAndUnique() const
+bool SetResult::IsDefinedAndUnique() const
 {
     return !complement_flag && xlinks.size() == 1;
 }
 
 
-SR::XLink SymbolSetResult::GetOnlyXLink() const
+SR::XLink SetResult::GetOnlyXLink() const
 {
     ASSERT( !complement_flag )("Is complement so not unique");
     return OnlyElementOf(xlinks);
 }
 
 
-bool SymbolSetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool SetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {
     if( complement_flag ) // Refusing to extensionalise a complement set
         return false;
@@ -158,24 +159,24 @@ bool SymbolSetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool SymbolSetResult::operator==( const SymbolResultInterface &other ) const
+bool SetResult::operator==( const SymbolResultInterface &other ) const
 {
     auto o = GET_THAT_POINTER(&other);
     return o && xlinks == o->xlinks && complement_flag==o->complement_flag;
 }
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::GetComplement() const
+shared_ptr<SetResult> SetResult::GetComplement() const
 {
-    return make_shared<SymbolSetResult>(xlinks, !complement_flag);
+    return make_shared<SetResult>(xlinks, !complement_flag);
 }
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::GetUnion( list<shared_ptr<SymbolSetResult>> ops )
+shared_ptr<SetResult> SetResult::GetUnion( list<shared_ptr<SetResult>> ops )
 {
     int n = ops.size();
     int n_comp = 0;
-    for( shared_ptr<SymbolSetResult> op : ops )
+    for( shared_ptr<SetResult> op : ops )
         n_comp += op->complement_flag ? 1 : 0;
 
     if( n_comp > 0 )
@@ -185,11 +186,11 @@ shared_ptr<SymbolSetResult> SymbolSetResult::GetUnion( list<shared_ptr<SymbolSet
 }
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::GetIntersection( list<shared_ptr<SymbolSetResult>> ops )
+shared_ptr<SetResult> SetResult::GetIntersection( list<shared_ptr<SetResult>> ops )
 {
     int n = ops.size();
     int n_comp = 0;
-    for( shared_ptr<SymbolSetResult> op : ops )
+    for( shared_ptr<SetResult> op : ops )
         n_comp += op->complement_flag ? 1 : 0;
 
     if( n_comp == n )
@@ -199,42 +200,42 @@ shared_ptr<SymbolSetResult> SymbolSetResult::GetIntersection( list<shared_ptr<Sy
 }
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::DeMorgan( function<shared_ptr<SymbolSetResult>( list<shared_ptr<SymbolSetResult>> )> lambda,
-                                                       list<shared_ptr<SymbolSetResult>> ops )
+shared_ptr<SetResult> SetResult::DeMorgan( function<shared_ptr<SetResult>( list<shared_ptr<SetResult>> )> lambda,
+                                                       list<shared_ptr<SetResult>> ops )
 {
-    list<shared_ptr<SymbolSetResult>> cops;
-    for( shared_ptr<SymbolSetResult> op : ops )
+    list<shared_ptr<SetResult>> cops;
+    for( shared_ptr<SetResult> op : ops )
         cops.push_back( op->GetComplement() );
 
-    shared_ptr<SymbolSetResult> cres = lambda(cops);
+    shared_ptr<SetResult> cres = lambda(cops);
 
     return cres->GetComplement();
 }                                                       
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::UnionCore( list<shared_ptr<SymbolSetResult>> ops )
+shared_ptr<SetResult> SetResult::UnionCore( list<shared_ptr<SetResult>> ops )
 {
     set<SR::XLink> result_xlinks;
-    for( shared_ptr<SymbolSetResult> op : ops )
+    for( shared_ptr<SetResult> op : ops )
     {
         ASSERTS( !op->complement_flag )("UnionCore requires no complements");
         result_xlinks = UnionOf( result_xlinks, op->xlinks );
     }
-    return make_shared<SymbolSetResult>( result_xlinks );   
+    return make_shared<SetResult>( result_xlinks );   
 }
 
 
-shared_ptr<SymbolSetResult> SymbolSetResult::IntersectionCore( list<shared_ptr<SymbolSetResult>> ops )
+shared_ptr<SetResult> SetResult::IntersectionCore( list<shared_ptr<SetResult>> ops )
 {
-    shared_ptr<SymbolSetResult> non_comp_op;
-    for( shared_ptr<SymbolSetResult> op : ops )
+    shared_ptr<SetResult> non_comp_op;
+    for( shared_ptr<SetResult> op : ops )
         if( !op->complement_flag )
             non_comp_op = op;
     ASSERTS( non_comp_op )("IntersectionCore requires at least one non-complement");
 
     // DifferenceOf() is the key to combining complemented with non-complimented
     set<SR::XLink> result_xlinks = non_comp_op->xlinks;
-    for( shared_ptr<SymbolSetResult> op : ops )
+    for( shared_ptr<SetResult> op : ops )
     {
         if( op == non_comp_op )
             continue; // got this one already
@@ -243,11 +244,11 @@ shared_ptr<SymbolSetResult> SymbolSetResult::IntersectionCore( list<shared_ptr<S
         else
             result_xlinks = IntersectionOf( result_xlinks, op->xlinks );            
     }
-    return make_shared<SymbolSetResult>( result_xlinks );
+    return make_shared<SetResult>( result_xlinks );
 }
 
 
-string SymbolSetResult::GetTrace() const
+string SetResult::GetTrace() const
 {
     string s;
     if( complement_flag )
@@ -256,9 +257,9 @@ string SymbolSetResult::GetTrace() const
     return s;
 }
 
-// ------------------------- SymbolRangeResult --------------------------
+// ------------------------- RangeResult --------------------------
 
-SymbolRangeResult::SymbolRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+RangeResult::RangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
     knowledge( knowledge_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
@@ -268,19 +269,19 @@ SymbolRangeResult::SymbolRangeResult( const SR::TheKnowledge *knowledge_, SR::XL
 }
 
 
-bool SymbolRangeResult::IsDefinedAndUnique() const
+bool RangeResult::IsDefinedAndUnique() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-SR::XLink SymbolRangeResult::GetOnlyXLink() const
+SR::XLink RangeResult::GetOnlyXLink() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-bool SymbolRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool RangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
     SR::TheKnowledge::DepthFirstOrderedIt it_lower, it_upper;
     
@@ -311,13 +312,13 @@ bool SymbolRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool SymbolRangeResult::operator==( const SymbolResultInterface &other ) const
+bool RangeResult::operator==( const SymbolResultInterface &other ) const
 {
     ASSERTFAIL("TODO");
 }
 
 
-string SymbolRangeResult::GetTrace() const
+string RangeResult::GetTrace() const
 {
     list<string> restrictions;
     
@@ -327,4 +328,47 @@ string SymbolRangeResult::GetTrace() const
         restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
         
     return Join(restrictions, " & ", "{", "}");
+}
+
+// ------------------------- EquivalenceClassResult --------------------------
+
+EquivalenceClassResult::EquivalenceClassResult( const SR::TheKnowledge *knowledge_, SR::XLink class_example_ ) :
+    knowledge( knowledge_ ),
+    class_example( class_example_ )
+{
+}
+
+
+bool EquivalenceClassResult::IsDefinedAndUnique() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+SR::XLink EquivalenceClassResult::GetOnlyXLink() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+{ 
+    links.clear();
+    TRACE("Searching unordered domain for equaivalent XLinks\n")(knowledge->unordered_domain)("\n");
+    for( SR::XLink xlink : knowledge->unordered_domain )    
+        if( equivalence_relation.Compare(xlink, class_example) == Orderable::EQUAL )
+            links.insert( xlink );
+    return true;
+}
+
+
+bool EquivalenceClassResult::operator==( const SymbolResultInterface &other ) const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+string EquivalenceClassResult::GetTrace() const
+{
+    return "{≡" + class_example.GetTrace() + "}";
 }

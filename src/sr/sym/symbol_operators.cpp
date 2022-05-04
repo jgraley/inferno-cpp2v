@@ -488,7 +488,7 @@ shared_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
         child_xlinks.insert( child_xlink );
     }
     
-    return make_shared<SymbolSetResult>( child_xlinks );
+    return make_shared<SetResult>( child_xlinks );
 }
 
 

@@ -20,7 +20,7 @@ class TheKnowledge;
 
 namespace SYM
 {
-class SymbolSetResult;
+class SetResult;
 };
 
 namespace CSP
@@ -82,7 +82,7 @@ public:
      * 
      * @note the returned set is allowed to contain inconsistent values. 
      */
-    virtual shared_ptr<SYM::SymbolSetResult> GetSuggestedValues( const Assignments &assignments,
+    virtual shared_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
                                                                  const VariableId &var ) const = 0;        
     
     string GetTrace() const;

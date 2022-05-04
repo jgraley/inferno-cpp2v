@@ -119,7 +119,7 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
 }
 
 
-shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
+shared_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
                                                                          const VariableId &var ) const
 {                                 
     ASSERT( var );
@@ -137,7 +137,7 @@ shared_ptr<SYM::SymbolSetResult> SymbolicConstraint::GetSuggestedValues( const A
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(var).at(givens);
     shared_ptr<SYM::SymbolResultInterface> hr = hint_expression->Evaluate( kit );
     ASSERT( hr );
-    shared_ptr<SYM::SymbolSetResult> hint_result = dynamic_pointer_cast<SYM::SymbolSetResult>(hr);
+    shared_ptr<SYM::SetResult> hint_result = dynamic_pointer_cast<SYM::SetResult>(hr);
     ASSERT( hint_result );
     return hint_result;
 }
