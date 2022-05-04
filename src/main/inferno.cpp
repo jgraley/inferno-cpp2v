@@ -496,7 +496,7 @@ int main( int argc, char *argv[] )
     HitCount::Enable( ReadArgs::trace_hits );
 
     // Do self-tests (unit tests) if requested
-    if( ReadArgs::selftest )
+    if( ReadArgs::unit_tests )
     {
         SelfTest();
         return EXIT_SUCCESS;

@@ -22,7 +22,8 @@ bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
 bool ReadArgs::trace_no_stack = false;
 string ReadArgs::hits_format;
-bool ReadArgs::selftest = false;
+bool ReadArgs::unit_tests = false;
+bool ReadArgs::csp_test = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
 bool ReadArgs::quitafter = false;
@@ -47,7 +48,8 @@ void ReadArgs::Usage(string msg)
                     "            Note: use -th? for help on <fmt>.\n"
                     "-tq         No output to console.\n"
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
-    		        "-s          Run self-tests and quit.\n"
+    		        "-su         Run unit tests and quit.\n"
+    		        "-sc         Enable CSV solver self-test.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, master match 2, first slave match 3.\n"    
@@ -63,8 +65,7 @@ void ReadArgs::Usage(string msg)
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
-                    "-uc         Use CSP solver.\n"
-                    "-ud         Split Disjunctions into 2-choice during pattern transformations.\n",
+                    "-u<x>       Use feature x (no x defined currently).\n",
     		        exename.c_str() );
     exit(1);
 }
@@ -191,7 +192,13 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='s' )
         {
-            selftest = true;
+            char assert_option = argv[curarg][2];
+            if( assert_option=='u' )
+                unit_tests = true;
+            else if( assert_option=='c' )
+                csp_test = true;
+            else
+                Usage("Unknown argument after -s");
         }
         else if( option=='a' )
         {

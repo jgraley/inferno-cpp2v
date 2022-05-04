@@ -188,8 +188,7 @@ void ReferenceSolver::Run( const SolutionReportFunction &solution_report_functio
     }
     else
     {                
-        TRACE("Simple solver matched on forced variables; solving for frees\n");  
-        current_var_index = 0;
+        TRACE("Simple solver matched on forced variables; solving for frees\n");          
         Solve();    
     }
 
@@ -204,12 +203,13 @@ void ReferenceSolver::Solve()
     TRACEC("Starting at X")(current_var_index)("\n");
     
     // Selector for first variable    
-    value_selectors[0] = 
+    current_var_index = 0;
+    value_selectors[current_var_index] = 
         make_shared<ValueSelector>( plan.affected_constraints.at(current_var_index), 
                                     knowledge, 
                                     assignments, 
                                     plan.free_variables.at(current_var_index) );
-    success_count[0] = 0;
+    success_count[current_var_index] = 0; 
     TRACEC("Made selector for X")(current_var_index)("\n");
 
     while(true)
@@ -228,7 +228,7 @@ void ReferenceSolver::Solve()
                 rejection_report_function( assignments );
 
             if( cease )
-                goto CEASE;
+                break;
         }        
         else
         {
@@ -297,14 +297,14 @@ ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( 
     {       
         assignments[plan.free_variables.at(my_var_index)] = value;
               
-        bool ok;
+        bool consistent;
         ConstraintSet unsatisfied;     
-        tie(ok, unsatisfied) = ConsistencyCheck( assignments, constraints_to_test );        
-        ASSERT( ok || !unsatisfied.empty() );
+        tie(consistent, unsatisfied) = ConsistencyCheck( assignments, constraints_to_test );        
+        ASSERT( consistent || !unsatisfied.empty() );
 
         values_tried_count++;
         all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);      
-        if( ok )
+        if( consistent )
         {
             TRACEC("Value is ")(value)("\n");
             return make_pair(value, all_unsatisfied);
@@ -320,7 +320,7 @@ ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( 
 
 
 ReferenceSolver::CCRV ReferenceSolver::ConsistencyCheck( const Assignments &assignments,
-                                                   const ConstraintSet &to_test ) const 
+                                                         const ConstraintSet &to_test ) const 
 {
     ConstraintSet unsatisfied;
     bool matched = true;

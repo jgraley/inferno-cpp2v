@@ -4,6 +4,7 @@
 #include "reference_solver.hpp"
 #include "backjumping_solver.hpp"
 #include "solver_test.hpp"
+#include "common/read_args.hpp"
 
 using namespace CSP;
 
@@ -15,15 +16,18 @@ shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr
                                                      free_variables, 
                                                      forced_variables );
 
-#if 0
-    auto refalg = make_shared<CSP::ReferenceSolver>( constraints, 
-                                                     free_variables, 
-                                                     forced_variables );
+    if( ReadArgs::csp_test )
+    {
+        auto refalg = make_shared<CSP::ReferenceSolver>( constraints, 
+                                                         free_variables, 
+                                                         forced_variables );
 
-    auto testalg = make_shared<CSP::SolverTest>( refalg, salg );
+        auto testalg = make_shared<CSP::SolverTest>( refalg, salg );
 
-    return make_shared<CSP::SolverHolder>( testalg );
-#else
-    return make_shared<CSP::SolverHolder>( salg );
-#endif    
+        return make_shared<CSP::SolverHolder>( testalg );
+    }
+    else
+    {
+        return make_shared<CSP::SolverHolder>( salg );
+    }
 }                                                       

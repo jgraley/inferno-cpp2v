@@ -38,7 +38,8 @@ public:
     static bool runonlyenable;
     static int repetitions;
     static bool rep_error;
-    static bool selftest;
+    static bool unit_tests;
+    static bool csp_test;
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
