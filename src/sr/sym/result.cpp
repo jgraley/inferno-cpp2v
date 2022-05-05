@@ -353,11 +353,15 @@ SR::XLink EquivalenceClassResult::GetOnlyXLink() const
 
 bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    links.clear();
-    TRACE("Searching unordered domain for equaivalent XLinks\n")(knowledge->unordered_domain)("\n");
-    for( SR::XLink xlink : knowledge->unordered_domain )    
-        if( equivalence_relation.Compare(xlink, class_example) == Orderable::EQUAL )
-            links.insert( xlink );
+    // Use multiset::equal_range() with our EquivalenceRelation as an
+    // ordering in order to get to the set of equivalent elements without
+    // having to iterate over the whole domain. We're still gaining entropy
+    // here though. It would be faster to get to the range via nuggests 
+    // (because XLink native comparison will be faster than SimpleCompare)
+    // but class_example might be an arbitrary force, and not in the domain.
+    // See #522 #525
+    auto p = knowledge->equivalence_ordered_domain.equal_range( class_example );
+    links = move( set<SR::XLink>( p.first, p.second ) );
     return true;
 }
 

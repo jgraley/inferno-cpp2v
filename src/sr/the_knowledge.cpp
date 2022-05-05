@@ -22,10 +22,9 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 
 void TheKnowledge::Clear()
 {
-#ifndef TRACE_KNOWLEDGE_DELTAS
     unordered_domain.clear();
-#endif
     depth_first_ordered_domain.clear();
+    equivalence_ordered_domain.clear();
     nuggets.clear();
     if( domain_extension_classes )
         domain_extension_classes->Clear();
@@ -37,6 +36,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     // Both should be cleared together
     unordered_domain.clear();
     depth_first_ordered_domain.clear();
+    equivalence_ordered_domain.clear();
     domain_extension_classes = make_shared<QuotientSet>();
     nuggets.clear();
     current_index = 0;
@@ -120,6 +120,7 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     // Update domain 
     InsertSolo( unordered_domain, xlink );
     depth_first_ordered_domain.push_back(xlink);
+    equivalence_ordered_domain.insert(xlink);
     
     DepthFirstOrderedIt it = depth_first_ordered_domain.end();
     --it; // I know this is OK because we just pushed to ordered_domain
