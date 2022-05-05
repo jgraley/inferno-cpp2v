@@ -12,6 +12,7 @@ using namespace SR;
  
 #define ALIGNMENT_BITS 3 
 
+// Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
 
 //////////////////////////// PatternLink ///////////////////////////////

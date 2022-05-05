@@ -537,8 +537,8 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
         // distinct OK because this only runs once per solve
         ASSERT( master_solution->count(link) == 1 )
               ("Master proxy link ")(link)(" not in:\n")(master_solution)("\n");
-        TreePtr<Node> keynode = master_solution->at(link).GetChildX();
-        master_and_root_links[link] = XLink::CreateDistinct(keynode);
+        // Used to use CreateDistinct, #523 case 1
+        master_and_root_links[link] = master_solution->at(link);
     }
     master_and_root_links[plan.root_plink] = root_xlink;
     
