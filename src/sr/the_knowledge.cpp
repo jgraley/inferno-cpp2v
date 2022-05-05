@@ -5,6 +5,14 @@
 using namespace SR;    
 
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
+//#define TRACE_KNOWLEDGE_DELTAS
+
+
+#ifdef TRACE_KNOWLEDGE_DELTAS
+// Global because there are different knowledges owned by different SCR Engines
+unordered_set<XLink> previous_unordered_domain;
+#endif    
+
 
 void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 {
@@ -14,7 +22,9 @@ void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
 
 void TheKnowledge::Clear()
 {
+#ifndef TRACE_KNOWLEDGE_DELTAS
     unordered_domain.clear();
+#endif
     depth_first_ordered_domain.clear();
     nuggets.clear();
     if( domain_extension_classes )
@@ -23,7 +33,7 @@ void TheKnowledge::Clear()
 
     
 void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
-{   
+{      
     // Both should be cleared together
     unordered_domain.clear();
     depth_first_ordered_domain.clear();
@@ -42,6 +52,14 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     
     if( es > is )
         TRACE("Knowledge size %d -> %d\n", is, es);
+    
+#ifdef TRACE_KNOWLEDGE_DELTAS
+    TRACE("Knowledge regenerated: new XLinks:\n")
+         ( DifferenceOf(unordered_domain, previous_unordered_domain) )
+         ("\nRemoved XLinks:\n")
+         ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
+    previous_unordered_domain = unordered_domain;
+#endif
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
     EquivalenceRelation e;
@@ -257,9 +275,23 @@ string TheKnowledge::Nugget::GetTrace() const
 const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
 {
     ASSERT( xlink );
-    ASSERT( nuggets.count(xlink) > 0 )
+    ASSERT( HasNugget(xlink) )
           ("Knowledge: no nugget for ")(xlink)("\n");
     //      ("Nuggets: ")(nuggets);
     return nuggets.at(xlink);
+}
+
+
+bool TheKnowledge::HasNugget(XLink xlink) const
+{
+    ASSERT( xlink );
+    return nuggets.count(xlink) > 0;
+}
+
+
+bool TheKnowledge::HasNuggetOrIsSubcontainer(XLink xlink) const
+{
+    ASSERT( xlink );
+    return TreePtr<SubContainer>::DynamicCast(xlink.GetChildX()) || nuggets.count(xlink) > 0;
 }
 

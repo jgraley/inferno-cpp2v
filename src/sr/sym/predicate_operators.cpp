@@ -788,21 +788,18 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
 
 shared_ptr<Expression> EquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                                  shared_ptr<BooleanExpression> to_equal ) const
-{
-#if 1
-    return nullptr;
-#endif    
+{  
     // Can only deal with to_equal==TRUE
     auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
     if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
         
-    shared_ptr<SymbolExpression> rb = make_shared<AllGreaterOperator>(b);
+    shared_ptr<SymbolExpression> rb = make_shared<AllEquivalentOperator>(b);
     shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, rb );
     if( a_solution )
         return a_solution;
     
-    shared_ptr<SymbolExpression> ra = make_shared<AllGreaterOperator>(a);   
+    shared_ptr<SymbolExpression> ra = make_shared<AllEquivalentOperator>(a);   
     shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, ra );
     if( b_solution )
         return b_solution;

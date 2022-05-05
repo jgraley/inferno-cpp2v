@@ -89,6 +89,13 @@ public:
     };
     
     const Nugget &GetNugget(XLink xlink) const;
+    bool HasNugget(XLink xlink) const;
+    
+    // Bit of a hack: we're going to allow subcontainers to be used in
+    // symbolic evaluation for a while, even though we can't get
+    // nuggets for them because they are created on the fly. Ideally,
+    // we won't create X nodes on the fly.
+    bool HasNuggetOrIsSubcontainer(XLink xlink) const;
 
 private:
     void DetermineDomain( PatternLink root_plink, XLink root_xlink );

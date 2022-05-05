@@ -47,7 +47,9 @@ void TruthTableSolver::PreSolve()
 shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExpression> target,
                                                             const GivenSymbolSet &givens ) const
 {
-    TRACE("Solve equation: ")(equation->Render())(" for ")(target->Render())("\n");
+    TRACE("=====================================================\nSolve equation: ")(equation->Render())
+         (" for ")(target->Render())
+         (" given ")(givens)("\n");
     ASSERT( ttwp )("You need to have done a PreSolve() first\n");
     
     // Sanity: givens are all required by equation
@@ -124,6 +126,8 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExp
         auto pred = folded_ttwp.GetFrontPredicate(axis);
         controls.push_back( pred );
     }
+
+    TRACEC("Solution map:\n")(solution_map)("\n");
 
     // Make up the options for the big multiplexor using set operations on the solutions
     vector<shared_ptr<SymbolExpression>> options;
