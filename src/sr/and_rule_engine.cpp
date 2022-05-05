@@ -134,14 +134,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list);
-    solver = CreateSolverAndHolder( constraints_list, 
-                                    ToVector(free_normal_links_ordered), 
-                                    ToVector(forced_normal_links_ordered) );    
+    solver_holder = CreateSolverAndHolder( constraints_list, 
+                                           ToVector(free_normal_links_ordered), 
+                                           ToVector(forced_normal_links_ordered) );    
                                     
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
-    solver->Dump();    
-    solver->CheckPlan();   
+    solver_holder->Dump();    
+    solver_holder->CheckPlan();   
 
     // ------------------ Configure subordinates ---------------------
     // Do this last to keep all the rest of the planning trace/dumps
@@ -543,7 +543,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     master_and_root_links[plan.root_plink] = root_xlink;
     
     TRACE("Starting solver\n");
-    plan.solver->Start( master_and_root_links, knowledge );
+    plan.solver_holder->Start( master_and_root_links, knowledge );
 }
 
 
@@ -551,7 +551,7 @@ void AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
 {
     TRACE("GetNextCSPSolution()\n");
     SolutionMap csp_solution;
-    bool match = plan.solver->GetNextSolution( &csp_solution );        
+    bool match = plan.solver_holder->GetNextSolution( &csp_solution );        
     if( !match )
         throw NoSolution();
 

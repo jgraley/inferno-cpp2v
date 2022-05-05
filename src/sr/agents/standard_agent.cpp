@@ -347,7 +347,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
     auto keyer = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_sing_expr = MakeOver<ChildSingularOperator>( GetArchetypeNode(), plan_sing.itemise_index, keyer );
+    auto keyer_sing_expr = MakeOver<SingularChildOperator>( GetArchetypeNode(), plan_sing.itemise_index, keyer );
     auto candidate_expr = MakeOver<SymbolVariable>(plan_sing.plink);
     return keyer_sing_expr == candidate_expr;
 }                                  

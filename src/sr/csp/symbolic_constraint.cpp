@@ -120,21 +120,21 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
 
 
 shared_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
-                                                                         const VariableId &var ) const
+                                                                   const VariableId &target_var ) const
 {                                 
-    ASSERT( var );
+    ASSERT( target_var );
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
 
     SYM::TruthTableSolver::GivenSymbolSet givens;
     for( VariableId v : plan.variables )            
-        if( v != var && assignments.count(v) > 0 )
+        if( v != target_var && assignments.count(v) > 0 )
             givens.insert( v );
 
-    if( plan.suggestion_expressions.count(var)==0 ||
-        plan.suggestion_expressions.at(var).count(givens)==0 )
+    if( plan.suggestion_expressions.count(target_var)==0 ||
+        plan.suggestion_expressions.at(target_var).count(givens)==0 )
         return nullptr;
         
-    shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(var).at(givens);
+    shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(target_var).at(givens);
     shared_ptr<SYM::SymbolResultInterface> hr = hint_expression->Evaluate( kit );
     ASSERT( hr );
     shared_ptr<SYM::SetResult> hint_result = dynamic_pointer_cast<SYM::SetResult>(hr);

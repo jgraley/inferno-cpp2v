@@ -124,9 +124,9 @@ public:
     virtual string GetItemTypeName() const override;    
 };
 
-// ------------------------- ChildSingularOperator --------------------------
+// ------------------------- SingularChildOperator --------------------------
 
-class ChildSingularOperator : public ChildOperator
+class SingularChildOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;

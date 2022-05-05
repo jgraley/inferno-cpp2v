@@ -122,7 +122,7 @@ public:
         set< shared_ptr<SYM::BooleanExpression> > expressions_for_current_solve;
         map< set<PatternLink>, set<shared_ptr<SYM::BooleanExpression>> > expressions_condensed;
 
-        shared_ptr<CSP::SolverHolder> solver;
+        shared_ptr<CSP::SolverHolder> solver_holder;
         list<PatternLink> normal_and_boundary_links_preorder;
         
     private: // working variables in plan construction

@@ -275,9 +275,9 @@ string ChildCollectionFrontOperator::GetItemTypeName() const
     return "col front";
 }
 
-// ------------------------- ChildSingularOperator --------------------------
+// ------------------------- SingularChildOperator --------------------------
 
-shared_ptr<SymbolResultInterface> ChildSingularOperator::EvalFromItem( SR::XLink parent_xlink, 
+shared_ptr<SymbolResultInterface> SingularChildOperator::EvalFromItem( SR::XLink parent_xlink, 
                                                               Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a singular item
@@ -291,7 +291,7 @@ shared_ptr<SymbolResultInterface> ChildSingularOperator::EvalFromItem( SR::XLink
 }
 
 
-string ChildSingularOperator::GetItemTypeName() const
+string SingularChildOperator::GetItemTypeName() const
 {
     return "sing";
 }

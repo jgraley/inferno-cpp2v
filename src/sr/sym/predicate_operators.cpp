@@ -557,6 +557,33 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
 }
 
 
+shared_ptr<Expression> AllDiffOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+                                                              shared_ptr<BooleanExpression> to_equal ) const
+{  
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+        
+    list< shared_ptr<SymbolExpression> > e_others = sa;    
+    for( shared_ptr<SymbolExpression> e0 : sa )
+    {
+        e_others.pop_front(); // we will rotate e_others, leaving a gap that should co-incide with e0
+        
+        // target must differ from all others. So we want ¬ { e1, e2, e3, ... }. Union
+        // will act to compose this set if given singles.
+        auto r = make_shared<ComplementOperator>( make_shared<UnionOperator>(e_others) );
+        shared_ptr<Expression> solution = e0->TrySolveForToEqual( target, r );
+        if( solution )
+            return solution;
+        
+        e_others.push_back( e0 ); // rotating e_others
+    }
+
+    return nullptr;
+}
+
+
 bool AllDiffOperator::IsCommutative() const
 {
     return true; 
