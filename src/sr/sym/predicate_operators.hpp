@@ -68,8 +68,7 @@ private:
 
 // ------------------------- EqualOperator --------------------------
 
-// EqualOperator is in fact a more general "AllSame" operator, which 
-// seems to make natural sense.
+// This is an equation when assumed to evaluate to true. See #527
 class EqualOperator : public PredicateOperator
 {
 public:    

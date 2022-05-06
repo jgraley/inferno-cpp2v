@@ -429,8 +429,8 @@ static void TestTruthTableDefaultMMAX()
     // This test tries out the MMAX logic for a default MMAX agent (at the time of writing) (harder case)
     // Sat expression is ((x0==M) iff (x1==M)) && (x1!=M => x1==f(x0)).
     // Setting predicates p1:x0==M, p2:x1==M, p3:x1=f(x0),
-    // we get predicate equation (p1 iff p2) && (!p2 => p3).
-    // Each clause gives an equation that we can rule out
+    // we get predicate form (p1 iff p2) && (!p2 => p3).
+    // Each clause gives an expression that we can rule out
     // (but this last step is not necessary; we can get the info we need from repeated evaluation)
     
     // 3-D truth table incorporates predicates p1 to p3
@@ -443,7 +443,7 @@ static void TestTruthTableDefaultMMAX()
     t_analytic.SetSlice( {{1, false}, {2, false}}, false ); // !p2 => p3 aka p2 || p3
     TRACE("Initial truth table (after clauses)\n")( "\n"+t_analytic.Render({1, 2}, pred_labels, render_cell_size) );
     
-    // Filled in by brute force (repeated evaluation of the predicate equation)
+    // Filled in by brute force (repeated evaluation of the predicate form)
     TruthTable t_brute( 3, true );
     t_brute.Set( {false, false, false}, false ); 
     t_brute.Set( {false, false, true}, true ); 
@@ -474,13 +474,13 @@ static void TestTruthTableCoupling()
     // This test tries out the MMAX logic for a 2-coupling (at the time of writing)
     // Sat expression is ((x0==M) || (x1==M)) || (x0~~x1)).
     // Setting predicates p1:x0==M, p2:x1==M, p3:x0~~x1,
-    // we get predicate equation (p1 || p2 || p3).
+    // we get predicate form (p1 || p2 || p3).
     
     // 3-D truth table incorporates predicates p1 to p3
     TruthTable t( 3, true );
     TRACE("Constructed truth table\n")( "\n"+t.Render({1, 2}, pred_labels, render_cell_size) );
 
-    // Filled in by brute force (repeated evaluation of the predicate equation)
+    // Filled in by brute force (repeated evaluation of the predicate form)
     t.Set( {false, false, false}, false ); 
     t.Set( {false, false, true}, true ); 
     t.Set( {false, true, false}, true ); 
@@ -517,15 +517,15 @@ static void TestTruthTableDisjunction()
     // This test tries out the logic for a binary Disjunction agent (at the time of writing)
     // Sat expression is (x1==x0 && x2==M) || (x1==M && x2=x0).
     // Setting predicates p1:=x1==x0, p2:=x2==M, p3:=x1==M, p4:x2==x0
-    // we get predicate equation (p1 && p2) || (p3 && p4).
-    // And this implies equations (1) to (8) of the form eg !p1 => p3 and similar
+    // we get predicate form (p1 && p2) || (p3 && p4).
+    // And this implies expressions (1) to (8) of the form eg !p1 => p3 and similar
     // (but this last step is not necessary; we can get the info we need from repeated evaluation)
     
     // 4-D truth table incorporates predicates p1 to p4
     TruthTable t( 4, true );
     TRACE("Constructed truth table\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
-    // Filled in by analysis but could be repeated evaluation of the predicate equation
+    // Filled in by analysis but could be repeated evaluation of the predicate form
     t.SetSlice( {{0, false}, {2, false}}, false ); // (1) !p1 => p3 aka p1 || p3
     t.SetSlice( {{1, false}, {2, false}}, false ); // (3) !p2 => p3 aka p2 || p3
     t.SetSlice( {{1, false}, {3, false}}, false ); // (4) !p2 => p4 aka p2 || p4

@@ -13,25 +13,25 @@ using namespace SYM;
 
 // -------------------------- TruthTableSolver ----------------------------    
 
-TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> equation_ ) :
-    equation( equation_ )
+TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> initial_expression_ ) :
+    initial_expression( initial_expression_ )
 {
 }
 
 
 void TruthTableSolver::PreSolve()
 {
-    // Pre-solve need only be done once for a given equation (i.e. once
+    // Pre-solve need only be done once for a given initial expression (i.e. once
     // on a given instance of this class) and then any number of solves and/or
-    // get alt equation may be performed.
-    TRACE("Presolve equation: ")(equation->Render())("\n");
+    // get alt expression may be performed.
+    TRACE("Presolve expression: ")(initial_expression->Render())("\n");
     
     // Find the predicates and create a truth table of them
-    auto predicates = PredicateAnalysis::GetPredicates( equation );
+    auto predicates = PredicateAnalysis::GetPredicates( initial_expression );
     ttwp = make_unique<TruthTableWithPredicates>( predicates, true, label_var_name, counting_based );
-    TRACEC(RenderEquationInTermsOfPredNames())("\n");
+    TRACEC(RenderInitialExpressionInTermsOfPredNames())("\n");
     
-    // Constrain (set cells to false) by evaluating our equation while the predicates 
+    // Constrain (set cells to false) by evaluating our initial expression while the predicates 
     // are all forced to evaluate true or false according to the truth table indices.
     ConstrainByEvaluating();
     TRACEC(ttwp->Render( {} ))("\n");
@@ -44,19 +44,19 @@ void TruthTableSolver::PreSolve()
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::TrySolveEquationForGiven( shared_ptr<SymbolExpression> target,
-                                                                         const GivenSymbolSet &givens ) const
+shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<SymbolExpression> target,
+                                                                 const GivenSymbolSet &givens ) const
 {
-    TRACE("=====================================================\nSolve equation: ")(equation->Render())
+    TRACE("=====================================================\nSolve expression: ")(initial_expression->Render())
          (" for ")(target->Render())
          (" given ")(givens)("\n");
     ASSERT( ttwp )("You need to have done a PreSolve() first\n");
     
-    // Sanity: givens are all required by equation
-    ASSERT( DifferenceOf(givens, equation->GetRequiredVariables()).empty() );
+    // Sanity: givens are all required by initial expression
+    ASSERT( DifferenceOf(givens, initial_expression->GetRequiredVariables()).empty() );
     
-    // Sanity: target symbol is required by equation
-    ASSERT( DifferenceOf(target->GetRequiredVariables(), equation->GetRequiredVariables()).empty() );
+    // Sanity: target symbol is required by initial expression
+    ASSERT( DifferenceOf(target->GetRequiredVariables(), initial_expression->GetRequiredVariables()).empty() );
 
     // Sanity: target symbol is not a given
     ASSERT( IntersectionOf(target->GetRequiredVariables(), givens).empty() );
@@ -181,10 +181,10 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveEquationForGiven( shared_
 }
 
 
-shared_ptr<BooleanExpression> TruthTableSolver::GetAltEquationForTesting() const
+shared_ptr<BooleanExpression> TruthTableSolver::GetAltExpressionForTesting() const
 {
-    // We can create an equation after pre-solve using the truth table 
-    // which shouldevaluate the same as the origninal expression, for use as a test.
+    // We can create an expression after pre-solve using the truth table 
+    // which should evaluate the same as the initial expression, for use as a test.
     
     // We'll make a big consitional. Controls are the predicates.
     vector<shared_ptr<BooleanExpression>> controls;
@@ -231,7 +231,7 @@ void TruthTableSolver::ConstrainByEvaluating()
                 pred->SetForceResult( vr[j] );       
             
         // Evaluate to find out what the boolean connectives do with forced preds
-        shared_ptr<BooleanResult> eval_result = equation->Evaluate(kit);
+        shared_ptr<BooleanResult> eval_result = initial_expression->Evaluate(kit);
         
         // Rule out any evaluations that come out false
         if( !eval_result->IsDefinedAndTrue() )
@@ -471,7 +471,7 @@ string TruthTableSolver::PredicateName(int j)
 }
 
 
-string TruthTableSolver::RenderEquationInTermsOfPredNames()
+string TruthTableSolver::RenderInitialExpressionInTermsOfPredNames()
 {
     string s;
     vector<shared_ptr<string>> pred_names(ttwp->GetDegree());
@@ -481,6 +481,6 @@ string TruthTableSolver::RenderEquationInTermsOfPredNames()
         for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
             pred->SetForceRender( pred_names[j] ); // want to use later...
     }
-    s += "We require " + equation->Render() + "\n";
+    s += "We require " + initial_expression->Render() + "\n";
     return s;
 }

@@ -62,7 +62,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
                 if( indices.at(i) )
                     givens.insert( other_vars_vec[i] );
             
-            shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveEquationForGiven(target, givens);
+            shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveForGiven(target, givens);
             if( he )
             {
                 TRACEC("Given:\n")(givens)
@@ -108,8 +108,8 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
     ASSERT( result );
     if( plan.alt_expression_for_testing )
     {
-        // Test that the truth table solver's version of the sat equation
-        // agrees with the original sat equation
+        // Test that the truth table solver's version of the consistency expression
+        // agrees with the original one
         shared_ptr<SYM::BooleanResult> alt_result = plan.alt_expression_for_testing->Evaluate( kit );
         ASSERT( alt_result );
         ASSERT( *alt_result == *result )(*alt_result)(" != ")(*result);

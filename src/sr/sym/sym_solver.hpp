@@ -18,21 +18,21 @@ class TruthTableSolver
 public:
     typedef set<SR::PatternLink> GivenSymbolSet;
 
-    TruthTableSolver( shared_ptr<BooleanExpression> equation );
+    TruthTableSolver( shared_ptr<BooleanExpression> initial_expression );
     
     void PreSolve();
     
     /** 
-     * Attempt to solve our equation in a specified way, according to args.
+     * Attempt to solve our initial expression in a specified way, according to args.
      * 
      * @param target The expression to solve for, probably needs to be a SymbolVariable
      * @param givens A set of PatternLinks indicating which variables should be assumed evaluatable in the solution
      * 
      * @return solution expression or NULL
      */
-    shared_ptr<SymbolExpression> TrySolveEquationForGiven( shared_ptr<SymbolExpression> target,
-                                                           const GivenSymbolSet &givens ) const;
-    shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
+    shared_ptr<SymbolExpression> TrySolveForGiven( shared_ptr<SymbolExpression> target,
+                                                   const GivenSymbolSet &givens ) const;
+    shared_ptr<BooleanExpression> GetAltExpressionForTesting() const;
     
 private:
     void ConstrainByEvaluating();
@@ -47,11 +47,11 @@ private:
                                               shared_ptr<SymbolExpression> with ) const;
     // Logging
     string PredicateName(int i);
-    string RenderEquationInTermsOfPredNames();
+    string RenderInitialExpressionInTermsOfPredNames();
 
     const string label_var_name = "p";
     const int counting_based = 1;
-    const shared_ptr<BooleanExpression> equation;
+    const shared_ptr<BooleanExpression> initial_expression;
     unique_ptr<TruthTableWithPredicates> ttwp;
 };
 
