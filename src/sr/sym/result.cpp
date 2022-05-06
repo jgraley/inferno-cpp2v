@@ -327,7 +327,7 @@ string RangeResult::GetTrace() const
     if( upper )
         restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
         
-    return Join(restrictions, " & ", "{", "}");
+    return Join(restrictions, " & ", "{DFW", "}");
 }
 
 // ------------------------- EquivalenceClassResult --------------------------
@@ -376,3 +376,79 @@ string EquivalenceClassResult::GetTrace() const
 {
     return "{≡" + class_example.GetTrace() + "}";
 }
+
+// ------------------------- SimpleCompareRangeResult --------------------------
+
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+    knowledge( knowledge_ ),
+    lower( lower_ ),
+    lower_incl( lower_incl_ ),
+    upper( upper_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+bool SimpleCompareRangeResult::IsDefinedAndUnique() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+{ 
+    SR::TheKnowledge::EquivalenceOrderedIt it_lower, it_upper;
+    
+    if( lower )
+    {
+        if( lower_incl )
+            it_lower = knowledge->equivalence_ordered_domain.lower_bound(lower);
+        else
+            it_lower = knowledge->equivalence_ordered_domain.upper_bound(lower);
+    }
+    else
+    {
+        it_lower = knowledge->equivalence_ordered_domain.begin();
+    }
+    
+    if( upper )
+    {
+        if( upper_incl )
+            it_upper = knowledge->equivalence_ordered_domain.upper_bound(upper);
+        else
+            it_upper = knowledge->equivalence_ordered_domain.lower_bound(upper);
+    }
+    else
+    {
+        it_upper = knowledge->equivalence_ordered_domain.begin();
+    }
+    
+    links = set<SR::XLink>( it_lower, it_upper );
+    return true;
+}
+
+
+bool SimpleCompareRangeResult::operator==( const SymbolResultInterface &other ) const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+string SimpleCompareRangeResult::GetTrace() const
+{
+    list<string> restrictions;
+    
+    if( lower )
+        restrictions.push_back( string(lower_incl?">=":">") + lower.GetTrace() );
+    if( upper )
+        restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
+        
+    return Join(restrictions, " & ", "{SC", "}");
+}
+

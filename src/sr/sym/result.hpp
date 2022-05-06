@@ -151,7 +151,32 @@ public:
 private:    
     const SR::TheKnowledge *knowledge;
     SR::XLink class_example;
-    SR::EquivalenceRelation equivalence_relation;
+};
+
+// ------------------------- SimpleCompareRangeResult --------------------------
+
+class SimpleCompareRangeResult : public SymbolResultInterface
+{
+public:
+    // lower or upper can be null to exclude that limit
+    SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    
+    bool IsDefinedAndUnique() const override;    
+    SR::XLink GetOnlyXLink() const override;    
+    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolResultInterface &other ) const override;
+
+    //shared_ptr<SetResult> GetComplement() const;
+    //static shared_ptr<SetResult> GetUnion( list<shared_ptr<SetResult>> ops );
+    //static shared_ptr<SetResult> GetIntersection( list<shared_ptr<SetResult>> ops );
+
+    string GetTrace() const override;
+
+private:    
+    const SR::TheKnowledge *knowledge;
+    SR::XLink lower;
+    SR::XLink upper;
+    bool lower_incl, upper_incl;
 };
 
 

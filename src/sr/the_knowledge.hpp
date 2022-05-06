@@ -42,6 +42,9 @@ public:
     typedef list<XLink> DepthFirstOrderedDomain;    
     typedef DepthFirstOrderedDomain::const_iterator DepthFirstOrderedIt;    
     
+    typedef multiset<XLink, EquivalenceRelation> EquivalenceOrderedDomain;
+    typedef EquivalenceOrderedDomain::iterator EquivalenceOrderedIt;
+    
     class Nugget : public Traceable
     {
     public:
@@ -118,7 +121,7 @@ public:
     DepthFirstOrderedDomain depth_first_ordered_domain;            
     
     // Whole domain in here, grouped by equivalence, findable using eg equal_range()
-    multiset<XLink, EquivalenceRelation> equivalence_ordered_domain;
+    EquivalenceOrderedDomain equivalence_ordered_domain;
     
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;
