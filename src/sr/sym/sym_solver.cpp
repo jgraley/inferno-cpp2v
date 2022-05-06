@@ -44,8 +44,8 @@ void TruthTableSolver::PreSolve()
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::TrySolveFor( shared_ptr<SymbolExpression> target,
-                                                            const GivenSymbolSet &givens ) const
+shared_ptr<SymbolExpression> TruthTableSolver::TrySolveEquationForGiven( shared_ptr<SymbolExpression> target,
+                                                                         const GivenSymbolSet &givens ) const
 {
     TRACE("=====================================================\nSolve equation: ")(equation->Render())
          (" for ")(target->Render())

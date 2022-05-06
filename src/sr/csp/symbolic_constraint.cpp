@@ -62,7 +62,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
                 if( indices.at(i) )
                     givens.insert( other_vars_vec[i] );
             
-            shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveFor(target, givens);
+            shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveEquationForGiven(target, givens);
             if( he )
             {
                 TRACEC("Given:\n")(givens)

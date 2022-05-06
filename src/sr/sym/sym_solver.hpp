@@ -30,8 +30,8 @@ public:
      * 
      * @return solution expression or NULL
      */
-    shared_ptr<SymbolExpression> TrySolveFor( shared_ptr<SymbolExpression> target,
-                                              const GivenSymbolSet &givens ) const;
+    shared_ptr<SymbolExpression> TrySolveEquationForGiven( shared_ptr<SymbolExpression> target,
+                                                           const GivenSymbolSet &givens ) const;
     shared_ptr<BooleanExpression> GetAltEquationForTesting() const;
     
 private:
