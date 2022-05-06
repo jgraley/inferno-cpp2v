@@ -202,10 +202,11 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
     if( c == this )
         return Orderable::EQUAL; // fast-out
         
-    // Primary ordering on name should make renders more repeatable
+    // Primary ordering on name due rule #528
     if( name != c->name )
         return name.compare(c->name);      
           
+    // Secondary ordering on address due rule #528
     Orderable::Result r;
     switch( order_property )
     {
