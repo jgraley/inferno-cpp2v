@@ -379,7 +379,7 @@ string EquivalenceClassResult::GetTrace() const
 
 // ------------------------- SimpleCompareRangeResult --------------------------
 
-SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
     knowledge( knowledge_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
@@ -402,15 +402,16 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 
 
 bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
-{ 
+{        
     SR::TheKnowledge::EquivalenceOrderedIt it_lower, it_upper;
-    
+
     if( lower )
     {
+        SR::XLink lower_xlink = SR::XLink::CreateDistinct( lower );
         if( lower_incl )
-            it_lower = knowledge->equivalence_ordered_domain.lower_bound(lower);
+            it_lower = knowledge->equivalence_ordered_domain.lower_bound(lower_xlink);
         else
-            it_lower = knowledge->equivalence_ordered_domain.upper_bound(lower);
+            it_lower = knowledge->equivalence_ordered_domain.upper_bound(lower_xlink);
     }
     else
     {
@@ -419,10 +420,11 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     
     if( upper )
     {
+        SR::XLink upper_xlink = SR::XLink::CreateDistinct( upper );
         if( upper_incl )
-            it_upper = knowledge->equivalence_ordered_domain.upper_bound(upper);
+            it_upper = knowledge->equivalence_ordered_domain.upper_bound(upper_xlink);
         else
-            it_upper = knowledge->equivalence_ordered_domain.lower_bound(upper);
+            it_upper = knowledge->equivalence_ordered_domain.lower_bound(upper_xlink);
     }
     else
     {

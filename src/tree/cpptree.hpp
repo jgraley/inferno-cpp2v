@@ -234,7 +234,7 @@ struct SpecificIdentifier : virtual Property
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
 
-private:
+protected:
 	string name;
 };
 

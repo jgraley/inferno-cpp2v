@@ -136,6 +136,9 @@ private:
 
 // ------------------------- AllEquivalentOperator --------------------------
 
+// Equivalence is under Simple Compare of Child X of a pair of XLinks. Actual 
+// root arrow-head identity is ignored. There is no ordering, only equivalence 
+// relation. This is sufficient for couplings. Rule #528
 class AllEquivalentOperator : public SymbolToSymbolExpression
 {
 public:    

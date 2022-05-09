@@ -159,7 +159,7 @@ class SimpleCompareRangeResult : public SymbolResultInterface
 {
 public:
     // lower or upper can be null to exclude that limit
-    SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, TreePtr<Node> lower, bool lower_incl, TreePtr<Node> upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -174,8 +174,8 @@ public:
 
 private:    
     const SR::TheKnowledge *knowledge;
-    SR::XLink lower;
-    SR::XLink upper;
+    TreePtr<Node> lower;
+    TreePtr<Node> upper;
     bool lower_incl, upper_incl;
 };
 

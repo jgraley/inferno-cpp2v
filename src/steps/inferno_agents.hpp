@@ -109,8 +109,29 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-
+    virtual pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( TreePtr<Node> prototype ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;
+
+    // We use the term _similar_ to describe nodes whose internal values and 
+    // children are the same under Simple Sompare, but can be at different 
+    // addresses (which implies that root arrow-head identity is ignored). For 
+    // most nodes, similar => equal unser SC, but not for identifiers. Rule #528
+    class AllSimilarOperator : public SYM::SymbolToSymbolExpression
+    {
+    public:    
+        typedef SymbolExpression NominalType;
+        AllSimilarOperator( const IdentifierByNameAgent *iba,
+                            shared_ptr<SymbolExpression> a );
+        list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+        shared_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const final;
+        string Render() const override;
+        Precedence GetPrecedence() const override;
+        
+    private:
+        const IdentifierByNameAgent * const iba;
+        const shared_ptr<SymbolExpression> a;
+    };
 
     class IsIdentifierNamedOperator : public SYM::PredicateOperator
     {
@@ -136,21 +157,36 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     };
 };
 
+//---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
 
 struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,                             
                                        IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
+    class MinimaxNode : public CPPTree::SpecificInstanceIdentifier
+    {        
+    public:
+        MinimaxNode() : is_max(false) {}; 
+        MinimaxNode( TreePtr<CPPTree::SpecificInstanceIdentifier> prototype, bool is_max ); 
+    
+    private:
+        Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                             OrderProperty order_property ) const;
+        const bool is_max;
+    };
+
     shared_ptr<const Node> GetPatternPtr() const
     {
         return shared_from_this();
     }
-    
+        
     InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
+    pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( TreePtr<Node> prototype ) const override;
 };
 
+//---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
 
 struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,                             
                                    IdentifierByNameAgent
@@ -164,8 +200,10 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
     
     TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
+    //pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( TreePtr<Node> prototype ) const override;
 };
 
+//---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
 
 // OUT OF TEST COVERAGE - keep consistent or de-duplicate/template/macro
 struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,                             
@@ -180,6 +218,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     
     LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
+    //pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( TreePtr<Node> prototype ) const override;
 };
 
 //---------------------------------- NestedAgent ------------------------------------    

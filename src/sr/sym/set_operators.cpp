@@ -281,3 +281,4 @@ Expression::Precedence AllEquivalentOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
 }
+
