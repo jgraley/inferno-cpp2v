@@ -118,47 +118,48 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
 {
     auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);
-    return SYM::MakeOver<IsIdentifierNamedOperator>(name, keyer_expr);
+    return SYM::MakeOver<IsIdentifierNamedOperator>(this, name, keyer_expr);
 }
 
 
-IdentifierByNameAgent::AllSimilarOperator::AllSimilarOperator( const IdentifierByNameAgent *iba_, 
-                                                               shared_ptr<SymbolExpression> a_ ) :
+IdentifierByNameAgent::AllIdentifiersNamedOperator::AllIdentifiersNamedOperator( const IdentifierByNameAgent *iba_, 
+                                                                                 string name_ ) :
     iba( iba_ ),
-    a( a_ )
+    name( name_ )
 {
 }
 
     
-list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllSimilarOperator::GetSymbolOperands() const
+list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllIdentifiersNamedOperator::GetSymbolOperands() const
 {
-    return {a};
+    return {};
 }
 
 
-shared_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllSimilarOperator::Evaluate( const EvalKit &kit,
+shared_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersNamedOperator::Evaluate( const EvalKit &kit,
                                                                                             const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SYM::SymbolResultInterface> ar = OnlyElementOf(op_results);    
-    pair<TreePtr<Node>, TreePtr<Node>> p = iba->GetMinimax( ar->GetOnlyXLink().GetChildX() );  
-    return make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, p.first, false, p.second, false );
+    pair<TreePtr<Node>, TreePtr<Node>> p = iba->GetMinimax( name );  
+    return make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, p.first, true, p.second, true );
 }
 
 
-string IdentifierByNameAgent::AllSimilarOperator::Render() const
+string IdentifierByNameAgent::AllIdentifiersNamedOperator::Render() const
 {
-    return "{≅" + RenderForMe(a) + "}";
+    return "{≅'" + name + "'}";
 }
 
 
-SYM::Expression::Precedence IdentifierByNameAgent::AllSimilarOperator::GetPrecedence() const
+SYM::Expression::Precedence IdentifierByNameAgent::AllIdentifiersNamedOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
 }
 
 
-IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( string name_,
+IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( const IdentifierByNameAgent *iba_,
+                                                                             string name_,
                                                                              shared_ptr<SYM::SymbolExpression> a_ ) :
+    iba( iba_ ),
     a( a_ ),
     name( name_ )
 {    
@@ -167,7 +168,7 @@ IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( str
 
 IdentifierByNameAgent::IsIdentifierNamedOperator *IdentifierByNameAgent::IsIdentifierNamedOperator::Clone() const
 {
-    return new IsIdentifierNamedOperator( name, a );
+    return new IsIdentifierNamedOperator( iba, name, a );
 }
 
 
@@ -178,7 +179,7 @@ list<shared_ptr<SYM::SymbolExpression> *> IdentifierByNameAgent::IsIdentifierNam
 
 
 shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                                    const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+                                                                                           const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(op_results);
@@ -200,8 +201,19 @@ shared_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
 }
 
 
+shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveForToEqualNT( shared_ptr<SYM::Expression> target, 
+                                                                                                    shared_ptr<SYM::BooleanExpression> to_equal ) const
+{
+#ifdef SOLVE_IBNA
+    return make_shared<AllIdentifiersNamedOperator>( iba, name );
+#else
+    return nullptr;
+#endif    
+}                                                                                                                                             
+                                              
+                                              
 Orderable::Result IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompareLocal( const Orderable *candidate, 
-                                                                                      OrderProperty order_property ) const 
+                                                                                       OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
     return name.compare(c->name);
@@ -210,19 +222,19 @@ Orderable::Result IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare
 
 string IdentifierByNameAgent::IsIdentifierNamedOperator::RenderNF() const
 {
-    return "IsIdentifierNamed<\"" + name  + "\">(" + a->Render() + ")"; 
+    return a->Render() + "≅'" + name + "'"; 
 }
 
 
 SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::GetPrecedenceNF() const
 {
-    return Precedence::PREFIX;
+    return Precedence::COMPARE;
 }
 
 //---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
 
-InstanceIdentifierByNameAgent::MinimaxNode::MinimaxNode( TreePtr<CPPTree::SpecificInstanceIdentifier> prototype, bool is_max_ ) :
-    SpecificInstanceIdentifier(*prototype),
+InstanceIdentifierByNameAgent::MinimaxNode::MinimaxNode( string name, bool is_max_ ) :
+    SpecificInstanceIdentifier(name),
     is_max( is_max_ )
 {
 }
@@ -245,17 +257,78 @@ Orderable::Result InstanceIdentifierByNameAgent::MinimaxNode::OrderCompareLocal(
 }                                                                      
 
 
-pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetMinimax( TreePtr<Node> prototype ) const
+pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetMinimax( string name ) const
 {
-    auto xsid = TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(prototype);
-    ASSERT( xsid )("InstanceIdentifierByNameAgent got non-SpecificInstanceIdentifier"); 
-    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( xsid, false );
-    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( xsid, true );
+    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( name, false );
+    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( name, true );
     return make_pair( minimus, maximus );
 }
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
+
+TypeIdentifierByNameAgent::MinimaxNode::MinimaxNode( string name, bool is_max_ ) :
+    SpecificTypeIdentifier(name),
+    is_max( is_max_ )
+{
+}
+        
+
+Orderable::Result TypeIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( const Orderable *candidate, 
+                                                                             OrderProperty order_property ) const
+{
+    auto c = GET_THAT_POINTER(candidate);
+        
+    if( c == this )
+        return Orderable::EQUAL; // fast-out
+        
+    // Primary ordering on name due rule #528
+    if( name != c->name )
+        return name.compare(c->name);      
+          
+    // We are a minimax node so secondary ordering is HARD-CODED!
+    return is_max ? 1 : -1;
+}                                                                      
+
+
+pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetMinimax( string name ) const
+{
+    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( name, false );
+    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( name, true );
+    return make_pair( minimus, maximus );
+}
+
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
+
+LabelIdentifierByNameAgent::MinimaxNode::MinimaxNode( string name, bool is_max_ ) :
+    SpecificLabelIdentifier(name),
+    is_max( is_max_ )
+{
+}
+        
+
+Orderable::Result LabelIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( const Orderable *candidate, 
+                                                                              OrderProperty order_property ) const
+{
+    auto c = GET_THAT_POINTER(candidate);
+        
+    if( c == this )
+        return Orderable::EQUAL; // fast-out
+        
+    // Primary ordering on name due rule #528
+    if( name != c->name )
+        return name.compare(c->name);      
+          
+    // We are a minimax node so secondary ordering is HARD-CODED!
+    return is_max ? 1 : -1;
+}                                                                      
+
+
+pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetMinimax( string name ) const
+{
+    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( name, false );
+    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( name, true );
+    return make_pair( minimus, maximus );
+}
 
 //---------------------------------- NestedAgent ------------------------------------    
 
