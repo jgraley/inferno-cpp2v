@@ -14,6 +14,7 @@
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;
 using namespace CPPTree;
+#define SOLVE_IBNA
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
@@ -140,13 +141,18 @@ shared_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersName
                                                                                             const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
 {
     pair<TreePtr<Node>, TreePtr<Node>> p = iba->GetMinimax( name );  
-    return make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, p.first, true, p.second, true );
+    auto r = make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, p.first, true, p.second, true );
+    FTRACE("Evaluated to ")(r)("\n");
+    //set<SR::XLink> links;
+    //(void)r->TryGetAsSetOfXLinks(links);
+    //FTRACE("Which is really ")(links)("\n");
+    return r;
 }
 
 
 string IdentifierByNameAgent::AllIdentifiersNamedOperator::Render() const
 {
-    return "{≅'" + name + "'}";
+    return "{≅ '" + name + "'}";
 }
 
 
@@ -222,7 +228,7 @@ Orderable::Result IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare
 
 string IdentifierByNameAgent::IsIdentifierNamedOperator::RenderNF() const
 {
-    return a->Render() + "≅'" + name + "'"; 
+    return a->Render() + " ≅ '" + name + "'"; 
 }
 
 
@@ -233,15 +239,15 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
 
 //---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
 
-InstanceIdentifierByNameAgent::MinimaxNode::MinimaxNode( string name, bool is_max_ ) :
+InstanceIdentifierByNameAgent::MinimaxInstanceIdentifier::MinimaxInstanceIdentifier( string name, bool is_max_ ) :
     SpecificInstanceIdentifier(name),
     is_max( is_max_ )
 {
 }
         
 
-Orderable::Result InstanceIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( const Orderable *candidate, 
-                                                                                 OrderProperty order_property ) const
+Orderable::Result InstanceIdentifierByNameAgent::MinimaxInstanceIdentifier::OrderCompareLocal( const Orderable *candidate, 
+                                                                                               OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
         
@@ -259,22 +265,22 @@ Orderable::Result InstanceIdentifierByNameAgent::MinimaxNode::OrderCompareLocal(
 
 pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetMinimax( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( name, false );
-    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( name, true );
+    TreePtr<Node> minimus = MakeTreePtr<SpecificInstanceIdentifier>( name, SpecificInstanceIdentifier::Similarity::MINIMUS );
+    TreePtr<Node> maximus = MakeTreePtr<SpecificInstanceIdentifier>( name, SpecificInstanceIdentifier::Similarity::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
 
-TypeIdentifierByNameAgent::MinimaxNode::MinimaxNode( string name, bool is_max_ ) :
+TypeIdentifierByNameAgent::MinimaxTypeIdentifier::MinimaxTypeIdentifier( string name, bool is_max_ ) :
     SpecificTypeIdentifier(name),
     is_max( is_max_ )
 {
 }
         
 
-Orderable::Result TypeIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( const Orderable *candidate, 
-                                                                             OrderProperty order_property ) const
+Orderable::Result TypeIdentifierByNameAgent::MinimaxTypeIdentifier::OrderCompareLocal( const Orderable *candidate, 
+                                                                                       OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
         
@@ -292,22 +298,22 @@ Orderable::Result TypeIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( con
 
 pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetMinimax( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( name, false );
-    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( name, true );
+    TreePtr<Node> minimus = MakeTreePtr<SpecificTypeIdentifier>( name, SpecificTypeIdentifier::Similarity::MINIMUS );
+    TreePtr<Node> maximus = MakeTreePtr<SpecificTypeIdentifier>( name, SpecificTypeIdentifier::Similarity::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
 
-LabelIdentifierByNameAgent::MinimaxNode::MinimaxNode( string name, bool is_max_ ) :
+LabelIdentifierByNameAgent::MinimaxLabelIdentifier::MinimaxLabelIdentifier( string name, bool is_max_ ) :
     SpecificLabelIdentifier(name),
     is_max( is_max_ )
 {
 }
         
 
-Orderable::Result LabelIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( const Orderable *candidate, 
-                                                                              OrderProperty order_property ) const
+Orderable::Result LabelIdentifierByNameAgent::MinimaxLabelIdentifier::OrderCompareLocal( const Orderable *candidate, 
+                                                                                         OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
         
@@ -325,8 +331,8 @@ Orderable::Result LabelIdentifierByNameAgent::MinimaxNode::OrderCompareLocal( co
 
 pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetMinimax( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<MinimaxNode>( name, false );
-    TreePtr<Node> maximus = MakeTreePtr<MinimaxNode>( name, true );
+    TreePtr<Node> minimus = MakeTreePtr<SpecificLabelIdentifier>( name, SpecificLabelIdentifier::Similarity::MINIMUS );
+    TreePtr<Node> maximus = MakeTreePtr<SpecificLabelIdentifier>( name, SpecificLabelIdentifier::Similarity::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 

@@ -169,11 +169,11 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
-    class MinimaxNode : public CPPTree::SpecificInstanceIdentifier
+    class MinimaxInstanceIdentifier : public CPPTree::SpecificInstanceIdentifier
     {        
     public:
-        MinimaxNode() : is_max(false) {}; 
-        MinimaxNode( string name, bool is_max ); 
+        MinimaxInstanceIdentifier() : is_max(false) {}; 
+        MinimaxInstanceIdentifier( string name, bool is_max ); 
     
     private:
         Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -198,11 +198,11 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
-    class MinimaxNode : public CPPTree::SpecificTypeIdentifier
+    class MinimaxTypeIdentifier : public CPPTree::SpecificTypeIdentifier
     {        
     public:
-        MinimaxNode() : is_max(false) {}; 
-        MinimaxNode( string name, bool is_max ); 
+        MinimaxTypeIdentifier() : is_max(false) {}; 
+        MinimaxTypeIdentifier( string name, bool is_max ); 
     
     private:
         Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -228,11 +228,11 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
-    class MinimaxNode : public CPPTree::SpecificLabelIdentifier
+    class MinimaxLabelIdentifier : public CPPTree::SpecificLabelIdentifier
     {        
     public:
-        MinimaxNode() : is_max(false) {}; 
-        MinimaxNode( string name, bool is_max ); 
+        MinimaxLabelIdentifier() : is_max(false) {}; 
+        MinimaxLabelIdentifier( string name, bool is_max ); 
     
     private:
         Orderable::Result OrderCompareLocal( const Orderable *candidate, 

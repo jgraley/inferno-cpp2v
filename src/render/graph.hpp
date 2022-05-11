@@ -35,10 +35,10 @@ public:
 
     enum LinkPlannedAs
     {
-        LINK_NORMAL,
+        LINK_DEFAULT,
         LINK_KEYER,
         LINK_RESIDUAL,
-        LINK_ABNORMAL,
+        LINK_ABDEFAULT,
         LINK_EVALUATOR,
         LINK_MULTIPLICITY        
     };

@@ -198,7 +198,7 @@ struct False : Bool
 	virtual string GetRender() const { return "false"; } 
 };
 
-//////////////////////////// Declarations /////////////////////
+//////////////////////////// Declarations //////////////////////////// 
 
 /// Property node for any identifier
 /** An Identifier is a name given to a user-defined entity within 
@@ -224,8 +224,17 @@ struct Identifier : virtual Property
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
+    
+    enum class Similarity
+    {
+        MINIMUS = -1, 
+        DEFAULT = 0,
+        MAXIMUS = 1
+        // Note: inclusiveness of MINIMUS and MAXIMUS is impl-defined, see rule #528
+    };
+    
 	SpecificIdentifier(); ///< default constructor, for making archetypes 
-	SpecificIdentifier( string s ); ///< construct with a given name
+	SpecificIdentifier( string s, Similarity similarity = Similarity::DEFAULT ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -235,6 +244,7 @@ struct SpecificIdentifier : virtual Property
     virtual string GetTrace() const;
 
 protected:
+    Similarity similarity;
 	string name;
 };
 
@@ -251,7 +261,8 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
                                     SpecificIdentifier
 {
 	SpecificInstanceIdentifier() {} ///< Default constructor
-	SpecificInstanceIdentifier( string s ) : SpecificIdentifier(s) {} ///< make identifier with the given name
+	SpecificInstanceIdentifier( string s, Similarity similarity = Similarity::DEFAULT ) : 
+        SpecificIdentifier(s, similarity) {} ///< make identifier with the given name
 	NODE_FUNCTIONS_FINAL
 };
                             
@@ -269,7 +280,8 @@ struct SpecificTypeIdentifier : TypeIdentifier,
                                 SpecificIdentifier
 {
 	SpecificTypeIdentifier() {} ///< Default constructor
-	SpecificTypeIdentifier( string s ) : SpecificIdentifier(s) {} ///< make identifier with the given name
+	SpecificTypeIdentifier( string s, Similarity similarity = Similarity::DEFAULT ) : 
+        SpecificIdentifier(s, similarity) {} ///< make identifier with the given name
 	NODE_FUNCTIONS_FINAL
 };
 
@@ -417,7 +429,8 @@ struct SpecificLabelIdentifier : LabelIdentifier,
                                  SpecificIdentifier
 {
 	SpecificLabelIdentifier() {} ///< Default constructor
-	SpecificLabelIdentifier( string s ) : SpecificIdentifier(s) {} ///< construct with initial name
+	SpecificLabelIdentifier( string s, Similarity similarity = Similarity::DEFAULT ) : 
+        SpecificIdentifier(s, similarity) {} ///< construct with initial name
 	NODE_FUNCTIONS_FINAL
 };
 

@@ -408,6 +408,8 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     if( lower )
     {
         SR::XLink lower_xlink = SR::XLink::CreateDistinct( lower );
+        FTRACE("lower xlink: ")(lower_xlink)("\n");
+        
         if( lower_incl )
             it_lower = knowledge->equivalence_ordered_domain.lower_bound(lower_xlink);
         else
@@ -421,6 +423,8 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     if( upper )
     {
         SR::XLink upper_xlink = SR::XLink::CreateDistinct( upper );
+        FTRACE("upper xlink: ")(upper_xlink)("\n");
+        
         if( upper_incl )
             it_upper = knowledge->equivalence_ordered_domain.upper_bound(upper_xlink);
         else
@@ -431,6 +435,10 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
         it_upper = knowledge->equivalence_ordered_domain.begin();
     }
     
+    FTRACE("lower bound: ")(*it_lower)("\nupper bound: ")(*it_upper)("\n");
+    
+    //FTRACE(knowledge->equivalence_ordered_domain)("\n");
+
     links = set<SR::XLink>( it_lower, it_upper );
     return true;
 }
@@ -451,6 +459,6 @@ string SimpleCompareRangeResult::GetTrace() const
     if( upper )
         restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
         
-    return Join(restrictions, " & ", "{SC", "}");
+    return Join(restrictions, ", ", "{SC", "}");
 }
 

@@ -174,7 +174,8 @@ SpecificIdentifier::SpecificIdentifier()
 }
 
 
-SpecificIdentifier::SpecificIdentifier( string s ) : 
+SpecificIdentifier::SpecificIdentifier( string s, Similarity similarity_ ) : 
+    similarity(similarity_),
     name(s) 
 {
 }
@@ -199,13 +200,27 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
 {
     auto c = GET_THAT_POINTER(candidate);
         
+    //FTRACEC("Compare ")(*this)(" with ")(*c)(": ");
+
     if( c == this )
+    {
+        //FTRACEC("0 (fast out)\n");
         return Orderable::EQUAL; // fast-out
+    }
         
     // Primary ordering on name due rule #528
     if( name != c->name )
+    {
+        //FTRACEC("%d (name)\n", name.compare(c->name));
         return name.compare(c->name);      
+    }
           
+    // Similaty ordering overrides if non-default due rule #528
+    if( similarity != Similarity::DEFAULT || c-> similarity != Similarity::DEFAULT )
+    {
+        return (int)similarity - (int)(c->similarity);
+    }    
+    
     // Secondary ordering on address due rule #528
     Orderable::Result r;
     switch( order_property )
@@ -220,6 +235,7 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
         r = Orderable::EQUAL;
         break;
     }
+    //FTRACEC("%d (address)\n", r);
     return r;
 }
 
@@ -232,13 +248,25 @@ string SpecificIdentifier::GetRender() const
 
 string SpecificIdentifier::GetGraphName() const
 {
-    return "'" + name + "'";
+    // Since this is text from the program, use single quotes
+    string s = "'" + name + "'";
+    switch( similarity )
+    {
+        case Similarity::DEFAULT:
+            break;
+        case Similarity::MINIMUS:
+            s += "::MINIMUS";
+            break;
+        case Similarity::MAXIMUS:
+            s += "::MAXIMUS";
+            break;
+    }    
+    return s;
 }
 
 
 string SpecificIdentifier::GetTrace() const
 {
-    // Since this is text from the program, use single quotes
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 

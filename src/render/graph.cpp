@@ -481,7 +481,7 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
                                                   nullptr );
         auto my_link = make_shared<MyLink>( link,
                                             GetRegionGraphId(region, get<0>(link_info)),
-                                            LINK_NORMAL );
+                                            LINK_DEFAULT );
         sub_block.links.push_back( my_link );
     }
     block.sub_blocks.push_back( sub_block );
@@ -548,7 +548,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
             // Fill in everything in my link 
             auto my_link = make_shared<MyLink>( link, 
                                                 GetRegionGraphId(region, link->child), 
-                                                LINK_NORMAL );		
+                                                LINK_DEFAULT );		
             
             // Detect pre-restrictions
             if( link->pptr )
@@ -973,7 +973,7 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
     string atts;
     switch(incoming_link_planned_as)
     {
-    case LINK_NORMAL:
+    case LINK_DEFAULT:
         break;
     case LINK_KEYER:
         atts += "arrowhead=\"normalnonebox\"\n";
@@ -981,7 +981,7 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
     case LINK_RESIDUAL:
         atts += "arrowhead=\"normalnonetee\"\n";
         break;
-    case LINK_ABNORMAL:
+    case LINK_ABDEFAULT:
         atts += "arrowhead=\"normalnoneodot\"\n";
         break;
     case LINK_EVALUATOR:

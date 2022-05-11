@@ -905,7 +905,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                 else if( keyers.count(plink) > 0 )
                     link.details.planned_as = Graph::LINK_KEYER;
                 else
-                    link.details.planned_as = Graph::LINK_NORMAL;
+                    link.details.planned_as = Graph::LINK_DEFAULT;
                 gf_agent.incoming_links.push_back( link );
             }            
             TRACEC(*p.first)("\n");            
@@ -942,7 +942,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
         }
 	};
 	TRACE("   Subordinates (my free abnormals):\n");    
-    subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABNORMAL );
+    subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABDEFAULT );
 	TRACE("   Subordinates (my evaluator abnormals):\n");    
     subordinates_lambda( plan.my_evaluator_abnormal_engines, Graph::LINK_EVALUATOR );
 	TRACE("   Subordinates (my multiplicity engines):\n");    
