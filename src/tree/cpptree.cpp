@@ -174,8 +174,8 @@ SpecificIdentifier::SpecificIdentifier()
 }
 
 
-SpecificIdentifier::SpecificIdentifier( string s, Similarity similarity_ ) : 
-    similarity(similarity_),
+SpecificIdentifier::SpecificIdentifier( string s, Bound addr_bound_ ) : 
+    addr_bound(addr_bound_),
     name(s) 
 {
 }
@@ -215,10 +215,10 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
         return name.compare(c->name);      
     }
           
-    // Similaty ordering overrides if non-default due rule #528
-    if( similarity != Similarity::DEFAULT || c-> similarity != Similarity::DEFAULT )
+    // Optional over-ride of address compare for making ranges, see rule #528
+    if( addr_bound != Bound::NONE || c->addr_bound != Bound::NONE )
     {
-        return (int)similarity - (int)(c->similarity);
+        return (int)addr_bound - (int)(c->addr_bound);
     }    
     
     // Secondary ordering on address due rule #528
@@ -250,14 +250,14 @@ string SpecificIdentifier::GetGraphName() const
 {
     // Since this is text from the program, use single quotes
     string s = "'" + name + "'";
-    switch( similarity )
+    switch( addr_bound )
     {
-        case Similarity::DEFAULT:
+        case Bound::NONE:
             break;
-        case Similarity::MINIMUS:
+        case Bound::MINIMUS:
             s += "::MINIMUS";
             break;
-        case Similarity::MAXIMUS:
+        case Bound::MAXIMUS:
             s += "::MAXIMUS";
             break;
     }    

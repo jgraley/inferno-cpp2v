@@ -19,6 +19,14 @@ public:
         REPEATABLE
     };
     
+    enum class Bound
+    {
+        MINIMUS = -1, 
+        NONE = 0,
+        MAXIMUS = 1
+        // Note: inclusiveness of MINIMUS and MAXIMUS is impl-defined, see rule #528
+    };
+
     static Orderable::Result OrderCompare( const Orderable *l, 
                                            const Orderable *r, 
                                            OrderProperty order_property = STRICT );

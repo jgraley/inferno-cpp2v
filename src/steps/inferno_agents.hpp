@@ -109,7 +109,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-    virtual pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
+    virtual pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;
 
     // We use the term _similar_ to describe nodes whose internal values and 
@@ -169,18 +169,6 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
-    class MinimaxInstanceIdentifier : public CPPTree::SpecificInstanceIdentifier
-    {        
-    public:
-        MinimaxInstanceIdentifier() : is_max(false) {}; 
-        MinimaxInstanceIdentifier( string name, bool is_max ); 
-    
-    private:
-        Orderable::Result OrderCompareLocal( const Orderable *candidate, 
-                                             OrderProperty order_property ) const;
-        const bool is_max;
-    };
-
     shared_ptr<const Node> GetPatternPtr() const
     {
         return shared_from_this();
@@ -188,7 +176,7 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
         
     InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
-    pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( string name ) const override;
+    pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const override;
 };
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
@@ -198,18 +186,6 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
-    class MinimaxTypeIdentifier : public CPPTree::SpecificTypeIdentifier
-    {        
-    public:
-        MinimaxTypeIdentifier() : is_max(false) {}; 
-        MinimaxTypeIdentifier( string name, bool is_max ); 
-    
-    private:
-        Orderable::Result OrderCompareLocal( const Orderable *candidate, 
-                                             OrderProperty order_property ) const;
-        const bool is_max;
-    };
-
     shared_ptr<const Node> GetPatternPtr() const
     {
         return shared_from_this();
@@ -217,7 +193,7 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
     
     TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
-    pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( string name ) const override;
+    pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const override;
 };
 
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
@@ -228,18 +204,6 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 {
     SPECIAL_NODE_FUNCTIONS
 
-    class MinimaxLabelIdentifier : public CPPTree::SpecificLabelIdentifier
-    {        
-    public:
-        MinimaxLabelIdentifier() : is_max(false) {}; 
-        MinimaxLabelIdentifier( string name, bool is_max ); 
-    
-    private:
-        Orderable::Result OrderCompareLocal( const Orderable *candidate, 
-                                             OrderProperty order_property ) const;
-        const bool is_max;
-    };
-
     shared_ptr<const Node> GetPatternPtr() const
     {
         return shared_from_this();
@@ -247,7 +211,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     
     LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
-    pair<TreePtr<Node>, TreePtr<Node>> GetMinimax( string name ) const override;
+    pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const override;
 };
 
 //---------------------------------- NestedAgent ------------------------------------    

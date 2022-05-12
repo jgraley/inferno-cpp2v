@@ -199,7 +199,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 Graphable::Block StuffAgent::GetGraphBlockInfo() const
 {
 	// The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
-	// right of the circle. # is chosen (as is the name Stuff) for its similarity to * because
+	// right of the circle. # is chosen (as is the name Stuff) for its addr_bound to * because
 	// the nodes are both able to wildcard multiple nodes in the input tree.
     Block block = SearchContainerAgent::GetGraphBlockInfo();
 	block.title = "Stuff"; 
