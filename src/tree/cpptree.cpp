@@ -174,8 +174,8 @@ SpecificIdentifier::SpecificIdentifier()
 }
 
 
-SpecificIdentifier::SpecificIdentifier( string s, Bound addr_bound_ ) : 
-    addr_bound(addr_bound_),
+SpecificIdentifier::SpecificIdentifier( string s, BoundingRole addr_bounding_role_ ) : 
+    addr_bounding_role(addr_bounding_role_),
     name(s) 
 {
 }
@@ -216,9 +216,9 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
     }
           
     // Optional over-ride of address compare for making ranges, see rule #528
-    if( addr_bound != Bound::NONE || c->addr_bound != Bound::NONE )
+    if( addr_bounding_role != BoundingRole::NONE || c->addr_bounding_role != BoundingRole::NONE )
     {
-        return (int)addr_bound - (int)(c->addr_bound);
+        return (int)addr_bounding_role - (int)(c->addr_bounding_role);
     }    
     
     // Secondary ordering on address due rule #528
@@ -250,14 +250,14 @@ string SpecificIdentifier::GetGraphName() const
 {
     // Since this is text from the program, use single quotes
     string s = "'" + name + "'";
-    switch( addr_bound )
+    switch( addr_bounding_role )
     {
-        case Bound::NONE:
+        case BoundingRole::NONE:
             break;
-        case Bound::MINIMUS:
+        case BoundingRole::MINIMUS:
             s += "::MINIMUS";
             break;
-        case Bound::MAXIMUS:
+        case BoundingRole::MAXIMUS:
             s += "::MAXIMUS";
             break;
     }    

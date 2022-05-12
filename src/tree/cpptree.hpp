@@ -226,7 +226,7 @@ struct SpecificIdentifier : virtual Property
     NODE_FUNCTIONS
         
 	SpecificIdentifier(); ///< default constructor, for making archetypes 
-	SpecificIdentifier( string s, Bound addr_bound = Bound::NONE ); ///< construct with a given name
+	SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -236,7 +236,7 @@ struct SpecificIdentifier : virtual Property
     virtual string GetTrace() const;
 
 protected:
-    Bound addr_bound;
+    BoundingRole addr_bounding_role;
 	string name;
 };
 
@@ -253,8 +253,8 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
                                     SpecificIdentifier
 {
 	SpecificInstanceIdentifier() {} ///< Default constructor
-	SpecificInstanceIdentifier( string s, Bound addr_bound = Bound::NONE ) : 
-        SpecificIdentifier(s, addr_bound) {} ///< make identifier with the given name
+	SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+        SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
 	NODE_FUNCTIONS_FINAL
 };
                             
@@ -272,8 +272,8 @@ struct SpecificTypeIdentifier : TypeIdentifier,
                                 SpecificIdentifier
 {
 	SpecificTypeIdentifier() {} ///< Default constructor
-	SpecificTypeIdentifier( string s, Bound addr_bound = Bound::NONE ) : 
-        SpecificIdentifier(s, addr_bound) {} ///< make identifier with the given name
+	SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+        SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
 	NODE_FUNCTIONS_FINAL
 };
 
@@ -421,8 +421,8 @@ struct SpecificLabelIdentifier : LabelIdentifier,
                                  SpecificIdentifier
 {
 	SpecificLabelIdentifier() {} ///< Default constructor
-	SpecificLabelIdentifier( string s, Bound addr_bound = Bound::NONE ) : 
-        SpecificIdentifier(s, addr_bound) {} ///< construct with initial name
+	SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+        SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
 	NODE_FUNCTIONS_FINAL
 };
 

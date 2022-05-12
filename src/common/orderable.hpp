@@ -19,7 +19,7 @@ public:
         REPEATABLE
     };
     
-    enum class Bound
+    enum class BoundingRole
     {
         MINIMUS = -1, 
         NONE = 0,

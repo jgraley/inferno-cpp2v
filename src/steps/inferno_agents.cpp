@@ -238,8 +238,8 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
 
 pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetAddressRangeBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::Bound::MINIMUS );
-    TreePtr<Node> maximus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::Bound::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
@@ -247,8 +247,8 @@ pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetAddressRang
 
 pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetAddressRangeBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::Bound::MINIMUS );
-    TreePtr<Node> maximus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::Bound::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
@@ -256,8 +256,8 @@ pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetAddressRangeBou
 
 pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetAddressRangeBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::Bound::MINIMUS );
-    TreePtr<Node> maximus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::Bound::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
