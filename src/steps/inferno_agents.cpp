@@ -125,7 +125,8 @@ SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 IdentifierByNameAgent::AllIdentifiersNamedOperator::AllIdentifiersNamedOperator( const IdentifierByNameAgent *iba_, 
                                                                                  string name_ ) :
     iba( iba_ ),
-    name( name_ )
+    name( name_ ),
+    bounds( iba->GetAddressRangeBounds( name ) )  
 {
 }
 
@@ -137,11 +138,9 @@ list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllIdentifiersNam
 
 
 shared_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                            const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
+                                                                                                     const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
 {
-    pair<TreePtr<Node>, TreePtr<Node>> p = iba->GetAddressRangeBounds( name );  
-    auto r = make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, p.first, true, p.second, true );
-    return r;
+    return make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, true, bounds.second, true );
 }
 
 

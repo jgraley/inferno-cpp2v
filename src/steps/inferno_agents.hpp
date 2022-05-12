@@ -131,6 +131,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     private:
         const IdentifierByNameAgent * const iba;
         const string name;
+        const pair<TreePtr<Node>, TreePtr<Node>> bounds;
     };
 
     class IsIdentifierNamedOperator : public SYM::PredicateOperator
