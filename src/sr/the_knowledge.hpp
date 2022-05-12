@@ -45,6 +45,10 @@ public:
     typedef multiset<XLink, EquivalenceRelation> EquivalenceOrderedDomain;
     typedef EquivalenceOrderedDomain::iterator EquivalenceOrderedIt;
     
+    // Should be the other way around, as an indication of policy
+    typedef EquivalenceOrderedDomain SimpleCompareOrderedDomain;
+    typedef EquivalenceOrderedIt SimpleCompareOrderedIt;
+    
     class Nugget : public Traceable
     {
     public:
@@ -122,6 +126,10 @@ public:
     
     // Whole domain in here, grouped by equivalence, findable using eg equal_range()
     EquivalenceOrderedDomain equivalence_ordered_domain;
+    
+    // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
+    // Should be the other way around, as an indication of policy
+    SimpleCompareOrderedDomain &simple_compare_ordered_domain = equivalence_ordered_domain;
     
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<QuotientSet> domain_extension_classes;

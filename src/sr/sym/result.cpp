@@ -403,15 +403,15 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 
 bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {        
-    SR::TheKnowledge::EquivalenceOrderedIt it_lower, it_upper;
+    SR::TheKnowledge::SimpleCompareOrderedIt it_lower, it_upper;
 
     if( lower )
     {
         SR::XLink lower_xlink = SR::XLink::CreateDistinct( lower );     
         if( lower_incl )
-            it_lower = knowledge->equivalence_ordered_domain.lower_bound(lower_xlink);
+            it_lower = knowledge->simple_compare_ordered_domain.lower_bound(lower_xlink);
         else
-            it_lower = knowledge->equivalence_ordered_domain.upper_bound(lower_xlink);
+            it_lower = knowledge->simple_compare_ordered_domain.upper_bound(lower_xlink);
     }
     else
     {
@@ -422,9 +422,9 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     {
         SR::XLink upper_xlink = SR::XLink::CreateDistinct( upper );        
         if( upper_incl )
-            it_upper = knowledge->equivalence_ordered_domain.upper_bound(upper_xlink);
+            it_upper = knowledge->simple_compare_ordered_domain.upper_bound(upper_xlink);
         else
-            it_upper = knowledge->equivalence_ordered_domain.lower_bound(upper_xlink);
+            it_upper = knowledge->simple_compare_ordered_domain.lower_bound(upper_xlink);
     }
     else
     {
