@@ -48,7 +48,7 @@ OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
 OPTIONS += -ggdb3
 
 # Enable profiling (slows compile times)
-OPTIONS += -pg
+#OPTIONS += -pg
 
 # Workaround compile error with SystemC
 OPTIONS += -fpermissive

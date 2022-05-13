@@ -7,7 +7,7 @@ using namespace CSP;
 Solver::Solver() 
 {
 }
-
+ 
 
 Solver::~Solver() 
 {

@@ -147,36 +147,6 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
     return make_shared<DecidedQuery>( pattern_query );
 }
                                 
-    
-void AgentCommon::RunCouplingQuery( const SolutionMap *hypothesis_links ) const
-{    
-    // This function establishes the policy for couplings in one place.
-    // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
-    // And it always will be: see #121; para starting at "No!!"
-    // HOWEVER: it is now possible for agents to override this policy.
-    
-    ASSERT( hypothesis_links );
-    // Without keyer, don't bother to check anything
-    if( hypothesis_links->count(keyer_plink) == 0 )
-        return;
-    XLink keyer = hypothesis_links->at(keyer_plink);
-    
-    for( PatternLink residual_plink : residual_plinks )
-    {
-        if( hypothesis_links->count(residual_plink) )
-        {
-            XLink residual = hypothesis_links->at(residual_plink);
-            if( residual == XLink::MMAX_Link || keyer == XLink::MMAX_Link)
-                continue; 
-                    
-            Orderable::Result cr = equivalence_relation.Compare( keyer, 
-                                                             residual );
-            if( cr != Orderable::EQUAL )
-                throw CouplingMismatch();               
-        }
-    }     
-}
-
 
 Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 {
@@ -203,6 +173,11 @@ Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
 
 Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
+    // This function establishes the policy for couplings in one place.
+    // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
+    // And it always will be: see #121; para starting at "No!!"
+    // HOWEVER: it is now possible for agents to override this policy.
+    
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
     auto expr = MakeOver<BooleanConstant>(true);

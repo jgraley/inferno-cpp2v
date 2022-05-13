@@ -51,9 +51,6 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
-                                         
-    /// Test an agent given given partial map of locations of keyer and residuals.  
-    virtual void RunCouplingQuery( const SolutionMap *hypothesis_links ) const = 0;                                       
 
     /// Obtain a symbolic expression for this node's queries (coupling and maybe NLQ)
     virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const = 0; 
