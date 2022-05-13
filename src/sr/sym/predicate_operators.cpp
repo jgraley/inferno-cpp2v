@@ -175,7 +175,7 @@ Relationship EqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> o
 {
     if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || 
         dynamic_pointer_cast<LessOrEqualOperator>(other) ||
-        dynamic_pointer_cast<EquivalentOperator>(other))
+        dynamic_pointer_cast<IsCouplingEquivalentOperator>(other))
         return Relationship::IMPLIES;
     
     // Note: CONTRADICTS and TAUTOLOGY are symmetrical could be determined by either predicate - 
@@ -771,9 +771,9 @@ Expression::Precedence ChildCollectionSizeOperator::GetPrecedenceNF() const
     return Precedence::PREFIX;
 }
 
-// ------------------------- EquivalentOperator --------------------------
+// ------------------------- IsCouplingEquivalentOperator --------------------------
 
-EquivalentOperator::EquivalentOperator( shared_ptr<SymbolExpression> a_, 
+IsCouplingEquivalentOperator::IsCouplingEquivalentOperator( shared_ptr<SymbolExpression> a_, 
                                         shared_ptr<SymbolExpression> b_ ) :
     a(a_),
     b(b_)
@@ -781,19 +781,19 @@ EquivalentOperator::EquivalentOperator( shared_ptr<SymbolExpression> a_,
 }    
     
 
-EquivalentOperator *EquivalentOperator::Clone() const
+IsCouplingEquivalentOperator *IsCouplingEquivalentOperator::Clone() const
 {
-    return new EquivalentOperator( a, b );
+    return new IsCouplingEquivalentOperator( a, b );
 }
     
 
-list<shared_ptr<SymbolExpression> *> EquivalentOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsCouplingEquivalentOperator::GetSymbolOperandPointers()
 {
     return { &a, &b };
 }
 
 
-shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
+shared_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
@@ -813,7 +813,7 @@ shared_ptr<BooleanResult> EquivalentOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> EquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                                  shared_ptr<BooleanExpression> to_equal ) const
 {  
     // Can only deal with to_equal==TRUE
@@ -821,12 +821,12 @@ shared_ptr<Expression> EquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expr
     if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
         
-    shared_ptr<SymbolExpression> rb = make_shared<AllEquivalentOperator>(b);
+    shared_ptr<SymbolExpression> rb = make_shared<AllCouplingEquivalentOperator>(b);
     shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, rb );
     if( a_solution )
         return a_solution;
     
-    shared_ptr<SymbolExpression> ra = make_shared<AllEquivalentOperator>(a);   
+    shared_ptr<SymbolExpression> ra = make_shared<AllCouplingEquivalentOperator>(a);   
     shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, ra );
     if( b_solution )
         return b_solution;
@@ -835,25 +835,25 @@ shared_ptr<Expression> EquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expr
 }
 
 
-bool EquivalentOperator::IsCommutative() const
+bool IsCouplingEquivalentOperator::IsCommutative() const
 {
     return true;
 }
 
 
-Transitivity EquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity IsCouplingEquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    return (bool)dynamic_pointer_cast<EquivalentOperator>(other) ? Transitivity::BIDIRECTIONAL : Transitivity::NONE;
+    return (bool)dynamic_pointer_cast<IsCouplingEquivalentOperator>(other) ? Transitivity::BIDIRECTIONAL : Transitivity::NONE;
 }
 
 
-string EquivalentOperator::RenderNF() const
+string IsCouplingEquivalentOperator::RenderNF() const
 {
     return RenderForMe(a) + " ≡ " + RenderForMe(b);
 }
 
 
-Expression::Precedence EquivalentOperator::GetPrecedenceNF() const
+Expression::Precedence IsCouplingEquivalentOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

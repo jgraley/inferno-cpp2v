@@ -84,7 +84,6 @@ protected:
     
 private:    
     int num_decisions;
-    EquivalenceRelation equivalence_relation;
     shared_ptr<Conjecture> nlq_conjecture;
 
     virtual string GetGraphId() const;

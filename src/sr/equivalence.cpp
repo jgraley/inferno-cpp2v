@@ -7,15 +7,15 @@
 
 using namespace SR;
 
-//////////////////////////// EquivalenceRelation ///////////////////////////////
+//////////////////////////// SimpleCompareRelation ///////////////////////////////
 
-EquivalenceRelation::EquivalenceRelation() :
+SimpleCompareRelation::SimpleCompareRelation() :
     simple_compare( make_shared<SimpleCompare>() )
 {
 }
 
 
-Orderable::Result EquivalenceRelation::Compare( XLink xlink, XLink ylink ) const
+Orderable::Result SimpleCompareRelation::Compare( XLink xlink, XLink ylink ) const
 {
     // Get the child nodes and disregard the arrow heads
     TreePtr<Node> xnode = xlink.GetChildX();
@@ -26,13 +26,13 @@ Orderable::Result EquivalenceRelation::Compare( XLink xlink, XLink ylink ) const
 }
 
 
-bool EquivalenceRelation::operator()( XLink xlink, XLink ylink ) const
+bool SimpleCompareRelation::operator()( XLink xlink, XLink ylink ) const
 {
     return Compare(xlink, ylink) < Orderable::EQUAL;
 }
 
 
-void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
+void SimpleCompareRelation::TestProperties( const set<XLink> &xlinks ) const
 {
     // Need a random access container because we will in fact randomly access it
     vector<XLink> vxlinks;
@@ -176,9 +176,9 @@ void EquivalenceRelation::TestProperties( const set<XLink> &xlinks ) const
           ("transitive ")(tt)("\n");
 }
 
-//////////////////////////// QuotientSet ///////////////////////////////
+//////////////////////////// SimpleCompareQuotientSet ///////////////////////////////
 
-XLink QuotientSet::Uniquify( XLink xlink )
+XLink SimpleCompareQuotientSet::Uniquify( XLink xlink )
 {
     // insert() only acts if element not already in set.
     // Conveniently, it returns an iterator to the matching element
@@ -190,7 +190,7 @@ XLink QuotientSet::Uniquify( XLink xlink )
 }
 
 
-void QuotientSet::Clear()
+void SimpleCompareQuotientSet::Clear()
 {
     classes.clear();
 }

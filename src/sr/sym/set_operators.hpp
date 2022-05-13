@@ -134,16 +134,16 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- AllEquivalentOperator --------------------------
+// ------------------------- AllCouplingEquivalentOperator --------------------------
 
 // Equivalence is under Simple Compare of Child X of a pair of XLinks. Actual 
 // root arrow-head identity is ignored. There is no ordering, only equivalence 
 // relation. This is sufficient for couplings. Rule #528
-class AllEquivalentOperator : public SymbolToSymbolExpression
+class AllCouplingEquivalentOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllEquivalentOperator( shared_ptr<SymbolExpression> a );
+    AllCouplingEquivalentOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const final;

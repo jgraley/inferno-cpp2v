@@ -257,9 +257,9 @@ string SetResult::GetTrace() const
     return s;
 }
 
-// ------------------------- RangeResult --------------------------
+// ------------------------- DepthFirstRangeResult --------------------------
 
-RangeResult::RangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+DepthFirstRangeResult::DepthFirstRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
     knowledge( knowledge_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
@@ -269,19 +269,19 @@ RangeResult::RangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, 
 }
 
 
-bool RangeResult::IsDefinedAndUnique() const
+bool DepthFirstRangeResult::IsDefinedAndUnique() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-SR::XLink RangeResult::GetOnlyXLink() const
+SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-bool RangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
     SR::TheKnowledge::DepthFirstOrderedIt it_lower, it_upper;
     
@@ -312,13 +312,13 @@ bool RangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool RangeResult::operator==( const SymbolResultInterface &other ) const
+bool DepthFirstRangeResult::operator==( const SymbolResultInterface &other ) const
 {
     ASSERTFAIL("TODO");
 }
 
 
-string RangeResult::GetTrace() const
+string DepthFirstRangeResult::GetTrace() const
 {
     list<string> restrictions;
     
@@ -353,14 +353,14 @@ SR::XLink EquivalenceClassResult::GetOnlyXLink() const
 
 bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    // Use multiset::equal_range() with our EquivalenceRelation as an
+    // Use multiset::equal_range() with our CouplingRelation as an
     // ordering in order to get to the set of equivalent elements without
     // having to iterate over the whole domain. We're still gaining entropy
     // here though. It would be faster to get to the range via nuggests 
     // (because XLink native comparison will be faster than SimpleCompare)
     // but class_example might be an arbitrary force, and not in the domain.
     // See #522 #525
-    auto p = knowledge->equivalence_ordered_domain.equal_range( class_example );
+    auto p = knowledge->coupling_ordered_domain.equal_range( class_example );
     links = move( set<SR::XLink>( p.first, p.second ) );
     return true;
 }
@@ -415,7 +415,7 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     }
     else
     {
-        it_lower = knowledge->equivalence_ordered_domain.begin();
+        it_lower = knowledge->simple_compare_ordered_domain.begin();
     }
     
     if( upper )
@@ -428,7 +428,7 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     }
     else
     {
-        it_upper = knowledge->equivalence_ordered_domain.begin();
+        it_upper = knowledge->simple_compare_ordered_domain.begin();
     }
 
     links = set<SR::XLink>( it_lower, it_upper );

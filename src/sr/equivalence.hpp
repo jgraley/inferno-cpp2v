@@ -15,16 +15,16 @@ class SimpleCompare;
 namespace SR
 {
 // At present we only have one equivalence relation
-class EquivalenceRelation
+class SimpleCompareRelation
 {
 public:
-    EquivalenceRelation();
+    SimpleCompareRelation();
     Orderable::Result Compare( XLink xlink, XLink ylink ) const;
 
     /// Less operator: for use with set, map etc
     bool operator()( XLink xlink, XLink ylink ) const;
     
-    /// Perform a test to check the reflexiv, symmetric and 
+    /// Perform a test to check the reflexive, symmetric and 
     /// transitive properties, given a representative set
     /// of links. Pass if no assert failure.
     void TestProperties( const set<XLink> &xlinks ) const;
@@ -33,14 +33,14 @@ private:
 }; 
 
 
-class QuotientSet
+class SimpleCompareQuotientSet
 {
 public:
     XLink Uniquify( XLink x );
     void Clear();
     
 private:    
-    typedef set<XLink, EquivalenceRelation> Classes;
+    typedef set<XLink, SimpleCompareRelation> Classes;
     Classes classes;
 };
 

@@ -173,11 +173,6 @@ Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
 
 Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
-    // This function establishes the policy for couplings in one place.
-    // Today, it's SimpleCompare, via EquivalenceRelation, with MMAX excused. 
-    // And it always will be: see #121; para starting at "No!!"
-    // HOWEVER: it is now possible for agents to override this policy.
-    
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
     auto expr = MakeOver<BooleanConstant>(true);
@@ -186,7 +181,7 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
     for( PatternLink residual_plink : residual_plinks )
     {
         auto residual_expr = MakeOver<SymbolVariable>(residual_plink);
-        expr &= ( MakeOver<EquivalentOperator>( keyer_expr, residual_expr ) |
+        expr &= ( MakeOver<IsCouplingEquivalentOperator>( keyer_expr, residual_expr ) |
                   keyer_expr == mmax_expr | // See thought on #384
                   residual_expr == mmax_expr );
     }

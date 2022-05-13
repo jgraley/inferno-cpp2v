@@ -104,13 +104,13 @@ private:
     bool complement_flag;
 };
 
-// ------------------------- RangeResult --------------------------
+// ------------------------- DepthFirstRangeResult --------------------------
 
-class RangeResult : public SymbolResultInterface
+class DepthFirstRangeResult : public SymbolResultInterface
 {
 public:
     // lower or upper can be null to exclude that limit
-    RangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    DepthFirstRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    

@@ -11,7 +11,7 @@
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
-class QuotientSet;
+class SimpleCompareQuotientSet;
     
 class TheKnowledge : public Traceable
 {
@@ -42,12 +42,16 @@ public:
     typedef list<XLink> DepthFirstOrderedDomain;    
     typedef DepthFirstOrderedDomain::const_iterator DepthFirstOrderedIt;    
     
-    typedef multiset<XLink, EquivalenceRelation> EquivalenceOrderedDomain;
-    typedef EquivalenceOrderedDomain::iterator EquivalenceOrderedIt;
+    // We will provide a SimpleCompare ordered version of the domain
+    typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedDomain;
+    typedef SimpleCompareOrderedDomain::iterator SimpleCompareOrderedIt;
     
-    // Should be the other way around, as an indication of policy
-    typedef EquivalenceOrderedDomain SimpleCompareOrderedDomain;
-    typedef EquivalenceOrderedIt SimpleCompareOrderedIt;
+    // This class establishes the policy for couplings in one place.
+    // Today, it's TheKnowledge, via typedefs to SimpleCompare. 
+    // And it always will be: see #121; para starting at "No!!"
+    typedef SimpleCompareRelation CouplingRelation;
+    typedef SimpleCompareOrderedDomain CouplingOrderedDomain;
+    typedef SimpleCompareOrderedIt CouplingOrderedIt;
     
     class Nugget : public Traceable
     {
@@ -124,15 +128,15 @@ public:
     // Global domain of possible xlink values - ordered
     DepthFirstOrderedDomain depth_first_ordered_domain;            
     
-    // Whole domain in here, grouped by equivalence, findable using eg equal_range()
-    EquivalenceOrderedDomain equivalence_ordered_domain;
-    
     // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
     // Should be the other way around, as an indication of policy
-    SimpleCompareOrderedDomain &simple_compare_ordered_domain = equivalence_ordered_domain;
+    SimpleCompareOrderedDomain simple_compare_ordered_domain;
+    
+    // Whole domain in here, grouped by equivalence, findable using eg equal_range()
+    CouplingOrderedDomain &coupling_ordered_domain = simple_compare_ordered_domain;
     
     // SimpleCompare equivalence classes over the domain.
-    shared_ptr<QuotientSet> domain_extension_classes;
+    shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
     
     // Child-to-nugget-of-knowledge map
     unordered_map<XLink, Nugget> nuggets;
