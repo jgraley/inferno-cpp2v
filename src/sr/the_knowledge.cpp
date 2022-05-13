@@ -62,7 +62,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 #endif
     
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
-    CouplingRelation e;
+    SimpleCompareRelation e;
     e.TestProperties( unordered_domain );
 #endif
 }

@@ -51,7 +51,6 @@ public:
     // And it always will be: see #121; para starting at "No!!"
     typedef SimpleCompareRelation CouplingRelation;
     typedef SimpleCompareOrderedDomain CouplingOrderedDomain;
-    typedef SimpleCompareOrderedIt CouplingOrderedIt;
     
     class Nugget : public Traceable
     {

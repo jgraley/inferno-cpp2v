@@ -353,7 +353,7 @@ SR::XLink EquivalenceClassResult::GetOnlyXLink() const
 
 bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    // Use multiset::equal_range() with our CouplingRelation as an
+    // Use multiset::equal_range() with our ordered domain as an
     // ordering in order to get to the set of equivalent elements without
     // having to iterate over the whole domain. We're still gaining entropy
     // here though. It would be faster to get to the range via nuggests 
