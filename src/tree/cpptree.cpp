@@ -255,10 +255,10 @@ string SpecificIdentifier::GetGraphName() const
         case BoundingRole::NONE:
             break;
         case BoundingRole::MINIMUS:
-            s += "::MINIMUS";
+            s += " MINIMUS";
             break;
         case BoundingRole::MAXIMUS:
-            s += "::MAXIMUS";
+            s += " MAXIMUS";
             break;
     }    
     return s;

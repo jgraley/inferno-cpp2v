@@ -18,7 +18,7 @@
 #include "agents/disjunction_agent.hpp"
 #include "link.hpp"
 #include "tree/cpptree.hpp"
-#include "equivalence.hpp"
+#include "sc_relation.hpp"
 #include "render/graph.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/rewriters.hpp"

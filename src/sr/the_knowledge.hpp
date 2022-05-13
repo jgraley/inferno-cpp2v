@@ -3,7 +3,7 @@
 
 #include "link.hpp"
 #include "common/standard.hpp"
-#include "equivalence.hpp"
+#include "sc_relation.hpp"
 
 #include <unordered_set>
 

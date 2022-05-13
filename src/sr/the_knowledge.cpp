@@ -1,5 +1,5 @@
 #include "the_knowledge.hpp"
-#include "equivalence.hpp"
+#include "sc_relation.hpp"
 #include "agents/agent.hpp"
 
 using namespace SR;    

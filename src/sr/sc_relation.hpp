@@ -1,5 +1,5 @@
-#ifndef EQUIVALENCE_HPP
-#define EQUIVALENCE_HPP
+#ifndef SC_RELATION_HPP
+#define SC_RELATION_HPP
 
 #include "common/common.hpp"
 #include "node/specialise_oostd.hpp"
@@ -14,7 +14,6 @@ class SimpleCompare;
 
 namespace SR
 {
-// At present we only have one equivalence relation
 class SimpleCompareRelation
 {
 public:

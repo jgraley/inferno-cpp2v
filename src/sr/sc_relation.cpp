@@ -1,4 +1,4 @@
-#include "equivalence.hpp"
+#include "sc_relation.hpp"
 
 #include "helpers/simple_compare.hpp"
 #include "helpers/duplicate.hpp"

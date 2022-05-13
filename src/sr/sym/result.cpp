@@ -327,7 +327,7 @@ string DepthFirstRangeResult::GetTrace() const
     if( upper )
         restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
         
-    return Join(restrictions, " & ", "{DFW", "}");
+    return Join(restrictions, " & ", "{DF", "}");
 }
 
 // ------------------------- EquivalenceClassResult --------------------------
@@ -447,10 +447,10 @@ string SimpleCompareRangeResult::GetTrace() const
     list<string> restrictions;
     
     if( lower )
-        restrictions.push_back( string(lower_incl?">=":">") + lower.GetTrace() );
+        restrictions.push_back( string(lower_incl?"[":"(") + lower.GetTrace() );
     if( upper )
-        restrictions.push_back( string(upper_incl?"<=":"<") + upper.GetTrace() );
+        restrictions.push_back( upper.GetTrace() + string(upper_incl?"]":")") );
         
-    return Join(restrictions, ", ", "{SC", "}");
+    return Join(restrictions, ", ", "{SC ", " }");
 }
 

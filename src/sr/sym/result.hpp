@@ -3,7 +3,6 @@
 
 #include "common/common.hpp"
 #include "../link.hpp"
-#include "../equivalence.hpp"
 #include "../the_knowledge.hpp"
 
 namespace SR
