@@ -49,15 +49,19 @@ public:
 
     // Get a folded down truth table in which the fold_axes have
     // been removed and the values combined together based on
-    // identity=false will OR; =true will AND
+    // identity=false will OR; =true will AND.
     TruthTable GetFolded( set<int> fold_axes, bool identity ) const; 
 
-    // Find values matching given value and return their indices
+    // Find values matching given value and return their indices.
     set<vector<bool>> GetIndicesOfValue( bool value ) const;
 
     // Do all the cells that correspond to the given fixed axes
-    // have the given value
-    bool IsKarnaughSlice( map<int, bool> fixed_map, bool value ) const; 
+    // have the given target value.
+    bool IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const; 
+
+    // Find the biggest slice wherein every element matches the
+    // given target value. If there are no such slices, nullptr is returned.
+    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const;
 
     // Ordering
     bool operator==( const TruthTable &other ) const;

@@ -139,34 +139,8 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         TruthTableWithPredicates evaluated_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
         TRACEC("evaluated_ttwp ")(evaluated_ttwp.Render({}))("\n");
         
-        set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( true );
-        TRACEC("Permitted terms ")(permitted_terms)("\n");
-
-        // Build a union of terms that were not ruled out
-        list< shared_ptr<SymbolExpression> > terms;
-        for( vector<bool> term : permitted_terms )
-        {
-            // Build an intersection of clauses corresponding to solveables
-            list< shared_ptr<SymbolExpression> > clauses;
-            for( int axis=0; axis<term.size(); axis++ )
-            {
-                auto pred = evaluated_ttwp.GetFrontPredicate(axis);
-                if( solution_map.count(pred) == 0 )
-                    continue; // skip where solve failed
-                shared_ptr<SymbolExpression> clause = solution_map.at(pred);
-                
-                // Needed to solve for false. Rather than redo the solve, we can 
-                // just complement the solution set.
-                if( term.at(axis)==false )
-                    clause = make_shared<ComplementOperator>(clause);
-                    
-                clauses.push_back( clause );
-            }
-             
-            terms.push_back( make_shared<IntersectionOperator>( clauses ) );
-        }
-
-        options.push_back( make_shared<UnionOperator>( terms ) );
+        shared_ptr<SymbolExpression> option = GetOptionExpression( evaluated_ttwp, solution_map );
+        options.push_back( option );
     } );
 
     shared_ptr<SymbolExpression> solution;
@@ -178,6 +152,40 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     TRACEC("solution is ")(solution)("\n");
 
     return solution;
+}
+
+
+shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWithPredicates evaluated_ttwp,
+                                                                    const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const
+{
+    set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( true );
+    TRACEC("Permitted terms ")(permitted_terms)("\n");
+
+    // Build a union of terms that were not ruled out
+    list< shared_ptr<SymbolExpression> > terms;
+    for( vector<bool> term : permitted_terms )
+    {
+        // Build an intersection of clauses corresponding to solveables
+        list< shared_ptr<SymbolExpression> > clauses;
+        for( int axis=0; axis<term.size(); axis++ )
+        {
+            auto pred = evaluated_ttwp.GetFrontPredicate(axis);
+            if( solution_map.count(pred) == 0 )
+                continue; // skip where solve failed
+            shared_ptr<SymbolExpression> clause = solution_map.at(pred);
+            
+            // Needed to solve for false. Rather than redo the solve, we can 
+            // just complement the solution set.
+            if( term.at(axis)==false )
+                clause = make_shared<ComplementOperator>(clause);
+                
+            clauses.push_back( clause );
+        }
+         
+        terms.push_back( make_shared<IntersectionOperator>( clauses ) );
+    }
+
+    return make_shared<UnionOperator>( terms );
 }
 
 

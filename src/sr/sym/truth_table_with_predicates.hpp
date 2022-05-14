@@ -36,6 +36,8 @@ public:
     TruthTableWithPredicates GetFolded( set<int> fold_axes, bool identity ) const;
     bool PredExists( shared_ptr<PredicateOperator> pred ) const;
     int PredToIndex( shared_ptr<PredicateOperator> pred ) const;
+    bool IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const; 
+    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const;
     string Render( set<int> column_axes ) const; 
     
     vector<EqualPredicateSet> &GetPredicates() { return predicates; }

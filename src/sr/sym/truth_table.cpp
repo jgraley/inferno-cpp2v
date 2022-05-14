@@ -209,7 +209,7 @@ set<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
 }
 
 
-bool TruthTable::IsKarnaughSlice( map<int, bool> fixed_map, bool value ) const
+bool TruthTable::IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const
 { 
     ASSERT( fixed_map.size() <= degree );
     
@@ -233,10 +233,68 @@ bool TruthTable::IsKarnaughSlice( map<int, bool> fixed_map, bool value ) const
         ScatterInto( full_indices, free_map );
 
         // Apply the change
-        success &= (Get(full_indices) == value);
+        success &= (Get(full_indices) == target_value);
     } );
 
     return success;
+}
+
+
+shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const
+{
+    enum KarnaughClass
+    {
+        FREE,
+        FALSE,
+        TRUE
+    };
+
+    KarnaughClass preferred_class = preferred_index ? TRUE : FALSE;
+
+    // Put FREE first so that we try the biggest slices first. Next is the preferred index
+    const vector<KarnaughClass> index_range_kc = {FREE, TRUE, FALSE};
+    shared_ptr<map<int, bool>> best_slice;
+    map<KarnaughClass, int> best_counts;
+    best_counts[FREE] = -1;
+    best_counts[FALSE] = -1;
+    best_counts[TRUE] = -1;
+
+    // We'll try 3^degree possibilities for Karnaugh slices
+    ForPower<KarnaughClass>( degree, index_range_kc, [&](vector<KarnaughClass> k_classes )
+    {     
+        auto candidate_slice = make_shared<map<int, bool>>();
+        map<KarnaughClass, int> candidate_counts;
+        for( int i=0; i<degree; i++ )
+        {
+            // Make slice across the FREE axes, located by the other ones
+            KarnaughClass c = k_classes.at(i);
+            switch( c )
+            {
+            case FREE:
+                break;
+            case FALSE:
+                (*candidate_slice)[i] = false;
+                break;
+            case TRUE:
+                (*candidate_slice)[i] = true;
+                break;            
+            }
+            candidate_counts[c]++;
+        }
+
+        // See if we've found a good slice
+        if( candidate_counts[FREE] > best_counts[FREE] ||
+            (candidate_counts[FREE] == best_counts[FREE] && candidate_counts[preferred_class] > best_counts[preferred_class]) )
+        {
+            if( IsKarnaughSlice( *candidate_slice, target_value ) )
+            {
+                best_slice = candidate_slice;
+                best_counts = candidate_counts;
+            }
+        } 
+    } );
+    
+    return best_slice; 
 }
 
 
@@ -505,6 +563,67 @@ static void TestTruthTableKarnaugh()
     ASSERT( !t.IsKarnaughSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, false ) );
     ASSERT( t.IsKarnaughSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, false ) );
     ASSERT( !t.IsKarnaughSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, true ) );
+
+    // Test TryFindBestKarnaughSlice() by walking through a map generation process on our "t".
+    shared_ptr<map<int, bool>> p;
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( *p == (map<int, bool>({{2, true}, {3, true}})) )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==4 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==4 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true );
+    ASSERT( !p );
+
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );    
+
+    // all and none cases
+    p = t_all.TryFindBestKarnaughSlice( true, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==0 )(*p);
+    
+    p = t_all.TryFindBestKarnaughSlice( false, true );
+    ASSERT( !p );
+
+    p = t_none.TryFindBestKarnaughSlice( false, true );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==0 )(*p);
+    
+    p = t_none.TryFindBestKarnaughSlice( true, true );
+    ASSERT( !p );
 }
 
 

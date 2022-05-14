@@ -144,6 +144,18 @@ int TruthTableWithPredicates::PredToIndex( shared_ptr<PredicateOperator> pred ) 
 }
 
 
+bool TruthTableWithPredicates::IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const
+{
+    return truth_table->IsKarnaughSlice( fixed_map, target_value );
+}
+
+
+shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const
+{
+    return truth_table->TryFindBestKarnaughSlice( target_value, preferred_index );
+}
+
+
 string TruthTableWithPredicates::Render( set<int> column_axes ) const
 {    
     string s;
