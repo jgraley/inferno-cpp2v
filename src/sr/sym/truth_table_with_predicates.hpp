@@ -32,12 +32,13 @@ public:
     shared_ptr<PredicateOperator> GetFrontPredicate( int axis ) const;
     EqualPredicateSet GetPredicateSet( int axis ) const;
     void Extend( vector<EqualPredicateSet> new_predicates );
+    void SetSlice( map<int, bool> fixed_map, bool new_value );
     TruthTableWithPredicates GetSlice( map<int, bool> fixed_map ) const; 
     TruthTableWithPredicates GetFolded( set<int> fold_axes, bool identity ) const;
     bool PredExists( shared_ptr<PredicateOperator> pred ) const;
     int PredToIndex( shared_ptr<PredicateOperator> pred ) const;
-    bool IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const; 
-    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const;
+    int CountInSlice( map<int, bool> fixed_map, bool target_value ) const; 
+    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const set<map<int, bool>> &exclude ) const;
     string Render( set<int> column_axes ) const; 
     
     vector<EqualPredicateSet> &GetPredicates() { return predicates; }

@@ -57,11 +57,11 @@ public:
 
     // Do all the cells that correspond to the given fixed axes
     // have the given target value.
-    bool IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const; 
+    int CountInSlice( map<int, bool> fixed_map, bool target_value ) const; 
 
     // Find the biggest slice wherein every element matches the
     // given target value. If there are no such slices, nullptr is returned.
-    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const;
+    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const set<map<int, bool>> &exclude ) const;
 
     // Ordering
     bool operator==( const TruthTable &other ) const;

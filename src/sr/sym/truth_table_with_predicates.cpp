@@ -89,6 +89,12 @@ void TruthTableWithPredicates::Extend( vector<EqualPredicateSet> new_predicates 
 }
 
 
+void TruthTableWithPredicates::SetSlice( map<int, bool> fixed_map, bool new_value )
+{
+    truth_table->SetSlice( fixed_map, new_value );
+}
+
+
 TruthTableWithPredicates TruthTableWithPredicates::GetSlice( map<int, bool> fixed_map ) const
 {
     vector<EqualPredicateSet> new_predicates;
@@ -144,15 +150,15 @@ int TruthTableWithPredicates::PredToIndex( shared_ptr<PredicateOperator> pred ) 
 }
 
 
-bool TruthTableWithPredicates::IsKarnaughSlice( map<int, bool> fixed_map, bool target_value ) const
+int TruthTableWithPredicates::CountInSlice( map<int, bool> fixed_map, bool target_value ) const
 {
-    return truth_table->IsKarnaughSlice( fixed_map, target_value );
+    return truth_table->CountInSlice( fixed_map, target_value );
 }
 
 
-shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( bool target_value, bool preferred_index ) const
+shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const set<map<int, bool>> &exclude ) const
 {
-    return truth_table->TryFindBestKarnaughSlice( target_value, preferred_index );
+    return truth_table->TryFindBestKarnaughSlice( target_value, preferred_index, exclude  );
 }
 
 

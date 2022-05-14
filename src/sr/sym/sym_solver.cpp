@@ -139,7 +139,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         TruthTableWithPredicates evaluated_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
         TRACEC("evaluated_ttwp ")(evaluated_ttwp.Render({}))("\n");
         
-        shared_ptr<SymbolExpression> option = GetOptionExpression( evaluated_ttwp, solution_map );
+        shared_ptr<SymbolExpression> option = GetOptionExpressionKarnaugh( evaluated_ttwp, solution_map );
         options.push_back( option );
     } );
 
@@ -177,6 +177,43 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWi
             // Needed to solve for false. Rather than redo the solve, we can 
             // just complement the solution set.
             if( term.at(axis)==false )
+                clause = make_shared<ComplementOperator>(clause);
+                
+            clauses.push_back( clause );
+        }
+         
+        terms.push_back( make_shared<IntersectionOperator>( clauses ) );
+    }
+
+    return make_shared<UnionOperator>( terms );
+}
+
+
+shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( TruthTableWithPredicates evaluated_ttwp,
+                                                                            const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const
+{
+    set<map<int, bool>> exclude;
+    
+    // Build a union of expressions for karnaugh slices
+    list< shared_ptr<SymbolExpression> > terms;
+    while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( true, true, exclude ) )
+    {
+        evaluated_ttwp.SetSlice(*karnaugh_slice, false); // Clear it (gives us a disjunctive Karnaugh map)
+        
+        // Build an intersection of clauses corresponding to solveables
+        list< shared_ptr<SymbolExpression> > clauses;
+        for( pair<int, bool> p : *karnaugh_slice )
+        {
+            int axis = p.first;
+            int index = p.second;
+            auto pred = evaluated_ttwp.GetFrontPredicate(axis);
+            if( solution_map.count(pred) == 0 )
+                continue; // skip where solve failed
+            shared_ptr<SymbolExpression> clause = solution_map.at(pred);
+            
+            // Needed to solve for false. Rather than redo the solve, we can 
+            // just complement the solution set.
+            if( index==false )
                 clause = make_shared<ComplementOperator>(clause);
                 
             clauses.push_back( clause );
