@@ -61,7 +61,7 @@ public:
 
     // Find the biggest slice wherein every element matches the
     // given target value. If there are no such slices, nullptr is returned.
-    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const set<map<int, bool>> &exclude ) const;
+    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const TruthTable &so_far ) const;
 
     // Ordering
     bool operator==( const TruthTable &other ) const;

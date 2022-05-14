@@ -156,9 +156,9 @@ int TruthTableWithPredicates::CountInSlice( map<int, bool> fixed_map, bool targe
 }
 
 
-shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const set<map<int, bool>> &exclude ) const
+shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const TruthTableWithPredicates &so_far ) const
 {
-    return truth_table->TryFindBestKarnaughSlice( target_value, preferred_index, exclude  );
+    return truth_table->TryFindBestKarnaughSlice( target_value, preferred_index, *(so_far.truth_table) );
 }
 
 

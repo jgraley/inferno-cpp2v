@@ -192,13 +192,13 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWi
 shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( TruthTableWithPredicates evaluated_ttwp,
                                                                             const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const
 {
-    set<map<int, bool>> exclude;
+    TruthTableWithPredicates so_far_ttwp = evaluated_ttwp;
     
     // Build a union of expressions for karnaugh slices
     list< shared_ptr<SymbolExpression> > terms;
-    while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( true, true, exclude ) )
+    while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( true, true, so_far_ttwp ) )
     {
-        evaluated_ttwp.SetSlice(*karnaugh_slice, false); // Clear it (gives us a disjunctive Karnaugh map)
+        so_far_ttwp.SetSlice(*karnaugh_slice, false); // Update the TT that indicates progress so far
         
         // Build an intersection of clauses corresponding to solveables
         list< shared_ptr<SymbolExpression> > clauses;
