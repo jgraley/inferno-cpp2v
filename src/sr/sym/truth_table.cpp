@@ -145,7 +145,7 @@ TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
         map<int, bool> dest_map = ZipToMap( dest_axes, dest_indices );
         ScatterInto( full_indices, dest_map );
 
-        // Apply the change
+        // Copy cell to destination
         dest.Set( dest_indices, Get( full_indices ) );
     } );
 
@@ -206,6 +206,37 @@ set<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
             indices_set.insert( indices );
     } );
     return indices_set;
+}
+
+
+bool TruthTable::IsKarnaughSlice( map<int, bool> fixed_map, bool value ) const
+{ 
+    ASSERT( fixed_map.size() <= degree );
+    
+    // Determine what the free axes must be
+    vector<int> free_axes;
+    for( int i=0; i<degree; i++ )
+        if( fixed_map.count(i) == 0 )
+            free_axes.push_back(i);
+    ASSERT( free_axes.size() + fixed_map.size() == degree );
+
+    // Capture the fixed axes and indices into our vector
+    vector<bool> full_indices(degree);
+    ScatterInto( full_indices, fixed_map );
+
+    // For all values of (bool)^(free axis count)
+    bool success = true;
+    ForPower<bool>( free_axes.size(), index_range_bool, [&](vector<bool> free_indices)
+    {
+        // Capture the free axes and indices into our vector
+        map<int, bool> free_map = ZipToMap( free_axes, free_indices );
+        ScatterInto( full_indices, free_map );
+
+        // Apply the change
+        success &= (Get(full_indices) == value);
+    } );
+
+    return success;
 }
 
 
@@ -421,6 +452,62 @@ static void TestTruthTableBase()
 }
 
 
+static void TestTruthTableKarnaugh()
+{
+    vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
+    int render_cell_size = 3;
+    
+    // Repeat TestTruthTableBase to get same truth table but
+    // without so many render checks.
+    TruthTable t( 4, true );
+    t.Set( {true, true, false, false}, false );
+    t.Set( {true, true, false, true}, false );
+    t.Set( {true, true, true, false}, false );
+    t.Set( {false, false, false, false}, false );
+    t.Set( {false, true, false, true}, false );
+    t.Set( {true, true, false, false}, true );
+    string r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE("{true, true, false, false} to true\n")( "\n"+r );
+    ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
+               "        ¬p3 ¬p3  p3  p3 \n"
+               "¬p2 ¬p4  ✘   ✔   ✔   ✔  \n"
+               " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
+               "¬p2  p4  ✔   ✔   ✔   ✔  \n"
+               " p2  p4  ✘   ✘   ✔   ✔  \n" );
+
+    // Now look for some karnaugh slices - success cases
+    ASSERT( t.IsKarnaughSlice( {{2, true}, {3, true}}, true ) );
+    ASSERT( t.IsKarnaughSlice( {{1, false}, {3, true}}, true ) );
+    ASSERT( t.IsKarnaughSlice( {{0, false}, {2, true}}, true ) );
+    ASSERT( t.IsKarnaughSlice( {{1, true}, {2, false}, {3, false}}, true ) );
+    ASSERT( t.IsKarnaughSlice( {{1, true}, {2, false}, {3, true}}, false ) );
+               
+    // Look for some more karnaugh slices - unsucessful cases
+    ASSERT( !t.IsKarnaughSlice( {{2, true}, {3, true}}, false ) );
+    ASSERT( !t.IsKarnaughSlice( {{1, true}, {2, false}, {3, true}}, true ) );
+    ASSERT( !t.IsKarnaughSlice( {{1, false}, {2, false}, {3, false}}, true ) );
+    ASSERT( !t.IsKarnaughSlice( {{1, false}, {3, false}}, true ) );
+    ASSERT( !t.IsKarnaughSlice( {{2, true}, {3, false}}, true ) );
+    ASSERT( !t.IsKarnaughSlice( {{3, false}}, true ) );
+
+    // Whole thing
+    ASSERT( !t.IsKarnaughSlice( {}, true ) );
+    ASSERT( !t.IsKarnaughSlice( {}, false ) );
+    TruthTable t_all( 4, true );
+    ASSERT( t_all.IsKarnaughSlice( {}, true ) );
+    ASSERT( !t_all.IsKarnaughSlice( {}, false ) );
+    TruthTable t_none( 4, false );
+    ASSERT( t_none.IsKarnaughSlice( {}, false ) );
+    ASSERT( !t_none.IsKarnaughSlice( {}, true ) );
+
+    // Single cell
+    ASSERT( t.IsKarnaughSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, true ) );
+    ASSERT( !t.IsKarnaughSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, false ) );
+    ASSERT( t.IsKarnaughSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, false ) );
+    ASSERT( !t.IsKarnaughSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, true ) );
+}
+
+
 static void TestTruthTableDefaultMMAX()
 {
     vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
@@ -570,4 +657,5 @@ void SYM::TestTruthTable()
     TestTruthTableDefaultMMAX();
     TestTruthTableCoupling();
     TestTruthTableDisjunction();
+    TestTruthTableKarnaugh();
 }

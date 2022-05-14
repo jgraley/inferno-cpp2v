@@ -55,6 +55,10 @@ public:
     // Find values matching given value and return their indices
     set<vector<bool>> GetIndicesOfValue( bool value ) const;
 
+    // Do all the cells that correspond to the given fixed axes
+    // have the given value
+    bool IsKarnaughSlice( map<int, bool> fixed_map, bool value ) const; 
+
     // Ordering
     bool operator==( const TruthTable &other ) const;
     bool operator<( const TruthTable &other ) const;
