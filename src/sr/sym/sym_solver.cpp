@@ -28,7 +28,7 @@ void TruthTableSolver::PreSolve()
     
     // Find the predicates and create a truth table of them
     auto predicates = PredicateAnalysis::GetPredicates( initial_expression );
-    ttwp = make_unique<TruthTableWithPredicates>( predicates, TruthTable::TRUE_CELL, label_var_name, counting_based );
+    ttwp = make_unique<TruthTableWithPredicates>( predicates, TruthTable::CellType::TRUE, label_var_name, counting_based );
     TRACEC(RenderInitialExpressionInTermsOfPredNames())("\n");
     
     // Constrain (set cells to false) by evaluating our initial expression while the predicates 
@@ -158,7 +158,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
 shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWithPredicates evaluated_ttwp,
                                                                     const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const
 {
-    set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( TruthTable::TRUE_CELL );
+    set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( TruthTable::CellType::TRUE );
     TRACEC("Permitted terms ")(permitted_terms)("\n");
 
     // Build a union of terms that were not ruled out
@@ -196,9 +196,9 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( Trut
     
     // Build a union of expressions for karnaugh slices
     list< shared_ptr<SymbolExpression> > terms;
-    while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far_ttwp ) )
+    while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far_ttwp ) )
     {
-        so_far_ttwp.SetSlice(*karnaugh_slice, TruthTable::FALSE_CELL); // Update the TT that indicates progress so far
+        so_far_ttwp.SetSlice(*karnaugh_slice, TruthTable::CellType::FALSE); // Update the TT that indicates progress so far
         
         // Build an intersection of clauses corresponding to solveables
         list< shared_ptr<SymbolExpression> > clauses;
@@ -240,8 +240,9 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltExpressionForTesting() con
     vector<shared_ptr<BooleanExpression>> options;
     ForPower<bool>( ttwp->GetDegree(), index_range_bool, [&](vector<bool> indices)
     {
-        bool cell_value = ttwp->GetTruthTable().Get( indices );      
-        options.push_back( make_shared<BooleanConstant>(cell_value) );
+        TruthTable::CellType cell_value = ttwp->GetTruthTable().Get( indices );      
+        bool cell_bool = (cell_value == TruthTable::CellType::TRUE);
+        options.push_back( make_shared<BooleanConstant>(cell_bool) );
     } );
 
     auto solution = make_shared<Multiplexor>( controls, options );
@@ -280,7 +281,7 @@ void TruthTableSolver::ConstrainByEvaluating()
         
         // Rule out any evaluations that come out false
         if( !eval_result->IsDefinedAndTrue() )
-            ttwp->GetTruthTable().Set( indices, TruthTable::FALSE_CELL );
+            ttwp->GetTruthTable().Set( indices, TruthTable::CellType::FALSE );
     } );
 }
 
@@ -362,13 +363,13 @@ void TruthTableSolver::ConstrainUsingDerived()
                 TRACEC("Enforcing interpolation: %s ∧ %s => FALSE\n", 
                        PredicateName(i).c_str(), 
                        PredicateName(j).c_str() );  
-                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}}, TruthTable::FALSE_CELL );
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}}, TruthTable::CellType::FALSE );
                 break;
             case Relationship::IMPLIES:
                 TRACEC("Enforcing interpolation: %s => %s\n", 
                        PredicateName(i).c_str(), 
                        PredicateName(j).c_str() );  
-                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, false}}, TruthTable::FALSE_CELL );
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, false}}, TruthTable::CellType::FALSE );
                 break;
             }
 
@@ -382,7 +383,7 @@ void TruthTableSolver::ConstrainUsingDerived()
                        PredicateName(i).c_str(), 
                        PredicateName(j).c_str(), 
                        PredicateName(k).c_str() );  
-                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, TruthTable::FALSE_CELL );
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, TruthTable::CellType::FALSE );
             }
         }
     }

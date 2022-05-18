@@ -19,11 +19,12 @@ namespace SYM
 class TruthTable
 {
 public:
-    enum CellType
+    enum class CellType
     {
-        // Folding prioritises higher vlaues
-        FALSE_CELL = 0,
-        TRUE_CELL = 1
+        // Folding prioritises higher values
+        DONT_CARE = -1,
+        FALSE = 0,
+        TRUE = 1
     };
 
     explicit TruthTable( int degree, CellType initval );
