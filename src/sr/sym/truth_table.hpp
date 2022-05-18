@@ -19,13 +19,12 @@ namespace SYM
 class TruthTable
 {
 public:
-    /*enum CellType
+    enum CellType
     {
-        FALSE,
-        TRUE,
-        DONT_CARE
-    };*/
-    typedef bool CellType;
+        // Folding prioritises higher vlaues
+        FALSE_CELL = 0,
+        TRUE_CELL = 1
+    };
 
     explicit TruthTable( int degree, CellType initval );
     TruthTable( const TruthTable &other );
@@ -65,11 +64,11 @@ public:
 
     // Do all the cells that correspond to the given fixed axes
     // have the given target value.
-    int CountInSlice( map<int, bool> fixed_map, bool target_value ) const; 
+    int CountInSlice( map<int, bool> fixed_map, CellType target_value ) const; 
 
     // Find the biggest slice wherein every element matches the
     // given target value. If there are no such slices, nullptr is returned.
-    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const TruthTable &so_far ) const;
+    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const;
 
     // Ordering
     bool operator==( const TruthTable &other ) const;

@@ -134,7 +134,7 @@ TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
         if( fixed_map.count(i) == 0 )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + fixed_map.size() == degree );
-    TruthTable dest( dest_axes.size(), false );
+    TruthTable dest( dest_axes.size(), FALSE_CELL );
 
     // Capture the fixed axes and indices into our vector
     vector<bool> full_indices(degree);
@@ -165,7 +165,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes ) const
         if( fold_axes.count(i) == 0 )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + fold_axes.size() == degree );
-    TruthTable dest( dest_axes.size(), false );
+    TruthTable dest( dest_axes.size(), FALSE_CELL );
 
     // For all values of (bool)^(dest axis count)
     ForPower<bool>( dest_axes.size(), index_range_bool, [&](vector<bool> dest_indices)
@@ -208,7 +208,7 @@ set<vector<bool>> TruthTable::GetIndicesOfValue( CellType value ) const
 }
 
 
-int TruthTable::CountInSlice( map<int, bool> fixed_map, bool target_value ) const
+int TruthTable::CountInSlice( map<int, bool> fixed_map, CellType target_value ) const
 { 
     ASSERT( fixed_map.size() <= degree );
     
@@ -240,24 +240,24 @@ int TruthTable::CountInSlice( map<int, bool> fixed_map, bool target_value ) cons
 }
 
 
-shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const TruthTable &so_far ) const
+shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const
 {
     enum KarnaughClass
     {
-        FREE,
-        FALSE,
-        TRUE
+        FREE_AXIS,
+        FALSE_AXIS,
+        TRUE_AXIS
     };
 
-    KarnaughClass preferred_class = preferred_index ? TRUE : FALSE;
+    KarnaughClass preferred_class = preferred_index ? TRUE_AXIS : FALSE_AXIS;
 
     // Put FREE first so that we try the biggest slices first. Next is the preferred index
-    const vector<KarnaughClass> index_range_kc = {FREE, TRUE, FALSE};
+    const vector<KarnaughClass> index_range_kc = {FREE_AXIS, TRUE_AXIS, FALSE_AXIS};
     shared_ptr<map<int, bool>> best_slice;
     map<KarnaughClass, int> best_counts;
-    best_counts[FREE] = -1;
-    best_counts[FALSE] = -1;
-    best_counts[TRUE] = -1;
+    best_counts[FREE_AXIS] = -1;
+    best_counts[FALSE_AXIS] = -1;
+    best_counts[TRUE_AXIS] = -1;
     int best_new_count = -1;
     
     // We'll try 3^degree possibilities for Karnaugh slices
@@ -271,12 +271,12 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( bool target_val
             KarnaughClass c = k_classes.at(i);
             switch( c )
             {
-            case FREE:
+            case FREE_AXIS:
                 break;
-            case FALSE:
+            case FALSE_AXIS:
                 (*candidate_slice)[i] = false;
                 break;
-            case TRUE:
+            case TRUE_AXIS:
                 (*candidate_slice)[i] = true;
                 break;            
             }
@@ -292,8 +292,8 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( bool target_val
         {
             // DESIRABLE conditions
             if( candidate_new_count > best_new_count || // 1. biggest improvement on so-far solution by count of "new ticks covered"
-                (candidate_new_count == best_new_count && candidate_counts[FREE] > best_counts[FREE]) || // higher dimension (fewer clauses)
-                (candidate_new_count == best_new_count && candidate_counts[FREE] == best_counts[FREE] && candidate_counts[preferred_class] > best_counts[preferred_class]) ) // more ticks (fewer negations)
+                (candidate_new_count == best_new_count && candidate_counts[FREE_AXIS] > best_counts[FREE_AXIS]) || // higher dimension (fewer clauses)
+                (candidate_new_count == best_new_count && candidate_counts[FREE_AXIS] == best_counts[FREE_AXIS] && candidate_counts[preferred_class] > best_counts[preferred_class]) ) // more ticks (fewer negations)
             {
                 best_slice = candidate_slice;
                 best_new_count = candidate_new_count;
@@ -464,8 +464,8 @@ static void TestTruthTableBase()
     
     // First test checks for consistency between simple Set()
     // and the renders, and looks for various kinds of swaps.
-    TruthTable t( 4, true );
-    t.Set( {true, true, false, false}, false );
+    TruthTable t( 4, TruthTable::TRUE_CELL );
+    t.Set( {true, true, false, false}, TruthTable::FALSE_CELL );
     string r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -474,7 +474,7 @@ static void TestTruthTableBase()
                " p2 ¬p4  ✔   ✘   ✔   ✔  \n"
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✔   ✔   ✔  \n" );
-    t.Set( {true, true, false, true}, false );
+    t.Set( {true, true, false, true}, TruthTable::FALSE_CELL );
     r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{true, true, false, true} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -483,7 +483,7 @@ static void TestTruthTableBase()
                " p2 ¬p4  ✔   ✘   ✔   ✔  \n"
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✘   ✔   ✔  \n" );
-    t.Set( {true, true, true, false}, false );
+    t.Set( {true, true, true, false}, TruthTable::FALSE_CELL );
     r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{true, true, true, false} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -492,7 +492,7 @@ static void TestTruthTableBase()
                " p2 ¬p4  ✔   ✘   ✔   ✘  \n"
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✘   ✔   ✔  \n" );
-    t.Set( {false, false, false, false}, false );
+    t.Set( {false, false, false, false}, TruthTable::FALSE_CELL );
     r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{false, false, false, false} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -501,7 +501,7 @@ static void TestTruthTableBase()
                " p2 ¬p4  ✔   ✘   ✔   ✘  \n"
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✔   ✘   ✔   ✔  \n" );
-    t.Set( {false, true, false, true}, false );
+    t.Set( {false, true, false, true}, TruthTable::FALSE_CELL );
     r = t.Render({0, 2}, pred_labels, render_cell_size);
     TRACE("{false, true, false, true} to false\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -511,7 +511,7 @@ static void TestTruthTableBase()
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
     // now undo the first one
-    t.Set( {true, true, false, false}, true );
+    t.Set( {true, true, false, false}, TruthTable::TRUE_CELL );
     r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to true\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -530,13 +530,13 @@ static void TestTruthTableKarnaugh()
     
     // Repeat TestTruthTableBase to get same truth table but
     // without so many render checks.
-    TruthTable t( 4, true );
-    t.Set( {true, true, false, false}, false );
-    t.Set( {true, true, false, true}, false );
-    t.Set( {true, true, true, false}, false );
-    t.Set( {false, false, false, false}, false );
-    t.Set( {false, true, false, true}, false );
-    t.Set( {true, true, false, false}, true );
+    TruthTable t( 4, TruthTable::TRUE_CELL );
+    t.Set( {true, true, false, false}, TruthTable::FALSE_CELL );
+    t.Set( {true, true, false, true}, TruthTable::FALSE_CELL );
+    t.Set( {true, true, true, false}, TruthTable::FALSE_CELL );
+    t.Set( {false, false, false, false}, TruthTable::FALSE_CELL );
+    t.Set( {false, true, false, true}, TruthTable::FALSE_CELL );
+    t.Set( {true, true, false, false}, TruthTable::TRUE_CELL );
     string r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to true\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -547,109 +547,109 @@ static void TestTruthTableKarnaugh()
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
 
     // Now look for some karnaugh slices - success cases
-    ASSERT( t.CountInSlice( {{2, true}, {3, true}}, true )==4 );
-    ASSERT( t.CountInSlice( {{1, false}, {3, true}}, true )==4 );
-    ASSERT( t.CountInSlice( {{0, false}, {2, true}}, true )==4 );
-    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, false}}, true )==2 );
-    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, false )==2 );
+    ASSERT( t.CountInSlice( {{2, true}, {3, true}}, TruthTable::TRUE_CELL )==4 );
+    ASSERT( t.CountInSlice( {{1, false}, {3, true}}, TruthTable::TRUE_CELL )==4 );
+    ASSERT( t.CountInSlice( {{0, false}, {2, true}}, TruthTable::TRUE_CELL )==4 );
+    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, false}}, TruthTable::TRUE_CELL )==2 );
+    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, TruthTable::FALSE_CELL )==2 );
                
     // Look for some more karnaugh slices - unsucessful cases
-    ASSERT( t.CountInSlice( {{2, true}, {3, true}}, false )<4 );
-    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, true )<2 );
-    ASSERT( t.CountInSlice( {{1, false}, {2, false}, {3, false}}, true )<2 );
-    ASSERT( t.CountInSlice( {{1, false}, {3, false}}, true )<4 );
-    ASSERT( t.CountInSlice( {{2, true}, {3, false}}, true )<4 );
-    ASSERT( t.CountInSlice( {{3, false}}, true )<8 );
+    ASSERT( t.CountInSlice( {{2, true}, {3, true}}, TruthTable::FALSE_CELL )<4 );
+    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, TruthTable::TRUE_CELL )<2 );
+    ASSERT( t.CountInSlice( {{1, false}, {2, false}, {3, false}}, TruthTable::TRUE_CELL )<2 );
+    ASSERT( t.CountInSlice( {{1, false}, {3, false}}, TruthTable::TRUE_CELL )<4 );
+    ASSERT( t.CountInSlice( {{2, true}, {3, false}}, TruthTable::TRUE_CELL )<4 );
+    ASSERT( t.CountInSlice( {{3, false}}, TruthTable::TRUE_CELL )<8 );
 
     // Whole thing
-    ASSERT( t.CountInSlice( {}, true )==12 );
-    ASSERT( t.CountInSlice( {}, false )==4 );
-    TruthTable t_all( 4, true );
-    ASSERT( t_all.CountInSlice( {}, true )==16 );
-    ASSERT( t_all.CountInSlice( {}, false )==0 );
-    TruthTable t_none( 4, false );
-    ASSERT( t_none.CountInSlice( {}, false )==16 );
-    ASSERT( t_none.CountInSlice( {}, true )==0 );
+    ASSERT( t.CountInSlice( {}, TruthTable::TRUE_CELL )==12 );
+    ASSERT( t.CountInSlice( {}, TruthTable::FALSE_CELL )==4 );
+    TruthTable t_all( 4, TruthTable::TRUE_CELL );
+    ASSERT( t_all.CountInSlice( {}, TruthTable::TRUE_CELL )==16 );
+    ASSERT( t_all.CountInSlice( {}, TruthTable::FALSE_CELL )==0 );
+    TruthTable t_none( 4, TruthTable::FALSE_CELL );
+    ASSERT( t_none.CountInSlice( {}, TruthTable::FALSE_CELL )==16 );
+    ASSERT( t_none.CountInSlice( {}, TruthTable::TRUE_CELL )==0 );
 
     // Single cell
-    ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, true )==1 );
-    ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, false )==0 );
-    ASSERT( t.CountInSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, false )==1 );
-    ASSERT( t.CountInSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, true )==0 );
+    ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, TruthTable::TRUE_CELL )==1 );
+    ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, TruthTable::FALSE_CELL )==0 );
+    ASSERT( t.CountInSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, TruthTable::FALSE_CELL )==1 );
+    ASSERT( t.CountInSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, TruthTable::TRUE_CELL )==0 );
 
     // -------------------------------- DISJOINT KARNAUGH --------------------------------------
 
     // Test TryFindBestKarnaughSlice() by walking through a map generation process on our "t".
     shared_ptr<map<int, bool>> p;
-    p = t.TryFindBestKarnaughSlice( true, true, t );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( *p == (map<int, bool>({{2, true}, {3, true}})) )(*p);
-    t.SetSlice(*p, false);
+    t.SetSlice(*p, TruthTable::FALSE_CELL);
     
-    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
-    t.SetSlice(*p, false);
+    t.SetSlice(*p, TruthTable::FALSE_CELL);
     
-    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
-    t.SetSlice(*p, false);
+    t.SetSlice(*p, TruthTable::FALSE_CELL);
     
-    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
-    t.SetSlice(*p, false);
+    t.SetSlice(*p, TruthTable::FALSE_CELL);
     
-    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==4 )(*p);
-    t.SetSlice(*p, false);
+    t.SetSlice(*p, TruthTable::FALSE_CELL);
     
-    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==4 )(*p);
-    t.SetSlice(*p, false);
+    t.SetSlice(*p, TruthTable::FALSE_CELL);
     
-    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t  );
     ASSERT( !p );
 
     r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );    
 
     // all and none cases
-    p = t_all.TryFindBestKarnaughSlice( true, true, t_all );
+    p = t_all.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t_all );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==0 )(*p);
     
-    p = t_all.TryFindBestKarnaughSlice( false, true, t_all );
+    p = t_all.TryFindBestKarnaughSlice( TruthTable::FALSE_CELL, true, t_all );
     ASSERT( !p );
 
-    p = t_none.TryFindBestKarnaughSlice( false, true, t_none );
+    p = t_none.TryFindBestKarnaughSlice( TruthTable::FALSE_CELL, true, t_none );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==0 )(*p);
     
-    p = t_none.TryFindBestKarnaughSlice( true, true, t_none );
+    p = t_none.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, t_none );
     ASSERT( !p );
 
     // -------------------------------- STANDARD KARNAUGH --------------------------------------
     // Repeat TestTruthTableBase to get same truth table but
     // without so many render checks.
-    t.SetSlice( {}, true );
-    t.Set( {true, true, false, false}, false );
-    t.Set( {true, true, false, true}, false );
-    t.Set( {true, true, true, false}, false );
-    t.Set( {false, false, false, false}, false );
-    t.Set( {false, true, false, true}, false );
-    t.Set( {true, true, false, false}, true );
+    t.SetSlice( {}, TruthTable::TRUE_CELL );
+    t.Set( {true, true, false, false}, TruthTable::FALSE_CELL );
+    t.Set( {true, true, false, true}, TruthTable::FALSE_CELL );
+    t.Set( {true, true, true, false}, TruthTable::FALSE_CELL );
+    t.Set( {false, false, false, false}, TruthTable::FALSE_CELL );
+    t.Set( {false, true, false, true}, TruthTable::FALSE_CELL );
+    t.Set( {true, true, false, false}, TruthTable::TRUE_CELL );
     r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to true\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
@@ -660,47 +660,47 @@ static void TestTruthTableKarnaugh()
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
 
     TruthTable so_far = t;
-    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( *p == (map<int, bool>({{2, true}, {3, true}})) )(*p);
-    so_far.SetSlice(*p, false);
+    so_far.SetSlice(*p, TruthTable::FALSE_CELL);
     r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );
         
-    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==2 )(*p);
-    so_far.SetSlice(*p, false);
+    so_far.SetSlice(*p, TruthTable::FALSE_CELL);
     r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );
         
-    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==2 )(*p);
-    so_far.SetSlice(*p, false);
+    so_far.SetSlice(*p, TruthTable::FALSE_CELL);
     r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );
         
-    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
-    so_far.SetSlice(*p, false);
+    so_far.SetSlice(*p, TruthTable::FALSE_CELL);
     r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );
     
-    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==2 )(*p);
-    so_far.SetSlice(*p, false);
+    so_far.SetSlice(*p, TruthTable::FALSE_CELL);
     r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );
     
-    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    p = t.TryFindBestKarnaughSlice( TruthTable::TRUE_CELL, true, so_far );
     ASSERT( !p );
 }
 
@@ -718,31 +718,31 @@ static void TestTruthTableDefaultMMAX()
     // (but this last step is not necessary; we can get the info we need from repeated evaluation)
     
     // 3-D truth table incorporates predicates p1 to p3
-    TruthTable t_analytic( 3, true );
+    TruthTable t_analytic( 3, TruthTable::TRUE_CELL );
     TRACE("Constructed truth table\n")( "\n"+t_analytic.Render({1, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis of predicate expression
-    t_analytic.SetSlice( {{0, false}, {1, true}}, false ); // (p1 iff p2)
-    t_analytic.SetSlice( {{0, true}, {1, false}}, false ); // (p1 iff p2) other way
-    t_analytic.SetSlice( {{1, false}, {2, false}}, false ); // !p2 => p3 aka p2 || p3
+    t_analytic.SetSlice( {{0, false}, {1, true}}, TruthTable::FALSE_CELL ); // (p1 iff p2)
+    t_analytic.SetSlice( {{0, true}, {1, false}}, TruthTable::FALSE_CELL ); // (p1 iff p2) other way
+    t_analytic.SetSlice( {{1, false}, {2, false}}, TruthTable::FALSE_CELL ); // !p2 => p3 aka p2 || p3
     TRACE("Initial truth table (after clauses)\n")( "\n"+t_analytic.Render({1, 2}, pred_labels, render_cell_size) );
     
     // Filled in by brute force (repeated evaluation of the predicate form)
-    TruthTable t_brute( 3, true );
-    t_brute.Set( {false, false, false}, false ); 
-    t_brute.Set( {false, false, true}, true ); 
-    t_brute.Set( {false, true, false}, false ); 
-    t_brute.Set( {false, true, true}, false ); 
-    t_brute.Set( {true, false, false}, false ); 
-    t_brute.Set( {true, false, true}, false ); 
-    t_brute.Set( {true, true, false}, true ); 
-    t_brute.Set( {true, true, true}, true ); 
+    TruthTable t_brute( 3, TruthTable::TRUE_CELL );
+    t_brute.Set( {false, false, false}, TruthTable::FALSE_CELL ); 
+    t_brute.Set( {false, false, true}, TruthTable::TRUE_CELL ); 
+    t_brute.Set( {false, true, false}, TruthTable::FALSE_CELL ); 
+    t_brute.Set( {false, true, true}, TruthTable::FALSE_CELL ); 
+    t_brute.Set( {true, false, false}, TruthTable::FALSE_CELL ); 
+    t_brute.Set( {true, false, true}, TruthTable::FALSE_CELL ); 
+    t_brute.Set( {true, true, false}, TruthTable::TRUE_CELL ); 
+    t_brute.Set( {true, true, true}, TruthTable::TRUE_CELL ); 
     TRACE("Initial truth table (after brute force)\n")( "\n"+t_brute.Render({1, 2}, pred_labels, render_cell_size) );
     
     ASSERT( t_analytic == t_brute );
     
     // Extract remaining possibles 
-    set<vector<bool>> iv = t_brute.GetIndicesOfValue( true );
+    set<vector<bool>> iv = t_brute.GetIndicesOfValue( TruthTable::TRUE_CELL );
     TRACE("Possible {p1, p2, p3}\n")(iv)("\n");
     ASSERT( iv == set<vector<bool>>({{false, false, true}, // not submerged MMAX case, f() applies
                                      {true, true, true},   // submerged MMAX case, don't care f()                           
@@ -761,18 +761,18 @@ static void TestTruthTableCoupling()
     // we get predicate form (p1 || p2 || p3).
     
     // 3-D truth table incorporates predicates p1 to p3
-    TruthTable t( 3, true );
+    TruthTable t( 3, TruthTable::TRUE_CELL );
     TRACE("Constructed truth table\n")( "\n"+t.Render({1, 2}, pred_labels, render_cell_size) );
 
     // Filled in by brute force (repeated evaluation of the predicate form)
-    t.Set( {false, false, false}, false ); 
-    t.Set( {false, false, true}, true ); 
-    t.Set( {false, true, false}, true ); 
-    t.Set( {false, true, true}, true ); 
-    t.Set( {true, false, false}, true ); 
-    t.Set( {true, false, true}, true ); 
-    t.Set( {true, true, false}, true ); 
-    t.Set( {true, true, true}, true ); 
+    t.Set( {false, false, false}, TruthTable::FALSE_CELL ); 
+    t.Set( {false, false, true}, TruthTable::TRUE_CELL ); 
+    t.Set( {false, true, false}, TruthTable::TRUE_CELL ); 
+    t.Set( {false, true, true}, TruthTable::TRUE_CELL ); 
+    t.Set( {true, false, false}, TruthTable::TRUE_CELL ); 
+    t.Set( {true, false, true}, TruthTable::TRUE_CELL ); 
+    t.Set( {true, true, false}, TruthTable::TRUE_CELL ); 
+    t.Set( {true, true, true}, TruthTable::TRUE_CELL ); 
     TRACE("Initial truth table (after brute force)\n")( "\n"+t.Render({1, 2}, pred_labels, render_cell_size) );
 
     // TODO imagine a property like x~~M iff x==M ("M is singleton under equivalence")
@@ -784,7 +784,7 @@ static void TestTruthTableCoupling()
     TruthTable ts = t.GetSlice( {{0, false}} );    
 
     // Extract remaining possibles 
-    set<vector<bool>> iv = ts.GetIndicesOfValue( true );
+    set<vector<bool>> iv = ts.GetIndicesOfValue( TruthTable::TRUE_CELL );
     TRACE("Possible {p2, p3}\n")(iv)("\n");
     
     ASSERT( iv == set<vector<bool>>({{false, true}, // x1 not MMAX; x1 equivalent to x0
@@ -806,14 +806,14 @@ static void TestTruthTableDisjunction()
     // (but this last step is not necessary; we can get the info we need from repeated evaluation)
     
     // 4-D truth table incorporates predicates p1 to p4
-    TruthTable t( 4, true );
+    TruthTable t( 4, TruthTable::TRUE_CELL );
     TRACE("Constructed truth table\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis but could be repeated evaluation of the predicate form
-    t.SetSlice( {{0, false}, {2, false}}, false ); // (1) !p1 => p3 aka p1 || p3
-    t.SetSlice( {{1, false}, {2, false}}, false ); // (3) !p2 => p3 aka p2 || p3
-    t.SetSlice( {{1, false}, {3, false}}, false ); // (4) !p2 => p4 aka p2 || p4
-    t.SetSlice( {{3, false}, {0, false}}, false ); // (7) !p4 => p1 aka p4 || p1
+    t.SetSlice( {{0, false}, {2, false}}, TruthTable::FALSE_CELL ); // (1) !p1 => p3 aka p1 || p3
+    t.SetSlice( {{1, false}, {2, false}}, TruthTable::FALSE_CELL ); // (3) !p2 => p3 aka p2 || p3
+    t.SetSlice( {{1, false}, {3, false}}, TruthTable::FALSE_CELL ); // (4) !p2 => p4 aka p2 || p4
+    t.SetSlice( {{3, false}, {0, false}}, TruthTable::FALSE_CELL ); // (7) !p4 => p1 aka p4 || p1
     TRACE("Initial truth table (after (1) (3) (4) (7))\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
     
     // (Too lazy to code up the brute force version here)
@@ -825,12 +825,12 @@ static void TestTruthTableDisjunction()
     TRACE("Extended truth table\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis including extrapolated predicate, searching for transitives/substitutions
-    t.SetSlice( {{0, true}, {2, true}, {4, false}}, false ); // (T1a) Transitive Equal p1 && p3 => p5 aka !p1 || !p3 || p5
-    t.SetSlice( {{0, true}, {2, false}, {4, true}}, false ); // (T1b) Transitive Equal p5 && p1 => p3 aka !p5 || !p1 || p3
-    t.SetSlice( {{0, false}, {2, true}, {4, true}}, false ); // (T1c) Transitive Equal p3 && p5 => p1 aka !p3 || !p5 || p1
-    t.SetSlice( {{1, true}, {3, true}, {4, false}}, false ); // (T2a) Transitive Equal p2 && p4 => p5 aka !p2 || !p4 || p5
-    t.SetSlice( {{1, true}, {3, false}, {4, true}}, false ); // (T2b) Transitive Equal p5 && p2 => p4 aka !p5 || !p2 || p4
-    t.SetSlice( {{1, false}, {3, true}, {4, true}}, false ); // (T2c) Transitive Equal p4 && p5 => p2 aka !p4 || !p5 || p2
+    t.SetSlice( {{0, true}, {2, true}, {4, false}}, TruthTable::FALSE_CELL ); // (T1a) Transitive Equal p1 && p3 => p5 aka !p1 || !p3 || p5
+    t.SetSlice( {{0, true}, {2, false}, {4, true}}, TruthTable::FALSE_CELL ); // (T1b) Transitive Equal p5 && p1 => p3 aka !p5 || !p1 || p3
+    t.SetSlice( {{0, false}, {2, true}, {4, true}}, TruthTable::FALSE_CELL ); // (T1c) Transitive Equal p3 && p5 => p1 aka !p3 || !p5 || p1
+    t.SetSlice( {{1, true}, {3, true}, {4, false}}, TruthTable::FALSE_CELL ); // (T2a) Transitive Equal p2 && p4 => p5 aka !p2 || !p4 || p5
+    t.SetSlice( {{1, true}, {3, false}, {4, true}}, TruthTable::FALSE_CELL ); // (T2b) Transitive Equal p5 && p2 => p4 aka !p5 || !p2 || p4
+    t.SetSlice( {{1, false}, {3, true}, {4, true}}, TruthTable::FALSE_CELL ); // (T2c) Transitive Equal p4 && p5 => p2 aka !p4 || !p5 || p2
 
     TRACE("Extrapolate-restricted (after (T1) (T2))\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
@@ -840,7 +840,7 @@ static void TestTruthTableDisjunction()
     TRACE("Folded back\n")( "\n"+t2.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Extract remaining possibles 
-    set<vector<bool>> iv = t2.GetIndicesOfValue( true );
+    set<vector<bool>> iv = t2.GetIndicesOfValue( TruthTable::TRUE_CELL );
     TRACE("Possible {p1, p2, p3, p4}\n")(iv)("\n");
     ASSERT( iv == set<vector<bool>>({{true, true, true, true}, // submerged MMAX case 
                                      {false, false, true, true}, // New MMAX on the left and match on right
