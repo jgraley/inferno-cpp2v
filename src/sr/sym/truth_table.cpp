@@ -147,7 +147,7 @@ TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
         map<int, bool> dest_map = ZipToMap( dest_axes, dest_indices );
         ScatterInto( full_indices, dest_map );
 
-        // Apply the change
+        // Copy cell to destination
         dest.Set( dest_indices, Get( full_indices ) );
     } );
 
@@ -205,6 +205,104 @@ set<vector<bool>> TruthTable::GetIndicesOfValue( CellType value ) const
             indices_set.insert( indices );
     } );
     return indices_set;
+}
+
+
+int TruthTable::CountInSlice( map<int, bool> fixed_map, bool target_value ) const
+{ 
+    ASSERT( fixed_map.size() <= degree );
+    
+    // Determine what the free axes must be
+    vector<int> free_axes;
+    for( int i=0; i<degree; i++ )
+        if( fixed_map.count(i) == 0 )
+            free_axes.push_back(i);
+    ASSERT( free_axes.size() + fixed_map.size() == degree );
+
+    // Capture the fixed axes and indices into our vector
+    vector<bool> full_indices(degree);
+    ScatterInto( full_indices, fixed_map );
+
+    // For all values of (bool)^(free axis count)
+    int count = 0;
+    ForPower<bool>( free_axes.size(), index_range_bool, [&](vector<bool> free_indices)
+    {
+        // Capture the free axes and indices into our vector
+        map<int, bool> free_map = ZipToMap( free_axes, free_indices );
+        ScatterInto( full_indices, free_map );
+
+        // Apply the change
+        if( Get(full_indices) == target_value )
+            count++;
+    } );
+
+    return count;
+}
+
+
+shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( bool target_value, bool preferred_index, const TruthTable &so_far ) const
+{
+    enum KarnaughClass
+    {
+        FREE,
+        FALSE,
+        TRUE
+    };
+
+    KarnaughClass preferred_class = preferred_index ? TRUE : FALSE;
+
+    // Put FREE first so that we try the biggest slices first. Next is the preferred index
+    const vector<KarnaughClass> index_range_kc = {FREE, TRUE, FALSE};
+    shared_ptr<map<int, bool>> best_slice;
+    map<KarnaughClass, int> best_counts;
+    best_counts[FREE] = -1;
+    best_counts[FALSE] = -1;
+    best_counts[TRUE] = -1;
+    int best_new_count = -1;
+    
+    // We'll try 3^degree possibilities for Karnaugh slices
+    ForPower<KarnaughClass>( degree, index_range_kc, [&](vector<KarnaughClass> k_classes )
+    {     
+        auto candidate_slice = make_shared<map<int, bool>>();
+        map<KarnaughClass, int> candidate_counts;
+        for( int i=0; i<degree; i++ )
+        {
+            // Make slice across the FREE axes, located by the other ones
+            KarnaughClass c = k_classes.at(i);
+            switch( c )
+            {
+            case FREE:
+                break;
+            case FALSE:
+                (*candidate_slice)[i] = false;
+                break;
+            case TRUE:
+                (*candidate_slice)[i] = true;
+                break;            
+            }
+            candidate_counts[c]++;
+        }
+
+        int slice_size = 1<<(degree-candidate_slice->size());
+        int candidate_new_count = so_far.CountInSlice( *candidate_slice, target_value );
+
+        // NECCESSARY conditions
+        if( CountInSlice( *candidate_slice, target_value ) == slice_size && // Slice should not include "crosses" in original truth table
+            candidate_new_count > 0 ) // Slice must improve upon so-far solution
+        {
+            // DESIRABLE conditions
+            if( candidate_new_count > best_new_count || // 1. biggest improvement on so-far solution by count of "new ticks covered"
+                (candidate_new_count == best_new_count && candidate_counts[FREE] > best_counts[FREE]) || // higher dimension (fewer clauses)
+                (candidate_new_count == best_new_count && candidate_counts[FREE] == best_counts[FREE] && candidate_counts[preferred_class] > best_counts[preferred_class]) ) // more ticks (fewer negations)
+            {
+                best_slice = candidate_slice;
+                best_new_count = candidate_new_count;
+                best_counts = candidate_counts;
+            }
+        } 
+    } );
+    
+    return best_slice; 
 }
 
 
@@ -425,6 +523,188 @@ static void TestTruthTableBase()
 }
 
 
+static void TestTruthTableKarnaugh()
+{
+    vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
+    int render_cell_size = 3;
+    
+    // Repeat TestTruthTableBase to get same truth table but
+    // without so many render checks.
+    TruthTable t( 4, true );
+    t.Set( {true, true, false, false}, false );
+    t.Set( {true, true, false, true}, false );
+    t.Set( {true, true, true, false}, false );
+    t.Set( {false, false, false, false}, false );
+    t.Set( {false, true, false, true}, false );
+    t.Set( {true, true, false, false}, true );
+    string r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE("{true, true, false, false} to true\n")( "\n"+r );
+    ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
+               "        ¬p3 ¬p3  p3  p3 \n"
+               "¬p2 ¬p4  ✘   ✔   ✔   ✔  \n"
+               " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
+               "¬p2  p4  ✔   ✔   ✔   ✔  \n"
+               " p2  p4  ✘   ✘   ✔   ✔  \n" );
+
+    // Now look for some karnaugh slices - success cases
+    ASSERT( t.CountInSlice( {{2, true}, {3, true}}, true )==4 );
+    ASSERT( t.CountInSlice( {{1, false}, {3, true}}, true )==4 );
+    ASSERT( t.CountInSlice( {{0, false}, {2, true}}, true )==4 );
+    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, false}}, true )==2 );
+    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, false )==2 );
+               
+    // Look for some more karnaugh slices - unsucessful cases
+    ASSERT( t.CountInSlice( {{2, true}, {3, true}}, false )<4 );
+    ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, true )<2 );
+    ASSERT( t.CountInSlice( {{1, false}, {2, false}, {3, false}}, true )<2 );
+    ASSERT( t.CountInSlice( {{1, false}, {3, false}}, true )<4 );
+    ASSERT( t.CountInSlice( {{2, true}, {3, false}}, true )<4 );
+    ASSERT( t.CountInSlice( {{3, false}}, true )<8 );
+
+    // Whole thing
+    ASSERT( t.CountInSlice( {}, true )==12 );
+    ASSERT( t.CountInSlice( {}, false )==4 );
+    TruthTable t_all( 4, true );
+    ASSERT( t_all.CountInSlice( {}, true )==16 );
+    ASSERT( t_all.CountInSlice( {}, false )==0 );
+    TruthTable t_none( 4, false );
+    ASSERT( t_none.CountInSlice( {}, false )==16 );
+    ASSERT( t_none.CountInSlice( {}, true )==0 );
+
+    // Single cell
+    ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, true )==1 );
+    ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, false )==0 );
+    ASSERT( t.CountInSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, false )==1 );
+    ASSERT( t.CountInSlice( {{0, false}, {1, false}, {2, false}, {3, false}}, true )==0 );
+
+    // -------------------------------- DISJOINT KARNAUGH --------------------------------------
+
+    // Test TryFindBestKarnaughSlice() by walking through a map generation process on our "t".
+    shared_ptr<map<int, bool>> p;
+    p = t.TryFindBestKarnaughSlice( true, true, t );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( *p == (map<int, bool>({{2, true}, {3, true}})) )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==4 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==4 )(*p);
+    t.SetSlice(*p, false);
+    
+    p = t.TryFindBestKarnaughSlice( true, true, t  );
+    ASSERT( !p );
+
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );    
+
+    // all and none cases
+    p = t_all.TryFindBestKarnaughSlice( true, true, t_all );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==0 )(*p);
+    
+    p = t_all.TryFindBestKarnaughSlice( false, true, t_all );
+    ASSERT( !p );
+
+    p = t_none.TryFindBestKarnaughSlice( false, true, t_none );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==0 )(*p);
+    
+    p = t_none.TryFindBestKarnaughSlice( true, true, t_none );
+    ASSERT( !p );
+
+    // -------------------------------- STANDARD KARNAUGH --------------------------------------
+    // Repeat TestTruthTableBase to get same truth table but
+    // without so many render checks.
+    t.SetSlice( {}, true );
+    t.Set( {true, true, false, false}, false );
+    t.Set( {true, true, false, true}, false );
+    t.Set( {true, true, true, false}, false );
+    t.Set( {false, false, false, false}, false );
+    t.Set( {false, true, false, true}, false );
+    t.Set( {true, true, false, false}, true );
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE("{true, true, false, false} to true\n")( "\n"+r );
+    ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
+               "        ¬p3 ¬p3  p3  p3 \n"
+               "¬p2 ¬p4  ✘   ✔   ✔   ✔  \n"
+               " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
+               "¬p2  p4  ✔   ✔   ✔   ✔  \n"
+               " p2  p4  ✘   ✘   ✔   ✔  \n" );
+
+    TruthTable so_far = t;
+    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( *p == (map<int, bool>({{2, true}, {3, true}})) )(*p);
+    so_far.SetSlice(*p, false);
+    r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+        
+    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==2 )(*p);
+    so_far.SetSlice(*p, false);
+    r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+        
+    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==2 )(*p);
+    so_far.SetSlice(*p, false);
+    r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+        
+    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    so_far.SetSlice(*p, false);
+    r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+    
+    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==2 )(*p);
+    so_far.SetSlice(*p, false);
+    r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+    
+    p = t.TryFindBestKarnaughSlice( true, true, so_far );
+    ASSERT( !p );
+}
+
+
 static void TestTruthTableDefaultMMAX()
 {
     vector<string> pred_labels = {"p1", "p2", "p3", "p4"};
@@ -574,4 +854,5 @@ void SYM::TestTruthTable()
     TestTruthTableDefaultMMAX();
     TestTruthTableCoupling();
     TestTruthTableDisjunction();
+    TestTruthTableKarnaugh();
 }

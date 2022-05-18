@@ -32,6 +32,10 @@ public:
      */
     shared_ptr<SymbolExpression> TrySolveForGiven( shared_ptr<SymbolExpression> target,
                                                    const GivenSymbolSet &givens ) const;
+    shared_ptr<SymbolExpression> GetOptionExpression( TruthTableWithPredicates evaluated_ttwp,
+                                                      const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const;
+    shared_ptr<SymbolExpression> GetOptionExpressionKarnaugh( TruthTableWithPredicates evaluated_ttwp,
+                                                              const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const;
     shared_ptr<BooleanExpression> GetAltExpressionForTesting() const;
     
 private:
