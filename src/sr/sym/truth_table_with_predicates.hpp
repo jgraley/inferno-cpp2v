@@ -4,6 +4,7 @@
 #include "common/common.hpp"
 #include "common/orderable.hpp"
 #include "predicate_operators.hpp"
+#include "truth_table.hpp"
 
 #include <vector>
 #include <map>
@@ -14,9 +15,7 @@ using namespace std;
 
 namespace SYM
 {
-             
-class TruthTable;             
-             
+                          
 // ------------------------- TruthTableWithPredicates --------------------------
 
 class TruthTableWithPredicates
@@ -24,7 +23,7 @@ class TruthTableWithPredicates
 public:
     typedef set<shared_ptr<PredicateOperator>> EqualPredicateSet; // all should compare equal
     
-    explicit TruthTableWithPredicates( vector<EqualPredicateSet> predicates, bool initval, string label_var_name, int counting_based );    
+    explicit TruthTableWithPredicates( vector<EqualPredicateSet> predicates, TruthTable::CellType initval, string label_var_name, int counting_based );    
     TruthTableWithPredicates( const TruthTableWithPredicates &other );    
     TruthTableWithPredicates &operator=( const TruthTableWithPredicates &other ); 
     
@@ -33,7 +32,7 @@ public:
     EqualPredicateSet GetPredicateSet( int axis ) const;
     void Extend( vector<EqualPredicateSet> new_predicates );
     TruthTableWithPredicates GetSlice( map<int, bool> fixed_map ) const; 
-    TruthTableWithPredicates GetFolded( set<int> fold_axes, bool identity ) const;
+    TruthTableWithPredicates GetFolded( set<int> fold_axes ) const;
     bool PredExists( shared_ptr<PredicateOperator> pred ) const;
     int PredToIndex( shared_ptr<PredicateOperator> pred ) const;
     string Render( set<int> column_axes ) const; 

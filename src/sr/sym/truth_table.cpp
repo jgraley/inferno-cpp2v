@@ -1,13 +1,15 @@
+#include "truth_table.hpp"
+
 #include "common/common.hpp"
 #include "common/orderable.hpp"
 
-#include "truth_table.hpp"
+#include <algorithm>
 
 using namespace SYM;
 
 // ------------------------- TruthTable --------------------------
 
-TruthTable::TruthTable( int degree_, bool initval ) :
+TruthTable::TruthTable( int degree_, CellType initval ) :
     degree( degree_ )
 {
     SizeType ncells = (SizeType)1 << degree;
@@ -30,14 +32,14 @@ TruthTable &TruthTable::operator=( const TruthTable &other )
 }
 
 
-void TruthTable::Set( vector<bool> full_indices, bool new_value )
+void TruthTable::Set( vector<bool> full_indices, CellType new_value )
 {
     cells.at( GetCellIndex(full_indices) ) = new_value;
     // TRACE(cells)("\n");
 }
 
 
-void TruthTable::SetSlice( map<int, bool> fixed_map, bool new_value )
+void TruthTable::SetSlice( map<int, bool> fixed_map, CellType new_value )
 {
     ASSERT( fixed_map.size() <= degree );
     
@@ -116,7 +118,7 @@ int TruthTable::GetDegree() const
 }
 
 
-bool TruthTable::Get( vector<bool> full_indices ) const
+TruthTable::CellType TruthTable::Get( vector<bool> full_indices ) const
 {
     return cells.at( GetCellIndex(full_indices) );
 }
@@ -153,7 +155,7 @@ TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
 }
 
 
-TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
+TruthTable TruthTable::GetFolded( set<int> fold_axes ) const
 {
     ASSERT( fold_axes.size() <= degree );
 
@@ -173,7 +175,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
         vector<bool> full_indices(degree);
         ScatterInto( full_indices, dest_map );
 
-        bool cell_total = identity;
+        set<int> cells_to_fold;
 
         // For all values of (bool)^(fold axis count)
         ForPower<bool>( fold_axes.size(), index_range_bool, [&](vector<bool> fold_indices)
@@ -182,21 +184,18 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes, bool identity ) const
             map<int, bool> fold_map = ZipToMap( fold_axes, fold_indices );
             ScatterInto( full_indices, fold_map );
 
-            bool cell = cells.at( GetCellIndex(full_indices) );
-            if( identity )
-                cell_total = cell_total && cell;
-            else
-                cell_total = cell_total || cell;            
+            cells_to_fold.insert( (int)cells.at( GetCellIndex(full_indices) ) );
         } );
-
-        dest.Set( dest_indices, cell_total );
+        
+        CellType folded_cell = (CellType)*max_element(cells_to_fold.begin(), cells_to_fold.end());
+        dest.Set( dest_indices, folded_cell );
     } );
 
     return dest;
 }
 
 
-set<vector<bool>> TruthTable::GetIndicesOfValue( bool value ) const
+set<vector<bool>> TruthTable::GetIndicesOfValue( CellType value ) const
 {
     set<vector<bool>> indices_set;
     
@@ -257,12 +256,17 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int
             map<int, bool> column_map = ZipToMap( column_axes, column_indices );
             ScatterInto( full_indices, column_map );
 
-            bool cell = cells.at( GetCellIndex(full_indices) );
+            CellType cell = cells.at( GetCellIndex(full_indices) );
             string str_cell = " "; // Align with the "P" in labels
-            if( cell )
+            switch( cell )
+            {
+            case true:
                 str_cell += "✔"; // Warning: .size() won't be what it looks like!!!!!
-            else
+                break;
+            case false:
                 str_cell += "✘"; // And here!!!
+                break;
+            }
             str_cell += string(render_cell_size-2, ' ');
             render_row_cells.push_back( str_cell );
         } );
@@ -551,7 +555,7 @@ static void TestTruthTableDisjunction()
     TRACE("Extrapolate-restricted (after (T1) (T2))\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Fold out extrapolated literal with OR-rule (because we don't care if it's true OR false)
-    TruthTable t2 = t.GetFolded({4}, false); 
+    TruthTable t2 = t.GetFolded({4}); 
 
     TRACE("Folded back\n")( "\n"+t2.Render({0, 2}, pred_labels, render_cell_size) );
 

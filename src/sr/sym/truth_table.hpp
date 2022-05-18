@@ -19,15 +19,23 @@ namespace SYM
 class TruthTable
 {
 public:
-    explicit TruthTable( int degree, bool initval );
+    /*enum CellType
+    {
+        FALSE,
+        TRUE,
+        DONT_CARE
+    };*/
+    typedef bool CellType;
+
+    explicit TruthTable( int degree, CellType initval );
     TruthTable( const TruthTable &other );
     TruthTable &operator=( const TruthTable &other );
 
     // Set a single cell value given a full vector of indices    
-    void Set( vector<bool> full_indices, bool new_value );
+    void Set( vector<bool> full_indices, CellType new_value );
 
     // Set all cells satisfying the supplied indices. 
-    void SetSlice( map<int, bool> fixed_map, bool new_value );
+    void SetSlice( map<int, bool> fixed_map, CellType new_value );
 
     // Set all cells satisfying the supplied indices. new_values
     // must have all remaining axes.   
@@ -40,7 +48,7 @@ public:
     int GetDegree() const;
 
     // Get a single cell value given a full fector of indices
-    bool Get( vector<bool> full_indices ) const;
+    CellType Get( vector<bool> full_indices ) const;
 
     // Get a slice of a truth table in which axes indicated
     // by fixed_map's keys have been reduced away as specified by 
@@ -48,12 +56,12 @@ public:
     TruthTable GetSlice( map<int, bool> fixed_map ) const; 
 
     // Get a folded down truth table in which the fold_axes have
-    // been removed and the values combined together based on
-    // identity=false will OR; =true will AND
-    TruthTable GetFolded( set<int> fold_axes, bool identity ) const; 
+    // been removed and cells are assigned the maximum value of
+    // the values across the fold_axes axes, i.e. higher takes priority.
+    TruthTable GetFolded( set<int> fold_axes ) const; 
 
     // Find values matching given value and return their indices
-    set<vector<bool>> GetIndicesOfValue( bool value ) const;
+    set<vector<bool>> GetIndicesOfValue( CellType value ) const;
 
     // Ordering
     bool operator==( const TruthTable &other ) const;
@@ -68,7 +76,7 @@ private:
     SizeType GetCellIndex( vector<bool> full_indices ) const;
 
     int degree;
-    vector<bool> cells;
+    vector<CellType> cells;
 };
 
 // ------------------------- unit tests --------------------------

@@ -90,7 +90,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     }    
     if( !dead_axes.empty() )
         TRACEC("Folding out dead axes:\n")(dead_axes)("\n");
-    TruthTableWithPredicates folded_ttwp( ttwp->GetFolded( dead_axes, false ) );
+    TruthTableWithPredicates folded_ttwp( ttwp->GetFolded( dead_axes ) );
     
     // Get axis numbers for the evaluatables and solveables, now that we've finished 
     // folding, which changes them. 
@@ -349,7 +349,7 @@ void TruthTableSolver::ConstrainUsingDerived()
         for( int k0=0; k0<derived_preds.size(); k0++ )
             fold_axes.insert(original_degree + k0);
 
-        *ttwp = ttwp->GetFolded( fold_axes, false );
+        *ttwp = ttwp->GetFolded( fold_axes );
     }
 }
 

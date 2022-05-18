@@ -10,15 +10,12 @@
 #include <set>
 #include <functional>
 
-using namespace SYM;
-
-             
-class TruthTable;             
+using namespace SYM;          
              
 // ------------------------- TruthTableWithPredicates --------------------------
 
 TruthTableWithPredicates::TruthTableWithPredicates( vector<EqualPredicateSet> predicates_, 
-                                                    bool initval, 
+                                                    TruthTable::CellType initval, 
                                                     string label_var_name_, 
                                                     int counting_based ) :
     label_var_name( label_var_name_ ),
@@ -110,7 +107,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetSlice( map<int, bool> fixe
 }
 
 
-TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes, bool identity ) const
+TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes ) const
 {
     vector<EqualPredicateSet> new_predicates;
     vector<string> new_pred_labels;
@@ -123,7 +120,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes
         }
     }
     
-    auto new_tt = make_shared<TruthTable>( truth_table->GetFolded( fold_axes, identity ) );
+    auto new_tt = make_shared<TruthTable>( truth_table->GetFolded( fold_axes ) );
 
     return TruthTableWithPredicates( label_var_name, render_cell_size, label_fmt, 
                                      new_predicates, new_tt, 
