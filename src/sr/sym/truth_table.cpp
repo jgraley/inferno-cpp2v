@@ -175,7 +175,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes ) const
         vector<bool> full_indices(degree);
         ScatterInto( full_indices, dest_map );
 
-        set<int> cells_to_fold;
+        set<CellType> cells_to_fold;
 
         // For all values of (bool)^(fold axis count)
         ForPower<bool>( fold_axes.size(), index_range_bool, [&](vector<bool> fold_indices)
@@ -184,10 +184,10 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes ) const
             map<int, bool> fold_map = ZipToMap( fold_axes, fold_indices );
             ScatterInto( full_indices, fold_map );
 
-            cells_to_fold.insert( (int)cells.at( GetCellIndex(full_indices) ) );
+            cells_to_fold.insert( cells.at( GetCellIndex(full_indices) ) );
         } );
         
-        CellType folded_cell = (CellType)*max_element(cells_to_fold.begin(), cells_to_fold.end());
+        CellType folded_cell = *max_element(cells_to_fold.begin(), cells_to_fold.end());
         dest.Set( dest_indices, folded_cell );
     } );
 
