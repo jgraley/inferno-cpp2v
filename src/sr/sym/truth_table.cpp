@@ -249,6 +249,7 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
         TRUE
     };
 
+    CellType avoid_value = (target_value==CellType::TRUE) ? CellType::FALSE : CellType::TRUE;
     KarnaughClass preferred_class = preferred_index ? KarnaughClass::TRUE : KarnaughClass::FALSE;
 
     // Put FREE first so that we try the biggest slices first. Next is the preferred index
@@ -287,8 +288,8 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
         int candidate_new_count = so_far.CountInSlice( *candidate_slice, target_value );
 
         // NECCESSARY conditions
-        if( CountInSlice( *candidate_slice, target_value ) == slice_size && // Slice should not include "crosses" in original truth table
-            candidate_new_count > 0 ) // Slice must improve upon so-far solution
+        if( CountInSlice( *candidate_slice, avoid_value ) == 0 && // Slice should not include "crosses" in original truth table
+            candidate_new_count > 0 ) // Slice must improve upon so-far solution by bringing at least one target cell in
         {
             // DESIRABLE conditions
             if( candidate_new_count > best_new_count || // 1. biggest improvement on so-far solution by count of "new ticks covered"
