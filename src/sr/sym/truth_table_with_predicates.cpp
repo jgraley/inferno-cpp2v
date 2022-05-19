@@ -159,11 +159,12 @@ shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( T
 }
 
 
-string TruthTableWithPredicates::Render( set<int> column_axes ) const
+string TruthTableWithPredicates::Render( set<int> column_axes, bool give_preds ) const
 {    
-    string s;
-    for( int axis=0; axis<GetDegree(); axis++ )
-        s += pred_labels.at(axis) + " := " + GetFrontPredicate(axis)->Render() + "\n";
+    string s = "\n"; // Work around trace prefix
+    if( give_preds )
+        for( int axis=0; axis<GetDegree(); axis++ )
+            s += pred_labels.at(axis) + " := " + GetFrontPredicate(axis)->Render() + "\n";
     s += truth_table->Render( column_axes, pred_labels, render_cell_size );
     return s;
 }

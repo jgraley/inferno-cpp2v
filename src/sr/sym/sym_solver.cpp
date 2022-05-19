@@ -34,16 +34,16 @@ void TruthTableSolver::PreSolve()
     ttwp = make_unique<TruthTableWithPredicates>( predicates, STARTING_VALUE, label_var_name, counting_based );
     TRACEC(RenderInitialExpressionInTermsOfPredNames())("\n");
     
-    // Constrain (set cells to false) by evaluating our initial expression while the predicates 
-    // are all forced to evaluate true or false according to the truth table indices.
-    ConstrainByEvaluating();
-    TRACEC(ttwp->Render( {} ))("\n");
-
     // Constrain by searching for derivations of the predicates using rules like
     // substitution or transitivity. Extend the truth table to include derived predicates,
     // constrain according to their rules and fold back down.
     ConstrainUsingDerived();
-    TRACEC(ttwp->Render( {} ))("\n");
+    TRACEC("Truth Table after derivation: ")(ttwp->Render( {} ))("\n");
+
+    // Constrain (set cells to false) by evaluating our initial expression while the predicates 
+    // are all forced to evaluate true or false according to the truth table indices.
+    ConstrainByEvaluating();
+    TRACEC("Truth Table after boolean evaluation: ")(ttwp->Render( {} ))("\n");
 }
 
 
@@ -105,7 +105,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         if( solveable_preds.count(pred) ) 
             solveable_axes.push_back(axis);
     }
-    TRACEC(folded_ttwp.Render( ToSet(solveable_axes) ))("\n");
+    TRACEC("Truth table after fold out dead: ")(folded_ttwp.Render( ToSet(solveable_axes), false ))("\n");
 
     // Solve the soveables into a map of solutions
     map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> pred_solves;
@@ -135,13 +135,17 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     vector<shared_ptr<SymbolExpression>> options;
     ForPower<bool>( evaluatable_axes.size(), index_range_bool, [&](vector<bool> evaluatable_indices)
     {
+        TRACEC("Option indices: ")(evaluatable_indices)("\n");
         map<int, bool> evaluatable_indices_map;
         for( int i=0; i<evaluatable_axes.size(); i++ )
             evaluatable_indices_map[evaluatable_axes.at(i)] = evaluatable_indices.at(i);
-        TruthTableWithPredicates evaluated_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
-        TRACEC("evaluated_ttwp ")(evaluated_ttwp.Render({}))("\n");
+        TruthTableWithPredicates option_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
+        set<int> column_axes; // Just for the trace
+        for( int i=0; i<option_ttwp.GetDegree(); i++ )
+            column_axes.insert(i);
+        TRACEC("Option truth table slice: ")(option_ttwp.Render(column_axes, false))("\n");
         
-        shared_ptr<SymbolExpression> option = GetOptionExpressionKarnaugh( evaluated_ttwp, pred_solves );
+        shared_ptr<SymbolExpression> option = GetOptionExpressionKarnaugh( option_ttwp, pred_solves );
         options.push_back( option );
     } );
 
@@ -258,6 +262,7 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltExpressionForTesting() con
 
 void TruthTableSolver::ConstrainByEvaluating()
 {
+    const TruthTable::CellType SHOULD_EVAL = TruthTable::CellType::TRUE;
     const TruthTable::CellType EVAL_EXCLUDE = TruthTable::CellType::FALSE;
     
     const SR::SolutionMap sm{};
@@ -268,25 +273,27 @@ void TruthTableSolver::ConstrainByEvaluating()
     ForPower<bool>( ttwp->GetDegree(), index_range_bool, [&](vector<bool> indices)
     {
         ASSERT( indices.size() == ttwp->GetDegree() );
-        
-        // Set up the shared_ptr<BooleanResult>s for the forcing. The forces 
-        // apply until these go out of scope. 
-        vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
-        for( bool b : indices )
-            vr.push_back( make_shared<BooleanResult>(b) );
-        
-        // Forces must be set up on *all* the predicates that may be reached
-        // while evaluating the expression, even if they are equal.
-        for( int j=0; j<ttwp->GetDegree(); j++ )
-            for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
-                pred->SetForceResult( vr[j] );       
+        if( ttwp->GetTruthTable().Get( indices ) == SHOULD_EVAL )
+        {            
+            // Set up the shared_ptr<BooleanResult>s for the forcing. The forces 
+            // apply until these go out of scope. 
+            vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
+            for( bool b : indices )
+                vr.push_back( make_shared<BooleanResult>(b) );
             
-        // Evaluate to find out what the boolean connectives do with forced preds
-        shared_ptr<BooleanResult> eval_result = initial_expression->Evaluate(kit);
-        
-        // Rule out any evaluations that come out false
-        if( !eval_result->IsDefinedAndTrue() )
-            ttwp->GetTruthTable().Set( indices, EVAL_EXCLUDE );
+            // Forces must be set up on *all* the predicates that may be reached
+            // while evaluating the expression, even if they are equal.
+            for( int j=0; j<ttwp->GetDegree(); j++ )
+                for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
+                    pred->SetForceResult( vr[j] );       
+                
+            // Evaluate to find out what the boolean connectives do with forced preds
+            shared_ptr<BooleanResult> eval_result = initial_expression->Evaluate(kit);
+            
+            // Rule out any evaluations that come out false
+            if( !eval_result->IsDefinedAndTrue() )
+                ttwp->GetTruthTable().Set( indices, EVAL_EXCLUDE );
+        }
     } );
 }
 

@@ -107,9 +107,13 @@ void CommonTest()
     ASSERT( r[3] == 103 );
 }
 
+// Max number of characters Join() will generate before deciding to 
+// insert newline after each separator 
+#define MAX_INLINE_JOIN 60
 
 string Join( const list<string> &ls, string sep, string pre, string post )
 {
+    const bool sep_has_nl = sep.size() > 0 && sep.at(sep.size()-1)=='\n';
     bool first = true;
     string s;
     s += pre;
@@ -119,6 +123,8 @@ string Join( const list<string> &ls, string sep, string pre, string post )
             s += sep;
         first = false;
         s += si;
+        if( !sep_has_nl && s.size() > MAX_INLINE_JOIN )
+            return Join( ls, sep+string("\n"), pre, post );
     }
     s += post;
     return s;

@@ -30,7 +30,7 @@ using namespace std;
 #include <unordered_map>
 #include <exception>
 	
-#define CONTAINER_SEP ",\n"    
+#define CONTAINER_SEP ", "    
     
 ////////////////////////// Trace() free functions //////////////////////////
     

@@ -38,7 +38,7 @@ public:
     int PredToIndex( shared_ptr<PredicateOperator> pred ) const;
     int CountInSlice( map<int, bool> fixed_map, TruthTable::CellType target_value ) const; 
     shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( TruthTable::CellType target_value, bool preferred_index, const TruthTableWithPredicates &so_far ) const;
-    string Render( set<int> column_axes ) const; 
+    string Render( set<int> column_axes, bool give_preds=true ) const; 
     
     vector<EqualPredicateSet> &GetPredicates() { return predicates; }
     TruthTable &GetTruthTable() { return *truth_table; }
