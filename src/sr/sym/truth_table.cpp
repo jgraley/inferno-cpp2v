@@ -303,6 +303,12 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
         } 
     } );
     
+    TRACE( "Bests: Axis counts: FREE: %d FALSE:%d TRUE:%d new cells count:%d\n", 
+           best_counts[KarnaughClass::FREE], 
+           best_counts[KarnaughClass::FALSE], 
+           best_counts[KarnaughClass::TRUE],
+           best_new_count );
+        
     return best_slice; 
 }
 
@@ -524,6 +530,16 @@ static void TestTruthTableBase()
                " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
                "¬p2  p4  ✔   ✔   ✔   ✔  \n"
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
+    // add a "don't care"
+    t.Set( {true, false, true, false}, TruthTable::CellType::DONT_CARE );
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE("{true, false, true, false} to don't care\n")( "\n"+r );
+    ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
+               "        ¬p3 ¬p3  p3  p3 \n"
+               "¬p2 ¬p4  ✘   ✔   ✔   -  \n"
+               " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
+               "¬p2  p4  ✔   ✔   ✔   ✔  \n"
+               " p2  p4  ✘   ✘   ✔   ✔  \n" );
 }
 
 
@@ -541,18 +557,20 @@ static void TestTruthTableKarnaugh()
     t.Set( {false, false, false, false}, TruthTable::CellType::FALSE );
     t.Set( {false, true, false, true}, TruthTable::CellType::FALSE );
     t.Set( {true, true, false, false}, TruthTable::CellType::TRUE );
+    t.Set( {true, false, true, false}, TruthTable::CellType::DONT_CARE ); // don't care tolerated in a slice with true
+    t.Set( {false, false, false, true}, TruthTable::CellType::DONT_CARE ); // slice of all don't care elided
     string r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to true\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
-               "¬p2 ¬p4  ✘   ✔   ✔   ✔  \n"
+               "¬p2 ¬p4  ✘   ✔   ✔   -  \n"
                " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
-               "¬p2  p4  ✔   ✔   ✔   ✔  \n"
+               "¬p2  p4  -   ✔   ✔   ✔  \n"
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
 
     // Now look for some karnaugh slices - success cases
     ASSERT( t.CountInSlice( {{2, true}, {3, true}}, TruthTable::CellType::TRUE )==4 );
-    ASSERT( t.CountInSlice( {{1, false}, {3, true}}, TruthTable::CellType::TRUE )==4 );
+    ASSERT( t.CountInSlice( {{1, false}, {3, true}}, TruthTable::CellType::TRUE )==3 );
     ASSERT( t.CountInSlice( {{0, false}, {2, true}}, TruthTable::CellType::TRUE )==4 );
     ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, false}}, TruthTable::CellType::TRUE )==2 );
     ASSERT( t.CountInSlice( {{1, true}, {2, false}, {3, true}}, TruthTable::CellType::FALSE )==2 );
@@ -566,14 +584,17 @@ static void TestTruthTableKarnaugh()
     ASSERT( t.CountInSlice( {{3, false}}, TruthTable::CellType::TRUE )<8 );
 
     // Whole thing
-    ASSERT( t.CountInSlice( {}, TruthTable::CellType::TRUE )==12 );
+    ASSERT( t.CountInSlice( {}, TruthTable::CellType::TRUE )==10 );
     ASSERT( t.CountInSlice( {}, TruthTable::CellType::FALSE )==4 );
+    ASSERT( t.CountInSlice( {}, TruthTable::CellType::DONT_CARE )==2 );
     TruthTable t_all( 4, TruthTable::CellType::TRUE );
     ASSERT( t_all.CountInSlice( {}, TruthTable::CellType::TRUE )==16 );
     ASSERT( t_all.CountInSlice( {}, TruthTable::CellType::FALSE )==0 );
+    ASSERT( t_all.CountInSlice( {}, TruthTable::CellType::DONT_CARE )==0 );
     TruthTable t_none( 4, TruthTable::CellType::FALSE );
     ASSERT( t_none.CountInSlice( {}, TruthTable::CellType::FALSE )==16 );
     ASSERT( t_none.CountInSlice( {}, TruthTable::CellType::TRUE )==0 );
+    ASSERT( t_none.CountInSlice( {}, TruthTable::CellType::DONT_CARE )==0 );
 
     // Single cell
     ASSERT( t.CountInSlice( {{0, true}, {1, false}, {2, false}, {3, false}}, TruthTable::CellType::TRUE )==1 );
@@ -590,36 +611,40 @@ static void TestTruthTableKarnaugh()
     TRACE(*p)("\n");
     ASSERT( *p == (map<int, bool>({{2, true}, {3, true}})) )(*p);
     t.SetSlice(*p, TruthTable::CellType::FALSE);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+        
+    p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
+    ASSERT( p );
+    TRACE(*p)("\n");
+    ASSERT( p->size()==3 )(*p);
+    t.SetSlice(*p, TruthTable::CellType::FALSE);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
     
     p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
     t.SetSlice(*p, TruthTable::CellType::FALSE);
-    
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
+        
     p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
     t.SetSlice(*p, TruthTable::CellType::FALSE);
-    
-    p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
-    ASSERT( p );
-    TRACE(*p)("\n");
-    ASSERT( p->size()==3 )(*p);
-    t.SetSlice(*p, TruthTable::CellType::FALSE);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
     
     p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==4 )(*p);
     t.SetSlice(*p, TruthTable::CellType::FALSE);
-    
-    p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
-    ASSERT( p );
-    TRACE(*p)("\n");
-    ASSERT( p->size()==4 )(*p);
-    t.SetSlice(*p, TruthTable::CellType::FALSE);
+    r = t.Render({0, 2}, pred_labels, render_cell_size);    
+    TRACE( "\n"+r );
     
     p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, t  );
     ASSERT( !p );
@@ -654,13 +679,15 @@ static void TestTruthTableKarnaugh()
     t.Set( {false, false, false, false}, TruthTable::CellType::FALSE );
     t.Set( {false, true, false, true}, TruthTable::CellType::FALSE );
     t.Set( {true, true, false, false}, TruthTable::CellType::TRUE );
+    t.Set( {true, false, true, false}, TruthTable::CellType::DONT_CARE ); // don't care tolerated in a slice with true
+    t.Set( {false, false, false, true}, TruthTable::CellType::DONT_CARE ); // slice of all don't care elided
     r = t.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE("{true, true, false, false} to true\n")( "\n"+r );
     ASSERT( r=="        ¬p1  p1 ¬p1  p1 \n"
                "        ¬p3 ¬p3  p3  p3 \n"
-               "¬p2 ¬p4  ✘   ✔   ✔   ✔  \n"
+               "¬p2 ¬p4  ✘   ✔   ✔   -  \n"
                " p2 ¬p4  ✔   ✔   ✔   ✘  \n"
-               "¬p2  p4  ✔   ✔   ✔   ✔  \n"
+               "¬p2  p4  -   ✔   ✔   ✔  \n"
                " p2  p4  ✘   ✘   ✔   ✔  \n" );
 
     TruthTable so_far = t;
@@ -692,14 +719,6 @@ static void TestTruthTableKarnaugh()
     ASSERT( p );
     TRACE(*p)("\n");
     ASSERT( p->size()==3 )(*p);
-    so_far.SetSlice(*p, TruthTable::CellType::FALSE);
-    r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
-    TRACE( "\n"+r );
-    
-    p = t.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far );
-    ASSERT( p );
-    TRACE(*p)("\n");
-    ASSERT( p->size()==2 )(*p);
     so_far.SetSlice(*p, TruthTable::CellType::FALSE);
     r = so_far.Render({0, 2}, pred_labels, render_cell_size);    
     TRACE( "\n"+r );
@@ -829,12 +848,12 @@ static void TestTruthTableDisjunction()
     TRACE("Extended truth table\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
     // Filled in by analysis including extrapolated predicate, searching for transitives/substitutions
-    t.SetSlice( {{0, true}, {2, true}, {4, false}}, TruthTable::CellType::FALSE ); // (T1a) Transitive Equal p1 && p3 => p5 aka !p1 || !p3 || p5
-    t.SetSlice( {{0, true}, {2, false}, {4, true}}, TruthTable::CellType::FALSE ); // (T1b) Transitive Equal p5 && p1 => p3 aka !p5 || !p1 || p3
-    t.SetSlice( {{0, false}, {2, true}, {4, true}}, TruthTable::CellType::FALSE ); // (T1c) Transitive Equal p3 && p5 => p1 aka !p3 || !p5 || p1
-    t.SetSlice( {{1, true}, {3, true}, {4, false}}, TruthTable::CellType::FALSE ); // (T2a) Transitive Equal p2 && p4 => p5 aka !p2 || !p4 || p5
-    t.SetSlice( {{1, true}, {3, false}, {4, true}}, TruthTable::CellType::FALSE ); // (T2b) Transitive Equal p5 && p2 => p4 aka !p5 || !p2 || p4
-    t.SetSlice( {{1, false}, {3, true}, {4, true}}, TruthTable::CellType::FALSE ); // (T2c) Transitive Equal p4 && p5 => p2 aka !p4 || !p5 || p2
+    t.SetSlice( {{0, true}, {2, true}, {4, false}}, TruthTable::CellType::DONT_CARE ); // (T1a) Transitive Equal p1 && p3 => p5 aka !p1 || !p3 || p5
+    t.SetSlice( {{0, true}, {2, false}, {4, true}}, TruthTable::CellType::DONT_CARE ); // (T1b) Transitive Equal p5 && p1 => p3 aka !p5 || !p1 || p3
+    t.SetSlice( {{0, false}, {2, true}, {4, true}}, TruthTable::CellType::DONT_CARE ); // (T1c) Transitive Equal p3 && p5 => p1 aka !p3 || !p5 || p1
+    t.SetSlice( {{1, true}, {3, true}, {4, false}}, TruthTable::CellType::DONT_CARE ); // (T2a) Transitive Equal p2 && p4 => p5 aka !p2 || !p4 || p5
+    t.SetSlice( {{1, true}, {3, false}, {4, true}}, TruthTable::CellType::DONT_CARE ); // (T2b) Transitive Equal p5 && p2 => p4 aka !p5 || !p2 || p4
+    t.SetSlice( {{1, false}, {3, true}, {4, true}}, TruthTable::CellType::DONT_CARE ); // (T2c) Transitive Equal p4 && p5 => p2 aka !p4 || !p5 || p2
 
     TRACE("Extrapolate-restricted (after (T1) (T2))\n")( "\n"+t.Render({0, 2}, pred_labels, render_cell_size) );
 
