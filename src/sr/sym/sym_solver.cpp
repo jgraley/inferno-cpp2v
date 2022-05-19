@@ -21,14 +21,17 @@ TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> initial_expres
 
 void TruthTableSolver::PreSolve()
 {
+    const TruthTable::CellType STARTING_VALUE = TruthTable::CellType::TRUE;
+ 
     // Pre-solve need only be done once for a given initial expression (i.e. once
     // on a given instance of this class) and then any number of solves and/or
     // get alt expression may be performed.
-    TRACE("Presolve expression: ")(initial_expression->Render())("\n");
+    TRACE("========================================================\nPresolve expression ")
+         (initial_expression->Render())("\n");
     
     // Find the predicates and create a truth table of them
     auto predicates = PredicateAnalysis::GetPredicates( initial_expression );
-    ttwp = make_unique<TruthTableWithPredicates>( predicates, TruthTable::CellType::TRUE, label_var_name, counting_based );
+    ttwp = make_unique<TruthTableWithPredicates>( predicates, STARTING_VALUE, label_var_name, counting_based );
     TRACEC(RenderInitialExpressionInTermsOfPredNames())("\n");
     
     // Constrain (set cells to false) by evaluating our initial expression while the predicates 
@@ -47,9 +50,8 @@ void TruthTableSolver::PreSolve()
 shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<SymbolExpression> target,
                                                                  const GivenSymbolSet &givens ) const
 {
-    TRACE("=====================================================\nSolve expression: ")(initial_expression->Render())
-         (" for ")(target->Render())
-         (" given ")(givens)("\n");
+    TRACE("=============================\nSolve for ")
+         (target->Render())(" given ")(givens)("\n");
     ASSERT( ttwp )("You need to have done a PreSolve() first\n");
     
     // Sanity: givens are all required by initial expression
@@ -106,7 +108,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     TRACEC(folded_ttwp.Render( ToSet(solveable_axes) ))("\n");
 
     // Solve the soveables into a map of solutions
-    map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> solution_map;
+    map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> pred_solves;
     for( int axis : solveable_axes )
     {
         auto pred = folded_ttwp.GetFrontPredicate(axis);
@@ -116,7 +118,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         
         auto solution = dynamic_pointer_cast<SymbolExpression>( esolution );
         ASSERT( solution );  
-        solution_map[pred] = solution;
+        pred_solves[pred] = solution;
     }
 
     // We'll make a big multiplexor aka symbolic conditional. Controls will be the evaluatables.
@@ -127,7 +129,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         controls.push_back( pred );
     }
 
-    TRACEC("Solution map:\n")(solution_map)("\n");
+    TRACEC("Solutions to solveable predicates:\n")(pred_solves)("\n");
 
     // Make up the options for the big multiplexor using set operations on the solutions
     vector<shared_ptr<SymbolExpression>> options;
@@ -139,7 +141,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         TruthTableWithPredicates evaluated_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
         TRACEC("evaluated_ttwp ")(evaluated_ttwp.Render({}))("\n");
         
-        shared_ptr<SymbolExpression> option = GetOptionExpressionKarnaugh( evaluated_ttwp, solution_map );
+        shared_ptr<SymbolExpression> option = GetOptionExpressionKarnaugh( evaluated_ttwp, pred_solves );
         options.push_back( option );
     } );
 
@@ -156,7 +158,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
 
 
 shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWithPredicates evaluated_ttwp,
-                                                                    const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const
+                                                                    const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
 {
     set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( TruthTable::CellType::TRUE );
     TRACEC("Permitted terms ")(permitted_terms)("\n");
@@ -170,9 +172,9 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWi
         for( int axis=0; axis<term.size(); axis++ )
         {
             auto pred = evaluated_ttwp.GetFrontPredicate(axis);
-            if( solution_map.count(pred) == 0 )
+            if( pred_solves.count(pred) == 0 )
                 continue; // skip where solve failed
-            shared_ptr<SymbolExpression> clause = solution_map.at(pred);
+            shared_ptr<SymbolExpression> clause = pred_solves.at(pred);
             
             // Needed to solve for false. Rather than redo the solve, we can 
             // just complement the solution set.
@@ -190,7 +192,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWi
 
 
 shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( TruthTableWithPredicates evaluated_ttwp,
-                                                                            const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const
+                                                                            const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
 {
     TruthTableWithPredicates so_far_ttwp = evaluated_ttwp;
     
@@ -198,6 +200,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( Trut
     list< shared_ptr<SymbolExpression> > terms;
     while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far_ttwp ) )
     {
+        TRACEC("Got Karnaugh slice: ")(*karnaugh_slice)("\n");
         so_far_ttwp.SetSlice(*karnaugh_slice, TruthTable::CellType::FALSE); // Update the TT that indicates progress so far
         
         // Build an intersection of clauses corresponding to solveables
@@ -207,9 +210,9 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( Trut
             int axis = p.first;
             int index = p.second;
             auto pred = evaluated_ttwp.GetFrontPredicate(axis);
-            if( solution_map.count(pred) == 0 )
+            if( pred_solves.count(pred) == 0 )
                 continue; // skip where solve failed
-            shared_ptr<SymbolExpression> clause = solution_map.at(pred);
+            shared_ptr<SymbolExpression> clause = pred_solves.at(pred);
             
             // Needed to solve for false. Rather than redo the solve, we can 
             // just complement the solution set.
@@ -255,6 +258,8 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltExpressionForTesting() con
 
 void TruthTableSolver::ConstrainByEvaluating()
 {
+    const TruthTable::CellType EVAL_EXCLUDE = TruthTable::CellType::FALSE;
+    
     const SR::SolutionMap sm{};
     const SR::TheKnowledge tk{};
     Expression::EvalKit kit { &sm, &tk }; 
@@ -281,13 +286,15 @@ void TruthTableSolver::ConstrainByEvaluating()
         
         // Rule out any evaluations that come out false
         if( !eval_result->IsDefinedAndTrue() )
-            ttwp->GetTruthTable().Set( indices, TruthTable::CellType::FALSE );
+            ttwp->GetTruthTable().Set( indices, EVAL_EXCLUDE );
     } );
 }
 
 
 void TruthTableSolver::ConstrainUsingDerived()
 {
+    const TruthTable::CellType DERIVE_EXCLUDE = TruthTable::CellType::DONT_CARE;
+    
     // Get all the extrapolations into maps, keyed by expression equality
     typedef TruthTableWithPredicates::EqualPredicateSet EqualPredicateSet;
     typedef shared_ptr<PredicateOperator> DerivedPred;
@@ -363,13 +370,13 @@ void TruthTableSolver::ConstrainUsingDerived()
                 TRACEC("Enforcing interpolation: %s ∧ %s => FALSE\n", 
                        PredicateName(i).c_str(), 
                        PredicateName(j).c_str() );  
-                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}}, TruthTable::CellType::FALSE );
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}}, DERIVE_EXCLUDE );
                 break;
             case Relationship::IMPLIES:
                 TRACEC("Enforcing interpolation: %s => %s\n", 
                        PredicateName(i).c_str(), 
                        PredicateName(j).c_str() );  
-                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, false}}, TruthTable::CellType::FALSE );
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, false}}, DERIVE_EXCLUDE );
                 break;
             }
 
@@ -383,7 +390,7 @@ void TruthTableSolver::ConstrainUsingDerived()
                        PredicateName(i).c_str(), 
                        PredicateName(j).c_str(), 
                        PredicateName(k).c_str() );  
-                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, TruthTable::CellType::FALSE );
+                ttwp->GetTruthTable().SetSlice( {{i, true}, {j, true}, {k, false}}, DERIVE_EXCLUDE );
             }
         }
     }

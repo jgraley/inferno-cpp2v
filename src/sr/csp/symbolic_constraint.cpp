@@ -63,12 +63,8 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
                     givens.insert( other_vars_vec[i] );
             
             shared_ptr<SYM::SymbolExpression> he = my_solver.TrySolveForGiven(target, givens);
-            if( he )
-            {
-                TRACEC("Given:\n")(givens)
-                      ("\nSolution:\n")(he->Render())("\n");
-                suggestion_expressions[v][givens] = he; // only store good ones in the map            
-            }            
+            if( he )            
+                suggestion_expressions[v][givens] = he; // only store good ones in the map                        
         });                       
     }
 }

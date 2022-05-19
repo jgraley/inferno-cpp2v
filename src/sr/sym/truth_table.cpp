@@ -303,11 +303,11 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
         } 
     } );
     
-    TRACE( "Bests: Axis counts: FREE: %d FALSE:%d TRUE:%d new cells count:%d\n", 
+    /*TRACE( "Bests: Axis counts: FREE: %d FALSE:%d TRUE:%d new cells count:%d\n", 
            best_counts[KarnaughClass::FREE], 
            best_counts[KarnaughClass::FALSE], 
            best_counts[KarnaughClass::TRUE],
-           best_new_count );
+           best_new_count );*/
         
     return best_slice; 
 }
