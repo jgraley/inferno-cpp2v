@@ -145,7 +145,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
             column_axes.insert(i);
         TRACEC("Option truth table slice: ")(option_ttwp.Render(column_axes, false))("\n");
         
-        shared_ptr<SymbolExpression> option = GetOptionExpressionKarnaugh( option_ttwp, pred_solves );
+        shared_ptr<SymbolExpression> option = GetExpressionViaKarnaughMap( option_ttwp, pred_solves );
         options.push_back( option );
     } );
 
@@ -161,10 +161,10 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWithPredicates evaluated_ttwp,
-                                                                    const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
+shared_ptr<SymbolExpression> TruthTableSolver::GetExpressionViaRaster( TruthTableWithPredicates initial_ttwp,
+                                                                       const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
 {
-    set<vector<bool>> permitted_terms = evaluated_ttwp.GetTruthTable().GetIndicesOfValue( TruthTable::CellType::TRUE );
+    set<vector<bool>> permitted_terms = initial_ttwp.GetTruthTable().GetIndicesOfValue( TruthTable::CellType::TRUE );
     TRACEC("Permitted terms ")(permitted_terms)("\n");
 
     // Build a union of terms that were not ruled out
@@ -175,7 +175,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWi
         list< shared_ptr<SymbolExpression> > clauses;
         for( int axis=0; axis<term.size(); axis++ )
         {
-            auto pred = evaluated_ttwp.GetFrontPredicate(axis);
+            auto pred = initial_ttwp.GetFrontPredicate(axis);
             if( pred_solves.count(pred) == 0 )
                 continue; // skip where solve failed
             shared_ptr<SymbolExpression> clause = pred_solves.at(pred);
@@ -195,25 +195,37 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpression( TruthTableWi
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( TruthTableWithPredicates evaluated_ttwp,
+shared_ptr<SymbolExpression> TruthTableSolver::GetExpressionViaKarnaughMap( TruthTableWithPredicates initial_ttwp,
                                                                             const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
 {
-    TruthTableWithPredicates so_far_ttwp = evaluated_ttwp;
-    
-    // Build a union of expressions for karnaugh slices
-    list< shared_ptr<SymbolExpression> > terms;
-    while( shared_ptr<TruthTable::SliceSpec> karnaugh_slice = evaluated_ttwp.GetTruthTable().TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far_ttwp.GetTruthTable() ) )
+    // Derive a Karnaugh map using TryFindBestKarnaughSlice()
+    TruthTableWithPredicates so_far_ttwp = initial_ttwp;
+    set<shared_ptr<TruthTable::SliceSpec>> karnaugh_map;
+    while( 1 )
     {
-        TRACEC("Got Karnaugh slice: ")(*karnaugh_slice)("\n");
-        so_far_ttwp.GetTruthTable().SetSlice(*karnaugh_slice, TruthTable::CellType::FALSE); // Update the TT that indicates progress so far
-        
+        shared_ptr<TruthTable::SliceSpec> slice = 
+            initial_ttwp.GetTruthTable().TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far_ttwp.GetTruthTable() );
+        if( !slice )
+            break; // must have got them all
+            
+        TRACEC("Got Karnaugh slice: ")(*slice)("\n");
+        karnaugh_map.insert( slice );
+               
+        so_far_ttwp.GetTruthTable().SetSlice(*slice, TruthTable::CellType::FALSE); // Update the TT that indicates progress so far
+    }
+    
+    // Build a union of expressions for the Karnaugh slices
+    list< shared_ptr<SymbolExpression> > terms;
+    for( shared_ptr<TruthTable::SliceSpec> slice : karnaugh_map )
+    {
+        ASSERT( slice );
         // Build an intersection of clauses corresponding to solveables
         list< shared_ptr<SymbolExpression> > clauses;
-        for( pair<int, bool> p : *karnaugh_slice )
+        for( pair<int, bool> p : *slice )
         {
             int axis = p.first;
             int index = p.second;
-            auto pred = evaluated_ttwp.GetFrontPredicate(axis);
+            auto pred = initial_ttwp.GetFrontPredicate(axis);
             if( pred_solves.count(pred) == 0 )
                 continue; // skip where solve failed
             shared_ptr<SymbolExpression> clause = pred_solves.at(pred);
