@@ -136,7 +136,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     ForPower<bool>( evaluatable_axes.size(), index_range_bool, [&](vector<bool> evaluatable_indices)
     {
         TRACEC("Option indices: ")(evaluatable_indices)("\n");
-        map<int, bool> evaluatable_indices_map;
+        TruthTable::SliceSpec evaluatable_indices_map;
         for( int i=0; i<evaluatable_axes.size(); i++ )
             evaluatable_indices_map[evaluatable_axes.at(i)] = evaluatable_indices.at(i);
         TruthTableWithPredicates option_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
@@ -202,10 +202,10 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetOptionExpressionKarnaugh( Trut
     
     // Build a union of expressions for karnaugh slices
     list< shared_ptr<SymbolExpression> > terms;
-    while( shared_ptr<map<int, bool>> karnaugh_slice = evaluated_ttwp.TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far_ttwp ) )
+    while( shared_ptr<TruthTable::SliceSpec> karnaugh_slice = evaluated_ttwp.GetTruthTable().TryFindBestKarnaughSlice( TruthTable::CellType::TRUE, true, so_far_ttwp.GetTruthTable() ) )
     {
         TRACEC("Got Karnaugh slice: ")(*karnaugh_slice)("\n");
-        so_far_ttwp.SetSlice(*karnaugh_slice, TruthTable::CellType::FALSE); // Update the TT that indicates progress so far
+        so_far_ttwp.GetTruthTable().SetSlice(*karnaugh_slice, TruthTable::CellType::FALSE); // Update the TT that indicates progress so far
         
         // Build an intersection of clauses corresponding to solveables
         list< shared_ptr<SymbolExpression> > clauses;

@@ -86,26 +86,20 @@ void TruthTableWithPredicates::Extend( vector<EqualPredicateSet> new_predicates 
 }
 
 
-void TruthTableWithPredicates::SetSlice( map<int, bool> fixed_map, TruthTable::CellType new_value )
-{
-    truth_table->SetSlice( fixed_map, new_value );
-}
-
-
-TruthTableWithPredicates TruthTableWithPredicates::GetSlice( map<int, bool> fixed_map ) const
+TruthTableWithPredicates TruthTableWithPredicates::GetSlice( TruthTable::SliceSpec slice ) const
 {
     vector<EqualPredicateSet> new_predicates;
     vector<string> new_pred_labels;
     for( int axis=0; axis<GetDegree(); axis++ )
     {  
-        if( fixed_map.count(axis) == 0 ) // this is NOT one of the fixed axes
+        if( slice.count(axis) == 0 ) // this is NOT one of the fixed axes
         {
             new_predicates.push_back( predicates.at(axis) );
             new_pred_labels.push_back( pred_labels.at(axis) );
         }
     }
 
-    auto new_tt = make_shared<TruthTable>( truth_table->GetSlice( fixed_map ) );
+    auto new_tt = make_shared<TruthTable>( truth_table->GetSlice( slice ) );
 
     return TruthTableWithPredicates( label_var_name, render_cell_size, label_fmt, 
                                      new_predicates, new_tt, 
@@ -144,18 +138,6 @@ int TruthTableWithPredicates::PredToIndex( shared_ptr<PredicateOperator> pred ) 
 {
     ASSERT( PredExists(pred) );
     return pred_to_index.at( pred );
-}
-
-
-int TruthTableWithPredicates::CountInSlice( map<int, bool> fixed_map, TruthTable::CellType target_value ) const
-{
-    return truth_table->CountInSlice( fixed_map, target_value );
-}
-
-
-shared_ptr<map<int, bool>> TruthTableWithPredicates::TryFindBestKarnaughSlice( TruthTable::CellType target_value, bool preferred_index, const TruthTableWithPredicates &so_far ) const
-{
-    return truth_table->TryFindBestKarnaughSlice( target_value, preferred_index, *(so_far.truth_table) );
 }
 
 

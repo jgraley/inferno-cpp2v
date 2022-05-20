@@ -26,6 +26,10 @@ public:
         FALSE = 0,
         TRUE = 1
     };
+    
+    // Specifies a slice by giving a value to every fixed index;
+    // free ones are the remaining ones.
+    typedef map<int, bool> SliceSpec;
 
     explicit TruthTable( int degree, CellType initval );
     TruthTable( const TruthTable &other );
@@ -35,11 +39,11 @@ public:
     void Set( vector<bool> full_indices, CellType new_value );
 
     // Set all cells satisfying the supplied indices. 
-    void SetSlice( map<int, bool> fixed_map, CellType new_value );
+    void SetSlice( SliceSpec slice, CellType new_value );
 
     // Set all cells satisfying the supplied indices. new_values
     // must have all remaining axes.   
-    void SetSlice( map<int, bool> fixed_map, const TruthTable &new_values );
+    void SetSlice( SliceSpec slice, const TruthTable &new_values );
 
     // Increase the degree by additional_degree, replicating
     // existing cell values. In-place.
@@ -53,7 +57,7 @@ public:
     // Get a slice of a truth table in which axes indicated
     // by fixed_map's keys have been reduced away as specified by 
     // fixed_map's values.
-    TruthTable GetSlice( map<int, bool> fixed_map ) const; 
+    TruthTable GetSlice( SliceSpec slice ) const; 
 
     // Get a folded down truth table in which the fold_axes have
     // been removed and cells are assigned the maximum value of
@@ -65,11 +69,11 @@ public:
 
     // Do all the cells that correspond to the given fixed axes
     // have the given target value.
-    int CountInSlice( map<int, bool> fixed_map, CellType target_value ) const; 
+    int CountInSlice( SliceSpec slice, CellType target_value ) const; 
 
     // Find the biggest slice wherein every element matches the
     // given target value. If there are no such slices, nullptr is returned.
-    shared_ptr<map<int, bool>> TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const;
+    shared_ptr<SliceSpec> TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const;
 
     // Ordering
     bool operator==( const TruthTable &other ) const;

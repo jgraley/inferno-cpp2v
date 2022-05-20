@@ -39,20 +39,20 @@ void TruthTable::Set( vector<bool> full_indices, CellType new_value )
 }
 
 
-void TruthTable::SetSlice( map<int, bool> fixed_map, CellType new_value )
+void TruthTable::SetSlice( SliceSpec slice, CellType new_value )
 {
-    ASSERT( fixed_map.size() <= degree );
+    ASSERT( slice.size() <= degree );
     
     // Determine what the free axes must be
     vector<int> free_axes;
     for( int i=0; i<degree; i++ )
-        if( fixed_map.count(i) == 0 )
+        if( slice.count(i) == 0 )
             free_axes.push_back(i);
-    ASSERT( free_axes.size() + fixed_map.size() == degree );
+    ASSERT( free_axes.size() + slice.size() == degree );
 
     // Capture the fixed axes and indices into our vector
     vector<bool> full_indices(degree);
-    ScatterInto( full_indices, fixed_map );
+    ScatterInto( full_indices, slice );
 
     // For all values of (bool)^(free axis count)
     ForPower<bool>( free_axes.size(), index_range_bool, [&](vector<bool> free_indices)
@@ -67,20 +67,20 @@ void TruthTable::SetSlice( map<int, bool> fixed_map, CellType new_value )
 }
 
 
-void TruthTable::SetSlice( map<int, bool> fixed_map, const TruthTable &new_values )
+void TruthTable::SetSlice( SliceSpec slice, const TruthTable &new_values )
 {
-    ASSERT( fixed_map.size() + new_values.degree == degree );
+    ASSERT( slice.size() + new_values.degree == degree );
     
     // Determine what the free axes must be
     vector<int> free_axes;
     for( int i=0; i<degree; i++ )
-        if( fixed_map.count(i) == 0 )
+        if( slice.count(i) == 0 )
             free_axes.push_back(i);
-    ASSERT( free_axes.size() + fixed_map.size() == degree );
+    ASSERT( free_axes.size() + slice.size() == degree );
 
     // Capture the fixed axes and indices into our vector
     vector<bool> full_indices(degree);
-    ScatterInto( full_indices, fixed_map );
+    ScatterInto( full_indices, slice );
 
     // For all values of (bool)^(free axis count)
     ForPower<bool>( free_axes.size(), index_range_bool, [&](vector<bool> free_indices)
@@ -124,21 +124,21 @@ TruthTable::CellType TruthTable::Get( vector<bool> full_indices ) const
 }
 
 
-TruthTable TruthTable::GetSlice( map<int, bool> fixed_map ) const
+TruthTable TruthTable::GetSlice( SliceSpec slice ) const
 {
-    ASSERT( fixed_map.size() <= degree );
+    ASSERT( slice.size() <= degree );
     
     // Determine what the free axes must be
     vector<int> dest_axes;
     for( int i=0; i<degree; i++ )
-        if( fixed_map.count(i) == 0 )
+        if( slice.count(i) == 0 )
             dest_axes.push_back(i);
-    ASSERT( dest_axes.size() + fixed_map.size() == degree );
+    ASSERT( dest_axes.size() + slice.size() == degree );
     TruthTable dest( dest_axes.size(), CellType::FALSE );
 
     // Capture the fixed axes and indices into our vector
     vector<bool> full_indices(degree);
-    ScatterInto( full_indices, fixed_map );
+    ScatterInto( full_indices, slice );
 
     // For all values of (bool)^(dest axis count)
     ForPower<bool>( dest_axes.size(), index_range_bool, [&](vector<bool> dest_indices)
@@ -208,20 +208,20 @@ set<vector<bool>> TruthTable::GetIndicesOfValue( CellType value ) const
 }
 
 
-int TruthTable::CountInSlice( map<int, bool> fixed_map, CellType target_value ) const
+int TruthTable::CountInSlice( SliceSpec slice, CellType target_value ) const
 { 
-    ASSERT( fixed_map.size() <= degree );
+    ASSERT( slice.size() <= degree );
     
     // Determine what the free axes must be
     vector<int> free_axes;
     for( int i=0; i<degree; i++ )
-        if( fixed_map.count(i) == 0 )
+        if( slice.count(i) == 0 )
             free_axes.push_back(i);
-    ASSERT( free_axes.size() + fixed_map.size() == degree );
+    ASSERT( free_axes.size() + slice.size() == degree );
 
     // Capture the fixed axes and indices into our vector
     vector<bool> full_indices(degree);
-    ScatterInto( full_indices, fixed_map );
+    ScatterInto( full_indices, slice );
 
     // For all values of (bool)^(free axis count)
     int count = 0;
@@ -240,7 +240,7 @@ int TruthTable::CountInSlice( map<int, bool> fixed_map, CellType target_value ) 
 }
 
 
-shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const
+shared_ptr<TruthTable::SliceSpec> TruthTable::TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const
 {
     enum class KarnaughClass
     {
@@ -254,7 +254,7 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
 
     // Put FREE first so that we try the biggest slices first. Next is the preferred index
     const vector<KarnaughClass> index_range_kc = {KarnaughClass::FREE, KarnaughClass::TRUE, KarnaughClass::FALSE};
-    shared_ptr<map<int, bool>> best_slice;
+    shared_ptr<SliceSpec> best_slice;
     map<KarnaughClass, int> best_counts;
     best_counts[KarnaughClass::FREE] = -1;
     best_counts[KarnaughClass::FALSE] = -1;
@@ -264,7 +264,7 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
     // We'll try 3^degree possibilities for Karnaugh slices
     ForPower<KarnaughClass>( degree, index_range_kc, [&](vector<KarnaughClass> k_classes )
     {     
-        auto candidate_slice = make_shared<map<int, bool>>();
+        auto candidate_slice = make_shared<SliceSpec>();
         map<KarnaughClass, int> candidate_counts;
         for( int i=0; i<degree; i++ )
         {
@@ -288,8 +288,8 @@ shared_ptr<map<int, bool>> TruthTable::TryFindBestKarnaughSlice( CellType target
         int candidate_new_count = so_far.CountInSlice( *candidate_slice, target_value );
 
         // NECCESSARY conditions
-        if( CountInSlice( *candidate_slice, avoid_value ) == 0 && // Slice should not include "crosses" in original truth table
-            candidate_new_count > 0 ) // Slice must improve upon so-far solution by bringing at least one target cell in
+        if( CountInSlice( *candidate_slice, avoid_value ) == 0 && // SliceSpec should not include "crosses" in original truth table
+            candidate_new_count > 0 ) // SliceSpec must improve upon so-far solution by bringing at least one target cell in
         {
             // DESIRABLE conditions
             if( candidate_new_count > best_new_count || // 1. biggest improvement on so-far solution by count of "new ticks covered"
