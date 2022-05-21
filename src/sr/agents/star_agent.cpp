@@ -120,28 +120,28 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
 }
  
 
-shared_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
                                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
 
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( false );
+        return MAKE_RESULT<BooleanResult>( false );
 
     auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetOnlyXLink().GetChildX().get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetOnlyXLink().GetChildX());
 
     // Nodes must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
-        return make_shared<BooleanResult>( false );
+        return MAKE_RESULT<BooleanResult>( false );
     
     // Check pre-restriction
     bool matches = true;
     FOREACH( const TreePtrInterface &xe, *x_ci )
         matches = matches & archetype_node->IsLocalMatch( ((TreePtr<Node>)xe).get() );            
 
-    return make_shared<BooleanResult>( matches );
+    return MAKE_RESULT<BooleanResult>( matches );
 }                                   
 
          

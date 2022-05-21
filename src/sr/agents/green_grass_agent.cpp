@@ -69,16 +69,16 @@ list<shared_ptr<SymbolExpression> *> GreenGrassAgent::IsGreenGrassOperator::GetS
 }
 
 
-shared_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
                                                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( false );
+        return MAKE_RESULT<BooleanResult>( false );
     
     bool res = ( dirty_grass->count( ra->GetOnlyXLink().GetChildX() ) == 0 ); 
-    return make_shared<BooleanResult>( res );         
+    return MAKE_RESULT<BooleanResult>( res );         
 }
 
 

@@ -7,9 +7,9 @@ using namespace SYM;
 
 // ------------------------- PredicateOperator --------------------------
 
-void PredicateOperator::SetForceResult( weak_ptr<BooleanResult> force_result_ )
+void PredicateOperator::SetForceExpression( weak_ptr<BooleanExpression> force_expression_ )
 {
-    force_result = force_result_;
+    force_expression = force_expression_;
 }
 
 
@@ -30,12 +30,12 @@ list<shared_ptr<SymbolExpression>> PredicateOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<BooleanResult> PredicateOperator::Evaluate( const EvalKit &kit ) const
+RESULT_PTR<BooleanResult> PredicateOperator::Evaluate( const EvalKit &kit ) const
 {
     // Apply forces where specified
-    shared_ptr<BooleanResult> locked_result = force_result.lock();
-    if( locked_result )
-        return locked_result;
+    shared_ptr<BooleanExpression> locked_expression = force_expression.lock();
+    if( locked_expression )
+        return locked_expression->Evaluate( kit );
 
     return Parent::Evaluate( kit );
 }
@@ -120,7 +120,7 @@ list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
 }
 
 
-shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
@@ -129,7 +129,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
     // return true as required.
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( false );
+            return MAKE_RESULT<BooleanResult>( false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -138,7 +138,7 @@ shared_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator) .
     bool res = ( ra->GetOnlyXLink() == rb->GetOnlyXLink() );
-    return make_shared<BooleanResult>( res );   
+    return MAKE_RESULT<BooleanResult>( res );   
 }
 
 
@@ -232,14 +232,14 @@ list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPo
 }
 
 
-shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
                                                              const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
     // IEEE 754 All inequalities result in false if an operand is NaS
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( false );
+            return MAKE_RESULT<BooleanResult>( false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -252,7 +252,7 @@ shared_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
     SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
     
     bool res = EvalBoolFromIndexes( index_a, index_b );
-    return make_shared<BooleanResult>( res );  
+    return MAKE_RESULT<BooleanResult>( res );  
 }
 
 
@@ -533,12 +533,12 @@ list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
 }
 
 
-shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
                                                      const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( false );
+            return MAKE_RESULT<BooleanResult>( false );
     
     // Note: could be done faster using a set<XLink>
     bool m = true;
@@ -553,7 +553,7 @@ shared_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
             m = false;
         }
     } );
-    return make_shared<BooleanResult>( m );   
+    return MAKE_RESULT<BooleanResult>( m );   
 }
 
 
@@ -635,7 +635,7 @@ list<shared_ptr<SymbolExpression> *> KindOfOperator::GetSymbolOperandPointers()
 }
 
 
-shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -643,10 +643,10 @@ shared_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
     // NaS. Possibly like a < ?
     shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( false );
+        return MAKE_RESULT<BooleanResult>( false );
     
     bool matches = archetype_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() );
-    return make_shared<BooleanResult>( matches );
+    return MAKE_RESULT<BooleanResult>( matches );
 }
 
 
@@ -699,7 +699,7 @@ list<shared_ptr<SymbolExpression> *> ChildCollectionSizeOperator::GetSymbolOpera
 }
 
 
-shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -710,12 +710,12 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==
     if( !ra->IsDefinedAndUnique() )
-        return make_shared<BooleanResult>( false );
+        return MAKE_RESULT<BooleanResult>( false );
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
     if( !archetype_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() ) )
-        return make_shared<BooleanResult>( false ); 
+        return MAKE_RESULT<BooleanResult>( false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -728,7 +728,7 @@ shared_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
     
     // Check that the size is as required
     bool res = ( p_x_col->size() == size );
-    return make_shared<BooleanResult>( res );
+    return MAKE_RESULT<BooleanResult>( res );
 }
 
 
@@ -793,14 +793,14 @@ list<shared_ptr<SymbolExpression> *> IsCouplingEquivalentOperator::GetSymbolOper
 }
 
 
-shared_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
+RESULT_PTR<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
                                                         const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
     for( shared_ptr<SymbolResultInterface> ra : op_results )
         if( !ra->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( false );
+            return MAKE_RESULT<BooleanResult>( false );
 
     shared_ptr<SymbolResultInterface> ra = op_results.front();
     shared_ptr<SymbolResultInterface> rb = op_results.back();
@@ -809,7 +809,7 @@ shared_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit 
     // themselves, which have the required uniqueness properties
     // within the full arrowhead model (cf IndexComparisonOperator).
     bool res = ( equivalence_relation.Compare(ra->GetOnlyXLink(), rb->GetOnlyXLink()) == EQUAL );
-    return make_shared<BooleanResult>( res );    
+    return MAKE_RESULT<BooleanResult>( res );    
 }
 
 

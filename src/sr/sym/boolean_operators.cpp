@@ -18,9 +18,9 @@ BooleanConstant::BooleanConstant( bool value_ ) :
 }
 
 
-shared_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
+RESULT_PTR<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<BooleanResult>( value );
+    return MAKE_RESULT<BooleanResult>( value );
 }
 
 
@@ -64,13 +64,13 @@ list<shared_ptr<BooleanExpression>> NotOperator::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
-                                                 const list<shared_ptr<BooleanResult>> &op_results ) const
+RESULT_PTR<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
+                                                 const list<RESULT_PTR<BooleanResult>> &op_results ) const
 {
-    shared_ptr<BooleanResult> ra = op_results.front();
+    RESULT_PTR<BooleanResult> ra = op_results.front();
     if( ra->IsDefinedAndUnique() ) // DEFINED
     {
-        return make_shared<BooleanResult>( !ra->GetAsBool() );
+        return MAKE_RESULT<BooleanResult>( !ra->GetAsBool() );
     }
     else // UNDEFINED
     {
@@ -110,13 +110,13 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
-                                                          const list<shared_ptr<BooleanResult>> &op_results ) const
+RESULT_PTR<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
+                                                          const list<RESULT_PTR<BooleanResult>> &op_results ) const
 {
     // Lower certainly dominates
     return *min_element( op_results.begin(), 
                          op_results.end(), 
-                         DereferencingCompare<shared_ptr<BooleanResult>> );
+                         DereferencingCompare<RESULT_PTR<BooleanResult>> );
 }
 
 
@@ -166,13 +166,13 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<BooleanResult>> &op_results ) const
+RESULT_PTR<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
+                                                         const list<RESULT_PTR<BooleanResult>> &op_results ) const
 {
     // Higher certainly dominates
     return *max_element( op_results.begin(), 
                          op_results.end(), 
-                         DereferencingCompare<shared_ptr<BooleanResult>> );
+                         DereferencingCompare<RESULT_PTR<BooleanResult>> );
 }
 
 
@@ -225,11 +225,11 @@ list<shared_ptr<BooleanExpression>> BoolEqualOperator::GetBooleanOperands() cons
 }
 
 
-shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
-                                                       const list<shared_ptr<BooleanResult>> &op_results ) const
+RESULT_PTR<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
+                                                       const list<RESULT_PTR<BooleanResult>> &op_results ) const
 {
-    shared_ptr<BooleanResult> ra = op_results.front();
-    shared_ptr<BooleanResult> rb = op_results.back();
+    RESULT_PTR<BooleanResult> ra = op_results.front();
+    RESULT_PTR<BooleanResult> rb = op_results.back();
     
     if( !ra->IsDefinedAndUnique() )
         return ra;
@@ -238,7 +238,7 @@ shared_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
         return rb;
     
     bool res = ( ra->GetAsBool() == rb->GetAsBool() );
-    return make_shared<BooleanResult>( res );     
+    return MAKE_RESULT<BooleanResult>( res );     
 }
 
 
@@ -280,11 +280,11 @@ list<shared_ptr<BooleanExpression>> ImplicationOperator::GetBooleanOperands() co
 }
 
 
-shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<BooleanResult>> &op_results ) const
+RESULT_PTR<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
+                                                         const list<RESULT_PTR<BooleanResult>> &op_results ) const
 {
-    shared_ptr<BooleanResult> ra = op_results.front();
-    shared_ptr<BooleanResult> rb = op_results.back();
+    RESULT_PTR<BooleanResult> ra = op_results.front();
+    RESULT_PTR<BooleanResult> rb = op_results.back();
     if( ra->IsDefinedAndUnique() )
     {
         if( ra->GetAsBool() ) // TRUE
@@ -293,7 +293,7 @@ shared_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
         }
         else // FALSE
         {
-            return make_shared<BooleanResult>( true );
+            return MAKE_RESULT<BooleanResult>( true );
         }
     }
     else // UNDEFINED
@@ -335,9 +335,9 @@ list<shared_ptr<BooleanExpression>> Uniplexor::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> Uniplexor::Evaluate( const EvalKit &kit ) const
+RESULT_PTR<BooleanResult> Uniplexor::Evaluate( const EvalKit &kit ) const
 {
-    shared_ptr<BooleanResult> ra = a->Evaluate(kit);   
+    RESULT_PTR<BooleanResult> ra = a->Evaluate(kit);   
     if( ra->IsDefinedAndUnique() )
     {
         if( ra->GetAsBool() ) // TRUE
@@ -351,11 +351,11 @@ shared_ptr<BooleanResult> Uniplexor::Evaluate( const EvalKit &kit ) const
     }
     else // UNDEFINED
     {
-        shared_ptr<BooleanResult> rb = b->Evaluate(kit);   
-        shared_ptr<BooleanResult> rc = c->Evaluate(kit);   
+        RESULT_PTR<BooleanResult> rb = b->Evaluate(kit);   
+        RESULT_PTR<BooleanResult> rc = c->Evaluate(kit);   
         if( *rb == *rc )
             return rb; // not ambiguous if both options are the same
-        return make_shared<BooleanResult>( false );
+        return MAKE_RESULT<BooleanResult>( false );
     }
 }
 
@@ -394,16 +394,16 @@ list<shared_ptr<BooleanExpression>> Multiplexor::GetBooleanOperands() const
 }
 
 
-shared_ptr<BooleanResult> Multiplexor::Evaluate( const EvalKit &kit ) const
+RESULT_PTR<BooleanResult> Multiplexor::Evaluate( const EvalKit &kit ) const
 {
     unsigned int int_control = 0;
     for( int i=0; i<controls.size(); i++ )
     {
-        shared_ptr<BooleanResult> r = controls[i]->Evaluate(kit);
+        RESULT_PTR<BooleanResult> r = controls[i]->Evaluate(kit);
         
         // Abort if any controls evaluate undefined (TODO could do better)
         if( !r->IsDefinedAndUnique() )
-            return make_shared<BooleanResult>( false );
+            return MAKE_RESULT<BooleanResult>( false );
             
         int_control |= (int)r->GetAsBool() << i;
     }

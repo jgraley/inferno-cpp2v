@@ -287,20 +287,20 @@ void TruthTableSolver::ConstrainByEvaluating()
         ASSERT( indices.size() == ttwp->GetDegree() );
         if( ttwp->GetTruthTable().Get( indices ) == SHOULD_EVAL )
         {            
-            // Set up the shared_ptr<BooleanResult>s for the forcing. The forces 
+            // Set up the RESULT_PTR<BooleanResult>s for the forcing. The forces 
             // apply until these go out of scope. 
-            vector<shared_ptr<BooleanResult>> vr; // must stay in scope across the Evaluate
+            vector<shared_ptr<BooleanExpression>> vbe; // must stay in scope across the Evaluate
             for( bool b : indices )
-                vr.push_back( make_shared<BooleanResult>(b) );
+                vbe.push_back( make_shared<BooleanConstant>(b) );
             
             // Forces must be set up on *all* the predicates that may be reached
             // while evaluating the expression, even if they are equal.
             for( int j=0; j<ttwp->GetDegree(); j++ )
                 for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
-                    pred->SetForceResult( vr[j] );       
+                    pred->SetForceExpression( vbe[j] );       
                 
             // Evaluate to find out what the boolean connectives do with forced preds
-            shared_ptr<BooleanResult> eval_result = initial_expression->Evaluate(kit);
+            RESULT_PTR<BooleanResult> eval_result = initial_expression->Evaluate(kit);
             
             // Rule out any evaluations that come out false
             if( !eval_result->IsDefinedAndTrue() )

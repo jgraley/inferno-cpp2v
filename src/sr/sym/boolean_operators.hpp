@@ -17,7 +17,7 @@ class BooleanConstant : public BooleanExpression
 public:    
     typedef BooleanExpression NominalType;
     explicit BooleanConstant( bool value );
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     bool GetAsBool() const;    
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -38,8 +38,8 @@ public:
     typedef BooleanExpression NominalType;
     explicit NotOperator( shared_ptr<BooleanExpression> a );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<RESULT_PTR<BooleanResult>> &op_results ) const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -57,8 +57,8 @@ public:
     typedef BooleanExpression NominalType;
     explicit AndOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<RESULT_PTR<BooleanResult>> &op_results ) const;
     bool IsCommutative() const override;
 
     virtual string Render() const override;
@@ -78,8 +78,8 @@ public:
     typedef BooleanExpression NominalType;
     explicit OrOperator( list< shared_ptr<BooleanExpression> > sa_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<RESULT_PTR<BooleanResult>> &op_results ) const;
     bool IsCommutative() const override;
 
     virtual string Render() const override;
@@ -100,8 +100,8 @@ public:
     explicit BoolEqualOperator( shared_ptr<BooleanExpression> a, 
                                 shared_ptr<BooleanExpression> b );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<RESULT_PTR<BooleanResult>> &op_results ) const;
     bool IsCommutative() const override;
 
     virtual string Render() const override;
@@ -123,8 +123,8 @@ public:
     explicit ImplicationOperator( shared_ptr<BooleanExpression> a_,
                                   shared_ptr<BooleanExpression> b_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const override;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                const list<shared_ptr<BooleanResult>> &op_results ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+                                                const list<RESULT_PTR<BooleanResult>> &op_results ) const;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -144,7 +144,7 @@ public:
                                          shared_ptr<BooleanExpression> b_,
                                          shared_ptr<BooleanExpression> c_ );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit ) const;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -167,7 +167,7 @@ public:
     explicit Multiplexor( vector<shared_ptr<BooleanExpression>> controls,
                           vector<shared_ptr<BooleanExpression>> options );
     virtual list<shared_ptr<BooleanExpression>> GetBooleanOperands() const;
-    virtual shared_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const;
+    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit ) const;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

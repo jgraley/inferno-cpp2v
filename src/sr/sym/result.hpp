@@ -5,6 +5,14 @@
 #include "../link.hpp"
 #include "../the_knowledge.hpp"
 
+#if 0
+#define RESULT_PTR unique_ptr
+#define MAKE_RESULT make_unique
+#else
+#define RESULT_PTR shared_ptr
+#define MAKE_RESULT make_shared
+#endif
+
 namespace SR
 {
     class TheKnowledge;
