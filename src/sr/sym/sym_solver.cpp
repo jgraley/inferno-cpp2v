@@ -287,7 +287,7 @@ void TruthTableSolver::ConstrainByEvaluating()
         ASSERT( indices.size() == ttwp->GetDegree() );
         if( ttwp->GetTruthTable().Get( indices ) == SHOULD_EVAL )
         {            
-            // Set up the RESULT_PTR<BooleanResult>s for the forcing. The forces 
+            // Set up the unique_ptr<BooleanResult>s for the forcing. The forces 
             // apply until these go out of scope. 
             vector<shared_ptr<BooleanExpression>> vbe; // must stay in scope across the Evaluate
             for( bool b : indices )
@@ -300,7 +300,7 @@ void TruthTableSolver::ConstrainByEvaluating()
                     pred->SetForceExpression( vbe[j] );       
                 
             // Evaluate to find out what the boolean connectives do with forced preds
-            RESULT_PTR<BooleanResult> eval_result = initial_expression->Evaluate(kit);
+            unique_ptr<BooleanResult> eval_result = initial_expression->Evaluate(kit);
             
             // Rule out any evaluations that come out false
             if( !eval_result->IsDefinedAndTrue() )

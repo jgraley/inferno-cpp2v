@@ -144,7 +144,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
         IsIdentifierNamedOperator *Clone() const override;
                                                    
         list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
-        virtual RESULT_PTR<SYM::BooleanResult> Evaluate( const EvalKit &kit,
+        virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
         shared_ptr<SYM::Expression> TrySolveForToEqualNT( shared_ptr<SYM::Expression> target, 

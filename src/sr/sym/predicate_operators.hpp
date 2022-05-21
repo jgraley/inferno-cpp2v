@@ -45,7 +45,7 @@ public:
 
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const final;
     virtual list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() = 0;
-    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     
     shared_ptr<PredicateOperator> TrySubstitute( shared_ptr<SymbolExpression> over,
                                                  shared_ptr<SymbolExpression> with ) const;
@@ -77,7 +77,7 @@ public:
     EqualOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+    unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                         const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     bool IsCommutative() const override;
 
@@ -111,7 +111,7 @@ public:
     explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                  shared_ptr<BooleanExpression> to_equal ) const override;
@@ -211,7 +211,7 @@ public:
     AllDiffOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
@@ -237,7 +237,7 @@ public:
     KindOfOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -267,7 +267,7 @@ public:
     ChildCollectionSizeOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -294,7 +294,7 @@ public:
     IsCouplingEquivalentOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    virtual RESULT_PTR<BooleanResult> Evaluate( const EvalKit &kit,
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const override;
     
     shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
