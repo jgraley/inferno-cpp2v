@@ -150,7 +150,7 @@ public:
     virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const;
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const;
 };
 
 // ------------------------- SymbolToSymbolExpression --------------------------
@@ -163,7 +163,7 @@ public:
     virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit, 
-                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const;
+                                               list<unique_ptr<SymbolResultInterface>> &&op_results ) const;
 };
 
 };

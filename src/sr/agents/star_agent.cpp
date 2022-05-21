@@ -121,7 +121,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
  
 
 unique_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
-                                                                           list<unique_ptr<SymbolResultInterface>> &op_results ) const
+                                                                           list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
     unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));

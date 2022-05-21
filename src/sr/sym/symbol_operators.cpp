@@ -133,7 +133,7 @@ list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() 
 
 
 unique_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                            list<unique_ptr<SymbolResultInterface>> &op_results ) const
+                                                            list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );
 
@@ -312,7 +312,7 @@ list<shared_ptr<SymbolExpression>> KnowledgeToSymbolOperator::GetSymbolOperands(
 
 
 unique_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                              list<unique_ptr<SymbolResultInterface>> &op_results ) const
+                                                              list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
@@ -469,7 +469,7 @@ list<shared_ptr<SymbolExpression>> AllChildrenOperator::GetSymbolOperands() cons
 
 
 unique_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &kit,
-                                                            list<unique_ptr<SymbolResultInterface>> &op_results ) const
+                                                            list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );
 

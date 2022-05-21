@@ -138,7 +138,7 @@ list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllIdentifiersNam
 
 
 unique_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                                     list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
+                                                                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
 {
     return make_unique<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, true, bounds.second, true );
 }
@@ -179,7 +179,7 @@ list<shared_ptr<SYM::SymbolExpression> *> IdentifierByNameAgent::IsIdentifierNam
 
 
 unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                           list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+                                                                                           list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     unique_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(move(op_results));
@@ -363,7 +363,7 @@ list<shared_ptr<SYM::SymbolExpression>> NestedAgent::NestingOperator::GetSymbolO
 
 
 unique_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( const EvalKit &kit,
-                                                                          list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+                                                                          list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     unique_ptr<SYM::SymbolResultInterface> keyer_result = OnlyElementOf(move(op_results));

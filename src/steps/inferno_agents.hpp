@@ -124,7 +124,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
                                      string name );
         list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
         unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                         list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const final;
+                                                         list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
         string Render() const override;
         Precedence GetPrecedence() const override;
         
@@ -145,7 +145,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
                                                    
         list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
-                                                         list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+                                                         list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
 
         shared_ptr<SYM::Expression> TrySolveForToEqualNT( shared_ptr<SYM::Expression> target, 
                                                           shared_ptr<SYM::BooleanExpression> to_equal ) const override;
@@ -243,7 +243,7 @@ struct NestedAgent : public virtual TeleportAgent
                                   shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+                                                                 list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
 
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;

@@ -65,7 +65,7 @@ public:
                                       shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
+                                               list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const = 0;
 
@@ -144,7 +144,7 @@ public:
     explicit KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
+                                               list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const = 0;
     virtual string Render() const override;
@@ -242,7 +242,7 @@ public:
     explicit AllChildrenOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
+                                               list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;

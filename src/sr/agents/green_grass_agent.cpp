@@ -70,7 +70,7 @@ list<shared_ptr<SymbolExpression> *> GreenGrassAgent::IsGreenGrassOperator::GetS
 
 
 unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
-                                                                                    list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                                                    list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));

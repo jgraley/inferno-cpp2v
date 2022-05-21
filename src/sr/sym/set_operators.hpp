@@ -21,7 +21,7 @@ public:
     explicit ComplementOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                        list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
+                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -38,7 +38,7 @@ public:
     explicit UnionOperator( list< shared_ptr<SymbolExpression> > sa_ );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                        list<unique_ptr<SymbolResultInterface>> &op_results ) const override;
+                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -56,7 +56,7 @@ public:
     explicit IntersectionOperator( list< shared_ptr<SymbolExpression> > sa_ );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                        list<unique_ptr<SymbolResultInterface>> &op_results ) const override;
+                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -74,7 +74,7 @@ public:
     AllGreaterOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const final;
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
     string Render() const override;
     Precedence GetPrecedence() const override;
     
@@ -91,7 +91,7 @@ public:
     AllLessOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const final;
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
     string Render() const override;
     Precedence GetPrecedence() const override;
     
@@ -108,7 +108,7 @@ public:
     AllGreaterOrEqualOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const final;
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
     string Render() const override;
     Precedence GetPrecedence() const override;
     
@@ -125,7 +125,7 @@ public:
     AllLessOrEqualOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const final;
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
     string Render() const override;
     Precedence GetPrecedence() const override;
     
@@ -145,7 +145,7 @@ public:
     AllCouplingEquivalentOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const final;
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
     string Render() const override;
     Precedence GetPrecedence() const override;
     

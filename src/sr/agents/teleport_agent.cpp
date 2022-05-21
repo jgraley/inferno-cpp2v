@@ -92,7 +92,7 @@ list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOpe
 
 
 unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
-                                                                             list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );            
     unique_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(move(op_results));

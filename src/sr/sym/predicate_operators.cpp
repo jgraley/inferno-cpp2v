@@ -121,7 +121,7 @@ list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
-                                                   list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                   list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==2 );
     // IEEE 754 Equals results in false if an operand is NaS. Not-equals has 
@@ -233,7 +233,7 @@ list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPo
 
 
 unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
-                                                             list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
     // IEEE 754 All inequalities result in false if an operand is NaS
@@ -534,7 +534,7 @@ list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                     list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     for( const unique_ptr<SymbolResultInterface> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
@@ -636,7 +636,7 @@ list<shared_ptr<SymbolExpression> *> KindOfOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
-                                                    list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                    list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
@@ -700,7 +700,7 @@ list<shared_ptr<SymbolExpression> *> ChildCollectionSizeOperator::GetSymbolOpera
 
 
 unique_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SymbolResultInterface>> &op_results ) const
+                                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
 
@@ -794,7 +794,7 @@ list<shared_ptr<SymbolExpression> *> IsCouplingEquivalentOperator::GetSymbolOper
 
 
 unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                        list<unique_ptr<SymbolResultInterface>> &op_results ) const 
+                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
