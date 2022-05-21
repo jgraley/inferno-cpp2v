@@ -137,10 +137,10 @@ list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllIdentifiersNam
 }
 
 
-shared_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                                     const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersNamedOperator::Evaluate( const EvalKit &kit,
+                                                                                                     list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const                                                                    
 {
-    return make_shared<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, true, bounds.second, true );
+    return make_unique<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, true, bounds.second, true );
 }
 
 
@@ -179,10 +179,10 @@ list<shared_ptr<SYM::SymbolExpression> *> IdentifierByNameAgent::IsIdentifierNam
 
 
 unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                           const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+                                                                                           list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    shared_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(op_results);
+    unique_ptr<SYM::SymbolResultInterface> ra = OnlyElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
         return make_unique<SYM::BooleanResult>( false );
     
@@ -362,13 +362,13 @@ list<shared_ptr<SYM::SymbolExpression>> NestedAgent::NestingOperator::GetSymbolO
 }
 
 
-shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( const EvalKit &kit,
-                                                                          const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const 
+unique_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( const EvalKit &kit,
+                                                                          list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    shared_ptr<SYM::SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
+    unique_ptr<SYM::SymbolResultInterface> keyer_result = OnlyElementOf(move(op_results));
     if( !keyer_result->IsDefinedAndUnique() )
-        return make_shared<SYM::SymbolResult>( SYM::SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SYM::SymbolResult>( SYM::SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
     
     // Keep advancing until we get nullptr, and remember the last non-null position
@@ -378,7 +378,7 @@ shared_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
     while( XLink next_xlink = agent->Advance(xlink, &s) )
         xlink = next_xlink;
         
-    return make_shared<SYM::SymbolResult>( xlink );        
+    return make_unique<SYM::SymbolResult>( xlink );        
 }
 
 

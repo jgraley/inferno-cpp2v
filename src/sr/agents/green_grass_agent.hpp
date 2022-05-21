@@ -30,7 +30,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
                                        
         list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
-                                                         const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+                                                         list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;

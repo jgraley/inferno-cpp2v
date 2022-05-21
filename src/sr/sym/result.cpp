@@ -116,23 +116,19 @@ SetResult::SetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
 }
 
 
-SetResult::SetResult( shared_ptr<SymbolResultInterface> other )
+SetResult::SetResult( unique_ptr<SymbolResultInterface> other )
 {
     if( auto ssr = dynamic_pointer_cast<SetResult>(other) )
     {
         xlinks = ssr->xlinks;
         complement_flag = ssr->complement_flag;
     }
-    else if( auto sr = dynamic_pointer_cast<SymbolResultInterface>(other) )
+    else // SymbolResultInterface
     {
         set<SR::XLink> links;
         bool ok = other->TryGetAsSetOfXLinks( xlinks );
         ASSERTS(ok);
         complement_flag = false;
-    }
-    else
-    {
-        ASSERTS(false)("Don't know how to make a SetResult out of ")(*other);
     }
 }
 
@@ -166,85 +162,85 @@ bool SetResult::operator==( const SymbolResultInterface &other ) const
 }
 
 
-shared_ptr<SetResult> SetResult::GetComplement() const
+unique_ptr<SetResult> SetResult::GetComplement() const
 {
-    return make_shared<SetResult>(xlinks, !complement_flag);
+    return make_unique<SetResult>(xlinks, !complement_flag);
 }
 
 
-shared_ptr<SetResult> SetResult::GetUnion( list<shared_ptr<SetResult>> ops )
+unique_ptr<SetResult> SetResult::GetUnion( list<unique_ptr<SetResult>> ops )
 {
     int n = ops.size();
     int n_comp = 0;
-    for( shared_ptr<SetResult> op : ops )
+    for( const unique_ptr<SetResult> &op : ops )
         n_comp += op->complement_flag ? 1 : 0;
 
     if( n_comp > 0 )
-        return DeMorgan( IntersectionCore, ops );
+        return DeMorgan( IntersectionCore, move(ops) );
     else
-        return UnionCore( ops );
+        return UnionCore( move(ops) );
 }
 
 
-shared_ptr<SetResult> SetResult::GetIntersection( list<shared_ptr<SetResult>> ops )
+unique_ptr<SetResult> SetResult::GetIntersection( list<unique_ptr<SetResult>> ops )
 {
     int n = ops.size();
     int n_comp = 0;
-    for( shared_ptr<SetResult> op : ops )
+    for( const unique_ptr<SetResult> &op : ops )
         n_comp += op->complement_flag ? 1 : 0;
 
     if( n_comp == n )
-        return DeMorgan( UnionCore, ops );
+        return DeMorgan( UnionCore, move(ops) );
     else
-        return IntersectionCore( ops );
+        return IntersectionCore( move(ops) );
 }
 
 
-shared_ptr<SetResult> SetResult::DeMorgan( function<shared_ptr<SetResult>( list<shared_ptr<SetResult>> )> lambda,
-                                                       list<shared_ptr<SetResult>> ops )
+unique_ptr<SetResult> SetResult::DeMorgan( function<unique_ptr<SetResult>( list<unique_ptr<SetResult>> )> lambda,
+                                                       list<unique_ptr<SetResult>> ops )
 {
-    list<shared_ptr<SetResult>> cops;
-    for( shared_ptr<SetResult> op : ops )
+    list<unique_ptr<SetResult>> cops;
+    for( const unique_ptr<SetResult> &op : ops )
         cops.push_back( op->GetComplement() );
 
-    shared_ptr<SetResult> cres = lambda(cops);
+    unique_ptr<SetResult> cres = lambda(move(cops));
 
     return cres->GetComplement();
 }                                                       
 
 
-shared_ptr<SetResult> SetResult::UnionCore( list<shared_ptr<SetResult>> ops )
+unique_ptr<SetResult> SetResult::UnionCore( list<unique_ptr<SetResult>> ops )
 {
     set<SR::XLink> result_xlinks;
-    for( shared_ptr<SetResult> op : ops )
+    for( const unique_ptr<SetResult> &op : ops )
     {
         ASSERTS( !op->complement_flag )("UnionCore requires no complements");
         result_xlinks = UnionOf( result_xlinks, op->xlinks );
     }
-    return make_shared<SetResult>( result_xlinks );   
+    return make_unique<SetResult>( result_xlinks );   
 }
 
 
-shared_ptr<SetResult> SetResult::IntersectionCore( list<shared_ptr<SetResult>> ops )
+unique_ptr<SetResult> SetResult::IntersectionCore( list<unique_ptr<SetResult>> ops )
 {
-    shared_ptr<SetResult> non_comp_op;
-    for( shared_ptr<SetResult> op : ops )
+    const unique_ptr<SetResult> *non_comp_op = nullptr;
+    for( const unique_ptr<SetResult> &op : ops )
         if( !op->complement_flag )
-            non_comp_op = op;
+            non_comp_op = &op;
     ASSERTS( non_comp_op )("IntersectionCore requires at least one non-complement");
 
     // DifferenceOf() is the key to combining complemented with non-complimented
-    set<SR::XLink> result_xlinks = non_comp_op->xlinks;
-    for( shared_ptr<SetResult> op : ops )
+    set<SR::XLink> result_xlinks = (*non_comp_op)->xlinks;
+    for( const unique_ptr<SetResult> &op : ops )
     {
-        if( op == non_comp_op )
+        if( &op == non_comp_op )
             continue; // got this one already
         if( op->complement_flag )
             result_xlinks = DifferenceOf( result_xlinks, op->xlinks );
         else
             result_xlinks = IntersectionOf( result_xlinks, op->xlinks );            
     }
-    return make_shared<SetResult>( result_xlinks );
+    return make_unique<SetResult>( result_xlinks );
 }
 
 

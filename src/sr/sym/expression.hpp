@@ -118,7 +118,7 @@ public:
 class SymbolExpression : public Expression
 {    
 public:
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
     
     shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
                                                shared_ptr<SymbolExpression> to_equal ) const;
@@ -150,7 +150,7 @@ public:
     virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const;
+                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const;
 };
 
 // ------------------------- SymbolToSymbolExpression --------------------------
@@ -161,9 +161,9 @@ class SymbolToSymbolExpression : public SymbolExpression
 public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit, 
-                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit, 
+                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const;
 };
 
 };

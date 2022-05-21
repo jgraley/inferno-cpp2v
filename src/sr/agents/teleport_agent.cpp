@@ -91,19 +91,19 @@ list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOpe
 }
 
 
-shared_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
-                                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
+                                                                             list<unique_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    ASSERT( op_results.size()==1 );        
-    shared_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(op_results);
+    ASSERT( op_results.size()==1 );            
+    unique_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(move(op_results));
     if( !keyer_result->IsDefinedAndUnique() )
-        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
     LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink );        
     if( (XLink)cached_link )
-        return make_shared<SymbolResult>( (XLink)cached_link );
+        return make_unique<SymbolResult>( (XLink)cached_link );
     else 
-        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
 }
 
 

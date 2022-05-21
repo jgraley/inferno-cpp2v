@@ -22,7 +22,7 @@ list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 }
 
 
-shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     unique_ptr<BooleanResult> r_control = control->Evaluate(kit);   
     if( r_control->IsDefinedAndUnique() )
@@ -38,11 +38,11 @@ shared_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &
     }
     else // UNDEFINED
     {
-        shared_ptr<SymbolResultInterface> r_option_true = option_true->Evaluate(kit);   
-        shared_ptr<SymbolResultInterface> r_option_false = option_false->Evaluate(kit);   
+        unique_ptr<SymbolResultInterface> r_option_true = option_true->Evaluate(kit);   
+        unique_ptr<SymbolResultInterface> r_option_false = option_false->Evaluate(kit);   
         if( *r_option_true == *r_option_false )
             return r_option_true; // not ambiguous if both options are the same
-        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     }
 }
 
@@ -81,7 +81,7 @@ list<shared_ptr<Expression>> MultiConditionalOperator::GetOperands() const
 }
 
 
-shared_ptr<SymbolResultInterface> MultiConditionalOperator::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResultInterface> MultiConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     unsigned int int_control = 0;
     for( int i=0; i<controls.size(); i++ )
@@ -90,12 +90,12 @@ shared_ptr<SymbolResultInterface> MultiConditionalOperator::Evaluate( const Eval
         
         // Abort if any controls evaluate undefined (TODO could do better)
         if( !r->IsDefinedAndUnique() )
-            return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+            return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
             
         int_control |= (int)r->GetAsBool() << i;
     }
         
-    shared_ptr<SymbolResultInterface> result = options[int_control]->Evaluate(kit);
+    unique_ptr<SymbolResultInterface> result = options[int_control]->Evaluate(kit);
     //FTRACE("Option %d is:", int_control)(options[int_control])("\n")
     //      ("Evaluates to:")(result)("\n");
     return result;

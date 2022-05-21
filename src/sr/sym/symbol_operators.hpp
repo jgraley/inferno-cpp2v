@@ -18,8 +18,8 @@ class SymbolConstant : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit SymbolConstant( SR::XLink xlink );
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
-    shared_ptr<SymbolResultInterface> GetValue() const;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
+    unique_ptr<SymbolResultInterface> GetValue() const;
     SR::XLink GetOnlyXLink() const;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -40,7 +40,7 @@ public:
     typedef SymbolExpression NominalType;
     explicit SymbolVariable( const SR::PatternLink &plink );
     virtual set<SR::PatternLink> GetRequiredVariables() const override;
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     SR::PatternLink GetPatternLink() const;
 
     // Note: no TrySolveForToEqualNT() because trivial solver is sufficient
@@ -64,9 +64,9 @@ public:
                                       int item, 
                                       shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
-    virtual shared_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
+    virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const = 0;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -97,7 +97,7 @@ class ChildSequenceFrontOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual shared_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -108,7 +108,7 @@ class ChildSequenceBackOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual shared_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -119,7 +119,7 @@ class ChildCollectionFrontOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual shared_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -130,7 +130,7 @@ class SingularChildOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual shared_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -143,8 +143,8 @@ public:
     typedef SymbolExpression NominalType;
     explicit KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const = 0;
     virtual string Render() const override;
@@ -241,8 +241,8 @@ public:
     typedef SymbolExpression NominalType;
     explicit AllChildrenOperator( shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    virtual shared_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                               const list<shared_ptr<SymbolResultInterface>> &op_results ) const override final;
+    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                               list<unique_ptr<SymbolResultInterface>> &op_results ) const override final;
 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;

@@ -32,8 +32,8 @@ private:
         explicit TeleportOperator( const TeleportAgent *agent,
                                    shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
-        virtual shared_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                                 const list<shared_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
+        virtual unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                                 list<unique_ptr<SYM::SymbolResultInterface>> &op_results ) const override;
 
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;

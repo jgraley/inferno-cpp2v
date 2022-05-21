@@ -17,11 +17,11 @@ list<shared_ptr<SymbolExpression>> ComplementOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<SymbolResultInterface> ComplementOperator::Evaluate( const EvalKit &kit,
-                                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> ComplementOperator::Evaluate( const EvalKit &kit,
+                                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    shared_ptr<SetResult> asr = make_shared<SetResult>( ar );
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SetResult> asr = make_unique<SetResult>( move(ar) );
     return asr->GetComplement();
 }
 
@@ -51,13 +51,13 @@ list<shared_ptr<SymbolExpression>> UnionOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<SymbolResultInterface> UnionOperator::Evaluate( const EvalKit &kit,
-                                                           const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+unique_ptr<SymbolResultInterface> UnionOperator::Evaluate( const EvalKit &kit,
+                                                           list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
-    list<shared_ptr<SetResult>> ssrs;
-    for( shared_ptr<SymbolResultInterface> ar : op_results )       
-        ssrs.push_back( make_shared<SetResult>( ar ) );
-    return SetResult::GetUnion( ssrs );
+    list<unique_ptr<SetResult>> ssrs;
+    for( unique_ptr<SymbolResultInterface> &ar : op_results )       
+        ssrs.push_back( make_unique<SetResult>( move(ar) ) );
+    return SetResult::GetUnion( move(ssrs) );
 }
 
 
@@ -91,13 +91,13 @@ list<shared_ptr<SymbolExpression>> IntersectionOperator::GetSymbolOperands() con
 }
 
 
-shared_ptr<SymbolResultInterface> IntersectionOperator::Evaluate( const EvalKit &kit,
-                                                                  const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+unique_ptr<SymbolResultInterface> IntersectionOperator::Evaluate( const EvalKit &kit,
+                                                                  list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
-    list<shared_ptr<SetResult>> ssrs;
-    for( shared_ptr<SymbolResultInterface> ar : op_results )       
-        ssrs.push_back( make_shared<SetResult>( ar ) );
-    return SetResult::GetIntersection( ssrs );
+    list<unique_ptr<SetResult>> ssrs;
+    for( unique_ptr<SymbolResultInterface> &ar : op_results )       
+        ssrs.push_back( make_unique<SetResult>( move(ar) ) );
+    return SetResult::GetIntersection( move(ssrs) );
 }
 
 
@@ -131,11 +131,11 @@ list<shared_ptr<SymbolExpression>> AllGreaterOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<SymbolResultInterface> AllGreaterOperator::Evaluate( const EvalKit &kit,
-                                                                const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllGreaterOperator::Evaluate( const EvalKit &kit,
+                                                                list<unique_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<DepthFirstRangeResult>( kit.knowledge, ar->GetOnlyXLink(), false, SR::XLink(), false );
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
+    return make_unique<DepthFirstRangeResult>( kit.knowledge, ar->GetOnlyXLink(), false, SR::XLink(), false );
 }
 
 
@@ -164,11 +164,11 @@ list<shared_ptr<SymbolExpression>> AllLessOperator::GetSymbolOperands() const
 }
 
 
-shared_ptr<SymbolResultInterface> AllLessOperator::Evaluate( const EvalKit &kit,
-                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllLessOperator::Evaluate( const EvalKit &kit,
+                                                             list<unique_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<DepthFirstRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), false );
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
+    return make_unique<DepthFirstRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), false );
 }
 
 
@@ -197,11 +197,11 @@ list<shared_ptr<SymbolExpression>> AllGreaterOrEqualOperator::GetSymbolOperands(
 }
 
 
-shared_ptr<SymbolResultInterface> AllGreaterOrEqualOperator::Evaluate( const EvalKit &kit,
-                                                                       const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllGreaterOrEqualOperator::Evaluate( const EvalKit &kit,
+                                                                       list<unique_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<DepthFirstRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, SR::XLink(), false );
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
+    return make_unique<DepthFirstRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, SR::XLink(), false );
 }
 
 
@@ -230,11 +230,11 @@ list<shared_ptr<SymbolExpression>> AllLessOrEqualOperator::GetSymbolOperands() c
 }
 
 
-shared_ptr<SymbolResultInterface> AllLessOrEqualOperator::Evaluate( const EvalKit &kit,
-                                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllLessOrEqualOperator::Evaluate( const EvalKit &kit,
+                                                                    list<unique_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<DepthFirstRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), true );
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
+    return make_unique<DepthFirstRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), true );
 }
 
 
@@ -263,11 +263,11 @@ list<shared_ptr<SymbolExpression>> AllCouplingEquivalentOperator::GetSymbolOpera
 }
 
 
-shared_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
+                                                                   list<unique_ptr<SymbolResultInterface>> &op_results ) const                                                                    
 {
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
-    return make_shared<EquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
+    return make_unique<EquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );
 }
 
 

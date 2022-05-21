@@ -5,12 +5,12 @@
 #include "../link.hpp"
 #include "../the_knowledge.hpp"
 
-#if 0
-#define RESULT_PTR unique_ptr
-#define MAKE_RESULT make_unique
+#if 1
+#define unique_ptr unique_ptr
+#define make_unique make_unique
 #else
-#define RESULT_PTR shared_ptr
-#define MAKE_RESULT make_shared
+#define unique_ptr shared_ptr
+#define make_unique make_shared
 #endif
 
 namespace SR
@@ -88,24 +88,24 @@ public:
     explicit SetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
     
     // Use this to force other or unknown symbol results to extensionalise
-    explicit SetResult( shared_ptr<SymbolResultInterface> other );
+    explicit SetResult( unique_ptr<SymbolResultInterface> other );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;
 
-    shared_ptr<SetResult> GetComplement() const;
-    static shared_ptr<SetResult> GetUnion( list<shared_ptr<SetResult>> ops );
-    static shared_ptr<SetResult> GetIntersection( list<shared_ptr<SetResult>> ops );
+    unique_ptr<SetResult> GetComplement() const;
+    static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
+    static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
     string GetTrace() const override;
 
 private:    
-    static shared_ptr<SetResult> DeMorgan( function<shared_ptr<SetResult>( list<shared_ptr<SetResult>> )> lambda,
-                                                 list<shared_ptr<SetResult>> ops );
-    static shared_ptr<SetResult> UnionCore( list<shared_ptr<SetResult>> ops );
-    static shared_ptr<SetResult> IntersectionCore( list<shared_ptr<SetResult>> ops );
+    static unique_ptr<SetResult> DeMorgan( function<unique_ptr<SetResult>( list<unique_ptr<SetResult>> )> lambda,
+                                                 list<unique_ptr<SetResult>> ops );
+    static unique_ptr<SetResult> UnionCore( list<unique_ptr<SetResult>> ops );
+    static unique_ptr<SetResult> IntersectionCore( list<unique_ptr<SetResult>> ops );
 
     set<SR::XLink> xlinks;
     bool complement_flag;
@@ -124,9 +124,9 @@ public:
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;
 
-    //shared_ptr<SetResult> GetComplement() const;
-    //static shared_ptr<SetResult> GetUnion( list<shared_ptr<SetResult>> ops );
-    //static shared_ptr<SetResult> GetIntersection( list<shared_ptr<SetResult>> ops );
+    //unique_ptr<SetResult> GetComplement() const;
+    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
+    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
     string GetTrace() const override;
 
@@ -149,9 +149,9 @@ public:
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;
 
-    //shared_ptr<SetResult> GetComplement() const;
-    //static shared_ptr<SetResult> GetUnion( list<shared_ptr<SetResult>> ops );
-    //static shared_ptr<SetResult> GetIntersection( list<shared_ptr<SetResult>> ops );
+    //unique_ptr<SetResult> GetComplement() const;
+    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
+    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
     string GetTrace() const override;
 
@@ -173,9 +173,9 @@ public:
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;
 
-    //shared_ptr<SetResult> GetComplement() const;
-    //static shared_ptr<SetResult> GetUnion( list<shared_ptr<SetResult>> ops );
-    //static shared_ptr<SetResult> GetIntersection( list<shared_ptr<SetResult>> ops );
+    //unique_ptr<SetResult> GetComplement() const;
+    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
+    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
     string GetTrace() const override;
 

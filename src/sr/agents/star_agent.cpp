@@ -121,10 +121,10 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
  
 
 unique_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
-                                                                           const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+                                                                           list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
-    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
+    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
 
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );

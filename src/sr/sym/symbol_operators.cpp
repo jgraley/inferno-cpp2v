@@ -15,15 +15,15 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 }
 
 
-shared_ptr<SymbolResultInterface> SymbolConstant::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResultInterface> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-    return make_shared<SymbolResult>( xlink );
+    return make_unique<SymbolResult>( xlink );
 }
 
 
-shared_ptr<SymbolResultInterface> SymbolConstant::GetValue() const
+unique_ptr<SymbolResultInterface> SymbolConstant::GetValue() const
 {
-    return make_shared<SymbolResult>( xlink );
+    return make_unique<SymbolResult>( xlink );
 }
 
 
@@ -72,13 +72,13 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 }
 
 
-shared_ptr<SymbolResultInterface> SymbolVariable::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolResultInterface> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     // This is an ERROR. You could perfectly easily have called GetRequiredVariables(),
     // done a quick set difference and KNOWN that it would come to this.
     ASSERT( kit.hypothesis_links->count(plink) > 0 );
     
-    return make_shared<SymbolResult>( kit.hypothesis_links->at(plink) );
+    return make_unique<SymbolResult>( kit.hypothesis_links->at(plink) );
 }
 
 
@@ -132,18 +132,18 @@ list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() 
 }
 
 
-shared_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+unique_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
+                                                            list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );
 
     // XLink must match our referee (i.e. be non-strict subtype)
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
     if( !archetype_node->IsLocalMatch( ar->GetOnlyXLink().GetChildX().get() ) )
-        return make_shared<SymbolResult>(SymbolResult::NOT_A_SYMBOL); // Will not be able to itemise due incompatible type
+        return make_unique<SymbolResult>(SymbolResult::NOT_A_SYMBOL); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
@@ -203,7 +203,7 @@ shared_ptr<Expression> ChildOperator::TrySolveForToEqualNT( shared_ptr<Expressio
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
-shared_ptr<SymbolResultInterface> ChildSequenceFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolResultInterface> ChildSequenceFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
                                                                    Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
@@ -218,7 +218,7 @@ shared_ptr<SymbolResultInterface> ChildSequenceFrontOperator::EvalFromItem( SR::
     else
         result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->front()));        
         
-    return make_shared<SymbolResult>( result_xlink );
+    return make_unique<SymbolResult>( result_xlink );
 }
 
 
@@ -229,7 +229,7 @@ string ChildSequenceFrontOperator::GetItemTypeName() const
 
 // ------------------------- ChildSequenceBackOperator --------------------------
 
-shared_ptr<SymbolResultInterface> ChildSequenceBackOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolResultInterface> ChildSequenceBackOperator::EvalFromItem( SR::XLink parent_xlink, 
                                                                   Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
@@ -239,10 +239,10 @@ shared_ptr<SymbolResultInterface> ChildSequenceBackOperator::EvalFromItem( SR::X
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>).
     if( p_x_seq->empty() )
-        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &(p_x_seq->back()));        
-    return make_shared<SymbolResult>( result_xlink );
+    return make_unique<SymbolResult>( result_xlink );
 }
 
 
@@ -253,7 +253,7 @@ string ChildSequenceBackOperator::GetItemTypeName() const
 
 // ------------------------- ChildCollectionFrontOperator --------------------------
 
-shared_ptr<SymbolResultInterface> ChildCollectionFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolResultInterface> ChildCollectionFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
                                                                      Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a collection
@@ -263,10 +263,10 @@ shared_ptr<SymbolResultInterface> ChildCollectionFrontOperator::EvalFromItem( SR
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>).
     if( p_x_col->empty() )
-        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), &*(p_x_col->begin()));        
-    return make_shared<SymbolResult>( result_xlink );
+    return make_unique<SymbolResult>( result_xlink );
 }
 
 
@@ -277,7 +277,7 @@ string ChildCollectionFrontOperator::GetItemTypeName() const
 
 // ------------------------- SingularChildOperator --------------------------
 
-shared_ptr<SymbolResultInterface> SingularChildOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolResultInterface> SingularChildOperator::EvalFromItem( SR::XLink parent_xlink, 
                                                               Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a singular item
@@ -287,7 +287,7 @@ shared_ptr<SymbolResultInterface> SingularChildOperator::EvalFromItem( SR::XLink
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>)
     auto result_xlink = SR::XLink(parent_xlink.GetChildX(), p_x_singular);        
-    return make_shared<SymbolResult>( result_xlink );
+    return make_unique<SymbolResult>( result_xlink );
 }
 
 
@@ -311,11 +311,11 @@ list<shared_ptr<SymbolExpression>> KnowledgeToSymbolOperator::GetSymbolOperands(
 }
 
 
-shared_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                              const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+unique_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit,
+                                                              list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);       
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
 
     if( !ar->IsDefinedAndUnique() )
         return ar;
@@ -323,9 +323,9 @@ shared_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const Eva
     const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->GetOnlyXLink()) );   
     SR::XLink result_xlink = EvalXLinkFromNugget( ar->GetOnlyXLink(), nugget );
     if( result_xlink ) 
-        return make_shared<SymbolResult>( result_xlink );
+        return make_unique<SymbolResult>( result_xlink );
     else
-        return make_shared<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
 }
 
 
@@ -468,13 +468,13 @@ list<shared_ptr<SymbolExpression>> AllChildrenOperator::GetSymbolOperands() cons
 }
 
 
-shared_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &kit,
-                                                            const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+unique_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &kit,
+                                                            list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );
 
     // XLink must match our referee (i.e. be non-strict subtype)
-    shared_ptr<SymbolResultInterface> ar = OnlyElementOf(op_results);
+    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
@@ -488,7 +488,7 @@ shared_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
         child_xlinks.insert( child_xlink );
     }
     
-    return make_shared<SetResult>( child_xlinks );
+    return make_unique<SetResult>( child_xlinks );
 }
 
 

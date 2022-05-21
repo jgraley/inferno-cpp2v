@@ -121,18 +121,18 @@ list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
-                                                   const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                   list<unique_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==2 );
     // IEEE 754 Equals results in false if an operand is NaS. Not-equals has 
     // no operator class of it's own and is implemented as ¬(==) so will 
     // return true as required.
-    for( shared_ptr<SymbolResultInterface> ra : op_results )
+    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
 
-    shared_ptr<SymbolResultInterface> ra = move( op_results.front() );
-    shared_ptr<SymbolResultInterface> rb = move( op_results.back() );
+    unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
+    unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
@@ -233,16 +233,16 @@ list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPo
 
 
 unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
-                                                             const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                             list<unique_ptr<SymbolResultInterface>> &op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
     // IEEE 754 All inequalities result in false if an operand is NaS
-    for( shared_ptr<SymbolResultInterface> ra : op_results )
+    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
 
-    shared_ptr<SymbolResultInterface> ra = move( op_results.front() );
-    shared_ptr<SymbolResultInterface> rb = move( op_results.back() );
+    unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
+    unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
     // For greater/less, we need to consult the knowledge. We use the 
     // overall depth-first ordering.
@@ -534,16 +534,16 @@ list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
-                                                     const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                     list<unique_ptr<SymbolResultInterface>> &op_results ) const 
 {
-    for( shared_ptr<SymbolResultInterface> ra : op_results )
+    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
     
     // Note: could be done faster using a set<XLink>
     bool m = true;
-    ForAllCommutativeDistinctPairs( op_results, [&](shared_ptr<SymbolResultInterface> ra,
-                                                    shared_ptr<SymbolResultInterface> rb) 
+    ForAllCommutativeDistinctPairs( op_results, [&](const unique_ptr<SymbolResultInterface> &ra,
+                                                    const unique_ptr<SymbolResultInterface> &rb) 
     {    
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -636,12 +636,12 @@ list<shared_ptr<SymbolExpression> *> KindOfOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
-                                                    const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                    list<unique_ptr<SymbolResultInterface>> &op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
     // NaS. Possibly like a < ?
-    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
+    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
@@ -700,12 +700,12 @@ list<shared_ptr<SymbolExpression> *> ChildCollectionSizeOperator::GetSymbolOpera
 
 
 unique_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
-                                                                 const list<shared_ptr<SymbolResultInterface>> &op_results ) const
+                                                                 list<unique_ptr<SymbolResultInterface>> &op_results ) const
 {
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    shared_ptr<SymbolResultInterface> ra = OnlyElementOf(op_results);
+    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
 
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==
@@ -794,16 +794,16 @@ list<shared_ptr<SymbolExpression> *> IsCouplingEquivalentOperator::GetSymbolOper
 
 
 unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                        const list<shared_ptr<SymbolResultInterface>> &op_results ) const 
+                                                        list<unique_ptr<SymbolResultInterface>> &op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
-    for( shared_ptr<SymbolResultInterface> ra : op_results )
+    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
 
-    shared_ptr<SymbolResultInterface> ra = move( op_results.front() );
-    shared_ptr<SymbolResultInterface> rb = move( op_results.back() );
+    unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
+    unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties

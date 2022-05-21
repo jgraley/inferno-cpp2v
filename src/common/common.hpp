@@ -311,6 +311,14 @@ const typename T::value_type &OnlyElementOf( const T&c )
 }
 
 
+template<typename T>
+typename T::value_type &&OnlyElementOf( T&&c )
+{
+    ASSERT( c.size()==1 );
+    return move(*(c.begin()));
+}
+
+
 // Provide somehting like front() that works on sets and maps
 template<typename T>
 const typename T::value_type &FrontOf( const T&c )
@@ -433,5 +441,37 @@ void ForPower( int degree, vector<AXIS_TYPE> index_range, function<void(vector<A
 
 // The value range of a bool, to be used with ForPower
 extern const vector<bool> index_range_bool;
+
+// dynamic_pointer_cast<>() extended to unique_ptr<>. This is based on an
+// example from Stack Overflow but I want to support the same if-else-if chain
+// style that I can with shared_ptr. 
+// So: 
+// - if src is NULL, so will the return be
+// - if the cast fails, NULL is returned and src is still valid
+// - if the cast succeeds, converted unique_ptr is returned and src is NULL
+// In effect, the "move" takes place iff the conversion succeeds. We need
+// to make src an lvalue for this to be possible, which rules out applying
+// the dynamic cast to a true rvalue. 
+// https://stackoverflow.com/questions/11002641/dynamic-casting-for-unique-ptr
+template <typename T_DEST, typename T_SRC>
+std::unique_ptr<T_DEST> dynamic_pointer_cast(std::unique_ptr<T_SRC>& src)
+{
+    // When nullptr, just return nullptr
+    if (!src) 
+        return std::unique_ptr<T_DEST>(nullptr);
+
+    // Perform dynamic_cast, throws std::bad_cast() if this doesn't work out
+    T_DEST* dest_ptr = dynamic_cast<T_DEST*>(src.get());
+    
+    // Do return nullptr on bad_cast
+    if (!dest_ptr) 
+        return std::unique_ptr<T_DEST>(nullptr);
+
+    // Move into new unique_ptr
+    std::unique_ptr<T_DEST> dest_temp(dest_ptr);
+    src.release();
+
+    return dest_temp;
+}
 
 #endif

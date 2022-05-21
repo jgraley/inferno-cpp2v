@@ -28,16 +28,16 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
 {
     INDENT("V");
        
-    list<shared_ptr<SYM::SetResult>> rl; 
+    list<unique_ptr<SYM::SetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_query )
     {                               
-        shared_ptr<SYM::SetResult> r = c->GetSuggestedValues( assignments, my_var );
+        unique_ptr<SYM::SetResult> r = c->GetSuggestedValues( assignments, my_var );
         ASSERT( r );
-        rl.push_back(r);
+        rl.push_back(move(r));
     }
 
     auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
-    shared_ptr<SYM::SetResult> result = SYM::SetResult::GetIntersection(rl);
+    unique_ptr<SYM::SetResult> result = SYM::SetResult::GetIntersection(move(rl));
     ASSERT( result );
     bool sok = result->TryGetAsSetOfXLinks(*s);
        

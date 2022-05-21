@@ -6,6 +6,7 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 #include "../link.hpp"
+#include "../sym/result.hpp"
 
 #include <memory>
 #include <list>
@@ -82,8 +83,8 @@ public:
      * 
      * @note the returned set is allowed to contain inconsistent values. 
      */
-    virtual shared_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
-                                                                 const VariableId &var ) const = 0;        
+    virtual unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
+                                                           const VariableId &var ) const = 0;        
     
     string GetTrace() const;
 
