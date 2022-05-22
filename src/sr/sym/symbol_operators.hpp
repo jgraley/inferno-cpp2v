@@ -142,6 +142,7 @@ class KnowledgeToSymbolOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a );
+    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;

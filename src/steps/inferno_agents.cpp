@@ -131,6 +131,12 @@ IdentifierByNameAgent::AllIdentifiersNamedOperator::AllIdentifiersNamedOperator(
 }
 
     
+SYM::Expression::KnowledgeLevel IdentifierByNameAgent::AllIdentifiersNamedOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::GENERAL;
+}
+
+
 list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllIdentifiersNamedOperator::GetSymbolOperands() const
 {
     return {};

@@ -11,9 +11,7 @@ namespace CSP
 class BackjumpingSolver : public ReferenceSolver
 {
 public:
-    BackjumpingSolver( const list< shared_ptr<Constraint> > &constraints, 
-                       const vector<VariableId> &free_variables, 
-                       const vector<VariableId> &forced_variables );
+    using ReferenceSolver::ReferenceSolver;
                        
 private:    
     void Solve() override;

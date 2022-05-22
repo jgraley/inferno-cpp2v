@@ -4,7 +4,6 @@
 #include "common/common.hpp"
 #include "common/orderable.hpp"
 #include "../link.hpp"
-#include "result.hpp"
 
 #include <exception>
 
@@ -53,9 +52,19 @@ public:
         CONDITIONAL,
         COMMA 
     };    
+    
+    enum class KnowledgeLevel
+    {
+        NONE,    // can have NULL knowledge in kit
+        GENERAL, // needs knowledge but does not use nuggets
+        NUGGETS  // uses nuggets
+    };
             
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
+    virtual KnowledgeLevel GetRequiredKnowledgeLevel() const;
+
+    void ForDepthFirstWalk( function<void(const Expression *)> f ) const;
     
     bool IsIndependentOf( shared_ptr<Expression> target ) const;
     using Orderable::OrderCompare;

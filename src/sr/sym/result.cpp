@@ -197,7 +197,7 @@ unique_ptr<SetResult> SetResult::GetIntersection( list<unique_ptr<SetResult>> op
 
 
 unique_ptr<SetResult> SetResult::DeMorgan( function<unique_ptr<SetResult>( list<unique_ptr<SetResult>> )> lambda,
-                                                       list<unique_ptr<SetResult>> ops )
+                                                                           list<unique_ptr<SetResult>> ops )
 {
     list<unique_ptr<SetResult>> cops;
     for( const unique_ptr<SetResult> &op : ops )
@@ -352,7 +352,7 @@ bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     // Use multiset::equal_range() with our ordered domain as an
     // ordering in order to get to the set of equivalent elements without
     // having to iterate over the whole domain. We're still gaining entropy
-    // here though. It would be faster to get to the range via nuggests 
+    // here though. It would be faster to get to the range via nuggets 
     // (because XLink native comparison will be faster than SimpleCompare)
     // but class_example might be an arbitrary force, and not in the domain.
     // See #522 #525

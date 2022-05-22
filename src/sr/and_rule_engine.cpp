@@ -136,7 +136,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateMyConstraints(constraints_list);
     solver_holder = CreateSolverAndHolder( constraints_list, 
                                            ToVector(free_normal_links_ordered), 
-                                           ToVector(forced_normal_links_ordered) );    
+                                           ToVector(domain_forced_normal_links_ordered),
+                                           ToVector(arbitrary_forced_normal_links_ordered) );    
                                     
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
@@ -414,13 +415,14 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
         if( link != root_plink )
             free_normal_links_ordered.push_back( link );
         else
-            forced_normal_links_ordered.push_back( link );
+            domain_forced_normal_links_ordered.push_back( link ); // Root will be in our domain
         current_solve_plinks.insert( link );
     }
     
     for( PatternLink link : master_boundary_keyer_links )
     {
-        forced_normal_links_ordered.push_back( link );
+        // Master links may not be in our domain if eg they got deleted by master replace
+        arbitrary_forced_normal_links_ordered.push_back( link );
         current_solve_plinks.insert( link );
     }
 }
@@ -511,8 +513,10 @@ void AndRuleEngine::Plan::Dump()
           Trace(normal_and_boundary_links_preorder) },
         { "free_normal_links_ordered",
           Trace(free_normal_links_ordered) },
-        { "forced_normal_links_ordered",
-          Trace(forced_normal_links_ordered) },
+        { "domain_forced_normal_links_ordered",
+          Trace(domain_forced_normal_links_ordered) },
+        { "arbitrary_forced_normal_links_ordered",
+          Trace(arbitrary_forced_normal_links_ordered) },
         { "current_solve_plinks",
           Trace(current_solve_plinks) }	  	
     };

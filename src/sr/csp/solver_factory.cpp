@@ -10,17 +10,20 @@ using namespace CSP;
 
 shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr<Constraint> > &constraints, 
                                                           const vector<VariableId> &free_variables, 
-                                                          const vector<VariableId> &forced_variables )
+                                                          const vector<VariableId> &domain_forced_variables, 
+                                                          const vector<VariableId> &arbitrary_forced_variables )
 {
     auto salg = make_shared<CSP::BackjumpingSolver>( constraints, 
                                                      free_variables, 
-                                                     forced_variables );
+                                                     domain_forced_variables, 
+                                                     arbitrary_forced_variables );
 
     if( ReadArgs::csp_test )
     {
         auto refalg = make_shared<CSP::ReferenceSolver>( constraints, 
                                                          free_variables, 
-                                                         forced_variables );
+                                                         domain_forced_variables, 
+                                                         arbitrary_forced_variables );
 
         auto testalg = make_shared<CSP::SolverTest>( refalg, salg );
 

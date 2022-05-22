@@ -38,7 +38,8 @@ public:
      */
     ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
                      const vector<VariableId> &free_variables, 
-                     const vector<VariableId> &forced_variables );
+                     const vector<VariableId> &domain_forced_variables, 
+                     const vector<VariableId> &arbitrary_forced_variables );
     ~ReferenceSolver();
 
     virtual void Start( const Assignments &forces,
@@ -52,14 +53,16 @@ protected:
         Plan( ReferenceSolver *algo,
               const list< shared_ptr<Constraint> > &constraints, 
               const vector<VariableId> &free_variables, 
-              const vector<VariableId> &forced_variables );
+              const vector<VariableId> &domain_forced_variables, 
+              const vector<VariableId> &arbitrary_forced_variables );
         void DeduceVariables();
         string GetTrace() const; // used for debug
     
         ReferenceSolver * const algo;
         const list< shared_ptr<Constraint> > constraints;
         const vector<VariableId> free_variables;
-        const vector<VariableId> forced_variables;
+        const vector<VariableId> domain_forced_variables;
+        const vector<VariableId> arbitrary_forced_variables;
         
         map<VariableId, int> free_variables_to_indices;
         ConstraintSet constraint_set;

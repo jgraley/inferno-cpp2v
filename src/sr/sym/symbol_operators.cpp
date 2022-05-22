@@ -305,6 +305,12 @@ KnowledgeToSymbolOperator::KnowledgeToSymbolOperator( shared_ptr<SymbolExpressio
 }    
 
 
+Expression::KnowledgeLevel KnowledgeToSymbolOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NUGGETS;
+}
+
+
 list<shared_ptr<SymbolExpression>> KnowledgeToSymbolOperator::GetSymbolOperands() const
 {
     return {a};
@@ -312,7 +318,7 @@ list<shared_ptr<SymbolExpression>> KnowledgeToSymbolOperator::GetSymbolOperands(
 
 
 unique_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                              list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+                                                                       list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       

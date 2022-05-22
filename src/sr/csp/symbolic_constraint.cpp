@@ -27,7 +27,8 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
     consistency_expression( expression_ )
 {
     DetermineVariables();   
-    DetermineHintExpressions();    
+    DetermineHintExpressions();   
+    DetermineKnowledgeRequirement(); 
 }
 
 
@@ -70,6 +71,30 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
 }
 
 
+void SymbolicConstraint::Plan::DetermineKnowledgeRequirement()
+{
+    required_knowledge_level = SYM::Expression::KnowledgeLevel::NONE;
+    
+    consistency_expression->ForDepthFirstWalk( [&](const SYM::Expression *expr)
+    {
+        required_knowledge_level = max( required_knowledge_level, 
+                                        expr->GetRequiredKnowledgeLevel() );
+    } );
+    
+    for( const auto &target_suggestions : suggestion_expressions )
+    {
+        for( auto suggestion : target_suggestions.second )
+        {
+            suggestion.second->ForDepthFirstWalk( [&](const SYM::Expression *expr)
+            {
+                required_knowledge_level = max( required_knowledge_level, 
+                                                expr->GetRequiredKnowledgeLevel() );            
+            } );
+        }
+    }    
+}   
+
+
 string SymbolicConstraint::Plan::GetTrace() const 
 {
     return algo->GetTrace() + ".plan";
@@ -79,6 +104,12 @@ string SymbolicConstraint::Plan::GetTrace() const
 const set<VariableId> &SymbolicConstraint::GetVariables() const
 { 
     return plan.variables;
+}
+
+
+SYM::Expression::KnowledgeLevel SymbolicConstraint::GetRequiredKnowledgeLevel() const
+{
+    return plan.required_knowledge_level;
 }
 
 

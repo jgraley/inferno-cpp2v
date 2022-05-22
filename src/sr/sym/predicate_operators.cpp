@@ -226,6 +226,12 @@ IndexComparisonOperator::IndexComparisonOperator( shared_ptr<SymbolExpression> a
 }    
     
 
+Expression::KnowledgeLevel IndexComparisonOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NUGGETS;
+}
+
+
 list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPointers()
 {
     return {&a, &b};

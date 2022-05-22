@@ -6,7 +6,7 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 #include "../link.hpp"
-#include "../sym/result.hpp"
+#include "../sym/expression.hpp"
 
 #include <memory>
 #include <list>
@@ -50,6 +50,13 @@ public:
      */
     virtual const set<VariableId> &GetVariables() const = 0;
           
+    /**
+     * Get the amount of knowledge this constraint's methods will require.
+     * 
+     * @return A list of variables affected by this constraint.
+     */
+    virtual SYM::Expression::KnowledgeLevel GetRequiredKnowledgeLevel() const = 0;
+
     /**
      * Set the values of the forced varibles
      * 

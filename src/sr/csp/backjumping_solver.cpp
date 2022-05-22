@@ -3,14 +3,6 @@
 using namespace CSP;
 
 
-BackjumpingSolver::BackjumpingSolver( const list< shared_ptr<Constraint> > &constraints, 
-                                      const vector<VariableId> &free_variables, 
-                                      const vector<VariableId> &forced_variables ) :
-    ReferenceSolver( constraints, free_variables, forced_variables )
-{
-}
-
-
 void BackjumpingSolver::Solve()
 {
     conflicted_count = 0;

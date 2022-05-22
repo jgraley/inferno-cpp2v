@@ -125,6 +125,12 @@ AllGreaterOperator::AllGreaterOperator( shared_ptr<SymbolExpression> a_ ) :
 }
 
     
+Expression::KnowledgeLevel AllGreaterOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NUGGETS;
+}
+
+
 list<shared_ptr<SymbolExpression>> AllGreaterOperator::GetSymbolOperands() const
 {
     return {a};
@@ -158,6 +164,12 @@ AllLessOperator::AllLessOperator( shared_ptr<SymbolExpression> a_ ) :
 }
 
     
+Expression::KnowledgeLevel AllLessOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NUGGETS;
+}
+
+
 list<shared_ptr<SymbolExpression>> AllLessOperator::GetSymbolOperands() const
 {
     return {a};
@@ -191,6 +203,12 @@ AllGreaterOrEqualOperator::AllGreaterOrEqualOperator( shared_ptr<SymbolExpressio
 }
 
     
+Expression::KnowledgeLevel AllGreaterOrEqualOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NUGGETS;
+}
+
+
 list<shared_ptr<SymbolExpression>> AllGreaterOrEqualOperator::GetSymbolOperands() const
 {
     return {a};
@@ -224,6 +242,12 @@ AllLessOrEqualOperator::AllLessOrEqualOperator( shared_ptr<SymbolExpression> a_ 
 }
 
     
+Expression::KnowledgeLevel AllLessOrEqualOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NUGGETS;
+}
+
+
 list<shared_ptr<SymbolExpression>> AllLessOrEqualOperator::GetSymbolOperands() const
 {
     return {a};
@@ -257,6 +281,12 @@ AllCouplingEquivalentOperator::AllCouplingEquivalentOperator( shared_ptr<SymbolE
 }
 
     
+Expression::KnowledgeLevel AllCouplingEquivalentOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::GENERAL;
+}
+
+
 list<shared_ptr<SymbolExpression>> AllCouplingEquivalentOperator::GetSymbolOperands() const
 {
     return {a};
@@ -264,7 +294,7 @@ list<shared_ptr<SymbolExpression>> AllCouplingEquivalentOperator::GetSymbolOpera
 
 
 unique_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                                   list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
+                                                                           list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
     return make_unique<EquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );

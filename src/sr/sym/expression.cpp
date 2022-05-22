@@ -21,6 +21,20 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
+Expression::KnowledgeLevel Expression::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::NONE;
+}
+
+
+void Expression::ForDepthFirstWalk( function<void(const Expression *)> f ) const
+{
+    f( this );
+    for( const shared_ptr<Expression> a : GetOperands() )
+        a->ForDepthFirstWalk( f );
+}
+
+
 bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
     if( OrderCompareEqual( this, target.get() ) )
