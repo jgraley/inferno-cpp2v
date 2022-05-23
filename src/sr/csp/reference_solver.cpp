@@ -20,8 +20,8 @@ using namespace CSP;
 ReferenceSolver::Plan::Plan( ReferenceSolver *algo_,
                              const list< shared_ptr<Constraint> > &constraints_, 
                              const vector<VariableId> &free_variables_, 
-                             const vector<VariableId> &domain_forced_variables_, 
-                             const vector<VariableId> &arbitrary_forced_variables_ ) :
+                             const set<VariableId> &domain_forced_variables_, 
+                             const set<VariableId> &arbitrary_forced_variables_ ) :
     algo( algo_ ), 
     constraints(constraints_),
     free_variables(free_variables_),
@@ -44,22 +44,16 @@ void ReferenceSolver::Plan::DeduceVariables()
     for( int i=0; i<free_variables.size(); i++ )   
     {    
         const VariableId &v = free_variables.at(i);
-        InsertSolo(free_variables_set, v); // Checks that elements of the list are unique
+        InsertSolo(free_variables_set, v); // Checks free vars are unique
         free_variables_to_indices[v] = i;
     }
     
-    // Checks that elements of the lists are unique and disjoint
-    set<VariableId> forced_variables_set;
-    for( VariableId v : domain_forced_variables )       
-        InsertSolo(forced_variables_set, v); 
-    for( VariableId v : arbitrary_forced_variables )       
-        InsertSolo(forced_variables_set, v); 
-    
-    set<VariableId> arbitrary_forced_variables_set;
-    for( VariableId v : arbitrary_forced_variables )       
-        InsertSolo(arbitrary_forced_variables_set, v); 
+    // Checks that forced vars are unique and disjoint
+    set<VariableId> forced_variables = UnionOfSolo( domain_forced_variables, 
+                                                    arbitrary_forced_variables );
 
-    ASSERT( IntersectionOf( free_variables_set, forced_variables_set ).empty() );
+    // Free and forced sets must be disjoint
+    ASSERT( IntersectionOf( free_variables_set, forced_variables ).empty() );
  
     completed_constraints.resize( free_variables.size() );
     affected_constraints.resize( free_variables.size() );
@@ -81,7 +75,7 @@ void ReferenceSolver::Plan::DeduceVariables()
                 c_free_vars.insert(v);
                 c_free_var_indices.insert( free_variables_to_indices.at(v) );
             }
-            if( arbitrary_forced_variables_set.count(v) == 1 )
+            if( arbitrary_forced_variables.count(v) == 1 )
             {
                 // Enfoce rule #525 - the arbitrary forces can be outside the
                 // domain and won't have knowledge nuggests. This is OK as long
@@ -140,8 +134,8 @@ string ReferenceSolver::Plan::GetTrace() const
 
 ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constraints, 
                                   const vector<VariableId> &free_variables, 
-                                  const vector<VariableId> &domain_forced_variables, 
-                                  const vector<VariableId> &arbitrary_forced_variables ) :
+                                  const set<VariableId> &domain_forced_variables, 
+                                  const set<VariableId> &arbitrary_forced_variables ) :
     plan( this, constraints, free_variables, domain_forced_variables, arbitrary_forced_variables ),
     solution_report_function(),
     rejection_report_function()

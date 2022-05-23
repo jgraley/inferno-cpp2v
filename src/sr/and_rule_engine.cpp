@@ -134,10 +134,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list);
+    // Master boundary links may not be in our domain if eg they got 
+    // deleted by master replace. So root_plink is the only one that
+    // we can guarantee will be in the domain.
     solver_holder = CreateSolverAndHolder( constraints_list, 
                                            ToVector(free_normal_links_ordered), 
-                                           ToVector(domain_forced_normal_links_ordered),
-                                           ToVector(arbitrary_forced_normal_links_ordered) );    
+                                           { root_plink },
+                                           master_boundary_keyer_links );    
                                     
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
@@ -414,17 +417,11 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
     {
         if( link != root_plink )
             free_normal_links_ordered.push_back( link );
-        else
-            domain_forced_normal_links_ordered.push_back( link ); // Root will be in our domain
         current_solve_plinks.insert( link );
     }
     
     for( PatternLink link : master_boundary_keyer_links )
-    {
-        // Master links may not be in our domain if eg they got deleted by master replace
-        arbitrary_forced_normal_links_ordered.push_back( link );
-        current_solve_plinks.insert( link );
-    }
+        current_solve_plinks.insert( link );    
 }
 
 
@@ -513,10 +510,6 @@ void AndRuleEngine::Plan::Dump()
           Trace(normal_and_boundary_links_preorder) },
         { "free_normal_links_ordered",
           Trace(free_normal_links_ordered) },
-        { "domain_forced_normal_links_ordered",
-          Trace(domain_forced_normal_links_ordered) },
-        { "arbitrary_forced_normal_links_ordered",
-          Trace(arbitrary_forced_normal_links_ordered) },
         { "current_solve_plinks",
           Trace(current_solve_plinks) }	  	
     };

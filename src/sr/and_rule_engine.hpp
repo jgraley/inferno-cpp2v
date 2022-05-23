@@ -115,8 +115,6 @@ public:
         map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
         map< Agent *, set<PatternLink> > parent_residual_links_to_master_boundary_agents;
         list<PatternLink> free_normal_links_ordered;
-        list<PatternLink> domain_forced_normal_links_ordered;
-        list<PatternLink> arbitrary_forced_normal_links_ordered;
         set<PatternLink> current_solve_plinks;
         set< shared_ptr<SYM::BooleanExpression> > expressions_from_agents;
         set< shared_ptr<SYM::BooleanExpression> > expressions_split;

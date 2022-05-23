@@ -10,8 +10,8 @@ using namespace CSP;
 
 shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr<Constraint> > &constraints, 
                                                           const vector<VariableId> &free_variables, 
-                                                          const vector<VariableId> &domain_forced_variables, 
-                                                          const vector<VariableId> &arbitrary_forced_variables )
+                                                          const set<VariableId> &domain_forced_variables, 
+                                                          const set<VariableId> &arbitrary_forced_variables )
 {
     auto salg = make_shared<CSP::BackjumpingSolver>( constraints, 
                                                      free_variables, 
