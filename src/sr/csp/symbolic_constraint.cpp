@@ -115,8 +115,18 @@ SYM::Expression::KnowledgeLevel SymbolicConstraint::GetRequiredKnowledgeLevel() 
 
 void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
 {
-    knowledge = knowledge_;
-    ASSERT( knowledge );
+    switch( plan.required_knowledge_level )
+    {
+    case SYM::Expression::KnowledgeLevel::NONE:
+        // Prove that these expressions really don't need the knowledge
+        // (kind of a self-test)
+        knowledge = nullptr;
+        break;
+    default:
+        knowledge = knowledge_;
+        ASSERT( knowledge );
+        break;
+    }
 }   
 
 
@@ -129,7 +139,6 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
     for( VariableId v : plan.variables )
         ASSERT( assignments.count(v)==1 );
 #endif        
-
     SYM::Expression::EvalKit kit { &assignments, knowledge };    
     unique_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
