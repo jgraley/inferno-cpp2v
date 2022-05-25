@@ -90,7 +90,7 @@ public:
     // Note the constness: do not try to mutate the agent via this function
     virtual shared_ptr<const Node> GetPatternPtr() const = 0;
     virtual TreePtr<Node> GetArchetypeNode() const = 0;
-    
+    virtual shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const = 0;
     virtual string GetPlanAsString() const = 0;
 };
 

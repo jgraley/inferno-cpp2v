@@ -110,9 +110,13 @@ private:
 // are TBD.
 
 #define ARCHETYPE_FUNCTION \
-    virtual TreePtr<Node> GetArchetypeNode() const override \
+    TreePtr<Node> GetArchetypeNode() const override \
     { \
         return this->SpecialGetArchetypeNode(); \
+    } \
+    shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override \
+    { \
+        return this->SpecialGetArchetypeTreePtr(); \
     }
 
 
@@ -121,7 +125,7 @@ private:
 class SpecialBase
 {
 public:    
-    virtual shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const = 0;
+    virtual shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const = 0;
     virtual TreePtr<Node> SpecialGetArchetypeNode() const = 0;
 	static bool IsNonTrivialPreRestriction(const TreePtrInterface *ptr);
 };
@@ -133,13 +137,15 @@ class Special : public SpecialBase,
                 public virtual PRE_RESTRICTION
 {
 public:
-    virtual shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
-    {
-        return make_shared<TreePtr<PRE_RESTRICTION>>();  
-    }
+    // Get an archetype NODE
     virtual TreePtr<Node> SpecialGetArchetypeNode() const override
     {
         return TreePtr<Node>( new PRE_RESTRICTION );  
+    }
+    // Get an architype TREE PTR. This is a different thing. It's actually NULL which is fine.
+    virtual shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const override
+    {
+        return make_shared<TreePtr<PRE_RESTRICTION>>();  
     }
 };
 

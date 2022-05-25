@@ -201,6 +201,11 @@ public:
     {
         return TreePtr<Node>( new NODE_TYPE );  
     }
+    
+    shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
+    {
+        return make_shared<TreePtr<NODE_TYPE>>();  
+    }
        
     // disambiguate between Agent and Node: Agent wins
     virtual string GetTrace() const override
