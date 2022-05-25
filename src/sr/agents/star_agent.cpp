@@ -3,6 +3,7 @@
 #include "../search_replace.hpp" 
 #include "link.hpp"
 #include "sym/symbol_operators.hpp"
+#include "sym/boolean_operators.hpp"
 #include "sym/result.hpp"
 
 using namespace SR;
@@ -22,8 +23,15 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 
 SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
 {
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
+    if( typeid( *keyer_plink.GetPatternPtr() ) != typeid( *GetArchetypeTreePtr() ) )
+    {
+        auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+        return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
+    }
+    else
+    {
+        return MakeOver<BooleanConstant>(true);
+    }    
 }
 
 
