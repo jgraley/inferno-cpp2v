@@ -4,6 +4,7 @@
 #include "agent_intermediates.hpp"
 #include "../search_replace.hpp"
 #include "../boolean_evaluator.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 {

@@ -6,6 +6,7 @@
 #include "../boolean_evaluator.hpp"
 #include "standard_agent.hpp"
 #include "../sym/predicate_operators.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 {

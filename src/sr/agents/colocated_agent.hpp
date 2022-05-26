@@ -2,6 +2,7 @@
 #define COLOCATED_AGENT_HPP
 
 #include "agent_common.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 {

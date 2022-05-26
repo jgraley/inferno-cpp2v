@@ -6,6 +6,7 @@
 #include "../scr_engine.hpp" 
 #include "colocated_agent.hpp"
 #include "standard_agent.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 { 

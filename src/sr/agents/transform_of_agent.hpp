@@ -7,6 +7,7 @@
 #include "delta_agent.hpp"
 #include "slave_agent.hpp"
 #include "../cache.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 {

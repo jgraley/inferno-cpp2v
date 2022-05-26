@@ -8,6 +8,7 @@
 #include "helpers/transformation.hpp"
 #include "../sym/expression.hpp"
 #include "../sym/predicate_operators.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 { 

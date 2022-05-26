@@ -6,6 +6,7 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 { 

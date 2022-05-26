@@ -6,6 +6,7 @@
 #include "../query.hpp"
 #include "../sym/overloads.hpp"
 #include "../cache.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 { 
