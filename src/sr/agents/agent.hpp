@@ -79,9 +79,9 @@ public:
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
                                             TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
     virtual list<PatternLink> GetChildren() const = 0;
-    virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;
-		
+    virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool IsPreRestrictionMatch( XLink x ) const = 0; // return true if matches
+    virtual bool IsNonTrivialPreRestriction() const = 0;                                
 
 	static Agent *AsAgent( shared_ptr<Node> node );
 	static Agent *TryAsAgent( shared_ptr<Node> node );

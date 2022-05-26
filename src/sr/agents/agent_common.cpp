@@ -186,9 +186,25 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 }
 
 
+bool AgentCommon::IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const
+{
+    // Does not need planning and so is handy for graphs.
+    // Note: we are using typeid on the tree pointer type, not the node type.
+    // So we need an archetype tree pointer.
+    return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
+}                                
+
+
+bool AgentCommon::IsNonTrivialPreRestriction() const
+{
+    // Use our keyer_plink to get pptr - but only after planning!
+    return IsNonTrivialPreRestrictionNP( keyer_plink.GetPatternPtr() );
+}                                
+
+
 SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
-    if( typeid( *keyer_plink.GetPatternPtr() ) != typeid( *GetArchetypeTreePtr() ) )
+    if( IsNonTrivialPreRestriction() )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
 	    return MakeOver<KindOfOperator>(GetArchetypeNode(), keyer_expr);

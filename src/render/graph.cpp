@@ -550,11 +550,18 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                                                 GetRegionGraphId(region, link->child), 
                                                 LINK_DEFAULT );		
             
-            // Detect pre-restrictions
-            if( link->pptr )
+            // Detect pre-restrictions. If link has no pptr, we can't do it. We also 
+            // only want to do it if the child is a special agent. Standard agents already
+            // show their type. 
+            // Note that we'll show prerestriction based on any parent, because we may not
+            // yet know the keyer. Solver only applies prerestriction to keyer plink.
+            if( link->pptr && dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*(link->pptr)) )
             {
-                if( SpecialBase::IsNonTrivialPreRestriction( link->pptr ) )
+                if( link->child->IsNonTrivialPreRestrictionNP( link->pptr ) )
+                {
                     block_ids_show_prerestriction.insert( my_link->child_id );
+                    FTRACE("prerestriction ")(my_link->child_id)("\n");
+                }
             }
             
             // Auto-determination of link trace string

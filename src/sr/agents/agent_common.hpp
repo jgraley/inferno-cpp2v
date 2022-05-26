@@ -29,7 +29,9 @@ public:
     virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
+    bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
+    bool IsNonTrivialPreRestriction() const override;                                
 	virtual SYM::Over<SYM::BooleanExpression> SymbolicPreRestriction() const;
 	
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

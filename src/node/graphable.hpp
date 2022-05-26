@@ -95,6 +95,9 @@ public:
         Block g{false, "", "", "", NODE_SHAPED, nullptr, {}}; 
         return g;
     };
+    
+    // If you don't know about pre-restrictions, you don't have one.
+    virtual bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const { return false; }
 };
 
 #endif
