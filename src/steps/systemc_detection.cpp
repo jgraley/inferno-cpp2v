@@ -309,25 +309,25 @@ RemoveVoidInstances::RemoveVoidInstances()
 }
 
 
-void DetectAllSCTypes::Build( vector< shared_ptr<Transformation> > *sequence )
+void DetectAllSCTypes::Build( vector< shared_ptr<VNTransformation> > *sequence )
 {
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCType( MakePatternPtr<Event>() ) ) );
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCBase( MakePatternPtr<Module>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCBase( MakePatternPtr<Interface>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCDynamic( MakePatternPtr<WaitDynamic>() ) ) );        
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCStatic( MakePatternPtr<WaitStatic>() ) ) );        
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCDelta( MakePatternPtr<WaitDelta>() ) ) );        
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCDynamic( MakePatternPtr<NextTriggerDynamic>() ) ) );        
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCStatic( MakePatternPtr<NextTriggerStatic>() ) ) );        
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCDelta( MakePatternPtr<NextTriggerDelta>() ) ) );        
-    sequence->push_back( shared_ptr<Transformation>( new DetectTerminationFunction( MakePatternPtr<Exit>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectTerminationFunction( MakePatternPtr<Cease>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Thread>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<ClockedThread>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Method>() ) ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCNotifyImmediate ) );    
-    sequence->push_back( shared_ptr<Transformation>( new DetectSCNotifyDelta ) );    
-    sequence->push_back( shared_ptr<Transformation>( new RemoveEmptyModuleConstructors ) );    
-    sequence->push_back( shared_ptr<Transformation>( new RemoveVoidInstances ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCType( MakePatternPtr<Event>() ) ) );
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCBase( MakePatternPtr<Module>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCBase( MakePatternPtr<Interface>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCDynamic( MakePatternPtr<WaitDynamic>() ) ) );        
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCStatic( MakePatternPtr<WaitStatic>() ) ) );        
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCDelta( MakePatternPtr<WaitDelta>() ) ) );        
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCDynamic( MakePatternPtr<NextTriggerDynamic>() ) ) );        
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCStatic( MakePatternPtr<NextTriggerStatic>() ) ) );        
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCDelta( MakePatternPtr<NextTriggerDelta>() ) ) );        
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectTerminationFunction( MakePatternPtr<Exit>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectTerminationFunction( MakePatternPtr<Cease>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCProcess( MakePatternPtr<Thread>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCProcess( MakePatternPtr<ClockedThread>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCProcess( MakePatternPtr<Method>() ) ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCNotifyImmediate ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new DetectSCNotifyDelta ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new RemoveEmptyModuleConstructors ) );    
+    sequence->push_back( shared_ptr<VNTransformation>( new RemoveVoidInstances ) );    
 }
 

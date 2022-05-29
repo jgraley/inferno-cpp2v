@@ -123,7 +123,7 @@ public:
 class DetectAllSCTypes
 {
 public:
-    static void Build( vector< shared_ptr<Transformation> > *sequence );
+    static void Build( vector< shared_ptr<VNTransformation> > *sequence );
 };
 
 };

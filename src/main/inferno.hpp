@@ -7,6 +7,11 @@
 #include <vector>
 #include <functional>
 
+namespace SR
+{
+    class VNTransformation;
+    class VNSequence;
+};
 
 class Inferno
 {
@@ -15,7 +20,7 @@ class Inferno
     public:
         struct Step
         {
-            shared_ptr<Transformation> tx;
+            shared_ptr<SR::VNTransformation> tx;
             int step_index;
             bool allow_trace;
             bool allow_hits;
