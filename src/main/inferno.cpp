@@ -162,13 +162,8 @@ void BuildDocSequence( vector< shared_ptr<VNTransformation> > *sequence )
 void GenerateGraphRegions( Graph &graph, shared_ptr<VNTransformation> t )
 {
 	graph( t.get() );
-	if( ReadArgs::graph_trace )
-    {
-		if( auto vnt = dynamic_pointer_cast<VNTransformation>(t) )
-			vnt->GenerateGraphRegions(graph);
-        else
-            ASSERTFAIL("Don't know how to do a trace-mode graph of this");
-    }
+	if( ReadArgs::graph_trace )    
+        t->GenerateGraphRegions(graph);
 }
    
    
@@ -397,10 +392,7 @@ void Inferno::RunStage( Plan::Stage stage )
                 VNTransformation::SetMaxReps( 100, true );
             if( stage.allow_stop && sp.allow_stop )
                 sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
-            if( auto pvnt = dynamic_pointer_cast<VNTransformation>(sp.tx) )
-                stage.step_function(pvnt, sp);
-            else
-                ASSERTFAIL("Unknown transformation");
+            stage.step_function(sp.tx, sp);
         }        
         break;
     }
