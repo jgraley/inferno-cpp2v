@@ -117,6 +117,7 @@ const map<Progress::Stage, Progress::StageInfoBlock> Progress::stage_info =
    { Progress::PLANNING_ONE,   {"P", STEPPY} },
    { Progress::PLANNING_TWO,   {"Q", STEPPY} },
    { Progress::PLANNING_THREE, {"R", STEPPY} },
+   { Progress::PLANNING_FOUR,  {"S", NON_STEPPY} }, 
    { Progress::PARSING,        {"I", NON_STEPPY} }, 
    { Progress::TRANSFORMING,   {"T", STEPPY} },
    { Progress::RENDERING,      {"O", NON_STEPPY} } };

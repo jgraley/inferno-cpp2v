@@ -444,7 +444,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         // Constraint will require these variables
         set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
         
-        // Uniquify over required_plinks
+        // Uniquify sets of expressions wrt required_plinks
         expressions_condensed[required_plinks].insert( bexpr );
     }
     
@@ -837,9 +837,9 @@ const set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
 }
 
 
-string AndRuleEngine::GetTrace() const
+set< shared_ptr<SYM::BooleanExpression> > AndRuleEngine::GetExpressions() const
 {
-    return GetName() + GetSerialString();
+    return plan.expressions_for_current_solve;
 }
 
 
@@ -854,6 +854,12 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 	for( auto p : plan.my_multiplicity_engines )
 		engines = engines + p.second->GetAndRuleEngines();
 	return engines;
+}
+
+
+string AndRuleEngine::GetTrace() const
+{
+    return GetName() + GetSerialString();
 }
 
 

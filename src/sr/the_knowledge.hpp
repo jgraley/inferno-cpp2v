@@ -7,14 +7,30 @@
 
 #include <unordered_set>
 
-
+namespace SYM
+{
+    class BooleanExpression;
+};
+    
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
 class SimpleCompareQuotientSet;
+class VNTransformation;
     
 class TheKnowledge : public Traceable
 {
+public:
+    explicit TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &expressions = {} );
+    
+private:
+    const struct Plan
+    {
+        Plan( const set< shared_ptr<SYM::BooleanExpression> > &expressions );
+        
+        const set< shared_ptr<SYM::BooleanExpression> > expressions;
+    } plan;
+
 public:
     void Build( PatternLink root_plink, XLink root_xlink );
     void Clear();

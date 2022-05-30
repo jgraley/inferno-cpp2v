@@ -28,6 +28,7 @@ public:
     void PlanningStageOne( int step_index );
     void PlanningStageTwo( int step_index );
     void PlanningStageThree( int step_index );
+    void PlanningStageFour();
     
     static void SetMaxReps( int step_index, int n, bool e );
     void SetStopAfter( int step_index, vector<int> ssa, int d=0 );    

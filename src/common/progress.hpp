@@ -17,6 +17,7 @@ public:
         PLANNING_ONE,
         PLANNING_TWO,
         PLANNING_THREE,
+        PLANNING_FOUR,
         PARSING, 
         TRANSFORMING,
         RENDERING

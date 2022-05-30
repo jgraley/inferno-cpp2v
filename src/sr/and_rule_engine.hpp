@@ -154,10 +154,10 @@ public:
     void ClearSolution();
     const set<Agent *> &GetKeyedAgents() const;
     const set<PatternLink> GetKeyerPatternLinks() const;
-
-public:
-    string GetTrace() const; // used for debug
+    set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEngines() const;
+
+    string GetTrace() const; // used for debug
     virtual string GetGraphId() const;
     void GenerateGraphRegions( Graph &graph, string scr_engine_id ) const;
     void GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const;

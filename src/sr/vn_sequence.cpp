@@ -6,8 +6,7 @@
 using namespace SR;
 
 VNSequence::VNSequence( const vector< shared_ptr<VNTransformation> > &sequence ) :
-    steps( sequence ),
-    knowledge( make_shared<TheKnowledge>() )
+    steps( sequence )
 {
 }                                  
 
@@ -33,6 +32,22 @@ void VNSequence::PlanningStageTwo( int step_index )
 void VNSequence::PlanningStageThree( int step_index )
 {
     steps[step_index]->PlanningStageThree();
+}
+
+
+void VNSequence::PlanningStageFour()
+{
+    // Determine the full set of expressions across all the steps
+    set< shared_ptr<SYM::BooleanExpression> > expressions;
+    for( shared_ptr<VNTransformation> vnt : steps )
+    {
+        const SCREngine *root_scr_engine = vnt->GetTopLevelEngine()->GetRootEngine();
+        set< shared_ptr<SYM::BooleanExpression> > step_exprs = root_scr_engine->GetExpressions();
+        expressions = UnionOfSolo( expressions, step_exprs );
+    }
+    
+    // Give that set to knowledge planning
+    knowledge = make_shared<TheKnowledge>(expressions);
 }
 
 
@@ -82,24 +97,28 @@ string VNSequence::GetStepName( int step_index ) const
 
 const TheKnowledge *VNSequence::GetTheKnowledge()
 {
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");
     return knowledge.get();
 }
 
 
 XLink VNSequence::UniquifyDomainExtension( XLink xlink ) const
 {
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");
     return knowledge->UniquifyDomainExtension( xlink ); 
 }
 
 
 XLink VNSequence::FindDomainExtension( XLink xlink ) const
 {
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");
     return knowledge->FindDomainExtension( xlink ); 
 }
 
 
 void VNSequence::UpdateTheKnowledge( PatternLink root_plink, XLink root_xlink )
 {
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");
     knowledge->Update( root_plink, root_xlink );
 }
 

@@ -15,6 +15,10 @@
 
 #include <set>
 
+namespace SYM
+{
+    class BooleanExpression;
+};
 
 /// SR namespace contains the search and replace implementation
 namespace SR 
@@ -116,6 +120,7 @@ public: // For top level engine/VN trans
                                  const SolutionMap *master_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
+    set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEngines() const;
     list<const SCREngine *> GetSCREngines() const;
     void GenerateGraphRegions( Graph &graph ) const;

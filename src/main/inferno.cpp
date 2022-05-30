@@ -297,7 +297,15 @@ Inferno::Plan::Plan(Inferno *algo_) :
           { 
               algo->vn_sequence->PlanningStageThree(sp.step_index); 
           }, 
-          nullptr }    
+          nullptr },    
+        { Progress::PLANNING_FOUR, 
+          true, false, false, false,
+          "Planning stage four", 
+          nullptr,
+          [this]()
+          { 
+              algo->vn_sequence->PlanningStageFour(); 
+          } }    
     } );         
                 
     // X transformation
@@ -324,22 +332,17 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( ShouldIQuitAfter(stage_pattern_transformation) )
         return;
 
-    stages.push_back( stages_planning[0] );     
-    if( ShouldIQuitAfter(stages_planning[0]) )
-        return;
+    for( Stage &stage : stages_planning )
+    {
+        stages.push_back( stage );
+        // If a pattern trace graph was requested, generate it immediately after last planning stage.
+        if( &stage == &(stages_planning.back()) && generate_pattern_graphs && ReadArgs::graph_trace )
+            stages.push_back( stage_pattern_graphs );     
+        if( ShouldIQuitAfter(stage) )
+            return;
+    }
 
-    stages.push_back( stages_planning[1] );     
-    if( ShouldIQuitAfter(stages_planning[1]) )
-        return;
-    
-    stages.push_back( stages_planning[2] );           
-    // If a pattern trace graph was requested, generate it now. We need the
-    // agents to have been configured (planning stage 2)
-    if( generate_pattern_graphs && ReadArgs::graph_trace )
-        stages.push_back( stage_pattern_graphs );        
-    if( ShouldIQuitAfter(stages_planning[2]) || 
-        ReadArgs::documentation_graphs || 
-        generate_pattern_graphs)
+    if( ReadArgs::documentation_graphs || generate_pattern_graphs )
         return;
 
     if( ReadArgs::infile=="" )

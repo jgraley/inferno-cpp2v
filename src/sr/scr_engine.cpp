@@ -510,6 +510,17 @@ void SCREngine::SetMaxReps( int n, bool e )
 }
 
 
+set< shared_ptr<SYM::BooleanExpression> > SCREngine::GetExpressions() const
+{
+    set< shared_ptr<SYM::BooleanExpression> > expressions;
+    for( const AndRuleEngine *are : GetAndRuleEngines() )
+    {
+        expressions = UnionOfSolo( expressions, are->GetExpressions() );
+    }
+    return expressions;
+}
+
+
 list<const AndRuleEngine *> SCREngine::GetAndRuleEngines() const
 {
 	list<const AndRuleEngine *> engines;

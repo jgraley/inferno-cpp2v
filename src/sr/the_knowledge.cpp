@@ -1,6 +1,7 @@
 #include "the_knowledge.hpp"
 #include "sc_relation.hpp"
 #include "agents/agent.hpp"
+#include "vn_transformation.hpp"
 
 using namespace SR;    
 
@@ -12,6 +13,18 @@ using namespace SR;
 // Global because there are different knowledges owned by different SCR Engines
 unordered_set<XLink> previous_unordered_domain;
 #endif    
+
+
+TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &expressions ) :
+    plan( expressions )
+{
+}
+
+
+TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &expressions_ ) :
+    expressions( expressions_ )
+{
+}
 
 
 void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
