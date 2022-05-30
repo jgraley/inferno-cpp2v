@@ -10,6 +10,7 @@
 #include "and_rule_engine.hpp"
 #include "link.hpp"
 #include "sc_relation.hpp"
+#include "vn_sequence.hpp"
 
 #include <list>
 
@@ -28,19 +29,21 @@ bool SCREngine::rep_error;
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
-SCREngine::SCREngine( const CompareReplace *overall_master,
+SCREngine::SCREngine( VNSequence *vn_sequence,
+                      const CompareReplace *overall_master,
                       CompareReplace::AgentPhases &in_progress_agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
                       const set<PatternLink> &master_plinks,
                       const SCREngine *master ) :
-    plan(this, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
+    plan(this, vn_sequence, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
     depth( 0 )
 {
 }
 
     
 SCREngine::Plan::Plan( SCREngine *algo_,
+                       VNSequence *vn_sequence_,
                        const CompareReplace *overall_master,
                        CompareReplace::AgentPhases &in_progress_agent_phases,
                        TreePtr<Node> cp,
@@ -48,6 +51,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        const set<PatternLink> &master_plinks_,
                        const SCREngine *master ) : // Note: Is planning stage one
     algo( algo_ ),
+    vn_sequence( vn_sequence_ ),
     master_ptr( nullptr ),
     master_plinks( master_plinks_ )
 {
@@ -160,7 +164,8 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
     {
         auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent());
         ASSERT( ae );    
-        my_engines[ae] = make_shared<SCREngine>( overall_master_ptr, 
+        my_engines[ae] = make_shared<SCREngine>( vn_sequence,
+                                                 overall_master_ptr, 
                                                  in_progress_agent_phases,
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
@@ -415,16 +420,22 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // Cannonicalise could change root
     XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
 
+    TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
+
     // Global domain of possible xlink values
-    knowledge.Build( plan.root_plink, root_xlink );
+    knowledge->Build( plan.root_plink, root_xlink );
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
-    // replace does so it can change the root node.
-    plan.and_rule_engine->Compare( root_xlink, master_solution, &knowledge );
+    // replace does so it can change the root node. We cast our knowledge
+    // pointer to const, to emphasise that the AndRuleEngine mustn't mess
+    // with it.
+    plan.and_rule_engine->Compare( root_xlink, 
+                                   master_solution, 
+                                   const_cast<const TheKnowledge *>(knowledge) );
     TRACE("Search got a match\n");
            
-    knowledge.Clear();
+    knowledge->Clear();
 
     *p_root_xnode = Replace(master_solution);
     
@@ -596,14 +607,15 @@ const CompareReplace * SCREngine::GetOverallMaster() const
 XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 {
     ASSERT( xlink );
+    TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
     
     // Don't worry about generated nodes that are already in 
     // the X tree (they had to have been found there after a
     // search). 
-    if( knowledge.unordered_domain.count(xlink) > 0 )
+    if( knowledge->unordered_domain.count(xlink) > 0 )
         return xlink;
         
-    return knowledge.domain_extension_classes->Uniquify( xlink ); 
+    return knowledge->domain_extension_classes->Uniquify( xlink ); 
 }
 
 

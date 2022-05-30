@@ -13,6 +13,7 @@ namespace SR
 {
 
 class CompareReplace;
+class VNSequence;
 
 /**
  * Vida Nova Transformation    
@@ -34,7 +35,7 @@ public:
     static PatternTransformationVector GetAllPatternTrans();
     void PatternTransformations();
 
-    void PlanningStageOne();
+    void PlanningStageOne( VNSequence *vn_sequence );
     void PlanningStageTwo();
     void PlanningStageThree();
     
@@ -57,6 +58,7 @@ public:
 
 private:
     shared_ptr<CompareReplace> top_level_engine;
+    VNSequence *vn_sequence = nullptr;
 };    
     
 }

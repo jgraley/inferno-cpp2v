@@ -5,6 +5,7 @@
 #include "common/hit_count.hpp"
 #include "node/graphable.hpp"
 #include "and_rule_engine.hpp"
+#include "vn_sequence.hpp"
 
 #include <list>
 
@@ -33,7 +34,7 @@ void CompareReplace::Plan::Configure( TreePtr<Node> cp,
 }
 
 
-void CompareReplace::Plan::PlanningStageOne()
+void CompareReplace::Plan::PlanningStageOne(VNSequence *vn_sequence)
 {
     // Two-part init for SCREngine: 
     // First, add extra root nodes, categorise, create subordinate 
@@ -41,7 +42,7 @@ void CompareReplace::Plan::PlanningStageOne()
     // This allows the phases of the agents to be determined correctly
     ASSERT( compare_pattern );
     ASSERT( !is_search );
-    scr_engine = make_shared<SCREngine>(algo, agent_phases, compare_pattern, replace_pattern);
+    scr_engine = make_shared<SCREngine>(vn_sequence, algo, agent_phases, compare_pattern, replace_pattern);
 
     list<const SCREngine *> scrs = scr_engine->GetSCREngines();
 	TRACE("SCR engines for this step: ")(scrs)("\n");
@@ -86,9 +87,9 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 }
 
 
-void CompareReplace::PlanningStageOne()
+void CompareReplace::PlanningStageOne(VNSequence *vn_sequence)
 {
-    plan.PlanningStageOne();
+    plan.PlanningStageOne(vn_sequence);
 }
 
 

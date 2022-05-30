@@ -23,6 +23,7 @@ class Agent;
 class Conjecture;
 class SpecialBase;
 class AndRuleEngine;
+class VNSequence;
 
 class RequiresSubordinateSCREngine : public virtual Graphable
 {
@@ -42,7 +43,8 @@ class SCREngine : public virtual GraphIdable,
                   public SerialNumber
 {      
 public:
-    SCREngine( const CompareReplace *overall_master,
+    SCREngine( VNSequence *vn_sequence,
+               const CompareReplace *overall_master,
                CompareReplace::AgentPhases &in_progress_agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
@@ -61,6 +63,7 @@ private:
     struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
+              VNSequence *vn_sequence,
               const CompareReplace *overall_master,
               CompareReplace::AgentPhases &in_progress_agent_phases,
               TreePtr<Node> cp,
@@ -83,6 +86,7 @@ private:
         string GetTrace() const; // used for debug
         
         SCREngine * const algo;
+        VNSequence *vn_sequence;
         const CompareReplace *overall_master_ptr;
         TreePtr<Node> root_pattern;
         PatternLink root_plink;
@@ -142,7 +146,6 @@ private:
     
     vector<int> stop_after;
     int depth;    
-    TheKnowledge knowledge;    
     
     mutable SolutionMap replace_solution;
     bool keys_available = false;    

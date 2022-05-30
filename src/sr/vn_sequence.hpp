@@ -12,6 +12,7 @@ namespace SR
 {
 
 class VNTransformation;
+class TheKnowledge;
 
 /**
  * Vida Nova Sequence
@@ -39,9 +40,11 @@ public:
     void DoGraph( int step_index, Graph &graph ) const;
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
+    TheKnowledge *GetTheKnowledge();
 
 private:
     vector< shared_ptr<VNTransformation> > steps;
+    shared_ptr<TheKnowledge> knowledge;    
 };    
     
 }

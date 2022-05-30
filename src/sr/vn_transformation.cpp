@@ -4,6 +4,7 @@
 #include "ptrans/combine_patterns.hpp"
 #include "ptrans/search_to_compare.hpp"
 #include "ptrans/split_disjunctions.hpp"
+#include "vn_sequence.hpp"
 
 using namespace SR;
 
@@ -52,11 +53,13 @@ void VNTransformation::PatternTransformations()
 }
 
 
-void VNTransformation::PlanningStageOne()
+void VNTransformation::PlanningStageOne( VNSequence *vn_sequence_ )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( vn_sequence_ );
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    top_level_engine->PlanningStageOne();
+    vn_sequence = vn_sequence_;
+    top_level_engine->PlanningStageOne(vn_sequence);
 }
 
 

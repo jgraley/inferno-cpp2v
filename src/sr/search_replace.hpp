@@ -17,6 +17,7 @@ class Agent;
 class Conjecture;
 class SpecialBase;
 class SCREngine;
+class VNSequence;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
 class CompareReplace : public virtual Graphable,
@@ -37,7 +38,7 @@ private:
               bool is_search );
         void Configure( TreePtr<Node> cp,
                         TreePtr<Node> rp );
-        void PlanningStageOne();
+        void PlanningStageOne(VNSequence *vn_sequence);
         void PlanningStageTwo();
         void PlanningStageThree();
         string GetTrace() const; // used for debug
@@ -54,7 +55,7 @@ private:
 public:
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
-    void PlanningStageOne();
+    void PlanningStageOne(VNSequence *vn_sequence);
     void PlanningStageTwo();
     void PlanningStageThree();
                                 

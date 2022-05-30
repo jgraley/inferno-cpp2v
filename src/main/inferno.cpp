@@ -519,10 +519,7 @@ int main( int argc, char *argv[] )
     Inferno::Stage stage_build_steps( 
         { Progress::BUILDING_STEPS }
     );
-
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
-
-    // Build the sequence of steps
     vector< shared_ptr<SR::VNTransformation> > sequence;
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Building patterns\n"); 
@@ -535,10 +532,10 @@ int main( int argc, char *argv[] )
     if( Inferno::ShouldIQuitAfter(stage_build_steps) )
         return EXIT_SUCCESS;    
 
-    // No, so create VNSequence and Inferno instances and run it
-    // VNSequence contains the algrithms
+    // No, so create VNSequence and Inferno instances and run it:
+    // VNSequence contains the algrithms.
     // Inferno is just a harness that supports various execution 
-    // scenarios based on command line args
+    // scenarios based on command line args.
     auto vn_sequence = make_shared<SR::VNSequence>( sequence );
     Inferno inferno( vn_sequence );
     inferno.Run();

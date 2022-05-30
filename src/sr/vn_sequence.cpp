@@ -1,11 +1,13 @@
 #include "vn_sequence.hpp"
 #include "vn_transformation.hpp"
 #include "render/graph.hpp"
+#include "the_knowledge.hpp"
 
 using namespace SR;
 
 VNSequence::VNSequence( const vector< shared_ptr<VNTransformation> > &sequence ) :
-    steps( sequence )
+    steps( sequence ),
+    knowledge( make_shared<TheKnowledge>() )
 {
 }                                  
 
@@ -18,7 +20,7 @@ void VNSequence::PatternTransformations( int step_index )
 
 void VNSequence::PlanningStageOne( int step_index )
 {
-    steps[step_index]->PlanningStageOne();
+    steps[step_index]->PlanningStageOne(this);
 }
 
 
@@ -75,5 +77,11 @@ void VNSequence::GenerateGraphRegions( int step_index, Graph &graph ) const
 string VNSequence::GetStepName( int step_index ) const
 {
     return steps[step_index]->GetName();
+}
+
+
+TheKnowledge *VNSequence::GetTheKnowledge()
+{
+    return knowledge.get();
 }
 
