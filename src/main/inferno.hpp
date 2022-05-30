@@ -15,33 +15,37 @@ namespace SR
 
 class Inferno
 {
+public:    
+    Inferno( shared_ptr<SR::VNSequence> vn_sequence );
+    
+    struct Step
+    {
+        int step_index;
+        bool allow_trace;
+        bool allow_hits;
+        bool allow_reps;
+        bool allow_stop;
+    };
+
+    struct Stage
+    {
+        Progress::Stage progress_stage;
+        bool allow_trace;
+        bool allow_hits;
+        bool allow_reps;
+        bool allow_stop;
+        string text;
+        function<void(const Step &)> step_function;
+        function<void()> stage_function;
+    };
+
+private:
+    shared_ptr<SR::VNSequence> vn_sequence;
+
     const class Plan
     {
     public:
-        struct Step
-        {
-            shared_ptr<SR::VNTransformation> tx;
-            int step_index;
-            bool allow_trace;
-            bool allow_hits;
-            bool allow_reps;
-            bool allow_stop;
-        };
-
-        struct Stage
-        {
-            Progress::Stage progress_stage;
-            bool allow_trace;
-            bool allow_hits;
-            bool allow_reps;
-            bool allow_stop;
-            string text;
-            function<void(shared_ptr<SR::VNTransformation>, const Plan::Step &)> step_function;
-            function<void()> stage_function;
-        };
-
-        Plan(Inferno *algo_);
-        bool ShouldIQuitAfter(Stage stage);
+        Plan(Inferno *algo_);    
 
         Inferno *algo;
         vector<Step> steps;      
@@ -49,13 +53,14 @@ class Inferno
     } plan;
     
 public:    
-    Inferno();
-
-    void RunStage( Plan::Stage stage );
+    void RunStage( Stage stage );
                          
     void GeneratePatternGraphs();
-    void RunTransformationStep(shared_ptr<SR::VNTransformation> pvnt, const Plan::Step &sp);
+    void GenerateGraphRegions( const Step &sp, Graph &graph );
+    void RunTransformationStep(const Step &sp);
     void Run();
+    
+    static bool ShouldIQuitAfter(Stage stage);
     
 private:
     TreePtr<Node> program;

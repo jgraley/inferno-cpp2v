@@ -1,12 +1,12 @@
 #include "vn_sequence.hpp"
 #include "vn_transformation.hpp"
-
+#include "render/graph.hpp"
 
 using namespace SR;
 
-void VNSequence::Configure( const vector< shared_ptr<VNTransformation> > &sequence )
+VNSequence::VNSequence( const vector< shared_ptr<VNTransformation> > &sequence ) :
+    steps( sequence )
 {
-    steps = sequence;
 }                                  
 
 
@@ -47,30 +47,33 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 
 
 void VNSequence::operator()( int step_index,
-                             TreePtr<Node> context, 
                              TreePtr<Node> *proot )
 {
-    (*steps[step_index])(context, proot);
+    (*steps[step_index])(proot);
 }                                   
                  
-/*
-Graphable::Block VNTransformation::GetGraphBlockInfo() const
+                 
+void VNSequence::ForSteps( function<void(int)> body )
 {
-    ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    return top_level_engine->GetGraphBlockInfo();
-}  
+    for( int i=0; i<steps.size(); i++ )
+        body( i );
+}
+                 
 
-
-string VNSequence::GetGraphId() const
+void VNSequence::DoGraph( int step_index, Graph &graph ) const
 {
-    ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    return top_level_engine->GetGraphId();
-}  
-*/
+    graph( steps[step_index].get() );
+}
+
 
 void VNSequence::GenerateGraphRegions( int step_index, Graph &graph ) const
 {
     steps[step_index]->GenerateGraphRegions(graph);
 }  
+
+
+string VNSequence::GetStepName( int step_index ) const
+{
+    return steps[step_index]->GetName();
+}
+

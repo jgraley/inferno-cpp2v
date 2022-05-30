@@ -7,7 +7,6 @@
 #include "render/graph.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
-#include "sr/search_replace.hpp"
 #include "tree/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
@@ -21,7 +20,9 @@
 #include "steps/to_sc_method.hpp"
 #include "render/doc_graphs.hpp"
 #include "unit_test.hpp"
+#include "sr/search_replace.hpp"
 #include "sr/csp/reference_solver.hpp"
+#include "sr/vn_sequence.hpp"
 
 #include <cstdlib>
 
@@ -159,15 +160,8 @@ void BuildDocSequence( vector< shared_ptr<VNTransformation> > *sequence )
 }
 
 
-void GenerateGraphRegions( Graph &graph, shared_ptr<VNTransformation> t )
-{
-	graph( t.get() );
-	if( ReadArgs::graph_trace )    
-        t->GenerateGraphRegions(graph);
-}
-   
-   
-Inferno::Inferno() :
+Inferno::Inferno( shared_ptr<VNSequence> vn_sequence_ ) :
+    vn_sequence( vn_sequence_ ),
     plan(this)
 {
 }
@@ -177,26 +171,11 @@ Inferno::Plan::Plan(Inferno *algo_) :
     algo( algo_ )
 {
     // ------------------------ Form steps plan -------------------------
-    Stage stage_build_steps( 
-        { Progress::BUILDING_STEPS }
-    );
-
-    Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
-
-    vector< shared_ptr<VNTransformation> > sequence;
-    // Build the sequence of steps
-    if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Building patterns\n"); 
-    if( ReadArgs::documentation_graphs )
-        BuildDocSequence( &sequence );
-    else
-        BuildDefaultSequence( &sequence );
-    if( ShouldIQuitAfter(stage_build_steps) )
-        return;    
-
     // Start a steps plan
-    for( int i=0; i<sequence.size(); i++ )
-        steps.push_back( { sequence[i], i, ReadArgs::trace, ReadArgs::trace_hits, true, false } );        
+    algo->vn_sequence->ForSteps( [&](int i)
+    {
+        steps.push_back( { i, ReadArgs::trace, ReadArgs::trace_hits, true, false } );        
+    } );
     
     // If we're to run only one step, restrict all stepped stages
     if( ReadArgs::runonlyenable )
@@ -228,7 +207,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
           ReadArgs::trace, false, false, false,
           SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
           nullptr, 
-          [this](){ Parse{ ReadArgs::infile }( algo->program, &algo->program ); } }
+          [this]()
+          { 
+              Parse{ ReadArgs::infile }( algo->program, &algo->program ); 
+          } }
     );
     
     // Render output X
@@ -236,7 +218,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
         { Progress::RENDERING, 
           false, ReadArgs::trace_hits, false, false,
           "Rendering output to code", 
-          nullptr, [&](){ Render{ ReadArgs::outfile }( &algo->program ); } }
+          nullptr, [&]()
+          { 
+              Render{ ReadArgs::outfile }( &algo->program ); 
+          } }
     );
 
     // Output a pattern graph
@@ -245,7 +230,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
           false, false, false, false,
           "Rendering pattern graphs",
           nullptr,  
-          [this](){ algo->GeneratePatternGraphs(); } } 
+          [this]()
+          { 
+              algo->GeneratePatternGraphs(); 
+          } } 
     );
     
     // Output an intermediate/output graph
@@ -254,7 +242,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
           false, ReadArgs::trace_hits, false, false,
           "Rendering output to graph", 
           nullptr, 
-          [this](){ Graph( ReadArgs::outfile, ReadArgs::outfile )( &algo->program ); } }
+          [this]()
+          { 
+              Graph( ReadArgs::outfile, ReadArgs::outfile )( &algo->program ); 
+          } }
     );
     
     // Dump the hit counts
@@ -263,7 +254,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
           false, false, false, false,
           "Dumping hit counts", 
           nullptr, 
-          [this](){ HitCount::instance.Dump(); } }
+          [this]()
+          { 
+              HitCount::instance.Dump(); 
+          } }
     );
             
     // Pattern transformations
@@ -271,7 +265,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
         { Progress::PATTERN_TRANS, 
           true, false, false, false,
           "Pattern transforming", 
-          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PatternTransformations(); }, 
+          [this](const Step &sp)
+          { 
+              algo->vn_sequence->PatternTransformations(sp.step_index); 
+          }, 
           nullptr } 
     ); 
 
@@ -280,17 +277,26 @@ Inferno::Plan::Plan(Inferno *algo_) :
         { Progress::PLANNING_ONE, 
           true, false, false, false,
           "Planning stage one", 
-          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageOne(); }, 
+          [this](const Step &sp)
+          { 
+              algo->vn_sequence->PlanningStageOne(sp.step_index); 
+          }, 
           nullptr },
         { Progress::PLANNING_TWO, 
           true, false, false, false,
           "Planning stage two", 
-          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageTwo(); }, 
+          [this](const Step &sp)
+          { 
+              algo->vn_sequence->PlanningStageTwo(sp.step_index); 
+          }, 
           nullptr },
         { Progress::PLANNING_THREE, 
           true, false, false, false,
           "Planning stage three", 
-          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ pvnt->PlanningStageThree(); }, 
+          [this](const Step &sp)
+          { 
+              algo->vn_sequence->PlanningStageThree(sp.step_index); 
+          }, 
           nullptr }    
     } );         
                 
@@ -299,7 +305,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
         { Progress::TRANSFORMING, 
           true, true, true, true,
           "Transforming", 
-          [this](shared_ptr<VNTransformation> pvnt, const Plan::Step &sp){ algo->RunTransformationStep(pvnt, sp); }, 
+          [this](const Step &sp)
+          { 
+              algo->RunTransformationStep(sp); 
+          }, 
           nullptr }
     );
             
@@ -359,14 +368,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
 }
 
 
-bool Inferno::Plan::ShouldIQuitAfter(Stage stage)
-{
-    return ReadArgs::quitafter && 
-           ReadArgs::quitafter_progress.GetStage()==stage.progress_stage;
-}
-
-
-void Inferno::RunStage( Plan::Stage stage )
+void Inferno::RunStage( Stage stage )
 {
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "%s\n", stage.text.c_str());     
@@ -381,18 +383,18 @@ void Inferno::RunStage( Plan::Stage stage )
         break;
     
     case Progress::STEPPY:        
-        for( const Plan::Step &sp : plan.steps )
+        for( const Step &sp : plan.steps )
         {
             Progress(stage.progress_stage, sp.step_index).SetAsCurrent();
             Tracer::Enable( stage.allow_trace && sp.allow_trace ); 
             HitCount::Enable( stage.allow_hits && sp.allow_hits ); 
             if( stage.allow_reps && sp.allow_reps )
-                VNTransformation::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
+                VNSequence::SetMaxReps( sp.step_index, ReadArgs::repetitions, ReadArgs::rep_error );
             else
-                VNTransformation::SetMaxReps( 100, true );
+                VNSequence::SetMaxReps( sp.step_index, 100, true );
             if( stage.allow_stop && sp.allow_stop )
-                sp.tx->SetStopAfter(ReadArgs::quitafter_counts, 0);
-            stage.step_function(sp.tx, sp);
+                vn_sequence->SetStopAfter(sp.step_index, ReadArgs::quitafter_counts, 0);
+            stage.step_function(sp);
         }        
         break;
     }
@@ -404,68 +406,80 @@ void Inferno::GeneratePatternGraphs()
     if( ReadArgs::pattern_graph_name.back()=='/' )
     {
         string dir = ReadArgs::pattern_graph_name;
-        for( const Plan::Step &sp : plan.steps )
+        for( const Step &sp : plan.steps )
         {
             Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
             string ss;
             if( !ReadArgs::documentation_graphs )
                 ss = SSPrintf("%03d-", sp.step_index);
-            string filepath = dir + ss + sp.tx->GetName() + ".dot";                                                       
-            Graph g( filepath, sp.tx->GetName() );
-            GenerateGraphRegions( g, sp.tx );
+            string filepath = dir + ss + vn_sequence->GetStepName(sp.step_index) + ".dot";                                                       
+            Graph g( filepath, vn_sequence->GetStepName(sp.step_index) );
+            GenerateGraphRegions( sp, g );
         }
     }
     else
     {
-        Plan::Step my_sp;
+        Step my_sp;
+        bool found = false;
         if( ReadArgs::pattern_graph_name.empty() )
         {
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
             ASSERT( ReadArgs::pattern_graph_index < plan.steps.size() )("There are only %d steps at present\n", plan.steps.size() );
             my_sp = plan.steps[ReadArgs::pattern_graph_index];
+            found = true;
         }
         else
         {
-            for( const Plan::Step &sp : plan.steps )
+            for( const Step &sp : plan.steps )
             {                    
                 if( ReadArgs::pattern_graph_name.empty() ?
                     sp.step_index == ReadArgs::pattern_graph_index :
-                    sp.tx->GetName() == ReadArgs::pattern_graph_name )
+                    vn_sequence->GetStepName(sp.step_index) == ReadArgs::pattern_graph_name )
                 {
                     my_sp = sp;
+                    found = true;
                     break;
                 }
             }
-            if( !my_sp.tx ) // not found?
+            if( !found ) // not found?
             {
                 fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
-                for( const Plan::Step &sp : plan.steps )
+                for( const Step &sp : plan.steps )
                 {
                     string ss = SSPrintf("%03d-", sp.step_index);
-                    string msg = ss+sp.tx->GetName();
+                    string msg = ss+vn_sequence->GetStepName(sp.step_index);
                     fprintf( stderr, "%szn", msg.c_str() );
                 }
                 ASSERT(false);
             }
         }
         Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();
-        Graph g( ReadArgs::outfile, my_sp.tx->GetName() );
-        GenerateGraphRegions( g, my_sp.tx );
+        Graph g( ReadArgs::outfile, vn_sequence->GetStepName(my_sp.step_index) );
+        GenerateGraphRegions( my_sp, g );
     }       
 }
 
 
-void Inferno::RunTransformationStep(shared_ptr<SR::VNTransformation> pvnt, const Plan::Step &sp)
+void Inferno::GenerateGraphRegions( const Step &sp, Graph &graph )
+{
+	vn_sequence->DoGraph( sp.step_index, graph );
+	if( ReadArgs::graph_trace )    
+        vn_sequence->GenerateGraphRegions(sp.step_index, graph);
+}
+   
+   
+void Inferno::RunTransformationStep(const Step &sp)
 {
     if( !ReadArgs::trace_quiet )
-        fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, sp.tx->GetName().c_str() ); 
-    (*pvnt)( &program );
+        fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str() ); 
+    VNSequence *vp =    vn_sequence.get(); 
+    (*vp)( sp.step_index, &program );
     if( ReadArgs::output_all )
     {
         Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
         r( &program );     
         Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
-                 ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, sp.tx->GetName().c_str()) );
+                 ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
         g( &program );    
     }           
 }
@@ -473,8 +487,15 @@ void Inferno::RunTransformationStep(shared_ptr<SR::VNTransformation> pvnt, const
 
 void Inferno::Run()
 {    
-    for( Plan::Stage stage : plan.stages )    
+    for( Stage stage : plan.stages )    
         RunStage(stage);    
+}
+
+
+bool Inferno::ShouldIQuitAfter(Stage stage)
+{
+    return ReadArgs::quitafter && 
+           ReadArgs::quitafter_progress.GetStage()==stage.progress_stage;
 }
 
 
@@ -494,13 +515,36 @@ int main( int argc, char *argv[] )
         return EXIT_SUCCESS;
     }
     
-    Inferno inferno;
+    // Build a sequence of steps 
+    Inferno::Stage stage_build_steps( 
+        { Progress::BUILDING_STEPS }
+    );
+
+    Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
+
+    // Build the sequence of steps
+    vector< shared_ptr<SR::VNTransformation> > sequence;
+    if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Building patterns\n"); 
+    if( ReadArgs::documentation_graphs )
+        BuildDocSequence( &sequence );
+    else
+        BuildDefaultSequence( &sequence );    
+        
+    // Maybe we want to stop after buolding the steps
+    if( Inferno::ShouldIQuitAfter(stage_build_steps) )
+        return EXIT_SUCCESS;    
+
+    // No, so create VNSequence and Inferno instances and run it
+    // VNSequence contains the algrithms
+    // Inferno is just a harness that supports various execution 
+    // scenarios based on command line args
+    auto vn_sequence = make_shared<SR::VNSequence>( sequence );
+    Inferno inferno( vn_sequence );
     inferno.Run();
     //CSP::ReferenceSolver::DumpGSV();
     return EXIT_SUCCESS;
 }
 
-// TODO Make Filter a functor. 
-// TODO Consider merging Filter into VNTransformation.
 // TODO Consider multi-terminus Stuff and multi-root (StarStuff)
 

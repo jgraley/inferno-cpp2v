@@ -19,7 +19,7 @@ class VNTransformation;
 class VNSequence
 {
 public:    
-    virtual void Configure( const vector< shared_ptr<VNTransformation> > &sequence );
+    VNSequence( const vector< shared_ptr<VNTransformation> > &sequence );
     
     void PatternTransformations( int step_index );
 
@@ -32,12 +32,13 @@ public:
         
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( int step_index,
-                     TreePtr<Node> context, 
                      TreePtr<Node> *proot );
     
-    /*virtual Block GetGraphBlockInfo() const;
-    virtual string GetGraphId() const; */
+    void ForSteps( function<void(int)> body );
+    
+    void DoGraph( int step_index, Graph &graph ) const;
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
+    string GetStepName( int step_index ) const;
 
 private:
     vector< shared_ptr<VNTransformation> > steps;
