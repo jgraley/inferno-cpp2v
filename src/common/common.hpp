@@ -106,6 +106,19 @@ inline S1 DifferenceOfSolo( const S1 &s1, const S2 &s2 )
 }    
 
 
+// Intersect set with complement, any compatible associative 
+// containers, ordered or otherwise.
+template< typename S1, typename S2 >
+inline S1 SymmetricDifferenceOf( const S1 &s1, const S2 &s2 )
+{
+    S1 result( s1.key_comp() );
+    set_symmetric_difference( s1.begin(), s1.end(), s2.begin(), s2.end(),
+                              std::inserter(result, result.begin()),
+                              s1.key_comp() );    
+    return result; 
+}    
+
+
 template< typename T0, typename T1 >
 inline list< pair<typename T0::value_type, typename T1::value_type> > Zip( const T0 &x0, const T1 &x1 )
 {

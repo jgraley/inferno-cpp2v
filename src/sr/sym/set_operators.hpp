@@ -4,8 +4,6 @@
 #include "expression.hpp"
 #include "overloads.hpp"
 
-#include "../the_knowledge.hpp"
-
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 

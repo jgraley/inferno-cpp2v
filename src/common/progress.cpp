@@ -112,7 +112,7 @@ Progress Progress::GetCurrentStage()
 
 
 const map<Progress::Stage, Progress::StageInfoBlock> Progress::stage_info =
- { { Progress::BUILDING_STEPS, {"B", NON_STEPPY} }, // Building could be steppy #385
+ { { Progress::BUILDING_STEPS, {"B", NON_STEPPY} }, 
    { Progress::PATTERN_TRANS,  {"X", STEPPY} },  
    { Progress::PLANNING_ONE,   {"P", STEPPY} },
    { Progress::PLANNING_TWO,   {"Q", STEPPY} },

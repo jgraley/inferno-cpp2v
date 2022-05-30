@@ -8,7 +8,6 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
-#include "the_knowledge.hpp"
 #include "agents/agent.hpp"
 #include "node/graphable.hpp"
 #include "search_replace.hpp"

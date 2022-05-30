@@ -1,6 +1,7 @@
 #include "result.hpp"
 
 #include "common/orderable.hpp"
+#include "the_knowledge.hpp"
 
 using namespace SYM;
 

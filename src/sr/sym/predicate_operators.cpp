@@ -678,6 +678,12 @@ Expression::Precedence KindOfOperator::GetPrecedenceNF() const
     return Precedence::PREFIX;
 }
 
+
+TreePtr<Node> KindOfOperator::GetArchetypeNode() const
+{
+    return archetype_node;
+}
+
 // ------------------------- ChildCollectionSizeOperator --------------------------
 
 ChildCollectionSizeOperator::ChildCollectionSizeOperator( TreePtr<Node> archetype_node_,

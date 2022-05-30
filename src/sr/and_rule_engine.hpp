@@ -32,6 +32,7 @@ class SlaveAgent;
 class Conjecture;
 class SpecialBase;
 class CompareReplace;
+class TheKnowledge;
 
 /// Solve an and-rule matching problem
 class AndRuleEngine : public virtual GraphIdable,

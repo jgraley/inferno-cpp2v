@@ -7,6 +7,8 @@
 
 #include <unordered_set>
 
+class SimpleCompare;
+
 namespace SYM
 {
     class BooleanExpression;
@@ -21,14 +23,21 @@ class VNTransformation;
 class TheKnowledge : public Traceable
 {
 public:
-    explicit TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &expressions = {} );
+    explicit TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
     
 private:
-    const struct Plan
+    const struct Plan : public Traceable
     {
-        Plan( const set< shared_ptr<SYM::BooleanExpression> > &expressions );
+        Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
         
-        const set< shared_ptr<SYM::BooleanExpression> > expressions;
+        int Score(int i, int j);
+        
+        shared_ptr<SimpleCompare> simple_compare;
+        const set< shared_ptr<SYM::BooleanExpression> > clauses;
+        set<TreePtr<Node>, SimpleCompare &> kind_of_architypes_per_sc;
+        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> archetype_to_supercats;
+        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> archetype_to_subcats;
+        vector<TreePtr<Node>> leaf_archetypes;
     } plan;
 
 public:

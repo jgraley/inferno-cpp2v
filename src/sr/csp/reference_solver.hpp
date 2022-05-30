@@ -6,11 +6,15 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
-#include "../the_knowledge.hpp"
 #include "value_selector.hpp"
 
 #include <chrono>
 #include <functional>
+
+namespace SR
+{
+    class TheKnowledge;
+};
 
 namespace CSP
 { 

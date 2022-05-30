@@ -249,7 +249,8 @@ public:
 
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
-    
+    TreePtr<Node> GetArchetypeNode() const;
+
 protected:
     shared_ptr<SymbolExpression> a;
     const TreePtr<Node> archetype_node;

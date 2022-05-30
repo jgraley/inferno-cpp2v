@@ -2,6 +2,9 @@
 #include "sc_relation.hpp"
 #include "agents/agent.hpp"
 #include "vn_transformation.hpp"
+#include "sym/expression.hpp"
+#include "sym/predicate_operators.hpp"
+#include "../helpers/simple_compare.hpp"
 
 using namespace SR;    
 
@@ -15,15 +18,121 @@ unordered_set<XLink> previous_unordered_domain;
 #endif    
 
 
-TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &expressions ) :
-    plan( expressions )
+TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
+    plan( clauses )
 {
 }
 
 
-TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &expressions_ ) :
-    expressions( expressions_ )
+TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses_ ) :
+    simple_compare( make_shared<SimpleCompare>() ),
+    clauses( clauses_ ),
+    kind_of_architypes_per_sc( *simple_compare )
 {
+    // Warning: there are a few places that declare an empty knowledge
+    if( clauses.empty() )
+        return;
+    
+    // Extract all the archetypes from the KindOfOperator nodes into a set.
+    set<TreePtr<Node>, SimpleCompare &> kind_of_architypes_per_sc( *simple_compare );
+    for( shared_ptr<SYM::BooleanExpression> clause : clauses )
+    {
+        clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
+        {
+            if( auto ko_expr = dynamic_cast<const SYM::KindOfOperator *>(expr) )
+                kind_of_architypes_per_sc.insert( ko_expr->GetArchetypeNode() );
+        } );
+    }
+    
+    // Find the set of strict super-categories for each architype    
+    for( TreePtr<Node> arch : kind_of_architypes_per_sc )
+    {
+        archetype_to_supercats.emplace( std::piecewise_construct,
+                                        std::forward_as_tuple(arch),
+                                        std::forward_as_tuple(*simple_compare) );
+        archetype_to_subcats.emplace( std::piecewise_construct,
+                                      std::forward_as_tuple(arch),
+                                      std::forward_as_tuple(*simple_compare) );
+        for( TreePtr<Node> candidate : kind_of_architypes_per_sc )
+        {
+            bool weak_super = candidate->IsLocalMatch( arch.get() );
+            bool weak_sub = arch->IsLocalMatch( candidate.get() );
+            if( weak_super && !weak_sub )
+                archetype_to_supercats.at(arch).insert(candidate);
+            if( weak_sub && !weak_super )
+                archetype_to_subcats.at(arch).insert(candidate);
+        }
+    }
+    //FTRACE(archetype_to_subcats)("\n");
+
+    // Put leaf architypes into a vector. NOTE: leaf means as far as we know,
+    // but these may not be final/leaf wrt the whole tree spec.    
+    for( auto p : archetype_to_subcats )
+    {
+        if( p.second.empty() ) // no subcategories
+            leaf_archetypes.push_back( p.first );
+    }
+    
+    int n = leaf_archetypes.size();
+    bool swapped;
+    do
+    {
+        swapped = false;
+        for( int i=0; i<n; i++ )
+        {
+            for( int j=n-1; j>=0; j-- )
+            {
+                // If i and j are one apart, a swap treads on neighbours 
+                if( i==j )
+                    continue; 
+                int curr_score = 0, swap_score = 0;
+                if( j != i+1 ) // so i != j-1
+                {
+                    curr_score += Score(i, i+1) + Score(j, j-1);
+                    swap_score += Score(i, j-1) + Score(j, i+1);
+                }
+                if( i != j+1 ) // so j != i-1
+                {
+                    curr_score += Score(i, i-1) + Score(j, j+1);
+                    swap_score += Score(i, j+1) + Score(j, i-1);
+                }
+                if( swap_score < curr_score )
+                {
+                    FTRACE("Swap i=%d j=%d\n", i, j);
+                    leaf_archetypes.at(i).swap( leaf_archetypes.at(j) );
+                    swapped = true;
+                }
+            }
+        }
+    } while( swapped );
+    
+    // Shows ordering and supercats together 
+    vector< tuple<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>, int >> for_trace;
+    for( int i=0; i<n; i++ )
+    {
+        auto arch = leaf_archetypes.at(i);
+        for_trace.push_back( make_tuple( arch, archetype_to_supercats.at(arch), Score(i, i+1) ) );
+    }
+    FTRACE(for_trace)("\n");
+}
+
+
+int TheKnowledge::Plan::Score(int p, int q)
+{
+    ASSERT( p != q ); // p is candidate to swap and q is neighbour. Swapping p must not change q.
+    int n = leaf_archetypes.size();
+    p = (p+n) % n;
+    q = (q+n) % n;
+    const TreePtr<Node> &pa = leaf_archetypes.at(p);
+    const TreePtr<Node> &qa = leaf_archetypes.at(q);
+    const set<TreePtr<Node>, SimpleCompare&> &psuper = archetype_to_supercats.at(pa);
+    const set<TreePtr<Node>, SimpleCompare&> &qsuper = archetype_to_supercats.at(qa);
+    set<TreePtr<Node>, SimpleCompare&> diff = SymmetricDifferenceOf( psuper, qsuper );
+    int score = 0;
+    for( TreePtr<Node> t : diff )
+        score += archetype_to_subcats.at(t).size(); // weight for bigness of the categories in the diff
+    //FTRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" score=%d\n", score);
+    return score;
 }
 
 

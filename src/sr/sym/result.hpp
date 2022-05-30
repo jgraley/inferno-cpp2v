@@ -3,7 +3,6 @@
 
 #include "common/common.hpp"
 #include "../link.hpp"
-#include "../the_knowledge.hpp"
 
 #if 1
 #define unique_ptr unique_ptr
@@ -16,7 +15,7 @@
 namespace SR
 {
     class TheKnowledge;
-}
+};
 
 namespace SYM
 { 
