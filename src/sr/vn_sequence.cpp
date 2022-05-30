@@ -80,7 +80,7 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-TheKnowledge *VNSequence::GetTheKnowledge()
+const TheKnowledge *VNSequence::GetTheKnowledge()
 {
     return knowledge.get();
 }

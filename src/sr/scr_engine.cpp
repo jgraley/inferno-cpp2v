@@ -420,7 +420,6 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // Cannonicalise could change root
     XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
 
-    TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
 
     // Global domain of possible xlink values
     plan.vn_sequence->UpdateTheKnowledge( plan.root_plink, root_xlink );
@@ -430,9 +429,10 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // replace does so it can change the root node. We cast our knowledge
     // pointer to const, to emphasise that the AndRuleEngine mustn't mess
     // with it.
+    const TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
     plan.and_rule_engine->Compare( root_xlink, 
                                    master_solution, 
-                                   const_cast<const TheKnowledge *>(knowledge) );
+                                   knowledge );
     TRACE("Search got a match\n");
            
     *p_root_xnode = Replace(master_solution);
