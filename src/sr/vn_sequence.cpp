@@ -85,3 +85,21 @@ TheKnowledge *VNSequence::GetTheKnowledge()
     return knowledge.get();
 }
 
+
+XLink VNSequence::UniquifyDomainExtension( XLink xlink ) const
+{
+    return knowledge->UniquifyDomainExtension( xlink ); 
+}
+
+
+XLink VNSequence::FindDomainExtension( XLink xlink ) const
+{
+    return knowledge->FindDomainExtension( xlink ); 
+}
+
+
+void VNSequence::UpdateTheKnowledge( PatternLink root_plink, XLink root_xlink )
+{
+    knowledge->Update( root_plink, root_xlink );
+}
+

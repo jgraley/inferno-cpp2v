@@ -30,7 +30,66 @@ void TheKnowledge::Clear()
         domain_extension_classes->Clear();
 }
 
+
+void TheKnowledge::Update( PatternLink root_plink, XLink root_xlink )
+{
+    Clear();
+    Build( root_plink, root_xlink );
+}
+
     
+XLink TheKnowledge::UniquifyDomainExtension( XLink xlink )
+{
+    ASSERT( xlink );
+  
+    // Don't worry about generated nodes that are already in 
+    // the X tree (they had to have been found there after a
+    // search). 
+    if( unordered_domain.count(xlink) > 0 )
+        return xlink;
+        
+    return domain_extension_classes->Uniquify( xlink ); 
+}
+
+
+XLink TheKnowledge::FindDomainExtension( XLink xlink ) const
+{
+    ASSERT( xlink );
+    
+    // Don't worry about generated nodes that are already in 
+    // the X tree (they had to have been found there after a
+    // search). 
+    if( unordered_domain.count(xlink) > 0 )
+        return xlink;
+        
+    return domain_extension_classes->Find( xlink ); 
+}
+
+
+const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
+{
+    ASSERT( xlink );
+    ASSERT( HasNugget(xlink) )
+          ("Knowledge: no nugget for ")(xlink)("\n");
+    //      ("Nuggets: ")(nuggets);
+    return nuggets.at(xlink);
+}
+
+
+bool TheKnowledge::HasNugget(XLink xlink) const
+{
+    ASSERT( xlink );
+    return nuggets.count(xlink) > 0;
+}
+
+
+bool TheKnowledge::HasNuggetOrIsSubcontainer(XLink xlink) const
+{
+    ASSERT( xlink );
+    return TreePtr<SubContainer>::DynamicCast(xlink.GetChildX()) || nuggets.count(xlink) > 0;
+}
+
+
 void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
 {      
     // Both should be cleared together
@@ -272,27 +331,4 @@ string TheKnowledge::Nugget::GetTrace() const
     return s;
 }
 
-
-const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
-{
-    ASSERT( xlink );
-    ASSERT( HasNugget(xlink) )
-          ("Knowledge: no nugget for ")(xlink)("\n");
-    //      ("Nuggets: ")(nuggets);
-    return nuggets.at(xlink);
-}
-
-
-bool TheKnowledge::HasNugget(XLink xlink) const
-{
-    ASSERT( xlink );
-    return nuggets.count(xlink) > 0;
-}
-
-
-bool TheKnowledge::HasNuggetOrIsSubcontainer(XLink xlink) const
-{
-    ASSERT( xlink );
-    return TreePtr<SubContainer>::DynamicCast(xlink.GetChildX()) || nuggets.count(xlink) > 0;
-}
 

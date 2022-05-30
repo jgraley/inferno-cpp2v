@@ -4,6 +4,7 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "node/tree_ptr.hpp"
+#include "link.hpp"
 
 class Graph;
 
@@ -40,7 +41,11 @@ public:
     void DoGraph( int step_index, Graph &graph ) const;
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
+
     TheKnowledge *GetTheKnowledge();
+    XLink UniquifyDomainExtension( XLink xlink ) const;
+    XLink FindDomainExtension( XLink xlink ) const;
+    void UpdateTheKnowledge( PatternLink root_plink, XLink root_xlink );
 
 private:
     vector< shared_ptr<VNTransformation> > steps;

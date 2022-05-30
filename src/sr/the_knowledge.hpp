@@ -18,6 +18,15 @@ class TheKnowledge : public Traceable
 public:
     void Build( PatternLink root_plink, XLink root_xlink );
     void Clear();
+    void Update( PatternLink root_plink, XLink root_xlink );
+    
+    // Add xlink to domain extension if not already there, and return the cannonical one.
+    XLink UniquifyDomainExtension( XLink xlink );
+
+    // Get the cannonical xlink for the given one.
+    XLink FindDomainExtension( XLink xlink ) const;
+
+    
     enum SubtreeMode
     {
         // Behaviour for main domain population: we will check uniqueness

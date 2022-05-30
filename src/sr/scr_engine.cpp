@@ -423,7 +423,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
 
     // Global domain of possible xlink values
-    knowledge->Build( plan.root_plink, root_xlink );
+    plan.vn_sequence->UpdateTheKnowledge( plan.root_plink, root_xlink );
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
@@ -435,8 +435,6 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
                                    const_cast<const TheKnowledge *>(knowledge) );
     TRACE("Search got a match\n");
            
-    knowledge->Clear();
-
     *p_root_xnode = Replace(master_solution);
     
     // Clear out anything cached in agents now that replace is done
@@ -606,31 +604,13 @@ const CompareReplace * SCREngine::GetOverallMaster() const
 
 XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 {
-    ASSERT( xlink );
-    TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
-    
-    // Don't worry about generated nodes that are already in 
-    // the X tree (they had to have been found there after a
-    // search). 
-    if( knowledge->unordered_domain.count(xlink) > 0 )
-        return xlink;
-        
-    return knowledge->domain_extension_classes->Uniquify( xlink ); 
+    return plan.vn_sequence->UniquifyDomainExtension( xlink ); 
 }
 
 
 XLink SCREngine::FindDomainExtension( XLink xlink ) const
 {
-    ASSERT( xlink );
-    TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
-    
-    // Don't worry about generated nodes that are already in 
-    // the X tree (they had to have been found there after a
-    // search). 
-    if( knowledge->unordered_domain.count(xlink) > 0 )
-        return xlink;
-        
-    return knowledge->domain_extension_classes->Find( xlink ); 
+    return plan.vn_sequence->FindDomainExtension( xlink ); 
 }
 
 
