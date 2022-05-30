@@ -14,7 +14,7 @@ namespace SR
 class TeleportAgent : public PreRestrictedAgent
 {
 public:    
-    virtual LocatedLink TeleportUniqueAndCache( XLink keyer_xlink ) const;                  
+    virtual LocatedLink TeleportUniqueAndCache( XLink keyer_xlink, bool expect_in_domain ) const;                  
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }

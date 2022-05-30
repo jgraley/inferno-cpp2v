@@ -190,6 +190,14 @@ XLink SimpleCompareQuotientSet::Uniquify( XLink xlink )
 }
 
 
+XLink SimpleCompareQuotientSet::Find( XLink xlink ) const
+{
+    Classes::iterator it = classes.find( xlink );
+    ASSERT( it != classes.end() )("No quotient set found for ")(xlink)("\nin")(classes)("\n");
+    return *it;
+}
+
+
 void SimpleCompareQuotientSet::Clear()
 {
     classes.clear();

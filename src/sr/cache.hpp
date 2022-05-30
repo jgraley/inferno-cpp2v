@@ -35,10 +35,21 @@ public:
      */
     Value operator()( Key key, CannonicalOperation op );
         
+    /**
+     * Extract a line from the cache on the basis that it's already there.
+     */
+    Value at( Key key ) const;
+    
+    /**
+     * Gain read/write reference access to a line, creating if not already there.
+     */
+    Value &operator[]( Key key );
+
+
     void Reset();    
     
 public:
-    map< Key, Value > cache;
+    map< Key, Value > lines;
 };
 
 };

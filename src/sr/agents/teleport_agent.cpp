@@ -18,7 +18,7 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-LocatedLink TeleportAgent::TeleportUniqueAndCache( XLink keyer_xlink ) const
+LocatedLink TeleportAgent::TeleportUniqueAndCache( XLink keyer_xlink, bool expect_in_domain ) const
 {
     auto op = [&](XLink keyer_xlink) -> LocatedLink
     {
@@ -27,7 +27,13 @@ LocatedLink TeleportAgent::TeleportUniqueAndCache( XLink keyer_xlink ) const
             return tp_link;
         
         // We will uniquify the link against the domain and then cache it against keyer_xlink
-        LocatedLink ude_link( (PatternLink)tp_link, master_scr_engine->UniquifyDomainExtension(tp_link) ); 
+        XLink domain_xlink;
+        if( expect_in_domain )
+            domain_xlink = master_scr_engine->FindDomainExtension(tp_link);
+        else
+            domain_xlink = master_scr_engine->UniquifyDomainExtension(tp_link);
+        
+        LocatedLink ude_link( (PatternLink)tp_link, domain_xlink ); 
                    
         return ude_link;
     };
@@ -60,7 +66,7 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &keyer_
 
         try
         {
-            LocatedLink cached_link = TeleportUniqueAndCache( keyer_xlink );
+            LocatedLink cached_link = TeleportUniqueAndCache( keyer_xlink, false );
             if( cached_link )
                 extra_xlinks.insert( (XLink)cached_link );
         }
@@ -99,7 +105,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     if( !keyer_result->IsDefinedAndUnique() )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
-    LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink );        
+    LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink, true );        
     if( (XLink)cached_link )
         return make_unique<SymbolResult>( (XLink)cached_link );
     else 

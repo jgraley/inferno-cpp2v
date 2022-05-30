@@ -6,17 +6,30 @@ using namespace SR;
     
 CacheByLocation::Value CacheByLocation::operator()( Key key, CannonicalOperation op )
 {  
-    if( cache.count( key ) )
-        return cache.at( key );
+    if( lines.count( key ) )
+        return lines.at( key );
         
     Value x = op( key ); // note: could throw TODO cache the exception object!
     
-    cache[key] = x;
+    lines[key] = x;
     return x;
+}
+
+
+CacheByLocation::Value CacheByLocation::at( Key key ) const
+{
+    ASSERT( lines.count(key) > 0 );
+    return lines.at(key);
+}
+
+
+CacheByLocation::Value &CacheByLocation::operator[]( Key key )
+{
+    return lines[key];
 }
 
 
 void CacheByLocation::Reset()
 {
-    cache.clear();
+    lines.clear();
 }

@@ -619,6 +619,21 @@ XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 }
 
 
+XLink SCREngine::FindDomainExtension( XLink xlink ) const
+{
+    ASSERT( xlink );
+    TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
+    
+    // Don't worry about generated nodes that are already in 
+    // the X tree (they had to have been found there after a
+    // search). 
+    if( knowledge->unordered_domain.count(xlink) > 0 )
+        return xlink;
+        
+    return knowledge->domain_extension_classes->Find( xlink ); 
+}
+
+
 string SCREngine::GetTrace() const
 {
     string s = Traceable::GetName() + GetSerialString();

@@ -35,7 +35,8 @@ private:
 class SimpleCompareQuotientSet
 {
 public:
-    XLink Uniquify( XLink x );
+    XLink Uniquify( XLink xlink );
+    XLink Find( XLink xlink ) const;
     void Clear();
     
 private:    

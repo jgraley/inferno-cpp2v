@@ -133,6 +133,7 @@ public: // For agents
     bool IsKeyed( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
     XLink UniquifyDomainExtension( XLink xlink ) const;
+    XLink FindDomainExtension( XLink xlink ) const;
     
     friend class Conjecture; 
 
