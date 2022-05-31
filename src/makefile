@@ -50,54 +50,54 @@ build/inferno.a : $(ALL_MODULES:%=build/%.o)
 
 $(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(NODE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(HELPERS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
 $(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_PTRANS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_CSP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_AGENTS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_SYM_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
 $(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(SRC_OPTIONS) $< -o $@
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
  
