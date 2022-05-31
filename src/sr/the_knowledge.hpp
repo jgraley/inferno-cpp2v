@@ -30,16 +30,16 @@ private:
     {
         Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
         
-        int Score(int i, int j);
+        int GetMetric(int i, int j);
         
         shared_ptr<SimpleCompare> simple_compare;
         const set< shared_ptr<SYM::BooleanExpression> > clauses;
-        set<TreePtr<Node>, SimpleCompare &> kind_of_architypes_per_sc;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> archetype_to_strict_supercats;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> archetype_to_nonstrict_supercats;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> archetype_to_strict_subcats;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> archetype_to_nonstrict_subcats;
-        vector<TreePtr<Node>> leaf_archetypes;
+        set<TreePtr<Node>, SimpleCompare &> categories;
+        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_nonstrict_supercats;
+        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_nonstrict_subcats;
+        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_strict_supercats;
+        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_strict_subcats;
+        vector<TreePtr<Node>> cats_in_lacing_order;
     } plan;
 
 public:

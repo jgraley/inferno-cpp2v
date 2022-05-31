@@ -299,7 +299,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           }, 
           nullptr },    
         { Progress::PLANNING_FOUR, 
-          true, false, false, false,
+          ReadArgs::trace, false, false, false,
           "Planning stage four", 
           nullptr,
           [this]()

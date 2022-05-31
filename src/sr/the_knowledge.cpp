@@ -27,13 +27,15 @@ TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &cla
 TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses_ ) :
     simple_compare( make_shared<SimpleCompare>() ),
     clauses( clauses_ ),
-    kind_of_architypes_per_sc( *simple_compare )
+    categories( *simple_compare )
 {
     // Warning: there are a few places that declare an empty knowledge
     if( clauses.empty() )
         return;
     
-    // Extract all the archetypes from the KindOfOperator nodes into a set.
+    // Extract all the non-final archetypes from the KindOfOperator nodes 
+    // into a set so that they are uniqued by SimpleCompare equality. These
+    // are the categories.
     for( shared_ptr<SYM::BooleanExpression> clause : clauses )
     {
         clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
@@ -42,141 +44,152 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
             { 
                 TreePtr<Node> arch = ko_expr->GetArchetypeNode();
                 if( !arch->IsFinal() )
-                    kind_of_architypes_per_sc.insert( arch );
+                    categories.insert( arch );
             }
         } );
     }
     
-    // Find the set of strict super-categories for each architype    
-    for( TreePtr<Node> arch : kind_of_architypes_per_sc )
+    // Find the set of strict/non-strict super/sub-categories for each category.
+    for( TreePtr<Node> arch : categories )
     {
-        archetype_to_nonstrict_supercats.emplace( std::piecewise_construct,
+        cats_to_nonstrict_supercats.emplace( std::piecewise_construct,
                                         std::forward_as_tuple(arch),
                                         std::forward_as_tuple(*simple_compare) );
-        archetype_to_nonstrict_subcats.emplace( std::piecewise_construct,
+        cats_to_nonstrict_subcats.emplace( std::piecewise_construct,
                                       std::forward_as_tuple(arch),
                                       std::forward_as_tuple(*simple_compare) );
-        archetype_to_strict_supercats.emplace( std::piecewise_construct,
+        cats_to_strict_supercats.emplace( std::piecewise_construct,
                                         std::forward_as_tuple(arch),
                                         std::forward_as_tuple(*simple_compare) );
-        archetype_to_strict_subcats.emplace( std::piecewise_construct,
+        cats_to_strict_subcats.emplace( std::piecewise_construct,
                                       std::forward_as_tuple(arch),
                                       std::forward_as_tuple(*simple_compare) );
-        for( TreePtr<Node> candidate : kind_of_architypes_per_sc )
+        for( TreePtr<Node> candidate : categories )
         {
             bool weak_super = candidate->IsLocalMatch( arch.get() );
             bool weak_sub = arch->IsLocalMatch( candidate.get() );
             if( weak_super )
-                archetype_to_nonstrict_supercats.at(arch).insert(candidate);
+                cats_to_nonstrict_supercats.at(arch).insert(candidate);
             if( weak_sub )
-                archetype_to_nonstrict_subcats.at(arch).insert(candidate);
+                cats_to_nonstrict_subcats.at(arch).insert(candidate);
             if( weak_super && !weak_sub )
-                archetype_to_strict_supercats.at(arch).insert(candidate);
+                cats_to_strict_supercats.at(arch).insert(candidate);
             if( weak_sub && !weak_super )
-                archetype_to_strict_subcats.at(arch).insert(candidate);
+                cats_to_strict_subcats.at(arch).insert(candidate);
         }
     }
-    //FTRACE(archetype_to_strict_subcats)("\n");
 
     // Put architypes into a vector.
-    for( TreePtr<Node> arch : kind_of_architypes_per_sc )
+    for( TreePtr<Node> arch : categories )
     {
-        leaf_archetypes.push_back( arch );
+        cats_in_lacing_order.push_back( arch );
     }
     
-    int n = leaf_archetypes.size();
+    // Determine lacing ordering, non-cyclic, weighted by number of 
+    // strict subcategories. We will apply swaps of contiguous blocks of 
+    // architypes for as long as we can reduce total distance metric on lace.
+    int n = cats_in_lacing_order.size();
     int count_outer = 0;
     bool swapped;
     do
     {
         swapped = false;
-        for( int bs=n/2; bs>=1; bs-- )
+        for( int bs=n/2; bs>=1; bs-- ) // Block sizes
         {
-            for( int i=0; i<n; i++ )
+            for( int i=0; i+bs<=n; i++ )
             {
-                for( int j=max(0, i+bs-n); j+bs<=i; j++ )
+                for( int j=0; j+bs<=i; j++ )
                 {
-                    int diff = (i-j+n) % n;
-                    ASSERT( diff >= bs );
-                    ASSERT( diff <= n-bs );
-                    int curr_score = 0, swap_score = 0;
+                    ASSERT( i-j >= bs );
+                    int curr_metric = 0, metric_if_swapped = 0;
                     
-                    // If blocks touch, a swap could tread on neighbours 
-                    if( diff != n-bs ) 
+                    // If blocks touch, swaps will change neigbours and
+                    // a different formula is required. 
+                    if( i-j != n-bs ) 
                     {
-                        curr_score += Score(i+bs-1, i+bs) + Score(j, j-1);
-                        swap_score += Score(i, j-1) + Score(j+bs-1, i+bs);
+                        curr_metric += GetMetric(i+bs-1, i+bs) + GetMetric(j, j-1);
+                        metric_if_swapped += GetMetric(i, j-1) + GetMetric(j+bs-1, i+bs);
                     }
                     else
                     {
-                        curr_score += Score(i+bs-1, j);
-                        swap_score += Score(j+bs-1, i);
+                        curr_metric += 0;
+                        metric_if_swapped += 0;
                     }
                     
-                    if( diff != bs ) 
+                    if( i-j != bs ) 
                     {
-                        curr_score += Score(i, i-1) + Score(j+bs-1, j+bs);
-                        swap_score += Score(i+bs-1, j+bs) + Score(j, i-1);
+                        curr_metric += GetMetric(i, i-1) + GetMetric(j+bs-1, j+bs);
+                        metric_if_swapped += GetMetric(i+bs-1, j+bs) + GetMetric(j, i-1);
                     }
                     else
                     {
-                        curr_score += Score(j+bs-1, i);
-                        swap_score += Score(i+bs-1, j);
+                        curr_metric += GetMetric(j+bs-1, i);
+                        metric_if_swapped += GetMetric(i+bs-1, j);
                     }
                     
-                    if( swap_score < curr_score )
+                    if( metric_if_swapped < curr_metric )
                     {
-                        int exp = curr_score-swap_score;
+                        int expected_reduction = curr_metric - metric_if_swapped;
                         int tot=0;
-                        vector<int> old_scores;
+                        vector<int> old_metrics;
                         for( int k=0; k<n; k++ )               
                         {         
-                            old_scores.push_back(Score(k, k+1));                        
-                            tot += Score(k, k+1);
+                            old_metrics.push_back(GetMetric(k, k+1));                        
+                            tot += GetMetric(k, k+1);
                         }
                         
                         for( int k=0; k<bs; k++ )
-                            leaf_archetypes.at((i+k)%n).swap( leaf_archetypes.at((j+k)%n) );
+                            cats_in_lacing_order.at((i+k)%n).swap( cats_in_lacing_order.at((j+k)%n) );
                         
                         for( int k=0; k<n; k++ )                        
-                            tot -= Score(k, k+1);                        
-                        TRACEC("Swap i=%d j=%d bs=%d expecting %d got %d\n", i, j, bs, exp, tot);
-                        ASSERT( exp==tot );
+                            tot -= GetMetric(k, k+1);                        
+                        TRACEC("Swap i=%d j=%d bs=%d expecting %d (%d-%d) got %d\n", i, j, bs, expected_reduction, curr_metric, metric_if_swapped, tot);
+                        if( expected_reduction != tot )
+                        {
+                            for( int k=0; k<n; k++ )
+                                TRACEC("%d: %d -> %d\n", k, old_metrics[k], GetMetric(k, k+1) );
+                        }
+                        ASSERT( expected_reduction==tot );
                         swapped = true;
                     }
                 }
             }
         }
         count_outer++;        
-    } while( swapped );
+    } while( swapped );    
     TRACE("count_outer=%d\n", count_outer);
+    
     // Shows ordering and supercats together 
-    vector< tuple<int, TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &> >> for_trace;
-    for( int i=0; i<n; i++ )
+    if( Tracer::IsEnabled() )
     {
-        auto arch = leaf_archetypes.at(i);
-        for_trace.push_back( make_tuple( Score(i, i+1), arch, archetype_to_strict_supercats.at(arch) ) );
+        vector< tuple<int, TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &> >> for_trace;
+        for( int i=0; i<n; i++ )
+        {
+            auto arch = cats_in_lacing_order.at(i);
+            for_trace.push_back( make_tuple( GetMetric(i, i+1), arch, cats_to_strict_supercats.at(arch) ) );
+        }
+        TRACE(for_trace)("\n");
     }
-    TRACE(for_trace)("\n");
 }
 
 
-int TheKnowledge::Plan::Score(int p, int q)
+int TheKnowledge::Plan::GetMetric(int p, int q)
 {
-    int n = leaf_archetypes.size();
-    p = (p+n) % n;
-    q = (q+n) % n;
+    int n = cats_in_lacing_order.size();
+    // Non-cyclic, so if we go off the end the score is zero
+    if( p<0 || p>=n || q<0 || q>=n )
+        return 0;
     ASSERT( p != q ); // p is candidate to swap and q is neighbour. Swapping p must not change q.
-    const TreePtr<Node> &pa = leaf_archetypes.at(p);
-    const TreePtr<Node> &qa = leaf_archetypes.at(q);
-    const set<TreePtr<Node>, SimpleCompare&> &psuper = archetype_to_nonstrict_supercats.at(pa);
-    const set<TreePtr<Node>, SimpleCompare&> &qsuper = archetype_to_nonstrict_supercats.at(qa);
-    set<TreePtr<Node>, SimpleCompare&> diff = SymmetricDifferenceOf( psuper, qsuper );
-    int score = 0;
+    const TreePtr<Node> &pa = cats_in_lacing_order.at(p);
+    const TreePtr<Node> &qa = cats_in_lacing_order.at(q);
+    const set<TreePtr<Node>, SimpleCompare&> &psupers = cats_to_nonstrict_supercats.at(pa);
+    const set<TreePtr<Node>, SimpleCompare&> &qsupers = cats_to_nonstrict_supercats.at(qa);
+    set<TreePtr<Node>, SimpleCompare&> diff = SymmetricDifferenceOf( psupers, qsupers );
+    int metric = 0;
     for( TreePtr<Node> t : diff )
-        score += archetype_to_strict_subcats.at(t).size(); // weight for bigness of the categories in the diff
-    //FTRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" score=%d\n", score);
-    return score;
+        metric += cats_to_strict_subcats.at(t).size(); // weight for bigness of the categories in the diff
+    //TRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" metric=%d\n", metric);
+    return metric;
 }
 
 
