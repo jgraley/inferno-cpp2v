@@ -17,7 +17,8 @@ public:
     typedef multiset<TreePtr<Node>, SimpleCompare &> Ordering;
 
     SimpleCompare( Orderable::OrderProperty order_property = Orderable::STRICT );
-    
+    SimpleCompare &operator=(const SimpleCompare &other);
+        
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
     virtual Orderable::Result Compare( TreePtr<Node> x, TreePtr<Node> y );
     
@@ -34,7 +35,7 @@ public:
     Ordering GetOrdering( ContainerInterface &c );
 
 private:
-    const Orderable::OrderProperty order_property;
+    Orderable::OrderProperty order_property;
 };
 
 #endif

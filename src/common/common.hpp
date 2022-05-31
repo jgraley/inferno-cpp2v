@@ -49,9 +49,10 @@ inline void InsertSolo( S &s, const typename S::value_type &p )
 template< typename S1, typename S2 >
 inline S1 UnionOf( const S1 &s1, const S2 &s2 )
 {
-    S1 result;
+    S1 result( s1.key_comp() );
     set_union( s1.begin(), s1.end(), s2.begin(), s2.end(),
-               std::inserter(result, result.begin()) );    
+               std::inserter(result, result.begin()),
+               s1.key_comp() );    
     return result; 
 }
 
@@ -61,10 +62,29 @@ inline S1 UnionOf( const S1 &s1, const S2 &s2 )
 template< typename S1, typename S2 >
 inline S1 UnionOfSolo( const S1 &s1, const S2 &s2 )
 {
-    S1 result;
+    S1 result( s1.key_comp() );
     set_union( s1.begin(), s1.end(), s2.begin(), s2.end(),
-               std::inserter(result, result.begin()) );    
+               std::inserter(result, result.begin()),
+               s1.key_comp() );    
     ASSERT( result.size() == s1.size() + s2.size() )("Solo rule");
+    return result; 
+}
+
+
+// Union any two maps.
+template< typename K, typename V, typename C >
+inline map<K, V, C> UnionOfSolo( const map<K, V, C> &m1, const map<K, V, C> &m2 )
+{
+    typename std::map<K, V, C>::key_compare kc1( m1.key_comp() );
+    typename std::map<K, V, C> result( kc1 );
+    auto kc2 = [&](const std::pair<K, V> &p1, const std::pair<K, V> &p2)
+    { 
+        return kc1(p1.first, p2.first); 
+    };
+    set_union( m1.begin(), m1.end(), m2.begin(), m2.end(),
+               std::inserter(result, result.begin()),
+               kc2 );    
+    ASSERT( result.size() == m1.size() + m2.size() )("Solo rule");
     return result; 
 }
 
@@ -74,9 +94,10 @@ inline S1 UnionOfSolo( const S1 &s1, const S2 &s2 )
 template< typename S1, typename S2 >
 inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 {
-    S1 result;
+    S1 result( s1.key_comp() );
     set_intersection( s1.begin(), s1.end(), s2.begin(), s2.end(),
-                      std::inserter(result, result.begin()) );    
+                      std::inserter(result, result.begin()),
+                      s1.key_comp() );    
     return result; 
 }
 
@@ -86,22 +107,41 @@ inline S1 IntersectionOf( const S1 &s1, const S2 &s2 )
 template< typename S1, typename S2 >
 inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 {
-    S1 result;
+    S1 result( s1.key_comp() );
     set_difference( s1.begin(), s1.end(), s2.begin(), s2.end(),
-                    std::inserter(result, result.begin()) );    
+                    std::inserter(result, result.begin()),
+                    s1.key_comp() );    
     return result; 
 }    
 
 
-// Intersect set with complement, any compatible associative 
-// containers, ordered or otherwise. s2 must be subset of s1.
+// Intersect set with complement. s2 must be subset of s1.
 template< typename S1, typename S2 >
 inline S1 DifferenceOfSolo( const S1 &s1, const S2 &s2 )
 {
-    S1 result;
+    S1 result( s1.key_comp() );
     set_difference( s1.begin(), s1.end(), s2.begin(), s2.end(),
-                    std::inserter(result, result.begin()) );    
+                    std::inserter(result, result.begin()),
+                    s1.key_comp() );    
     ASSERT( result.size() == s1.size() - s2.size() )("Solo rule");
+    return result; 
+}    
+
+
+// Intersect map with complement. s2 must be subset of s1.
+template< typename K, typename V, typename C >
+inline map<K, V, C> DifferenceOfSolo( const map<K, V, C> &m1, const map<K, V, C> &m2 )
+{
+    typename std::map<K, V, C>::key_compare kc1( m1.key_comp() );
+    typename std::map<K, V, C> result( kc1 );
+    auto kc2 = [&](const std::pair<K, V> &p1, const std::pair<K, V> &p2)
+    { 
+        return kc1(p1.first, p2.first); 
+    };
+    set_difference( m1.begin(), m1.end(), m2.begin(), m2.end(),
+                    std::inserter(result, result.begin()),
+                    kc2 );    
+    ASSERT( result.size() == m1.size() - m2.size() )("Solo rule");
     return result; 
 }    
 

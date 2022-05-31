@@ -4,6 +4,7 @@
 #include "link.hpp"
 #include "common/standard.hpp"
 #include "sc_relation.hpp"
+#include "../helpers/simple_compare.hpp"
 
 #include <unordered_set>
 
@@ -19,6 +20,7 @@ namespace SR
 {
 class SimpleCompareQuotientSet;
 class VNTransformation;
+class Lacing;
     
 class TheKnowledge : public Traceable
 {
@@ -30,16 +32,7 @@ private:
     {
         Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
         
-        int GetMetric(int i, int j);
-        
-        shared_ptr<SimpleCompare> simple_compare;
-        const set< shared_ptr<SYM::BooleanExpression> > clauses;
-        set<TreePtr<Node>, SimpleCompare &> categories;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_nonstrict_supercats;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_nonstrict_subcats;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_strict_supercats;
-        map<TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &>> cats_to_strict_subcats;
-        vector<TreePtr<Node>> cats_in_lacing_order;
+        shared_ptr<Lacing> lacing;
     } plan;
 
 public:

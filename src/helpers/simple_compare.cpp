@@ -8,6 +8,13 @@ SimpleCompare::SimpleCompare( Orderable::OrderProperty order_property_ ) :
 }
 
 
+SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
+{
+    order_property = other.order_property;
+    return *this;
+}
+
+
 Orderable::Result SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
 {   
     // Inputs must be non-NULL (though we do handle NULL in itemise, see below)

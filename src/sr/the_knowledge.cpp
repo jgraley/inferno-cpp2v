@@ -4,7 +4,7 @@
 #include "vn_transformation.hpp"
 #include "sym/expression.hpp"
 #include "sym/predicate_operators.hpp"
-#include "../helpers/simple_compare.hpp"
+#include "lacing.hpp"
 
 using namespace SR;    
 
@@ -24,10 +24,8 @@ TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &cla
 }
 
 
-TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses_ ) :
-    simple_compare( make_shared<SimpleCompare>() ),
-    clauses( clauses_ ),
-    categories( *simple_compare )
+TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
+    lacing( make_shared<Lacing>() )
 {
     // Warning: there are a few places that declare an empty knowledge
     if( clauses.empty() )
@@ -36,160 +34,25 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     // Extract all the non-final archetypes from the KindOfOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.
+    Lacing::CategorySet categories{ SimpleCompare() };
     for( shared_ptr<SYM::BooleanExpression> clause : clauses )
     {
         clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
         {
             if( auto ko_expr = dynamic_cast<const SYM::KindOfOperator *>(expr) )
             { 
-                TreePtr<Node> arch = ko_expr->GetArchetypeNode();
-                if( !arch->IsFinal() )
-                    categories.insert( arch );
+                TreePtr<Node> archetype = ko_expr->GetArchetypeNode();
+                
+                // Note: excluding final categories here means that final
+                // KindOfOperators will need to range on the SimpleCompare
+                // ordering, in order to fix the node type.
+                if( !archetype->IsFinal() )
+                    categories.insert( archetype );
             }
         } );
     }
-    
-    // Find the set of strict/non-strict super/sub-categories for each category.
-    for( TreePtr<Node> arch : categories )
-    {
-        cats_to_nonstrict_supercats.emplace( std::piecewise_construct,
-                                        std::forward_as_tuple(arch),
-                                        std::forward_as_tuple(*simple_compare) );
-        cats_to_nonstrict_subcats.emplace( std::piecewise_construct,
-                                      std::forward_as_tuple(arch),
-                                      std::forward_as_tuple(*simple_compare) );
-        cats_to_strict_supercats.emplace( std::piecewise_construct,
-                                        std::forward_as_tuple(arch),
-                                        std::forward_as_tuple(*simple_compare) );
-        cats_to_strict_subcats.emplace( std::piecewise_construct,
-                                      std::forward_as_tuple(arch),
-                                      std::forward_as_tuple(*simple_compare) );
-        for( TreePtr<Node> candidate : categories )
-        {
-            bool weak_super = candidate->IsLocalMatch( arch.get() );
-            bool weak_sub = arch->IsLocalMatch( candidate.get() );
-            if( weak_super )
-                cats_to_nonstrict_supercats.at(arch).insert(candidate);
-            if( weak_sub )
-                cats_to_nonstrict_subcats.at(arch).insert(candidate);
-            if( weak_super && !weak_sub )
-                cats_to_strict_supercats.at(arch).insert(candidate);
-            if( weak_sub && !weak_super )
-                cats_to_strict_subcats.at(arch).insert(candidate);
-        }
-    }
 
-    // Put architypes into a vector.
-    for( TreePtr<Node> arch : categories )
-    {
-        cats_in_lacing_order.push_back( arch );
-    }
-    
-    // Determine lacing ordering, non-cyclic, weighted by number of 
-    // strict subcategories. We will apply swaps of contiguous blocks of 
-    // architypes for as long as we can reduce total distance metric on lace.
-    int n = cats_in_lacing_order.size();
-    int count_outer = 0;
-    bool swapped;
-    do
-    {
-        swapped = false;
-        for( int bs=n/2; bs>=1; bs-- ) // Block sizes
-        {
-            for( int i=0; i+bs<=n; i++ )
-            {
-                for( int j=0; j+bs<=i; j++ )
-                {
-                    ASSERT( i-j >= bs );
-                    int curr_metric = 0, metric_if_swapped = 0;
-                    
-                    // If blocks touch, swaps will change neigbours and
-                    // a different formula is required. 
-                    if( i-j != n-bs ) 
-                    {
-                        curr_metric += GetMetric(i+bs-1, i+bs) + GetMetric(j, j-1);
-                        metric_if_swapped += GetMetric(i, j-1) + GetMetric(j+bs-1, i+bs);
-                    }
-                    else
-                    {
-                        curr_metric += 0;
-                        metric_if_swapped += 0;
-                    }
-                    
-                    if( i-j != bs ) 
-                    {
-                        curr_metric += GetMetric(i, i-1) + GetMetric(j+bs-1, j+bs);
-                        metric_if_swapped += GetMetric(i+bs-1, j+bs) + GetMetric(j, i-1);
-                    }
-                    else
-                    {
-                        curr_metric += GetMetric(j+bs-1, i);
-                        metric_if_swapped += GetMetric(i+bs-1, j);
-                    }
-                    
-                    if( metric_if_swapped < curr_metric )
-                    {
-                        int expected_reduction = curr_metric - metric_if_swapped;
-                        int tot=0;
-                        vector<int> old_metrics;
-                        for( int k=0; k<n; k++ )               
-                        {         
-                            old_metrics.push_back(GetMetric(k, k+1));                        
-                            tot += GetMetric(k, k+1);
-                        }
-                        
-                        for( int k=0; k<bs; k++ )
-                            cats_in_lacing_order.at((i+k)%n).swap( cats_in_lacing_order.at((j+k)%n) );
-                        
-                        for( int k=0; k<n; k++ )                        
-                            tot -= GetMetric(k, k+1);                        
-                        TRACEC("Swap i=%d j=%d bs=%d expecting %d (%d-%d) got %d\n", i, j, bs, expected_reduction, curr_metric, metric_if_swapped, tot);
-                        if( expected_reduction != tot )
-                        {
-                            for( int k=0; k<n; k++ )
-                                TRACEC("%d: %d -> %d\n", k, old_metrics[k], GetMetric(k, k+1) );
-                        }
-                        ASSERT( expected_reduction==tot );
-                        swapped = true;
-                    }
-                }
-            }
-        }
-        count_outer++;        
-    } while( swapped );    
-    TRACE("count_outer=%d\n", count_outer);
-    
-    // Shows ordering and supercats together 
-    if( Tracer::IsEnabled() )
-    {
-        vector< tuple<int, TreePtr<Node>, set<TreePtr<Node>, SimpleCompare &> >> for_trace;
-        for( int i=0; i<n; i++ )
-        {
-            auto arch = cats_in_lacing_order.at(i);
-            for_trace.push_back( make_tuple( GetMetric(i, i+1), arch, cats_to_strict_supercats.at(arch) ) );
-        }
-        TRACE(for_trace)("\n");
-    }
-}
-
-
-int TheKnowledge::Plan::GetMetric(int p, int q)
-{
-    int n = cats_in_lacing_order.size();
-    // Non-cyclic, so if we go off the end the score is zero
-    if( p<0 || p>=n || q<0 || q>=n )
-        return 0;
-    ASSERT( p != q ); // p is candidate to swap and q is neighbour. Swapping p must not change q.
-    const TreePtr<Node> &pa = cats_in_lacing_order.at(p);
-    const TreePtr<Node> &qa = cats_in_lacing_order.at(q);
-    const set<TreePtr<Node>, SimpleCompare&> &psupers = cats_to_nonstrict_supercats.at(pa);
-    const set<TreePtr<Node>, SimpleCompare&> &qsupers = cats_to_nonstrict_supercats.at(qa);
-    set<TreePtr<Node>, SimpleCompare&> diff = SymmetricDifferenceOf( psupers, qsupers );
-    int metric = 0;
-    for( TreePtr<Node> t : diff )
-        metric += cats_to_strict_subcats.at(t).size(); // weight for bigness of the categories in the diff
-    //TRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" metric=%d\n", metric);
-    return metric;
+    lacing->Build(categories);
 }
 
 
