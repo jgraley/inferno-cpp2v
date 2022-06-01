@@ -50,14 +50,15 @@ public:
 private:    
     class DecisionNode;
     
-    void Categorise();
-    static bool LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r );
+    void FixupCategories(const CategorySet &categories_);
+    void FindSuperAndSubCategories();
     void Sort();
     int GetMetric(int i, int j);
     void BuildRanges();
     void BuildDecisionTree();
     void TestDecisionTree();
     shared_ptr<DecisionNode> MakeDecisionSubtree( const set<int> &possible_lacing_indices );
+    static bool LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r );
 
     class DecisionNode
     {        

@@ -11,23 +11,8 @@ Lacing::Lacing()
 
 void Lacing::Build( const CategorySet &categories_ )
 {
-    set<TreePtr<Node>, SimpleCompare> unique_categories{SimpleCompare()};
-    std::copy( categories_.begin(), 
-               categories_.end(),
-               std::inserter( unique_categories, unique_categories.begin() ) );
-    
-    categories.clear();
-    std::copy( unique_categories.begin(), 
-               unique_categories.end(),
-               std::inserter( categories, categories.begin() ) );
-    
-    // We need to process a NULL category that includes all the X tree
-    // nodes that don't fall into any of the supplied categories. It's
-    // a disjoint category: no strict supers or subs.
-    categories.insert( nullptr ); 
-    ncats = categories.size();
-    
-    Categorise();
+    FixupCategories(categories_);
+    FindSuperAndSubCategories();
     Sort();
     BuildRanges();
     BuildDecisionTree();
@@ -47,7 +32,32 @@ int Lacing::GetIndexForNode( TreePtr<Node> node ) const
 }
 
 
-void Lacing::Categorise()
+void Lacing::FixupCategories(const CategorySet &categories_)
+{
+    // Uniquify categories by copying into a set that's ordered by
+    // simple compare. These are archetypes, so we get a type-based
+    // uniqueness. 
+    set<TreePtr<Node>, SimpleCompare> unique_categories{SimpleCompare()};
+    std::copy( categories_.begin(), 
+               categories_.end(),
+               std::inserter( unique_categories, unique_categories.begin() ) );
+               
+    // Copy back to set with defailt comparer, so we can have NULL 
+    // pointer elements
+    categories.clear();
+    std::copy( unique_categories.begin(), 
+               unique_categories.end(),
+               std::inserter( categories, categories.begin() ) );
+    
+    // We need to process a NULL category that includes all the X tree
+    // nodes that don't fall into any of the supplied categories. It's
+    // a disjoint category: no strict supers or subs.
+    categories.insert( nullptr ); 
+    ncats = categories.size();
+}
+
+
+void Lacing::FindSuperAndSubCategories()
 {
     // Find the set of strict/non-strict super/sub-categories for each category.
     for( TreePtr<Node> cat : categories )
@@ -70,18 +80,6 @@ void Lacing::Categorise()
                 cats_to_strict_subcats.at(cat).insert(candidate);
         }
     }
-}
-
-
-bool Lacing::LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r )
-{
-    // Model TreePtr<Node>==NULL as a disjoint category
-    if( !r && !l )
-        return true; // NULL matches NULL
-    else if( !l || !r )
-        return false; // Null and non-NULL never match 
-    else 
-        return l->IsLocalMatch( r.get() );
 }
 
 
@@ -327,6 +325,18 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
     // Generate a decision node that should decide based on IsLocalMatch
     // during the unwind.
     return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no );    
+}
+
+
+bool Lacing::LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r )
+{
+    // Model TreePtr<Node>==NULL as a disjoint category
+    if( !r && !l )
+        return true; // NULL matches NULL
+    else if( !l || !r )
+        return false; // Null and non-NULL never match 
+    else 
+        return l->IsLocalMatch( r.get() );
 }
 
 

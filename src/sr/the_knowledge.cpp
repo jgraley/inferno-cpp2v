@@ -10,6 +10,7 @@ using namespace SR;
 
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
 //#define TRACE_KNOWLEDGE_DELTAS
+//#define REMOVE_FINALS_FROM_CATEGORY_ORDERING
 
 
 #ifdef TRACE_KNOWLEDGE_DELTAS
@@ -47,7 +48,9 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
                 // Note: excluding final categories here means that final
                 // KindOfOperators will need to range on the SimpleCompare
                 // ordering, in order to fix the node type.
-                //if( !archetype->IsFinal() )
+#ifdef REMOVE_FINALS_FROM_CATEGORY_ORDERING
+                if( !archetype->IsFinal() )
+#endif                
                     categories.insert( archetype );
             }
         } );
