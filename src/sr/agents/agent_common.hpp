@@ -31,7 +31,8 @@ public:
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
-    bool IsNonTrivialPreRestriction() const override;                                
+    bool IsNonTrivialPreRestriction() const;
+    bool ShouldGenerateKindOfClause() const override;                                
 	virtual SYM::Over<SYM::BooleanExpression> SymbolicPreRestriction() const;
 	
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

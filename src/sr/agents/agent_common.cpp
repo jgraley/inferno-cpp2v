@@ -21,6 +21,8 @@
 using namespace SR;
 using namespace SYM;
 
+#define GENERATE_KINDOF_CLAUSES_FOR_TRIVIAL_PR
+
 //---------------------------------- AgentCommon ------------------------------------    
 
 AgentCommon::AgentCommon() :
@@ -188,7 +190,7 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 
 bool AgentCommon::IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const
 {
-    // Does not need planning and so is handy for graphs.
+    // No Plan version: does not need planning and so is handy for graphs.
     // Note: we are using typeid on the tree pointer type, not the node type.
     // So we need an archetype tree pointer.
     return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
@@ -202,9 +204,28 @@ bool AgentCommon::IsNonTrivialPreRestriction() const
 }                                
 
 
+bool AgentCommon::ShouldGenerateKindOfClause() const
+{
+#ifdef GENERATE_KINDOF_CLAUSES_FOR_TRIVIAL_PR
+    // It could be argued that, from the CSP solver's point of
+    // view, if we didn't need pre-restriction constraint, we would
+    // still need a "type-correctness constraint", i.e. something
+    // to stop the solver wasting time querying values that would lead
+    // to non-type-safe trees. We don't get fails without it because
+    // solver never finds them because they're not there due type-safety.
+    // But if we're type Node, then the parent pointer(s) must also be
+    // Node, and there's no need for any restriction.
+    return typeid( Node() ) != typeid( *GetArchetypeTreePtr() );
+#else    
+    // Use our keyer_plink to get pptr - but only after planning!
+    return IsNonTrivialPreRestriction();
+#endif
+}                                
+
+
 SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
-    if( IsNonTrivialPreRestriction() )
+    if( ShouldGenerateKindOfClause() )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
 	    return MakeOver<KindOfOperator>(GetArchetypeNode(), keyer_expr);

@@ -23,7 +23,7 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 
 SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
 {
-    if( IsNonTrivialPreRestriction() )
+    if( ShouldGenerateKindOfClause() )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
         return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);

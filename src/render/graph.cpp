@@ -560,7 +560,6 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                 if( link->child->IsNonTrivialPreRestrictionNP( link->pptr ) )
                 {
                     block_ids_show_prerestriction.insert( my_link->child_id );
-                    FTRACE("prerestriction ")(my_link->child_id)("\n");
                 }
             }
             
