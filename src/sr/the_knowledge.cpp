@@ -35,7 +35,7 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     // Extract all the non-final archetypes from the KindOfOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.
-    Lacing::CategorySet categories{ SimpleCompare() };
+    Lacing::CategorySet categories;
     for( shared_ptr<SYM::BooleanExpression> clause : clauses )
     {
         clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
@@ -47,7 +47,7 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
                 // Note: excluding final categories here means that final
                 // KindOfOperators will need to range on the SimpleCompare
                 // ordering, in order to fix the node type.
-                if( !archetype->IsFinal() )
+                //if( !archetype->IsFinal() )
                     categories.insert( archetype );
             }
         } );
@@ -118,9 +118,8 @@ TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
 
 bool TheKnowledge::CategoryRelation::operator() (const XLink& x, const XLink& y) const
 {
-    int xi = lacing->GetIndexForCandidate( x.GetChildX() );
-    int yi = lacing->GetIndexForCandidate( y.GetChildX() );
-    FTRACEC("Is ")(x)("->%d < ", xi)(y)("->%d?\n", yi);
+    int xi = lacing->GetIndexForNode( x.GetChildX() );
+    int yi = lacing->GetIndexForNode( y.GetChildX() );
     return xi < yi;
 }
 
@@ -184,8 +183,6 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     SimpleCompareRelation e;
     e.TestProperties( unordered_domain );
 #endif
-    FTRACE(category_ordered_domain)("\n");
-    ASSERT( false);
 }
 
 
@@ -241,7 +238,6 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     // Update domains 
     InsertSolo( unordered_domain, xlink );
     depth_first_ordered_domain.push_back(xlink);
-    FTRACE("Inserting ")(xlink)("\n");
     category_ordered_domain.insert(xlink);
     simple_compare_ordered_domain.insert(xlink);
     

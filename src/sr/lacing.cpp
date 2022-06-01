@@ -11,7 +11,20 @@ Lacing::Lacing()
 
 void Lacing::Build( const CategorySet &categories_ )
 {
-    categories = categories_;
+    set<TreePtr<Node>, SimpleCompare> unique_categories{SimpleCompare()};
+    std::copy( categories_.begin(), 
+               categories_.end(),
+               std::inserter( unique_categories, unique_categories.begin() ) );
+    
+    categories.clear();
+    std::copy( unique_categories.begin(), 
+               unique_categories.end(),
+               std::inserter( categories, categories.begin() ) );
+    
+    // We need to process a NULL category that includes all the X tree
+    // nodes that don't fall into any of the supplied categories. It's
+    // a disjoint category: no strict supers or subs.
+    categories.insert( nullptr ); 
     ncats = categories.size();
     
     Categorise();
@@ -28,9 +41,9 @@ const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> arche
 }
 
 
-int Lacing::GetIndexForCandidate( TreePtr<Node> candidate ) const
+int Lacing::GetIndexForNode( TreePtr<Node> node ) const
 {
-    return decision_tree->GetLacingIndex( candidate );
+    return decision_tree->GetLacingIndex( node );
 }
 
 
@@ -39,22 +52,14 @@ void Lacing::Categorise()
     // Find the set of strict/non-strict super/sub-categories for each category.
     for( TreePtr<Node> cat : categories )
     {
-        cats_to_nonstrict_supercats.emplace( std::piecewise_construct,
-                                        std::forward_as_tuple(cat),
-                                        std::forward_as_tuple(SimpleCompare()) );
-        cats_to_nonstrict_subcats.emplace( std::piecewise_construct,
-                                      std::forward_as_tuple(cat),
-                                      std::forward_as_tuple(SimpleCompare()) );
-        cats_to_strict_supercats.emplace( std::piecewise_construct,
-                                        std::forward_as_tuple(cat),
-                                        std::forward_as_tuple(SimpleCompare()) );
-        cats_to_strict_subcats.emplace( std::piecewise_construct,
-                                      std::forward_as_tuple(cat),
-                                      std::forward_as_tuple(SimpleCompare()) );
+        cats_to_nonstrict_supercats[cat];
+        cats_to_nonstrict_subcats[cat];
+        cats_to_strict_supercats[cat];
+        cats_to_strict_subcats[cat];
         for( TreePtr<Node> candidate : categories )
         {
-            bool weak_super = candidate->IsLocalMatch( cat.get() );
-            bool weak_sub = cat->IsLocalMatch( candidate.get() );
+            bool weak_super = LocalMatchWithNULL( candidate, cat );
+            bool weak_sub = LocalMatchWithNULL( cat, candidate );
             if( weak_super )
                 cats_to_nonstrict_supercats.at(cat).insert(candidate);
             if( weak_sub )
@@ -65,6 +70,18 @@ void Lacing::Categorise()
                 cats_to_strict_subcats.at(cat).insert(candidate);
         }
     }
+}
+
+
+bool Lacing::LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r )
+{
+    // Model TreePtr<Node>==NULL as a disjoint category
+    if( !r && !l )
+        return true; // NULL matches NULL
+    else if( !l || !r )
+        return false; // Null and non-NULL never match 
+    else 
+        return l->IsLocalMatch( r.get() );
 }
 
 
@@ -180,7 +197,7 @@ int Lacing::GetMetric(int p, int q)
     CategorySet diff = SymmetricDifferenceOf( psupers, qsupers );
     int metric = 0;
     for( TreePtr<Node> t : diff )
-        metric += cats_to_strict_subcats.at(t).size(); // weight for bigness of the categories in the diff
+        metric += cats_to_nonstrict_subcats.at(t).size(); // weight for bigness of the categories in the diff
     //TRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" metric=%d\n", metric);
     return metric;
 }
@@ -228,7 +245,7 @@ void Lacing::BuildDecisionTree()
     for( int i=0; i<ncats; i++ )
         possible_lacing_indices.insert(i);
         
-    decision_tree = MakeDecisionTree( possible_lacing_indices );
+    decision_tree = MakeDecisionSubtree( possible_lacing_indices );
     
     TRACE("Decision tree to obtain lacing index given any X node\n")
          ("\n"+decision_tree->Render());
@@ -241,13 +258,13 @@ void Lacing::TestDecisionTree()
     for( int i=0; i<ncats; i++ ) 
     {
         TreePtr<Node> cat = cats_in_lacing_order.at(i);
-        ASSERT( GetIndexForCandidate( cat ) == i );
+        ASSERT( GetIndexForNode( cat ) == i );
     }
     TRACE("Lacing decision tree self-check OK\n");
 }
 
 
-shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionTree( const set<int> &possible_lacing_indices )
+shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &possible_lacing_indices )
 {    
     ASSERT( !possible_lacing_indices.empty() ); // Unexpected error: assert on best_cat should prevent this from failing
     
@@ -262,31 +279,40 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionTree( const set<int> &possi
     }
     
     // Find the category whose lacing set best halves the set of possible lacing indices
-    int target_inter_size = possible_lacing_indices.size() / 2;
-    int best_diff = target_inter_size+1;
+    int target_inter_size = possible_lacing_indices.size(); // TIMES TWO!!
+    int best_diff = target_inter_size+1; // TIMES TWO!!
     TreePtr<Node> best_cat;  
     set<int> best_inter;  
+    bool found = false;
+    //TRACEC(possible_lacing_indices)(" target=%d\n", target_inter_size); 
     for( TreePtr<Node> cat : categories )
     {
+        // We don't want to test the NULL category, so hopefully the others
+        // are sufficient to differentiate everything.
+        if( !cat )
+            continue; 
+            
         // size of intersection between current lacing set and possible indices
         set<int> inter = IntersectionOf( possible_lacing_indices,
                                          cats_to_lacing_sets.at(cat) );
-                     
+        //TRACEC(cat)(" intersection=")(inter)("\n");
+        
         // Skip where cat didn't provide any useful split of possible indices
         if( inter.empty() || inter.size()==possible_lacing_indices.size() )
             continue;
                                          
         // Closer to the target is better
-        int diff = abs( (int)inter.size() - target_inter_size );
+        int diff = abs( (int)inter.size()*2 - target_inter_size ); // TIMES TWO!!
         if( diff < best_diff )
         {
             best_diff = diff;
             best_cat = cat;
             best_inter = inter; 
+            found = true;
         }                                                                               
     }
         
-    ASSERT( best_cat )
+    ASSERT( found )
           ("Problem with the lacing: no category can differentiate these possible indices:\n")
           (possible_lacing_indices)("\n");
         
@@ -295,8 +321,8 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionTree( const set<int> &possi
                                           cats_to_lacing_sets.at(best_cat) );
 
     // Recurse twice on the two hopefully-nearly-halves of the possible set
-    shared_ptr<DecisionNode> yes = MakeDecisionTree( best_inter );
-    shared_ptr<DecisionNode> no = MakeDecisionTree( best_setdiff );
+    shared_ptr<DecisionNode> yes = MakeDecisionSubtree( best_inter );
+    shared_ptr<DecisionNode> no = MakeDecisionSubtree( best_setdiff );
     
     // Generate a decision node that should decide based on IsLocalMatch
     // during the unwind.
@@ -319,11 +345,11 @@ Lacing::DecisionNodeLocalMatch::DecisionNodeLocalMatch( TreePtr<Node> category_,
 }
     
 
-int Lacing::DecisionNodeLocalMatch::GetLacingIndex( TreePtr<Node> candidate ) const
+int Lacing::DecisionNodeLocalMatch::GetLacingIndex( TreePtr<Node> node ) const
 {
-    return category->IsLocalMatch( candidate.get() ) ?
-           if_yes->GetLacingIndex( candidate ) :
-           if_no->GetLacingIndex( candidate );
+    return LocalMatchWithNULL( category, node ) ?
+           if_yes->GetLacingIndex( node ) :
+           if_no->GetLacingIndex( node );
 }
 
 
@@ -342,8 +368,9 @@ Lacing::DecisionNodeLeaf::DecisionNodeLeaf( int lacing_index_ ) :
 }
 
 
-int Lacing::DecisionNodeLeaf::GetLacingIndex( TreePtr<Node> candidate ) const
+int Lacing::DecisionNodeLeaf::GetLacingIndex( TreePtr<Node> node ) const
 {
+    (void)node; 
     return lacing_index;
 }
 

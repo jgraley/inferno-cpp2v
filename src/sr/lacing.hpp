@@ -24,14 +24,14 @@ class VNTransformation;
  * types or even all categories - just the ones we're likely to restrict against
  * during search. 
  * 
- * Methods are provided for building/updating the ordering (GetIndexForCandidate())
+ * Methods are provided for building/updating the ordering (GetIndexForNode())
  * and for generating ranges from categories for AllX operators to use with
  * eg upper_bound() etc (GetRangeListForCategory()).
  */
 class Lacing
 {
 public:    
-    typedef set<TreePtr<Node>, SimpleCompare> CategorySet;
+    typedef set<TreePtr<Node>> CategorySet;
 
     Lacing();
     
@@ -45,24 +45,25 @@ public:
     const list<pair<int, int>> &GetRangeListForCategory( TreePtr<Node> archetype ) const;
     
     // Returns the lacing index value for the candidate.
-    int GetIndexForCandidate( TreePtr<Node> candidate ) const;
+    int GetIndexForNode( TreePtr<Node> node ) const;
 
 private:    
     class DecisionNode;
     
     void Categorise();
+    static bool LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r );
     void Sort();
     int GetMetric(int i, int j);
     void BuildRanges();
     void BuildDecisionTree();
     void TestDecisionTree();
-    shared_ptr<DecisionNode> MakeDecisionTree( const set<int> &possible_lacing_indices );
+    shared_ptr<DecisionNode> MakeDecisionSubtree( const set<int> &possible_lacing_indices );
 
     class DecisionNode
     {        
     public:
         virtual ~DecisionNode();
-        virtual int GetLacingIndex( TreePtr<Node> candidate ) const = 0;
+        virtual int GetLacingIndex( TreePtr<Node> node ) const = 0;
         virtual string Render(string pre="") = 0;
     };
     
@@ -72,7 +73,7 @@ private:
         DecisionNodeLocalMatch( TreePtr<Node> category, 
                          shared_ptr<DecisionNode> if_yes,         
                          shared_ptr<DecisionNode> if_no );
-        int GetLacingIndex( TreePtr<Node> candidate ) const override;
+        int GetLacingIndex( TreePtr<Node> node ) const override;
         string Render(string pre) override;
         
     private:
@@ -85,7 +86,7 @@ private:
     {
     public:
         DecisionNodeLeaf( int lacing_index );
-        int GetLacingIndex( TreePtr<Node> candidate ) const override;
+        int GetLacingIndex( TreePtr<Node> node ) const override;
         string Render(string pre) override;
         
     private:
