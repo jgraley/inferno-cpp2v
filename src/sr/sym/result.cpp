@@ -464,3 +464,68 @@ string SimpleCompareRangeResult::GetTrace() const
     return Join(restrictions, ", ", "{SC ", " }");
 }
 
+// ------------------------- CategoryRangeResult --------------------------
+
+CategoryRangeResult::CategoryRangeResult( const SR::TheKnowledge *knowledge_, XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+    knowledge( knowledge_ ),
+    bounds_list( move(bounds_list_) ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+bool CategoryRangeResult::IsDefinedAndUnique() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+SR::XLink CategoryRangeResult::GetOnlyXLink() const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+{        
+    links.clear();
+    for( const XLinkBounds &bounds : bounds_list )
+    {
+        SR::TheKnowledge::SimpleCompareOrderedIt it_lower, it_upper;
+
+        if( lower_incl )
+            it_lower = knowledge->category_ordered_domain.lower_bound(*bounds.first);
+        else
+            it_lower = knowledge->category_ordered_domain.upper_bound(*bounds.first);
+
+        if( upper_incl )
+            it_upper = knowledge->category_ordered_domain.upper_bound(*bounds.second);
+        else
+            it_upper = knowledge->category_ordered_domain.lower_bound(*bounds.second);
+
+        links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
+    }
+    return true;
+}
+
+
+bool CategoryRangeResult::operator==( const SymbolResultInterface &other ) const
+{
+    ASSERTFAIL("TODO");
+}
+
+
+string CategoryRangeResult::GetTrace() const
+{
+    list<string> terms;;
+    for( const XLinkBounds &bounds : bounds_list )
+    {
+        list<string> restrictions;
+        restrictions.push_back( string(lower_incl?"[":"(") + bounds.first->GetTrace() );
+        restrictions.push_back( bounds.second->GetTrace() + string(upper_incl?"]":")") );
+        terms.push_back( Join(restrictions, ", ") );
+    }
+    return Join(terms, " ∪ ", "{CAT ", " }");
+}
+

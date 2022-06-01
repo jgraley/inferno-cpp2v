@@ -656,6 +656,21 @@ unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 }
 
 
+#ifdef KIND_OF_IS_SOLVEABLE
+shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( shared_ptr<SYM::Expression> target, 
+                                                                  shared_ptr<SYM::BooleanExpression> to_equal ) const
+{
+    // Can only deal with to_equal==TRUE
+    auto to_equal_bc = dynamic_pointer_cast<SYM::BooleanConstant>( to_equal );
+    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
+        return nullptr;
+
+    auto r = make_shared<AllOfKindOperator>( archetype_node );  
+    return a->TrySolveForToEqual( target, r );
+}                                                                                                                                             
+#endif
+                                              
+                                              
 Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {

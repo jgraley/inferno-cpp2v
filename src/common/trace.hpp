@@ -80,7 +80,14 @@ string Trace(const T *p)
 
 
 template<typename T>
-string Trace(shared_ptr<T> p) 
+string Trace(const shared_ptr<T> &p) 
+{
+    return Trace(p.get());        
+}
+    
+    
+template<typename T>
+string Trace(const unique_ptr<T> &p) 
 {
     return Trace(p.get());        
 }
@@ -127,11 +134,13 @@ string Trace(tuple<TYPES...> const & t)
 
 
 template<typename T, class A>
-string Trace(const vector<T, A> &l) 
+string Trace(const vector<T, A> &v) 
 {
+    int iw = max( (int)SSPrintf("%d", v.size()-1).size(), 1 );
+    string fmt = SSPrintf("%%%dd: ", iw);
     list<string> elts;
-    for( auto x : l )
-        elts.push_back( Trace(x) );
+    for( int i=0; i<v.size(); i++ )
+        elts.push_back( SSPrintf(fmt.c_str(), i) + Trace(v.at(i)) );
     return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
@@ -140,7 +149,7 @@ template<typename T, class A>
 string Trace(const list<T, A> &l) 
 {
     list<string> elts;
-    for( auto x : l )
+    for( const auto &x : l )
         elts.push_back( Trace(x) );
     return Join( elts, CONTAINER_SEP, "[", "]" );
 }
@@ -150,7 +159,7 @@ template<typename T, class C, class A>
 string Trace(const set<T, C, A> &s) 
 {
     list<string> elts;
-    for( auto x : s )
+    for( const auto &x : s )
         elts.push_back( Trace(x) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -160,7 +169,7 @@ template<typename TK, typename TV, class C, class A>
 string Trace(const map<TK, TV, C, A> &m) 
 {
     list<string> elts;
-    for( auto p : m )
+    for( const auto &p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -170,7 +179,7 @@ template<typename T, class C, class A>
 string Trace(const multiset<T, C, A> &s) 
 {
     list<string> elts;
-    for( auto x : s )
+    for( const auto &x : s )
         elts.push_back( Trace(x) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -180,7 +189,7 @@ template<typename TK, typename TV, class C, class A>
 string Trace(const multimap<TK, TV, C, A> &m) 
 {
     list<string> elts;
-    for( auto p : m )
+    for( const auto &p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -190,7 +199,7 @@ template<typename T, class H, class K, class A>
 string Trace(const unordered_set<T, H, K, A> &s) 
 {
     list<string> elts;
-    for( auto x : s )
+    for( const auto &x : s )
         elts.push_back( Trace(x) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -200,7 +209,7 @@ template<typename TK, typename TV, class H, class K, class A>
 string Trace(const unordered_map<TK, TV, H, K, A> &m) 
 {
     list<string> elts;
-    for( auto p : m )
+    for( const auto &p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -210,7 +219,7 @@ template<typename T, class H, class K, class A>
 string Trace(const unordered_multiset<T, H, K, A> &s) 
 {
     list<string> elts;
-    for( auto x : s )
+    for( const auto &x : s )
         elts.push_back( Trace(x) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }
@@ -220,7 +229,7 @@ template<typename TK, typename TV, class H, class K, class A>
 string Trace(const unordered_multimap<TK, TV, H, K, A> &m) 
 {
     list<string> elts;
-    for( auto p : m )
+    for( const auto &p : m )
         elts.push_back( Trace(p.first) + ": " + Trace(p.second) );
     return Join( elts, CONTAINER_SEP, "{", "}" );
 }

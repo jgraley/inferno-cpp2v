@@ -63,6 +63,7 @@ public:
            const TreePtrInterface *px,
            void *whodat=nullptr );
     XLink( const LocatedLink &l );
+    virtual ~XLink() {}
     // Make link from walk iterator; if at root (i.e. Walk::begin()) substitute root link
     static XLink FromWalkIterator( const Walk::iterator &wit, XLink root, int generations = 0 );
     // Make a copy of tp_x which acts as a new, distinct value 

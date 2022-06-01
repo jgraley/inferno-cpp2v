@@ -105,7 +105,7 @@ UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
 }
 
 
-Orderable::Result UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b )
+Orderable::Result UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b ) const
 {
     //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
     

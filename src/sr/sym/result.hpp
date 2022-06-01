@@ -186,6 +186,35 @@ private:
 };
 
 
+// ------------------------- CategoryRangeResult --------------------------
+
+class CategoryRangeResult : public SymbolResultInterface
+{
+public:
+    typedef pair<unique_ptr<SR::XLink>, unique_ptr<SR::XLink>> XLinkBounds;
+    typedef list<XLinkBounds> XLinkBoundsList;
+
+    // lower or upper can be null to exclude that limit
+    CategoryRangeResult( const SR::TheKnowledge *knowledge, XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    
+    bool IsDefinedAndUnique() const override;    
+    SR::XLink GetOnlyXLink() const override;    
+    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolResultInterface &other ) const override;
+
+    //unique_ptr<SetResult> GetComplement() const;
+    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
+    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
+
+    string GetTrace() const override;
+
+private:    
+    const SR::TheKnowledge *knowledge;
+    XLinkBoundsList bounds_list;
+    bool lower_incl, upper_incl;
+};
+
+
 };
 
 #endif // include guard

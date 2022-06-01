@@ -126,7 +126,7 @@ IdentifierByNameAgent::AllIdentifiersNamedOperator::AllIdentifiersNamedOperator(
                                                                                  string name_ ) :
     iba( iba_ ),
     name( name_ ),
-    bounds( iba->GetAddressRangeBounds( name ) )  
+    bounds( iba->GetBounds( name ) )  
 {
 }
 
@@ -241,7 +241,7 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
 
 //---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetAddressRangeBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
@@ -250,7 +250,7 @@ pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetAddressRang
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetAddressRangeBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
@@ -259,7 +259,7 @@ pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetAddressRangeBou
 
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetAddressRangeBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MAXIMUS );

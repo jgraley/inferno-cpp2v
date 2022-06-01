@@ -1,10 +1,11 @@
 #include "lacing.hpp"
-#include "sc_relation.hpp"
 #include "agents/agent.hpp"
 
 using namespace SR;    
 
-Lacing::Lacing() 
+Lacing::Lacing() :
+    unique_categories(SimpleCompare()),
+    cats_to_lacing_range_lists(SimpleCompare())
 {
 }
 
@@ -22,6 +23,9 @@ void Lacing::Build( const CategorySet &categories_ )
 
 const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> archetype ) const
 {
+    ASSERT( cats_to_lacing_range_lists.count(archetype)>0 )
+          ("Could not find lacing info for ")(archetype)
+          ("\nin:\n")(cats_to_lacing_range_lists)("\n");
     return cats_to_lacing_range_lists.at(archetype);
 }
 
@@ -37,7 +41,7 @@ void Lacing::FixupCategories(const CategorySet &categories_)
     // Uniquify categories by copying into a set that's ordered by
     // simple compare. These are archetypes, so we get a type-based
     // uniqueness. 
-    set<TreePtr<Node>, SimpleCompare> unique_categories{SimpleCompare()};
+    unique_categories.clear();
     std::copy( categories_.begin(), 
                categories_.end(),
                std::inserter( unique_categories, unique_categories.begin() ) );

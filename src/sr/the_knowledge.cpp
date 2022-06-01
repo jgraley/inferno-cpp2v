@@ -113,6 +113,12 @@ XLink TheKnowledge::FindDomainExtension( XLink xlink ) const
 }
 
 
+const Lacing *TheKnowledge::GetLacing() const
+{
+    return plan.lacing.get();
+}
+
+
 TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
     lacing( lacing_ )
 {
@@ -121,9 +127,34 @@ TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
 
 bool TheKnowledge::CategoryRelation::operator() (const XLink& x, const XLink& y) const
 {
-    int xi = lacing->GetIndexForNode( x.GetChildX() );
-    int yi = lacing->GetIndexForNode( y.GetChildX() );
+    int xi, yi;
+    if( auto cat_x = dynamic_cast<const CategoryVXLink *>(&x) )
+        xi = cat_x->GetLacingIndex();
+    else
+        xi = lacing->GetIndexForNode( x.GetChildX() );
+    if( auto cat_y = dynamic_cast<const CategoryVXLink *>(&y) )
+        yi = cat_y->GetLacingIndex();
+    else
+        yi = lacing->GetIndexForNode( y.GetChildX() );
     return xi < yi;
+}
+
+
+TheKnowledge::CategoryVXLink::CategoryVXLink( int lacing_index_ ) :
+    lacing_index( lacing_index_ )
+{
+}
+    
+
+int TheKnowledge::CategoryVXLink::GetLacingIndex() const
+{
+    return lacing_index;
+}
+ 
+
+string TheKnowledge::CategoryVXLink::GetTrace() const
+{
+    return GetTypeName() + SSPrintf("(lacing_index=%d)", lacing_index);
 }
 
 

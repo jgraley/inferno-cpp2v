@@ -94,6 +94,7 @@ private:
         int lacing_index;
     };    
             
+    set<TreePtr<Node>, SimpleCompare> unique_categories;
     CategorySet categories;
     int ncats;
     // Categorisation of the categories
@@ -104,7 +105,7 @@ private:
     // Lacing ordering
     vector<TreePtr<Node>> cats_in_lacing_order;
     // Lacing range sets
-    map<TreePtr<Node>, list<pair<int, int>>> cats_to_lacing_range_lists;
+    map<TreePtr<Node>, list<pair<int, int>>, SimpleCompare> cats_to_lacing_range_lists;
     // Decision tree stuff
     map<TreePtr<Node>, set<int>> cats_to_lacing_sets;
     shared_ptr<DecisionNode> decision_tree;

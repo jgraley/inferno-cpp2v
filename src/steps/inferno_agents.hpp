@@ -109,13 +109,13 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-    virtual pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
+    virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;
 
     // We use the term _similar_ to describe nodes whose internal values and 
-    // children are the same under Simple Sompare, but can be at different 
-    // addresses (which implies that root arrow-head identity is ignored). For 
-    // most nodes, similar => equal unser SC, but not for identifiers. Rule #528
+    // children are the same under Simple Compare, but can be different 
+    // instances (which implies that root arrow-head identity is ignored). For 
+    // most nodes, similar => equal under SC, but not for identifiers. Rule #528
     class AllIdentifiersNamedOperator : public SYM::SymbolToSymbolExpression
     {
     public:    
@@ -178,7 +178,7 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
         
     InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
-    pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const override;
+    pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
 };
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
@@ -195,7 +195,7 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
     
     TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
-    pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const override;
+    pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
 };
 
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
@@ -213,7 +213,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     
     LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
-    pair<TreePtr<Node>, TreePtr<Node>> GetAddressRangeBounds( string name ) const override;
+    pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
 };
 
 //---------------------------------- NestedAgent ------------------------------------    

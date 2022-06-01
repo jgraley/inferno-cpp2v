@@ -1,5 +1,7 @@
 #include "set_operators.hpp"
 #include "result.hpp"
+#include "../the_knowledge.hpp"
+#include "../lacing.hpp"
 
 using namespace SYM;
 
@@ -312,3 +314,51 @@ Expression::Precedence AllCouplingEquivalentOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
+// ------------------------- AllOfKindOperator --------------------------
+
+AllOfKindOperator::AllOfKindOperator( TreePtr<Node> archetype_node_ ) :
+    archetype_node(archetype_node_) 
+{
+}
+
+    
+Expression::KnowledgeLevel AllOfKindOperator::GetRequiredKnowledgeLevel() const
+{
+    return KnowledgeLevel::GENERAL;
+}
+
+
+list<shared_ptr<SymbolExpression>> AllOfKindOperator::GetSymbolOperands() const
+{
+    return {};
+}
+
+
+unique_ptr<SymbolResultInterface> AllOfKindOperator::Evaluate( const EvalKit &kit,
+                                                               list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
+{
+    // Could be done earlier but needs access to knowledge plan. TODO no reason not to provide this to "Solve" functions.
+    const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
+    CategoryRangeResult::XLinkBoundsList vxlink_range_list;
+    for( pair<int, int> int_range : int_range_list )
+    {
+        // int_range is a half-open minimax
+        vxlink_range_list.push_back( make_pair( make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.first),
+                                                make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
+    }
+    TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
+        
+    return make_unique<CategoryRangeResult>( kit.knowledge, move(vxlink_range_list), true, false );    
+}
+
+
+string AllOfKindOperator::Render() const
+{
+    return "{KindOf<" + archetype_node->GetTypeName() + ">}";
+}
+
+
+SYM::Expression::Precedence AllOfKindOperator::GetPrecedence() const
+{
+    return Precedence::COMPARE;
+}

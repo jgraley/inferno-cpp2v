@@ -46,6 +46,8 @@ public:
     // Get the cannonical xlink for the given one.
     XLink FindDomainExtension( XLink xlink ) const;
     
+    const Lacing *GetLacing() const;
+    
     enum SubtreeMode
     {
         // Behaviour for main domain population: we will check uniqueness
@@ -69,6 +71,16 @@ public:
         bool operator() (const XLink& x, const XLink& y) const;
     private:
         const shared_ptr<Lacing> lacing;
+    };
+    
+    class CategoryVXLink : public XLink
+    {
+    public:
+        CategoryVXLink( int lacing_index );
+        int GetLacingIndex() const;
+        string GetTrace() const override;
+    private:
+        const int lacing_index;
     };
 
     // Domain ordered by depth-first walk

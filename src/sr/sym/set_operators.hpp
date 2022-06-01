@@ -156,6 +156,24 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
+// ------------------------- AllOfKindOperator --------------------------
+
+class AllOfKindOperator : public SYM::SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllOfKindOperator( TreePtr<Node> archetype_node );
+    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    const TreePtr<Node> archetype_node;
+};
+
 };
 
 #endif // include guard

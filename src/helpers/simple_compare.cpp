@@ -15,7 +15,7 @@ SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
 }
 
 
-Orderable::Result SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
+Orderable::Result SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y ) const
 {   
     // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
     ASSERT(x);
@@ -89,7 +89,7 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y )
 }
 
 
-Orderable::Result SimpleCompare::Compare( SequenceInterface &x, SequenceInterface &y )
+Orderable::Result SimpleCompare::Compare( SequenceInterface &x, SequenceInterface &y ) const
 {
     // Ensure the sizes are the same so we don;t go off the end
     int sd = (int)(x.size()) - (int)(y.size());
@@ -111,7 +111,7 @@ Orderable::Result SimpleCompare::Compare( SequenceInterface &x, SequenceInterfac
 }
 
 
-Orderable::Result SimpleCompare::Compare( CollectionInterface &x, CollectionInterface &y )
+Orderable::Result SimpleCompare::Compare( CollectionInterface &x, CollectionInterface &y ) const
 {
     // Ensure the sizes are the same so we don't go off the end
     int sd = (int)(x.size()) - (int)(y.size());
@@ -136,14 +136,14 @@ Orderable::Result SimpleCompare::Compare( CollectionInterface &x, CollectionInte
 }
 
 
-bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl )
+bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl ) const
 {
     //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
     return Compare(xl, yl) < Orderable::EQUAL;
 }
 
 
-SimpleCompare::Ordering SimpleCompare::GetOrdering( ContainerInterface &c )
+SimpleCompare::Ordering SimpleCompare::GetOrdering( ContainerInterface &c ) const
 {
     Ordering ordered( *this );
     FOREACH( const TreePtrInterface &e, c )
