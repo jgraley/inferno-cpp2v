@@ -12,7 +12,30 @@ Lacing::Lacing()
 void Lacing::Build( const CategorySet &categories_ )
 {
     categories = categories_;
+    ncats = categories.size();
     
+    Categorise();
+    Sort();
+    BuildRanges();
+    BuildDecisionTree();
+    TestDecisionTree();
+}
+
+
+const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> archetype ) const
+{
+    return cats_to_lacing_range_lists.at(archetype);
+}
+
+
+int Lacing::GetIndexForCandidate( TreePtr<Node> candidate ) const
+{
+    return decision_tree->GetLacingIndex( candidate );
+}
+
+
+void Lacing::Categorise()
+{
     // Find the set of strict/non-strict super/sub-categories for each category.
     for( TreePtr<Node> cat : categories )
     {
@@ -42,34 +65,41 @@ void Lacing::Build( const CategorySet &categories_ )
                 cats_to_strict_subcats.at(cat).insert(candidate);
         }
     }
+}
 
+
+void Lacing::Sort()
+{
+    // TODO optimisation opportunity: put all the metrics into 
+    // a map<TPN, map<TPN, int>> first (n squared) and then just use that
+    // in the main sort.
+    
     // Put architypes into a vector.
     for( TreePtr<Node> arch : categories )
-    {
         cats_in_lacing_order.push_back( arch );
-    }
     
     // Determine lacing ordering, non-cyclic, weighted by number of 
     // strict subcategories. We will apply swaps of contiguous blocks of 
     // architypes for as long as we can reduce total distance metric on lace.
-    int n = cats_in_lacing_order.size();
     int count_outer = 0;
     bool swapped;
     do
     {
         swapped = false;
-        for( int bs=n/2; bs>=1; bs-- ) // Block sizes
+        for( int bs=ncats/2; bs>=1; bs-- ) // Block sizes
         {
-            for( int i=0; i+bs<=n; i++ )
+            for( int i=0; i+bs<=ncats; i++ )
             {
+                ASSERT( i+bs <= ncats );
                 for( int j=0; j+bs<=i; j++ )
                 {
                     ASSERT( i-j >= bs );
+                    ASSERT( j+bs <= ncats );
                     int curr_metric = 0, metric_if_swapped = 0;
                     
                     // If blocks touch, swaps will change neigbours and
                     // a different formula is required. 
-                    if( i-j != n-bs ) 
+                    if( i-j != ncats-bs ) 
                     {
                         curr_metric += GetMetric(i+bs-1, i+bs) + GetMetric(j, j-1);
                         metric_if_swapped += GetMetric(i, j-1) + GetMetric(j+bs-1, i+bs);
@@ -96,21 +126,21 @@ void Lacing::Build( const CategorySet &categories_ )
                         int expected_reduction = curr_metric - metric_if_swapped;
                         int tot=0;
                         vector<int> old_metrics;
-                        for( int k=0; k<n; k++ )               
+                        for( int k=0; k<ncats; k++ )               
                         {         
                             old_metrics.push_back(GetMetric(k, k+1));                        
                             tot += GetMetric(k, k+1);
                         }
                         
                         for( int k=0; k<bs; k++ )
-                            cats_in_lacing_order.at((i+k)%n).swap( cats_in_lacing_order.at((j+k)%n) );
+                            cats_in_lacing_order.at(i+k).swap( cats_in_lacing_order.at(j+k) );
                         
-                        for( int k=0; k<n; k++ )                        
+                        for( int k=0; k<ncats; k++ )                        
                             tot -= GetMetric(k, k+1);                        
                         TRACEC("Swap i=%d j=%d bs=%d expecting %d (%d-%d) got %d\n", i, j, bs, expected_reduction, curr_metric, metric_if_swapped, tot);
                         if( expected_reduction != tot )
                         {
-                            for( int k=0; k<n; k++ )
+                            for( int k=0; k<ncats; k++ )
                                 TRACEC("%d: %d -> %d\n", k, old_metrics[k], GetMetric(k, k+1) );
                         }
                         ASSERT( expected_reduction==tot );
@@ -127,74 +157,82 @@ void Lacing::Build( const CategorySet &categories_ )
     if( Tracer::IsEnabled() )
     {
         vector< tuple<int, TreePtr<Node>, CategorySet>> for_trace;
-        for( int i=0; i<n; i++ )
+        for( int i=0; i<ncats; i++ )
         {
             auto arch = cats_in_lacing_order.at(i);
             for_trace.push_back( make_tuple( GetMetric(i, i+1), arch, cats_to_strict_supercats.at(arch) ) );
         }
         TRACE(for_trace)("\n");
-    }
-    
-    // Determine a list of ranges for each category within the lacing:
-    // pairs of (begin, end) indices on cats_in_lacing_order. Also gather
-    // sets of lacing indexes.
-    CategorySet prev_cats; 
-    for( int i=0; i<=n; i++ ) // note extra iteration!!
-    {
-        TreePtr<Node> cat_i = (i<n ? cats_in_lacing_order.at(i) : nullptr);
-        CategorySet current_cats = (cat_i ? cats_to_nonstrict_supercats.at(cat_i) : CategorySet());                
-        for( TreePtr<Node> cat : current_cats )
-            cats_to_lacing_sets[cat].insert(i);
-            
-        CategorySet begin_cats = DifferenceOf( current_cats, prev_cats );
-        for( TreePtr<Node> cat : begin_cats )
-            cats_to_lacing_range_lists[cat].push_back( make_pair(i, -1) );
+    }    
+}    
 
-        CategorySet end_cats = DifferenceOf( prev_cats, current_cats );
-        for( TreePtr<Node> cat : end_cats )
-            cats_to_lacing_range_lists[cat].back().second = i;  
+
+void Lacing::BuildRanges()
+{
+    // Determine a list of ranges for each category within the lacing:
+    // pairs of (begin, end) indices on cats_in_lacing_order. 
+    CategorySet prev_supercats; 
+    for( int i=0; i<=ncats; i++ ) // Note extra iteration! Lets us use ncats as overall "end".
+    {
+        TreePtr<Node> cat_i = (i<ncats ? cats_in_lacing_order.at(i) : nullptr);
+        CategorySet current_supercats = (cat_i ? cats_to_nonstrict_supercats.at(cat_i) : CategorySet());                
+            
+        CategorySet begin_supercats = DifferenceOf( current_supercats, prev_supercats );
+        for( TreePtr<Node> supercat : begin_supercats )
+            cats_to_lacing_range_lists[supercat].push_back( make_pair(i, -1) );
+
+        CategorySet end_supercats = DifferenceOf( prev_supercats, current_supercats );
+        for( TreePtr<Node> supercat : end_supercats )
+            cats_to_lacing_range_lists[supercat].back().second = i;  
                  
-        prev_cats = current_cats;
+        prev_supercats = current_supercats;
+    }    
+    TRACE(cats_to_lacing_range_lists)("\n");      
+}
+
+
+void Lacing::BuildDecisionTree()
+{
+    // Gather sets of lacing indexes.
+    map<TreePtr<Node>, set<int>> cats_to_lacing_sets;
+    for( int i=0; i<ncats; i++ )
+    {
+        TreePtr<Node> cat_i = cats_in_lacing_order.at(i);
+        CategorySet current_supercats = cats_to_nonstrict_supercats.at(cat_i);                
+        for( TreePtr<Node> supercat : current_supercats )
+            cats_to_lacing_sets[supercat].insert(i);
     }    
     TRACE(cats_to_lacing_sets)("\n");
-    TRACE(cats_to_lacing_range_lists)("\n");  
     
     // Generate a decision tree that determines lacing index using just
     // IsLocalMatch() on some X node (not necessarily seen here)
     set<int> possible_lacing_indices;
-    for( int i=0; i<n; i++ )
+    for( int i=0; i<ncats; i++ )
         possible_lacing_indices.insert(i);
+        
     decision_tree = MakeDecisionTree( possible_lacing_indices );
+    
     TRACE("Decision tree to obtain lacing index given any X node\n")
          ("\n"+decision_tree->Render());
-         
+}
+
+
+void Lacing::TestDecisionTree()
+{
     // Self-test
-    for( int i=0; i<n; i++ ) 
+    for( int i=0; i<ncats; i++ ) 
     {
         TreePtr<Node> cat = cats_in_lacing_order.at(i);
         ASSERT( GetIndexForCandidate( cat ) == i );
     }
-    TRACE("Lacing self-check OK\n");
-}
-
-
-const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> archetype ) const
-{
-    return cats_to_lacing_range_lists.at(archetype);
-}
-
-
-int Lacing::GetIndexForCandidate( TreePtr<Node> candidate ) const
-{
-    return decision_tree->GetLacingIndex( candidate );
+    TRACE("Lacing decision tree self-check OK\n");
 }
 
 
 int Lacing::GetMetric(int p, int q)
 {
-    int n = cats_in_lacing_order.size();
     // Non-cyclic, so if we go off the end the score is zero
-    if( p<0 || p>=n || q<0 || q>=n )
+    if( p<0 || p>=ncats || q<0 || q>=ncats )
         return 0;
     ASSERT( p != q ); // p is candidate to swap and q is neighbour. Swapping p must not change q.
     const TreePtr<Node> &pa = cats_in_lacing_order.at(p);
