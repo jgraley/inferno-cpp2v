@@ -52,10 +52,10 @@ private:
     
     void Categorise();
     void Sort();
+    int GetMetric(int i, int j);
     void BuildRanges();
     void BuildDecisionTree();
     void TestDecisionTree();
-    int GetMetric(int i, int j);
     shared_ptr<DecisionNode> MakeDecisionTree( const set<int> &possible_lacing_indices );
 
     class DecisionNode
@@ -94,12 +94,17 @@ private:
             
     CategorySet categories;
     int ncats;
+    // Categorisation of the categories
     map<TreePtr<Node>, CategorySet> cats_to_nonstrict_supercats;
     map<TreePtr<Node>, CategorySet> cats_to_nonstrict_subcats;
     map<TreePtr<Node>, CategorySet> cats_to_strict_supercats;
     map<TreePtr<Node>, CategorySet> cats_to_strict_subcats;
+    // Lacing ordering
     vector<TreePtr<Node>> cats_in_lacing_order;
+    // Lacing range sets
     map<TreePtr<Node>, list<pair<int, int>>> cats_to_lacing_range_lists;
+    // Decision tree stuff
+    map<TreePtr<Node>, set<int>> cats_to_lacing_sets;
     shared_ptr<DecisionNode> decision_tree;
 };
     

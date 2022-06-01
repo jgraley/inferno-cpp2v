@@ -97,7 +97,7 @@ void Lacing::Sort()
                     ASSERT( j+bs <= ncats );
                     int curr_metric = 0, metric_if_swapped = 0;
                     
-                    // If blocks touch, swaps will change neigbours and
+                    // If blocks touch, swaps will change neighbours and
                     // a different formula is required. 
                     if( i-j != ncats-bs ) 
                     {
@@ -167,6 +167,25 @@ void Lacing::Sort()
 }    
 
 
+int Lacing::GetMetric(int p, int q)
+{
+    // Non-cyclic, so if we go off the end the score is zero
+    if( p<0 || p>=ncats || q<0 || q>=ncats )
+        return 0;
+    ASSERT( p != q ); // p is candidate to swap and q is neighbour. Swapping p must not change q.
+    const TreePtr<Node> &pa = cats_in_lacing_order.at(p);
+    const TreePtr<Node> &qa = cats_in_lacing_order.at(q);
+    const CategorySet &psupers = cats_to_nonstrict_supercats.at(pa);
+    const CategorySet &qsupers = cats_to_nonstrict_supercats.at(qa);
+    CategorySet diff = SymmetricDifferenceOf( psupers, qsupers );
+    int metric = 0;
+    for( TreePtr<Node> t : diff )
+        metric += cats_to_strict_subcats.at(t).size(); // weight for bigness of the categories in the diff
+    //TRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" metric=%d\n", metric);
+    return metric;
+}
+
+
 void Lacing::BuildRanges()
 {
     // Determine a list of ranges for each category within the lacing:
@@ -194,7 +213,6 @@ void Lacing::BuildRanges()
 void Lacing::BuildDecisionTree()
 {
     // Gather sets of lacing indexes.
-    map<TreePtr<Node>, set<int>> cats_to_lacing_sets;
     for( int i=0; i<ncats; i++ )
     {
         TreePtr<Node> cat_i = cats_in_lacing_order.at(i);
@@ -226,25 +244,6 @@ void Lacing::TestDecisionTree()
         ASSERT( GetIndexForCandidate( cat ) == i );
     }
     TRACE("Lacing decision tree self-check OK\n");
-}
-
-
-int Lacing::GetMetric(int p, int q)
-{
-    // Non-cyclic, so if we go off the end the score is zero
-    if( p<0 || p>=ncats || q<0 || q>=ncats )
-        return 0;
-    ASSERT( p != q ); // p is candidate to swap and q is neighbour. Swapping p must not change q.
-    const TreePtr<Node> &pa = cats_in_lacing_order.at(p);
-    const TreePtr<Node> &qa = cats_in_lacing_order.at(q);
-    const CategorySet &psupers = cats_to_nonstrict_supercats.at(pa);
-    const CategorySet &qsupers = cats_to_nonstrict_supercats.at(qa);
-    CategorySet diff = SymmetricDifferenceOf( psupers, qsupers );
-    int metric = 0;
-    for( TreePtr<Node> t : diff )
-        metric += cats_to_strict_subcats.at(t).size(); // weight for bigness of the categories in the diff
-    //TRACEC("p=%d q=%d: ", p, q)(pa)(" ")(qa)(" metric=%d\n", metric);
-    return metric;
 }
 
 
@@ -291,7 +290,7 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionTree( const set<int> &possi
           ("Problem with the lacing: no category can differentiate these possible indices:\n")
           (possible_lacing_indices)("\n");
         
-    // We'll need a set of possible indices that are NOT in best lacing set
+    // We'll also need a set of possible indices that are NOT in best lacing set
     set<int> best_setdiff = DifferenceOf( possible_lacing_indices,
                                           cats_to_lacing_sets.at(best_cat) );
 

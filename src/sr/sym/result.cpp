@@ -360,6 +360,19 @@ bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     auto p = knowledge->coupling_ordered_domain.equal_range( class_example );
     links = move( set<SR::XLink>( p.first, p.second ) );
     return true;
+    
+    // Note on equal_range: there's set::equal_range(), multiset::equal_range()
+    // and free equal_range() (and probably others for eg map, unordered etc)
+    // x::equal_range() always uses the container's comparer, and so 
+    // set::equal_range() guarantees to return zero or one element, see
+    // https://www.cplusplus.com/reference/set/set/equal_range/
+    // Free equal_range() can be given a comparer, which could differ from
+    // the underlying container's one, but then you'd have to deal with fiddly
+    // rules on whether the container is correctly partitioned wrt the 
+    // comparer you are using. multiset::equal_range() gets you all matching 
+    // elements and seems to be the only way to do this - multiset::find()
+    // only guarantees to find A matching element - pretty feeble if you ask me.
+    // See https://en.cppreference.com/w/cpp/container/multiset/find
 }
 
 

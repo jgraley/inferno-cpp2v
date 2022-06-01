@@ -45,7 +45,6 @@ public:
 
     // Get the cannonical xlink for the given one.
     XLink FindDomainExtension( XLink xlink ) const;
-
     
     enum SubtreeMode
     {
@@ -63,6 +62,15 @@ public:
     
     typedef int IndexType;
 
+    class CategoryRelation
+    {
+    public:
+        CategoryRelation( shared_ptr<Lacing> lacing );
+        bool operator() (const XLink& x, const XLink& y) const;
+    private:
+        const shared_ptr<Lacing> lacing;
+    };
+
     // Domain ordered by depth-first walk
     // Don't use a vector for this:
     // (a) you'd need the size in advance otherwise the iterators in
@@ -71,6 +79,10 @@ public:
     typedef list<XLink> DepthFirstOrderedDomain;    
     typedef DepthFirstOrderedDomain::const_iterator DepthFirstOrderedIt;    
     
+    // Category ordering TODO merge with SimpleCompare ordering
+    typedef multiset<XLink, CategoryRelation> CategoryOrderedDomain;
+    typedef CategoryOrderedDomain::iterator CategoryOrderedIt;
+
     // We will provide a SimpleCompare ordered version of the domain
     typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedDomain;
     typedef SimpleCompareOrderedDomain::iterator SimpleCompareOrderedIt;
@@ -155,6 +167,9 @@ public:
     
     // Global domain of possible xlink values - ordered
     DepthFirstOrderedDomain depth_first_ordered_domain;            
+    
+    // Domain ordered by category
+    CategoryOrderedDomain category_ordered_domain;
     
     // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
     // Should be the other way around, as an indication of policy

@@ -19,7 +19,8 @@ unordered_set<XLink> previous_unordered_domain;
 
 
 TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
-    plan( clauses )
+    plan( clauses ),
+    category_ordered_domain( plan.lacing )
 {
 }
 
@@ -66,6 +67,7 @@ void TheKnowledge::Clear()
 {
     unordered_domain.clear();
     depth_first_ordered_domain.clear();
+    category_ordered_domain.clear();
     simple_compare_ordered_domain.clear();
     nuggets.clear();
     if( domain_extension_classes )
@@ -108,6 +110,21 @@ XLink TheKnowledge::FindDomainExtension( XLink xlink ) const
 }
 
 
+TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
+    lacing( lacing_ )
+{
+}
+
+
+bool TheKnowledge::CategoryRelation::operator() (const XLink& x, const XLink& y) const
+{
+    int xi = lacing->GetIndexForCandidate( x.GetChildX() );
+    int yi = lacing->GetIndexForCandidate( y.GetChildX() );
+    FTRACEC("Is ")(x)("->%d < ", xi)(y)("->%d?\n", yi);
+    return xi < yi;
+}
+
+
 const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
 {
     ASSERT( xlink );
@@ -137,6 +154,7 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     // Both should be cleared together
     unordered_domain.clear();
     depth_first_ordered_domain.clear();
+    category_ordered_domain.clear();
     simple_compare_ordered_domain.clear();
     domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     nuggets.clear();
@@ -166,6 +184,8 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     SimpleCompareRelation e;
     e.TestProperties( unordered_domain );
 #endif
+    FTRACE(category_ordered_domain)("\n");
+    ASSERT( false);
 }
 
 
@@ -218,9 +238,11 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     if( mode==STOP_IF_ALREADY_IN && nuggets.count(xlink) > 0 )
         return; // Terminate into the existing domain
     
-    // Update domain 
+    // Update domains 
     InsertSolo( unordered_domain, xlink );
     depth_first_ordered_domain.push_back(xlink);
+    FTRACE("Inserting ")(xlink)("\n");
+    category_ordered_domain.insert(xlink);
     simple_compare_ordered_domain.insert(xlink);
     
     DepthFirstOrderedIt it = depth_first_ordered_domain.end();
