@@ -127,12 +127,17 @@ TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
 
 bool TheKnowledge::CategoryRelation::operator() (const XLink& x, const XLink& y) const
 {
+    auto cat_x = dynamic_cast<const CategoryVXLink *>(&x);
+    auto cat_y = dynamic_cast<const CategoryVXLink *>(&y);
+    if( !cat_x && !cat_y )
+        return lacing->IsIndexLess( x.GetChildX(), y.GetChildX() );
+    
     int xi, yi;
-    if( auto cat_x = dynamic_cast<const CategoryVXLink *>(&x) )
+    if( cat_x )
         xi = cat_x->GetLacingIndex();
     else
         xi = lacing->GetIndexForNode( x.GetChildX() );
-    if( auto cat_y = dynamic_cast<const CategoryVXLink *>(&y) )
+    if( cat_y )
         yi = cat_y->GetLacingIndex();
     else
         yi = lacing->GetIndexForNode( y.GetChildX() );

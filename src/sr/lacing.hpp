@@ -47,6 +47,9 @@ public:
     // Returns the lacing index value for the candidate.
     int GetIndexForNode( TreePtr<Node> node ) const;
 
+    // Equivalent to GetIndexForNode(lnode) < GetIndexForNode(rnode)
+    bool IsIndexLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
+
 private:    
     class DecisionNode;
     
@@ -64,7 +67,6 @@ private:
     {        
     public:
         virtual ~DecisionNode();
-        virtual int GetLacingIndex( TreePtr<Node> node ) const = 0;
         virtual string Render(string pre="") = 0;
     };
     
@@ -72,22 +74,27 @@ private:
     {
     public:
         DecisionNodeLocalMatch( TreePtr<Node> category, 
-                         shared_ptr<DecisionNode> if_yes,         
-                         shared_ptr<DecisionNode> if_no );
-        int GetLacingIndex( TreePtr<Node> node ) const override;
+                                shared_ptr<DecisionNode> if_yes,         
+                                shared_ptr<DecisionNode> if_no,
+                                int min_lacing_index,
+                                int max_lacing_index );
+        const DecisionNode *GetNextDecisionNode( TreePtr<Node> node ) const;
+        pair<int, int> GetLacingRange() const;
         string Render(string pre) override;
         
     private:
         TreePtr<Node> category;
         shared_ptr<DecisionNode> if_yes;
         shared_ptr<DecisionNode> if_no;        
+        int min_lacing_index;
+        int max_lacing_index;
     };
     
     class DecisionNodeLeaf : public DecisionNode
     {
     public:
         DecisionNodeLeaf( int lacing_index );
-        int GetLacingIndex( TreePtr<Node> node ) const override;
+        int GetLacingIndex() const;
         string Render(string pre) override;
         
     private:
@@ -108,7 +115,7 @@ private:
     map<TreePtr<Node>, list<pair<int, int>>, SimpleCompare> cats_to_lacing_range_lists;
     // Decision tree stuff
     map<TreePtr<Node>, set<int>> cats_to_lacing_sets;
-    shared_ptr<DecisionNode> decision_tree;
+    shared_ptr<DecisionNode> decision_tree_root;
 };
     
 };

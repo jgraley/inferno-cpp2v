@@ -1,6 +1,8 @@
 #include "lacing.hpp"
 #include "agents/agent.hpp"
 
+#include <limits>
+
 using namespace SR;    
 
 Lacing::Lacing() :
@@ -30,9 +32,80 @@ const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> arche
 }
 
 
-int Lacing::GetIndexForNode( TreePtr<Node> node ) const
+int Lacing::GetIndexForNode( TreePtr<Node> target_node ) const
 {
-    return decision_tree->GetLacingIndex( node );
+    const Lacing::DecisionNode *decision_node = decision_tree_root.get();
+    while(true) 
+    {
+        if( auto dn_leaf = dynamic_cast<const DecisionNodeLeaf *>(decision_node) )
+        {
+            return dn_leaf->GetLacingIndex();
+        }
+        else if( auto dn_local_match = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node) )
+        {
+            //dn_local_match->GetLacingRange();
+            decision_node = dn_local_match->GetNextDecisionNode( target_node );
+        }
+        else
+        {
+            ASSERTFAIL();            
+        }
+    }
+}
+
+
+bool Lacing::IsIndexLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
+{
+    const Lacing::DecisionNode *decision_node_l = decision_tree_root.get();
+    const Lacing::DecisionNode *decision_node_r = decision_tree_root.get();
+    int lmin=0, lmax=numeric_limits<int>::max(), 
+        rmin=0, rmax=numeric_limits<int>::max();
+    while(true) 
+    {
+        // Advance left
+        if( auto dn_local_match_l = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_l) )
+        {
+            decision_node_l = dn_local_match_l->GetNextDecisionNode( lnode );
+            tie(lmin, lmax) = dn_local_match_l->GetLacingRange();
+        }
+        else if( auto dn_leaf_l = dynamic_cast<const DecisionNodeLeaf *>(decision_node_l) )
+        {
+            if( lmin != lmax )
+                lmin = lmax = dn_leaf_l->GetLacingIndex();      
+        }
+        else 
+        {
+            ASSERTFAIL();            
+        }
+        
+        // Do we have a result yet?
+        if( lmax < rmin )
+            return true;
+        if( lmin >= rmax )
+            return false;
+
+        // Advance right
+        if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
+        {
+            decision_node_r = dn_local_match_r->GetNextDecisionNode( rnode );
+            tie(rmin, rmax) = dn_local_match_r->GetLacingRange();
+        }
+        else if( auto dn_leaf_r = dynamic_cast<const DecisionNodeLeaf *>(decision_node_r) )
+        {
+            if( rmin != rmax )
+                rmin = rmax = dn_leaf_r->GetLacingIndex();
+        }
+        else 
+        {
+            ASSERTFAIL();            
+        }
+        
+        // Do we have a result yet?
+        if( lmax < rmin )
+            return true;
+        if( lmin >= rmax )
+            return false;
+    }
 }
 
 
@@ -247,10 +320,10 @@ void Lacing::BuildDecisionTree()
     for( int i=0; i<ncats; i++ )
         possible_lacing_indices.insert(i);
         
-    decision_tree = MakeDecisionSubtree( possible_lacing_indices );
+    decision_tree_root = MakeDecisionSubtree( possible_lacing_indices );
     
     TRACE("Decision tree to obtain lacing index given any X node\n")
-         ("\n"+decision_tree->Render());
+         ("\n"+decision_tree_root->Render());
 }
 
 
@@ -326,9 +399,13 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
     shared_ptr<DecisionNode> yes = MakeDecisionSubtree( best_inter );
     shared_ptr<DecisionNode> no = MakeDecisionSubtree( best_setdiff );
     
+    // Use the set<int>'s ordering to get min and max elements easily
+    int min_lacing_index = FrontOf(possible_lacing_indices);
+    int max_lacing_index = BackOf(possible_lacing_indices);
+ 
     // Generate a decision node that should decide based on IsLocalMatch
     // during the unwind.
-    return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no );    
+   return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no, min_lacing_index, max_lacing_index );    
 }
 
 
@@ -351,19 +428,27 @@ Lacing::DecisionNode::~DecisionNode()
 
 Lacing::DecisionNodeLocalMatch::DecisionNodeLocalMatch( TreePtr<Node> category_, 
                                                         shared_ptr<DecisionNode> if_yes_,         
-                                                        shared_ptr<DecisionNode> if_no_ ) :
+                                                        shared_ptr<DecisionNode> if_no_,
+                                                        int min_lacing_index_,
+                                                        int max_lacing_index_ ) :
     category( category_ ),
     if_yes( if_yes_ ),
-    if_no( if_no_ )
+    if_no( if_no_ ),
+    min_lacing_index( min_lacing_index_ ),
+    max_lacing_index( max_lacing_index_ )
 {
 }
     
 
-int Lacing::DecisionNodeLocalMatch::GetLacingIndex( TreePtr<Node> node ) const
+const Lacing::DecisionNode *Lacing::DecisionNodeLocalMatch::GetNextDecisionNode( TreePtr<Node> node ) const
 {
-    return LocalMatchWithNULL( category, node ) ?
-           if_yes->GetLacingIndex( node ) :
-           if_no->GetLacingIndex( node );
+    return LocalMatchWithNULL( category, node ) ? if_yes.get() : if_no.get();
+}
+
+
+pair<int, int> Lacing::DecisionNodeLocalMatch::GetLacingRange() const 
+{
+    return make_pair( min_lacing_index, max_lacing_index );
 }
 
 
@@ -382,9 +467,8 @@ Lacing::DecisionNodeLeaf::DecisionNodeLeaf( int lacing_index_ ) :
 }
 
 
-int Lacing::DecisionNodeLeaf::GetLacingIndex( TreePtr<Node> node ) const
+int Lacing::DecisionNodeLeaf::GetLacingIndex() const
 {
-    (void)node; 
     return lacing_index;
 }
 

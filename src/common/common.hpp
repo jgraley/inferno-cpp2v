@@ -372,12 +372,23 @@ typename T::value_type &&OnlyElementOf( T&&c )
 }
 
 
-// Provide somehting like front() that works on sets and maps
+// Provide something like front() that works on sets and maps
 template<typename T>
 const typename T::value_type &FrontOf( const T&c )
 {
     ASSERT( !c.empty() );
     return *(c.begin());
+}
+
+
+// Provide something like back() that works on sets and maps
+template<typename T>
+const typename T::value_type &BackOf( const T&c )
+{
+    ASSERT( !c.empty() );
+    typename T::const_iterator it = c.end();
+    --it;
+    return *it;
 }
 
 // ----------------------- make_unique<>() -----------------------
