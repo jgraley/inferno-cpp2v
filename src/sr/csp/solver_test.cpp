@@ -41,7 +41,7 @@ void SolverTest::Run( const SolutionReportFunction &solution_report_function,
     { 
         for( const Solution &s : reference_solutions )
         {
-            ASSERT( !IsSubset( assigns, s ) );
+            ASSERT( !IsIncludes( assigns, s ) );
         }
     };
     solver_under_test->Run( under_test_srl, under_test_rrl );

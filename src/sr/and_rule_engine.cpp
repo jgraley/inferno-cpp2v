@@ -435,7 +435,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         // If required plinks are not a subset of the current solve, the
         // constraint's requirements will not be met. Hopefully another
         // AndRuleEngine will (TODO check this).
-        if( IsSubset( required_plinks, current_solve_plinks ) )
+        if( IsIncludes( required_plinks, current_solve_plinks ) )
             expressions_for_current_solve.insert(bexpr);    
     }        
      
