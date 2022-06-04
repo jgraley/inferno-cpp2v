@@ -32,6 +32,8 @@
 
 #define CHECK_FOR_MASTER_KEYERS
 
+#define EXTRA_CONDENSED_CONSTRINTS
+
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
@@ -435,7 +437,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         // If required plinks are not a subset of the current solve, the
         // constraint's requirements will not be met. Hopefully another
         // AndRuleEngine will (TODO check this).
-        if( IsIncludes( required_plinks, current_solve_plinks ) )
+        if( IsIncludes( current_solve_plinks, required_plinks ) )
             expressions_for_current_solve.insert(bexpr);    
     }        
      
@@ -447,6 +449,28 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         // Uniquify sets of expressions wrt required_plinks
         expressions_condensed[required_plinks].insert( bexpr );
     }
+    
+#ifdef EXTRA_CONDENSED_CONSTRINTS
+    bool changed;
+    do
+    {
+        changed = false;
+        for( auto &p1 : expressions_condensed )
+        {
+            for( auto &p2 : expressions_condensed )
+            {
+                if( p1.first != p2.first && IsIncludes(p1.first, p2.first) )
+                {
+                    p1.second = UnionOf( p1.second, p2.second );
+                    expressions_condensed.erase(p2.first);
+                    changed = true;
+                    goto DONE;
+                }
+            }
+        }
+        DONE:;
+    } while( changed );
+#endif    
     
     for( auto p : expressions_condensed )
     {

@@ -247,7 +247,7 @@ inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
 template< typename C1, typename C2 >
 inline bool IsIncludes( const C1 &c1, const C2 &c2 )
 {
-    return includes( c2.begin(), c2.end(), c1.begin(), c1.end(), c1.key_comp() );
+    return includes( c1.begin(), c1.end(), c2.begin(), c2.end(), c1.key_comp() );
 }
 
 

@@ -53,6 +53,7 @@ public:
         COMMA 
     };    
     
+    // Note this is ordered - increasing is more knowledge
     enum class KnowledgeLevel
     {
         NONE,    // can have NULL knowledge in kit

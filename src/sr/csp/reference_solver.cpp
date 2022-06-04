@@ -77,10 +77,12 @@ void ReferenceSolver::Plan::DeduceVariables()
             }
             if( arbitrary_forced_variables.count(v) == 1 )
             {
-                // Enfoce rule #525 - the arbitrary forces can be outside the
-                // domain and won't have knowledge nuggests. This is OK as long
+                // Enforce rule #525 - the arbitrary forces can be outside the
+                // domain and won't have knowledge nuggets. This is OK as long
                 // as constraints that have to deal with them don't need nuggets.
-                ASSERT( c->GetRequiredKnowledgeLevel() < SYM::Expression::KnowledgeLevel::NUGGETS );
+                //ASSERT( c->GetRequiredKnowledgeLevel() < SYM::Expression::KnowledgeLevel::NUGGETS )
+                //      ( "Constraint:\n")(c)("\nrequires NUGGETS but ")(v)(" is arbitrary\n");
+                // Re-opening ticket #525 to resolve - we need more precise resolution in checks
             }
         }        
         for( int i : c_free_var_indices )
