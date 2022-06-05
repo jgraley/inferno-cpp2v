@@ -122,7 +122,6 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
         typedef SymbolExpression NominalType;
         AllIdentifiersNamedOperator( const IdentifierByNameAgent *iba,
                                      string name );
-        KnowledgeLevel GetRequiredKnowledgeLevel() const override;
         list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
         unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;

@@ -305,9 +305,9 @@ KnowledgeToSymbolOperator::KnowledgeToSymbolOperator( shared_ptr<SymbolExpressio
 }    
 
 
-Expression::KnowledgeLevel KnowledgeToSymbolOperator::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets KnowledgeToSymbolOperator::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NUGGETS;
+    return GetRequiredVariables();
 }
 
 

@@ -52,18 +52,12 @@ public:
         CONDITIONAL,
         COMMA 
     };    
-    
-    // Note this is ordered - increasing is more knowledge
-    enum class KnowledgeLevel
-    {
-        NONE,    // can have NULL knowledge in kit
-        GENERAL, // needs knowledge but does not use nuggets
-        NUGGETS  // uses nuggets
-    };
-            
+                
+    typedef set<SR::PatternLink> VariablesRequiringNuggets;
+                
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
-    virtual KnowledgeLevel GetRequiredKnowledgeLevel() const;
+    virtual VariablesRequiringNuggets GetVariablesRequiringNuggets() const;
 
     void ForDepthFirstWalk( function<void(const Expression *)> f ) const;
     

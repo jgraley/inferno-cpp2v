@@ -21,9 +21,12 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
-Expression::KnowledgeLevel Expression::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets Expression::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NONE;
+    VariablesRequiringNuggets k;
+    for( shared_ptr<Expression> p : GetOperands() )
+        k = UnionOf( k, p->GetVariablesRequiringNuggets() );
+    return k;
 }
 
 

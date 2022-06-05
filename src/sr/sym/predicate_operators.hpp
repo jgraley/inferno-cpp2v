@@ -112,7 +112,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;

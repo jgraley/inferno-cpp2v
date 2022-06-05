@@ -70,7 +70,7 @@ class AllGreaterOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllGreaterOperator( shared_ptr<SymbolExpression> a );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
@@ -88,7 +88,7 @@ class AllLessOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllLessOperator( shared_ptr<SymbolExpression> a );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
@@ -106,7 +106,7 @@ class AllGreaterOrEqualOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllGreaterOrEqualOperator( shared_ptr<SymbolExpression> a );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
@@ -124,7 +124,7 @@ class AllLessOrEqualOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllLessOrEqualOperator( shared_ptr<SymbolExpression> a );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
@@ -145,7 +145,6 @@ class AllCouplingEquivalentOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllCouplingEquivalentOperator( shared_ptr<SymbolExpression> a );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
@@ -163,7 +162,6 @@ class AllOfKindOperator : public SYM::SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllOfKindOperator( TreePtr<Node> archetype_node );
-    KnowledgeLevel GetRequiredKnowledgeLevel() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;

@@ -226,9 +226,9 @@ IndexComparisonOperator::IndexComparisonOperator( shared_ptr<SymbolExpression> a
 }    
     
 
-Expression::KnowledgeLevel IndexComparisonOperator::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets IndexComparisonOperator::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NUGGETS;
+    return GetRequiredVariables();
 }
 
 

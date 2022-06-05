@@ -50,11 +50,11 @@ private:
         typedef map< set<VariableId>, shared_ptr<SYM::SymbolExpression>> GivensToExpression;
         map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;       
-        SYM::Expression::KnowledgeLevel required_knowledge_level; 
+        SYM::Expression::VariablesRequiringNuggets required_knowledge_level; 
     } plan;
 
     const set<VariableId> &GetVariables() const override;
-    SYM::Expression::KnowledgeLevel GetRequiredKnowledgeLevel() const override;
+    SYM::Expression::VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     virtual void Start( const SR::TheKnowledge *knowledge_ );    
     bool IsConsistent( const Assignments &assignments ) const override;
     unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,

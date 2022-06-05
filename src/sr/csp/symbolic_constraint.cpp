@@ -73,12 +73,12 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
 
 void SymbolicConstraint::Plan::DetermineKnowledgeRequirement()
 {
-    required_knowledge_level = SYM::Expression::KnowledgeLevel::NONE;
+    required_knowledge_level.clear();
     
     consistency_expression->ForDepthFirstWalk( [&](const SYM::Expression *expr)
     {
-        required_knowledge_level = max( required_knowledge_level, 
-                                        expr->GetRequiredKnowledgeLevel() );
+        required_knowledge_level = UnionOf( required_knowledge_level, 
+                                            expr->GetVariablesRequiringNuggets() );
     } );
     
     for( const auto &target_suggestions : suggestion_expressions )
@@ -87,8 +87,8 @@ void SymbolicConstraint::Plan::DetermineKnowledgeRequirement()
         {
             suggestion.second->ForDepthFirstWalk( [&](const SYM::Expression *expr)
             {
-                required_knowledge_level = max( required_knowledge_level, 
-                                                expr->GetRequiredKnowledgeLevel() );            
+                required_knowledge_level = UnionOf( required_knowledge_level, 
+                                                    expr->GetVariablesRequiringNuggets() );            
             } );
         }
     }    
@@ -107,7 +107,7 @@ const set<VariableId> &SymbolicConstraint::GetVariables() const
 }
 
 
-SYM::Expression::KnowledgeLevel SymbolicConstraint::GetRequiredKnowledgeLevel() const
+SYM::Expression::VariablesRequiringNuggets SymbolicConstraint::GetVariablesRequiringNuggets() const
 {
     return plan.required_knowledge_level;
 }
@@ -115,18 +115,8 @@ SYM::Expression::KnowledgeLevel SymbolicConstraint::GetRequiredKnowledgeLevel() 
 
 void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
 {
-    switch( plan.required_knowledge_level )
-    {
-    case SYM::Expression::KnowledgeLevel::NONE:
-        // Prove that these expressions really don't need the knowledge
-        // (kind of a self-test)
-        knowledge = nullptr;
-        break;
-    default:
-        knowledge = knowledge_;
-        ASSERT( knowledge );
-        break;
-    }
+    ASSERT( knowledge_ );
+    knowledge = knowledge_;
 }   
 
 

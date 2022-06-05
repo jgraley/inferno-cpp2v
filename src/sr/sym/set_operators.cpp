@@ -127,9 +127,9 @@ AllGreaterOperator::AllGreaterOperator( shared_ptr<SymbolExpression> a_ ) :
 }
 
     
-Expression::KnowledgeLevel AllGreaterOperator::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets AllGreaterOperator::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NUGGETS;
+    return GetRequiredVariables();
 }
 
 
@@ -166,9 +166,9 @@ AllLessOperator::AllLessOperator( shared_ptr<SymbolExpression> a_ ) :
 }
 
     
-Expression::KnowledgeLevel AllLessOperator::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets AllLessOperator::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NUGGETS;
+    return GetRequiredVariables();
 }
 
 
@@ -205,9 +205,9 @@ AllGreaterOrEqualOperator::AllGreaterOrEqualOperator( shared_ptr<SymbolExpressio
 }
 
     
-Expression::KnowledgeLevel AllGreaterOrEqualOperator::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets AllGreaterOrEqualOperator::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NUGGETS;
+    return GetRequiredVariables();
 }
 
 
@@ -244,9 +244,9 @@ AllLessOrEqualOperator::AllLessOrEqualOperator( shared_ptr<SymbolExpression> a_ 
 }
 
     
-Expression::KnowledgeLevel AllLessOrEqualOperator::GetRequiredKnowledgeLevel() const
+Expression::VariablesRequiringNuggets AllLessOrEqualOperator::GetVariablesRequiringNuggets() const
 {
-    return KnowledgeLevel::NUGGETS;
+    return GetRequiredVariables();
 }
 
 
@@ -283,12 +283,6 @@ AllCouplingEquivalentOperator::AllCouplingEquivalentOperator( shared_ptr<SymbolE
 }
 
     
-Expression::KnowledgeLevel AllCouplingEquivalentOperator::GetRequiredKnowledgeLevel() const
-{
-    return KnowledgeLevel::GENERAL;
-}
-
-
 list<shared_ptr<SymbolExpression>> AllCouplingEquivalentOperator::GetSymbolOperands() const
 {
     return {a};
@@ -319,12 +313,6 @@ Expression::Precedence AllCouplingEquivalentOperator::GetPrecedence() const
 AllOfKindOperator::AllOfKindOperator( TreePtr<Node> archetype_node_ ) :
     archetype_node(archetype_node_) 
 {
-}
-
-    
-Expression::KnowledgeLevel AllOfKindOperator::GetRequiredKnowledgeLevel() const
-{
-    return KnowledgeLevel::GENERAL;
 }
 
 

@@ -55,7 +55,7 @@ public:
      * 
      * @return A list of variables affected by this constraint.
      */
-    virtual SYM::Expression::KnowledgeLevel GetRequiredKnowledgeLevel() const = 0;
+    virtual SYM::Expression::VariablesRequiringNuggets GetVariablesRequiringNuggets() const = 0;
 
     /**
      * Set the values of the forced varibles
