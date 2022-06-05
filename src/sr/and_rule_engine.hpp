@@ -60,12 +60,13 @@ public:
     
     ~AndRuleEngine();
     
-    const struct Plan : public virtual Traceable
+    struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo,  
               PatternLink root_plink, 
               const set<PatternLink> &master_plinks,
               const set<PatternLink> &master_keyer_plinks );
+        void PlanningStageFive();
         void PopulateMasterBoundaryStuff( PatternLink link,
                                           const set<Agent *> &master_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
@@ -129,6 +130,8 @@ public:
         set<Agent *> reached_agents;
         set<PatternLink> reached_links; 
     } plan;
+    
+    void PlanningStageFive();      
     
 private:        
     void StartCSPSolver( XLink root_xlink );

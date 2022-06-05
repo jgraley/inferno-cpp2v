@@ -61,6 +61,10 @@ public:
     {
         plan.PlanningStageThree(master_keyers); 
     }
+    void PlanningStageFive()
+    {
+        plan.PlanningStageFive(); 
+    }
                     
 private:
     struct Plan : public virtual Traceable
@@ -83,6 +87,7 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree(set<PatternLink> master_keyers);
+        void PlanningStageFive();
         void PlanCompare();
         void PlanReplace();
         void Dump();

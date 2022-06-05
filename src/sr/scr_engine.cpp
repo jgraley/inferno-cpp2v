@@ -201,7 +201,7 @@ void SCREngine::Plan::ConfigureAgents()
 }
 
 
- void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
+void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
@@ -220,8 +220,6 @@ void SCREngine::Plan::ConfigureAgents()
     // Recurse into subordinate SCREngines
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningStageThree(all_keyer_plinks);    
-        
-    Dump();
 } 
 
 
@@ -251,6 +249,19 @@ void SCREngine::Plan::PlanReplace()
         }
     }
 }
+
+
+void SCREngine::Plan::PlanningStageFive()
+{    
+    TRACE("Planning stage five\n");
+
+    and_rule_engine->PlanningStageFive();
+    
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+        p.second->PlanningStageFive();    
+        
+    Dump();
+} 
 
 
 void SCREngine::Plan::Dump()

@@ -51,6 +51,12 @@ void VNSequence::PlanningStageFour()
 }
 
 
+void VNSequence::PlanningStageFive( int step_index )
+{
+    steps[step_index]->PlanningStageFive();
+}
+
+
 void VNSequence::SetMaxReps( int step_index, int n, bool e ) 
 { 
     VNTransformation::SetMaxReps(n, e);

@@ -74,6 +74,13 @@ void CompareReplace::Plan::PlanningStageThree()
 }                                      
 
 
+void CompareReplace::Plan::PlanningStageFive()
+{
+    // Third, create subordinate AndRuleEngines
+    scr_engine->PlanningStageFive();
+}                                      
+
+
 string CompareReplace::Plan::GetTrace() const 
 {
     return algo->GetName() + ".plan" + algo->GetSerialString();
@@ -102,6 +109,12 @@ void CompareReplace::PlanningStageTwo()
 void CompareReplace::PlanningStageThree()
 {
     plan.PlanningStageThree();
+}
+
+
+void CompareReplace::PlanningStageFive()
+{
+    plan.PlanningStageFive();
 }
 
 

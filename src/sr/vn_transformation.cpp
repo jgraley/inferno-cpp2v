@@ -79,6 +79,14 @@ void VNTransformation::PlanningStageThree()
 }
 
 
+void VNTransformation::PlanningStageFive()
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    top_level_engine->PlanningStageFive();
+}
+
+
 void VNTransformation::SetMaxReps( int n, bool e ) 
 { 
     SCREngine::SetMaxReps(n, e); 

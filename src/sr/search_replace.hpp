@@ -41,6 +41,7 @@ private:
         void PlanningStageOne(VNSequence *vn_sequence);
         void PlanningStageTwo();
         void PlanningStageThree();
+        void PlanningStageFive();
         string GetTrace() const; // used for debug
 
         TreePtr<Node> compare_pattern;
@@ -58,6 +59,7 @@ public:
     void PlanningStageOne(VNSequence *vn_sequence);
     void PlanningStageTwo();
     void PlanningStageThree();
+    void PlanningStageFive();
                                 
     using Transformation::operator();
     

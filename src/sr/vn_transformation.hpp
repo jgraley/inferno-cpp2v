@@ -38,6 +38,7 @@ public:
     void PlanningStageOne( VNSequence *vn_sequence );
     void PlanningStageTwo();
     void PlanningStageThree();
+    void PlanningStageFive();
     
     static void SetMaxReps( int n, bool e );
     void SetStopAfter( vector<int> ssa, int d=0 );    

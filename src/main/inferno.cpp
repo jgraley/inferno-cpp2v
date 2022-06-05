@@ -305,7 +305,15 @@ Inferno::Plan::Plan(Inferno *algo_) :
           [this]()
           { 
               algo->vn_sequence->PlanningStageFour(); 
-          } }    
+          } },    
+        { Progress::PLANNING_FIVE, 
+          true, false, false, false,
+          "Planning stage five", 
+          [this](const Step &sp)
+          { 
+              algo->vn_sequence->PlanningStageFive(sp.step_index); 
+          }, 
+          nullptr }
     } );         
                 
     // X transformation

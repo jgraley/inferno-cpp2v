@@ -133,6 +133,18 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     CreateMasterCouplingSymbolics();    
     SymbolicRewrites();
     
+    // ------------------ Configure subordinates ---------------------
+    // Do this last to keep all the rest of the planning trace/dumps
+    // all together in the same pre-order sequence instead of mixed pre 
+    // and post order
+    set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
+    set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
+    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );          
+}
+
+
+void AndRuleEngine::Plan::PlanningStageFive()
+{
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list);
@@ -148,14 +160,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // references; only constraints held onto by solver will remain.
     solver_holder->Dump();    
     solver_holder->CheckPlan();   
-
-    // ------------------ Configure subordinates ---------------------
-    // Do this last to keep all the rest of the planning trace/dumps
-    // all together in the same pre-order sequence instead of mixed pre 
-    // and post order
-    set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
-    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );          
+    
+    // ------------------ Stage five on subordinates ---------------------
+	for( auto p : my_free_abnormal_engines )
+		p.second->PlanningStageFive();
+	for( auto p : my_evaluator_abnormal_engines )
+		p.second->PlanningStageFive();
+	for( auto p : my_multiplicity_engines )
+		p.second->PlanningStageFive();    
 }
 
 
@@ -410,6 +422,18 @@ void AndRuleEngine::Plan::SymbolicRewrites()
     //TRACE("expressions_from_agents:\n")(expressions_from_agents)("\n");
     expressions_split = SYM::PreprocessForEngine()(expressions_from_agents);
     //TRACE("expressions_split:\n")(expressions_split)("\n");
+
+    for( auto bexpr : expressions_split )
+    {
+        // Constraint will require these variables
+        set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
+        
+        // If required plinks are not a subset of the current solve, the
+        // constraint's requirements will not be met. Hopefully another
+        // AndRuleEngine will (TODO check this).
+        if( IsIncludes( current_solve_plinks, required_plinks ) )
+            expressions_for_current_solve.insert(bexpr);    
+    }        
 }
 
 
@@ -429,18 +453,6 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
 {
-    for( auto bexpr : expressions_split )
-    {
-        // Constraint will require these variables
-        set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
-        
-        // If required plinks are not a subset of the current solve, the
-        // constraint's requirements will not be met. Hopefully another
-        // AndRuleEngine will (TODO check this).
-        if( IsIncludes( current_solve_plinks, required_plinks ) )
-            expressions_for_current_solve.insert(bexpr);    
-    }        
-     
     for( auto bexpr : expressions_for_current_solve )
     {		
         // Constraint will require these variables
@@ -548,6 +560,12 @@ string AndRuleEngine::Plan::GetTrace() const
 }
 
 
+void AndRuleEngine::PlanningStageFive()
+{
+    plan.PlanningStageFive();
+}
+
+
 void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 {    
     // Determine the full set of forces 
@@ -564,6 +582,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     master_and_root_links[plan.root_plink] = root_xlink;
     
     TRACE("Starting solver\n");
+    ASSERT( plan.solver_holder );
     plan.solver_holder->Start( master_and_root_links, knowledge );
 }
 
