@@ -143,11 +143,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 }
 
 
-void AndRuleEngine::Plan::PlanningStageFive()
+void AndRuleEngine::Plan::PlanningStageFive(shared_ptr<TheKnowledge> knowledge_)
 {
+    algo->knowledge = knowledge_.get();
+    
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
-    CreateMyConstraints(constraints_list);
+    CreateMyConstraints(constraints_list, knowledge_);
+    
     // Master boundary links may not be in our domain if eg they got 
     // deleted by master replace. So root_plink is the only one that
     // we can guarantee will be in the domain.
@@ -163,11 +166,11 @@ void AndRuleEngine::Plan::PlanningStageFive()
     
     // ------------------ Stage five on subordinates ---------------------
 	for( auto p : my_free_abnormal_engines )
-		p.second->PlanningStageFive();
+		p.second->PlanningStageFive(knowledge_);
 	for( auto p : my_evaluator_abnormal_engines )
-		p.second->PlanningStageFive();
+		p.second->PlanningStageFive(knowledge_);
 	for( auto p : my_multiplicity_engines )
-		p.second->PlanningStageFive();    
+		p.second->PlanningStageFive(knowledge_);    
 }
 
 
@@ -451,7 +454,8 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 }
 
 
-void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list )
+void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
+                                               shared_ptr<TheKnowledge> knowledge )
 {
     for( auto bexpr : expressions_for_current_solve )
     {		
@@ -492,7 +496,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
 
 		SYM::PredicateAnalysis::CheckRegularPredicateForm( bexpr );
 
-        auto c = make_shared<CSP::SymbolicConstraint>(bexpr);
+        auto c = make_shared<CSP::SymbolicConstraint>(bexpr, knowledge);
         constraints_list.push_back(c);    
     }        
 }
@@ -560,9 +564,9 @@ string AndRuleEngine::Plan::GetTrace() const
 }
 
 
-void AndRuleEngine::PlanningStageFive()
+void AndRuleEngine::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
 {
-    plan.PlanningStageFive();
+    plan.PlanningStageFive(knowledge);
 }
 
 

@@ -79,11 +79,11 @@ void VNTransformation::PlanningStageThree()
 }
 
 
-void VNTransformation::PlanningStageFive()
+void VNTransformation::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    top_level_engine->PlanningStageFive();
+    top_level_engine->PlanningStageFive(knowledge);
 }
 
 

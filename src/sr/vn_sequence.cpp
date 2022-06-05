@@ -53,7 +53,7 @@ void VNSequence::PlanningStageFour()
 
 void VNSequence::PlanningStageFive( int step_index )
 {
-    steps[step_index]->PlanningStageFive();
+    steps[step_index]->PlanningStageFive(knowledge);
 }
 
 

@@ -18,7 +18,7 @@ public:
         PLANNING_TWO,
         PLANNING_THREE,
         PLANNING_FOUR,
-        PLANNING_FIVE,
+        PLANNING_FIVE, // See #545
         PARSING, 
         TRANSFORMING,
         RENDERING

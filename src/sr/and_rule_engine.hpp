@@ -66,7 +66,7 @@ public:
               PatternLink root_plink, 
               const set<PatternLink> &master_plinks,
               const set<PatternLink> &master_keyer_plinks );
-        void PlanningStageFive();
+        void PlanningStageFive(shared_ptr<TheKnowledge> knowledge);
         void PopulateMasterBoundaryStuff( PatternLink link,
                                           const set<Agent *> &master_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
@@ -90,7 +90,8 @@ public:
 
         // CSP solver stuff
         void DeduceCSPVariables();
-        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list );
+        void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
+                                  shared_ptr<TheKnowledge> knowledge );
         void Dump();
 
         string GetTrace() const; // used for debug
@@ -131,7 +132,7 @@ public:
         set<PatternLink> reached_links; 
     } plan;
     
-    void PlanningStageFive();      
+    void PlanningStageFive(shared_ptr<TheKnowledge> knowledge);      
     
 private:        
     void StartCSPSolver( XLink root_xlink );

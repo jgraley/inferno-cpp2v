@@ -251,14 +251,14 @@ void SCREngine::Plan::PlanReplace()
 }
 
 
-void SCREngine::Plan::PlanningStageFive()
+void SCREngine::Plan::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
 {    
     TRACE("Planning stage five\n");
 
-    and_rule_engine->PlanningStageFive();
+    and_rule_engine->PlanningStageFive(knowledge);
     
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageFive();    
+        p.second->PlanningStageFive(knowledge);    
         
     Dump();
 } 

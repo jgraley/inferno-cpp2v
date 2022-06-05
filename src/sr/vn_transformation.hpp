@@ -14,6 +14,7 @@ namespace SR
 
 class CompareReplace;
 class VNSequence;
+class TheKnowledge;
 
 /**
  * Vida Nova Transformation    
@@ -38,7 +39,7 @@ public:
     void PlanningStageOne( VNSequence *vn_sequence );
     void PlanningStageTwo();
     void PlanningStageThree();
-    void PlanningStageFive();
+    void PlanningStageFive(shared_ptr<TheKnowledge> knowledge);
     
     static void SetMaxReps( int n, bool e );
     void SetStopAfter( vector<int> ssa, int d=0 );    
