@@ -145,7 +145,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
 void AndRuleEngine::Plan::PlanningStageFive(shared_ptr<TheKnowledge> knowledge_)
 {
-    algo->knowledge = knowledge_.get();
+    algo->knowledge = knowledge_;
     
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
@@ -587,7 +587,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
     
     TRACE("Starting solver\n");
     ASSERT( plan.solver_holder );
-    plan.solver_holder->Start( master_and_root_links, knowledge );
+    plan.solver_holder->Start( master_and_root_links, knowledge.get() );
 }
 
 
@@ -631,7 +631,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            e->Compare( xlink, solution_for_subordinates, knowledge );
+            e->Compare( xlink, solution_for_subordinates );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -671,7 +671,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-            e->Compare( xe_link, solution_for_subordinates, knowledge );
+            e->Compare( xe_link, solution_for_subordinates );
         }
     }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
@@ -679,7 +679,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         for( XLink xe_link : xssl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, solution_for_subordinates, knowledge );
+            e->Compare( xe_link, solution_for_subordinates );
         }
     }    
     else
@@ -703,9 +703,9 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 #endif
     
 #ifdef NLQ_TEST
-    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, knowledge );
+    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, knowledge.get() );
 #else    
-    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, knowledge );
+    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, knowledge.get() );
 #endif
     
     int i=0;
@@ -733,7 +733,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    e->Compare( link, &solution_for_subordinates, knowledge );
+                    e->Compare( link, &solution_for_subordinates );
                 }
             }                    
             
@@ -788,15 +788,13 @@ void AndRuleEngine::RegenerationPass()
 
 
 void AndRuleEngine::Compare( XLink root_xlink,
-                             const SolutionMap *master_solution_,
-                             const TheKnowledge *knowledge_ )
+                             const SolutionMap *master_solution_ )
 {
     INDENT("C");
     ASSERT( root_xlink );
     used = true;
          
     master_solution = master_solution_;    
-    knowledge = knowledge_;
     
     LocatedLink root_link( plan.root_plink, root_xlink );
 
@@ -846,9 +844,8 @@ void AndRuleEngine::Compare( XLink root_xlink,
 void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
     SolutionMap empty_solution;
-    TheKnowledge empty_knowledge;
     XLink root_xlink = XLink::CreateDistinct(root_xnode);
-    Compare( root_xlink, &empty_solution, &empty_knowledge );
+    Compare( root_xlink, &empty_solution );
 }
 
 

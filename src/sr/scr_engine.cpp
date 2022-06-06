@@ -442,8 +442,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     // with it.
     const TheKnowledge *knowledge = plan.vn_sequence->GetTheKnowledge();
     plan.and_rule_engine->Compare( root_xlink, 
-                                   master_solution, 
-                                   knowledge );
+                                   master_solution );
     TRACE("Search got a match\n");
            
     *p_root_xnode = Replace(master_solution);

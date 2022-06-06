@@ -151,8 +151,7 @@ private:
     
 public:
     void Compare( XLink root_xlink,
-                  const SolutionMap *master_solution,
-                  const TheKnowledge *knowledge );
+                  const SolutionMap *master_solution );
     void Compare( TreePtr<Node> root_xnode );
 
     const SolutionMap &GetSolution();
@@ -169,7 +168,7 @@ public:
 
 private:
     // Information about the X tree
-    const TheKnowledge *knowledge;
+    shared_ptr<const TheKnowledge> knowledge;
 
     // Keys are mapped agaist agents, even though one of the links into
     // the agent is the keyer. This is well-defined and avoids merging

@@ -16,7 +16,7 @@
 using namespace CSP;
 
 SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
-                                        shared_ptr<SR::TheKnowledge> knowledge ) :
+                                        shared_ptr<const SR::TheKnowledge> knowledge ) :
     plan( this, expression, knowledge )
 {
 }
@@ -24,7 +24,7 @@ SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expre
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_,
-                                shared_ptr<SR::TheKnowledge> knowledge_ ) :
+                                shared_ptr<const SR::TheKnowledge> knowledge_ ) :
     algo( algo_ ),
     consistency_expression( expression_ ),
     knowledge( knowledge_ )
