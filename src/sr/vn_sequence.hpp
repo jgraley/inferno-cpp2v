@@ -44,7 +44,6 @@ public:
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
 
-    const TheKnowledge *GetTheKnowledge();
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
     void UpdateTheKnowledge( PatternLink root_plink, XLink root_xlink );

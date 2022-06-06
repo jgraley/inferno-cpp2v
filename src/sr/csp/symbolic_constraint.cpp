@@ -116,10 +116,9 @@ SYM::Expression::VariablesRequiringNuggets SymbolicConstraint::GetVariablesRequi
 }
 
 
-void SymbolicConstraint::Start( const SR::TheKnowledge *knowledge_ )
+void SymbolicConstraint::Start()
 {
-    ASSERT( knowledge_ );
-    knowledge = knowledge_;
+    ASSERT( plan.knowledge );
 }   
 
 
@@ -132,7 +131,7 @@ bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
     for( VariableId v : plan.variables )
         ASSERT( assignments.count(v)==1 );
 #endif        
-    SYM::Expression::EvalKit kit { &assignments, knowledge };    
+    SYM::Expression::EvalKit kit { &assignments, plan.knowledge.get() };    
     unique_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
     if( plan.alt_expression_for_testing )
@@ -152,7 +151,7 @@ unique_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignm
                                                                    const VariableId &target_var ) const
 {                                 
     ASSERT( target_var );
-    SYM::Expression::EvalKit kit { &assignments, knowledge };    
+    SYM::Expression::EvalKit kit { &assignments, plan.knowledge.get() };    
 
     SYM::TruthTableSolver::GivenSymbolSet givens;
     for( VariableId v : plan.variables )            

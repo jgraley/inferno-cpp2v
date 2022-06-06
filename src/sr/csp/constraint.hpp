@@ -16,7 +16,6 @@
 namespace SR
 {
 class Agent;
-class TheKnowledge;
 };
 
 namespace SYM
@@ -62,7 +61,7 @@ public:
      * 
      * @param knowledge [in] pointer to an uptodate TheKnowledge object
      */    
-    virtual void Start( const SR::TheKnowledge *knowledge ) = 0;    
+    virtual void Start() = 0;    
     
     /**
      * Test a list of variable values for consistency with this constraint. 

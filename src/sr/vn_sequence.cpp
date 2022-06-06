@@ -101,13 +101,6 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-const TheKnowledge *VNSequence::GetTheKnowledge()
-{
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    return knowledge.get();
-}
-
-
 XLink VNSequence::UniquifyDomainExtension( XLink xlink ) const
 {
     ASSERT( knowledge )("Planning stage four should have created knowledge object");

@@ -162,7 +162,7 @@ void ReferenceSolver::Start( const Assignments &forces,
 
     // Tell all the constraints about the forces
     for( shared_ptr<CSP::Constraint> c : plan.constraints )
-        c->Start( knowledge );
+        c->Start();
 
     assignments = forced_assignments;    
 }

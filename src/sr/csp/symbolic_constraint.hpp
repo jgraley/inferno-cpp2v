@@ -59,12 +59,10 @@ private:
 
     const set<VariableId> &GetVariables() const override;
     SYM::Expression::VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
-    virtual void Start( const SR::TheKnowledge *knowledge_ );    
+    virtual void Start();    
     bool IsConsistent( const Assignments &assignments ) const override;
     unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
                                                    const VariableId &var ) const override;               
-    
-    const SR::TheKnowledge *knowledge;
     
     void Dump() const;
 };
