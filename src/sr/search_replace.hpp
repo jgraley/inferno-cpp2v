@@ -41,7 +41,7 @@ private:
         void PlanningStageOne(VNSequence *vn_sequence);
         void PlanningStageTwo();
         void PlanningStageThree();
-        void PlanningStageFive(shared_ptr<TheKnowledge> knowledge);
+        void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
         string GetTrace() const; // used for debug
 
         TreePtr<Node> compare_pattern;
@@ -59,7 +59,7 @@ public:
     void PlanningStageOne(VNSequence *vn_sequence);
     void PlanningStageTwo();
     void PlanningStageThree();
-    void PlanningStageFive(shared_ptr<TheKnowledge> knowledge);
+    void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
                                 
     using Transformation::operator();
     

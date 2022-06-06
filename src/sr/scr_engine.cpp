@@ -251,7 +251,7 @@ void SCREngine::Plan::PlanReplace()
 }
 
 
-void SCREngine::Plan::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
+void SCREngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
 {    
     TRACE("Planning stage five\n");
 

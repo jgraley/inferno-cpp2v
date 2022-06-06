@@ -143,7 +143,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 }
 
 
-void AndRuleEngine::Plan::PlanningStageFive(shared_ptr<TheKnowledge> knowledge_)
+void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge_ )
 {
     algo->knowledge = knowledge_;
     
@@ -455,7 +455,7 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
-                                               shared_ptr<TheKnowledge> knowledge )
+                                               shared_ptr<const TheKnowledge> knowledge )
 {
     for( auto bexpr : expressions_for_current_solve )
     {		
@@ -564,7 +564,7 @@ string AndRuleEngine::Plan::GetTrace() const
 }
 
 
-void AndRuleEngine::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
+void AndRuleEngine::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
 {
     plan.PlanningStageFive(knowledge);
 }

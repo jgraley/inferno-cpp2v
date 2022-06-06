@@ -74,7 +74,7 @@ void CompareReplace::Plan::PlanningStageThree()
 }                                      
 
 
-void CompareReplace::Plan::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
+void CompareReplace::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
 {
     // Third, create subordinate AndRuleEngines
     scr_engine->PlanningStageFive(knowledge);
@@ -112,7 +112,7 @@ void CompareReplace::PlanningStageThree()
 }
 
 
-void CompareReplace::PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
+void CompareReplace::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
 {
     plan.PlanningStageFive(knowledge);
 }

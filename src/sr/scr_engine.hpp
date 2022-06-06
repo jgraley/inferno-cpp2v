@@ -61,7 +61,7 @@ public:
     {
         plan.PlanningStageThree(master_keyers); 
     }
-    void PlanningStageFive(shared_ptr<TheKnowledge> knowledge)
+    void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
     {
         plan.PlanningStageFive(knowledge); 
     }
@@ -87,7 +87,7 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree(set<PatternLink> master_keyers);
-        void PlanningStageFive(shared_ptr<TheKnowledge> knowledge);
+        void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
         void PlanCompare();
         void PlanReplace();
         void Dump();
