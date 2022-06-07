@@ -195,7 +195,7 @@ public:
     typedef list<XLinkBounds> XLinkBoundsList;
 
     // lower or upper can be null to exclude that limit
-    CategoryRangeResult( const SR::TheKnowledge *knowledge, XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    CategoryRangeResult( const SR::TheKnowledge *knowledge, const XLinkBoundsList &bounds_list, bool lower_incl, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -210,8 +210,8 @@ public:
 
 private:    
     const SR::TheKnowledge *knowledge;
-    XLinkBoundsList bounds_list;
-    bool lower_incl, upper_incl;
+    const XLinkBoundsList &bounds_list;
+    const bool lower_incl, upper_incl;
 };
 
 

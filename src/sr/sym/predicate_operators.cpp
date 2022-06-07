@@ -665,7 +665,7 @@ shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( const SolveKit
     if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
 
-    auto r = make_shared<AllOfKindOperator>( archetype_node );  
+    auto r = make_shared<AllOfKindOperator>( kit.knowledge, archetype_node );  
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
 #endif

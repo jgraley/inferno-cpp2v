@@ -466,9 +466,9 @@ string SimpleCompareRangeResult::GetTrace() const
 
 // ------------------------- CategoryRangeResult --------------------------
 
-CategoryRangeResult::CategoryRangeResult( const SR::TheKnowledge *knowledge_, XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+CategoryRangeResult::CategoryRangeResult( const SR::TheKnowledge *knowledge_, const XLinkBoundsList &bounds_list_, bool lower_incl_, bool upper_incl_ ) :
     knowledge( knowledge_ ),
-    bounds_list( move(bounds_list_) ),
+    bounds_list( bounds_list_ ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
 {

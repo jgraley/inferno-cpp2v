@@ -310,9 +310,18 @@ Expression::Precedence AllCouplingEquivalentOperator::GetPrecedence() const
 
 // ------------------------- AllOfKindOperator --------------------------
 
-AllOfKindOperator::AllOfKindOperator( TreePtr<Node> archetype_node_ ) :
-    archetype_node(archetype_node_) 
+AllOfKindOperator::AllOfKindOperator( const SR::TheKnowledge *knowledge, 
+                                      TreePtr<Node> archetype_node )
 {
+    // Could be done earlier but needs access to knowledge plan. TODO no reason not to provide this to "Solve" functions.
+    const list<pair<int, int>> &int_range_list = knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
+    for( pair<int, int> int_range : int_range_list )
+    {
+        // int_range is a half-open minimax
+        vxlink_range_list.push_back( make_pair( make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.first),
+                                                make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
+    }
+    TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
 }
 
 
@@ -324,29 +333,21 @@ list<shared_ptr<SymbolExpression>> AllOfKindOperator::GetSymbolOperands() const
 
 unique_ptr<SymbolResultInterface> AllOfKindOperator::Evaluate( const EvalKit &kit,
                                                                list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
-{
-    // Could be done earlier but needs access to knowledge plan. TODO no reason not to provide this to "Solve" functions.
-    const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
-    CategoryRangeResult::XLinkBoundsList vxlink_range_list;
-    for( pair<int, int> int_range : int_range_list )
-    {
-        // int_range is a half-open minimax
-        vxlink_range_list.push_back( make_pair( make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.first),
-                                                make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
-    }
-    TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
-        
-    return make_unique<CategoryRangeResult>( kit.knowledge, move(vxlink_range_list), true, false );    
+{        
+    return make_unique<CategoryRangeResult>( kit.knowledge, vxlink_range_list, true, false );    
 }
 
 
 string AllOfKindOperator::Render() const
 {
-    return "{KindOf<" + archetype_node->GetTypeName() + ">}";
+    // No operands, so I always evaluate to the same thing, so my render 
+    // string can be my result's render string.
+    EvalKit empty_kit;
+    return Evaluate(empty_kit, {})->GetTrace();
 }
 
 
 SYM::Expression::Precedence AllOfKindOperator::GetPrecedence() const
 {
-    return Precedence::COMPARE;
+    return Precedence::SCOPE;
 }

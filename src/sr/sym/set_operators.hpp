@@ -3,6 +3,8 @@
 
 #include "expression.hpp"
 #include "overloads.hpp"
+#include "result.hpp"
+#include "the_knowledge.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -161,7 +163,8 @@ class AllOfKindOperator : public SYM::SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllOfKindOperator( TreePtr<Node> archetype_node );
+    AllOfKindOperator( const SR::TheKnowledge *knowledge, 
+                       TreePtr<Node> archetype_node );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
@@ -169,7 +172,7 @@ public:
     Precedence GetPrecedence() const override;
     
 private:
-    const TreePtr<Node> archetype_node;
+    CategoryRangeResult::XLinkBoundsList vxlink_range_list;
 };
 
 };
