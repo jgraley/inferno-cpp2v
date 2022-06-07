@@ -157,14 +157,13 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- AllOfKindOperator --------------------------
+// ------------------------- AllInCategoryRange --------------------------
 
-class AllOfKindOperator : public SYM::SymbolToSymbolExpression
+class AllInCategoryRange : public SYM::SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllOfKindOperator( const SR::TheKnowledge *knowledge, 
-                       TreePtr<Node> archetype_node );
+    AllInCategoryRange( CategoryRangeResult::XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
@@ -172,7 +171,8 @@ public:
     Precedence GetPrecedence() const override;
     
 private:
-    CategoryRangeResult::XLinkBoundsList vxlink_range_list;
+    CategoryRangeResult::XLinkBoundsList bounds_list;
+    const bool lower_incl, upper_incl;
 };
 
 };

@@ -2,6 +2,7 @@
 #include "boolean_operators.hpp"
 #include "set_operators.hpp"
 #include "result.hpp"
+#include "../lacing.hpp"
 
 using namespace SYM;
 
@@ -665,7 +666,20 @@ shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( const SolveKit
     if( !to_equal_bc || !to_equal_bc->GetAsBool() )
         return nullptr;
 
-    auto r = make_shared<AllOfKindOperator>( kit.knowledge, archetype_node );  
+    // Get lacing index range
+    const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
+    
+    // Get specially hacked XLinks that can be used with the category ordering
+    CategoryRangeResult::XLinkBoundsList vxlink_range_list;
+    for( pair<int, int> int_range : int_range_list )
+    {
+        // int_range is a half-open minimax
+        vxlink_range_list.push_back( make_pair( make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.first),
+                                                make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
+    }
+    TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
+    
+    auto r = make_shared<AllInCategoryRange>( move(vxlink_range_list), true, false );  
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
 #endif

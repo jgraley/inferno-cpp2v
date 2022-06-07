@@ -1,7 +1,6 @@
 #include "set_operators.hpp"
 #include "result.hpp"
 #include "../the_knowledge.hpp"
-#include "../lacing.hpp"
 
 using namespace SYM;
 
@@ -308,37 +307,30 @@ Expression::Precedence AllCouplingEquivalentOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- AllOfKindOperator --------------------------
+// ------------------------- AllInCategoryRange --------------------------
 
-AllOfKindOperator::AllOfKindOperator( const SR::TheKnowledge *knowledge, 
-                                      TreePtr<Node> archetype_node )
+AllInCategoryRange::AllInCategoryRange( CategoryRangeResult::XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+    bounds_list( move(bounds_list_) ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
 {
-    // Could be done earlier but needs access to knowledge plan. TODO no reason not to provide this to "Solve" functions.
-    const list<pair<int, int>> &int_range_list = knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
-    for( pair<int, int> int_range : int_range_list )
-    {
-        // int_range is a half-open minimax
-        vxlink_range_list.push_back( make_pair( make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.first),
-                                                make_unique<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
-    }
-    TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
 }
 
 
-list<shared_ptr<SymbolExpression>> AllOfKindOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> AllInCategoryRange::GetSymbolOperands() const
 {
     return {};
 }
 
 
-unique_ptr<SymbolResultInterface> AllOfKindOperator::Evaluate( const EvalKit &kit,
-                                                               list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllInCategoryRange::Evaluate( const EvalKit &kit,
+                                                                list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
 {        
-    return make_unique<CategoryRangeResult>( kit.knowledge, vxlink_range_list, true, false );    
+    return make_unique<CategoryRangeResult>( kit.knowledge, bounds_list, lower_incl, upper_incl );    
 }
 
 
-string AllOfKindOperator::Render() const
+string AllInCategoryRange::Render() const
 {
     // No operands, so I always evaluate to the same thing, so my render 
     // string can be my result's render string.
@@ -347,7 +339,7 @@ string AllOfKindOperator::Render() const
 }
 
 
-SYM::Expression::Precedence AllOfKindOperator::GetPrecedence() const
+SYM::Expression::Precedence AllInCategoryRange::GetPrecedence() const
 {
     return Precedence::SCOPE;
 }

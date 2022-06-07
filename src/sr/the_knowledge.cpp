@@ -159,7 +159,7 @@ int TheKnowledge::CategoryVXLink::GetLacingIndex() const
 
 string TheKnowledge::CategoryVXLink::GetTrace() const
 {
-    return GetTypeName() + SSPrintf("(⸾=%d)", lacing_index);
+    return GetTypeName() + SSPrintf("(%d)", lacing_index);
 }
 
 
