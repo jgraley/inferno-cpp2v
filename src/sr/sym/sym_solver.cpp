@@ -13,7 +13,9 @@ using namespace SYM;
 
 // -------------------------- TruthTableSolver ----------------------------    
 
-TruthTableSolver::TruthTableSolver( shared_ptr<BooleanExpression> initial_expression_ ) :
+TruthTableSolver::TruthTableSolver( const Expression::SolveKit &kit_,
+                                    shared_ptr<BooleanExpression> initial_expression_ ) :
+    kit( kit_ ),
     initial_expression( initial_expression_ )
 {
 }
@@ -76,7 +78,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         
         if( pred->IsIndependentOf(target) )
             evaluatable_preds.insert( pred );
-        else if( pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) ) )
+        else if( pred->TrySolveForToEqual( kit, target, make_shared<BooleanConstant>(true) ) )
             solveable_preds.insert( pred );
     }
     
@@ -112,7 +114,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     for( int axis : solveable_axes )
     {
         auto pred = folded_ttwp.GetFrontPredicate(axis);
-        shared_ptr<Expression> esolution = pred->TrySolveForToEqual( target, make_shared<BooleanConstant>(true) );
+        shared_ptr<Expression> esolution = pred->TrySolveForToEqual( kit, target, make_shared<BooleanConstant>(true) );
         if( !esolution )   // NULL means failed to solve
             continue;
         

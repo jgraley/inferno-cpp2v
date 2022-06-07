@@ -201,7 +201,7 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
 }
 
 
-shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveForToEqualNT( shared_ptr<SYM::Expression> target, 
+shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SYM::Expression> target, 
                                                                                                     shared_ptr<SYM::BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -210,7 +210,7 @@ shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::Tr
         return nullptr;
 
     auto r = make_shared<AllIdentifiersNamedOperator>( iba, name );  
-    return a->TrySolveForToEqual( target, r );
+    return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               
                                               

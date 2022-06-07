@@ -148,7 +148,7 @@ bool EqualOperator::IsCommutative() const
 }
 
 
-shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                             shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -159,11 +159,11 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( shared_ptr<Expressio
     // This is already an equals operator, so very close to the semantics of
     // TrySolveForToEqual() - we just need to try it both ways around
     
-    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, b );
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( kit, target, b );
     if( a_solution )
         return a_solution;
     
-    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, a );
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( kit, target, a );
     if( b_solution )
         return b_solution;
     
@@ -262,7 +262,7 @@ unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                       shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -272,11 +272,11 @@ shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqualNT( shared_ptr
         
     auto ranges = GetRanges();
     
-    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, ranges.first );
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( kit, target, ranges.first );
     if( a_solution )
         return a_solution;
     
-    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, ranges.second );
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( kit, target, ranges.second );
     if( b_solution )
         return b_solution;
     
@@ -563,7 +563,7 @@ unique_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> AllDiffOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> AllDiffOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {  
     // Can only deal with to_equal==TRUE
@@ -579,7 +579,7 @@ shared_ptr<Expression> AllDiffOperator::TrySolveForToEqualNT( shared_ptr<Express
         // target must differ from all others. So we want ¬ { e1, e2, e3, ... }. Union
         // will act to compose this set if given singles.
         auto r = make_shared<ComplementOperator>( make_shared<UnionOperator>(e_others) );
-        shared_ptr<Expression> solution = e0->TrySolveForToEqual( target, r );
+        shared_ptr<Expression> solution = e0->TrySolveForToEqual( kit, target, r );
         if( solution )
             return solution;
         
@@ -657,7 +657,7 @@ unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 
 
 #ifdef KIND_OF_IS_SOLVEABLE
-shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( shared_ptr<SYM::Expression> target, 
+shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SYM::Expression> target, 
                                                                   shared_ptr<SYM::BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -666,7 +666,7 @@ shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( shared_ptr<SYM
         return nullptr;
 
     auto r = make_shared<AllOfKindOperator>( archetype_node );  
-    return a->TrySolveForToEqual( target, r );
+    return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
 #endif
                                               
@@ -840,7 +840,7 @@ unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit 
 }
 
 
-shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                  shared_ptr<BooleanExpression> to_equal ) const
 {  
     // Can only deal with to_equal==TRUE
@@ -849,12 +849,12 @@ shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqualNT( share
         return nullptr;
         
     shared_ptr<SymbolExpression> rb = make_shared<AllCouplingEquivalentOperator>(b);
-    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( target, rb );
+    shared_ptr<Expression> a_solution = a->TrySolveForToEqual( kit, target, rb );
     if( a_solution )
         return a_solution;
     
     shared_ptr<SymbolExpression> ra = make_shared<AllCouplingEquivalentOperator>(a);   
-    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( target, ra );
+    shared_ptr<Expression> b_solution = b->TrySolveForToEqual( kit, target, ra );
     if( b_solution )
         return b_solution;
     

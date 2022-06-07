@@ -193,12 +193,12 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ChildOperator --------------------------
 
-shared_ptr<Expression> ChildOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> ChildOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                             shared_ptr<SymbolExpression> to_equal ) const
 {   
     // ParentOperator uniquely inverts all the ChildOperators
     auto a_to_equal = make_shared<ParentOperator>( to_equal );
-    return a->TrySolveForToEqual( target, a_to_equal );
+    return a->TrySolveForToEqual( kit, target, a_to_equal );
 }
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
@@ -356,12 +356,12 @@ SR::XLink ParentOperator::EvalXLinkFromNugget( SR::XLink parent_xlink,
 }
 
 
-shared_ptr<Expression> ParentOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> ParentOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
 {   
     // AllChildren and Parent are inverse of each other
     auto a_to_equal = make_shared<AllChildrenOperator>( to_equal );
-    return a->TrySolveForToEqual( target, a_to_equal );
+    return a->TrySolveForToEqual( kit, target, a_to_equal );
 }
 
 
@@ -423,12 +423,12 @@ SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xli
 }
 
 
-shared_ptr<Expression> MySequenceSuccessorOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> MySequenceSuccessorOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                           shared_ptr<SymbolExpression> to_equal ) const
 {   
     // Predecessor and successors are inverse of each other
     auto a_to_equal = make_shared<MySequencePredecessorOperator>( to_equal );
-    return a->TrySolveForToEqual( target, a_to_equal );
+    return a->TrySolveForToEqual( kit, target, a_to_equal );
 }
 
 
@@ -446,12 +446,12 @@ SR::XLink MySequencePredecessorOperator::EvalXLinkFromNugget( SR::XLink parent_x
 }
 
 
-shared_ptr<Expression> MySequencePredecessorOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> MySequencePredecessorOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                             shared_ptr<SymbolExpression> to_equal ) const
 {   
     // Predecessor and successors are inverse of each other
     auto a_to_equal = make_shared<MySequenceSuccessorOperator>( to_equal );
-    return a->TrySolveForToEqual( target, a_to_equal );
+    return a->TrySolveForToEqual( kit, target, a_to_equal );
 }
 
 
@@ -498,12 +498,12 @@ unique_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
 }
 
 
-shared_ptr<Expression> AllChildrenOperator::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> AllChildrenOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                   shared_ptr<SymbolExpression> to_equal ) const
 {   
     // AllChildren and Parent are inverse of each other
     auto a_to_equal = make_shared<ParentOperator>( to_equal );
-    return a->TrySolveForToEqual( target, a_to_equal );
+    return a->TrySolveForToEqual( kit, target, a_to_equal );
 }
 
 

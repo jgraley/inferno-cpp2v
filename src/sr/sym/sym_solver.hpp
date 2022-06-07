@@ -18,7 +18,8 @@ class TruthTableSolver
 public:
     typedef set<SR::PatternLink> GivenSymbolSet;
 
-    TruthTableSolver( shared_ptr<BooleanExpression> initial_expression );
+    TruthTableSolver( const Expression::SolveKit &kit,
+                      shared_ptr<BooleanExpression> initial_expression );
     
     void PreSolve();
     
@@ -56,6 +57,7 @@ private:
     const string label_var_name = "p";
     const int counting_based = 1;
     const shared_ptr<BooleanExpression> initial_expression;
+    const Expression::SolveKit &kit;                                            
     unique_ptr<TruthTableWithPredicates> ttwp;
 };
 

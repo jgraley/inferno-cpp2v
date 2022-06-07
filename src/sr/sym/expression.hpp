@@ -25,8 +25,16 @@ class Expression : public Traceable, public Orderable
 {    
 public:
     /**
-     * The information we need to evaluate a symbolic expression (but
-     * not to manipulate it).
+     * The information we need to solve a symbolic expression (and
+     * maybe other manipulations).
+     */
+    struct SolveKit
+    {
+        const SR::TheKnowledge *knowledge;
+    };
+
+    /**
+     * The information we need to evaluate a symbolic expression.
      */
     struct EvalKit
     {
@@ -110,9 +118,9 @@ public:
 
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
     
-    shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
+    shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
                                                shared_ptr<BooleanExpression> to_equal ) const;
-    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const;
 };
 
@@ -124,9 +132,9 @@ class SymbolExpression : public Expression
 public:
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
     
-    shared_ptr<Expression> TrySolveForToEqual( shared_ptr<Expression> target, 
+    shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
                                                shared_ptr<SymbolExpression> to_equal ) const;
-    virtual shared_ptr<Expression> TrySolveForToEqualNT( shared_ptr<Expression> target, 
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const;
 };
 

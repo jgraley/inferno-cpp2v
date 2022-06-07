@@ -160,7 +160,7 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
-shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {
     // Make sure any solution is independent of target
@@ -174,11 +174,11 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( shared_ptr<Express
         return to_equal;
     
     // Well that didn't work, try for non-trivial solutions
-    return TrySolveForToEqualNT( target, to_equal );
+    return TrySolveForToEqualNT( kit, target, to_equal );
 }
 
 
-shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                 shared_ptr<BooleanExpression> to_equal ) const
 {
     return nullptr;
@@ -186,7 +186,7 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( shared_ptr<Expre
 
 // ------------------------- SymbolExpression --------------------------
 
-shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( shared_ptr<Expression> target, 
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
 {
     // Make sure any solution is independent of target
@@ -200,10 +200,10 @@ shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( shared_ptr<Expressi
         return to_equal;
     
     // Well that didn't work, try for non-trivial solutions
-    return TrySolveForToEqualNT( target, to_equal );
+    return TrySolveForToEqualNT( kit, target, to_equal );
 }                                                             
 
-shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( shared_ptr<Expression> target, 
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                                shared_ptr<SymbolExpression> to_equal ) const
 {
     return nullptr;

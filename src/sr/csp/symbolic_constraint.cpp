@@ -47,7 +47,8 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     TRACE("Trying to solve:\n")(consistency_expression->Render())("\n");
    
     // Truth-table solver
-    SYM::TruthTableSolver my_solver(consistency_expression);
+    SYM::Expression::SolveKit kit { knowledge.get() };    
+    SYM::TruthTableSolver my_solver(kit, consistency_expression);
     my_solver.PreSolve();    
         
     for( VariableId v : variables )
