@@ -118,8 +118,9 @@ public:
 
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
     
+    // Solve methods are named per rule #527
     shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
-                                               shared_ptr<BooleanExpression> to_equal ) const;
+                                               shared_ptr<BooleanExpression> to_equal ) const; 
     virtual shared_ptr<Expression> TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                          shared_ptr<BooleanExpression> to_equal ) const;
 };
@@ -132,6 +133,7 @@ class SymbolExpression : public Expression
 public:
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
     
+    // Solve methods are named per rule #527
     shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
                                                shared_ptr<SymbolExpression> to_equal ) const;
     virtual shared_ptr<Expression> TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 

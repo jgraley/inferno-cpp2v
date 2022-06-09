@@ -327,28 +327,28 @@ string DepthFirstRangeResult::GetTrace() const
     return Join(restrictions, " & ", "{DF", "}");
 }
 
-// ------------------------- EquivalenceClassResult --------------------------
+// ------------------------- CouplingEquivalenceClassResult --------------------------
 
-EquivalenceClassResult::EquivalenceClassResult( const SR::TheKnowledge *knowledge_, SR::XLink class_example_ ) :
+CouplingEquivalenceClassResult::CouplingEquivalenceClassResult( const SR::TheKnowledge *knowledge_, SR::XLink class_example_ ) :
     knowledge( knowledge_ ),
     class_example( class_example_ )
 {
 }
 
 
-bool EquivalenceClassResult::IsDefinedAndUnique() const
+bool CouplingEquivalenceClassResult::IsDefinedAndUnique() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-SR::XLink EquivalenceClassResult::GetOnlyXLink() const
+SR::XLink CouplingEquivalenceClassResult::GetOnlyXLink() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool CouplingEquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
     // Use multiset::equal_range() with our ordered domain as an
     // ordering in order to get to the set of equivalent elements without
@@ -376,13 +376,13 @@ bool EquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool EquivalenceClassResult::operator==( const SymbolResultInterface &other ) const
+bool CouplingEquivalenceClassResult::operator==( const SymbolResultInterface &other ) const
 {
     ASSERTFAIL("TODO");
 }
 
 
-string EquivalenceClassResult::GetTrace() const
+string CouplingEquivalenceClassResult::GetTrace() const
 {
     return "{≡" + class_example.GetTrace() + "}";
 }

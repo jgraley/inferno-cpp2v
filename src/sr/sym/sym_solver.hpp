@@ -21,13 +21,22 @@ public:
     TruthTableSolver( const Expression::SolveKit &kit,
                       shared_ptr<BooleanExpression> initial_expression );
     
+    /** 
+     * Perform analysis on the initial expression that will assist with
+     * subsequent solves.
+     *
+     * @note Solve methods are named per rule #527
+     */
     void PreSolve();
     
     /** 
-     * Attempt to solve our initial expression in a specified way, according to args.
+     * Attempt to solve our initial expression for a target variable, expecting 
+     * certain given variables to be assumed evaluatable when evaluating the solution.
      * 
      * @param target The expression to solve for, probably needs to be a SymbolVariable
-     * @param givens A set of PatternLinks indicating which variables should be assumed evaluatable in the solution
+     * @param givens A set of PatternLinks indicating which variables are given
+     *
+     * @note Solve methods are named per rule #527
      * 
      * @return solution expression or NULL
      */

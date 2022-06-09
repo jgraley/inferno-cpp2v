@@ -135,13 +135,13 @@ private:
     bool lower_incl, upper_incl;
 };
 
-// ------------------------- EquivalenceClassResult --------------------------
+// ------------------------- CouplingEquivalenceClassResult --------------------------
 
-class EquivalenceClassResult : public SymbolResultInterface
+class CouplingEquivalenceClassResult : public SymbolResultInterface
 {
 public:
     // lower or upper can be null to exclude that limit
-    EquivalenceClassResult( const SR::TheKnowledge *knowledge, SR::XLink class_example );
+    CouplingEquivalenceClassResult( const SR::TheKnowledge *knowledge, SR::XLink class_example );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    

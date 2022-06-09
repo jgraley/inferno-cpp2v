@@ -292,7 +292,7 @@ unique_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const
                                                                            list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-    return make_unique<EquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );
+    return make_unique<CouplingEquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );
 }
 
 
