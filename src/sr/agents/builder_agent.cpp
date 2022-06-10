@@ -1,7 +1,18 @@
 #include "builder_agent.hpp"
 #include "scr_engine.hpp"
+#include "sym/overloads.hpp"
+#include "sym/overloads.hpp"
+#include "sym/boolean_operators.hpp"
 
 using namespace SR;
+
+
+SYM::Over<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed() const
+{
+    // Match anything (subject to pre-restriction, MMAX and couplings)
+    return SYM::MakeOver<SYM::BooleanConstant>(true);
+}                                      
+
 
 bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink, 
                                       set<PatternLink> keyer_plinks )

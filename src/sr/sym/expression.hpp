@@ -93,7 +93,7 @@ public:
 
     virtual string Render() const = 0;    
     string RenderWithParentheses() const;
-    string GetTrace() const; // used for debug
+    string GetTrace() const final; // used for debug
     
 protected:    
     virtual Precedence GetPrecedence() const = 0;

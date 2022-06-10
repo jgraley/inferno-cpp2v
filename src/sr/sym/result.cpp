@@ -51,11 +51,23 @@ bool BooleanResult::operator<( const BooleanResult &other ) const
 }
 
 
-string BooleanResult::GetTrace() const
+string BooleanResult::Render() const
 {
     return Trace(value);
 }
 
+
+string BooleanResult::GetTrace() const
+{
+    return Render();
+}
+
+// ------------------------- SymbolResultInterface --------------------------
+
+string SymbolResultInterface::GetTrace() const
+{
+    return Render();
+}
 
 // ------------------------- SymbolResult --------------------------
 
@@ -100,7 +112,7 @@ bool SymbolResult::operator==( const SymbolResultInterface &other ) const
 }
 
 
-string SymbolResult::GetTrace() const
+string SymbolResult::Render() const
 {
     if( xlink )
         return Trace(xlink);
@@ -245,7 +257,7 @@ unique_ptr<SetResult> SetResult::IntersectionCore( list<unique_ptr<SetResult>> o
 }
 
 
-string SetResult::GetTrace() const
+string SetResult::Render() const
 {
     string s;
     if( complement_flag )
@@ -315,7 +327,7 @@ bool DepthFirstRangeResult::operator==( const SymbolResultInterface &other ) con
 }
 
 
-string DepthFirstRangeResult::GetTrace() const
+string DepthFirstRangeResult::Render() const
 {
     list<string> restrictions;
     
@@ -382,7 +394,7 @@ bool CouplingEquivalenceClassResult::operator==( const SymbolResultInterface &ot
 }
 
 
-string CouplingEquivalenceClassResult::GetTrace() const
+string CouplingEquivalenceClassResult::Render() const
 {
     return "{≡" + class_example.GetTrace() + "}";
 }
@@ -452,7 +464,7 @@ bool SimpleCompareRangeResult::operator==( const SymbolResultInterface &other ) 
 }
 
 
-string SimpleCompareRangeResult::GetTrace() const
+string SimpleCompareRangeResult::Render() const
 {
     list<string> restrictions;
     
@@ -516,7 +528,7 @@ bool CategoryRangeResult::operator==( const SymbolResultInterface &other ) const
 }
 
 
-string CategoryRangeResult::GetTrace() const
+string CategoryRangeResult::Render() const
 {
     list<string> terms;;
     for( const XLinkBounds &bounds : bounds_list )

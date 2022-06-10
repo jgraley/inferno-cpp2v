@@ -45,8 +45,3 @@ shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
     return make_shared<PatternQuery>(this);
 }
 
-
-SYM::Over<SYM::BooleanExpression> SearchLeafAgent::SymbolicNormalLinkedQueryPRed() const
-{
-    return MakeOver<SYM::BooleanConstant>(true);
-}                                      

@@ -335,7 +335,7 @@ string AllInCategoryRange::Render() const
     // No operands, so I always evaluate to the same thing, so my render 
     // string can be my result's render string.
     EvalKit empty_kit;
-    return Evaluate(empty_kit, {})->GetTrace();
+    return Evaluate(empty_kit, {})->Render();
 }
 
 

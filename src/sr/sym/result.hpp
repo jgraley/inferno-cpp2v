@@ -38,7 +38,8 @@ public:
     // which is bigger than false.
     bool operator<( const BooleanResult &other ) const;
 
-    string GetTrace() const override;
+    virtual string Render() const;
+    string GetTrace() const final;
     
 private:
     bool value;
@@ -53,6 +54,9 @@ public:
     virtual SR::XLink GetOnlyXLink() const = 0;   
     virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;     
     virtual bool operator==( const SymbolResultInterface &other ) const = 0;    
+
+    virtual string Render() const = 0;
+    string GetTrace() const final;
 };
 
 // ------------------------- SymbolResult --------------------------
@@ -73,7 +77,7 @@ public:
     bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
     bool operator==( const SymbolResultInterface &other ) const override;    
     
-    string GetTrace() const override;
+    string Render() const override;
 
 private:    
     SR::XLink xlink;
@@ -98,7 +102,7 @@ public:
     static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
     static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
-    string GetTrace() const override;
+    string Render() const override;
 
 private:    
     static unique_ptr<SetResult> DeMorgan( function<unique_ptr<SetResult>( list<unique_ptr<SetResult>> )> lambda,
@@ -127,7 +131,7 @@ public:
     //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
     //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
-    string GetTrace() const override;
+    string Render() const override;
 
 private:    
     const SR::TheKnowledge *knowledge;
@@ -152,7 +156,7 @@ public:
     //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
     //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
-    string GetTrace() const override;
+    string Render() const override;
 
 private:    
     const SR::TheKnowledge *knowledge;
@@ -176,7 +180,7 @@ public:
     //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
     //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
-    string GetTrace() const override;
+    string Render() const override;
 
 private:    
     const SR::TheKnowledge *knowledge;
@@ -206,7 +210,7 @@ public:
     //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
     //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
 
-    string GetTrace() const override;
+    string Render() const override;
 
 private:    
     const SR::TheKnowledge *knowledge;
