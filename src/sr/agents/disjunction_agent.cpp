@@ -34,7 +34,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQueryImpl() const
+SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() const
 {
     ASSERT( GetDisjuncts().size() == 2 )
           ("Got %d choices; to support more than 2 disjuncts, enable SplitDisjunctions; fewer than 2 not allowed", GetDisjuncts().size());

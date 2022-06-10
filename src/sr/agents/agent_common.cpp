@@ -147,26 +147,14 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 }
                                 
 
-Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
+Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const 
 {
-	auto cq_lazy = SymbolicCouplingQuery();
+	auto cq_expr = SymbolicCouplingQuery();
     if( coupling_only )
-        return cq_lazy;
+        return cq_expr;
 
-    auto nlq_lazy = SymbolicNormalLinkedQuery();
-   	return cq_lazy & nlq_lazy; // Over-style symbolic expression
-}
-
-
-Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQuery() const
-{
-    return SymbolicNormalLinkedQueryImpl();            
-}
-
-
-Over<BooleanExpression> AgentCommon::SymbolicNormalLinkedQueryImpl() const
-{
-    ASSERTFAIL();
+    auto nlq_expr = SymbolicNormalLinkedQuery();
+   	return cq_expr & nlq_expr; 
 }
 
 
@@ -228,7 +216,7 @@ SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
     if( ShouldGenerateKindOfClause() )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-	    return MakeOver<KindOfOperator>(GetArchetypeNode(), keyer_expr);
+	    return MakeOver<IsKindOfOperator>(GetArchetypeNode(), keyer_expr);
     }
     else
     {

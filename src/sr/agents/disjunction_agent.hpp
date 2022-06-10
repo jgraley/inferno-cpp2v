@@ -26,7 +26,7 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                                
                                                                
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
+    SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
     virtual Block GetGraphBlockInfo() const;
     

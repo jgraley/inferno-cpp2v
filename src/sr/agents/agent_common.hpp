@@ -26,9 +26,8 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
                                   
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const;                                       
+    SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const = 0;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
     bool IsNonTrivialPreRestriction() const;

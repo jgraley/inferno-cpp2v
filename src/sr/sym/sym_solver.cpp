@@ -446,7 +446,7 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
         // We want the operands common to both i and j to be either all of i's operands or all of j's
         // This is fine for the common 2-op vs 2-op case, but consider also
         // - some preds like TypeOfOperator are 1-op, but can still have relationships with each other (#510)
-        // - AllDiffOperator is an n-op, but EqualOperator (2-op) contradicts any pair of its operands    
+        // - IsAllDiffOperator is an n-op, but IsEqualOperator (2-op) contradicts any pair of its operands    
         if( set_ops_common.size() < min(set_ops_i.size(), set_ops_j.size()) )
             return Relationship::NONE;
             

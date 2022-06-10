@@ -329,7 +329,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
         list< shared_ptr<SymbolExpression> > candidate_exprs;
         for( PatternLink candidate_plink : plan_col.non_stars ) 
             candidate_exprs.push_back( MakeOver<SymbolVariable>(candidate_plink) );
-        expr &= MakeOver<AllDiffOperator>( candidate_exprs );        
+        expr &= MakeOver<IsAllDiffOperator>( candidate_exprs );        
     }
 
     // Require that there are no leftover x, if no star in pattern. 
@@ -337,7 +337,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
     if( !plan_col.star_plink )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-        expr &= MakeOver<ChildCollectionSizeOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
+        expr &= MakeOver<IsCollectionSizedOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
     }
 
     return expr;

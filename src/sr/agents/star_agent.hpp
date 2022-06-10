@@ -32,7 +32,7 @@ public:
     class NotASubcontainerMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
+    SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const TheKnowledge *knowledge ) const;                                                                                          
@@ -43,9 +43,9 @@ public:
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
 
-    class SubcontainerKindOfOperator : public SYM::KindOfOperator
+    class SubcontainerKindOfOperator : public SYM::IsKindOfOperator
     {
-        using KindOfOperator::KindOfOperator; 
+        using IsKindOfOperator::IsKindOfOperator; 
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
         virtual string RenderNF() const override;

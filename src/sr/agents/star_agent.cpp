@@ -21,7 +21,7 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 }
 
 
-SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQueryImpl() const
+SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery() const
 {
     if( ShouldGenerateKindOfClause() )
     {

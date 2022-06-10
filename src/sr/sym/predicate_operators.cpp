@@ -99,9 +99,9 @@ Expression::Precedence PredicateOperator::GetPrecedence() const
 }
 
 
-// ------------------------- EqualOperator --------------------------
+// ------------------------- IsEqualOperator --------------------------
 
-EqualOperator::EqualOperator( shared_ptr<SymbolExpression> a_, 
+IsEqualOperator::IsEqualOperator( shared_ptr<SymbolExpression> a_, 
                               shared_ptr<SymbolExpression> b_ ) :
     a(a_),
     b(b_)
@@ -109,19 +109,19 @@ EqualOperator::EqualOperator( shared_ptr<SymbolExpression> a_,
 }    
     
     
-EqualOperator *EqualOperator::Clone() const
+IsEqualOperator *IsEqualOperator::Clone() const
 {
-    return new EqualOperator( a, b );
+    return new IsEqualOperator( a, b );
 }
     
 
-list<shared_ptr<SymbolExpression>*> EqualOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression>*> IsEqualOperator::GetSymbolOperandPointers()
 {
     return {&a, &b};
 }
 
 
-unique_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsEqualOperator::Evaluate( const EvalKit &kit,
                                                    list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==2 );
@@ -143,13 +143,13 @@ unique_ptr<BooleanResult> EqualOperator::Evaluate( const EvalKit &kit,
 }
 
 
-bool EqualOperator::IsCommutative() const
+bool IsEqualOperator::IsCommutative() const
 {
     return true;
 }
 
 
-shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
+shared_ptr<Expression> IsEqualOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                             shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -172,10 +172,10 @@ shared_ptr<Expression> EqualOperator::TrySolveForToEqualNT( const SolveKit &kit,
 }
 
 
-Relationship EqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || 
-        dynamic_pointer_cast<LessOrEqualOperator>(other) ||
+    if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) || 
+        dynamic_pointer_cast<IsLessOrEqualOperator>(other) ||
         dynamic_pointer_cast<IsCouplingEquivalentOperator>(other))
         return Relationship::IMPLIES;
     
@@ -185,20 +185,20 @@ Relationship EqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> o
 }
 
 
-bool EqualOperator::IsCanSubstituteFrom() const
+bool IsEqualOperator::IsCanSubstituteFrom() const
 {
     return true;
 }
 
 
-string EqualOperator::RenderNF() const
+string IsEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " == " + RenderForMe(b);
 
 }
 
 
-Expression::Precedence EqualOperator::GetPrecedenceNF() const
+Expression::Precedence IsEqualOperator::GetPrecedenceNF() const
 {
     return Precedence::COMPARE;
 }
@@ -206,7 +206,7 @@ Expression::Precedence EqualOperator::GetPrecedenceNF() const
 
 Over<BooleanExpression> SYM::operator==( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<EqualOperator>( a, b );
+    return MakeOver<IsEqualOperator>( a, b );
 }
 
 // ------------------------- (not equal operator) --------------------------
@@ -290,55 +290,55 @@ Expression::Precedence IndexComparisonOperator::GetPrecedenceNF() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- GreaterOperator --------------------------
+// ------------------------- IsGreaterOperator --------------------------
 
-GreaterOperator *GreaterOperator::Clone() const
+IsGreaterOperator *IsGreaterOperator::Clone() const
 {
-    return new GreaterOperator( a, b );
+    return new IsGreaterOperator( a, b );
 }
     
 
-bool GreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+bool IsGreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                            SR::TheKnowledge::IndexType index_b ) const
 {
     return index_a > index_b;
 }                    
                                         
 
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GreaterOperator::GetRanges() const
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsGreaterOperator::GetRanges() const
 {
     return make_pair( make_shared<AllGreaterOperator>(b),
                       make_shared<AllLessOperator>(a) );
 }
 
 
-Relationship GreaterOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsGreaterOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) )
         return Relationship::IMPLIES;
     
-    if( dynamic_pointer_cast<EqualOperator>(other) ||
-        dynamic_pointer_cast<LessOperator>(other) ||
-        dynamic_pointer_cast<LessOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsEqualOperator>(other) ||
+        dynamic_pointer_cast<IsLessOperator>(other) ||
+        dynamic_pointer_cast<IsLessOrEqualOperator>(other) )
         return Relationship::CONTRADICTS;
     
     return Relationship::NONE; 
 }
 
 
-Transitivity GreaterOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity IsGreaterOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other) )
+    if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) || dynamic_pointer_cast<IsGreaterOperator>(other) )
         return Transitivity::FORWARD;
 
-    if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other) )
+    if( dynamic_pointer_cast<IsLessOrEqualOperator>(other) || dynamic_pointer_cast<IsLessOperator>(other) )
         return Transitivity::REVERSE;
         
     return Transitivity::NONE;
 }
 
 
-string GreaterOperator::RenderNF() const
+string IsGreaterOperator::RenderNF() const
 {
     return RenderForMe(a) + " > " + RenderForMe(b);
 }
@@ -346,58 +346,58 @@ string GreaterOperator::RenderNF() const
 
 Over<BooleanExpression> SYM::operator>( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<GreaterOperator>( a, b );
+    return MakeOver<IsGreaterOperator>( a, b );
 }
 
-// ------------------------- LessOperator --------------------------
+// ------------------------- IsLessOperator --------------------------
 
-LessOperator *LessOperator::Clone() const
+IsLessOperator *IsLessOperator::Clone() const
 {
-    return new LessOperator( a, b );
+    return new IsLessOperator( a, b );
 }
     
 
-bool LessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+bool IsLessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                         SR::TheKnowledge::IndexType index_b ) const
 {
     return index_a < index_b;
 }                    
             
                                   
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> LessOperator::GetRanges() const
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsLessOperator::GetRanges() const
 {
     return make_pair( make_shared<AllLessOperator>(b),
                       make_shared<AllGreaterOperator>(a) );
 }
 
 
-Relationship LessOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsLessOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsLessOrEqualOperator>(other) )
         return Relationship::IMPLIES;
     
-    if( dynamic_pointer_cast<EqualOperator>(other) ||
-        dynamic_pointer_cast<GreaterOperator>(other) ||
-        dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsEqualOperator>(other) ||
+        dynamic_pointer_cast<IsGreaterOperator>(other) ||
+        dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) )
         return Relationship::CONTRADICTS;
     
     return Relationship::NONE; 
 }
 
 
-Transitivity LessOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity IsLessOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<LessOrEqualOperator>(other) || dynamic_pointer_cast<LessOperator>(other))
+    if( dynamic_pointer_cast<IsLessOrEqualOperator>(other) || dynamic_pointer_cast<IsLessOperator>(other))
         return Transitivity::FORWARD;
     
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) || dynamic_pointer_cast<GreaterOperator>(other))
+    if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) || dynamic_pointer_cast<IsGreaterOperator>(other))
         return Transitivity::REVERSE;
     
     return Transitivity::NONE;
 }
 
 
-string LessOperator::RenderNF() const
+string IsLessOperator::RenderNF() const
 {
     return RenderForMe(a) + " < " + RenderForMe(b);
 }
@@ -405,53 +405,53 @@ string LessOperator::RenderNF() const
 
 Over<BooleanExpression> SYM::operator<( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<LessOperator>( a, b );
+    return MakeOver<IsLessOperator>( a, b );
 }
 
-// ------------------------- GreaterOrEqualOperator --------------------------
+// ------------------------- IsGreaterOrEqualOperator --------------------------
 
-GreaterOrEqualOperator *GreaterOrEqualOperator::Clone() const
+IsGreaterOrEqualOperator *IsGreaterOrEqualOperator::Clone() const
 {
-    return new GreaterOrEqualOperator( a, b );
+    return new IsGreaterOrEqualOperator( a, b );
 }
     
 
-bool GreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                                   SR::TheKnowledge::IndexType index_b ) const
 {
     return index_a >= index_b;
 }                    
             
                                   
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GreaterOrEqualOperator::GetRanges() const
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsGreaterOrEqualOperator::GetRanges() const
 {
     return make_pair( make_shared<AllGreaterOrEqualOperator>(b),
                       make_shared<AllLessOrEqualOperator>(a) );
 }
 
 
-Relationship GreaterOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsGreaterOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<LessOperator>(other) )
+    if( dynamic_pointer_cast<IsLessOperator>(other) )
         return Relationship::CONTRADICTS;
     
     return Relationship::NONE; 
 }
 
 
-Transitivity GreaterOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity IsGreaterOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) )
         return Transitivity::FORWARD;
 
-    if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsLessOrEqualOperator>(other) )
         return Transitivity::REVERSE;
         
     return Transitivity::NONE;
 }
 
 
-string GreaterOrEqualOperator::RenderNF() const
+string IsGreaterOrEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " >= " + RenderForMe(b);
 }
@@ -459,53 +459,53 @@ string GreaterOrEqualOperator::RenderNF() const
 
 Over<BooleanExpression> SYM::operator>=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<GreaterOrEqualOperator>( a, b );
+    return MakeOver<IsGreaterOrEqualOperator>( a, b );
 }
 
-// ------------------------- LessOrEqualOperator --------------------------
+// ------------------------- IsLessOrEqualOperator --------------------------
 
-LessOrEqualOperator *LessOrEqualOperator::Clone() const
+IsLessOrEqualOperator *IsLessOrEqualOperator::Clone() const
 {
-    return new LessOrEqualOperator( a, b );
+    return new IsLessOrEqualOperator( a, b );
 }
     
 
-bool LessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
+bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                                SR::TheKnowledge::IndexType index_b ) const
 {
     return index_a <= index_b;
 }                    
             
                                   
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> LessOrEqualOperator::GetRanges() const
+pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsLessOrEqualOperator::GetRanges() const
 {
     return make_pair( make_shared<AllLessOrEqualOperator>(b),
                       make_shared<AllGreaterOrEqualOperator>(a) );
 }
 
 
-Relationship LessOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsLessOrEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<GreaterOperator>(other) )
+    if( dynamic_pointer_cast<IsGreaterOperator>(other) )
         return Relationship::CONTRADICTS;
     
     return Relationship::NONE; 
 }
 
 
-Transitivity LessOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity IsLessOrEqualOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<LessOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsLessOrEqualOperator>(other) )
         return Transitivity::FORWARD;
     
-    if( dynamic_pointer_cast<GreaterOrEqualOperator>(other) )
+    if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) )
         return Transitivity::REVERSE;
     
     return Transitivity::NONE;
 }
 
 
-string LessOrEqualOperator::RenderNF() const
+string IsLessOrEqualOperator::RenderNF() const
 {
     return RenderForMe(a) + " <= " + RenderForMe(b);
 }
@@ -513,25 +513,25 @@ string LessOrEqualOperator::RenderNF() const
 
 Over<BooleanExpression> SYM::operator<=( Over<SymbolExpression> a, Over<SymbolExpression> b )
 {
-    return MakeOver<LessOrEqualOperator>( a, b );
+    return MakeOver<IsLessOrEqualOperator>( a, b );
 }
 
-// ------------------------- AllDiffOperator --------------------------
+// ------------------------- IsAllDiffOperator --------------------------
 
-AllDiffOperator::AllDiffOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
+IsAllDiffOperator::IsAllDiffOperator( list< shared_ptr<SymbolExpression> > sa_ ) :
     sa(sa_)
 {
     ASSERT( sa.size() >= 2 );
 }    
     
 
-AllDiffOperator *AllDiffOperator::Clone() const
+IsAllDiffOperator *IsAllDiffOperator::Clone() const
 {
-    return new AllDiffOperator( sa );
+    return new IsAllDiffOperator( sa );
 }
     
 
-list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsAllDiffOperator::GetSymbolOperandPointers()
 {
     list<shared_ptr<SymbolExpression> *> lp;
     for( shared_ptr<SymbolExpression> &r : sa )
@@ -540,7 +540,7 @@ list<shared_ptr<SymbolExpression> *> AllDiffOperator::GetSymbolOperandPointers()
 }
 
 
-unique_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     for( const unique_ptr<SymbolResultInterface> &ra : op_results )
@@ -564,7 +564,7 @@ unique_ptr<BooleanResult> AllDiffOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> AllDiffOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
+shared_ptr<Expression> IsAllDiffOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {  
     // Can only deal with to_equal==TRUE
@@ -591,22 +591,22 @@ shared_ptr<Expression> AllDiffOperator::TrySolveForToEqualNT( const SolveKit &ki
 }
 
 
-bool AllDiffOperator::IsCommutative() const
+bool IsAllDiffOperator::IsCommutative() const
 {
     return true; 
 }
 
 
-Relationship AllDiffOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsAllDiffOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( dynamic_pointer_cast<EqualOperator>(other) )
+    if( dynamic_pointer_cast<IsEqualOperator>(other) )
         return Relationship::CONTRADICTS;
     
     return Relationship::NONE; 
 }
 
 
-string AllDiffOperator::RenderNF() const
+string IsAllDiffOperator::RenderNF() const
 {
     list<string> ls;
     for( shared_ptr<SymbolExpression> a : sa )
@@ -615,14 +615,14 @@ string AllDiffOperator::RenderNF() const
 }
 
 
-Expression::Precedence AllDiffOperator::GetPrecedenceNF() const
+Expression::Precedence IsAllDiffOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
 
-// ------------------------- KindOfOperator --------------------------
+// ------------------------- IsKindOfOperator --------------------------
 
-KindOfOperator::KindOfOperator( TreePtr<Node> archetype_node_,
+IsKindOfOperator::IsKindOfOperator( TreePtr<Node> archetype_node_,
                                 shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
     archetype_node( archetype_node_ )
@@ -630,19 +630,19 @@ KindOfOperator::KindOfOperator( TreePtr<Node> archetype_node_,
 }                                                
 
 
-KindOfOperator *KindOfOperator::Clone() const
+IsKindOfOperator *IsKindOfOperator::Clone() const
 {
-    return new KindOfOperator( archetype_node, a );
+    return new IsKindOfOperator( archetype_node, a );
 }
     
 
-list<shared_ptr<SymbolExpression> *> KindOfOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsKindOfOperator::GetSymbolOperandPointers()
 {
     return { &a };
 }
 
 
-unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsKindOfOperator::Evaluate( const EvalKit &kit,
                                                     list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -658,7 +658,7 @@ unique_ptr<BooleanResult> KindOfOperator::Evaluate( const EvalKit &kit,
 
 
 #ifdef KIND_OF_IS_SOLVEABLE
-shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SYM::Expression> target, 
+shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SYM::Expression> target, 
                                                                   shared_ptr<SYM::BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -685,7 +685,7 @@ shared_ptr<SYM::Expression> KindOfOperator::TrySolveForToEqualNT( const SolveKit
 #endif
                                               
                                               
-Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Result IsKindOfOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -696,26 +696,26 @@ Orderable::Result KindOfOperator::OrderCompareLocal( const Orderable *candidate,
 }  
 
 
-string KindOfOperator::RenderNF() const
+string IsKindOfOperator::RenderNF() const
 {
     return "KindOf<" + archetype_node->GetTypeName() + ">" + a->RenderWithParentheses(); 
 }
 
 
-Expression::Precedence KindOfOperator::GetPrecedenceNF() const
+Expression::Precedence IsKindOfOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
 
 
-TreePtr<Node> KindOfOperator::GetArchetypeNode() const
+TreePtr<Node> IsKindOfOperator::GetArchetypeNode() const
 {
     return archetype_node;
 }
 
-// ------------------------- ChildCollectionSizeOperator --------------------------
+// ------------------------- IsCollectionSizedOperator --------------------------
 
-ChildCollectionSizeOperator::ChildCollectionSizeOperator( TreePtr<Node> archetype_node_,
+IsCollectionSizedOperator::IsCollectionSizedOperator( TreePtr<Node> archetype_node_,
                                                           int item_index_, 
                                                           shared_ptr<SymbolExpression> a_,
                                                           int size_ ) :
@@ -728,19 +728,19 @@ ChildCollectionSizeOperator::ChildCollectionSizeOperator( TreePtr<Node> archetyp
 }    
 
 
-ChildCollectionSizeOperator *ChildCollectionSizeOperator::Clone() const
+IsCollectionSizedOperator *IsCollectionSizedOperator::Clone() const
 {
-    return new ChildCollectionSizeOperator( archetype_node, item_index, a, size );
+    return new IsCollectionSizedOperator( archetype_node, item_index, a, size );
 }
     
 
-list<shared_ptr<SymbolExpression> *> ChildCollectionSizeOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsCollectionSizedOperator::GetSymbolOperandPointers()
 {
     return { &a };
 }
 
 
-unique_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsCollectionSizedOperator::Evaluate( const EvalKit &kit,
                                                                  list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -773,7 +773,7 @@ unique_ptr<BooleanResult> ChildCollectionSizeOperator::Evaluate( const EvalKit &
 }
 
 
-Orderable::Result ChildCollectionSizeOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Result IsCollectionSizedOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                   OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -791,7 +791,7 @@ Orderable::Result ChildCollectionSizeOperator::OrderCompareLocal( const Orderabl
 }  
 
 
-string ChildCollectionSizeOperator::RenderNF() const
+string IsCollectionSizedOperator::RenderNF() const
 {
     string name = archetype_node->GetTypeName();
 
@@ -807,7 +807,7 @@ string ChildCollectionSizeOperator::RenderNF() const
 }
 
 
-Expression::Precedence ChildCollectionSizeOperator::GetPrecedenceNF() const
+Expression::Precedence IsCollectionSizedOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

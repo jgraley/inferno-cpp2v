@@ -13,7 +13,7 @@ namespace SR
 class DefaultMMAXAgent : public AgentCommon
 {
 public:                                        
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryImpl() const;                                       
+    SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const = 0;                                       
 };
 
@@ -21,8 +21,8 @@ public:
 class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const override;                                       
+    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const = 0;                                       
 };
 
 

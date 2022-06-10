@@ -33,7 +33,7 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     if( clauses.empty() )
         return;
     
-    // Extract all the non-final archetypes from the KindOfOperator nodes 
+    // Extract all the non-final archetypes from the IsKindOfOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.
     Lacing::CategorySet categories;
@@ -41,7 +41,7 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     {
         clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
         {
-            if( auto ko_expr = dynamic_cast<const SYM::KindOfOperator *>(expr) )
+            if( auto ko_expr = dynamic_cast<const SYM::IsKindOfOperator *>(expr) )
             { 
                 TreePtr<Node> archetype = ko_expr->GetArchetypeNode();
                 

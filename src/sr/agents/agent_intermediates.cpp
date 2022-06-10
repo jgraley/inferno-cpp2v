@@ -23,7 +23,7 @@ using namespace SYM;
 
 //---------------------------------- DefaultMMAXAgent ------------------------------------    
 
-SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImpl() const
+SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
 {    
     auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
     ClutchRewriter mmax_rewriter( mmax_expr );
@@ -36,13 +36,7 @@ SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQueryImp
 SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
 {
     return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
-}
-
-                               
-SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryPRed() const                                      
-{                      
-	ASSERTFAIL("Override me\n");
-}                     
+}                  
 
 //---------------------------------- SearchLeafAgent ------------------------------------    
 
