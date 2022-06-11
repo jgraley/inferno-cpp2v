@@ -149,7 +149,7 @@ bool IsEqualOperator::IsCommutative() const
 }
 
 
-shared_ptr<Expression> IsEqualOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> IsEqualOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                             shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -263,7 +263,7 @@ unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                       shared_ptr<BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -564,7 +564,7 @@ unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> IsAllDiffOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> IsAllDiffOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {  
     // Can only deal with to_equal==TRUE
@@ -657,7 +657,7 @@ unique_ptr<BooleanResult> IsKindOfOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                   shared_ptr<SYM::BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE
@@ -852,7 +852,7 @@ unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit 
 }
 
 
-shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                  shared_ptr<BooleanExpression> to_equal ) const
 {  
     // Can only deal with to_equal==TRUE

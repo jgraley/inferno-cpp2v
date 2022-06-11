@@ -88,7 +88,7 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 }
 
 
-shared_ptr<Expression> SymbolVariable::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> SymbolVariable::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
 {
     // Trivial case terminates a recursive solve. This amounts to "what 
@@ -208,7 +208,7 @@ Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ChildOperator --------------------------
 
-shared_ptr<Expression> ChildOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> ChildOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                             shared_ptr<SymbolExpression> to_equal ) const
 {   
     // ParentOperator uniquely inverts all the ChildOperators
@@ -371,7 +371,7 @@ SR::XLink ParentOperator::EvalXLinkFromNugget( SR::XLink parent_xlink,
 }
 
 
-shared_ptr<Expression> ParentOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> ParentOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
 {   
     // AllChildren and Parent are inverse of each other
@@ -438,7 +438,7 @@ SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xli
 }
 
 
-shared_ptr<Expression> MySequenceSuccessorOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> MySequenceSuccessorOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                           shared_ptr<SymbolExpression> to_equal ) const
 {   
     // Predecessor and successors are inverse of each other
@@ -461,7 +461,7 @@ SR::XLink MySequencePredecessorOperator::EvalXLinkFromNugget( SR::XLink parent_x
 }
 
 
-shared_ptr<Expression> MySequencePredecessorOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> MySequencePredecessorOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                             shared_ptr<SymbolExpression> to_equal ) const
 {   
     // Predecessor and successors are inverse of each other
@@ -513,7 +513,7 @@ unique_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
 }
 
 
-shared_ptr<Expression> AllChildrenOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+shared_ptr<Expression> AllChildrenOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                   shared_ptr<SymbolExpression> to_equal ) const
 {   
     // AllChildren and Parent are inverse of each other

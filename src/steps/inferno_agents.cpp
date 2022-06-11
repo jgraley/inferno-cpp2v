@@ -201,7 +201,7 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
 }
 
 
-shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target, 
+shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target, 
                                                                                                     shared_ptr<SYM::BooleanExpression> to_equal ) const
 {
     // Can only deal with to_equal==TRUE

@@ -164,13 +164,6 @@ string Expression::GetTrace() const
 shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {
-    return TrySolveForToEqualNT( kit, target, to_equal );
-}
-
-
-shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                                shared_ptr<BooleanExpression> to_equal ) const
-{
     return nullptr;
 }
 
@@ -178,20 +171,6 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &
 
 shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
-{
-        
-    // To solve: (this given target) == to_equal
-    // So, if this===target then trivial solution: 
-    // target==to_equal and to_equal is solution wrt target
-    //if( OrderCompareEqual( this, target.get() ) )
-    //    return to_equal;
-    
-    // Well that didn't work, try for non-trivial solutions
-    return TrySolveForToEqualNT( kit, target, to_equal );
-}                                                             
-
-shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                               shared_ptr<SymbolExpression> to_equal ) const
 {
     return nullptr;
 }
