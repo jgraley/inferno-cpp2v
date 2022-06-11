@@ -78,7 +78,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         
         if( pred->IsIndependentOf(target) )
             evaluatable_preds.insert( pred );
-        else if( pred->TrySolveForToEqual( kit, target, make_shared<BooleanConstant>(true) ) )
+        else if( pred->TrySolveFor( kit, target ) )
             solveable_preds.insert( pred );
     }
     
@@ -114,8 +114,8 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     for( int axis : solveable_axes )
     {
         auto pred = folded_ttwp.GetFrontPredicate(axis);
-        shared_ptr<Expression> esolution = pred->TrySolveForToEqual( kit, target, make_shared<BooleanConstant>(true) );
-        if( !esolution )   // NULL means failed to solve
+        shared_ptr<Expression> esolution = pred->TrySolveFor( kit, target );
+        if( !esolution )   // NULL means failed to solve OR solution is universal set
             continue;
         
         auto solution = dynamic_pointer_cast<SymbolExpression>( esolution );

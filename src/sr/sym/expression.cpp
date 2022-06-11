@@ -161,8 +161,7 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
-shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                              shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> BooleanExpression::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
     return nullptr;
 }

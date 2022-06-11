@@ -149,16 +149,10 @@ bool IsEqualOperator::IsCommutative() const
 }
 
 
-shared_ptr<Expression> IsEqualOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                            shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> IsEqualOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
-    // Can only deal with to_equal==TRUE
-    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
-        return nullptr;
-        
     // This is already an equals operator, so very close to the semantics of
-    // TrySolveForToEqual() - we just need to try it both ways around
+    // SymbolExpression::TrySolveForToEqual() - we just need to try it both ways around
     
     shared_ptr<Expression> a_solution = a->TrySolveForToEqual( kit, target, b );
     if( a_solution )
@@ -263,14 +257,8 @@ unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> IndexComparisonOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                                      shared_ptr<BooleanExpression> to_equal ) const
-{
-    // Can only deal with to_equal==TRUE
-    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
-        return nullptr;
-        
+shared_ptr<Expression> IndexComparisonOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
+{ 
     auto ranges = GetRanges();
     
     shared_ptr<Expression> a_solution = a->TrySolveForToEqual( kit, target, ranges.first );
@@ -564,14 +552,8 @@ unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<Expression> IsAllDiffOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                              shared_ptr<BooleanExpression> to_equal ) const
-{  
-    // Can only deal with to_equal==TRUE
-    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
-        return nullptr;
-        
+shared_ptr<Expression> IsAllDiffOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
+{      
     list< shared_ptr<SymbolExpression> > e_others = sa;    
     for( shared_ptr<SymbolExpression> e0 : sa )
     {
@@ -657,14 +639,8 @@ unique_ptr<BooleanResult> IsKindOfOperator::Evaluate( const EvalKit &kit,
 }
 
 
-shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                                  shared_ptr<SYM::BooleanExpression> to_equal ) const
+shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
-    // Can only deal with to_equal==TRUE
-    auto to_equal_bc = dynamic_pointer_cast<SYM::BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
-        return nullptr;
-
     // Get lacing index range
     const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
     
@@ -852,14 +828,8 @@ unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit 
 }
 
 
-shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                                 shared_ptr<BooleanExpression> to_equal ) const
+shared_ptr<Expression> IsCouplingEquivalentOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {  
-    // Can only deal with to_equal==TRUE
-    auto to_equal_bc = dynamic_pointer_cast<BooleanConstant>( to_equal );
-    if( !to_equal_bc || !to_equal_bc->GetAsBool() )
-        return nullptr;
-        
     shared_ptr<SymbolExpression> rb = make_shared<AllCouplingEquivalentOperator>(b);
     shared_ptr<Expression> a_solution = a->TrySolveForToEqual( kit, target, rb );
     if( a_solution )
