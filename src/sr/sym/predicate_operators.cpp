@@ -157,9 +157,9 @@ shared_ptr<SymbolExpression> IsEqualOperator::TrySolveFor( const SolveKit &kit, 
                          [&](const shared_ptr<SymbolExpression> &first, 
                              const shared_ptr<SymbolExpression> &second)
     {    
-        shared_ptr<SymbolExpression> candidate = first->TrySolveForToEqual( kit, target, second );
-        if( candidate )
-            solution = candidate;
+        solution = first->TrySolveForToEqual( kit, target, second );
+        if( solution )
+            Break();
     } );
 
     return solution;
@@ -260,16 +260,16 @@ unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 shared_ptr<SymbolExpression> IndexComparisonOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 { 
     auto ranges = GetRanges();
+
+    shared_ptr<SymbolExpression> solution = nullptr;
+    for( auto p : Zip( list<shared_ptr<SymbolExpression>>{a, b}, ranges ) )
+    {    
+        solution = p.first->TrySolveForToEqual( kit, target, p.second );
+        if( solution )
+            break;
+    }
     
-    shared_ptr<SymbolExpression> a_solution = a->TrySolveForToEqual( kit, target, ranges.first );
-    if( a_solution )
-        return a_solution;
-    
-    shared_ptr<SymbolExpression> b_solution = b->TrySolveForToEqual( kit, target, ranges.second );
-    if( b_solution )
-        return b_solution;
-    
-    return nullptr;
+    return solution;
 }
 
 
@@ -293,10 +293,10 @@ bool IsGreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a
 }                    
                                         
 
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsGreaterOperator::GetRanges() const
+list<shared_ptr<SymbolExpression>> IsGreaterOperator::GetRanges() const
 {
-    return make_pair( make_shared<AllGreaterOperator>(b),
-                      make_shared<AllLessOperator>(a) );
+    return { make_shared<AllGreaterOperator>(b),
+             make_shared<AllLessOperator>(a) };
 }
 
 
@@ -346,16 +346,16 @@ IsLessOperator *IsLessOperator::Clone() const
     
 
 bool IsLessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                        SR::TheKnowledge::IndexType index_b ) const
+                                          SR::TheKnowledge::IndexType index_b ) const
 {
     return index_a < index_b;
 }                    
             
                                   
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsLessOperator::GetRanges() const
+list<shared_ptr<SymbolExpression>> IsLessOperator::GetRanges() const
 {
-    return make_pair( make_shared<AllLessOperator>(b),
-                      make_shared<AllGreaterOperator>(a) );
+    return { make_shared<AllLessOperator>(b),
+             make_shared<AllGreaterOperator>(a) };
 }
 
 
@@ -411,10 +411,10 @@ bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType 
 }                    
             
                                   
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsGreaterOrEqualOperator::GetRanges() const
+list<shared_ptr<SymbolExpression>> IsGreaterOrEqualOperator::GetRanges() const
 {
-    return make_pair( make_shared<AllGreaterOrEqualOperator>(b),
-                      make_shared<AllLessOrEqualOperator>(a) );
+    return { make_shared<AllGreaterOrEqualOperator>(b),
+             make_shared<AllLessOrEqualOperator>(a) };
 }
 
 
@@ -465,10 +465,10 @@ bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType ind
 }                    
             
                                   
-pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> IsLessOrEqualOperator::GetRanges() const
+list<shared_ptr<SymbolExpression>> IsLessOrEqualOperator::GetRanges() const
 {
-    return make_pair( make_shared<AllLessOrEqualOperator>(b),
-                      make_shared<AllGreaterOrEqualOperator>(a) );
+    return { make_shared<AllLessOrEqualOperator>(b),
+             make_shared<AllGreaterOrEqualOperator>(a) };
 }
 
 
@@ -546,6 +546,7 @@ unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
         if( ra->GetOnlyXLink() == rb->GetOnlyXLink() )
         {
             m = false;
+            Break();
         }
     } );
     return make_unique<BooleanResult>( m );   
@@ -830,15 +831,16 @@ unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit 
 
 shared_ptr<SymbolExpression> IsCouplingEquivalentOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {  
-    shared_ptr<SymbolExpression> rb = make_shared<AllCouplingEquivalentOperator>(b);
-    shared_ptr<SymbolExpression> a_solution = a->TrySolveForToEqual( kit, target, rb );
-    if( a_solution )
-        return a_solution;
-    
-    shared_ptr<SymbolExpression> ra = make_shared<AllCouplingEquivalentOperator>(a);   
-    shared_ptr<SymbolExpression> b_solution = b->TrySolveForToEqual( kit, target, ra );
-    if( b_solution )
-        return b_solution;
+    shared_ptr<SymbolExpression> solution = nullptr;
+    ForAllDistinctPairs( list<shared_ptr<SymbolExpression>>{a, b}, 
+                         [&](const shared_ptr<SymbolExpression> &first, 
+                             const shared_ptr<SymbolExpression> &second)
+    {    
+        shared_ptr<SymbolExpression> r = make_shared<AllCouplingEquivalentOperator>(second);
+        solution = first->TrySolveForToEqual( kit, target, r );
+        if( solution )
+            Break();
+    } );
     
     return nullptr;
 }

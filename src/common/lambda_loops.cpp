@@ -5,6 +5,13 @@
 
 #include <string>
 
+void Break()
+{
+    // I am not worried about this use of exceptions, and neither should you be.
+    throw BreakException();
+}
+
+
 bool IncrementIndices( vector<int> &indices, int index_range )
 {
     for( int &i : indices )
