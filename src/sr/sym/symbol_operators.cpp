@@ -88,6 +88,15 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 }
 
 
+shared_ptr<Expression> SymbolVariable::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+                                                           shared_ptr<SymbolExpression> to_equal ) const
+{
+    // Trivial case terminates a recursive solve. This amounts to "what 
+    // should we set target to so that target equals to_equal?".
+    return to_equal;
+}                                                                                                                  
+
+
 Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {

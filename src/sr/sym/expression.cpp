@@ -186,8 +186,8 @@ shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit
     // To solve: (this given target) == to_equal
     // So, if this===target then trivial solution: 
     // target==to_equal and to_equal is solution wrt target
-    if( OrderCompareEqual( this, target.get() ) )
-        return to_equal;
+    //if( OrderCompareEqual( this, target.get() ) )
+    //    return to_equal;
     
     // Well that didn't work, try for non-trivial solutions
     return TrySolveForToEqualNT( kit, target, to_equal );

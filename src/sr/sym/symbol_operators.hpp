@@ -43,7 +43,9 @@ public:
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     SR::PatternLink GetPatternLink() const;
 
-    // Note: no TrySolveForToEqualNT() because trivial solver is sufficient
+    virtual shared_ptr<Expression> TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+                                                       shared_ptr<SymbolExpression> to_equal ) const override;
+
     Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                          OrderProperty order_property ) const override;
 
