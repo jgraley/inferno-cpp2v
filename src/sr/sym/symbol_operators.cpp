@@ -89,10 +89,16 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 
 
 shared_ptr<Expression> SymbolVariable::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                           shared_ptr<SymbolExpression> to_equal ) const
+                                                             shared_ptr<SymbolExpression> to_equal ) const
 {
     // Trivial case terminates a recursive solve. This amounts to "what 
-    // should we set target to so that target equals to_equal?".
+    // should we set target to so that target equals to_equal?". But
+    // if target _is_ to_equal, then could be anything and so we fail 
+    // to solve.
+
+    if( !to_equal->IsIndependentOf( target ) )
+        return nullptr;
+
     return to_equal;
 }                                                                                                                  
 

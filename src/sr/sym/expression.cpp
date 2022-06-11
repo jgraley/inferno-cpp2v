@@ -179,9 +179,6 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &
 shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
 {
-    // Make sure any solution is independent of target
-    if( !to_equal->IsIndependentOf( target ) )
-        return nullptr;
         
     // To solve: (this given target) == to_equal
     // So, if this===target then trivial solution: 
