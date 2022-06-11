@@ -8,6 +8,7 @@
 #include "truth_table_with_predicates.hpp"
 #include "conditional_operators.hpp"
 #include "set_operators.hpp"
+#include "common/lambda_loops.hpp"
 
 using namespace SYM;
 

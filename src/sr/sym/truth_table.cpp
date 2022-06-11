@@ -2,6 +2,7 @@
 
 #include "common/common.hpp"
 #include "common/orderable.hpp"
+#include "common/lambda_loops.hpp"
 
 #include <algorithm>
 

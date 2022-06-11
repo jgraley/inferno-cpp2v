@@ -4,6 +4,7 @@
 #include "predicate_operators.hpp"
 #include "symbol_operators.hpp"
 #include "result.hpp"
+#include "common/lambda_loops.hpp"
 
 #define BOOL_EQUALITY_METHOD
 

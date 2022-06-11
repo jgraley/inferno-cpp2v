@@ -7,6 +7,7 @@
 #include "../sym/symbol_operators.hpp"
 #include "../sym/sym_solver.hpp"
 #include "../sym/result.hpp"
+#include "common/lambda_loops.hpp"
 
 #include <inttypes.h> 
 

@@ -3,6 +3,7 @@
 #include "set_operators.hpp"
 #include "result.hpp"
 #include "../lacing.hpp"
+#include "common/lambda_loops.hpp"
 
 using namespace SYM;
 
@@ -151,18 +152,17 @@ bool IsEqualOperator::IsCommutative() const
 
 shared_ptr<SymbolExpression> IsEqualOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
-    // This is already an equals operator, so very close to the semantics of
-    // SymbolExpression::TrySolveForToEqual() - we just need to try it both ways around
-    
-    shared_ptr<SymbolExpression> a_solution = a->TrySolveForToEqual( kit, target, b );
-    if( a_solution )
-        return a_solution;
-    
-    shared_ptr<SymbolExpression> b_solution = b->TrySolveForToEqual( kit, target, a );
-    if( b_solution )
-        return b_solution;
-    
-    return nullptr;
+    shared_ptr<SymbolExpression> solution = nullptr;
+    ForAllDistinctPairs( list<shared_ptr<SymbolExpression>>{a, b}, 
+                         [&](const shared_ptr<SymbolExpression> &first, 
+                             const shared_ptr<SymbolExpression> &second)
+    {    
+        shared_ptr<SymbolExpression> candidate = first->TrySolveForToEqual( kit, target, second );
+        if( candidate )
+            solution = candidate;
+    } );
+
+    return solution;
 }
 
 
