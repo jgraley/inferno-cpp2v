@@ -657,7 +657,6 @@ unique_ptr<BooleanResult> IsKindOfOperator::Evaluate( const EvalKit &kit,
 }
 
 
-#ifdef KIND_OF_IS_SOLVEABLE
 shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SYM::Expression> target, 
                                                                   shared_ptr<SYM::BooleanExpression> to_equal ) const
 {
@@ -682,7 +681,6 @@ shared_ptr<SYM::Expression> IsKindOfOperator::TrySolveForToEqualNT( const SolveK
     auto r = make_shared<AllInCategoryRange>( move(vxlink_range_list), true, false );  
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
-#endif
                                               
                                               
 Orderable::Result IsKindOfOperator::OrderCompareLocal( const Orderable *candidate, 

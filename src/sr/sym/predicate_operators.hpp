@@ -9,8 +9,6 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 
-#define KIND_OF_IS_SOLVEABLE
-
 namespace SYM
 { 
 
@@ -242,10 +240,8 @@ public:
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
-#ifdef KIND_OF_IS_SOLVEABLE
     shared_ptr<Expression> TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
                                                  shared_ptr<BooleanExpression> to_equal ) const override;
-#endif
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
