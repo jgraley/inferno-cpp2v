@@ -40,7 +40,7 @@ public:
      * 
      * @return solution expression or NULL
      */
-    shared_ptr<SymbolExpression> TrySolveForGiven( shared_ptr<SymbolExpression> target,
+    shared_ptr<SymbolExpression> TrySolveForGiven( shared_ptr<SymbolVariable> target,
                                                    const GivenSymbolSet &givens ) const;
     shared_ptr<SymbolExpression> GetExpressionViaRaster( TruthTableWithPredicates evaluated_ttwp,
                                                          const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const;

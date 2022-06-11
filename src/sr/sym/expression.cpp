@@ -1,5 +1,6 @@
 #include "expression.hpp"
 #include "result.hpp"
+#include "symbol_operators.hpp"
 
 using namespace SYM;
 
@@ -160,25 +161,14 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
-shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                               shared_ptr<BooleanExpression> to_equal ) const
 {
-    // Make sure any solution is independent of target
-    if( !to_equal->IsIndependentOf( target ) )
-        return nullptr;
-        
-    // To solve: (this given target) == to_equal
-    // So, if this===target then trivial solution: 
-    // target==to_equal and to_equal is solution wrt target
-    if( OrderCompareEqual( this, target.get() ) )
-        return to_equal;
-    
-    // Well that didn't work, try for non-trivial solutions
     return TrySolveForToEqualNT( kit, target, to_equal );
 }
 
 
-shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
+shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                 shared_ptr<BooleanExpression> to_equal ) const
 {
     return nullptr;
@@ -186,7 +176,7 @@ shared_ptr<Expression> BooleanExpression::TrySolveForToEqualNT( const SolveKit &
 
 // ------------------------- SymbolExpression --------------------------
 
-shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<Expression> target, 
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                              shared_ptr<SymbolExpression> to_equal ) const
 {
     // Make sure any solution is independent of target
@@ -203,7 +193,7 @@ shared_ptr<Expression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit
     return TrySolveForToEqualNT( kit, target, to_equal );
 }                                                             
 
-shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<Expression> target, 
+shared_ptr<Expression> SymbolExpression::TrySolveForToEqualNT( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                                shared_ptr<SymbolExpression> to_equal ) const
 {
     return nullptr;

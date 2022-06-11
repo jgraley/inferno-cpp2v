@@ -49,7 +49,7 @@ void TruthTableSolver::PreSolve()
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<SymbolExpression> target,
+shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<SymbolVariable> target,
                                                                  const GivenSymbolSet &givens ) const
 {
     TRACE("=============================\nSolve for ")
