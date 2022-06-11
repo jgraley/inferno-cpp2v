@@ -120,7 +120,7 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const = 0;
     
     // Solve methods are named per rule #527
-    virtual shared_ptr<Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const;
+    virtual shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const;
 };
 
 // ------------------------- SymbolExpression --------------------------
@@ -132,7 +132,7 @@ public:
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
     
     // Solve methods are named per rule #527
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const;
 };
 

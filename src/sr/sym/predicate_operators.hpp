@@ -81,7 +81,7 @@ public:
                                         list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
     bool IsCommutative() const override;
 
-    shared_ptr<Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     bool IsCanSubstituteFrom() const override;
 
@@ -113,7 +113,7 @@ public:
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
-    shared_ptr<Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     virtual pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> GetRanges() const = 0;
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const = 0;
@@ -213,7 +213,7 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
 
-    shared_ptr<Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     bool IsCommutative() const override;
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
     
@@ -237,7 +237,7 @@ public:
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
-    shared_ptr<Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;
@@ -297,7 +297,7 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
     
-    shared_ptr<Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     bool IsCommutative() const override;
     Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
     

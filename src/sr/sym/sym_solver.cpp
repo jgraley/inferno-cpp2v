@@ -114,12 +114,10 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     for( int axis : solveable_axes )
     {
         auto pred = folded_ttwp.GetFrontPredicate(axis);
-        shared_ptr<Expression> esolution = pred->TrySolveFor( kit, target );
-        if( !esolution )   // NULL means failed to solve OR solution is universal set
+        shared_ptr<SymbolExpression> solution = pred->TrySolveFor( kit, target );
+        if( !solution )   // NULL means failed to solve OR solution is universal set
             continue;
         
-        auto solution = dynamic_pointer_cast<SymbolExpression>( esolution );
-        ASSERT( solution );  
         pred_solves[pred] = solution;
     }
 

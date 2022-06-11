@@ -201,7 +201,7 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
 }
 
 
-shared_ptr<SYM::Expression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const
+shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const
 {
     auto r = make_shared<AllIdentifiersNamedOperator>( iba, name );  
     return a->TrySolveForToEqual( kit, target, r );

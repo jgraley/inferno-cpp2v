@@ -43,7 +43,7 @@ public:
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     SR::PatternLink GetPatternLink() const;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                        shared_ptr<SymbolExpression> to_equal ) const override;
 
     Orderable::Result OrderCompareLocal( const Orderable *candidate, 
@@ -89,7 +89,7 @@ protected:
 class ChildOperator : public ItemiseToSymbolOperator
 {
     using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const;
 };
 
@@ -167,7 +167,7 @@ public:
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
 
     virtual string GetKnowledgeName() const override;
@@ -215,7 +215,7 @@ public:
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
 
     virtual string GetKnowledgeName() const override;
@@ -230,7 +230,7 @@ public:
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
                                            const SR::TheKnowledge::Nugget &nugget ) const override;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
 
     virtual string GetKnowledgeName() const override;
@@ -247,7 +247,7 @@ public:
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
 
-    virtual shared_ptr<Expression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
                                              
     virtual string Render() const override;

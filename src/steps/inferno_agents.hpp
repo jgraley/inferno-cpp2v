@@ -147,7 +147,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
 
-        shared_ptr<SYM::Expression> TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const override;
+        shared_ptr<SYM::SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const override;
 
         virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const override;
