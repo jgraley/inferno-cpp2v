@@ -339,77 +339,23 @@ string DepthFirstRangeResult::Render() const
     return Join(restrictions, " & ", "{DF", "}");
 }
 
-// ------------------------- CouplingEquivalenceClassResult --------------------------
-
-CouplingEquivalenceClassResult::CouplingEquivalenceClassResult( const SR::TheKnowledge *knowledge_, SR::XLink class_example_ ) :
-    knowledge( knowledge_ ),
-    class_example( class_example_ )
-{
-}
-
-
-bool CouplingEquivalenceClassResult::IsDefinedAndUnique() const
-{
-    ASSERTFAIL("TODO");
-}
-
-
-SR::XLink CouplingEquivalenceClassResult::GetOnlyXLink() const
-{
-    ASSERTFAIL("TODO");
-}
-
-
-bool CouplingEquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
-{ 
-    // Use multiset::equal_range() with our ordered domain as an
-    // ordering in order to get to the set of equivalent elements without
-    // having to iterate over the whole domain. We're still gaining entropy
-    // here though. It would be faster to get to the range via nuggets 
-    // (because XLink native comparison will be faster than SimpleCompare)
-    // but class_example might be an arbitrary force, and not in the domain.
-    // See #522 #525
-
-    // This class establishes the policy for couplings in one place.
-    // Today, it's $CURRENT_CLASS. 
-    // And it always will be: see #121; para starting at "No!!"
-    auto p = knowledge->simple_compare_ordered_domain.equal_range( class_example );
-    links = move( set<SR::XLink>( p.first, p.second ) );
-    return true;
-    
-    // Note on equal_range: there's set::equal_range(), multiset::equal_range()
-    // and free equal_range() (and probably others for eg map, unordered etc)
-    // x::equal_range() always uses the container's comparer, and so 
-    // set::equal_range() guarantees to return zero or one element, see
-    // https://www.cplusplus.com/reference/set/set/equal_range/
-    // Free equal_range() can be given a comparer, which could differ from
-    // the underlying container's one, but then you'd have to deal with fiddly
-    // rules on whether the container is correctly partitioned wrt the 
-    // comparer you are using. multiset::equal_range() gets you all matching 
-    // elements and seems to be the only way to do this - multiset::find()
-    // only guarantees to find A matching element - pretty feeble if you ask me.
-    // See https://en.cppreference.com/w/cpp/container/multiset/find
-}
-
-
-bool CouplingEquivalenceClassResult::operator==( const SymbolResultInterface &other ) const
-{
-    ASSERTFAIL("TODO");
-}
-
-
-string CouplingEquivalenceClassResult::Render() const
-{
-    return "{≡" + class_example.GetTrace() + "}";
-}
-
 // ------------------------- SimpleCompareRangeResult --------------------------
 
-SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
     knowledge( knowledge_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
     upper( upper_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
+    knowledge( knowledge_ ),
+    lower( SR::XLink::CreateDistinct( lower_ ) ),
+    lower_incl( lower_incl_ ),
+    upper( SR::XLink::CreateDistinct( upper_ ) ),
     upper_incl( upper_incl_ )
 {
 }
@@ -433,11 +379,10 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
 
     if( lower )
     {
-        SR::XLink lower_xlink = SR::XLink::CreateDistinct( lower );     
         if( lower_incl )
-            it_lower = knowledge->simple_compare_ordered_domain.lower_bound(lower_xlink);
+            it_lower = knowledge->simple_compare_ordered_domain.lower_bound(lower);
         else
-            it_lower = knowledge->simple_compare_ordered_domain.upper_bound(lower_xlink);
+            it_lower = knowledge->simple_compare_ordered_domain.upper_bound(lower);
     }
     else
     {
@@ -446,11 +391,10 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     
     if( upper )
     {
-        SR::XLink upper_xlink = SR::XLink::CreateDistinct( upper );        
         if( upper_incl )
-            it_upper = knowledge->simple_compare_ordered_domain.upper_bound(upper_xlink);
+            it_upper = knowledge->simple_compare_ordered_domain.upper_bound(upper);
         else
-            it_upper = knowledge->simple_compare_ordered_domain.lower_bound(upper_xlink);
+            it_upper = knowledge->simple_compare_ordered_domain.lower_bound(upper);
     }
     else
     {

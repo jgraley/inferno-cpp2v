@@ -292,7 +292,20 @@ unique_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const
                                                                            list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-    return make_unique<CouplingEquivalenceClassResult>( kit.knowledge, ar->GetOnlyXLink() );
+
+    // This class establishes the policy for couplings in one place.
+    // Today, it's $CURRENT_CLASS. 
+    // And it always will be: see #121; para starting at "No!!"
+
+    // Simulate multiset::equal_range() with our ordered domain as an
+    // ordering in order to get to the set of equivalent elements without
+    // having to iterate over the whole domain. We're still gaining entropy
+    // here though. It would be faster to get to the range via nuggets 
+    // (because XLink native comparison will be faster than SimpleCompare)
+    // but ar might be an arbitrary force, and not in the domain.
+    // See #522 #525
+    // X, true, X, true gets simulates equal_range()    
+    return make_unique<SimpleCompareRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, ar->GetOnlyXLink(), true ); 
 }
 
 

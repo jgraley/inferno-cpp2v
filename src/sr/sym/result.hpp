@@ -139,36 +139,13 @@ private:
     bool lower_incl, upper_incl;
 };
 
-// ------------------------- CouplingEquivalenceClassResult --------------------------
-
-class CouplingEquivalenceClassResult : public SymbolResultInterface
-{
-public:
-    // lower or upper can be null to exclude that limit
-    CouplingEquivalenceClassResult( const SR::TheKnowledge *knowledge, SR::XLink class_example );
-    
-    bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const SymbolResultInterface &other ) const override;
-
-    //unique_ptr<SetResult> GetComplement() const;
-    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
-    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
-
-    string Render() const override;
-
-private:    
-    const SR::TheKnowledge *knowledge;
-    SR::XLink class_example;
-};
-
 // ------------------------- SimpleCompareRangeResult --------------------------
 
 class SimpleCompareRangeResult : public SymbolResultInterface
 {
 public:
     // lower or upper can be null to exclude that limit
+    SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
     SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, TreePtr<Node> lower, bool lower_incl, TreePtr<Node> upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
@@ -184,8 +161,8 @@ public:
 
 private:    
     const SR::TheKnowledge *knowledge;
-    TreePtr<Node> lower;
-    TreePtr<Node> upper;
+    SR::XLink lower;
+    SR::XLink upper;
     bool lower_incl, upper_incl;
 };
 
