@@ -836,7 +836,10 @@ shared_ptr<SymbolExpression> IsCouplingEquivalentOperator::TrySolveFor( const So
                          [&](const shared_ptr<SymbolExpression> &first, 
                              const shared_ptr<SymbolExpression> &second)
     {    
-        shared_ptr<SymbolExpression> r = make_shared<AllCouplingEquivalentOperator>(second);
+        // This class establishes the policy for couplings in one place.
+        // Today, it's $CURRENT_CLASS. 
+        // And it always will be: see #121; para starting at "No!!"
+        shared_ptr<SymbolExpression> r = make_shared<AllSimpleCompareEquivalentOperator>(second);
         solution = first->TrySolveForToEqual( kit, target, r );
         if( solution )
             Break();

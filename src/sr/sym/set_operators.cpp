@@ -274,28 +274,24 @@ Expression::Precedence AllLessOrEqualOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- AllCouplingEquivalentOperator --------------------------
+// ------------------------- AllSimpleCompareEquivalentOperator --------------------------
 
-AllCouplingEquivalentOperator::AllCouplingEquivalentOperator( shared_ptr<SymbolExpression> a_ ) :
+AllSimpleCompareEquivalentOperator::AllSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a_ ) :
     a( a_ )
 {
 }
 
     
-list<shared_ptr<SymbolExpression>> AllCouplingEquivalentOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> AllSimpleCompareEquivalentOperator::GetSymbolOperands() const
 {
     return {a};
 }
 
 
-unique_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                                           list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllSimpleCompareEquivalentOperator::Evaluate( const EvalKit &kit,
+                                                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-
-    // This class establishes the policy for couplings in one place.
-    // Today, it's $CURRENT_CLASS. 
-    // And it always will be: see #121; para starting at "No!!"
 
     // Simulate multiset::equal_range() with our ordered domain as an
     // ordering in order to get to the set of equivalent elements without
@@ -309,21 +305,29 @@ unique_ptr<SymbolResultInterface> AllCouplingEquivalentOperator::Evaluate( const
 }
 
 
-string AllCouplingEquivalentOperator::Render() const
+string AllSimpleCompareEquivalentOperator::Render() const
 {
     return "{≡" + RenderForMe(a) + "}";
 }
 
 
-Expression::Precedence AllCouplingEquivalentOperator::GetPrecedence() const
+Expression::Precedence AllSimpleCompareEquivalentOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
 }
 
 // ------------------------- AllInSimpleCompareRangeOperator --------------------------
 
-AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
+AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<SR::XLink, SR::XLink> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
     bounds( move(bounds_) ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
+    bounds( make_pair(SR::XLink::CreateDistinct(bounds_.first), SR::XLink::CreateDistinct(bounds_.second) ) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
 {

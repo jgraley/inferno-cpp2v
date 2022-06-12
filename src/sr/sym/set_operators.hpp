@@ -137,16 +137,16 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- AllCouplingEquivalentOperator --------------------------
+// ------------------------- AllSimpleCompareEquivalentOperator --------------------------
 
 // Equivalence is under Simple Compare of Child X of a pair of XLinks. Actual 
 // root arrow-head identity is ignored. There is no ordering, only equivalence 
 // relation. This is sufficient for couplings. Rule #528
-class AllCouplingEquivalentOperator : public SymbolToSymbolExpression
+class AllSimpleCompareEquivalentOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllCouplingEquivalentOperator( shared_ptr<SymbolExpression> a );
+    AllSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
@@ -163,6 +163,7 @@ class AllInSimpleCompareRangeOperator : public SYM::SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
+    AllInSimpleCompareRangeOperator( pair<SR::XLink, SR::XLink> &&bounds, bool lower_incl, bool upper_incl );
     AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
@@ -171,7 +172,7 @@ public:
     Precedence GetPrecedence() const override;
     
 private:
-    pair<TreePtr<Node>, TreePtr<Node>> bounds;
+    pair<SR::XLink, SR::XLink> bounds;
     const bool lower_incl, upper_incl;
 };
 
