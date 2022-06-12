@@ -369,7 +369,11 @@ bool CouplingEquivalenceClassResult::TryGetAsSetOfXLinks( set<SR::XLink> &links 
     // (because XLink native comparison will be faster than SimpleCompare)
     // but class_example might be an arbitrary force, and not in the domain.
     // See #522 #525
-    auto p = knowledge->coupling_ordered_domain.equal_range( class_example );
+
+    // This class establishes the policy for couplings in one place.
+    // Today, it's $CURRENT_CLASS. 
+    // And it always will be: see #121; para starting at "No!!"
+    auto p = knowledge->simple_compare_ordered_domain.equal_range( class_example );
     links = move( set<SR::XLink>( p.first, p.second ) );
     return true;
     

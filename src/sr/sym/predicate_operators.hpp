@@ -5,6 +5,7 @@
 #include "overloads.hpp"
 
 #include "../the_knowledge.hpp"
+#include "../sc_relation.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -307,7 +308,7 @@ public:
 private:
     shared_ptr<SymbolExpression> a;
     shared_ptr<SymbolExpression> b;
-    SR::TheKnowledge::CouplingRelation equivalence_relation;
+    SR::SimpleCompareRelation equivalence_relation;
 };
 
 };
