@@ -162,13 +162,16 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
 	
+    // This class establishes the policy for couplings in one place.
+    // And it always will be: see #121; para starting at "No!!"
+
     auto expr = MakeOver<BooleanConstant>(true);
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
     auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
     for( PatternLink residual_plink : residual_plinks )
     {
         auto residual_expr = MakeOver<SymbolVariable>(residual_plink);
-        expr &= ( MakeOver<IsCouplingEquivalentOperator>( keyer_expr, residual_expr ) |
+        expr &= ( MakeOver<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
                   keyer_expr == mmax_expr | // See thought on #384
                   residual_expr == mmax_expr );
     }

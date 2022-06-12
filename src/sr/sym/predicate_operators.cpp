@@ -170,7 +170,7 @@ Relationship IsEqualOperator::GetRelationshipWith( shared_ptr<PredicateOperator>
 {
     if( dynamic_pointer_cast<IsGreaterOrEqualOperator>(other) || 
         dynamic_pointer_cast<IsLessOrEqualOperator>(other) ||
-        dynamic_pointer_cast<IsCouplingEquivalentOperator>(other))
+        dynamic_pointer_cast<IsSimpleCompareEquivalentOperator>(other))
         return Relationship::IMPLIES;
     
     // Note: CONTRADICTS and TAUTOLOGY are symmetrical could be determined by either predicate - 
@@ -787,9 +787,9 @@ Expression::Precedence IsCollectionSizedOperator::GetPrecedenceNF() const
     return Precedence::PREFIX;
 }
 
-// ------------------------- IsCouplingEquivalentOperator --------------------------
+// ------------------------- IsSimpleCompareEquivalentOperator --------------------------
 
-IsCouplingEquivalentOperator::IsCouplingEquivalentOperator( shared_ptr<SymbolExpression> a_, 
+IsSimpleCompareEquivalentOperator::IsSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a_, 
                                         shared_ptr<SymbolExpression> b_ ) :
     a(a_),
     b(b_)
@@ -797,19 +797,19 @@ IsCouplingEquivalentOperator::IsCouplingEquivalentOperator( shared_ptr<SymbolExp
 }    
     
 
-IsCouplingEquivalentOperator *IsCouplingEquivalentOperator::Clone() const
+IsSimpleCompareEquivalentOperator *IsSimpleCompareEquivalentOperator::Clone() const
 {
-    return new IsCouplingEquivalentOperator( a, b );
+    return new IsSimpleCompareEquivalentOperator( a, b );
 }
     
 
-list<shared_ptr<SymbolExpression> *> IsCouplingEquivalentOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsSimpleCompareEquivalentOperator::GetSymbolOperandPointers()
 {
     return { &a, &b };
 }
 
 
-unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const EvalKit &kit,
                                                         list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
@@ -829,16 +829,13 @@ unique_ptr<BooleanResult> IsCouplingEquivalentOperator::Evaluate( const EvalKit 
 }
 
 
-shared_ptr<SymbolExpression> IsCouplingEquivalentOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
+shared_ptr<SymbolExpression> IsSimpleCompareEquivalentOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {  
     shared_ptr<SymbolExpression> solution = nullptr;
     ForAllDistinctPairs( list<shared_ptr<SymbolExpression>>{a, b}, 
                          [&](const shared_ptr<SymbolExpression> &first, 
                              const shared_ptr<SymbolExpression> &second)
     {    
-        // This class establishes the policy for couplings in one place.
-        // Today, it's $CURRENT_CLASS. 
-        // And it always will be: see #121; para starting at "No!!"
         shared_ptr<SymbolExpression> r = make_shared<AllSimpleCompareEquivalentOperator>(second);
         solution = first->TrySolveForToEqual( kit, target, r );
         if( solution )
@@ -849,25 +846,25 @@ shared_ptr<SymbolExpression> IsCouplingEquivalentOperator::TrySolveFor( const So
 }
 
 
-bool IsCouplingEquivalentOperator::IsCommutative() const
+bool IsSimpleCompareEquivalentOperator::IsCommutative() const
 {
     return true;
 }
 
 
-Transitivity IsCouplingEquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity IsSimpleCompareEquivalentOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
 {
-    return (bool)dynamic_pointer_cast<IsCouplingEquivalentOperator>(other) ? Transitivity::BIDIRECTIONAL : Transitivity::NONE;
+    return (bool)dynamic_pointer_cast<IsSimpleCompareEquivalentOperator>(other) ? Transitivity::BIDIRECTIONAL : Transitivity::NONE;
 }
 
 
-string IsCouplingEquivalentOperator::RenderNF() const
+string IsSimpleCompareEquivalentOperator::RenderNF() const
 {
     return RenderForMe(a) + " ≡ " + RenderForMe(b);
 }
 
 
-Expression::Precedence IsCouplingEquivalentOperator::GetPrecedenceNF() const
+Expression::Precedence IsSimpleCompareEquivalentOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

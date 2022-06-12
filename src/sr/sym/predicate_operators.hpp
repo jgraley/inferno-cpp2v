@@ -284,15 +284,15 @@ private:
     const int size;
 };
 
-// ------------------------- IsCouplingEquivalentOperator --------------------------
+// ------------------------- IsSimpleCompareEquivalentOperator --------------------------
 
-class IsCouplingEquivalentOperator : public PredicateOperator
+class IsSimpleCompareEquivalentOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit IsCouplingEquivalentOperator( shared_ptr<SymbolExpression> a, 
+    explicit IsSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a, 
                                  shared_ptr<SymbolExpression> b );
-    IsCouplingEquivalentOperator *Clone() const override;
+    IsSimpleCompareEquivalentOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
