@@ -116,24 +116,6 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     // children are the same under Simple Compare, but can be different 
     // instances (which implies that root arrow-head identity is ignored). For 
     // most nodes, similar => equal under SC, but not for identifiers. Rule #528
-    class AllIdentifiersNamedOperator : public SYM::SymbolToSymbolExpression
-    {
-    public:    
-        typedef SymbolExpression NominalType;
-        AllIdentifiersNamedOperator( const IdentifierByNameAgent *iba,
-                                     string name );
-        list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-        unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                         list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
-        string Render() const override;
-        Precedence GetPrecedence() const override;
-        
-    private:
-        const IdentifierByNameAgent * const iba;
-        const string name;
-        const pair<TreePtr<Node>, TreePtr<Node>> bounds;
-    };
-
     class IsIdentifierNamedOperator : public SYM::PredicateOperator
     {
     public:    

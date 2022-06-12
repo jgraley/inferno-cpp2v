@@ -343,3 +343,41 @@ SYM::Expression::Precedence AllInCategoryRange::GetPrecedence() const
 {
     return Precedence::SCOPE;
 }
+
+// ------------------------- AllInSimpleCompareRange --------------------------
+
+AllInSimpleCompareRange::AllInSimpleCompareRange( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
+    bounds( move(bounds_) ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+list<shared_ptr<SymbolExpression>> AllInSimpleCompareRange::GetSymbolOperands() const
+{
+    return {};
+}
+
+
+unique_ptr<SymbolResultInterface> AllInSimpleCompareRange::Evaluate( const EvalKit &kit,
+                                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
+{        
+    return make_unique<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, lower_incl, bounds.second, upper_incl );
+}
+
+
+string AllInSimpleCompareRange::Render() const
+{
+    // No operands, so I always evaluate to the same thing, so my render 
+    // string can be my result's render string.
+    EvalKit empty_kit;
+    return Evaluate(empty_kit, {})->Render();
+}
+
+
+SYM::Expression::Precedence AllInSimpleCompareRange::GetPrecedence() const
+{
+    return Precedence::SCOPE;
+}
+

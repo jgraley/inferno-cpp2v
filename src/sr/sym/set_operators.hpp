@@ -4,7 +4,7 @@
 #include "expression.hpp"
 #include "overloads.hpp"
 #include "result.hpp"
-#include "the_knowledge.hpp"
+#include "../the_knowledge.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -172,6 +172,24 @@ public:
     
 private:
     CategoryRangeResult::XLinkBoundsList bounds_list;
+    const bool lower_incl, upper_incl;
+};
+
+// ------------------------- AllInSimpleCompareRange --------------------------
+
+class AllInSimpleCompareRange : public SYM::SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllInSimpleCompareRange( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    pair<TreePtr<Node>, TreePtr<Node>> bounds;
     const bool lower_incl, upper_incl;
 };
 

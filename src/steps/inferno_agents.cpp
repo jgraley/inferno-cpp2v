@@ -10,6 +10,7 @@
 #include "sr/sym/overloads.hpp"
 #include "sr/sym/boolean_operators.hpp"
 #include "sr/sym/symbol_operators.hpp"
+#include "sr/sym/set_operators.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;
@@ -117,42 +118,8 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 
 SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);
+    auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);   
     return SYM::MakeOver<IsIdentifierNamedOperator>(this, name, keyer_expr);
-}
-
-
-IdentifierByNameAgent::AllIdentifiersNamedOperator::AllIdentifiersNamedOperator( const IdentifierByNameAgent *iba_, 
-                                                                                 string name_ ) :
-    iba( iba_ ),
-    name( name_ ),
-    bounds( iba->GetBounds( name ) )  
-{
-}
-
-
-list<shared_ptr<SYM::SymbolExpression>> IdentifierByNameAgent::AllIdentifiersNamedOperator::GetSymbolOperands() const
-{
-    return {};
-}
-
-
-unique_ptr<SYM::SymbolResultInterface> IdentifierByNameAgent::AllIdentifiersNamedOperator::Evaluate( const EvalKit &kit,
-                                                                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
-{
-    return make_unique<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, true, bounds.second, true );
-}
-
-
-string IdentifierByNameAgent::AllIdentifiersNamedOperator::Render() const
-{
-    return "{≅ '" + name + "'}";
-}
-
-
-SYM::Expression::Precedence IdentifierByNameAgent::AllIdentifiersNamedOperator::GetPrecedence() const
-{
-    return Precedence::COMPARE;
 }
 
 
@@ -203,7 +170,7 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
 
 shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const
 {
-    auto r = make_shared<AllIdentifiersNamedOperator>( iba, name );  
+    auto r = make_shared<SYM::AllInSimpleCompareRange>( iba->GetBounds( name ), true, true );
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               
