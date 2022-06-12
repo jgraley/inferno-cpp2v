@@ -99,9 +99,6 @@ public:
     typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedDomain;
     typedef SimpleCompareOrderedDomain::iterator SimpleCompareOrderedIt;
     
-    // This class establishes the policy for couplings in one place.
-    // Today, it's TheKnowledge, via typedefs to SimpleCompare. 
-    // And it always will be: see #121; para starting at "No!!"
     typedef SimpleCompareRelation CouplingRelation;
     typedef SimpleCompareOrderedDomain CouplingOrderedDomain;
     

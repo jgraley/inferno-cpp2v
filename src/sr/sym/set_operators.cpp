@@ -307,46 +307,9 @@ Expression::Precedence AllCouplingEquivalentOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- AllInCategoryRange --------------------------
+// ------------------------- AllInSimpleCompareRangeOperator --------------------------
 
-AllInCategoryRange::AllInCategoryRange( CategoryRangeResult::XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
-    bounds_list( move(bounds_list_) ),
-    lower_incl( lower_incl_ ),
-    upper_incl( upper_incl_ )
-{
-}
-
-
-list<shared_ptr<SymbolExpression>> AllInCategoryRange::GetSymbolOperands() const
-{
-    return {};
-}
-
-
-unique_ptr<SymbolResultInterface> AllInCategoryRange::Evaluate( const EvalKit &kit,
-                                                                list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
-{        
-    return make_unique<CategoryRangeResult>( kit.knowledge, bounds_list, lower_incl, upper_incl );    
-}
-
-
-string AllInCategoryRange::Render() const
-{
-    // No operands, so I always evaluate to the same thing, so my render 
-    // string can be my result's render string.
-    EvalKit empty_kit;
-    return Evaluate(empty_kit, {})->Render();
-}
-
-
-SYM::Expression::Precedence AllInCategoryRange::GetPrecedence() const
-{
-    return Precedence::SCOPE;
-}
-
-// ------------------------- AllInSimpleCompareRange --------------------------
-
-AllInSimpleCompareRange::AllInSimpleCompareRange( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
+AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
     bounds( move(bounds_) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
@@ -354,20 +317,20 @@ AllInSimpleCompareRange::AllInSimpleCompareRange( pair<TreePtr<Node>, TreePtr<No
 }
 
 
-list<shared_ptr<SymbolExpression>> AllInSimpleCompareRange::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> AllInSimpleCompareRangeOperator::GetSymbolOperands() const
 {
     return {};
 }
 
 
-unique_ptr<SymbolResultInterface> AllInSimpleCompareRange::Evaluate( const EvalKit &kit,
-                                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const                                                                    
+unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( const EvalKit &kit,
+                                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {        
-    return make_unique<SYM::SimpleCompareRangeResult>( kit.knowledge, bounds.first, lower_incl, bounds.second, upper_incl );
+    return make_unique<SimpleCompareRangeResult>( kit.knowledge, bounds.first, lower_incl, bounds.second, upper_incl );
 }
 
 
-string AllInSimpleCompareRange::Render() const
+string AllInSimpleCompareRangeOperator::Render() const
 {
     // No operands, so I always evaluate to the same thing, so my render 
     // string can be my result's render string.
@@ -376,7 +339,44 @@ string AllInSimpleCompareRange::Render() const
 }
 
 
-SYM::Expression::Precedence AllInSimpleCompareRange::GetPrecedence() const
+Expression::Precedence AllInSimpleCompareRangeOperator::GetPrecedence() const
+{
+    return Precedence::SCOPE;
+}
+
+// ------------------------- AllInCategoryRangeOperator --------------------------
+
+AllInCategoryRangeOperator::AllInCategoryRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+    bounds_list( move(bounds_list_) ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+list<shared_ptr<SymbolExpression>> AllInCategoryRangeOperator::GetSymbolOperands() const
+{
+    return {};
+}
+
+
+unique_ptr<SymbolResultInterface> AllInCategoryRangeOperator::Evaluate( const EvalKit &kit,
+                                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
+{        
+    return make_unique<CategoryRangeResult>( kit.knowledge, bounds_list, lower_incl, upper_incl );    
+}
+
+
+string AllInCategoryRangeOperator::Render() const
+{
+    // No operands, so I always evaluate to the same thing, so my render 
+    // string can be my result's render string.
+    EvalKit empty_kit;
+    return Evaluate(empty_kit, {})->Render();
+}
+
+
+Expression::Precedence AllInCategoryRangeOperator::GetPrecedence() const
 {
     return Precedence::SCOPE;
 }

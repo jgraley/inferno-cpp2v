@@ -157,31 +157,13 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- AllInCategoryRange --------------------------
+// ------------------------- AllInSimpleCompareRangeOperator --------------------------
 
-class AllInCategoryRange : public SYM::SymbolToSymbolExpression
+class AllInSimpleCompareRangeOperator : public SYM::SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllInCategoryRange( CategoryRangeResult::XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
-    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
-    string Render() const override;
-    Precedence GetPrecedence() const override;
-    
-private:
-    CategoryRangeResult::XLinkBoundsList bounds_list;
-    const bool lower_incl, upper_incl;
-};
-
-// ------------------------- AllInSimpleCompareRange --------------------------
-
-class AllInSimpleCompareRange : public SYM::SymbolToSymbolExpression
-{
-public:    
-    typedef SymbolExpression NominalType;
-    AllInSimpleCompareRange( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
+    AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
@@ -190,6 +172,24 @@ public:
     
 private:
     pair<TreePtr<Node>, TreePtr<Node>> bounds;
+    const bool lower_incl, upper_incl;
+};
+
+// ------------------------- AllInCategoryRangeOperator --------------------------
+
+class AllInCategoryRangeOperator : public SYM::SymbolToSymbolExpression
+{
+public:    
+    typedef SymbolExpression NominalType;
+    AllInCategoryRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
+                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    CategoryRangeResult::XLinkBoundsList bounds_list;
     const bool lower_incl, upper_incl;
 };
 

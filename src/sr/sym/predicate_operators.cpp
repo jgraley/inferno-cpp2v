@@ -655,7 +655,7 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
     
-    auto r = make_shared<AllInCategoryRange>( move(vxlink_range_list), true, false );  
+    auto r = make_shared<AllInCategoryRangeOperator>( move(vxlink_range_list), true, false );  
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               
