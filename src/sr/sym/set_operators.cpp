@@ -316,9 +316,9 @@ Expression::Precedence AllSimpleCompareEquivalentOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- AllInSimpleCompareRangeOperator --------------------------
+// ------------------------- AllInSimpleCompareFixedRangeOperator --------------------------
 
-AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<SR::XLink, SR::XLink> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
+AllInSimpleCompareFixedRangeOperator::AllInSimpleCompareFixedRangeOperator( pair<SR::XLink, SR::XLink> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
     bounds( move(bounds_) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
@@ -326,7 +326,7 @@ AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<SR::XLink
 }
 
 
-AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
+AllInSimpleCompareFixedRangeOperator::AllInSimpleCompareFixedRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
     bounds( make_pair(SR::XLink::CreateDistinct(bounds_.first), SR::XLink::CreateDistinct(bounds_.second) ) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
@@ -334,20 +334,20 @@ AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( pair<TreePtr<N
 }
 
 
-list<shared_ptr<SymbolExpression>> AllInSimpleCompareRangeOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> AllInSimpleCompareFixedRangeOperator::GetSymbolOperands() const
 {
     return {};
 }
 
 
-unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( const EvalKit &kit,
+unique_ptr<SymbolResultInterface> AllInSimpleCompareFixedRangeOperator::Evaluate( const EvalKit &kit,
                                                                              list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {        
     return make_unique<SimpleCompareRangeResult>( kit.knowledge, bounds.first, lower_incl, bounds.second, upper_incl );
 }
 
 
-string AllInSimpleCompareRangeOperator::Render() const
+string AllInSimpleCompareFixedRangeOperator::Render() const
 {
     // No operands, so I always evaluate to the same thing, so my render 
     // string can be my result's render string.
@@ -356,14 +356,14 @@ string AllInSimpleCompareRangeOperator::Render() const
 }
 
 
-Expression::Precedence AllInSimpleCompareRangeOperator::GetPrecedence() const
+Expression::Precedence AllInSimpleCompareFixedRangeOperator::GetPrecedence() const
 {
     return Precedence::SCOPE;
 }
 
-// ------------------------- AllInCategoryRangeOperator --------------------------
+// ------------------------- AllInCategoryFixedRangeOperator --------------------------
 
-AllInCategoryRangeOperator::AllInCategoryRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+AllInCategoryFixedRangeOperator::AllInCategoryFixedRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
     bounds_list( move(bounds_list_) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
@@ -371,20 +371,20 @@ AllInCategoryRangeOperator::AllInCategoryRangeOperator( CategoryRangeResult::XLi
 }
 
 
-list<shared_ptr<SymbolExpression>> AllInCategoryRangeOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> AllInCategoryFixedRangeOperator::GetSymbolOperands() const
 {
     return {};
 }
 
 
-unique_ptr<SymbolResultInterface> AllInCategoryRangeOperator::Evaluate( const EvalKit &kit,
+unique_ptr<SymbolResultInterface> AllInCategoryFixedRangeOperator::Evaluate( const EvalKit &kit,
                                                                         list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {        
     return make_unique<CategoryRangeResult>( kit.knowledge, bounds_list, lower_incl, upper_incl );    
 }
 
 
-string AllInCategoryRangeOperator::Render() const
+string AllInCategoryFixedRangeOperator::Render() const
 {
     // No operands, so I always evaluate to the same thing, so my render 
     // string can be my result's render string.
@@ -393,7 +393,7 @@ string AllInCategoryRangeOperator::Render() const
 }
 
 
-Expression::Precedence AllInCategoryRangeOperator::GetPrecedence() const
+Expression::Precedence AllInCategoryFixedRangeOperator::GetPrecedence() const
 {
     return Precedence::SCOPE;
 }

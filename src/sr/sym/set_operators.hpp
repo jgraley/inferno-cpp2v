@@ -157,14 +157,14 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- AllInSimpleCompareRangeOperator --------------------------
+// ------------------------- AllInSimpleCompareFixedRangeOperator --------------------------
 
-class AllInSimpleCompareRangeOperator : public SYM::SymbolToSymbolExpression
+class AllInSimpleCompareFixedRangeOperator : public SYM::SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllInSimpleCompareRangeOperator( pair<SR::XLink, SR::XLink> &&bounds, bool lower_incl, bool upper_incl );
-    AllInSimpleCompareRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
+    AllInSimpleCompareFixedRangeOperator( pair<SR::XLink, SR::XLink> &&bounds, bool lower_incl, bool upper_incl );
+    AllInSimpleCompareFixedRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
@@ -176,13 +176,13 @@ private:
     const bool lower_incl, upper_incl;
 };
 
-// ------------------------- AllInCategoryRangeOperator --------------------------
+// ------------------------- AllInCategoryFixedRangeOperator --------------------------
 
-class AllInCategoryRangeOperator : public SYM::SymbolToSymbolExpression
+class AllInCategoryFixedRangeOperator : public SYM::SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllInCategoryRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    AllInCategoryFixedRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
