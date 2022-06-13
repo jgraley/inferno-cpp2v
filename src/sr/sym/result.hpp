@@ -162,8 +162,9 @@ public:
 private:    
     const SR::TheKnowledge *knowledge;
     SR::XLink lower;
+    bool lower_incl;
     SR::XLink upper;
-    bool lower_incl, upper_incl;
+    bool upper_incl;
 };
 
 

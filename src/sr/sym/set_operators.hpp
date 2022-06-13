@@ -159,8 +159,9 @@ public:
     
 private:
     const shared_ptr<SymbolExpression> lower;
+    const bool lower_incl;
     const shared_ptr<SymbolExpression> upper;
-    const bool lower_incl, upper_incl;
+    const bool upper_incl;
 };
 
 // ------------------------- AllInSimpleCompareFixedRangeOperator --------------------------

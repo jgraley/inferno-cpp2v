@@ -281,8 +281,8 @@ AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( shared_ptr<Sym
                                                                   shared_ptr<SymbolExpression> upper_,
                                                                   bool upper_incl_ ) :
     lower( lower_ ),
-    upper( upper_ ),
     lower_incl( lower_incl_ ),
+    upper( upper_ ),
     upper_incl( upper_incl_ )
 {
 }
