@@ -7,6 +7,10 @@
 
 using namespace SYM;
 
+// For #558 but will need #560 before can continue, since special xlinks 
+// would need to be able to pass through various symbolic things.
+// #define UNFIXED_SC_RANGE
+
 // ------------------------- PredicateOperator --------------------------
 
 void PredicateOperator::SetForceExpression( weak_ptr<BooleanExpression> force_expression_ )
@@ -645,7 +649,18 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
     // Get lacing index range
     const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
     
-#if 1
+#ifdef UNFIXED_SC_RANGE
+    AllInCategoryRangeOperator::ExprBoundsList range_list;
+    
+    for( pair<int, int> int_range : int_range_list )
+    {
+        // int_range is a half-open minimax
+        vxlink_range_list.push_back( make_pair( make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.first),
+                                                make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
+    }
+
+    auto r = make_shared<AllInCategoryRangeOperator>( move(range_list), true, false );  
+#else
     // Get specially hacked XLinks that can be used with the category ordering
     CategoryRangeResult::XLinkBoundsList vxlink_range_list;
     for( pair<int, int> int_range : int_range_list )
@@ -657,18 +672,6 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
     TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
     
     auto r = make_shared<AllInCategoryFixedRangeOperator>( move(vxlink_range_list), true, false );  
-#else
-    AllInCategoryRangeOperator::ExprBoundsList range_list;
-    
-    for( pair<int, int> int_range : int_range_list )
-    {
-        // int_range is a half-open minimax
-        vxlink_range_list.push_back( make_pair( make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.first),
-                                                make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
-    }
-    
-
-    auto r = make_shared<AllInCategoryRangeOperator>( move(range_list), true, false );  
 #endif    
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
