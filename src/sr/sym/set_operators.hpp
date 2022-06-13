@@ -137,24 +137,30 @@ private:
     const shared_ptr<SymbolExpression> a;
 };
 
-// ------------------------- AllSimpleCompareEquivalentOperator --------------------------
+// ------------------------- AllInSimpleCompareRangeOperator --------------------------
 
 // Equivalence is under Simple Compare of Child X of a pair of XLinks. Actual 
 // root arrow-head identity is ignored. There is no ordering, only equivalence 
 // relation. This is sufficient for couplings. Rule #528
-class AllSimpleCompareEquivalentOperator : public SymbolToSymbolExpression
+class AllInSimpleCompareRangeOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    AllSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a );
+    AllInSimpleCompareRangeOperator( shared_ptr<SymbolExpression> lower,
+                                     bool lower_incl,
+                                     shared_ptr<SymbolExpression> upper,
+                                     bool upper_incl ); 
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const final;
+    
+    // Note we override the version without the operand solves - we'll do that here
+    unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const final;
     string Render() const override;
     Precedence GetPrecedence() const override;
     
 private:
-    const shared_ptr<SymbolExpression> a;
+    const shared_ptr<SymbolExpression> lower;
+    const shared_ptr<SymbolExpression> upper;
+    const bool lower_incl, upper_incl;
 };
 
 // ------------------------- AllInSimpleCompareFixedRangeOperator --------------------------

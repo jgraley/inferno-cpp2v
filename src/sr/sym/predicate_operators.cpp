@@ -836,7 +836,15 @@ shared_ptr<SymbolExpression> IsSimpleCompareEquivalentOperator::TrySolveFor( con
                          [&](const shared_ptr<SymbolExpression> &first, 
                              const shared_ptr<SymbolExpression> &second)
     {    
-        shared_ptr<SymbolExpression> r = make_shared<AllSimpleCompareEquivalentOperator>(second);
+        // Simulate multiset::equal_range() with our ordered domain as an
+        // ordering in order to get to the set of equivalent elements without
+        // having to iterate over the whole domain. We're still gaining entropy
+        // here though. It would be faster to get to the range via nuggets 
+        // (because XLink native comparison will be faster than SimpleCompare)
+        // but ar might be an arbitrary force, and not in the domain.
+        // See #522 #525
+        // X, true, X, true gets simulates equal_range()    
+        shared_ptr<SymbolExpression> r = make_shared<AllInSimpleCompareRangeOperator>(second, true, second, true);
         solution = first->TrySolveForToEqual( kit, target, r );
         if( solution )
             Break();

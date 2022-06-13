@@ -274,44 +274,61 @@ Expression::Precedence AllLessOrEqualOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- AllSimpleCompareEquivalentOperator --------------------------
+// ------------------------- AllInSimpleCompareRangeOperator --------------------------
 
-AllSimpleCompareEquivalentOperator::AllSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a_ ) :
-    a( a_ )
+AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( shared_ptr<SymbolExpression> lower_,
+                                                                  bool lower_incl_,
+                                                                  shared_ptr<SymbolExpression> upper_,
+                                                                  bool upper_incl_ ) :
+    lower( lower_ ),
+    upper( upper_ ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
 {
 }
 
+      
+list<shared_ptr<SymbolExpression>> AllInSimpleCompareRangeOperator::GetSymbolOperands() const
+{
+    return { lower, upper };
+}
+
+
+unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
+{
+    unique_ptr<SymbolResultInterface> r_lower = move( lower->Evaluate(kit) );
     
-list<shared_ptr<SymbolExpression>> AllSimpleCompareEquivalentOperator::GetSymbolOperands() const
-{
-    return {a};
+    // Optimise case when operands are equal by only evaluating once
+    if( lower==upper )       
+        return make_unique<SimpleCompareRangeResult>( kit.knowledge, 
+                                                      r_lower->GetOnlyXLink(), 
+                                                      lower_incl, 
+                                                      r_lower->GetOnlyXLink(), 
+                                                      upper_incl ); 
+    
+    unique_ptr<SymbolResultInterface> r_upper = move( upper->Evaluate(kit) );       
+    return make_unique<SimpleCompareRangeResult>( kit.knowledge, 
+                                                  r_lower->GetOnlyXLink(), 
+                                                  lower_incl, 
+                                                  r_upper->GetOnlyXLink(), 
+                                                  upper_incl ); 
 }
 
 
-unique_ptr<SymbolResultInterface> AllSimpleCompareEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
+string AllInSimpleCompareRangeOperator::Render() const
 {
-    unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-
-    // Simulate multiset::equal_range() with our ordered domain as an
-    // ordering in order to get to the set of equivalent elements without
-    // having to iterate over the whole domain. We're still gaining entropy
-    // here though. It would be faster to get to the range via nuggets 
-    // (because XLink native comparison will be faster than SimpleCompare)
-    // but ar might be an arbitrary force, and not in the domain.
-    // See #522 #525
-    // X, true, X, true gets simulates equal_range()    
-    return make_unique<SimpleCompareRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, ar->GetOnlyXLink(), true ); 
+    list<string> restrictions;
+    
+    if( lower )
+        restrictions.push_back( string(lower_incl?"[":"(") + lower->Render() );
+    if( upper )
+        restrictions.push_back( upper->Render() + string(upper_incl?"]":")") );
+        
+    return Join(restrictions, ", ", "{SC ", " }");
 }
 
 
-string AllSimpleCompareEquivalentOperator::Render() const
-{
-    return "{≡" + RenderForMe(a) + "}";
-}
-
-
-Expression::Precedence AllSimpleCompareEquivalentOperator::GetPrecedence() const
+Expression::Precedence AllInSimpleCompareRangeOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
 }
