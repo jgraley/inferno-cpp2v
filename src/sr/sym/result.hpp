@@ -173,7 +173,8 @@ private:
 class CategoryRangeResult : public SymbolResultInterface
 {
 public:
-    typedef pair<unique_ptr<SR::XLink>, unique_ptr<SR::XLink>> XLinkBounds;
+    // Shared_ptr is OK since we don't mutate at eval time, just dereference
+    typedef pair<shared_ptr<SR::XLink>, shared_ptr<SR::XLink>> XLinkBounds;
     typedef list<XLinkBounds> XLinkBoundsList;
 
     // lower or upper can be null to exclude that limit

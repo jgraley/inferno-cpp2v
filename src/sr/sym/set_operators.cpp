@@ -296,22 +296,14 @@ list<shared_ptr<SymbolExpression>> AllInSimpleCompareRangeOperator::GetSymbolOpe
 
 unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
 {
-    unique_ptr<SymbolResultInterface> r_lower = move( lower->Evaluate(kit) );
-    
+    SR::XLink lower_xlink = lower->Evaluate(kit)->GetOnlyXLink();
+
     // Optimise case when operands are equal by only evaluating once
-    if( lower==upper )       
-        return make_unique<SimpleCompareRangeResult>( kit.knowledge, 
-                                                      r_lower->GetOnlyXLink(), 
-                                                      lower_incl, 
-                                                      r_lower->GetOnlyXLink(), 
-                                                      upper_incl ); 
-    
-    unique_ptr<SymbolResultInterface> r_upper = move( upper->Evaluate(kit) );       
-    return make_unique<SimpleCompareRangeResult>( kit.knowledge, 
-                                                  r_lower->GetOnlyXLink(), 
-                                                  lower_incl, 
-                                                  r_upper->GetOnlyXLink(), 
-                                                  upper_incl ); 
+    SR::XLink upper_xlink = (upper==lower) ? 
+                            lower_xlink : 
+                            upper->Evaluate(kit)->GetOnlyXLink();
+
+    return make_unique<SimpleCompareRangeResult>( kit.knowledge, lower_xlink, lower_incl, upper_xlink, upper_incl ); 
 }
 
 
@@ -331,51 +323,6 @@ string AllInSimpleCompareRangeOperator::Render() const
 Expression::Precedence AllInSimpleCompareRangeOperator::GetPrecedence() const
 {
     return Precedence::COMPARE;
-}
-
-// ------------------------- AllInSimpleCompareFixedRangeOperator --------------------------
-
-AllInSimpleCompareFixedRangeOperator::AllInSimpleCompareFixedRangeOperator( pair<SR::XLink, SR::XLink> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
-    bounds( move(bounds_) ),
-    lower_incl( lower_incl_ ),
-    upper_incl( upper_incl_ )
-{
-}
-
-
-AllInSimpleCompareFixedRangeOperator::AllInSimpleCompareFixedRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds_, bool lower_incl_, bool upper_incl_ ) :
-    bounds( make_pair(SR::XLink::CreateDistinct(bounds_.first), SR::XLink::CreateDistinct(bounds_.second) ) ),
-    lower_incl( lower_incl_ ),
-    upper_incl( upper_incl_ )
-{
-}
-
-
-list<shared_ptr<SymbolExpression>> AllInSimpleCompareFixedRangeOperator::GetSymbolOperands() const
-{
-    return {};
-}
-
-
-unique_ptr<SymbolResultInterface> AllInSimpleCompareFixedRangeOperator::Evaluate( const EvalKit &kit,
-                                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
-{        
-    return make_unique<SimpleCompareRangeResult>( kit.knowledge, bounds.first, lower_incl, bounds.second, upper_incl );
-}
-
-
-string AllInSimpleCompareFixedRangeOperator::Render() const
-{
-    // No operands, so I always evaluate to the same thing, so my render 
-    // string can be my result's render string.
-    EvalKit empty_kit;
-    return Evaluate(empty_kit, {})->Render();
-}
-
-
-Expression::Precedence AllInSimpleCompareFixedRangeOperator::GetPrecedence() const
-{
-    return Precedence::SCOPE;
 }
 
 // ------------------------- AllInCategoryFixedRangeOperator --------------------------
@@ -411,6 +358,67 @@ string AllInCategoryFixedRangeOperator::Render() const
 
 
 Expression::Precedence AllInCategoryFixedRangeOperator::GetPrecedence() const
+{
+    return Precedence::SCOPE;
+}
+
+
+// ------------------------- AllInCategoryRangeOperator --------------------------
+
+AllInCategoryRangeOperator::AllInCategoryRangeOperator( ExprBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+    bounds_list( move(bounds_list_) ),
+    lower_incl( lower_incl_ ),
+    upper_incl( upper_incl_ )
+{
+}
+
+
+list<shared_ptr<SymbolExpression>> AllInCategoryRangeOperator::GetSymbolOperands() const
+{
+    list<shared_ptr<SymbolExpression>> ops;
+    for( const ExprBounds &bounds : bounds_list )
+    {
+        ops.push_back( bounds.first );
+        ops.push_back( bounds.second );
+    }
+    return ops;
+}
+
+
+unique_ptr<SymbolResultInterface> AllInCategoryRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
+{        
+    CategoryRangeResult::XLinkBoundsList xlink_bounds_list;
+    for( const ExprBounds &bounds : bounds_list )
+    {
+        SR::XLink lower_xlink = bounds.first->Evaluate(kit)->GetOnlyXLink();
+
+        // Optimise case when operands are equal by only evaluating once
+        SR::XLink upper_xlink = (bounds.second==bounds.first) ? 
+                                lower_xlink : 
+                                bounds.second->Evaluate(kit)->GetOnlyXLink();
+                              
+        xlink_bounds_list.push_back( make_pair( make_unique<SR::XLink>(lower_xlink),
+                                                make_unique<SR::XLink>(upper_xlink) ) );
+    }
+    return make_unique<CategoryRangeResult>( kit.knowledge, xlink_bounds_list, lower_incl, upper_incl );    
+}
+
+
+string AllInCategoryRangeOperator::Render() const
+{
+    list<string> terms;;
+    for( const ExprBounds &bounds : bounds_list )
+    {
+        list<string> restrictions;
+        restrictions.push_back( string(lower_incl?"[":"(") + bounds.first->Render() );
+        restrictions.push_back( bounds.second->Render() + string(upper_incl?"]":")") );
+        terms.push_back( Join(restrictions, ", ") );
+    }
+    return Join(terms, " ∪ ", "{CAT ", " }");
+}
+
+
+Expression::Precedence AllInCategoryRangeOperator::GetPrecedence() const
 {
     return Precedence::SCOPE;
 }

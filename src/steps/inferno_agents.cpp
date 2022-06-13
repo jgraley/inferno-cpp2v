@@ -170,7 +170,10 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
 
 shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const
 {
-    auto r = make_shared<SYM::AllInSimpleCompareFixedRangeOperator>( iba->GetBounds( name ), true, true );
+    pair<TreePtr<Node>, TreePtr<Node>> range_nodes = iba->GetBounds( name );
+    auto lower = make_shared<SYM::SymbolConstant>( range_nodes.first );
+    auto upper = make_shared<SYM::SymbolConstant>( range_nodes.second );
+    auto r = make_shared<SYM::AllInSimpleCompareRangeOperator>( lower, true, upper, true );
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               

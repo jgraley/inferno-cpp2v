@@ -164,25 +164,6 @@ private:
     const bool upper_incl;
 };
 
-// ------------------------- AllInSimpleCompareFixedRangeOperator --------------------------
-
-class AllInSimpleCompareFixedRangeOperator : public SYM::SymbolToSymbolExpression
-{
-public:    
-    typedef SymbolExpression NominalType;
-    AllInSimpleCompareFixedRangeOperator( pair<SR::XLink, SR::XLink> &&bounds, bool lower_incl, bool upper_incl );
-    AllInSimpleCompareFixedRangeOperator( pair<TreePtr<Node>, TreePtr<Node>> &&bounds, bool lower_incl, bool upper_incl );
-    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
-    string Render() const override;
-    Precedence GetPrecedence() const override;
-    
-private:
-    pair<SR::XLink, SR::XLink> bounds;
-    const bool lower_incl, upper_incl;
-};
-
 // ------------------------- AllInCategoryFixedRangeOperator --------------------------
 
 class AllInCategoryFixedRangeOperator : public SYM::SymbolToSymbolExpression
@@ -198,6 +179,28 @@ public:
     
 private:
     CategoryRangeResult::XLinkBoundsList bounds_list;
+    const bool lower_incl, upper_incl;
+};
+
+// ------------------------- AllInCategoryRangeOperator --------------------------
+
+class AllInCategoryRangeOperator : public SYM::SymbolToSymbolExpression
+{
+public:    
+    typedef pair<shared_ptr<SymbolExpression>, shared_ptr<SymbolExpression>> ExprBounds;
+    typedef list<ExprBounds> ExprBoundsList;
+
+    typedef SymbolExpression NominalType;
+    AllInCategoryRangeOperator( ExprBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
+    
+    // Note we override the version without the operand solves - we'll do that here
+    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit ) const final;
+    string Render() const override;
+    Precedence GetPrecedence() const override;
+    
+private:
+    ExprBoundsList bounds_list;
     const bool lower_incl, upper_incl;
 };
 

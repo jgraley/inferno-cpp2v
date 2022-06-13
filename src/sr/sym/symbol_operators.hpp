@@ -18,6 +18,7 @@ class SymbolConstant : public SymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit SymbolConstant( SR::XLink xlink );
+    explicit SymbolConstant( TreePtr<Node> node );
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;    
     unique_ptr<SymbolResultInterface> GetValue() const;
     SR::XLink GetOnlyXLink() const;

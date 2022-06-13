@@ -15,6 +15,12 @@ SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
 }
 
 
+SymbolConstant::SymbolConstant( TreePtr<Node> node ) :
+    SymbolConstant( SR::XLink::CreateDistinct(node) )
+{
+}
+
+
 unique_ptr<SymbolResultInterface> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
     return make_unique<SymbolResult>( xlink );

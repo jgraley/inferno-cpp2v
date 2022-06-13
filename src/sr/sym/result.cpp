@@ -478,7 +478,7 @@ bool CategoryRangeResult::operator==( const SymbolResultInterface &other ) const
 
 string CategoryRangeResult::Render() const
 {
-    list<string> terms;;
+    list<string> terms;
     for( const XLinkBounds &bounds : bounds_list )
     {
         list<string> restrictions;
