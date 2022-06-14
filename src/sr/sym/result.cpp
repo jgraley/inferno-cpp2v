@@ -426,9 +426,9 @@ string SimpleCompareRangeResult::Render() const
 
 // ------------------------- CategoryRangeResult --------------------------
 
-CategoryRangeResult::CategoryRangeResult( const SR::TheKnowledge *knowledge_, const XLinkBoundsList &bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+CategoryRangeResult::CategoryRangeResult( const SR::TheKnowledge *knowledge_, XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
     knowledge( knowledge_ ),
-    bounds_list( bounds_list_ ),
+    bounds_list( move(bounds_list_) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
 {
@@ -454,11 +454,14 @@ bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     {
         SR::TheKnowledge::SimpleCompareOrderedIt it_lower, it_upper;
 
+        ASSERT( &bounds );
+        ASSERT( bounds.first );
         if( lower_incl )
             it_lower = knowledge->category_ordered_domain.lower_bound(*bounds.first);
         else
             it_lower = knowledge->category_ordered_domain.upper_bound(*bounds.first);
 
+        ASSERT( bounds.second );
         if( upper_incl )
             it_upper = knowledge->category_ordered_domain.upper_bound(*bounds.second);
         else

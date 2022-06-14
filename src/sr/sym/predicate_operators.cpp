@@ -1,15 +1,12 @@
 #include "predicate_operators.hpp"
 #include "boolean_operators.hpp"
+#include "symbol_operators.hpp"
 #include "set_operators.hpp"
 #include "result.hpp"
 #include "../lacing.hpp"
 #include "common/lambda_loops.hpp"
 
 using namespace SYM;
-
-// For #558 but will need #560 before can continue, since special xlinks 
-// would need to be able to pass through various symbolic things.
-// #define UNFIXED_SC_RANGE
 
 // ------------------------- PredicateOperator --------------------------
 
@@ -649,21 +646,19 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
     // Get lacing index range
     const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
     
-#ifdef UNFIXED_SC_RANGE
-#else
     // Get specially hacked XLinks that can be used with the category ordering
-    CategoryRangeResult::XLinkBoundsList vxlink_range_list;
+    AllInCategoryRangeOperator::ExprBoundsList expr_range_list;
     for( pair<int, int> int_range : int_range_list )
     {
-        CategoryRangeResult::XLinkBounds vxlink_range;
-        vxlink_range.first = make_shared<SR::XLink>( SR::XLink::CreateDistinct( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.first) ) );
-        vxlink_range.second = make_shared<SR::XLink>( SR::XLink::CreateDistinct( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.second) ) );        
-        vxlink_range_list.push_back( vxlink_range );
+        AllInCategoryRangeOperator::ExprBounds expr_range;
+        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.first) );
+        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.second) );        
+        expr_range_list.push_back( expr_range );
     }
-    TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
+    TRACE(archetype_node)("\n")(int_range_list)("\n")(expr_range_list)("\n");
     // int_range is a half-open minimax
-    auto r = make_shared<AllInCategoryFixedRangeOperator>( move(vxlink_range_list), true, false );     
-#endif
+    auto r = make_shared<AllInCategoryRangeOperator>( move(expr_range_list), true, false );     
+
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               

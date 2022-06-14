@@ -164,24 +164,6 @@ private:
     const bool upper_incl;
 };
 
-// ------------------------- AllInCategoryFixedRangeOperator --------------------------
-
-class AllInCategoryFixedRangeOperator : public SYM::SymbolToSymbolExpression
-{
-public:    
-    typedef SymbolExpression NominalType;
-    AllInCategoryFixedRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
-    list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
-    unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const final;
-    string Render() const override;
-    Precedence GetPrecedence() const override;
-    
-private:
-    CategoryRangeResult::XLinkBoundsList bounds_list;
-    const bool lower_incl, upper_incl;
-};
-
 // ------------------------- AllInCategoryRangeOperator --------------------------
 
 class AllInCategoryRangeOperator : public SYM::SymbolToSymbolExpression

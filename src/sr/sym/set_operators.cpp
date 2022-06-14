@@ -325,44 +325,6 @@ Expression::Precedence AllInSimpleCompareRangeOperator::GetPrecedence() const
     return Precedence::COMPARE;
 }
 
-// ------------------------- AllInCategoryFixedRangeOperator --------------------------
-
-AllInCategoryFixedRangeOperator::AllInCategoryFixedRangeOperator( CategoryRangeResult::XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
-    bounds_list( move(bounds_list_) ),
-    lower_incl( lower_incl_ ),
-    upper_incl( upper_incl_ )
-{
-}
-
-
-list<shared_ptr<SymbolExpression>> AllInCategoryFixedRangeOperator::GetSymbolOperands() const
-{
-    return {};
-}
-
-
-unique_ptr<SymbolResultInterface> AllInCategoryFixedRangeOperator::Evaluate( const EvalKit &kit,
-                                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
-{        
-    return make_unique<CategoryRangeResult>( kit.knowledge, bounds_list, lower_incl, upper_incl );    
-}
-
-
-string AllInCategoryFixedRangeOperator::Render() const
-{
-    // No operands, so I always evaluate to the same thing, so my render 
-    // string can be my result's render string.
-    EvalKit empty_kit;
-    return Evaluate(empty_kit, {})->Render();
-}
-
-
-Expression::Precedence AllInCategoryFixedRangeOperator::GetPrecedence() const
-{
-    return Precedence::SCOPE;
-}
-
-
 // ------------------------- AllInCategoryRangeOperator --------------------------
 
 AllInCategoryRangeOperator::AllInCategoryRangeOperator( ExprBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
@@ -400,7 +362,7 @@ unique_ptr<SymbolResultInterface> AllInCategoryRangeOperator::Evaluate( const Ev
         xlink_bounds_list.push_back( make_pair( make_unique<SR::XLink>(lower_xlink),
                                                 make_unique<SR::XLink>(upper_xlink) ) );
     }
-    return make_unique<CategoryRangeResult>( kit.knowledge, xlink_bounds_list, lower_incl, upper_incl );    
+    return make_unique<CategoryRangeResult>( kit.knowledge, move(xlink_bounds_list), lower_incl, upper_incl );    
 }
 
 
