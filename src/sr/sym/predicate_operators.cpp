@@ -650,29 +650,20 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
     const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
     
 #ifdef UNFIXED_SC_RANGE
-    AllInCategoryRangeOperator::ExprBoundsList range_list;
-    
-    for( pair<int, int> int_range : int_range_list )
-    {
-        // int_range is a half-open minimax
-        vxlink_range_list.push_back( make_pair( make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.first),
-                                                make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
-    }
-
-    auto r = make_shared<AllInCategoryRangeOperator>( move(range_list), true, false );  
 #else
     // Get specially hacked XLinks that can be used with the category ordering
     CategoryRangeResult::XLinkBoundsList vxlink_range_list;
     for( pair<int, int> int_range : int_range_list )
     {
-        // int_range is a half-open minimax
-        vxlink_range_list.push_back( make_pair( make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.first),
-                                                make_shared<SR::TheKnowledge::CategoryVXLink>(int_range.second) ) );
+        CategoryRangeResult::XLinkBounds vxlink_range;
+        vxlink_range.first = make_shared<SR::XLink>( SR::XLink::CreateDistinct( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.first) ) );
+        vxlink_range.second = make_shared<SR::XLink>( SR::XLink::CreateDistinct( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.second) ) );        
+        vxlink_range_list.push_back( vxlink_range );
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(vxlink_range_list)("\n");
-    
-    auto r = make_shared<AllInCategoryFixedRangeOperator>( move(vxlink_range_list), true, false );  
-#endif    
+    // int_range is a half-open minimax
+    auto r = make_shared<AllInCategoryFixedRangeOperator>( move(vxlink_range_list), true, false );     
+#endif
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               

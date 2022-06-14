@@ -68,19 +68,23 @@ public:
     {
     public:
         CategoryRelation( shared_ptr<Lacing> lacing );
-        bool operator() (const XLink& x, const XLink& y) const;
+        bool operator() (const XLink& x_link, const XLink& y_link) const;
     private:
         const shared_ptr<Lacing> lacing;
     };
-    
-    class CategoryVXLink : public XLink
+
+    // Create a node here so that a regular XLink can be used and passed
+    // through the sym stuff by value.
+    class CategoryMinimaxNode : public Node
     {
     public:
-        CategoryVXLink( int lacing_index );
+        NODE_FUNCTIONS_FINAL
+        CategoryMinimaxNode( int lacing_index );
+        CategoryMinimaxNode(); ///< default constructor, for making archetypes 
         int GetLacingIndex() const;
         string GetTrace() const override;
     private:
-        const int lacing_index;
+        int lacing_index;
     };
 
     // Domain ordered by depth-first walk

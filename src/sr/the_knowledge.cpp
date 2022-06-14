@@ -125,39 +125,48 @@ TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
 }
 
 
-bool TheKnowledge::CategoryRelation::operator() (const XLink& x, const XLink& y) const
+bool TheKnowledge::CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
 {
-    auto cat_x = dynamic_cast<const CategoryVXLink *>(&x);
-    auto cat_y = dynamic_cast<const CategoryVXLink *>(&y);
+    TreePtr<Node> x = x_link.GetChildX();
+    auto cat_x = TreePtr<CategoryMinimaxNode>::DynamicCast( x );
+    TreePtr<Node> y = y_link.GetChildX();    
+    auto cat_y = TreePtr<CategoryMinimaxNode>::DynamicCast( y );
+
     if( !cat_x && !cat_y )
-        return lacing->IsIndexLess( x.GetChildX(), y.GetChildX() );
-    
+        return lacing->IsIndexLess( x, y );    
+   
     int xi, yi;
     if( cat_x )
         xi = cat_x->GetLacingIndex();
     else
-        xi = lacing->GetIndexForNode( x.GetChildX() );
+        xi = lacing->GetIndexForNode( x );
     if( cat_y )
         yi = cat_y->GetLacingIndex();
     else
-        yi = lacing->GetIndexForNode( y.GetChildX() );
-    return xi < yi;
+        yi = lacing->GetIndexForNode( y );
+    return xi < yi;   
 }
 
 
-TheKnowledge::CategoryVXLink::CategoryVXLink( int lacing_index_ ) :
+TheKnowledge::CategoryMinimaxNode::CategoryMinimaxNode( int lacing_index_ ) :
     lacing_index( lacing_index_ )
 {
 }
     
 
-int TheKnowledge::CategoryVXLink::GetLacingIndex() const
+TheKnowledge::CategoryMinimaxNode::CategoryMinimaxNode() :
+    lacing_index( 0 )
+{
+}
+    
+
+int TheKnowledge::CategoryMinimaxNode::GetLacingIndex() const
 {
     return lacing_index;
 }
  
 
-string TheKnowledge::CategoryVXLink::GetTrace() const
+string TheKnowledge::CategoryMinimaxNode::GetTrace() const
 {
     return GetTypeName() + SSPrintf("(%d)", lacing_index);
 }
