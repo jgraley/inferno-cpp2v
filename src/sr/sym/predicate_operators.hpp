@@ -227,6 +227,10 @@ private:
 
 // ------------------------- IsKindOfOperator --------------------------
 
+// Note: this predicate is kept specific (rather than generalising to 
+// eg IsInCategoryRange) because it needs to be seen by knowledge planning
+// and only then can it be solved into the more generic AllInCategoryRangeOperator. 
+// Also this means its solving properties could be exposed eg implies. 
 class IsKindOfOperator : public PredicateOperator
 {
 public:    
@@ -286,6 +290,9 @@ private:
 
 // ------------------------- IsSimpleCompareEquivalentOperator --------------------------
 
+// Note: this predicate is kept specific (rather than generalising to 
+// eg IsInSimpleCompareRangeOperator or via IsMemeberOperator) so that its
+// solving properties can be exposed eg transitivity. 
 class IsSimpleCompareEquivalentOperator : public PredicateOperator
 {
 public:    
@@ -309,32 +316,6 @@ private:
     shared_ptr<SymbolExpression> a;
     shared_ptr<SymbolExpression> b;
     SR::SimpleCompareRelation equivalence_relation;
-};
-
-// ------------------------- IsMemberOperator --------------------------
-
-class IsMemberOperator : public PredicateOperator
-{
-public:    
-    typedef BooleanExpression NominalType;
-    explicit IsMemberOperator( shared_ptr<SymbolExpression> a, 
-                               shared_ptr<SymbolExpression> b );
-    IsMemberOperator *Clone() const override;
-
-    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
-    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
-    
-    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
-    bool IsCommutative() const override;
-    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
-    
-    virtual string RenderNF() const override;
-    virtual Precedence GetPrecedenceNF() const override;
-    
-private:
-    shared_ptr<SymbolExpression> a;
-    shared_ptr<SymbolExpression> b;
 };
 
 };
