@@ -311,6 +311,32 @@ private:
     SR::SimpleCompareRelation equivalence_relation;
 };
 
+// ------------------------- IsMemberOperator --------------------------
+
+class IsMemberOperator : public PredicateOperator
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit IsMemberOperator( shared_ptr<SymbolExpression> a, 
+                               shared_ptr<SymbolExpression> b );
+    IsMemberOperator *Clone() const override;
+
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
+    
+    shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    bool IsCommutative() const override;
+    Transitivity GetTransitivityWith( shared_ptr<PredicateOperator> other ) const override;
+    
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
+    
+private:
+    shared_ptr<SymbolExpression> a;
+    shared_ptr<SymbolExpression> b;
+};
+
 };
 
 #endif // include guard

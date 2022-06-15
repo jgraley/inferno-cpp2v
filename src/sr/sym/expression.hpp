@@ -53,6 +53,7 @@ public:
         MULTIPLY,
         ADD,
         SHIFT,
+        MEMBER,
         COMPARE,
         AND,
         XOR,

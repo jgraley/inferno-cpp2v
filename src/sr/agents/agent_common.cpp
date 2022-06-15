@@ -165,12 +165,17 @@ Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
 
-    auto expr = MakeOver<BooleanConstant>(true);
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
     auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
+    
+    // Policy must apply for every residual
+    auto expr = MakeOver<BooleanConstant>(true);
     for( PatternLink residual_plink : residual_plinks )
     {
         auto residual_expr = MakeOver<SymbolVariable>(residual_plink);
+        
+        // Policy: Accept SimpleCompare equivalence of current 
+        // residual to keyer, or either one being MMAX
         expr &= ( MakeOver<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
                   keyer_expr == mmax_expr | // See thought on #384
                   residual_expr == mmax_expr );
