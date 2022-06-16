@@ -242,6 +242,7 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
+    Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
 
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const override;

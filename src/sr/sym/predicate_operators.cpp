@@ -663,6 +663,23 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
 }                                                                                                                                             
                                               
                                               
+Relationship IsKindOfOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+{
+    if( auto ko_other = dynamic_pointer_cast<IsKindOfOperator>(other) )
+    {
+        // For implication, the SUBCATEGORY implies the SUPERCATEGORY
+        if( ko_other->GetArchetypeNode()->IsLocalMatch( archetype_node.get() ) ) // like "contains"
+            return Relationship::IMPLIES;
+            
+        // TODO could determine CONTRADICTS by studying the lacings, or by
+        // solving, evaluating solution and testing the results (since
+        // the range is fixed).
+    }
+    
+    return Relationship::NONE; 
+}
+
+
 Orderable::Result IsKindOfOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {

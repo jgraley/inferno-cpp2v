@@ -431,6 +431,9 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
                                                       shared_ptr<PredicateOperator> pj ) const
 {
     ASSERT( !Expression::OrderCompareEqual(pi, pj) ); // caller doesn't pass us equal preds
+    auto ops_i = pi->GetSymbolOperands();
+    auto ops_j = pj->GetSymbolOperands();
+    
     if( pi->IsCommutative() || pj->IsCommutative() )
     {
         // Use this un-ordered version if either pred is commutative. Consider > and ==: they
@@ -438,13 +441,13 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
         
         // Note that taking sets of operands can contract on eg S1 ⚬ S1, but I think
         // the relationship deduction is the same (but most predicates like that are effectively consts)
-        auto set_ops_i = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( pi->GetSymbolOperands() );
-        auto set_ops_j = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( pj->GetSymbolOperands() );
+        auto set_ops_i = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( ops_i );
+        auto set_ops_j = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( ops_j );
         auto set_ops_common = IntersectionOf( set_ops_i, set_ops_j );
         
         // We want the operands common to both i and j to be either all of i's operands or all of j's
         // This is fine for the common 2-op vs 2-op case, but consider also
-        // - some preds like TypeOfOperator are 1-op, but can still have relationships with each other (#510)
+        // - some preds like KindOfOperator are 1-op, but can still have relationships with each other (#510)
         // - IsAllDiffOperator is an n-op, but IsEqualOperator (2-op) contradicts any pair of its operands    
         if( set_ops_common.size() < min(set_ops_i.size(), set_ops_j.size()) )
             return Relationship::NONE;
@@ -452,20 +455,29 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
         TRACE("Checking for relationship between ")(pi->Render())(" and ")(pj->Render())(" (unordered)\n");
     }
     else 
-    {
+    {        
         // Use this order-respecting version if both preds are non-commutative.
-        auto ops_i = pi->GetSymbolOperands();
-        auto ops_j = pj->GetSymbolOperands();
-        
         // We need identical lists of identical operands
         // TODO: we should be able to do something if Pj's operands are 
         // reversed. Maybe need a GetCommute() on non-commutative preds?
         // So if the lex compare with reversed j ops matches we do
-        // pi->GetRelationshipWith( pj->GetCommute() )
-        if( lexicographical_compare( ops_i.begin(), ops_i.end(), 
-					                 ops_j.begin(), ops_j.end(),
-                                     Expression::OrderComparer() ) != 0 )
+        // pi->GetRelationshipWith( pj->GetCommute() ). Could be used for 
+        // REVERSE transitivity too.
+        if( LexicographicalCompare( ops_i, ops_j, Expression::OrderComparer() ) != 0 )
             return Relationship::NONE;
+            
+        if( ops_i.size()==1 && ops_j.size()==1 )
+        {
+            // Supposed to be the same operand
+            
+            // Check using OrderCompareEqual()
+            ASSERT( Expression::OrderCompareEqual( OnlyElementOf(ops_i), OnlyElementOf(ops_j) ) );
+            
+            // Check by looking directly
+            if( auto svi = dynamic_pointer_cast<SymbolVariable>(OnlyElementOf(ops_i)) )
+                if( auto svj = dynamic_pointer_cast<SymbolVariable>(OnlyElementOf(ops_j)) )
+                    ASSERT( svi->GetPatternLink() == svj->GetPatternLink() );
+        }
 
         TRACE("Checking for relationship between ")(pi->Render())(" and ")(pj->Render())(" (ordered)\n");
     }

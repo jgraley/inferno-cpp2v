@@ -472,6 +472,22 @@ bool DereferencingCompare( const POINTER_TYPE &a,
 }                                      
 
 
+// 2 differences from std::lexicographical_compare():
+// - You don't need all those .begin() .end()
+// - You get a full comparison result: -ve for less, 0 for equal, +ve for greater
+template<typename C0, typename C1, class COMPARE>
+int LexicographicalCompare( const C0 &c0, const C1 &c1, const COMPARE &compare )
+{
+    bool less_01 = lexicographical_compare( c0.begin(), c0.end(), 
+                                            c1.begin(), c1.end(),
+                                            compare );
+    bool less_10 = lexicographical_compare( c1.begin(), c1.end(), 
+                                            c0.begin(), c0.end(),
+                                            compare );
+    return (int)less_01 - (int)less_10;
+}
+
+
 // Convert a pair of equal-length vectors to a map. Keys must be unique.
 template<typename KEYS_TYPE, typename VALUES_TYPE>
 map<typename KEYS_TYPE::value_type, typename VALUES_TYPE::value_type> ZipToMap( const KEYS_TYPE &keys, const VALUES_TYPE &values )
