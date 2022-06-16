@@ -230,7 +230,6 @@ private:
 // Note: this predicate is kept specific (rather than generalising to 
 // eg IsInCategoryRange) because it needs to be seen by knowledge planning
 // and only then can it be solved into the more generic AllInCategoryRangeOperator. 
-// Also this means its solving properties could be exposed eg implies. 
 class IsKindOfOperator : public PredicateOperator
 {
 public:    
@@ -292,7 +291,7 @@ private:
 
 // Note: this predicate is kept specific (rather than generalising to 
 // eg IsInSimpleCompareRangeOperator or via IsMemeberOperator) so that its
-// solving properties can be exposed eg transitivity. 
+// solving properties can be exposed more easily eg transitivity. 
 class IsSimpleCompareEquivalentOperator : public PredicateOperator
 {
 public:    
