@@ -96,13 +96,7 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
     else
     {
         // Non-commutative
-        for( auto p : Zip(ll, rl) )     
-        {
-            Orderable::Result cr = OrderCompare( p.first, p.second, order_property );
-            if( cr != EQUAL )
-                return cr;
-        }
-        return EQUAL;
+        return LexicographicalCompare( ll, rl, OrderComparer() );
     }
 }
 
