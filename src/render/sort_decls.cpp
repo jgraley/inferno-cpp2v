@@ -199,7 +199,7 @@ Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdent
 
     // Make a SimpleCompare-ordered set and fill it with the decls
     auto comparer = UniquifyCompare(unique);
-    SimpleCompare::Ordering sco = comparer.GetOrdering(c);
+    SimpleCompare::Orderered sco = comparer.GetOrdering(c);
     //SimpleCompare(Orderable::REPEATABLE).GetOrdering(c);
 
     // Extract the decls from the set, now in SimpleCompare order

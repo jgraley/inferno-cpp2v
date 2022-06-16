@@ -90,16 +90,8 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
         set<shared_ptr<Expression>, OrderComparer> ro;
         for( shared_ptr<Expression> e : rl )      
             ro.insert( e );
-            
-        int r1 = (int)lexicographical_compare(lo.begin(), lo.end(), 
-					                          ro.begin(), ro.end(),
-                                              OrderComparer()); 
 
-        int r2 = (int)lexicographical_compare(ro.begin(), ro.end(), 
-					                          lo.begin(), lo.end(),
-                                              OrderComparer()); 
-
-        return r1 - r2;
+        return LexicographicalCompare( lo, ro, OrderComparer() );
     }
     else
     {

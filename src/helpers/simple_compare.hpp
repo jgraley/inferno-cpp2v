@@ -14,7 +14,7 @@ public:
     // Orderable could be REPEATABLE which is weak, but we still want
     // to account for the number of equivalent elements, so use multiset.
     // Use a reference to SimpleCompare so derived classes can use it.
-    typedef multiset<TreePtr<Node>, const SimpleCompare &> Ordering;
+    typedef multiset<TreePtr<Node>, const SimpleCompare &> Orderered;
 
     SimpleCompare( Orderable::OrderProperty order_property = Orderable::STRICT );
     SimpleCompare &operator=(const SimpleCompare &other);
@@ -32,7 +32,7 @@ public:
     bool operator()( TreePtr<Node> x, TreePtr<Node> y ) const;
     
     /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container
-    Ordering GetOrdering( ContainerInterface &c ) const;
+    Orderered GetOrdering( ContainerInterface &c ) const;
 
 private:
     Orderable::OrderProperty order_property;

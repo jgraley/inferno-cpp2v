@@ -119,20 +119,10 @@ Orderable::Result SimpleCompare::Compare( CollectionInterface &x, CollectionInte
         return sd;
         
     // Use this object so our ordering is used.
-    Ordering xo = GetOrdering(x);
-    Ordering yo = GetOrdering(y);
-
-    int r1 = (int)lexicographical_compare( xo.begin(), xo.end(), 
-                                           yo.begin(), yo.end(),
-                                           *this ); 
-
-    int r2 = (int)lexicographical_compare( yo.begin(), yo.end(), 
-                                           xo.begin(), xo.end(),
-                                           *this ); 
-
-    return r1 - r2;
-    // Compare them (will use SimpleCompare)
-    return (int)(xo > yo) - (int)(xo < yo);
+    Orderered xo = GetOrdering(x);
+    Orderered yo = GetOrdering(y);
+    
+    return LexicographicalCompare(xo, yo, *this);
 }
 
 
@@ -143,9 +133,9 @@ bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl ) const
 }
 
 
-SimpleCompare::Ordering SimpleCompare::GetOrdering( ContainerInterface &c ) const
+SimpleCompare::Orderered SimpleCompare::GetOrdering( ContainerInterface &c ) const
 {
-    Ordering ordered( *this );
+    Orderered ordered( *this );
     FOREACH( const TreePtrInterface &e, c )
     	ordered.insert( (TreePtr<Node>)e );
     return ordered; // hoping for a "move"

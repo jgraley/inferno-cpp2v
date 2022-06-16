@@ -75,7 +75,7 @@ public:
     // given target value. If there are no such slices, nullptr is returned.
     shared_ptr<SliceSpec> TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const;
 
-    // Ordering
+    // Orderered
     bool operator==( const TruthTable &other ) const;
     bool operator<( const TruthTable &other ) const;
      
