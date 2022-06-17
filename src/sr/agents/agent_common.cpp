@@ -211,7 +211,7 @@ bool AgentCommon::ShouldGenerateKindOfClause() const
     // solver never finds them because they're not there due type-safety.
     // But if we're type Node, then the parent pointer(s) must also be
     // Node, and there's no need for any restriction.
-    return typeid( Node() ) != typeid( *GetArchetypeTreePtr() );
+    return typeid( *GetArchetypeNode() ) != typeid(Node);
 #else    
     // Use our keyer_plink to get pptr - but only after planning!
     return IsNonTrivialPreRestriction();

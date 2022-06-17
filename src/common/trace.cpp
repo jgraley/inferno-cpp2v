@@ -85,6 +85,12 @@ string Trace(const Progress &progress)
 }
 
 
+string Trace(const std::type_info &ti)
+{
+    return Traceable::CPPFilt(string(ti.name())) + "#" + to_string(ti.hash_code());
+}
+
+
 string GetTrace()
 {
     return "::";

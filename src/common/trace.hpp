@@ -64,6 +64,7 @@ string Trace(size_t i);
 string Trace(const exception &e); 
 string Trace(const void *p); 
 string Trace(const Progress &progress); 
+string Trace(const std::type_info &ti);
 
 template<typename T>
 string Trace(const T *p) 
