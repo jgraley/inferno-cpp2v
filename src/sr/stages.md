@@ -1,17 +1,17 @@
 # Vida Nova Stages
 
-## Build or load patterns and sequence
+## Build or load patterns and sequence `B`
 
 Ends up with a `VNSequence` of `VNTransformation`s which have 
 `CompareReplace` or `SearchReplace` engines.
 
-## Pattern Transformation
+## Pattern Transformation `X`
 
 Transformations applied to the pattern before planning:
  - Implement `SearchReplace` in terms of `CompareReplace`.
  - Break up `Disjunction`s of more than 2 inputs.
 
-### Planning Stage One
+### Planning Stage One `P`
 
 In stage one, `SCREngine`s are created. There is one for master/outer and
 one for every slave/inner defined within the master/outer. The
@@ -21,13 +21,13 @@ one for every slave/inner defined within the master/outer. The
  - What order are they reached during replace?
  - Which slave/inner `SCREngine`s will be reached?
  
-### Planning Stage Two
+### Planning Stage Two `Q`
 
 `SCREngine` configuration of the `Agent`s. Informs the agent:
  - which is its owning `SCREngine` and
  - its phase.
  
-### Planning Stage Three
+### Planning Stage Three `R`
 
 Interleaved compare and replace planning across all the `SCREngine`s. 
 
@@ -46,14 +46,14 @@ Replace planning:
  - Prepare agents for overlay.
  - Configure agents that are keyers during replace phase (eg builders).
  
-### Planning Stage Four
+### Planning Stage Four `S`
 
 Knowledge/database planning. Central to the `VNSequence` (i.e. run once 
 for all steps):
  - Deduce lacing intervals based on analysis of all pre-restrictions/
    type-restrictions, for category ordering/index.
  
-### Planning stage Five
+### Planning stage Five `U`
 
 `AndRuleEngine`s build CSP problem:
  - Create constraints based on symbolic sat expressions:
@@ -62,6 +62,6 @@ for all steps):
  - Create constraint solver:
    - Categorise variables.
 
-## Run It
+## Run It `T`
 
 Off it goes!
