@@ -41,6 +41,7 @@ pattern:
    - keyer and residual links for coupled agents.
  - Extracts symbolics (satisfiability expressions) from agents.
  - Engine-wide manipulation of sat expression clauses.
+ 
 Replace planning:
  - Prepare agents for overlay.
  - Configure agents that are keyers during replace phase (eg builders).
