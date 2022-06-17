@@ -21,8 +21,6 @@
 using namespace SR;
 using namespace SYM;
 
-#define GENERATE_KINDOF_CLAUSES_FOR_TRIVIAL_PR
-
 //---------------------------------- AgentCommon ------------------------------------    
 
 AgentCommon::AgentCommon() :
@@ -202,7 +200,6 @@ bool AgentCommon::IsNonTrivialPreRestriction() const
 
 bool AgentCommon::ShouldGenerateKindOfClause() const
 {
-#ifdef GENERATE_KINDOF_CLAUSES_FOR_TRIVIAL_PR
     // It could be argued that, from the CSP solver's point of
     // view, if we didn't need pre-restriction constraint, we would
     // still need a "type-correctness constraint", i.e. something
@@ -212,10 +209,9 @@ bool AgentCommon::ShouldGenerateKindOfClause() const
     // But if we're type Node, then the parent pointer(s) must also be
     // Node, and there's no need for any restriction.
     return typeid( *GetArchetypeNode() ) != typeid(Node);
-#else    
-    // Use our keyer_plink to get pptr - but only after planning!
-    return IsNonTrivialPreRestriction();
-#endif
+    
+    // Note about typeid(): if I go typeid( Node() ) I get the type of a 
+    // node constructor. 
 }                                
 
 
