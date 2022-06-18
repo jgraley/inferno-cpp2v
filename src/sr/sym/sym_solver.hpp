@@ -61,7 +61,7 @@ private:
     string RenderInitialExpressionInTermsOfPredNames();
 
     const string label_var_name = "p";
-    const int counting_based = 1;
+    const int counting_based = 0;
     const shared_ptr<BooleanExpression> initial_expression;
     const Expression::SolveKit &kit;                                            
     unique_ptr<TruthTableWithPredicates> ttwp;
