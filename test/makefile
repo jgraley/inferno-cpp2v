@@ -45,14 +45,14 @@ test : $(CASES:%=${RESULTS_PATH}/execution/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "EXECUTION TESTS PASSED"
-	@spd-say -r -100 -p -100 "the execution tests have parssed"
+	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 minitest : $(MINICASES:%=${RESULTS_PATH}/execution/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
 	@echo "MINI EXECUTION TESTS PASSED"
-	@spd-say -r -100 -p -100 "the mini execution tests have parssed"
+	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 $(SRCASES:%=${RESULTS_PATH}/sr/%.pass) : ${RESULTS_PATH}/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p ${RESULTS_PATH}/sr
@@ -66,7 +66,7 @@ srtest : $(SRCASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "SR TESTS PASSED"
-	@spd-say -r -100 -p -100 "the search and replace tests have parssed"
+	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 minisrtest : $(MINISRCASES:%=${RESULTS_PATH}/sr/%.pass)
 	@touch $@
@@ -74,7 +74,7 @@ minisrtest : $(MINISRCASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "MINI SR TESTS PASSED"
-	@spd-say -r -100 -p -100 "the mini search and replace tests have parssed"
+	@spd-say -i 0 -r -100 -p -100 "the mini search and replace tests have parssed"
 
 $(CASES:%=${RESULTS_PATH}/rep/%.pass) : ${RESULTS_PATH}/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh ${RESOURCE_ARTEFACTS}
 	@mkdir -p ${RESULTS_PATH}/rep
@@ -88,7 +88,7 @@ reptest : $(CASES:%=${RESULTS_PATH}/rep/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "REP TESTS PASSED"
-	@spd-say -r -100 -p -100 "the rep tests have passed"
+	@spd-say -i 0 -r -100 -p -100 "the tests have passed"
 
 graphtest : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
 	./gen_dev_graphs.sh --pattern --docs --intermediate
@@ -98,6 +98,6 @@ graphtest : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
 	@echo -n "Tests Run: "
 	@date
 	@echo "GRAPH TESTS PASSED"
-	@spd-say -r -100 -p -100 "the graph tests have passed"
+	@spd-say -i 0 -r -100 -p -100 "the tests have passed"
 
 .PHONY: all test ${RESULTS_PATH}/graph.pass
