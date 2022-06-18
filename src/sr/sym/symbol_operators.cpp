@@ -140,9 +140,9 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
     return Precedence::LITERAL;
 }
 
-// ------------------------- ItemiseToSymbolOperator --------------------------
+// ------------------------- ChildToSymbolOperator --------------------------
 
-ItemiseToSymbolOperator::ItemiseToSymbolOperator( TreePtr<Node> archetype_node_,
+ChildToSymbolOperator::ChildToSymbolOperator( TreePtr<Node> archetype_node_,
                                                   int item_index_, 
                                                   shared_ptr<SymbolExpression> a_ ) :
     archetype_node( archetype_node_ ),
@@ -153,13 +153,13 @@ ItemiseToSymbolOperator::ItemiseToSymbolOperator( TreePtr<Node> archetype_node_,
 }    
 
 
-list<shared_ptr<SymbolExpression>> ItemiseToSymbolOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> ChildToSymbolOperator::GetSymbolOperands() const
 {
     return {a};
 }
 
 
-unique_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalKit &kit,
+unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit &kit,
                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );
@@ -182,7 +182,7 @@ unique_ptr<SymbolResultInterface> ItemiseToSymbolOperator::Evaluate( const EvalK
 }
 
 
-Orderable::Result ItemiseToSymbolOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Result ChildToSymbolOperator::OrderCompareLocal( const Orderable *candidate, 
                                                               OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -197,12 +197,12 @@ Orderable::Result ItemiseToSymbolOperator::OrderCompareLocal( const Orderable *c
 }  
 
 
-string ItemiseToSymbolOperator::Render() const
+string ChildToSymbolOperator::Render() const
 {
     string name = archetype_node->GetTypeName();
 
     // Not using RenderForMe() because we always want () here
-    return "Item<" + 
+    return "Child<" + 
            name + 
            "@" + 
            to_string(item_index) + 
@@ -213,7 +213,7 @@ string ItemiseToSymbolOperator::Render() const
 }
 
 
-Expression::Precedence ItemiseToSymbolOperator::GetPrecedence() const
+Expression::Precedence ChildToSymbolOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }

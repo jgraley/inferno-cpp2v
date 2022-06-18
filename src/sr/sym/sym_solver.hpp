@@ -42,10 +42,7 @@ public:
      */
     shared_ptr<SymbolExpression> TrySolveForGiven( shared_ptr<SymbolVariable> target,
                                                    const GivenSymbolSet &givens ) const;
-    shared_ptr<SymbolExpression> GetExpressionViaRaster( TruthTableWithPredicates evaluated_ttwp,
-                                                         const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const;
-    shared_ptr<SymbolExpression> GetExpressionViaKarnaughMap( TruthTableWithPredicates evaluated_ttwp,
-                                                              const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &solution_map ) const;
+    shared_ptr<BooleanExpression> GetExpressionViaKarnaughMap( TruthTableWithPredicates initial_ttwp ) const;
     shared_ptr<BooleanExpression> GetAltExpressionForTesting() const;
     
 private:

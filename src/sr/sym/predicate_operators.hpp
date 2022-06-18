@@ -259,17 +259,17 @@ protected:
     const TreePtr<Node> archetype_node;
 };
 
-// ------------------------- IsCollectionSizedOperator --------------------------
+// ------------------------- IsChildCollectionSizedOperator --------------------------
 
-class IsCollectionSizedOperator : public PredicateOperator
+class IsChildCollectionSizedOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit IsCollectionSizedOperator( TreePtr<Node> archetype_node,
+    explicit IsChildCollectionSizedOperator( TreePtr<Node> archetype_node,
                                           int item, 
                                           shared_ptr<SymbolExpression> a,
                                           int size );
-    IsCollectionSizedOperator *Clone() const override;
+    IsChildCollectionSizedOperator *Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,

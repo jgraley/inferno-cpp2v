@@ -337,7 +337,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
     if( !plan_col.star_plink )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-        expr &= MakeOver<IsCollectionSizedOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
+        expr &= MakeOver<IsChildCollectionSizedOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
     }
 
     return expr;

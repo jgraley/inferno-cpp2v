@@ -18,7 +18,10 @@ ConditionalOperator::ConditionalOperator( shared_ptr<BooleanExpression> control_
     
 list<shared_ptr<Expression>> ConditionalOperator::GetOperands() const
 {
-    return {control, option_true, option_false};
+    if( option_false )
+        return {control, option_true, option_false};
+    else
+        return {control, option_true};
 }
 
 
@@ -33,7 +36,10 @@ unique_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &
         }
         else // FALSE
         {
-            return option_false->Evaluate(kit);
+            if( option_false )
+                return option_false->Evaluate(kit);
+            else
+                return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
         }
     }
     else // UNDEFINED
@@ -49,7 +55,10 @@ unique_ptr<SymbolResultInterface> ConditionalOperator::Evaluate( const EvalKit &
 
 string ConditionalOperator::Render() const
 {
-    return RenderForMe(control) + " ? " + RenderForMe(option_true) + " : " + RenderForMe(option_false);
+    if( option_false )
+        return RenderForMe(control) + " → ⎨" + RenderForMe(option_false) + ", " + RenderForMe(option_true) + "⎬";
+    else
+        return RenderForMe(control) + " → " + RenderForMe(option_true);    
 }
 
 
@@ -112,9 +121,9 @@ string MultiConditionalOperator::Render() const
     for( shared_ptr<SymbolExpression> o : options )
         str_options.push_back( o->Render() );
         
-    return Join(str_controls, ", ") + 
-           " ?: " + 
-           Join(str_options, ", ");
+    return Join(str_controls, ", ", "⎨", "⎬") + 
+           " → " + 
+           Join(str_options, ", ", "⎨", "⎬");
 }
 
 

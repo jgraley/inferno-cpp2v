@@ -57,13 +57,13 @@ private:
     const SR::PatternLink plink;
 };
 
-// ------------------------- ItemiseToSymbolOperator --------------------------
+// ------------------------- ChildToSymbolOperator --------------------------
 
-class ItemiseToSymbolOperator : public SymbolToSymbolExpression
+class ChildToSymbolOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit ItemiseToSymbolOperator( TreePtr<Node> archetype_node,
+    explicit ChildToSymbolOperator( TreePtr<Node> archetype_node,
                                       int item, 
                                       shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
@@ -87,9 +87,9 @@ protected:
 
 // ------------------------- ChildOperator --------------------------
 
-class ChildOperator : public ItemiseToSymbolOperator
+class ChildOperator : public ChildToSymbolOperator
 {
-    using ItemiseToSymbolOperator::ItemiseToSymbolOperator;
+    using ChildToSymbolOperator::ChildToSymbolOperator;
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const;
 };

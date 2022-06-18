@@ -9,6 +9,7 @@
 #include "conditional_operators.hpp"
 #include "set_operators.hpp"
 #include "common/lambda_loops.hpp"
+#include "rewriters.hpp"
 
 using namespace SYM;
 
@@ -70,6 +71,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
 
     // Categorise the preds
     set<shared_ptr<PredicateOperator>> evaluatable_preds, solveable_preds;
+    map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> pred_solves;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
@@ -79,8 +81,11 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         
         if( pred->IsIndependentOf(target) )
             evaluatable_preds.insert( pred );
-        else if( pred->TrySolveFor( kit, target ) )
+        else if( shared_ptr<SymbolExpression> solution = pred->TrySolveFor( kit, target ) )
+        {
             solveable_preds.insert( pred );
+            pred_solves[pred] = solution;
+        }
     }
     
     // Get axis numbers for dead axes and fold them out. Dead axes include 
@@ -94,110 +99,79 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
             dead_axes.insert(axis);
     }    
     if( !dead_axes.empty() )
-        TRACEC("Folding out dead axes:\n")(dead_axes)("\n");
+        TRACE("Folding out dead axes:\n")(dead_axes)("\n");
     TruthTableWithPredicates folded_ttwp( ttwp->GetFolded( dead_axes ) );
-    
+
     // Get axis numbers for the evaluatables and solveables, now that we've finished 
     // folding, which changes them. 
     vector<int> evaluatable_axes, solveable_axes;
     for( int axis=0; axis<folded_ttwp.GetDegree(); axis++ )
-    {
-        auto pred = folded_ttwp.GetFrontPredicate(axis);
-        if( evaluatable_preds.count(pred) )
-            evaluatable_axes.push_back(axis);
-        if( solveable_preds.count(pred) ) 
+        if( solveable_preds.count(folded_ttwp.GetFrontPredicate(axis)) ) 
             solveable_axes.push_back(axis);
-    }
-    TRACEC("Truth table after fold out dead: ")(folded_ttwp.Render( ToSet(solveable_axes), false ))("\n");
+    TRACE("Truth table after fold out dead: ")(folded_ttwp.Render( ToSet(solveable_axes), false ))("\n");
 
-    // Solve the soveables into a map of solutions
-    map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> pred_solves;
-    for( int axis : solveable_axes )
+    // Now make a Karnaugh map around all the non-dead axes (evals and solveables)
+    shared_ptr<BooleanExpression> folded_expr = GetExpressionViaKarnaughMap(folded_ttwp);
+    TRACE("Expression from folded truth table: ")(folded_expr->Render())("\n");
+
+    // Solve this equation as laid out in #535
+    list< shared_ptr<SymbolExpression> > uniands;
+    auto terms_in = dynamic_pointer_cast<OrOperator>( folded_expr );
+    ASSERT( terms_in );
+    for( shared_ptr<BooleanExpression> term_in : terms_in->GetBooleanOperands() )
     {
-        auto pred = folded_ttwp.GetFrontPredicate(axis);
-        shared_ptr<SymbolExpression> solution = pred->TrySolveFor( kit, target );
-        if( !solution )   // NULL means failed to solve OR solution is universal set
-            continue;
-        
-        pred_solves[pred] = solution;
+        list< shared_ptr<SymbolExpression> > interands;
+        list< shared_ptr<BooleanExpression> > clauses_out;
+        auto clauses_in = dynamic_pointer_cast<AndOperator>( term_in );
+        ASSERT( clauses_in );
+        for( shared_ptr<BooleanExpression> clause_in : clauses_in->GetBooleanOperands() )
+        {            
+            auto negated = dynamic_pointer_cast<NotOperator>( clause_in );
+            shared_ptr<PredicateOperator> pred;    
+            if( negated )
+                pred = dynamic_pointer_cast<PredicateOperator>(OnlyElementOf(negated->GetBooleanOperands()));
+            else
+                pred = dynamic_pointer_cast<PredicateOperator>(clause_in);
+            ASSERT( pred );
+
+            if( evaluatable_preds.count(pred) )
+            {            
+                clauses_out.push_back( clause_in );
+            }
+            else if( solveable_preds.count(pred) )
+            {
+                shared_ptr<SymbolExpression> interand = pred_solves.at(pred);
+            
+                // Needed to solve for false. Rather than redo the solve, we can 
+                // just complement the solution set.
+                if( negated )
+                    interands.push_back( make_shared<ComplementOperator>(interand) );
+                else
+                    interands.push_front( interand ); // non-negated first looks nicer               
+            }
+        }
+        shared_ptr<SymbolExpression> part = make_shared<IntersectionOperator>( interands );
+        if( clauses_out.empty() )
+        {
+            // No restricting clauses, so we always get the intersection
+            uniands.push_back( part );
+        }
+        else
+        {
+            auto cond = CreateTidiedOperator<AndOperator>(true)( clauses_out );
+            auto uniand = make_shared<ConditionalOperator>( cond, part );
+            uniands.push_back( uniand );
+        }
     }
+    auto solution = make_shared<UnionOperator>( uniands );
 
-    // We'll make a big multiplexor aka symbolic conditional. Controls will be the evaluatables.
-    vector<shared_ptr<BooleanExpression>> controls;
-    for( int axis : evaluatable_axes )
-    {
-        auto pred = folded_ttwp.GetFrontPredicate(axis);
-        controls.push_back( pred );
-    }
-
-    TRACEC("Solutions to solveable predicates:\n")(pred_solves)("\n");
-
-    // Make up the options for the big multiplexor using set operations on the solutions
-    vector<shared_ptr<SymbolExpression>> options;
-    ForPower<bool>( evaluatable_axes.size(), index_range_bool, [&](vector<bool> evaluatable_indices)
-    {
-        TRACEC("Option indices: ")(evaluatable_indices)("\n");
-        TruthTable::SliceSpec evaluatable_indices_map;
-        for( int i=0; i<evaluatable_axes.size(); i++ )
-            evaluatable_indices_map[evaluatable_axes.at(i)] = evaluatable_indices.at(i);
-        TruthTableWithPredicates option_ttwp( folded_ttwp.GetSlice( evaluatable_indices_map ) ); 
-        set<int> column_axes; // Just for the trace
-        for( int i=0; i<option_ttwp.GetDegree(); i++ )
-            column_axes.insert(i);
-        TRACEC("Option truth table slice: ")(option_ttwp.Render(column_axes, false))("\n");
-        
-        shared_ptr<SymbolExpression> option = GetExpressionViaKarnaughMap( option_ttwp, pred_solves );
-        options.push_back( option );
-    } );
-
-    shared_ptr<SymbolExpression> solution;
-    if( controls.empty() )
-        solution = options.at(0);
-    else
-        solution = make_shared<MultiConditionalOperator>( controls, options );
-
-    TRACEC("solution is ")(solution)("\n");
+    TRACE("solution is ")(solution)("\n");
 
     return solution;
 }
 
 
-shared_ptr<SymbolExpression> TruthTableSolver::GetExpressionViaRaster( TruthTableWithPredicates initial_ttwp,
-                                                                       const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
-{
-    set<vector<bool>> permitted_terms = initial_ttwp.GetTruthTable().GetIndicesOfValue( TruthTable::CellType::TRUE );
-    TRACEC("Permitted terms ")(permitted_terms)("\n");
-
-    // Build a union of terms that were not ruled out
-    list< shared_ptr<SymbolExpression> > terms;
-    for( vector<bool> term : permitted_terms )
-    {
-        // Build an intersection of clauses corresponding to solveables
-        list< shared_ptr<SymbolExpression> > clauses;
-        for( int axis=0; axis<term.size(); axis++ )
-        {
-            auto pred = initial_ttwp.GetFrontPredicate(axis);
-            if( pred_solves.count(pred) == 0 )
-                continue; // skip where solve failed
-            shared_ptr<SymbolExpression> clause = pred_solves.at(pred);
-            
-            // Needed to solve for false. Rather than redo the solve, we can 
-            // just complement the solution set.
-            if( term.at(axis)==false )
-                clause = make_shared<ComplementOperator>(clause);
-                
-            clauses.push_back( clause );
-        }
-         
-        terms.push_back( make_shared<IntersectionOperator>( clauses ) );
-    }
-
-    return make_shared<UnionOperator>( terms );
-}
-
-
-shared_ptr<SymbolExpression> TruthTableSolver::GetExpressionViaKarnaughMap( TruthTableWithPredicates initial_ttwp,
-                                                                            const map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> &pred_solves ) const
+shared_ptr<BooleanExpression> TruthTableSolver::GetExpressionViaKarnaughMap( TruthTableWithPredicates initial_ttwp ) const
 {
     // Derive a Karnaugh map using TryFindBestKarnaughSlice()
     TruthTableWithPredicates so_far_ttwp = initial_ttwp;
@@ -216,33 +190,29 @@ shared_ptr<SymbolExpression> TruthTableSolver::GetExpressionViaKarnaughMap( Trut
     }
     
     // Build a union of expressions for the Karnaugh slices
-    list< shared_ptr<SymbolExpression> > terms;
+    list< shared_ptr<BooleanExpression> > terms;
     for( shared_ptr<TruthTable::SliceSpec> slice : karnaugh_map )
     {
         ASSERT( slice );
         // Build an intersection of clauses corresponding to solveables
-        list< shared_ptr<SymbolExpression> > clauses;
+        list< shared_ptr<BooleanExpression> > clauses;
         for( pair<int, bool> p : *slice )
         {
             int axis = p.first;
             int index = p.second;
             auto pred = initial_ttwp.GetFrontPredicate(axis);
-            if( pred_solves.count(pred) == 0 )
-                continue; // skip where solve failed
-            shared_ptr<SymbolExpression> clause = pred_solves.at(pred);
+            shared_ptr<BooleanExpression> clause = pred;
             
-            // Needed to solve for false. Rather than redo the solve, we can 
-            // just complement the solution set.
             if( index==false )
-                clause = make_shared<ComplementOperator>(clause);
+                clause = make_shared<NotOperator>(clause);
                 
             clauses.push_back( clause );
         }
          
-        terms.push_back( make_shared<IntersectionOperator>( clauses ) );
+        terms.push_back( make_shared<AndOperator>( clauses ) );
     }
 
-    return make_shared<UnionOperator>( terms );
+    return make_shared<OrOperator>( terms );
 }
 
 

@@ -18,7 +18,7 @@ public:
     typedef SymbolExpression NominalType;
     explicit ConditionalOperator( shared_ptr<BooleanExpression> control,
                                   shared_ptr<SymbolExpression> option_true,
-                                  shared_ptr<SymbolExpression> option_false );
+                                  shared_ptr<SymbolExpression> option_false = nullptr);
     virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;

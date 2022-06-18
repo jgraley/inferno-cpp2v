@@ -708,9 +708,9 @@ TreePtr<Node> IsKindOfOperator::GetArchetypeNode() const
     return archetype_node;
 }
 
-// ------------------------- IsCollectionSizedOperator --------------------------
+// ------------------------- IsChildCollectionSizedOperator --------------------------
 
-IsCollectionSizedOperator::IsCollectionSizedOperator( TreePtr<Node> archetype_node_,
+IsChildCollectionSizedOperator::IsChildCollectionSizedOperator( TreePtr<Node> archetype_node_,
                                                           int item_index_, 
                                                           shared_ptr<SymbolExpression> a_,
                                                           int size_ ) :
@@ -723,19 +723,19 @@ IsCollectionSizedOperator::IsCollectionSizedOperator( TreePtr<Node> archetype_no
 }    
 
 
-IsCollectionSizedOperator *IsCollectionSizedOperator::Clone() const
+IsChildCollectionSizedOperator *IsChildCollectionSizedOperator::Clone() const
 {
-    return new IsCollectionSizedOperator( archetype_node, item_index, a, size );
+    return new IsChildCollectionSizedOperator( archetype_node, item_index, a, size );
 }
     
 
-list<shared_ptr<SymbolExpression> *> IsCollectionSizedOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsChildCollectionSizedOperator::GetSymbolOperandPointers()
 {
     return { &a };
 }
 
 
-unique_ptr<BooleanResult> IsCollectionSizedOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKit &kit,
                                                                  list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -768,7 +768,7 @@ unique_ptr<BooleanResult> IsCollectionSizedOperator::Evaluate( const EvalKit &ki
 }
 
 
-Orderable::Result IsCollectionSizedOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Result IsChildCollectionSizedOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                   OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -786,12 +786,12 @@ Orderable::Result IsCollectionSizedOperator::OrderCompareLocal( const Orderable 
 }  
 
 
-string IsCollectionSizedOperator::RenderNF() const
+string IsChildCollectionSizedOperator::RenderNF() const
 {
     string name = archetype_node->GetTypeName();
 
     // Not using RenderForMe() because we always want () here
-    return "Item<" + 
+    return "Child<" + 
            name + 
            "@" + 
            to_string(item_index) + 
@@ -802,7 +802,7 @@ string IsCollectionSizedOperator::RenderNF() const
 }
 
 
-Expression::Precedence IsCollectionSizedOperator::GetPrecedenceNF() const
+Expression::Precedence IsChildCollectionSizedOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }

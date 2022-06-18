@@ -113,6 +113,9 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
                                                  list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+    if( op_results.empty() )
+        return make_unique<BooleanResult>( true ); // identity element
+        
     // Lower certainly dominates
     return move( *min_element( op_results.begin(), 
                                op_results.end(), 
@@ -133,7 +136,7 @@ string AndOperator::Render() const
     list<string> ls;
     for( shared_ptr<BooleanExpression> a : sa )
         ls.push_back( RenderForMe(a) );
-    return Join( ls, " & " );
+    return Join( ls, " ∧ " );
 }
 
 
@@ -169,6 +172,9 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+    if( op_results.empty() )
+        return make_unique<BooleanResult>( false ); // identity element
+
     // Higher certainly dominates
     return move( *max_element( op_results.begin(), 
                                op_results.end(), 
@@ -189,7 +195,7 @@ string OrOperator::Render() const
     list<string> ls;
     for( shared_ptr<BooleanExpression> a : sa )
         ls.push_back( RenderForMe(a) );
-    return Join( ls, " | " );
+    return Join( ls, " ∨ " );
 }
 
 
@@ -249,7 +255,7 @@ bool BoolEqualOperator::IsCommutative() const
 
 string BoolEqualOperator::Render() const
 {
-    return RenderForMe(a) + " iff " + RenderForMe(b);
+    return RenderForMe(a) + " ⇔ " + RenderForMe(b);
 }
 
 
@@ -362,7 +368,7 @@ unique_ptr<BooleanResult> Uniplexor::Evaluate( const EvalKit &kit ) const
 
 string Uniplexor::Render() const
 {
-    return RenderForMe(a) + " ? " + RenderForMe(b) + " : " + RenderForMe(c);
+    return RenderForMe(a) + " → ⎨" + RenderForMe(c) + ", " + RenderForMe(b) + "⎬";
 }
 
 
@@ -422,9 +428,9 @@ string Multiplexor::Render() const
     for( shared_ptr<BooleanExpression> o : options )
         str_options.push_back( o->Render() );
         
-    return Join(str_controls, ", ", "[", "]") + 
-           "?:" + 
-           Join(str_options, ", ", "[", "]");
+    return Join(str_controls, ", ", "⎨", "⎬") + 
+           " → " + 
+           Join(str_options, ", ", "⎨", "⎬");
 }
 
 
