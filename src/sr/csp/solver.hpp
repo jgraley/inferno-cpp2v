@@ -58,6 +58,10 @@ public:
     
     /**
      * Prepare to solve.
+     * 
+     * @param forces [in] partial assignment with values for all forced variables.
+     * 
+     * @param knowledge [in] database of information about the current values.
      */
     virtual void Start( const Assignments &forces,
                         const SR::TheKnowledge *knowledge ) = 0;

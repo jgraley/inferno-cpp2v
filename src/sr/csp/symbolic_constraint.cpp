@@ -124,7 +124,7 @@ void SymbolicConstraint::Start()
 }   
 
 
-bool SymbolicConstraint::IsConsistent( const Assignments &assignments ) const
+bool SymbolicConstraint::IsSatisfied( const Assignments &assignments ) const
 {   
     INDENT("T");
     ASSERT(plan.consistency_expression);

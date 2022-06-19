@@ -60,7 +60,7 @@ private:
     const set<VariableId> &GetVariables() const override;
     SYM::Expression::VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     virtual void Start();    
-    bool IsConsistent( const Assignments &assignments ) const override;
+    bool IsSatisfied( const Assignments &assignments ) const override;
     unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
                                                    const VariableId &var ) const override;               
     

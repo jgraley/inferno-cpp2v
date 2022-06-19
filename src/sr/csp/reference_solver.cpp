@@ -341,7 +341,7 @@ ReferenceSolver::CCRV ReferenceSolver::ConsistencyCheck( const Assignments &assi
     bool matched = true;
     for( shared_ptr<Constraint> c : to_test )
     {                               
-        if( !c->IsConsistent(assignments) )
+        if( !c->IsSatisfied(assignments) )
         {            
             matched = false;
             unsatisfied.insert( c );

@@ -64,7 +64,7 @@ public:
     virtual void Start() = 0;    
     
     /**
-     * Test a list of variable values for consistency with this constraint. 
+     * Determine whether a partila assignment satisfies this constraint. 
      * 
      * @param assignments [in] a partial assignment of free and forced 
      * varaibles for this constraint. 
@@ -72,9 +72,9 @@ public:
      * @note All required variables should be present. Variables not used 
      * by this constraint are ignored.
      * 
-     * @return True if consistent.
+     * @return True if satisfied.
      */
-    virtual bool IsConsistent( const Assignments &assignments ) const = 0;        
+    virtual bool IsSatisfied( const Assignments &assignments ) const = 0;        
     
     /**
      * Get a set of values for a given variable that contains all satisfying values. 
