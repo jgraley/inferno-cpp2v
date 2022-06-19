@@ -70,7 +70,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     GivenSymbolSet givens_and_target = UnionOf( givens, target->GetRequiredVariables() );
 
     // Categorise the preds
-    set<shared_ptr<PredicateOperator>> evaluatable_preds, solveable_preds;
+    set<shared_ptr<PredicateOperator>> evaluatable_preds;
     map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> pred_solves;
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
@@ -82,10 +82,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
         if( pred->IsIndependentOf(target) )
             evaluatable_preds.insert( pred );
         else if( shared_ptr<SymbolExpression> solution = pred->TrySolveFor( kit, target ) )
-        {
-            solveable_preds.insert( pred );
             pred_solves[pred] = solution;
-        }
     }
     
     // Get axis numbers for dead axes and fold them out. Dead axes include 
@@ -95,7 +92,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     for( int axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
-        if( evaluatable_preds.count(pred)==0 && solveable_preds.count(pred)==0 )
+        if( evaluatable_preds.count(pred)==0 && pred_solves.count(pred)==0 )
             dead_axes.insert(axis);
     }    
     if( !dead_axes.empty() )
@@ -106,7 +103,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     // folding, which changes them. 
     vector<int> evaluatable_axes, solveable_axes;
     for( int axis=0; axis<folded_ttwp.GetDegree(); axis++ )
-        if( solveable_preds.count(folded_ttwp.GetFrontPredicate(axis)) ) 
+        if( pred_solves.count(folded_ttwp.GetFrontPredicate(axis)) ) 
             solveable_axes.push_back(axis);
     TRACE("Truth table after fold out dead: ")(folded_ttwp.Render( ToSet(solveable_axes), false ))("\n");
 
@@ -138,7 +135,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
             {            
                 clauses_out.push_back( clause_in );
             }
-            else if( solveable_preds.count(pred) )
+            else if( pred_solves.count(pred) )
             {
                 shared_ptr<SymbolExpression> interand = pred_solves.at(pred);
             
