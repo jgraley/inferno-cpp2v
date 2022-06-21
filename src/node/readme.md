@@ -110,13 +110,13 @@ In trees for programs, TreePtr<X> can never be NULL. This rule does not apply to
 
 `Sequence<>` has similar semantics to `list< TreePtr<> >`. `SequenceInterface` is a base class for all `Sequence<X>`. The node interface adds `Itemiser::Element` as a sub-base class. 
 
-4.3 `Collection<>`
+### 4.3 `Collection<>`
 
 `Collection<>` is a `TreePtr<>` specialisation of `OOStd::SimpleAssociativeContainer<>` and `std::multiset<>`. We use it to hold zero or more `TreePtr<>` objects which will point to other nodes and discard the order in which elements were first added i.e. an unordered 1:n relationship. The use of `multiset` ensures that multiple references to the same node in a collection will not disappear. Both `Sequence` and `Collection` preserve the number of `TreePtr<>`s inserted.
 
 `Collection<>` has similar semantics to `multiset< TreePtr<> >`. `CollectionInterface` is a base class for all `Collection<X>`. The node interface adds `Itemiser::Element` as a sub base class.
 
-4.4 Notes
+### 4.4 Notes
 
 The `OOStd` provides `Container<>`, which is a common base interface for `Sequence<>` and `Collection<>` as well as `ContainerInterface<>` which is a base for all `Container<X>`. Containers support iteration and the other container operations that are found in both `std::list` and `std::multiset`.
 
