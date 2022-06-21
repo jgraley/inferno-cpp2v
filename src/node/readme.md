@@ -132,9 +132,11 @@ These examples are taken from the tree definitions for C/C++ at the time of writ
 
 ### 5.1 An intermediate and a final node
 
- - `struct Type : virtual Node { NODE_FUNCTIONS };`
- - `struct Boolean : Type { NODE_FUNCTIONS_FINAL };`
-    
+```
+struct Type : virtual Node { NODE_FUNCTIONS };
+struct Boolean : Type { NODE_FUNCTIONS_FINAL };
+```
+
 Here, `Type` is an intermediate and so cannot appear in program trees (but can in patterns). It represents the set of types - a node is a type if it derives from `Type`. `Boolean` is a final node and can appear in program trees. It represents the C++ data type `bool`. 
 
 With `TreePtr<Node> T` pointing to a `Type` node and `B` pointing to a Boolean node, we have `T.IsSubclass(B)` is true and `B.IsSubclass(T)` is false. `IsLocalMatch()` would give the same results.
@@ -142,7 +144,10 @@ With `TreePtr<Node> T` pointing to a `Type` node and `B` pointing to a Boolean n
 ### 5.2 Topologically-oriented style
 
 Integer types may be signed or unsigned. We might expect to use a node like this
- - `struct Integral : Numeric { NODE_FUNCTIONS_FINAL; bool unsigned; ...}`
+
+```
+struct Integral : Numeric { NODE_FUNCTIONS_FINAL; bool unsigned; ...}
+```
     
 Where `Numeric` derives from `Type` and `.unsigned` says whether the type is `int` or `unsigned int`. However in Vida Nova, we prefer to use types and interconnections to express information such as this. So we use:
 
