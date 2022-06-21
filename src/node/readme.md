@@ -12,7 +12,7 @@ Program trees are networks of nodes (actually acyclic directed graphs). We do no
 
 Vida Nova nodes are typically inheritance hierarchies under `Node`, including intermediate nodes which represent categories. It is useful to see such a hierarchy in a set-theoretical sense, where subclass is equivalent to subset. Thus the base class called `Node` is equivalent to the set of all nodes, and an intermediate node is equivalent to the subset of nodes that inherit from it. 
 
-Multiple inheritance is allowed, and by convention Vida Nova trees use virtual inheritance, so that diamonds do not duplicate the base (our inheritance is true specialisation and so we want the set-union of members, not composition in disguise where we would want concatenation).
+Multiple inheritance is allowed, and by convention Vida Nova trees use virtual inheritance so that diamonds do not duplicate the base (our inheritance is true specialisation and so we want the set-union of members, not composition in disguise where we would want concatenation).
 
 Only final (i.e. not intermediate) nodes may appear in the tree for a program. Intermediate nodes can, however, legally be constructed in other contexts such as search and replace patterns.
 
@@ -175,13 +175,13 @@ struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 struct Integer : Number { NODE_FUNCTIONS };
 struct SpecificInteger : Integer
 {
-	NODE_FUNCTIONS_FINAL
-	int value;
-	virtual bool IsLocalMatch( const Matcher *candidate ) const
-	{
-    	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
-    	return c && c->value == value;
-	}
+    NODE_FUNCTIONS_FINAL
+    int value;
+    bool IsLocalMatch( const Matcher *candidate ) const override
+    {
+        const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
+        return c && c->value == value;
+    }
 };
 ```
 
@@ -200,13 +200,13 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
-	virtual bool IsLocalMatch( const Matcher *candidate ) const
-	{
-		return candidate == this;
-	}
-    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p )
+    bool IsLocalMatch( const Matcher *candidate ) const override
     {
-    	return p;
+        return candidate == this;
+    }
+    shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ) override
+    {
+        return p;
     }
 };
 ```
