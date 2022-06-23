@@ -186,6 +186,8 @@ But consider coupling a node within the `Negation`'s subtree into the replace pa
 
 `Conjunction` implements the "and" function. The `Conjunction` node should be placed at the root of the subtrees of interest, and the member named `conjuncts` (a collection) should be populated with all the subtrees that should match. `Conjunction` does creates a normal context for its pattern subtrees, so they can key couplings. Conjuncts are not invoked during replace (since it would be unclear which one to use) so a `Delta` node must be placed around the `Conjunction` node, coupling its overlay pattern to the desired element.
 
+When one of the conjuncts is a `Negation` node, it may be easier to think of the `Conjunction` as meaning "but" rather than "and".
+
 ### 6.3 `Disjunction`
 
 `Disjunction` implements the "or" function. The `Disjunction` node should be placed at the root of the subtree of interest, and the member named `disjuncts` (a collection) should be populated with all the subtrees that may match. The subtrees under a `Disjunction` node in a search pattern abnormal contexts because a given pattern element may not be a match even when the `Disjunction` itself does match.
@@ -245,139 +247,144 @@ These special nodes have to be initialised with a format string and an optional 
 
 For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a `BuildInstanceIdentifier` node. We might set the format to "%s_count" and place a pointer to the `LabelIdentifier` of the label whose jumps we are counting in the sources sequence. If a label is seen called `"EXIT"`, we will get a variable called `"EXIT_count"`. 
 
-The optional flags field permits the folling changes to behaviour:
+The optional flags field permits the following changes to behaviour:
 
  - `BYPASS_WHEN_IDENTICAL`: For use when there are 2 or more sources. If the names of the sources are all identical to each other, then this common name will be used for the generated identififer, bypassing the `printf()`-like operation. This can help avoid duplication in merging scenarios.
 
 Usages of the new variable elsewhere in the replace pattern can just couple directly to the `BuildInstanceIdentifier` node.
 
-10 Slave search and replace
+## 10 Slave search and replace
 
 It can be useful to build a 1:n relationship between two search and replace patterns. For example, we may wish to perform a transformation on a variable that modifies the declaration and all the usages of the variable. In this example, we would want each match to a variable's declaration (the master) to correspond with n matches to usages (the slaves), where n can be zero or more.
 
-This is achieved by constructing the search and replace pattens for the master (the variable declaration in the example) and then placing a special node called SlaveSearchReplace into the master's replace pattern. The SlaveSearchReplace node is filled in with search and replace patterns for the slave (a usage of the variable in the example). For each match that master finds, the slave will operate repeatedly and will perform zero or more replace operations depending on how many matches it finds.
+This is achieved by constructing the search and replace pattens for the master (the variable declaration in the example) and then placing a special node called `SlaveSearchReplace` into the master's replace pattern. The `SlaveSearchReplace` node is filled in with search and replace patterns for the slave (a usage of the variable in the example). For each match that master finds, the slave will operate repeatedly and will perform zero or more replace operations depending on how many matches it finds.
 
-SlaveSearchReplace has three members: through, which simply points to the remainder of the master's replace pattern, and search and replace which specify the slave's behaviour as documented for `VNTransfomation`. You can also use SlaveCompareReplace, which has through, compare and replace members and behaves as per CompareReplace described above.
+`SlaveSearchReplace` has three members:
+ - `through`, which simply points to the remainder of the master's replace pattern;
+ - `search` and
+ - `replace` which specify the slave's behaviour as documented for `VNTransfomation`.
+
+ You can also use `SlaveCompareReplace`, which has `through`, `compare` and `replace` members and behaves as per `CompareReplace` described above.
 
 What makes slaves useful (as opposed to just running the program through the master and then the slave as two separate transformations) is the ability to restrict what the slave can match based on the context of a particular match in the master. This is achieved in two ways:
 
 1. Nodes in the slave search pattern may be coupled into nodes in the master pattern. Each such coupling must be keyed in the master (that is, it must include a node in a normal context in the master search pattern or a builder node in the master replace pattern). In the example, the variable modified by the master would be coupled into the slave to ensure it only finds usages of the same variable.
 
-2. The slave node is placed within the master replace pattern. Now the slave will only match at (SlaveCompareReplace) or under (SlaveSearchReplace) the position where it is found in the master replace pattern. In the example, the slave pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
+2. The slave node is placed within the master replace pattern. Now the slave will only match at (`SlaveCompareReplace`) or under (`SlaveSearchReplace`) the position where it is found in the master replace pattern. In the example, the slave pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
 
-10.1 Nested
+### 10.1 Nested
 
 It is possible to use more than one slave in a pattern, they appear nested (that is as direct or indirect children of each other) and can nest in two distinct ways:
 
-1. A second slave may be pointed to by the through member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order. The relationship here is 1:n+m.
+1. A second slave may be pointed to by the `through` member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order. The relationship here is 1:n+m.
 
-2. A second slave may be pointed to by the replace member of the first. This creates a sub-slave, which has the relationship described above to the first slave (so the first slave now acts as master to the second). The second slave acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
+2. A second slave may be pointed to by the `replace` member of the first. This creates a sub-slave, which has the relationship described above to the first slave (so the first slave now acts as master to the second). The second slave acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
 
-Note: having these two nesting options is confusing: the first style looks too much like the second and can be easily confused when reading graphs, so it's important to look out for this.
+Note: having these two nesting options can be confusing: the first style looks too much like the second and can be easily confused when studying graphs, so it's important to look out for this.
 
-10.2 Important note
+### 10.2 Important note
 
-The patterns under slaves must be fully assembled before the slave is constructed or configured. This is because configuration (which is triggered by construction with pattern pointers) examines the patterns and may cache informationa bout them or set hidden properties on them. 
+The patterns under slaves must be fully assembled before the slave is constructed or configured. This is because configuration (which is triggered by construction with pattern pointers) examines the patterns and may cache information about them or set hidden properties on them. 
 
-11 Spinning prevention
+## 11 Spinning prevention
 
-As described above, `VNTransfomation` and CompareReplace act repeatedly until no further matches are found. This means the output program tree of a search and replace operation (that terminates) does not match the search pattern. This is a reliable post-invariant and serves the concept of Vida Nova as a principally reductive or goal-seeking algorithm. However, it is possible to create patterns that would repeat forever if every replace action creates another match. For this reason, any algorithm that re-tries a subtree that has been modified by a replace could spin forever.
+As described above, `VNTransfomation` acts repeatedly until no further matches are found. This means the output program tree of a search and replace operation (that terminates) does not match the search pattern. This is a reliable post-invariant and serves the concept of Vida Nova as a principally _reductive_ or _goal-seeking_ algorithm. However, it is possible to create patterns that would repeat forever if every replace action creates a tree that will match. For this reason, any algorithm that re-tries a subtree that has been modified by a replace could spin forever.
 
-Some program transformation approaches guarantee termination by for example traversing the input program exactly once while looking for matches on the way. These can suffer from missed matches when the replace action creates a match that was not present during the initial traversal. 
+Some program transformation approaches guarantee termination by for example traversing the input program exactly once while looking for matches on the way. This approach can suffer from missed matches when the replace action creates a match that was not present during the initial traversal (if the desired invariant is that there should not be a match, we have not obtained it). 
 
 As a practical matter, a (buggy) search and replace pattern that spins forever may be spotted easily. Debugging this scenario is actually more straightforward than the alternative scenario of debugging a pattern that does not match due to traversal rules and thereby breaks the post-invariant condition. 
 
-Typically, one uses the -rn<x> option to permit repeating some finite number of times before terminating without error. In the resulting output program, the results of many (say 10 to 100) repetitions of the pattern should be obvious (in graphs and c renders piped though iindent.sh, the repeating portion will usually be found further to the right than the remainder of the program). 
+Typically, one uses the `-rn<x>` command-line option to permit repeating some finite number of times before terminating without error. In the resulting output program, the results of many (say 10 to 100) repetitions of the pattern should be obvious due to the repeted structures and possibly extreme nesting depth. 
 
 There follow some methods for preventing spinning - these must be applied separately to the master and to any slaves. This is unlikely to be a complete list.
 
-11.1 Reducing patterns
+### 11.1 Reductive patterns
 
 Any replace pattern that strictly reduces the number of nodes in the tree for each hit, must eventually terminate. We can estimate whether a pattern has this property by counting the number of non-special nodes in the search and replace pattern and noting that the replace pattern is indeed smaller. Care must be taken around `Delta` nodes, to determine the size change that results. 
 
-Further, it suffices to reduce the number of occurrences of any single node type, as long as it is explicitly matched by the search pattern. For example, the ForToWhile transformation acts only when a For node is seen, and produces an output tree not including the For node that was matched. Even though the output trees are typically bigger, the number of For nodes strictly reduces and the transformation will terminate when there are no more For nodes in the program. 
+Further, it suffices to reduce the number of occurrences of any single node type, as long as it is explicitly matched by the search pattern. For example, the `ForToWhile` transformation acts only when a `For` node is seen, and produces an output tree not including the For node that was matched. Even though the output trees are typically bigger, the number of `For` nodes strictly reduces and the transformation will terminate when there are no more `For` nodes in the program. 
 
-These patterns are termed "strictly reductive".
+These patterns are termed _strictly reductive_.
 
-11.2 "but-not" pattern
+### 11.2 _But-not_ pattern
 
-Where a pattern converts a general form of a construct to a specific form the reduction is less readily apparent. What is being removed is any construct of the general kind but not the specific kind. For example, converting general usage of If into a restricted form like If(value:Expression, then:Goto, else:Nop) is actually trying to reduce away the if statements that are not in the form shown.
+Where a pattern converts a general form of a construct to a specific form the reduction is less readily apparent. What is being removed is any construct of the general kind but not the specific kind. For example, converting general usage of`If` into a restricted form like `If(value:Expression, then:Goto, else:Nop)` is actually trying to reduce away the if statements that are not in the form shown.
 
-A common solution is to insert `Conjunction` in the search pattern, with a `Negation` node on the other leg. So when reducing X to Y, the search pattern becomes `Conjunction`( X, `Negation`(Y) ). This provides an and-not or but-not type of restriction. The search pattern subtree Y will resemble the replace pattern, but must be supplied separately because a coupling would not make sense here (or be allowed because the subtree under `Negation` is an abnormal context).
+A common solution is to insert `Conjunction` in the search pattern, with a `Negation` node on the other leg. So when reducing `X` to `Y`, the search pattern becomes `Conjunction( X, Negation(Y) )`. This provides an and-not or but-not type of restriction. The search pattern subtree `Y` will resemble the replace pattern, but must be supplied separately because a coupling would not make sense here (or be allowed because the subtree under `Negation` is an abnormal context).
 
-11.2.1 Anti-parenting
+#### 11.2.1 Anti-parenting
 
-As an aside, the but-not pattern is useful for anti-parenting. This is where you want to find occurrences of a node whose parentage is *not* some specific pattern. For example, if you want to differentiate between declarations and usages of a variable, the declarations may be matched easily as Declaration( identifier:my_variable ). But to find usages, we have to allow any other node that might point to an InstanceIdentifier, like Operator, If etc *including* Declaration where the variable is used as the initialiser - obviously a usage.
+As an aside, the but-not pattern is useful for anti-parenting. This is where you want to find occurrences of a node whose parentage is _not_ some specific pattern. For example, if you want to differentiate between declarations and usages of a variable, the declarations may be matched easily as `Declaration( identifier:my_variable )`. But to find usages, we have to allow any other node that might point to an `InstanceIdentifier`, like `Operator`, `If` etc _including_ `Declaration` where the variable is used as the initialiser - obviously a usage.
 
-There are a few ways to do this in Vida Nova, but the preferred one uses a combination of `Conjunction` and `Negation` to create an and-not pattern; the undesired parentage is expressed in the `Negation` branch, and the other branch points to the target node via AnyNode in order to match any other parentage. Written down, it looks like 
+There are a few ways to do this in Vida Nova, but the preferred one uses a combination of `Conjunction` and `Negation` to create an and-not pattern; the undesired parentage is expressed in the `Negation` branch, and the other branch points to the target node via `AnyNode` in order to match any other parentage. Written down, it looks like 
 
-`Conjunction`( `Negation`( bad_parent( my_node ) ), AnyNode( my_node ) )
+`Conjunction( Negation( bad_parent( my_node ) ), AnyNode( my_node ) )`
 
-To modify just my_node, insert an `Delta` node before it in the AnyNode branch.
+To modify just `my_node`, insert a `Delta` node before it in the `AnyNode` branch.
 
-11.3 GreenGrass node
+### 11.3 `GreenGrass` node
 
-Vida Nova S&R supports a special node called GreenGrass to help in tricky cases of non-termination. It is inserted into a search pattern via its through member. The immediate child node will be matched as normal, but only if it is a node from the input program tree. GreenGrass restricts the search to not match the node if it was produced by an earlier iteration of the replace algorithm. The specific rules for GreenGrass are as follows:
-- During the first search in any `VNTransfomation`, CompareReplace or slave, the GreenGrass node does not restrict at all
-- During successive passes, GreenGrass restricts to nodes that reached the input program tree via Stuff node substitution in the previous pass. Note this includes the portion outside of the match when `VNTransfomation` is used (see the implementation note by CompareReplace).
-- In cases where one pass creates a new node (that GreenGrass would reject) and then a later pass preserves it via Stuff node substitution, GreenGrass will still reject it.
-- GreenGrass will restrict nodes created by the parent, even when located in a slave search pattern.
+Vida Nova S&R supports a special node called `GreenGrass` to help in tricky termination cases. It is inserted into a search pattern via its through member. The immediate child node will be matched as normal, but only if it is a node from the input program tree. `GreenGrass` restricts the search to not match the node if it was produced by an earlier iteration of the replace algorithm. The specific rules for `GreenGrass` are as follows:
+- During the first search in any `VNTransfomation` or slave, the `GreenGrass` node does not restrict at all
+- During successive passes, `GreenGrass` restricts to nodes that reached the input program tree via `Stuff` node substitution in the previous pass. Note this includes the portion outside of the match when `VNTransfomation` is used.
+- In cases where one pass creates a new node (that `GreenGrass` would reject) and then a later pass preserves it via `Stuff` node substitution, `GreenGrass` will still reject it.
+- `GreenGrass` will restrict nodes created by the parent, even when located in a slave search pattern.
 
-Broadly speaking, GreenGrass assumes that Stuff substitution is not really changing the nodes, just moving them around. It restricts matches to nodes from the original input tree that may be been moved around. 
+Broadly speaking, `GreenGrass` assumes that `Stuff` substitution is not really changing the nodes, just moving them around. It restricts matches to nodes from the original input tree that may be been moved around. 
 
-12 Worked examples
+## 12 Worked examples
 
 A small example, two medium examples and one large one follow. 
 
-12.1 removing Nop
+### 12.1 removing `Nop`
 
-CleanupNop uses `VNTransfomation` to eliminate obviously redundant Nops from code. Nop is a do-nothing statement rather like NOP instructions in assembly language (except it is not intended to consume processor cycles). The search pattern is a Compound statement with a `Star`<Declaration> node in the decls. The sequence of statements in the Compound block (an ordered container) contain the following: `Star`<Statement>, Nop, `Star`<Statement>. All the `Star` nodes have no pre-restriction and are maximally wild, so they'll match anything. 
+`Nop` is a `Statement` node that represents "no operation". `CleanupNop` uses `VNTransfomation` to eliminate obviously redundant `Nop`s from code. The search pattern is a `Compound` statement with a `Star<Declaration>` node in the `Declaration`s collection. The sequence of `Statement`s in the `Compound` block (an ordered container) contain the following: `Star<Statement>`, `Nop`, `Star<Statement>`. All the `Star` nodes have no pre-restriction and are maximally wild, so they'll match anything. 
 
-Our search can therefore match a Compound block with any decls, and any statements as long as there is at least one Nop (this transformation only deals with Nops in Compound blocks). The Nop can be anywhere in the sequence of statements: the layout of `Star`, X, `Star` resembles *X* in filename globbing.
+Our search can therefore match a `Compound` block with any decls, and any statements as long as there is at least one `Nop` (this transformation only deals with `Nop`s in `Compound` blocks). The `Nop` can be anywhere in the sequence of statements: the layout of `Star`, `X`, `Star` resembles `.*X.*` in regular expressions.
 
-For replacing, we wish to preserve everything in the compound block except the Nop. And we wish to preserve the statements in the correct order. We supply a new Compound block in the replace pattern, and fill in its declarations and statements by pointing to the same `Star` nodes we created in the search pattern. Thus the `Star` nodes each have two parent nodes, and are coupled. The effect of coupling the star nodes is to reproduce whatever they matched (which could be 0 or mode nodes, complete with any subtrees) in the output program at that position. 
+For replacing, we wish to preserve everything in the compound block except the `Nop`. And we wish to preserve the statements in the correct order. We supply a new `Compound` block in the replace pattern, and fill in its declarations and statements by pointing to the same `Star` nodes we created in the search pattern. Thus the `Star` nodes each have two parent nodes, and are coupled. The effect of coupling the star nodes is to reproduce whatever they matched (which could be 0 or mode nodes, complete with any subtrees) in the output program at that position. 
 
-The pattern is strictly reductive: each hit will reduce the number of Nop statements by one, and the transformation will terminate when the program contains no Nop statements. The repeating nature of the Vida Nova S&R algorithm means we will keep trying until we don't get any hits. This means that a compound block containing many Nop statements will be correctly transformed after multiple hits. On each hit, the `Star`<Statement> nodes will match different subsequences of the statements in the compound block. For this step (and I believe in general) it does not matter whether the first Nop matched is the one at the top, or bottom or middle of the block.
+The pattern is strictly reductive: each hit will reduce the number of `Nop` statements by one, and the transformation will terminate when the program contains no `Nop` statements. The repeating nature of the Vida Nova S&R algorithm means we will keep trying until we don't get any hits. This means that a compound block containing many `Nop` statements will be correctly transformed after multiple hits. On each hit, the `Star<Statement>` nodes will match different subsequences of the statements in the compound block. For this step (and I believe in general) it does not matter whether the first `Nop` matched is the one at the top, or bottom or middle of the block.
 
-12.2 Generate implicit casts
+### 12.2 Generate implicit casts
 
-GenerateImplicitCasts adds a C-style cast to every function call argument that is not of the same type as the parameter in the function declaration. 
+`GenerateImplicitCasts` adds a C-style cast to every function call argument that is not of the same type as the parameter in the function declaration. 
 
-To do this we search for a call to a function (the Call node). Because function calls can be expressions (involving function pointers) the Call node specifies the function using an expression. The signature of the function is the type of this expression, and it contains the types of the parameters. To get the type of the expression, we specify TransformOf<Expression>(Typeof) node. The type is then compared with the pattern given as the child of TypeOf. Here we specify Procedure, which is the type for a callable entity that has parameters (but not necessarily a return value). Function derives from Procedure.
+To do this we search for a call to a function (the `Call` node). Because function calls can be expressions (involving function pointers) the `Call` node specifies the function using an expression. The signature of the function is the type of this expression, and it contains the types of the parameters. To get the type of the expression, we specify `TransformOf<Expression>(Typeof)` node. The type is then compared with the pattern given as the child of `TypeOf`. Here we specify `Procedure`, which is the type for a callable entity that has parameters (but not necessarily a return value). `Function` derives from `Procedure`.
 
-Note: Vida Nova stores parameters in an unordered collection, which differs from C source language which relies on parameter ordering. Arguments to a call are then specified in the form of a map, with the key being the parameter's identifier and the value being the argument expression. Vida Nova does not support maps directly (only sequences and collections) so the tree specification for C builds a map from a collection of nodes called MapOperand which act as key-value pairs. A call is therefore conceptually more like a named parameter call e.g. foo( param1:arg1, param2:arg2 ...). This type of structure is easy to manipulate in search and replace using couplings. Ordered parameters would be more difficult because it would require an ordinal correspondence (index coupling). However, the reason for doing it this way is not S&R simplicity, but rather a desire not to store redundant information in the tree.
+Note: Vida Nova stores parameters in an unordered collection, which differs from C source language which relies on parameter ordering. Arguments to a call are then specified in the form of a map, with the key being the parameter's identifier and the value being the argument expression. Vida Nova does not support maps directly (only sequences and collections) so the tree specification for C builds a map from a collection of nodes called `MapOperand` which act as key-value pairs. A call is therefore conceptually more like a named parameter call e.g. `foo( param1:arg1, param2:arg2 ...)`. This type of structure is easy to manipulate in search and replace using couplings. Ordered parameters would be more difficult because it would require an ordinal correspondence (index coupling). However, the reason for doing it this way is not S&R simplicity, but rather a desire not to store redundant information in the tree.
 
-Since we will act on one parameter at a time, we use `Star` to match the other parameters. The one we are interested in will be an Instance node, since a parameter is a declaration of a variable-like construct. The identifier and type are given maximal wildcards to allow any parameter to match. In the arguments collection of the search pattern's Call node, we again supply a `Star` for other arguments, and a MapOperand, as explained above, for the argument in question. To ensure the MapOperand corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. 
+Since we will act on one parameter at a time, we use `Star` to match the other parameters. The one we are interested in will be an `Instance` node, since a parameter is a declaration of a variable-like construct. The identifier and type are given maximal wildcards to allow any parameter to match. In the arguments collection of the search pattern's `Call` node, we again supply a `Star` for other arguments, and a `MapOperand`, as explained above, for the argument in question. To ensure the `MapOperand` corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. 
 
-We must restrict the search to cases where the types differ, so we use the but-not pattern, by placing TypeOf on the argument expression, and coupling to the parameter type under a Not node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
+We must restrict the search to cases where the types differ, so we use the but-not pattern, by placing `TypeOf` on the argument expression, and coupling to the parameter type under a `Negation` node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
 
-The replace pattern for this transformation is relatively simple. In the replace pattern's Call, we couple the other args and the expression that chooses the function, so that they are the same (when you couple to a TypeOf node, you get the expression; to get the type, couple to its child). We replace the missing argument with a new MapOperand, coupling the identifier to that of the MapOperand in the search pattern. For the expression, we supply a Cast node, which corresponds to a C-style cast. Its type is the type of the parameter in the declaration. The expression is coupled to the the argument expression. This will generate a cast that casts the expression in the original call to the type of the parameter in the function's declaration, as required.
+The replace pattern for this transformation is relatively simple. In the replace pattern's `Call`, we couple the other args and the expression that chooses the function, so that they are the same (when you couple to a `TypeOf` node, you get the expression; to get the type, couple to its child). We replace the missing argument with a new `MapOperand`, coupling the identifier to that of the `MapOperand` in the search pattern. For the expression, we supply a `Cast` node, which corresponds to a C-style cast. Its type is the type of the parameter in the declaration. The expression is coupled to the the argument expression. This will generate a cast that casts the expression in the original call to the type of the parameter in the function's declaration, as required.
 
 Note that we see some three-way couplings around the parameter type and identifier. This works just fine, Vida Nova is cool about that sort of thing.
 
-12.3 For to While
+### 12.3 For to While
 
-ForToWhile transforms For loops into semantically equivalent While loops. C makes this easy and hard. Easy because the three elements of a For loop are general C constructs that can simply be moved to the appropriate places around a While loop; hard because of Break and Continue. We do not have to worry about Break here because it has already been handled by another step, but Continue requires explicit treatment (Continue works in While loops, but has the wrong semantics: the increment would be skipped).
+`ForToWhile` transforms For loops into semantically equivalent `While` loops. C makes this easy and hard. Easy because the three elements of a `For` loop are general C constructs that can simply be moved to the appropriate places around a `While` loop; hard because of `Break` and `Continue`. We do not have to worry about `Break` here because it has already been handled by another step, but `Continue` requires explicit treatment (`Continue` works in While loops, but we have to be careful about the semantics: the increment could be skipped).
 
-Our master search pattern describes a general For loop. There is a For node, and its expression (the test) is filled in with an Expression node which is a maximal wildcard that will match any expression. Its init condition, increment and body are all maximally wild Statement nodes. Therefore, any For loop will match (Vida Nova fills absent statements with Nop, which will match).
+Our master search pattern describes a general `For` loop. There is a `For` node, and its expression (the test) is filled in with an `Expression` node which is a maximal wildcard that will match any expression. Its init condition, increment and body are all maximally wild `Statement` nodes. Therefore, any `For` loop will match (Vida Nova fills absent statements with `Nop`, which will match).
 
-The master replace pattern begins with a Compound node. This is there to make the pattern simpler, and there are clean-up steps that remove them where they are redundant. Generous use of Compound blocks is encouraged style. The compound has only 2 statements: the init statement from the For loop via a coupling, followed by a While node. The While loop's test expression is coupled in from the For loop's test expression. In the body of the While loop we place the For loop body (but see below) followed by the increment from the For loop. This completes the basic transformation - by inspection, you can determine that the constructs from the For loop are in the right places. 
+The master replace pattern begins with a `Compound` node. This is there to make the pattern simpler, and there are clean-up steps that remove them where they are redundant. Generous use of `Compound` blocks is encouraged style. The compound has only 2 statements: the init statement from the `For` loop via a coupling, followed by a `While` node. The `While` loop's test expression is coupled in from the `For` loop's test expression. In the body of the `While` loop we place the `For` loop body (but see below) followed by the increment from the `For` loop. This completes the basic transformation - by inspection, you can determine that the constructs from the `For` loop are in the right places. 
 
-In order to deal with Continue, we insert a SlaveCompareReplace into the master replace pattern, just above where we couple the body of the For loop. Recall that the through member is simply there to allow the master replace pattern to continue. During each master replace (in other words, as S&R is building the While loop) the slave will act on the replaced version of the subtree under the through link. This is the body of the original For loop (via coupling).
+In order to deal with `Continue`, we insert a `SlaveCompareReplace` into the master replace pattern, just above where we couple the body of the `For` loop. Recall that the through member is simply there to allow the master replace pattern to continue. During each master replace (in other words, as S&R is building the While loop) the slave will act on the replaced version of the subtree under the through link. This is the body of the original `For` loop (via coupling).
 
-In this body, we wish to change the behaviour of Continue: we wish to insert a copy of the increment statement just before each continue, to compensate for continue skipping the increment we placed at the end of the body. The positioning of the slave ensures we do not change continues outside of For loops. Were it not for two awkward issues, we would simply use SlaveSearchReplace, search for continue and replace with a compound containing the increment condition (coupled) followed by continue. This is indeed approximately how the slave is laid out, but there are extra nodes to solve the problems:
+In this body, we wish to change the behaviour of `Continue`: we wish to insert a copy of the increment statement just before each continue, to compensate for continue skipping the increment we placed at the end of the body. The positioning of the slave ensures we do not change continues outside of `For` loops. Were it not for two awkward issues, we would simply use `SlaveSearchReplace`, search for continue and replace with a compound containing the increment condition (coupled) followed by continue. This is indeed approximately how the slave is laid out, but there are extra nodes to solve the problems:
 
-1. The slave replace pattern contains continue, so the slave would not terminate. We want each continue in the input program (under a For) to be replaced exactly once by the compound of increment and continue. More or fewer replacements would increment too many or too few times. The GreenGrass node ensures we only replace continues that were in the input tree, and not ones that came from our replace pattern.
+1. The slave replace pattern contains continue, so the slave would not terminate. We want each continue in the input program (under a For) to be replaced exactly once by the compound of increment and continue. More or fewer replacements would increment too many or too few times. The `GreenGrass` node ensures we only replace continues that were in the input tree, and not ones that came from our replace pattern.
 
-2. Not all continue statements under a For loop apply to that loop, because there could be nested loops (see the C spec). We cannot just use a SlaveSearchReplace because it would find continues that we don't want to change. The actual pattern used is a stuff node, which can recurse to find a continue (continue is the terminus, via the `Delta` node), and it has a recurse restriction filled in with `Negation` and a Loop wildcard. This part of the pattern means "not any kind of Loop" and the Stuff node will therefore not recurse through any loops as it looks for a terminus match. Stuff is followed by an `Delta` node, which allows the new Compound to be overlayed over the original Continue.
+2. Not all continue statements under a `For` loop apply to that loop, because there could be nested loops (see the C spec). We cannot just use a `SlaveSearchReplace` because it would find continues that we don't want to change. The actual pattern used is a stuff node, which can recurse to find a continue (continue is the terminus, via the `Delta` node), and it has a recurse restriction filled in with `Negation` and a `Loop` wildcard. This part of the pattern means "not any kind of `Loop`" and the `Stuff` node will therefore not recurse through any loops as it looks for a terminus match. `Stuff` is followed by a `Delta` node, which allows the new `Compound` to be overlayed over the original `Continue`.
 
-Note that the SlaveCompareReplace(Stuff(`Delta`)) pattern resembles the pattern that `VNTransfomation` generates to emulate search and replace using the CompareReplace implementation. The difference here is that we needed to add a recurse restriction, and so we wrote that pattern out long-hand. If there was no need for a recurse restriction, we would use SlaveSearchReplace and get a more readable pattern.
+Note that if there was no need for a recurse restriction, we would use `SlaveSearchReplace` and get a more readable pattern.
 
-12.4 Generate stacks
+### 12.4 Generate stacks
 
-GenerateStacks is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
+`GenerateStacks` is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
 
-We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep - 10 is the number I use as a todo to make the number configurable in future (a #define symbol would not show up in graphs).
+We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep.
 
 The stacks and stack index are all local static variables. In future, these will be made members of some containing class, which will improve locality.
 
@@ -385,66 +392,68 @@ A single static stack pointer is declared for each function. It is incremented a
 
 Salient points:
 
-The Subroutine Instance at the root of the pattern is coupled, and the part we wish to change is separated out again using an `Delta` node. This is an equally effective alternative to having separate Instance nodes for search and replace and keying the members that do not change. It might be more tolerant of future changes in the definition of the Instance node.
+The `Subroutine` `Instance` at the root of the pattern is coupled, and the part we wish to change is separated out again using a `Delta` node. This is an equally effective alternative to having separate `Instance` nodes for search and replace and keying the members that do not change. It might be more tolerant of future changes in the definition of the `Instance` node.
 
-The search pattern continues through the `Delta` nodes through pointer. We match a generic Compound so that we can couple into the replace pattern, preserving the function's existing body. We add a `Conjunction` branch which goes though a Stuff node to an Automatic node. This ensures the master does not spin, adding more and more stack indexes. It also means we do not modify functions that already do not have automatic variables.
+The search pattern continues through the `Delta` nodes through pointer. We match a generic `Compound` so that we can couple into the replace pattern, preserving the function's existing body. We add a `Conjunction` branch which goes though a `Stuff` node to an `Automatic` node. This ensures the master does not spin, adding more and more stack indexes. It also means we do not modify functions that already do not have automatic variables.
 
-The master replace is reached by passing through the through pointers of the two first-level slaves. It produces a new compound, inserting a new declaration for the stack index into the decls collection, and placing an increment and decrement of the same variable at the top and bottom of the statements sequence. The identifier of the variable is built from the function name and _stack_index to make the output readable.
+The master replace is reached by passing through the through pointers of the two first-level slaves. It produces a new compound, inserting a new declaration for the stack index into the decls collection, and placing an increment and decrement of the same variable at the top and bottom of the statements sequence. The identifier of the variable is built from the function name and `_stack_index` to make the output readable.
 
-The first slave to act is the most-nested first-level slave, which is a SlaveCompareReplace. It emulates `VNTransfomation` using `Star` and `Delta`, as seen before. This time, the reason is to allow a sub-slave to be tucked in at the root of the replace pattern, above the Stuff. The `Delta` splits out into a search pattern for an automatic, and a replace pattern that declares an array type. Again, we build the array's identifier from that of the original variable name with _stack appended.
+The first slave to act is the most-nested first-level slave, which is a `SlaveCompareReplace`. It emulates `VNTransfomation` using `Star` and `Delta`, as seen before. This time, the reason is to allow a sub-slave to be tucked in at the root of the replace pattern, above the `Stuff`. The `Delta` splits out into a search pattern for an automatic, and a replace pattern that declares an array type. Again, we build the array's identifier from that of the original variable name with `_stack` appended.
 
-This slave's sub-slave searches for the original variable, and replaces it with a subscript of the new array by the new stack index. This does not hit the declaration, because slaves operate after the pattern under through has been replaced, and the original variable has been replaced with a new one that has a different identifier (it isn't the name that makes identifiers different, just the fact that they are separate nodes - I believe GCC does it that way too, could be wrong).
+This slave's sub-slave searches for the original variable, and replaces it with a subscript of the new array by the new stack index. This does not hit the declaration, because slaves operate after the pattern under through has been replaced, and the original variable has been replaced with a new one that has a different identifier (it isn't the name that makes identifiers different, just the fact that they are separate nodes).
 
-Finally, the other first-level slave looks for return and replaces with a compound containing a decrement of the stack index followed by a return. We use GreenGrass to stop this transformation happening again to the the returns we generate (which would spin). This uses the Temp storage class, which is not fully defined and may not be a permanent feature of Vida Nova. At present it is a variable that makes only those guarantees made by all of Automatic, Static and Member.
+Finally, the other first-level slave looks for `Return` and replaces with a `Compound` containing a decrement of the stack index followed by a return. We use `GreenGrass` to stop this transformation happening again to the the returns we generate (which would spin). This uses the `Temp` storage class, which is not fully defined and may not be a permanent feature of Vida Nova. At present it is a variable that makes only those guarantees made by all of `Automatic`,`Static` and `Member`.
 
 Future directions:
 
-The step could probably be cleaned up, for example by taking advantage of the fact that every usage of a local variable must be in or under the compound in which it was declared - this would let all the slaves be SlaveSearchReplace and remove the need for the Stuff/`Delta` combination. 
+The step could probably be cleaned up, for example by taking advantage of the fact that every usage of a local variable must be in or under the compound in which it was declared - this would let all the slaves be `SlaveSearchReplace` and remove the need for the `Stuff``/`Delta` combination. 
 
-As for enhancement, detection of non-recursive functions is complicated because it is non-local. But we can easily detect leaf functions and do a trivial Automatic to Static (or Member or Temp) conversion (perhaps in a separate step). This could be extended to detect leaf-scoped variables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - this would be harder in S&R but might be possible.
+As for enhancement, detection of non-recursive functions is complicated because it is non-local. But we can easily detect leaf functions and do a trivial `Automatic` to `Static` (or `Member` or `Temp`) conversion (perhaps in a separate step). This could be extended to detect leaf-scoped variables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - this would be harder in S&R but might be possible.
 
-Stack overflow detection would simply require boilerplate code at the point of the increment. It would invoke some kind of intrinsic debug assert node in case of overflow. This would be disabled when generating silicon, after extensive debugging with a simulator or on an intermediate C++ render.
+Stack overflow detection would simply require boilerplate code at the point of the increment. It would invoke some kind of intrinsic debug assert node in case of overflow.
 
-13 Notes on pattern development in C++
+## 13 Notes on pattern development in C++
 
-At present, S&R patterns are built by short C++ routines in the constructors for step classes. We derive step classes from S&R so that the S&R interfaces are inherited, and pass the patterns in via Configure().
+At present, S&R patterns are built by short C++ routines in the constructors for step classes. We derive step classes from S&R so that the S&R interfaces are inherited, and pass the patterns in via `Configure()`.
 
-Vida Nova uses a template type called TreePtr<> to point to child nodes. This is derived from boost::shared_ptr, but supports some extra functionality needed by Vida Nova.
+Vida Nova uses a template type called `TreePtr<>` to point to child nodes. This is derived from `std::shared_ptr`, but supports some extra functionality needed by Vida Nova.
 
-13.1 Helpful syntactic sugar
+### 13.1 Helpful syntactic sugar
 
-MakeTreePtr<> can simplify the construction of TreePtr<> members. MakeTreePtr<X> may be constructed in the same way as X, but will then masquerade as a TreePtr<X> where the pointed-to X has been allocated using new. It is similar to Boost's make_shared<>() except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of X has a large number of parameters, the implementation of MakeTreePtr<> may need to be extended.
+`MakeTreePtr<>` can simplify the construction of `TreePtr<>` members. `MakeTreePtr<X>` may be constructed in the same way as `X`, but will then masquerade as a `TreePtr<X>` where the pointed-to `X` has been allocated using new. It is similar to `std::make_shared<>() except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of `X` has a large number of parameters, the implementation of `MakeTreePtr<>` may need to be extended.
 
-Vida Nova containers (Sequence and Collection) support initialisation directly from TreePtrs of the right type, and from comma-separated lists of TreePtrs (via operator, overloading). This can avoid the need for repeated calls to insert() or push_back().
+Vida Nova containers (`Sequence` and `Collection`) support initialisation directly from `TreePtr`s of the right type, and from comma-separated lists of `TreePtr`s (via `operator,` overloading). This can avoid the need for repeated calls to `insert()` or `push_back()`.
 
 13.2 Style tips
 
-When building a Container from TreePtrs using the comma operator, it is good style to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to separate function arguments.
+When building a `Container` from `TreePtr`s using the comma operator, it is good style to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to separate function arguments.
 
-Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used s_ for search pattern nodes and r_ for replace pattern nodes, with no prefix for nodes coupled into both (or c_ could be used here). I prepend l_ for slaves and sometimes insert x into nodes under a `Negation` node, such as with the but-not pattern. Further slaves at the same level (reached via "through") are named m_, n_, o_ etc. Sub-slaves recieve two letters, eg ll_ or nm_. In this case n is master and m is second level slave.
+Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used `s_` for search pattern nodes and `r_` for replace pattern nodes, with no prefix for nodes coupled into both (or `c_` could be used here). I prepend `l_` for slaves and sometimes insert `x` into nodes under a `Negation` node, such as with the but-not pattern. Further slaves at the same level (reached via `through`) are named `m_`, `n_`, `o_` etc. Sub-slaves recieve two letters, eg `ll_` or `nm_`. In this case `n` is master and `m` is second level slave.
 
-I usually leave numbers and strings that are passed into SpecificX or Builder nodes as magic, possibly with a comment. Any macros, enums etc will be reduced to the raw number in a graph plot anyway.
+I usually leave numbers and strings that are passed into `SpecificX` or `Builder` nodes as magic, possibly with a comment. Any macros, enums etc will be reduced to the raw number in a graph plot anyway.
 
-The order in which pattern nodes are created and connected together is mostly flexible, since members are mostly assigned via direct member assignment. It is mostly possible to declare all the nodes and then connect them all together. One exception is the slave nodes, which are actually instances of the `VNTransfomation` engine, and require either to be constructed using a constructor call or via Configure(). I usually use the constructor form to avoid confusion.
+The order in which pattern nodes are created and connected together is mostly flexible, since members are mostly assigned via direct member assignment. It is mostly possible to declare all the nodes and then connect them all together. One exception is the slave nodes, which are actually instances of the `VNTransfomation` engine, and require either to be constructed using a constructor call or via `Configure()`.
 
-There is no need to implement Transformation's functor operator (operator()). By deriving publicly from `VNTransfomation`, your transformation will inherit that operator. Configuring the `VNTransfomation` object at construct time is strongly advised, because (a) Configure() may contain slow algorithms in future that should only run once even if the transformation is invoked many times and (b) the S&R engine may collect information, such as coverage measurements, across multiple invocations.
+### 13.3 Warning about empty versus maximally wild
 
-13.3 Warning about empty versus maximally wild
+Remember that a singular `TreePtr<>` in a search pattern that is set to NULL is a maximal wildcard, i.e. will match any node that is type-compatible. On the other hand, a `Collection<>` or `Sequence<>` that is left empty only matches an empty `Collection<>` or `Sequence<>` in the input program. If, when creating steps, these members are left uninitialised, the `TreePtr<>` will be NULL and the `Collection<>` or `Sequence<>` will be left empty. These behaviours differ, and this can be a gotcha when writing steps.
 
-Remember that a TreePtr<> in a search pattern that is set to NULL is a maximal wildcard, i.e. will match any node that is type-compatible. On the other hand, a Collection<> or Sequence<> that is left empty only matches an empty Collection<> or Sequence<> in the input program. If, when creating steps, these members are left uninitialised, the TreePtr<> will be NULL and the Collection<> or Sequence<> will be left empty. These behaviours differ, and this can be a gotcha when writing steps.
+It does not make sense for a singular `TreePtr<>` to be "empty" - this is not supported in Vida Nova, and singular relationships are always 1:1 in program trees. It does make sense to wildcard a `Collection<>` or `Sequence<>` - the way to do this is to insert a single `Star<>` of the contained type. It is unfortunately impossible to write
 
-It does not make sense for a TreePtr<> to be "empty" - this is not supported in Vida Nova, and TreePtr<> relationships are always 1:1 in program trees. It does make sense to wildcard a Collection<> or Sequence<> - the way to do this is to insert a single `Star`<> of the contained type. It is unfortunately impossible to write
-
+```
 MakeTreePtr< Collection<X> > my_collection;
 my_collection = ();
+```
 
 but it might be a good style to write
 
+```
 //my_collection = ();
+```
 
 so that the reader can see that omission means "be an empty container" rather than "be a wildcard".
 
-13.4 Most important tip
+### 13.4 Most important tip
 
 It is a very good idea to use graph plots right from the start when developing steps. Look at the graphs for the kinds of input test programs you are interested in. Code up a program resembling the expected output program, and look at the graph for that too, side by side. These will give a starting point for what the search and replace patterns will need to look like. As soon as you have a transformation that compiles, even if incomplete, take a look at the pattern graph and see if it looks right. The graphs are not just for fun, they really help!
 

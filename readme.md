@@ -7,6 +7,7 @@ Inferno is a project to convert C++ programs into practical, synthesisable Veril
 ### External
 
 [The Node Interface](src/node/node_interface.md)
+[Search and Replace Documentation](src/sr/search_replace_documentation.md)
 
 ### Internal
 
