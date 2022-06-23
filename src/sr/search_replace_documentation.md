@@ -420,7 +420,7 @@ Vida Nova uses a template type called `TreePtr<>` to point to child nodes. This 
 
 ### 13.1 Helpful syntactic sugar
 
-`MakeTreePtr<>` can simplify the construction of `TreePtr<>` members. `MakeTreePtr<X>` may be constructed in the same way as `X`, but will then masquerade as a `TreePtr<X>` where the pointed-to `X` has been allocated using new. It is similar to `std::make_shared<>() except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of `X` has a large number of parameters, the implementation of `MakeTreePtr<>` may need to be extended.
+`MakeTreePtr<>` can simplify the construction of `TreePtr<>` members. `MakeTreePtr<X>` may be constructed in the same way as `X`, but will then masquerade as a `TreePtr<X>` where the pointed-to `X` has been allocated using new. It is similar to `std::make_shared<>()` except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of `X` has a large number of parameters, the implementation of `MakeTreePtr<>` may need to be extended.
 
 Vida Nova containers (sequence and collection) support initialisation directly from `TreePtr`s of the right type, and from comma-separated lists of `TreePtr`s (via `operator,` overloading). This can avoid the need for repeated calls to `insert()` or `push_back()`.
 
