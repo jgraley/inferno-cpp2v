@@ -62,7 +62,7 @@ In order to maximise the utility of topological wildcarding (and its coupling su
 
 - a new hierarchy of nodes under a new intermediate `Y` is created, and the original node `X` contains a pointer to `Y` in place of the original field. This may be applied to any field of any given `X`. For example `Public`, `Private` and `Protected` are all subclasses of `AccessSpec`, and the `Definition` node points to `AccessSpec`.
 
-In fact, this policy leads most nodes to contain only pointer, `Collection` and `Sequence`. Only a small number of nodes contain other data types such as int, string etc that cannot be accommodated topologically. This is termed a topologically-oriented tree and is a reasonably consistent canonical form for program elements.
+In fact, this policy leads most nodes to contain only singulars, collections and sequences. Only a small number of nodes contain other data types such as int, string etc that cannot be accommodated topologically. This is termed a topologically-oriented tree and is a reasonably consistent canonical form for program elements.
 
 ## 3 Joining and splitting the patterns
 
@@ -114,7 +114,7 @@ The rule is that you cannot couple nodes in separate abnormal contexts. A coupli
 
 ## 4 `Star` search pattern
 
-The Vida Nova tree supports one-to-many relationships using containers, of which two types are available: `Sequence`, which preserves ordering and `Collection`, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called `Star<>`, which is templated on the collection's element type. So a container of pointers to `Statement`s can be wildcarded using `Star<Statement>`. 
+The Vida Nova tree supports one-to-many relationships using containers, of which two types are available: sequence, which preserves ordering and collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called `Star<>`, which is templated on the collection's element type. So a container of pointers to `Statement`s can be wildcarded using `Star<Statement>`. 
 
 If a pre-restriction is given, every container element matched by the `Star` must satisfy the pre-restriction (i.e. be a non-strict subclass of the supplied base class). Additionally, the `pattern` member may point to a subtree, which must be matched by every element that the star node matches. This pattern is an abnormal context.
 
@@ -243,7 +243,7 @@ In general, builder nodes are able to key a coupling. Therefore, it is possible 
 
 `BuildIdentifier` is a builder node that constructs identifiers with new names using a `printf()` format string. At present, `InstanceIdentifier` can be built using `BuildInstanceIdentifier`, and `LabelIdentifier` can be built using `BuildLabelIdentifier`. 
 
-These special nodes have to be initialised with a format string and an optional flags string. Additionally, they contain a member called `sources`, which is a `Sequence` of `TreePtr<Identifier>`. The format is a `printf()` format string for the name of the newly built identifier. Each `%s` format specifier will be replaced by the name of the node pointed to by the corresponding element of `sources` (can be any kind of identifier). The sources will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
+These special nodes have to be initialised with a format string and an optional flags string. Additionally, they contain a member called `sources`, which is a sequence of `TreePtr<Identifier>`. The format is a `printf()` format string for the name of the newly built identifier. Each `%s` format specifier will be replaced by the name of the node pointed to by the corresponding element of `sources` (can be any kind of identifier). The sources will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
 
 For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a `BuildInstanceIdentifier` node. We might set the format to "%s_count" and place a pointer to the `LabelIdentifier` of the label whose jumps we are counting in the sources sequence. If a label is seen called `"EXIT"`, we will get a variable called `"EXIT_count"`. 
 
@@ -422,7 +422,7 @@ Vida Nova uses a template type called `TreePtr<>` to point to child nodes. This 
 
 `MakeTreePtr<>` can simplify the construction of `TreePtr<>` members. `MakeTreePtr<X>` may be constructed in the same way as `X`, but will then masquerade as a `TreePtr<X>` where the pointed-to `X` has been allocated using new. It is similar to `std::make_shared<>() except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of `X` has a large number of parameters, the implementation of `MakeTreePtr<>` may need to be extended.
 
-Vida Nova containers (`Sequence` and `Collection`) support initialisation directly from `TreePtr`s of the right type, and from comma-separated lists of `TreePtr`s (via `operator,` overloading). This can avoid the need for repeated calls to `insert()` or `push_back()`.
+Vida Nova containers (sequence and collection) support initialisation directly from `TreePtr`s of the right type, and from comma-separated lists of `TreePtr`s (via `operator,` overloading). This can avoid the need for repeated calls to `insert()` or `push_back()`.
 
 13.2 Style tips
 
