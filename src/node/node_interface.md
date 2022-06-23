@@ -96,13 +96,13 @@ Specifically:
  - a common container interface 
 are added in the `OOStd` layer, which we then specialise for the `Node` class. 
 
-### 4.1 `TreePtr<>`
+### 4.1 `TreePtr<>` (_singular_)
 
 `TreePtr<>` is a `Node` specialisation of `OOStd::SharedPtr<>` which is the `OOStd` wrapper for `std::shared_ptr<>`. We use it to point to a single child node, i.e. a 1:1 relationship. `TreePtr<>` is also used in general to handle `Node`s - we do not store nodes under any other kind of storage or management scheme. 
 
 `TreePtr<>` has similar semantics to `std::shared_ptr<>`. The `OOStd` adds `TreePtrInterface` which is a base for all `TreePtr<X>` (if `Y` derives from `X` then sadly `TreePtr<Y>` does not derive from `TreePtr<X>`). The node interface adds `Itemiser::Element` as a sub base class.
 
-In trees for programs, TreePtr<X> can never be NULL. This rule does not apply to other trees like search/replace patterns.
+In trees for programs, TreePtr<X> can never be NULL. This rule does not apply to other trees like search/replace patterns. We call this direct use of `TreePtr<>` a _singluar_ parent-child link.
 
 ### 4.2 `Sequence<>`
 
