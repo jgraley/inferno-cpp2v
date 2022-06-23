@@ -186,7 +186,7 @@ But consider coupling a node within the `Negation`'s subtree into the replace pa
 
 `Conjunction` implements the "and" function. The `Conjunction` node should be placed at the root of the subtrees of interest, and the member named `conjuncts` (a collection) should be populated with all the subtrees that should match. `Conjunction` does creates a normal context for its pattern subtrees, so they can key couplings. Conjuncts are not invoked during replace (since it would be unclear which one to use) so a `Delta` node must be placed around the `Conjunction` node, coupling its overlay pattern to the desired element.
 
-When one of the conjuncts is a `Negation` node, it may be easier to think of the `Conjunction` as meaning "but" rather than "and".
+When one of the conjuncts is a `Negation` node, it may be helpful to think of the `Conjunction` as meaning "but" rather than "and".
 
 ### 6.3 `Disjunction`
 
