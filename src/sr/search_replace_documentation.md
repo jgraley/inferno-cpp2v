@@ -418,13 +418,17 @@ At present, S&R patterns are built by short C++ routines in the constructors for
 
 Vida Nova uses a template type called `TreePtr<>` to point to child nodes. This is derived from `std::shared_ptr`, but supports some extra functionality needed by Vida Nova.
 
-### 13.1 Helpful syntactic sugar
+### 13.1 `MakePatternPtr<>()`
 
-`MakePatternPtr<>` can simplify the construction of `TreePtr<>` members. `MakePatternPtr<X>` may be constructed in the same way as `X`, but will then masquerade as a `TreePtr<X>` where the pointed-to `X` has been allocated using new. It is similar to `std::make_shared<>()` except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. 
+`MakeTreePtr<>()` is similar to `std::make_shared<>()` but creates `TreePtr<>` instances. However, when building patterns you will normally use `MakePatternPtr<>()` which:
+ - Invokes `MakeTreePtr<>()` directly for special nodes.
+ - Wraps ordinary tree nodes in a wrapper that allows them to be used in patterns.
+
+### 13.2 Container initialisation
 
 Vida Nova containers (sequence and collection) support initialisation directly from `TreePtr`s of the right type, and from comma-separated lists of `TreePtr`s (via `operator,` overloading). This can avoid the need for repeated calls to `insert()` or `push_back()`.
 
-13.2 Style tips
+### 13.3 Style tips
 
 When building a `Container` from `TreePtr`s using the comma operator, it is good style to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to separate function arguments.
 
@@ -434,7 +438,7 @@ I usually leave numbers and strings that are passed into `SpecificX` or `Builder
 
 The order in which pattern nodes are created and connected together is mostly flexible, since members are mostly assigned via direct member assignment. It is mostly possible to declare all the nodes and then connect them all together. One exception is the slave nodes, which are actually instances of the `VNTransfomation` engine, and require either to be constructed using a constructor call or via `Configure()`.
 
-### 13.3 Warning about empty versus maximally wild
+### 13.4 Warning about empty versus maximally wild
 
 Remember that a singular `TreePtr<>` in a search pattern that is set to NULL is a maximal wildcard, i.e. will match any node that is type-compatible. On the other hand, a `Collection<>` or `Sequence<>` that is left empty only matches an empty `Collection<>` or `Sequence<>` in the input program. If, when creating steps, these members are left uninitialised, the `TreePtr<>` will be NULL and the `Collection<>` or `Sequence<>` will be left empty. These behaviours differ, and this can be a gotcha when writing steps.
 
@@ -453,7 +457,7 @@ but it might be a good style to write
 
 so that the reader can see that omission means "be an empty container" rather than "be a wildcard".
 
-### 13.4 Most important tip
+### 13.5 Most important tip
 
 It is a very good idea to use graph plots right from the start when developing steps. Look at the graphs for the kinds of input test programs you are interested in. Code up a program resembling the expected output program, and look at the graph for that too, side by side. These will give a starting point for what the search and replace patterns will need to look like. As soon as you have a transformation that compiles, even if incomplete, take a look at the pattern graph and see if it looks right. The graphs are not just for fun, they really help!
 

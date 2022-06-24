@@ -706,8 +706,11 @@ LoopRotation::LoopRotation()
     auto outer_top_stuff = MakePatternPtr< Stuff<Expression> >();
     auto loop_top_equal = MakePatternPtr<Equal>();
     auto outer_top_equal = MakePatternPtr<Equal>();
-    MakePatternPtr< Stuff<Statement> > loop_bottom_stuff_enum, outer_bottom_stuff_enum, 
-                                    loop_bottom_stuff_noyield, yield_stuff, outer_bottom_stuff_noyield;
+    auto loop_bottom_stuff_enum = MakePatternPtr< Stuff<Statement> >();
+    auto outer_bottom_stuff_enum = MakePatternPtr< Stuff<Statement> >();
+    auto loop_bottom_stuff_noyield = MakePatternPtr< Stuff<Statement> >();
+    auto yield_stuff = MakePatternPtr< Stuff<Statement> >();
+    auto outer_bottom_stuff_noyield = MakePatternPtr< Stuff<Statement> >();
     auto loop_bottom_matchall = MakePatternPtr< Conjunction<Statement> >();
     auto outer_bottom_matchall = MakePatternPtr< Conjunction<Statement> >();
     auto loop_bottom_notmatch = MakePatternPtr< Negation<Statement> >();
