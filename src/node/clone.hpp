@@ -17,8 +17,7 @@ public:
     template< class TYPE >
     inline static shared_ptr<Cloner> CloneStatic( const TYPE *source )
     {
-        shared_ptr<Cloner> clone = make_shared<TYPE>(*source);
-        *clone = *source; // Copy everything - be aware that this means the clone has links into the source subtree!
+        shared_ptr<Cloner> clone = make_shared<TYPE>(*source);        
         return clone;
     }    
 };
