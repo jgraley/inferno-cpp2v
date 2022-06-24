@@ -123,7 +123,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
         explicit IsIdentifierNamedOperator( const IdentifierByNameAgent *iba,
                                             string name,
                                             shared_ptr<SYM::SymbolExpression> a); 
-        IsIdentifierNamedOperator *Clone() const override;
+        shared_ptr<PredicateOperator> Clone() const override;
                                                    
         list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,

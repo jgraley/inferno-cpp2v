@@ -57,9 +57,9 @@ GreenGrassAgent::IsGreenGrassOperator::IsGreenGrassOperator( const set< TreePtr<
 }                                                
 
 
-GreenGrassAgent::IsGreenGrassOperator *GreenGrassAgent::IsGreenGrassOperator::Clone() const
+shared_ptr<PredicateOperator> GreenGrassAgent::IsGreenGrassOperator::Clone() const
 {
-    return new IsGreenGrassOperator( dirty_grass, a );
+    return make_shared<IsGreenGrassOperator>( dirty_grass, a );
 }
     
 

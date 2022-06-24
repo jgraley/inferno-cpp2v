@@ -38,7 +38,7 @@ class PredicateOperator : public SymbolToBooleanExpression
 public:    
     typedef SymbolToBooleanExpression Parent;
             
-    virtual PredicateOperator *Clone() const = 0;
+    virtual shared_ptr<PredicateOperator> Clone() const = 0;
     
     // Stored as weak pointer so that force is undone when weak pointer expires. Sort of RAII-at-a-distance.
     void SetForceExpression( weak_ptr<BooleanExpression> force_expression );
@@ -75,7 +75,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit IsEqualOperator( shared_ptr<SymbolExpression> a, 
                             shared_ptr<SymbolExpression> b );
-    IsEqualOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
@@ -130,7 +130,7 @@ protected:
 class IsGreaterOperator : public IndexComparisonOperator
 {
     using IndexComparisonOperator::IndexComparisonOperator;
-    IsGreaterOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
@@ -149,7 +149,7 @@ Over<BooleanExpression> operator>( Over<SymbolExpression> a, Over<SymbolExpressi
 class IsLessOperator : public IndexComparisonOperator
 {
     using IndexComparisonOperator::IndexComparisonOperator;
-    IsLessOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
@@ -168,7 +168,7 @@ Over<BooleanExpression> operator<( Over<SymbolExpression> a, Over<SymbolExpressi
 class IsGreaterOrEqualOperator : public IndexComparisonOperator
 {
     using IndexComparisonOperator::IndexComparisonOperator;
-    IsGreaterOrEqualOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
@@ -187,7 +187,7 @@ Over<BooleanExpression> operator>=( Over<SymbolExpression> a, Over<SymbolExpress
 class IsLessOrEqualOperator : public IndexComparisonOperator
 {
     using IndexComparisonOperator::IndexComparisonOperator;
-    IsLessOrEqualOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
                                       SR::TheKnowledge::IndexType index_b ) const override;
@@ -208,7 +208,7 @@ class IsAllDiffOperator : public PredicateOperator
 public:    
     typedef BooleanExpression NominalType;
     explicit IsAllDiffOperator( list< shared_ptr<SymbolExpression> > sa );
-    IsAllDiffOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
@@ -236,7 +236,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit IsKindOfOperator( TreePtr<Node> archetype_node,
                              shared_ptr<SymbolExpression> a); 
-    IsKindOfOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
@@ -269,7 +269,7 @@ public:
                                           int item, 
                                           shared_ptr<SymbolExpression> a,
                                           int size );
-    IsChildCollectionSizedOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
@@ -299,7 +299,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit IsSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a, 
                                  shared_ptr<SymbolExpression> b );
-    IsSimpleCompareEquivalentOperator *Clone() const override;
+    shared_ptr<PredicateOperator> Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,

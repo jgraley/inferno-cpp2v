@@ -133,9 +133,9 @@ IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( con
 }                                                
 
 
-IdentifierByNameAgent::IsIdentifierNamedOperator *IdentifierByNameAgent::IsIdentifierNamedOperator::Clone() const
+shared_ptr<SYM::PredicateOperator> IdentifierByNameAgent::IsIdentifierNamedOperator::Clone() const
 {
-    return new IsIdentifierNamedOperator( iba, name, a );
+    return make_shared<IsIdentifierNamedOperator>( iba, name, a );
 }
 
 

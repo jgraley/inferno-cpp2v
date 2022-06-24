@@ -47,7 +47,7 @@ unique_ptr<BooleanResult> PredicateOperator::Evaluate( const EvalKit &kit ) cons
 shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<SymbolExpression> over,
                                                                 shared_ptr<SymbolExpression> with ) const
 {
-    auto p = shared_ptr<PredicateOperator>(Clone());
+    auto p = Clone();
     
     list<shared_ptr<SymbolExpression> *> sop = p->GetSymbolOperandPointers();
     for( shared_ptr<SymbolExpression> *s : sop )
@@ -111,9 +111,9 @@ IsEqualOperator::IsEqualOperator( shared_ptr<SymbolExpression> a_,
 }    
     
     
-IsEqualOperator *IsEqualOperator::Clone() const
+shared_ptr<PredicateOperator> IsEqualOperator::Clone() const
 {
-    return new IsEqualOperator( a, b );
+    return make_shared<IsEqualOperator>( a, b );
 }
     
 
@@ -281,9 +281,9 @@ Expression::Precedence IndexComparisonOperator::GetPrecedenceNF() const
 
 // ------------------------- IsGreaterOperator --------------------------
 
-IsGreaterOperator *IsGreaterOperator::Clone() const
+shared_ptr<PredicateOperator> IsGreaterOperator::Clone() const
 {
-    return new IsGreaterOperator( a, b );
+    return make_shared<IsGreaterOperator>( a, b );
 }
     
 
@@ -340,9 +340,9 @@ Over<BooleanExpression> SYM::operator>( Over<SymbolExpression> a, Over<SymbolExp
 
 // ------------------------- IsLessOperator --------------------------
 
-IsLessOperator *IsLessOperator::Clone() const
+shared_ptr<PredicateOperator> IsLessOperator::Clone() const
 {
-    return new IsLessOperator( a, b );
+    return make_shared<IsLessOperator>( a, b );
 }
     
 
@@ -399,9 +399,9 @@ Over<BooleanExpression> SYM::operator<( Over<SymbolExpression> a, Over<SymbolExp
 
 // ------------------------- IsGreaterOrEqualOperator --------------------------
 
-IsGreaterOrEqualOperator *IsGreaterOrEqualOperator::Clone() const
+shared_ptr<PredicateOperator> IsGreaterOrEqualOperator::Clone() const
 {
-    return new IsGreaterOrEqualOperator( a, b );
+    return make_shared<IsGreaterOrEqualOperator>( a, b );
 }
     
 
@@ -453,9 +453,9 @@ Over<BooleanExpression> SYM::operator>=( Over<SymbolExpression> a, Over<SymbolEx
 
 // ------------------------- IsLessOrEqualOperator --------------------------
 
-IsLessOrEqualOperator *IsLessOrEqualOperator::Clone() const
+shared_ptr<PredicateOperator> IsLessOrEqualOperator::Clone() const
 {
-    return new IsLessOrEqualOperator( a, b );
+    return make_shared<IsLessOrEqualOperator>( a, b );
 }
     
 
@@ -514,9 +514,9 @@ IsAllDiffOperator::IsAllDiffOperator( list< shared_ptr<SymbolExpression> > sa_ )
 }    
     
 
-IsAllDiffOperator *IsAllDiffOperator::Clone() const
+shared_ptr<PredicateOperator> IsAllDiffOperator::Clone() const
 {
-    return new IsAllDiffOperator( sa );
+    return make_shared<IsAllDiffOperator>( sa );
 }
     
 
@@ -614,9 +614,9 @@ IsKindOfOperator::IsKindOfOperator( TreePtr<Node> archetype_node_,
 }                                                
 
 
-IsKindOfOperator *IsKindOfOperator::Clone() const
+shared_ptr<PredicateOperator> IsKindOfOperator::Clone() const
 {
-    return new IsKindOfOperator( archetype_node, a );
+    return make_shared<IsKindOfOperator>( archetype_node, a );
 }
     
 
@@ -723,9 +723,9 @@ IsChildCollectionSizedOperator::IsChildCollectionSizedOperator( TreePtr<Node> ar
 }    
 
 
-IsChildCollectionSizedOperator *IsChildCollectionSizedOperator::Clone() const
+shared_ptr<PredicateOperator> IsChildCollectionSizedOperator::Clone() const
 {
-    return new IsChildCollectionSizedOperator( archetype_node, item_index, a, size );
+    return make_shared<IsChildCollectionSizedOperator>( archetype_node, item_index, a, size );
 }
     
 
@@ -817,9 +817,9 @@ IsSimpleCompareEquivalentOperator::IsSimpleCompareEquivalentOperator( shared_ptr
 }    
     
 
-IsSimpleCompareEquivalentOperator *IsSimpleCompareEquivalentOperator::Clone() const
+shared_ptr<PredicateOperator> IsSimpleCompareEquivalentOperator::Clone() const
 {
-    return new IsSimpleCompareEquivalentOperator( a, b );
+    return make_shared<IsSimpleCompareEquivalentOperator>( a, b );
 }
     
 
