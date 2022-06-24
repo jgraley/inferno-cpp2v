@@ -220,7 +220,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
-			shared_ptr<iterator> ni( new iterator );
+			auto ni = make_shared<iterator>();
 			*ni = *this;
 			return ni;
 		}
@@ -361,7 +361,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
-			shared_ptr<iterator> ni( new iterator );
+			auto ni = make_shared<iterator>();
 			*ni = *this;
 			return ni;
 		}

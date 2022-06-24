@@ -6,21 +6,18 @@
 
 // NOTE: Duplicate uses shared_ptr so that it can be overloaded to return
 // the supplied pointer (as done by SpecificIdentifier). Clone is guaranteed
-// to return a new() object.
+// to return a new object.
 /// Support class for allowing copies of nodes to be made
 class Cloner
 {
 public:
     virtual shared_ptr<Cloner> Clone() const = 0;
-    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p )
-    {
-        ASSERT( p.get() == this ); // unfortunate wrinkle: must always call as PX->Duplicate(PX)
-    	return Clone(); // default duplication is to clone, but can be over-ridden
-    }
+    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p );
+    
     template< class TYPE >
     inline static shared_ptr<Cloner> CloneStatic( const TYPE *source )
     {
-        shared_ptr<Cloner> clone( new TYPE(*source) );
+        shared_ptr<Cloner> clone = make_shared<TYPE>(*source);
         *clone = *source; // Copy everything - be aware that this means the clone has links into the source subtree!
         return clone;
     }    

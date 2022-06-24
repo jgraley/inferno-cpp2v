@@ -17,7 +17,7 @@ struct MyNode : Node
 void GenericsTest()
 {
 	TRACE();
-    shared_ptr<MyNode> n( new MyNode );
+    auto n = make_shared<MyNode>();
 	TRACE();
     vector< Itemiser::Element * > i = n->Itemise();
 	TRACE();

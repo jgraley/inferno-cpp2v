@@ -69,7 +69,7 @@ shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink keyer_
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new FlattenNode( keyer_xlink.GetChildX() ) );
+    return make_shared<FlattenNode>( keyer_xlink.GetChildX() );
 }
 
 
@@ -103,7 +103,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink keyer_xl
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new Walk( keyer_xlink.GetChildX(), nullptr, nullptr ) );
+    return make_shared<Walk>( keyer_xlink.GetChildX(), nullptr, nullptr );
 }
 
 
@@ -128,7 +128,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
     // underlying the current iterator, thistime.
     if( recurse_restriction )
     {
-        TreePtr<SubSequence> xpr_ss( new SubSequence() );
+        auto xpr_ss = MakeTreePtr<SubSequence>();
 
         // See if we are looking at a walk iterator
         const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
@@ -180,7 +180,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     XLink req_terminus_xlink = hypothesis_links->at(terminus_plink); 
     
     XLink xlink = req_terminus_xlink;
-    TreePtr<SubSequence> xpr_ss( new SubSequence() );
+    auto xpr_ss = MakeTreePtr<SubSequence>();
     while(xlink != keyer_xlink)
     {       
         const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );       

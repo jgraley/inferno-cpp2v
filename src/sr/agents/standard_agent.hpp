@@ -199,7 +199,7 @@ public:
     
     virtual TreePtr<Node> GetArchetypeNode() const override
     {
-        return TreePtr<Node>( new NODE_TYPE );  
+        return MakeTreePtr<NODE_TYPE>();  
     }
     
     shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
