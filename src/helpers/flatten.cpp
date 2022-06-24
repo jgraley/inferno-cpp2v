@@ -100,8 +100,7 @@ string FlattenNode_iterator::GetName() const
 
 shared_ptr<ContainerInterface::iterator_interface> FlattenNode_iterator::Clone() const
 {
-	shared_ptr<FlattenNode_iterator> ni( new FlattenNode_iterator(*this) );
-	return ni;
+	return make_shared<FlattenNode_iterator>(*this);
 }
 
 

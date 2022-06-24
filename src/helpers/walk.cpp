@@ -16,7 +16,7 @@ Walk_iterator::Walk_iterator() :
 Walk_iterator::Walk_iterator( TreePtr<Node> &r,
                               Filter *of,
                               Filter *rf ) :
-    root( new TreePtr<Node>(r) ),
+    root( make_shared<TreePtr<Node>>(r) ),
     out_filter( of ),
     recurse_filter( rf ),
     done( false )
@@ -138,7 +138,7 @@ void Walk_iterator::BypassEndOfChildren()
 
 shared_ptr<ContainerInterface> Walk_iterator::GetChildContainer( TreePtr<Node> n ) const
 { 
-    return shared_ptr<ContainerInterface>( new FlattenNode(n) );
+    return make_shared<FlattenNode>(n);
 }        
 
 
@@ -214,8 +214,7 @@ void Walk_iterator::AdvanceOver()
 
 shared_ptr<ContainerInterface::iterator_interface> Walk_iterator::Clone() const
 {
-	shared_ptr<Walk_iterator> ni( new Walk_iterator(*this) );
-	return ni;
+	return make_shared<Walk_iterator>( *this );
 }
 
 
@@ -361,8 +360,7 @@ UniqueWalk_iterator::UniqueWalk_iterator( TreePtr<Node> &root ) :
 
 shared_ptr<ContainerInterface::iterator_interface> UniqueWalk_iterator::Clone() const
 {
-	shared_ptr<UniqueWalk_iterator> ni( new UniqueWalk_iterator(*this) );
-	return ni;
+	return make_shared<UniqueWalk_iterator>( *this );
 }
 
 

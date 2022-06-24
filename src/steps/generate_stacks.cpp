@@ -62,35 +62,35 @@ ExplicitiseReturn::ExplicitiseReturn()
 UseTempForReturnValue::UseTempForReturnValue()
 {
     // search for return statement in a compound (TODO don't think we need the outer compound)
-    TreePtr<Return> s_return( new Return );
-    TreePtr< Conjunction<Expression> > s_and( new Conjunction<Expression> );
+    auto s_return = MakeTreePtr<Return>();
+    auto s_and = MakeTreePtr< Conjunction<Expression> >();
     s_return->return_value = s_and;
     auto retval = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternPtr<Type>();
     retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
-    TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> ); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
+    auto cs_stuff = MakeTreePtr< Stuff<Expression> >(); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
                                                                     // use Not<GetDec<Temp>>
     s_and->conjuncts = ( retval, cs_stuff );
     auto cs_id = MakePatternPtr< TransformOf<InstanceIdentifier> >( &GetDeclaration::instance );
     cs_stuff->terminus = cs_id;
-    TreePtr<Instance> cs_instance( new Automatic );
+    auto cs_instance = MakeTreePtr<Instance>();
     cs_id->pattern = cs_instance;
     
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
-    TreePtr<Compound> r_sub_comp( new Compound );
-    TreePtr< Temporary > r_newvar( new Temporary );
+    auto r_sub_comp= MakeTreePtr<Compound>();
+    auto r_newvar = MakeTreePtr< Temporary >();
     r_newvar->type = type;
     auto id = MakePatternPtr<BuildInstanceIdentifierAgent>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternPtr<Uninitialised>();
     r_sub_comp->members = ( r_newvar );
-    TreePtr<Assign> r_assign( new Assign );
+    auto r_assign = MakeTreePtr<Assign>();
     r_assign->operands.push_back( id );
     r_assign->operands.push_back( retval );
     r_sub_comp->statements.push_back( r_assign );
-    TreePtr<Return> r_return( new Return );
+    auto r_return = MakeTreePtr<Return>();
     r_sub_comp->statements.push_back( r_return );
     r_return->return_value = id;
        

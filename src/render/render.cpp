@@ -701,7 +701,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		}
 
 		// Render the other stuff as a Compound so we always get {} in all cases
-		TreePtr<Compound> r( new Compound );
+		auto r = MakeTreePtr<Compound>();
 		r->members = members;
 		r->statements = remainder;
 		s += "\n" + RenderStatement(r, "");
@@ -797,22 +797,22 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		if( DynamicTreePtrCast< Class >(r) || scr )
 		{
 			s += "class";
-			a = TreePtr<Private>(new Private);
+			a = MakeTreePtr<Private>();
 		}
 		else if( DynamicTreePtrCast< Struct >(r) )
 		{
 			s += "struct";
-			a = TreePtr<Public>(new Public);
+			a = MakeTreePtr<Public>();
 		}
 		else if( DynamicTreePtrCast< Union >(r) )
 		{
 			s += "union";
-			a = TreePtr<Public>(new Public);
+			a = MakeTreePtr<Public>();
 		}
 		else if( DynamicTreePtrCast< Enum >(r) )
 		{
 			s += "enum";
-			a = TreePtr<Public>(new Public);
+			a = MakeTreePtr<Public>();
 			sep2 = ",\n";
 			showtype = false;
 		}

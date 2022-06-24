@@ -267,7 +267,7 @@ LocatedLink NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
         while( XLink next_xlink = Advance(xlink, &s) )
             xlink = next_xlink;
 
-        TreePtr<Node> cur_depth( new SpecificString(s) );
+        auto cur_depth = MakeTreePtr<Node>();
         XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
         tp_link = LocatedLink(PatternLink(this, &depth), new_xlink);
     }

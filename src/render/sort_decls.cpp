@@ -13,7 +13,7 @@ public:
     UniqueWalkNoBody_iterator() : UniqueWalk::iterator() {}
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return shared_ptr<UniqueWalkNoBody_iterator>( new UniqueWalkNoBody_iterator(*this) );
+   	    return make_shared<UniqueWalkNoBody_iterator>(*this);
 	}      
 protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
@@ -27,7 +27,7 @@ protected:
                 // it's an instance, so set up a container containing type and identifier only, 
                 // not initialiser (others don't matter for deps purposes). We need 
                 // the type for params etc
-                shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+                auto seq = make_shared< Sequence<Node> >();
                 seq->push_back( i->type );
                 seq->push_back( i->identifier );
                 return seq;
@@ -48,7 +48,7 @@ public:
     UniqueWalkNoBodyOrIndirection_iterator() : UniqueWalkNoBody::iterator() {}
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return shared_ptr<UniqueWalkNoBodyOrIndirection_iterator>( new UniqueWalkNoBodyOrIndirection_iterator(*this) );
+   	    return make_shared<UniqueWalkNoBodyOrIndirection_iterator>(*this);
 	}      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
@@ -58,8 +58,7 @@ private:
         if( dynamic_pointer_cast<Indirection>( n ) ) // an instance...
         {
             //TRACE("special behaviour for ")(*n)("\n");
-            shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
-            return seq;
+            return make_shared< Sequence<Node> >();
         }
         //TRACE("defaulting ")(*n)("\n");
         // it's not a slave, so proceed as for UniqueWalk
