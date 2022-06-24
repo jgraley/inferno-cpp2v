@@ -242,7 +242,7 @@ inline bool operator<( const TreePtrInterface &x,
 
 // Handy typing saver for creating objects and TreePtrs to them.
 template<typename VALUE_TYPE, typename ... CP>
-TreePtr<VALUE_TYPE> MakeTreePtr(const CP& ... cp) 
+TreePtr<VALUE_TYPE> MakeTreePtr(const CP &...cp) 
 {
     return TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
 }

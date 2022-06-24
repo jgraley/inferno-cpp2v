@@ -160,21 +160,9 @@ class StandardAgentWrapper : public virtual NODE_TYPE,
 public:
     StandardAgentWrapper() : NODE_TYPE() {}
 
-	template<typename CP0>
-    StandardAgentWrapper(const CP0 &cp0) : 
-        NODE_TYPE(cp0) {}
-
-	template<typename CP0, typename CP1>
-    StandardAgentWrapper(const CP0 &cp0, const CP1 &cp1) : 
-        NODE_TYPE(cp0, cp1) {}
-
-    template<typename CP0, typename CP1, typename CP2>
-    StandardAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : 
-        NODE_TYPE(cp0, cp1, cp2) {}
-    
-    template<typename CP0, typename CP1, typename CP2, typename CP3>
-    StandardAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP2 &cp3) : 
-        NODE_TYPE(cp0, cp1, cp2, cp3) {}
+	template<typename ... CP>
+    StandardAgentWrapper(const CP &...cp) : 
+        NODE_TYPE(cp...) {}
     
     virtual string GetTypeName() const // used by parse, render etc
     {
@@ -221,7 +209,7 @@ class MakePatternPtrHelper
 {
 public:    
     template<typename ... CP>
-    static inline TreePtr<NODE_TYPE> MakePtr(const CP& ... cp)
+    static inline TreePtr<NODE_TYPE> MakePtr(const CP &...cp)
     {
         return MakeTreePtr<StandardAgentWrapper<NODE_TYPE>>(cp...);
     }    
@@ -234,7 +222,7 @@ class MakePatternPtrHelper<true, NODE_TYPE> // NODE_TYPE is an agent, so behave 
 {
 public:
     template<typename ... CP>
-    static inline TreePtr<NODE_TYPE> MakePtr(const CP&... cp)
+    static inline TreePtr<NODE_TYPE> MakePtr(const CP &...cp)
     {
         return MakeTreePtr<NODE_TYPE>(cp...);
     }    
@@ -245,7 +233,7 @@ public:
 // than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. 
 /// Utility for constructing nodes that are to be used in patterns from standard tree nodes
 template<typename NODE_TYPE, typename ... CP>
-TreePtr<NODE_TYPE> MakePatternPtr(const CP& ... cp)
+TreePtr<NODE_TYPE> MakePatternPtr(const CP &...cp)
 {
     // Using the magic of Boost, find out at compile time whether the NODE_TYPE is already an Agent.	
 	return MakePatternPtrHelper<is_base_of<Agent, NODE_TYPE>::value, NODE_TYPE>::MakePtr(cp...); 
