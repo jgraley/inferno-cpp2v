@@ -2014,7 +2014,7 @@ private:
 	virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
 			bool ArrayForm, ExprTy *Expression )
 	{
-		TreePtr<Delete> d( new Delete );
+		auto d = MakeTreePtr<Delete>();
 		d->pointer = hold_expr.FromRaw( Expression );
 
 		if( ArrayForm )

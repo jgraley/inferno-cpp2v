@@ -8,7 +8,7 @@
 IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     global( g )
 {
-    shared_ptr<TNode> ts( new TNode );    
+    auto ts = make_shared<TNode>();    
     ts->cs = nullptr;
     ts->parent = shared_ptr<TNode>(); 
     ts->II = nullptr;
@@ -41,7 +41,7 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
     }
     else
     {
-        ts = shared_ptr<TNode>( new TNode );    
+        ts = make_shared<TNode>();    
         ts->cs = nullptr;
         ts->parent = shared_ptr<TNode>(); 
         ts->II = nullptr;
@@ -105,7 +105,7 @@ void IdentifierTracker::NewScope( clang::Scope *S )
     {
         // We were not warned about the new scope, so just make a new anonymous one.
         TRACE("no next_record; \n");
-        shared_ptr<TNode> ts = shared_ptr<TNode>( new TNode );    
+        auto ts = make_shared<TNode>();    
         ts->II = nullptr;
         ts->parent = scope_stack.empty()?shared_ptr<TNode>():scope_stack.top();
         PushScope( S, ts );
@@ -133,7 +133,7 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, c
     SeenScope( S );
     
     // Make the TNode for this identifier and fill in    
-    shared_ptr<TNode> i( new TNode );    
+    auto i = make_shared<TNode>();    
     i->II = II;
     i->node = node;
     i->parent = scope_stack.top();  

@@ -485,7 +485,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 // ---------------------------- Replace stuff ----------------------------------                                               
 
 void StandardAgent::PlanOverlayImpl( PatternLink me_plink, 
-                                     PatternLink under_plink )
+                                     PatternLink under_plink ) 
 {
     INDENT("T");
     ASSERT( under_plink.GetChildAgent() );
