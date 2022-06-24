@@ -116,7 +116,7 @@ list<PatternLink> AgentCommon::GetChildren() const
 {
 	// Normally all children should be visible 
     typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
-    auto con = shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
+    auto con = make_shared<FlattenNodePtr>(this);
     // Note: a pattern query should be just as good...
     // Incorrect! This gets the replace-side stuff as well; GetPatternQuery()
     // is only for search.

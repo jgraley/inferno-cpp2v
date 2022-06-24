@@ -1,0 +1,1 @@
+s/^(\s*)TreePtr<([A-Za-z]+)>\s*([a-z_]+)\(new\s*([A-Za-z]+)\);\s*$/\1auto \3 = MakeTreePtr<\2>();/
