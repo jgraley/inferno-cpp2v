@@ -37,7 +37,7 @@ void SearchToCompare::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &
 
     // Obtain search and replace semantics from a compare and replace engine
     // by inserting a stuff node at root
-    MakePatternPtr< Stuff<Node> > stuff;        
+    auto stuff = MakePatternPtr< Stuff<Node> >();        
     stuff->terminus = scp;
     scp = rp = stuff;   
     

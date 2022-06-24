@@ -241,7 +241,7 @@ public:
 };
 
 
-// Similar to MakeTreePtr<> (see node/specialise_oostd.hpp) but produces a TreePtr to StandardAgentWrapper<NODE_TYPE> rather
+// Similar to MakeTreePtr<> (see node/tree_ptr.hpp) but produces a TreePtr to StandardAgentWrapper<NODE_TYPE> rather
 // than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. 
 /// Utility for constructing nodes that are to be used in patterns from standard tree nodes
 template<typename NODE_TYPE>

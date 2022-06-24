@@ -13,23 +13,24 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 	// Match a compound with an ini9tialised decl in the statements. Replace
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
-    MakePatternPtr<Compound> sc;
-    MakePatternPtr<LocalVariable> si;
-    MakePatternPtr< Delta<LocalVariable> > over;
+    auto sc = MakePatternPtr<Compound>();
+    auto si = MakePatternPtr<LocalVariable>();
+    auto over = MakePatternPtr< Delta<LocalVariable> >();
     si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
-    MakePatternPtr< Star<Declaration> > decls;
+    auto decls = MakePatternPtr< Star<Declaration> >();
     sc->members = { decls };
-    MakePatternPtr< Star<Statement> > pre, post;
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
     sc->statements = ( pre, over, post );
 
-    MakePatternPtr<Compound> rc;
-    MakePatternPtr<LocalVariable> ri;
+    auto rc = MakePatternPtr<Compound>();
+    auto ri = MakePatternPtr<LocalVariable>();
     over->through = si;
     over->overlay = ri;
     ri->initialiser = MakePatternPtr<Uninitialised>();
     rc->members = ( over, decls );
-    MakePatternPtr<Assign> ra;
+    auto ra = MakePatternPtr<Assign>();
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( pre, ra, post );
 
@@ -40,14 +41,15 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 MoveInstanceDeclarations::MoveInstanceDeclarations()
 {	
 	// Just move the decl to the decls collection
-    MakePatternPtr<Compound> sc;
-    MakePatternPtr<LocalVariable> var;
-    MakePatternPtr< Star<Declaration> > decls;
+    auto sc = MakePatternPtr<Compound>();
+    auto var = MakePatternPtr<LocalVariable>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
     sc->members = ( decls );
-    MakePatternPtr< Star<Statement> > pre, post;
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
     sc->statements = ( pre, var, post );
 
-    MakePatternPtr<Compound> rc;
+    auto rc = MakePatternPtr<Compound>();
     rc->members = ( var, decls ); // Instance now in unordered decls part
     rc->statements = ( pre, post );
 
@@ -60,23 +62,23 @@ SplitInstanceDeclarations2::SplitInstanceDeclarations2()
 	// Match a compound with an ini9tialised decl in the statements. Replace
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
-    MakePatternPtr<Compound> sc;
-    MakePatternPtr<LocalVariable> si;
-    MakePatternPtr< Delta<LocalVariable> > over;
+    auto sc = MakePatternPtr<Compound>();
+    auto si = MakePatternPtr<LocalVariable>();
+    auto over = MakePatternPtr< Delta<LocalVariable> >();
     si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
-    MakePatternPtr< Star<Declaration> > decls;
+    auto decls = MakePatternPtr< Star<Declaration> >();
     sc->members = ( decls, over );
-    MakePatternPtr< Star<Statement> > stmts;
+    auto stmts = MakePatternPtr< Star<Statement> >();
     sc->statements = ( stmts );
 
-    MakePatternPtr<Compound> rc;
-    MakePatternPtr<LocalVariable> ri;
+    auto rc = MakePatternPtr<Compound>();
+    auto ri = MakePatternPtr<LocalVariable>();
     over->through = si;
     over->overlay = ri;
     ri->initialiser = MakePatternPtr<Uninitialised>();
     rc->members = ( over, decls );
-    MakePatternPtr<Assign> ra;
+    auto ra = MakePatternPtr<Assign>();
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( ra, stmts );
 

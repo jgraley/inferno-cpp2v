@@ -19,17 +19,22 @@ using namespace SCTree;
 /// Place return at end of void functions, if not already there
 ExplicitiseReturn::ExplicitiseReturn()
 {
-    MakePatternPtr< Instance > fi;
-    MakePatternPtr<Compound> s_comp, sx_comp, r_comp;        
-    MakePatternPtr< Star<Statement> > pre, sx_pre;
-    MakePatternPtr< Star<Declaration> > decls, sx_decls;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr<Return> sx_return, r_return;
-    MakePatternPtr< Disjunction<Callable> > s_any;
-    MakePatternPtr<Function> s_func;
-    MakePatternPtr<Procedure> s_proc;
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Negation<Compound> > s_not;
+    auto fi = MakePatternPtr< Instance >();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto sx_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto sx_pre = MakePatternPtr< Star<Statement> >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto sx_decls = MakePatternPtr< Star<Declaration> >();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto sx_return = MakePatternPtr<Return>();
+    auto r_return = MakePatternPtr<Return>();
+    auto s_any = MakePatternPtr< Disjunction<Callable> >();
+    auto s_func = MakePatternPtr<Function>();
+    auto s_proc = MakePatternPtr<Procedure>();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto s_not = MakePatternPtr< Negation<Compound> >();
         
     fi->type = s_any;
     s_any->disjuncts = (s_func, s_proc, MakePatternPtr<Subroutine>() );
@@ -60,15 +65,15 @@ UseTempForReturnValue::UseTempForReturnValue()
     TreePtr<Return> s_return( new Return );
     TreePtr< Conjunction<Expression> > s_and( new Conjunction<Expression> );
     s_return->return_value = s_and;
-    MakePatternPtr< TransformOf<Expression> > retval( &TypeOf::instance );
-    MakePatternPtr<Type> type;
+    auto retval = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
+    auto type = MakePatternPtr<Type>();
     retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
     TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> ); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
                                                                     // use Not<GetDec<Temp>>
     s_and->conjuncts = ( retval, cs_stuff );
-    MakePatternPtr< TransformOf<InstanceIdentifier> > cs_id( &GetDeclaration::instance );
+    auto cs_id = MakePatternPtr< TransformOf<InstanceIdentifier> >( &GetDeclaration::instance );
     cs_stuff->terminus = cs_id;
     TreePtr<Instance> cs_instance( new Automatic );
     cs_id->pattern = cs_instance;
@@ -77,7 +82,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     TreePtr<Compound> r_sub_comp( new Compound );
     TreePtr< Temporary > r_newvar( new Temporary );
     r_newvar->type = type;
-    MakePatternPtr<BuildInstanceIdentifierAgent> id("temp_retval");
+    auto id = MakePatternPtr<BuildInstanceIdentifierAgent>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternPtr<Uninitialised>();
     r_sub_comp->members = ( r_newvar );
@@ -95,32 +100,37 @@ UseTempForReturnValue::UseTempForReturnValue()
 
 ReturnViaTemp::ReturnViaTemp()
 {
-    MakePatternPtr<Scope> s_module, r_module;
-    MakePatternPtr<Instance> func;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Base> > bases;
-    MakePatternPtr<Function> cp;
-    MakePatternPtr< Negation<Type> > return_type;
-    MakePatternPtr<Void> sx_void;
-    MakePatternPtr<Compound> s_body, r_body, lr_comp;
-    MakePatternPtr< Star<Statement> > statements;
-    MakePatternPtr< Star<Declaration> > locals;
-    MakePatternPtr<InstanceIdentifier> func_id;
-    MakePatternPtr<TypeIdentifier> module_id;
-    MakePatternPtr< Star<Instance> > params;
-    MakePatternPtr<Call> m_call;
-    MakePatternPtr< Star<MapOperand> > m_operands;
-    MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr<Assign> mr_assign, lr_assign;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("%s_return");
-    MakePatternPtr<Return> ls_return, lr_return;
-    MakePatternPtr<Expression> l_return_value;
-    MakePatternPtr<StatementExpression> mr_comp;
-    MakePatternPtr< GreenGrass<Call> > ms_gg;
-    MakePatternPtr< Delta<Type> > overcp;
-    MakePatternPtr< Delta<Initialiser> > overi;
+    auto s_module = MakePatternPtr<Scope>();
+    auto r_module = MakePatternPtr<Scope>();
+    auto func = MakePatternPtr<Instance>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto cp = MakePatternPtr<Function>();
+    auto return_type = MakePatternPtr< Negation<Type> >();
+    auto sx_void = MakePatternPtr<Void>();
+    auto s_body = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto lr_comp = MakePatternPtr<Compound>();
+    auto statements = MakePatternPtr< Star<Statement> >();
+    auto locals = MakePatternPtr< Star<Declaration> >();
+    auto func_id = MakePatternPtr<InstanceIdentifier>();
+    auto module_id = MakePatternPtr<TypeIdentifier>();
+    auto params = MakePatternPtr< Star<Instance> >();
+    auto m_call = MakePatternPtr<Call>();
+    auto m_operands = MakePatternPtr< Star<MapOperand> >();
+    auto r_temp = MakePatternPtr<Temporary>();
+    auto mr_assign = MakePatternPtr<Assign>();
+    auto lr_assign = MakePatternPtr<Assign>();
+    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_return");
+    auto ls_return = MakePatternPtr<Return>();
+    auto lr_return = MakePatternPtr<Return>();
+    auto l_return_value = MakePatternPtr<Expression>();
+    auto mr_comp = MakePatternPtr<StatementExpression>();
+    auto ms_gg = MakePatternPtr< GreenGrass<Call> >();
+    auto overcp = MakePatternPtr< Delta<Type> >();
+    auto overi = MakePatternPtr< Delta<Initialiser> >();
     
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavel( r_body, ls_return, lr_comp );
+    auto slavel = MakePatternPtr< SlaveSearchReplace<Compound> >( r_body, ls_return, lr_comp );
     ls_return->return_value = l_return_value; // note this also pre-restricts away Return<Uninitialised>
     lr_comp->statements = (lr_assign, lr_return);
     lr_assign->operands = (r_temp_id, l_return_value);
@@ -130,7 +140,7 @@ ReturnViaTemp::ReturnViaTemp()
     m_call->callee = func_id;
     m_call->operands = (m_operands);
     mr_comp->statements = (m_call, r_temp_id);
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, ms_gg, mr_comp );
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Scope> >( r_module, ms_gg, mr_comp );
     
     s_module->members = (decls, func);
     r_module->members = (decls, func, r_temp);
@@ -165,44 +175,54 @@ struct TempReturnAddress : Temporary
 
 AddLinkAddress::AddLinkAddress()
 {
-    MakePatternPtr<Scope> s_module, r_module;
-    MakePatternPtr< Star<Declaration> > decls;    
-    MakePatternPtr< Star<Base> > bases;    
-    MakePatternPtr<Temporary> r_retaddr;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_retaddr_id("%s_link");
-    MakePatternPtr<Automatic> lr_retaddr;
-    MakePatternPtr<BuildInstanceIdentifierAgent> lr_retaddr_id("link");
-    MakePatternPtr<TempReturnAddress> lr_temp_retaddr;
-    MakePatternPtr<BuildInstanceIdentifierAgent> lr_temp_retaddr_id("temp_link");
-    MakePatternPtr< Negation<Declaration> > s_nm, ls_nm;
-    MakePatternPtr< GreenGrass<Declaration> > gg;
-    MakePatternPtr<Instance> l_inst;
-    MakePatternPtr< Delta<Compound> > l_over;
-    MakePatternPtr<Compound> ls_comp, lr_comp;
-    MakePatternPtr< Star<Declaration> > l_decls;
-    MakePatternPtr< Star<Statement> > l_stmts, msx_stmts;
-    MakePatternPtr<Assign> msx_assign;
-    MakePatternPtr<Call> ms_call, mr_call;
-    MakePatternPtr<Compound> mr_comp, msx_comp;
-    MakePatternPtr<Label> mr_label;
-    MakePatternPtr<BuildLabelIdentifierAgent> mr_labelid("LINK");
-    MakePatternPtr< Conjunction<Statement> > m_all;
-    MakePatternPtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
-    MakePatternPtr< Negation<Statement> > ms_not;
-    MakePatternPtr< Delta<Statement> > m_over;
-    MakePatternPtr< Delta<Function> > l_func_over;
-    MakePatternPtr<Function> ls_func, lr_func;
-    MakePatternPtr<TypeIdentifier> ident;
-    MakePatternPtr<InstanceIdentifier> l_inst_id;
-    MakePatternPtr<Return> ll_return;
-    MakePatternPtr<Compound> llr_comp, llsx_comp;
-    MakePatternPtr<Assign> llr_assign, llsx_assign;
-    MakePatternPtr< Conjunction<Statement> > ll_all;
-    MakePatternPtr< AnyNode<Statement> > ll_any;
-    MakePatternPtr< Negation<Statement> > lls_not;
-    MakePatternPtr< Delta<Statement> > ll_over;
-    MakePatternPtr< GreenGrass<Statement> > m_gg, ll_gg;
-    MakePatternPtr<MapOperand> mr_operand;
+    auto s_module = MakePatternPtr<Scope>();
+    auto r_module = MakePatternPtr<Scope>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto r_retaddr = MakePatternPtr<Temporary>();
+    auto r_retaddr_id = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_link");
+    auto lr_retaddr = MakePatternPtr<Automatic>();
+    auto lr_retaddr_id = MakePatternPtr<BuildInstanceIdentifierAgent>("link");
+    auto lr_temp_retaddr = MakePatternPtr<TempReturnAddress>();
+    auto lr_temp_retaddr_id = MakePatternPtr<BuildInstanceIdentifierAgent>("temp_link");
+    auto s_nm = MakePatternPtr< Negation<Declaration> >();
+    auto ls_nm = MakePatternPtr< Negation<Declaration> >();
+    auto gg = MakePatternPtr< GreenGrass<Declaration> >();
+    auto l_inst = MakePatternPtr<Instance>();
+    auto l_over = MakePatternPtr< Delta<Compound> >();
+    auto ls_comp = MakePatternPtr<Compound>();
+    auto lr_comp = MakePatternPtr<Compound>();
+    auto l_decls = MakePatternPtr< Star<Declaration> >();
+    auto l_stmts = MakePatternPtr< Star<Statement> >();
+    auto msx_stmts = MakePatternPtr< Star<Statement> >();
+    auto msx_assign = MakePatternPtr<Assign>();
+    auto ms_call = MakePatternPtr<Call>();
+    auto mr_call = MakePatternPtr<Call>();
+    auto mr_comp = MakePatternPtr<Compound>();
+    auto msx_comp = MakePatternPtr<Compound>();
+    auto mr_label = MakePatternPtr<Label>();
+    auto mr_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("LINK");
+    auto m_all = MakePatternPtr< Conjunction<Statement> >();
+    auto m_any = MakePatternPtr< AnyNode<Statement> >(); // TODO rename AnyNode -> Blob
+    auto ms_not = MakePatternPtr< Negation<Statement> >();
+    auto m_over = MakePatternPtr< Delta<Statement> >();
+    auto l_func_over = MakePatternPtr< Delta<Function> >();
+    auto ls_func = MakePatternPtr<Function>();
+    auto lr_func = MakePatternPtr<Function>();
+    auto ident = MakePatternPtr<TypeIdentifier>();
+    auto l_inst_id = MakePatternPtr<InstanceIdentifier>();
+    auto ll_return = MakePatternPtr<Return>();
+    auto llr_comp = MakePatternPtr<Compound>();
+    auto llsx_comp = MakePatternPtr<Compound>();
+    auto llr_assign = MakePatternPtr<Assign>();
+    auto llsx_assign = MakePatternPtr<Assign>();
+    auto ll_all = MakePatternPtr< Conjunction<Statement> >();
+    auto ll_any = MakePatternPtr< AnyNode<Statement> >();
+    auto lls_not = MakePatternPtr< Negation<Statement> >();
+    auto ll_over = MakePatternPtr< Delta<Statement> >();
+    auto m_gg = MakePatternPtr< GreenGrass<Statement> >();
+    auto ll_gg = MakePatternPtr< GreenGrass<Statement> >();
+    auto mr_operand = MakePatternPtr<MapOperand>();
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
@@ -210,7 +230,7 @@ AddLinkAddress::AddLinkAddress()
     llr_comp->statements = (llr_assign, ll_return);
     llr_assign->operands = (lr_temp_retaddr_id, lr_retaddr_id);
    
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavell( lr_comp, ll_gg, llr_comp );   
+    auto slavell = MakePatternPtr< SlaveSearchReplace<Compound> >( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = ms_call;
     ms_call->operands = (MakePatternPtr< Star<MapOperand> >());
@@ -222,7 +242,7 @@ AddLinkAddress::AddLinkAddress()
     mr_operand->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
     
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, m_gg, mr_comp );
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Scope> >( r_module, m_gg, mr_comp );
     
     l_inst->type = l_func_over;
     l_func_over->through = ls_func;
@@ -262,29 +282,36 @@ AddLinkAddress::AddLinkAddress()
 
 ParamsViaTemps::ParamsViaTemps()
 {
-    MakePatternPtr<Scope> s_module, r_module;
-    MakePatternPtr<Instance> s_func, r_func;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Base> > bases;
-    MakePatternPtr<Function> s_cp, r_cp;
-    MakePatternPtr<Type> return_type;
-    MakePatternPtr<Compound> s_body, r_body, mr_comp;
-    MakePatternPtr< Star<Statement> > statements;
-    MakePatternPtr< Star<Declaration> > locals;
-    MakePatternPtr<InstanceIdentifier> func_id, param_id;
-    MakePatternPtr<TypeIdentifier> module_id;
-    MakePatternPtr<Instance> s_param;
-    MakePatternPtr< Star<Instance> > params;
-    MakePatternPtr<Call> ms_call, mr_call;
-    MakePatternPtr<MapOperand> ms_operand;
-    MakePatternPtr< Star<MapOperand> > m_operands;
-    MakePatternPtr<Automatic> r_param;
-    MakePatternPtr<Type> param_type;
-    MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr<Assign> mr_assign;
-    MakePatternPtr<Expression> m_expr;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("%s_%s");
-    MakePatternPtr< Delta<Declaration> > over;
+    auto s_module = MakePatternPtr<Scope>();
+    auto r_module = MakePatternPtr<Scope>();
+    auto s_func = MakePatternPtr<Instance>();
+    auto r_func = MakePatternPtr<Instance>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto s_cp = MakePatternPtr<Function>();
+    auto r_cp = MakePatternPtr<Function>();
+    auto return_type = MakePatternPtr<Type>();
+    auto s_body = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto mr_comp = MakePatternPtr<Compound>();
+    auto statements = MakePatternPtr< Star<Statement> >();
+    auto locals = MakePatternPtr< Star<Declaration> >();
+    auto func_id = MakePatternPtr<InstanceIdentifier>();
+    auto param_id = MakePatternPtr<InstanceIdentifier>();
+    auto module_id = MakePatternPtr<TypeIdentifier>();
+    auto s_param = MakePatternPtr<Instance>();
+    auto params = MakePatternPtr< Star<Instance> >();
+    auto ms_call = MakePatternPtr<Call>();
+    auto mr_call = MakePatternPtr<Call>();
+    auto ms_operand = MakePatternPtr<MapOperand>();
+    auto m_operands = MakePatternPtr< Star<MapOperand> >();
+    auto r_param = MakePatternPtr<Automatic>();
+    auto param_type = MakePatternPtr<Type>();
+    auto r_temp = MakePatternPtr<Temporary>();
+    auto mr_assign = MakePatternPtr<Assign>();
+    auto m_expr = MakePatternPtr<Expression>();
+    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_%s");
+    auto over = MakePatternPtr< Delta<Declaration> >();
     
     ms_call->callee = func_id;
     ms_call->operands = (m_operands, ms_operand);
@@ -294,7 +321,7 @@ ParamsViaTemps::ParamsViaTemps()
     mr_assign->operands = (r_temp_id, m_expr);
     mr_call->callee = func_id;
     mr_call->operands = (m_operands);
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, ms_call, mr_comp );
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Scope> >( r_module, ms_call, mr_comp );
     
     s_module->members = (decls, over);
     r_module->members = (decls, over, r_temp);
@@ -342,46 +369,60 @@ GenerateStacks::GenerateStacks()
     // Using a sub-slave of the variable-finding slave, look for usages of 
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
-    MakePatternPtr<Instance> s_fi, r_fi, l_fi;
-    MakePatternPtr<Thread> sx_thread;
-    MakePatternPtr<Method> sx_method;
-    MakePatternPtr< Disjunction<Type> > sx_any;
-    MakePatternPtr< Negation<Type> > s_not;
-    MakePatternPtr< Conjunction<Initialiser> > s_and;
-    MakePatternPtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
-    MakePatternPtr< Star<Declaration> > top_decls;
-    MakePatternPtr< Star<Statement> > top_pre;
-    MakePatternPtr< Stuff<Initialiser> > stuff;
-    MakePatternPtr< Stuff<Compound> > cs_stuff;
-    MakePatternPtr< Delta<Statement> > overlay;
-    MakePatternPtr< Delta<Declaration> > over;
-    MakePatternPtr<Automatic> cs_instance, s_instance;
-    MakePatternPtr<Field> r_index, r_instance;
-    MakePatternPtr<Unsigned> r_index_type;
-    MakePatternPtr<PostIncrement> r_inc;
-    MakePatternPtr<PostDecrement> r_ret_dec;
-    MakePatternPtr<InstanceIdentifier> s_identifier;
-    MakePatternPtr<Array> r_array;
-    MakePatternPtr<Return> ret;
-    MakePatternPtr<Subscript> l_r_sub;
-    MakePatternPtr< Conjunction<Node> > s_and3;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_index_identifier("%s_stack_index");
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_identifier("%s_stack");
-    MakePatternPtr< GreenGrass<Statement> > s_gg;
-    MakePatternPtr<Assign> r_index_init;
-    MakePatternPtr< Star<Declaration> > members;
-    MakePatternPtr<Scope> s_module, r_module, ls_module, lr_module;
-    MakePatternPtr< Star<Base> > bases, l_bases;
-    MakePatternPtr<TypeIdentifier> module_id, l_module_id;
-    MakePatternPtr<Compound> s_vcomp, r_vcomp;
-    MakePatternPtr< Star<Declaration> > vdecls, l_members;
-    MakePatternPtr< Star<Statement> > vstmts;
-    MakePatternPtr<InstanceIdentifier> fi_id;
+    auto s_fi = MakePatternPtr<Instance>();
+    auto r_fi = MakePatternPtr<Instance>();
+    auto l_fi = MakePatternPtr<Instance>();
+    auto sx_thread = MakePatternPtr<Thread>();
+    auto sx_method = MakePatternPtr<Method>();
+    auto sx_any = MakePatternPtr< Disjunction<Type> >();
+    auto s_not = MakePatternPtr< Negation<Type> >();
+    auto s_and = MakePatternPtr< Conjunction<Initialiser> >();
+    auto s_top_comp = MakePatternPtr<Compound>();
+    auto r_top_comp = MakePatternPtr<Compound>();
+    auto r_ret_comp = MakePatternPtr<Compound>();
+    auto temp = MakePatternPtr<Compound>();
+    auto top_decls = MakePatternPtr< Star<Declaration> >();
+    auto top_pre = MakePatternPtr< Star<Statement> >();
+    auto stuff = MakePatternPtr< Stuff<Initialiser> >();
+    auto cs_stuff = MakePatternPtr< Stuff<Compound> >();
+    auto overlay = MakePatternPtr< Delta<Statement> >();
+    auto over = MakePatternPtr< Delta<Declaration> >();
+    auto cs_instance = MakePatternPtr<Automatic>();
+    auto s_instance = MakePatternPtr<Automatic>();
+    auto r_index = MakePatternPtr<Field>();
+    auto r_instance = MakePatternPtr<Field>();
+    auto r_index_type = MakePatternPtr<Unsigned>();
+    auto r_inc = MakePatternPtr<PostIncrement>();
+    auto r_ret_dec = MakePatternPtr<PostDecrement>();
+    auto s_identifier = MakePatternPtr<InstanceIdentifier>();
+    auto r_array = MakePatternPtr<Array>();
+    auto ret = MakePatternPtr<Return>();
+    auto l_r_sub = MakePatternPtr<Subscript>();
+    auto s_and3 = MakePatternPtr< Conjunction<Node> >();
+    auto r_index_identifier = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_stack_index");
+    auto r_identifier = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_stack");
+    auto s_gg = MakePatternPtr< GreenGrass<Statement> >();
+    auto r_index_init = MakePatternPtr<Assign>();
+    auto members = MakePatternPtr< Star<Declaration> >();
+    auto s_module = MakePatternPtr<Scope>();
+    auto r_module = MakePatternPtr<Scope>();
+    auto ls_module = MakePatternPtr<Scope>();
+    auto lr_module = MakePatternPtr<Scope>();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto l_bases = MakePatternPtr< Star<Base> >();
+    auto module_id = MakePatternPtr<TypeIdentifier>();
+    auto l_module_id = MakePatternPtr<TypeIdentifier>();
+    auto s_vcomp = MakePatternPtr<Compound>();
+    auto r_vcomp = MakePatternPtr<Compound>();
+    auto vdecls = MakePatternPtr< Star<Declaration> >();
+    auto l_members = MakePatternPtr< Star<Declaration> >();
+    auto vstmts = MakePatternPtr< Star<Statement> >();
+    auto fi_id = MakePatternPtr<InstanceIdentifier>();
 
     // Sub-slave replace with a subscript into the array
     l_r_sub->operands = ( r_identifier, r_index_identifier );
 
-    MakePatternPtr< SlaveSearchReplace<Statement> > r_slave( r_vcomp, s_identifier, l_r_sub );
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Statement> >( r_vcomp, s_identifier, l_r_sub );
 
     // SlaveSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
@@ -419,9 +460,9 @@ GenerateStacks::GenerateStacks()
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
     
-    MakePatternPtr< SlaveCompareReplace<Scope> > r_mid( r_module, ls_module, lr_module ); // stuff, stuff
+    auto r_mid = MakePatternPtr< SlaveCompareReplace<Scope> >( r_module, ls_module, lr_module ); // stuff, stuff
 
-    MakePatternPtr< SlaveSearchReplace<Statement> > r_slave3( r_top_comp, s_gg, r_ret_comp );
+    auto r_slave3 = MakePatternPtr< SlaveSearchReplace<Statement> >( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
     
     // Master search - look for functions satisfying the construct limitation and get
@@ -479,29 +520,34 @@ GenerateStacks::GenerateStacks()
     // Using a sub-slave of the variable-finding slave, look for usages of 
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
-    MakePatternPtr<Instance> fi;
-    MakePatternPtr< Delta<Initialiser> > oinit;
-    MakePatternPtr<Callable> s_func;
-    MakePatternPtr< Conjunction<Initialiser> > s_and;
-    MakePatternPtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
-    MakePatternPtr< Star<Declaration> > top_decls;
-    MakePatternPtr< Star<Statement> > top_pre;
-    MakePatternPtr< Stuff<Statement> > stuff;
-    MakePatternPtr< Stuff<Compound> > cs_stuff;
-    MakePatternPtr< Delta<Statement> > overlay;
-    MakePatternPtr<Automatic> cs_instance, s_instance;
-    MakePatternPtr<Static> r_index, r_instance;
-    MakePatternPtr<Unsigned> r_index_type;
-    MakePatternPtr<PostIncrement> r_inc;
-    MakePatternPtr<PostDecrement> r_ret_dec;
-    MakePatternPtr<InstanceIdentifier> s_identifier;
-    MakePatternPtr<Array> r_array;
-    MakePatternPtr<Return> ret;
-    MakePatternPtr<Subscript> l_r_sub;
-    MakePatternPtr< Conjunction<Node> > s_and3;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_index_identifier("%s_stack_index");
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_identifier("%s_stack");
-    MakePatternPtr< GreenGrass<Statement> > s_gg;
+    auto fi = MakePatternPtr<Instance>();
+    auto oinit = MakePatternPtr< Delta<Initialiser> >();
+    auto s_func = MakePatternPtr<Callable>();
+    auto s_and = MakePatternPtr< Conjunction<Initialiser> >();
+    auto s_top_comp = MakePatternPtr<Compound>();
+    auto r_top_comp = MakePatternPtr<Compound>();
+    auto r_ret_comp = MakePatternPtr<Compound>();
+    auto temp = MakePatternPtr<Compound>();
+    auto top_decls = MakePatternPtr< Star<Declaration> >();
+    auto top_pre = MakePatternPtr< Star<Statement> >();
+    auto stuff = MakePatternPtr< Stuff<Statement> >();
+    auto cs_stuff = MakePatternPtr< Stuff<Compound> >();
+    auto overlay = MakePatternPtr< Delta<Statement> >();
+    auto cs_instance = MakePatternPtr<Automatic>();
+    auto s_instance = MakePatternPtr<Automatic>();
+    auto r_index = MakePatternPtr<Static>();
+    auto r_instance = MakePatternPtr<Static>();
+    auto r_index_type = MakePatternPtr<Unsigned>();
+    auto r_inc = MakePatternPtr<PostIncrement>();
+    auto r_ret_dec = MakePatternPtr<PostDecrement>();
+    auto s_identifier = MakePatternPtr<InstanceIdentifier>();
+    auto r_array = MakePatternPtr<Array>();
+    auto ret = MakePatternPtr<Return>();
+    auto l_r_sub = MakePatternPtr<Subscript>();
+    auto s_and3 = MakePatternPtr< Conjunction<Node> >();
+    auto r_index_identifier = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_stack_index");
+    auto r_identifier = MakePatternPtr<BuildInstanceIdentifierAgent>("%s_stack");
+    auto s_gg = MakePatternPtr< GreenGrass<Statement> >();
 
     // Master search - look for functions satisfying the construct limitation and get
     fi->identifier = MakePatternPtr<InstanceIdentifier>();
@@ -516,9 +562,9 @@ GenerateStacks::GenerateStacks()
     s_and->conjuncts = ( s_top_comp, cs_stuff );
 
     // Master replace - insert index variable, inc and dec into function at top level
-    MakePatternPtr< SlaveSearchReplace<Statement> > r_slave( stuff, s_identifier, l_r_sub );
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_mid( r_top_comp, stuff, r_slave );
-    MakePatternPtr< SlaveSearchReplace<Statement> > r_slave3( r_mid, s_gg, r_ret_comp );
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Statement> >( stuff, s_identifier, l_r_sub );
+    auto r_mid = MakePatternPtr< SlaveCompareReplace<Statement> >( r_top_comp, stuff, r_slave );
+    auto r_slave3 = MakePatternPtr< SlaveSearchReplace<Statement> >( r_mid, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
     oinit->overlay = temp;//r_slave3; 
 
@@ -575,35 +621,42 @@ GenerateStacks::GenerateStacks()
 
 MergeFunctions::MergeFunctions()
 {
-    MakePatternPtr<Scope> s_module, r_module;
-    MakePatternPtr<Field> thread, s_func;
-    MakePatternPtr<Thread> thread_type;
-    MakePatternPtr<Callable> func_type;
-    MakePatternPtr< Star<Declaration> > members, thread_decls;
-    MakePatternPtr< Star<Statement> > thread_stmts;
-    MakePatternPtr< Star<Base> > bases;    
-    MakePatternPtr< Delta<Compound> > thread_over;
-    MakePatternPtr<Compound> s_thread_comp, r_thread_comp;
-    MakePatternPtr<Call> s_call, ls_call;
-    MakePatternPtr<InstanceIdentifier> func_id;
-    MakePatternPtr<Label> r_label;
-    MakePatternPtr< BuildLabelIdentifierAgent > r_label_id("ENTER_%s");
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Stuff<Compound> > s_stuff, func_stuff;
-    MakePatternPtr<TypeIdentifier> module_id;
-    MakePatternPtr<Goto> lr_goto, mr_goto;
-    MakePatternPtr<Return> ms_return;    
-    MakePatternPtr<TempReturnAddress> retaddr;
-    MakePatternPtr<InstanceIdentifier> retaddr_id;
+    auto s_module = MakePatternPtr<Scope>();
+    auto r_module = MakePatternPtr<Scope>();
+    auto thread = MakePatternPtr<Field>();
+    auto s_func = MakePatternPtr<Field>();
+    auto thread_type = MakePatternPtr<Thread>();
+    auto func_type = MakePatternPtr<Callable>();
+    auto members = MakePatternPtr< Star<Declaration> >();
+    auto thread_decls = MakePatternPtr< Star<Declaration> >();
+    auto thread_stmts = MakePatternPtr< Star<Statement> >();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto thread_over = MakePatternPtr< Delta<Compound> >();
+    auto s_thread_comp = MakePatternPtr<Compound>();
+    auto r_thread_comp = MakePatternPtr<Compound>();
+    auto s_call = MakePatternPtr<Call>();
+    auto ls_call = MakePatternPtr<Call>();
+    auto func_id = MakePatternPtr<InstanceIdentifier>();
+    auto r_label = MakePatternPtr<Label>();
+    auto r_label_id = MakePatternPtr< BuildLabelIdentifierAgent >("ENTER_%s");
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto s_stuff = MakePatternPtr< Stuff<Compound> >();
+    auto func_stuff = MakePatternPtr< Stuff<Compound> >();
+    auto module_id = MakePatternPtr<TypeIdentifier>();
+    auto lr_goto = MakePatternPtr<Goto>();
+    auto mr_goto = MakePatternPtr<Goto>();
+    auto ms_return = MakePatternPtr<Return>();
+    auto retaddr = MakePatternPtr<TempReturnAddress>();
+    auto retaddr_id = MakePatternPtr<InstanceIdentifier>();
     
     mr_goto->destination = retaddr_id;
      
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( func_stuff, ms_return, mr_goto );        
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Compound> >( func_stuff, ms_return, mr_goto );        
     
     ls_call->callee = func_id;
     lr_goto->destination = r_label_id;
         
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavel( r_thread_comp, ls_call, lr_goto );    
+    auto slavel = MakePatternPtr< SlaveSearchReplace<Compound> >( r_thread_comp, ls_call, lr_goto );    
     
     s_module->members = (members, thread, s_func);
     r_module->members = (members, thread);

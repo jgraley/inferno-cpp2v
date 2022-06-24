@@ -22,18 +22,19 @@ struct CombableBreak : Break { NODE_FUNCTIONS_FINAL };
 
 DetectUncombableSwitch::DetectUncombableSwitch()
 {
-    MakePatternPtr< Conjunction<Switch> > s_all;
-    MakePatternPtr< Negation<Switch> > sx_not;
-    MakePatternPtr<UncombableSwitch> sx_uswitch;
-    MakePatternPtr<Switch> s_switch;
-    MakePatternPtr<Expression> expr;
-    MakePatternPtr<Compound> comp;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< Negation<Statement> > x_not;
-    MakePatternPtr<Break> x_break;
-    MakePatternPtr<SwitchTarget> target;
-    MakePatternPtr<UncombableSwitch> r_uswitch;
+    auto s_all = MakePatternPtr< Conjunction<Switch> >();
+    auto sx_not = MakePatternPtr< Negation<Switch> >();
+    auto sx_uswitch = MakePatternPtr<UncombableSwitch>();
+    auto s_switch = MakePatternPtr<Switch>();
+    auto expr = MakePatternPtr<Expression>();
+    auto comp = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto x_not = MakePatternPtr< Negation<Statement> >();
+    auto x_break = MakePatternPtr<Break>();
+    auto target = MakePatternPtr<SwitchTarget>();
+    auto r_uswitch = MakePatternPtr<UncombableSwitch>();
     
     s_all->conjuncts = (sx_not, s_switch);
     sx_not->negand = sx_uswitch;
@@ -54,15 +55,15 @@ DetectUncombableSwitch::DetectUncombableSwitch()
 // way, and can avoid a top-level NOT
 MakeAllForUncombable::MakeAllForUncombable()
 {
-    MakePatternPtr< Conjunction<For> > s_all;
-    MakePatternPtr< Negation<For> > s_not;
-    MakePatternPtr<UncombableFor> sx_ufor;
-    MakePatternPtr<For> s_for;
-    MakePatternPtr<Statement> init;
-    MakePatternPtr<Expression> test; 
-    MakePatternPtr<Statement> inc; 
-    MakePatternPtr<Statement> body;
-    MakePatternPtr<UncombableFor> r_ufor;
+    auto s_all = MakePatternPtr< Conjunction<For> >();
+    auto s_not = MakePatternPtr< Negation<For> >();
+    auto sx_ufor = MakePatternPtr<UncombableFor>();
+    auto s_for = MakePatternPtr<For>();
+    auto init = MakePatternPtr<Statement>();
+    auto test = MakePatternPtr<Expression>();
+    auto inc = MakePatternPtr<Statement>();
+    auto body = MakePatternPtr<Statement>();
+    auto r_ufor = MakePatternPtr<UncombableFor>();
     
     s_all->conjuncts = (s_not, s_for);
     s_not->negand = sx_ufor;
@@ -82,32 +83,33 @@ MakeAllForUncombable::MakeAllForUncombable()
 
 DetectCombableFor::DetectCombableFor()
 {
-    MakePatternPtr<UncombableFor> s_ufor;
-    MakePatternPtr<Assign> init;
-    MakePatternPtr< Disjunction<Operator> > test;
-    MakePatternPtr<Less> lt;
-    MakePatternPtr<LessOrEqual> le;
-    MakePatternPtr<Greater> gt;
-    MakePatternPtr<GreaterOrEqual> ge;
-    MakePatternPtr<NotEqual> ne;    
-    MakePatternPtr<Integer> init_val;
-    MakePatternPtr< Disjunction<AssignmentOperator> > inc;
-    MakePatternPtr<PostIncrement> postinc; 
-    MakePatternPtr<PreIncrement> preinc; 
-    MakePatternPtr<PostDecrement> postdec; 
-    MakePatternPtr<PreDecrement> predec; 
-    MakePatternPtr<AssignmentAdd> asadd; 
-    MakePatternPtr<AssignmentSubtract> assub; 
-    MakePatternPtr<Assign> assign1, assign2;
-    MakePatternPtr<Add> add;
-    MakePatternPtr<Subtract> sub;    
-    MakePatternPtr< Negation<Statement> > body;
-    MakePatternPtr< Stuff<Statement> > astuff;
-    MakePatternPtr<AssignmentOperator> assignop;
+    auto s_ufor = MakePatternPtr<UncombableFor>();
+    auto init = MakePatternPtr<Assign>();
+    auto test = MakePatternPtr< Disjunction<Operator> >();
+    auto lt = MakePatternPtr<Less>();
+    auto le = MakePatternPtr<LessOrEqual>();
+    auto gt = MakePatternPtr<Greater>();
+    auto ge = MakePatternPtr<GreaterOrEqual>();
+    auto ne = MakePatternPtr<NotEqual>();
+    auto init_val = MakePatternPtr<Integer>();
+    auto inc = MakePatternPtr< Disjunction<AssignmentOperator> >();
+    auto postinc = MakePatternPtr<PostIncrement>();
+    auto preinc = MakePatternPtr<PreIncrement>();
+    auto postdec = MakePatternPtr<PostDecrement>();
+    auto predec = MakePatternPtr<PreDecrement>();
+    auto asadd = MakePatternPtr<AssignmentAdd>();
+    auto assub = MakePatternPtr<AssignmentSubtract>();
+    auto assign1 = MakePatternPtr<Assign>();
+    auto assign2 = MakePatternPtr<Assign>();
+    auto add = MakePatternPtr<Add>();
+    auto sub = MakePatternPtr<Subtract>();
+    auto body = MakePatternPtr< Negation<Statement> >();
+    auto astuff = MakePatternPtr< Stuff<Statement> >();
+    auto assignop = MakePatternPtr<AssignmentOperator>();
     
-    MakePatternPtr<CombableFor> r_for;
-    MakePatternPtr< TransformOf<InstanceIdentifier> > loopvar( &TypeOf::instance );
-    MakePatternPtr<Integral> type;
+    auto r_for = MakePatternPtr<CombableFor>();
+    auto loopvar = MakePatternPtr< TransformOf<InstanceIdentifier> >( &TypeOf::instance );
+    auto type = MakePatternPtr<Integral>();
     
     s_ufor->initialisation = init;
     init->operands = (loopvar, init_val);
@@ -149,14 +151,14 @@ DetectCombableFor::DetectCombableFor()
 // way, and can avoid a top-level NOT
 MakeAllBreakUncombable::MakeAllBreakUncombable()
 {
-    MakePatternPtr< Negation<Break> > s_not;
-    MakePatternPtr<UncombableBreak> sx_ubreak;
-    MakePatternPtr<Break> s_break;
-    MakePatternPtr<Statement> init;
-    MakePatternPtr<Expression> test; 
-    MakePatternPtr<Statement> inc; 
-    MakePatternPtr<Statement> body;
-    MakePatternPtr<UncombableBreak> r_ubreak;
+    auto s_not = MakePatternPtr< Negation<Break> >();
+    auto sx_ubreak = MakePatternPtr<UncombableBreak>();
+    auto s_break = MakePatternPtr<Break>();
+    auto init = MakePatternPtr<Statement>();
+    auto test = MakePatternPtr<Expression>();
+    auto inc = MakePatternPtr<Statement>();
+    auto body = MakePatternPtr<Statement>();
+    auto r_ubreak = MakePatternPtr<UncombableBreak>();
     
     s_not->negand = sx_ubreak;
         
@@ -170,17 +172,18 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
 // under constructs like if
 DetectCombableBreak::DetectCombableBreak()
 {
-    MakePatternPtr< Conjunction<Switch> > all;
-    MakePatternPtr< Negation<Switch> > x_not;
-    MakePatternPtr<UncombableSwitch> uswitch;
-    MakePatternPtr<Switch> swtch;
-    MakePatternPtr<Expression> expr;
-    MakePatternPtr<Compound> comp;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< Delta<Break> > over;
-    MakePatternPtr<UncombableBreak> s_ubreak;
-    MakePatternPtr<CombableBreak> r_break;
+    auto all = MakePatternPtr< Conjunction<Switch> >();
+    auto x_not = MakePatternPtr< Negation<Switch> >();
+    auto uswitch = MakePatternPtr<UncombableSwitch>();
+    auto swtch = MakePatternPtr<Switch>();
+    auto expr = MakePatternPtr<Expression>();
+    auto comp = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto over = MakePatternPtr< Delta<Break> >();
+    auto s_ubreak = MakePatternPtr<UncombableBreak>();
+    auto r_break = MakePatternPtr<CombableBreak>();
     
     all->conjuncts = (x_not, swtch);
     x_not->negand = uswitch;
@@ -208,21 +211,24 @@ ForToWhile::ForToWhile()
     // Avoid matching continues that don't belong to use by using a recurse 
     // restriction, like in BreakToGoto.
     
-    MakePatternPtr<For> s_for;
-    MakePatternPtr<Statement> forbody, inc, init;
-    MakePatternPtr<Expression> cond;
-    MakePatternPtr<While> r_while;
-    MakePatternPtr<Compound> r_outer, r_body;
-    MakePatternPtr< Stuff<Statement> > l_stuff;
-    MakePatternPtr< Delta<Statement> > l_overlay;
-    MakePatternPtr< Negation<Statement> > l_s_not;
-    MakePatternPtr< Loop > l_s_loop;
+    auto s_for = MakePatternPtr<For>();
+    auto forbody = MakePatternPtr<Statement>();
+    auto inc = MakePatternPtr<Statement>();
+    auto init = MakePatternPtr<Statement>();
+    auto cond = MakePatternPtr<Expression>();
+    auto r_while = MakePatternPtr<While>();
+    auto r_outer = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto l_stuff = MakePatternPtr< Stuff<Statement> >();
+    auto l_overlay = MakePatternPtr< Delta<Statement> >();
+    auto l_s_not = MakePatternPtr< Negation<Statement> >();
+    auto l_s_loop = MakePatternPtr< Loop >();
     
-    MakePatternPtr<Continue> l_s_cont;
-    MakePatternPtr<Nop> l_r_nop;
-    MakePatternPtr<BuildLabelIdentifierAgent> r_cont_labelid("CONTINUE");
-    MakePatternPtr<Label> r_cont_label;
-    MakePatternPtr<Goto> lr_goto;
+    auto l_s_cont = MakePatternPtr<Continue>();
+    auto l_r_nop = MakePatternPtr<Nop>();
+    auto r_cont_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("CONTINUE");
+    auto r_cont_label = MakePatternPtr<Label>();
+    auto lr_goto = MakePatternPtr<Goto>();
 
     l_stuff->terminus = l_overlay;
     l_overlay->through = l_s_cont;
@@ -230,7 +236,7 @@ ForToWhile::ForToWhile()
     l_overlay->overlay = lr_goto;
     lr_goto->destination = r_cont_labelid;
     l_s_not->negand = l_s_loop;
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
+    auto r_slave = MakePatternPtr< SlaveCompareReplace<Statement> >( forbody, l_stuff, l_stuff );
     
     s_for->body = forbody;
     s_for->initialisation = init;
@@ -250,12 +256,12 @@ WhileToDo::WhileToDo()
 {
     // Just need to insert an "if" statement for the case 
     // where there are 0 iterations.
-    MakePatternPtr<While> s_while;
-    MakePatternPtr<Statement> body;
-    MakePatternPtr<Expression> cond;
-    MakePatternPtr<Nop> r_nop;
-    MakePatternPtr<If> r_if;
-    MakePatternPtr<Do> r_do;
+    auto s_while = MakePatternPtr<While>();
+    auto body = MakePatternPtr<Statement>();
+    auto cond = MakePatternPtr<Expression>();
+    auto r_nop = MakePatternPtr<Nop>();
+    auto r_if = MakePatternPtr<If>();
+    auto r_do = MakePatternPtr<Do>();
 
     s_while->body = body;
     s_while->condition = cond;
@@ -276,17 +282,25 @@ IfToIfGoto::IfToIfGoto()
     // to a more specific kind (the condiitonal goto pattern) we have to 
     // exclude the conditional goto explicitly using and-not in the search 
     // pattern. Otherwise we would spin forever expanding them over and over.
-    MakePatternPtr< Conjunction<Statement> > s_and;    
-    MakePatternPtr<If> s_if, l_r_if, r_if;
-    MakePatternPtr<Statement> body, else_body;
-    MakePatternPtr<Expression> cond;
-    MakePatternPtr< Negation<Statement> > l_r_not;
-    MakePatternPtr<Goto> l_r_goto, r_goto, r_goto_else;
-    MakePatternPtr<Nop> l_r_nop, r_nop;
-    MakePatternPtr<Compound> r_comp;
-    MakePatternPtr<LogicalNot> r_not;
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid1("THEN"), r_labelid2("ELSE");
-    MakePatternPtr<Label> r_label1, r_label2;
+    auto s_and = MakePatternPtr< Conjunction<Statement> >();
+    auto s_if = MakePatternPtr<If>();
+    auto l_r_if = MakePatternPtr<If>();
+    auto r_if = MakePatternPtr<If>();
+    auto body = MakePatternPtr<Statement>();
+    auto else_body = MakePatternPtr<Statement>();
+    auto cond = MakePatternPtr<Expression>();
+    auto l_r_not = MakePatternPtr< Negation<Statement> >();
+    auto l_r_goto = MakePatternPtr<Goto>();
+    auto r_goto = MakePatternPtr<Goto>();
+    auto r_goto_else = MakePatternPtr<Goto>();
+    auto l_r_nop = MakePatternPtr<Nop>();
+    auto r_nop = MakePatternPtr<Nop>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto r_not = MakePatternPtr<LogicalNot>();
+    auto r_labelid1 = MakePatternPtr<BuildLabelIdentifierAgent>("THEN");
+    auto r_labelid2 = MakePatternPtr<BuildLabelIdentifierAgent>("ELSE");
+    auto r_label1 = MakePatternPtr<Label>();
+    auto r_label2 = MakePatternPtr<Label>();
     
     s_and->conjuncts = (s_if, l_r_not);
     s_if->condition = cond;
@@ -327,22 +341,24 @@ SwitchToIfGoto::SwitchToIfGoto()
     //
     // The order of the conditional gotos that result from cases should not matter
     // because cases should not overlap. 
-    MakePatternPtr<Switch> s_switch;
-    MakePatternPtr<Compound> r_comp;
-    MakePatternPtr<Statement> body;
-    MakePatternPtr<Type> cond_type;
-    MakePatternPtr<Automatic> r_decl;
-    MakePatternPtr<BuildInstanceIdentifierAgent> id("switch_value");
-    MakePatternPtr< TransformOf<Expression> > s_cond( &TypeOf::instance );
+    auto s_switch = MakePatternPtr<Switch>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto body = MakePatternPtr<Statement>();
+    auto cond_type = MakePatternPtr<Type>();
+    auto r_decl = MakePatternPtr<Automatic>();
+    auto id = MakePatternPtr<BuildInstanceIdentifierAgent>("switch_value");
+    auto s_cond = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
     
     // SlaveSearchReplace for default
-    MakePatternPtr<Compound> l1_s_body, l1_r_body;
-    MakePatternPtr< Star<Declaration> > l1_decls;
-    MakePatternPtr< Star<Statement> > l1_pre, l1_post;
-    MakePatternPtr< Default > l1_s_default;
-    MakePatternPtr< Label > l1_r_label;
-    MakePatternPtr<BuildLabelIdentifierAgent> l1_r_labelid("DEFAULT");
-    MakePatternPtr<Goto> l1_r_goto;
+    auto l1_s_body = MakePatternPtr<Compound>();
+    auto l1_r_body = MakePatternPtr<Compound>();
+    auto l1_decls = MakePatternPtr< Star<Declaration> >();
+    auto l1_pre = MakePatternPtr< Star<Statement> >();
+    auto l1_post = MakePatternPtr< Star<Statement> >();
+    auto l1_s_default = MakePatternPtr< Default >();
+    auto l1_r_label = MakePatternPtr< Label >();
+    auto l1_r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("DEFAULT");
+    auto l1_r_goto = MakePatternPtr<Goto>();
     
     l1_s_body->members = l1_decls;
     l1_s_body->statements = (l1_pre, l1_s_default, l1_post);
@@ -352,20 +368,22 @@ SwitchToIfGoto::SwitchToIfGoto()
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
     
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave1( body, l1_s_body, l1_r_body );
+    auto r_slave1 = MakePatternPtr< SlaveCompareReplace<Statement> >( body, l1_s_body, l1_r_body );
 
     // slave for normal case statements (single value)
-    MakePatternPtr<Compound> l2_s_body, l2_r_body;
-    MakePatternPtr< Star<Declaration> > l2_decls;
-    MakePatternPtr< Star<Statement> > l2_pre, l2_post;
-    MakePatternPtr< Case > l2_s_case;
-    MakePatternPtr< Label > l2_r_label;
-    MakePatternPtr<BuildLabelIdentifierAgent> l2_r_labelid("CASE");
-    MakePatternPtr<If> l2_r_if;
-    MakePatternPtr<Nop> l2_r_nop;
-    MakePatternPtr<Goto> l2_r_goto;
-    MakePatternPtr<Equal> l2_r_equal;
-    MakePatternPtr<Expression> l2_exp;
+    auto l2_s_body = MakePatternPtr<Compound>();
+    auto l2_r_body = MakePatternPtr<Compound>();
+    auto l2_decls = MakePatternPtr< Star<Declaration> >();
+    auto l2_pre = MakePatternPtr< Star<Statement> >();
+    auto l2_post = MakePatternPtr< Star<Statement> >();
+    auto l2_s_case = MakePatternPtr< Case >();
+    auto l2_r_label = MakePatternPtr< Label >();
+    auto l2_r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("CASE");
+    auto l2_r_if = MakePatternPtr<If>();
+    auto l2_r_nop = MakePatternPtr<Nop>();
+    auto l2_r_goto = MakePatternPtr<Goto>();
+    auto l2_r_equal = MakePatternPtr<Equal>();
+    auto l2_exp = MakePatternPtr<Expression>();
     
     l2_s_body->members = l2_decls;
     l2_s_body->statements = (l2_pre, l2_s_case, l2_post);
@@ -380,22 +398,25 @@ SwitchToIfGoto::SwitchToIfGoto()
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
     
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave2( r_slave1, l2_s_body, l2_r_body );
+    auto r_slave2 = MakePatternPtr< SlaveCompareReplace<Statement> >( r_slave1, l2_s_body, l2_r_body );
     
     // SlaveSearchReplace for range cases (GCC extension) eg case 5..7:    
-    MakePatternPtr<Compound> l3_s_body, l3_r_body;
-    MakePatternPtr< Star<Declaration> > l3_decls;
-    MakePatternPtr< Star<Statement> > l3_pre, l3_post;
-    MakePatternPtr< RangeCase > l3_s_case;
-    MakePatternPtr< Label > l3_r_label;
-    MakePatternPtr<BuildLabelIdentifierAgent> l3_r_labelid("CASE");
-    MakePatternPtr<If> l3_r_if;
-    MakePatternPtr<Nop> l3_r_nop;
-    MakePatternPtr<Goto> l3_r_goto;
-    MakePatternPtr<LogicalAnd> l3_r_and;
-    MakePatternPtr<GreaterOrEqual> l3_r_ge;
-    MakePatternPtr<LessOrEqual> l3_r_le;
-    MakePatternPtr<Expression> l3_exp_lo, l3_exp_hi;
+    auto l3_s_body = MakePatternPtr<Compound>();
+    auto l3_r_body = MakePatternPtr<Compound>();
+    auto l3_decls = MakePatternPtr< Star<Declaration> >();
+    auto l3_pre = MakePatternPtr< Star<Statement> >();
+    auto l3_post = MakePatternPtr< Star<Statement> >();
+    auto l3_s_case = MakePatternPtr< RangeCase >();
+    auto l3_r_label = MakePatternPtr< Label >();
+    auto l3_r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("CASE");
+    auto l3_r_if = MakePatternPtr<If>();
+    auto l3_r_nop = MakePatternPtr<Nop>();
+    auto l3_r_goto = MakePatternPtr<Goto>();
+    auto l3_r_and = MakePatternPtr<LogicalAnd>();
+    auto l3_r_ge = MakePatternPtr<GreaterOrEqual>();
+    auto l3_r_le = MakePatternPtr<LessOrEqual>();
+    auto l3_exp_lo = MakePatternPtr<Expression>();
+    auto l3_exp_hi = MakePatternPtr<Expression>();
     
     l3_s_body->members = l3_decls;
     l3_s_body->statements = (l3_pre, l3_s_case, l3_post);
@@ -413,7 +434,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l3_r_goto->destination = l3_r_labelid;
     l3_r_label->identifier = l3_r_labelid;
     
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave3( r_slave2, l3_s_body, l3_r_body );
+    auto r_slave3 = MakePatternPtr< SlaveCompareReplace<Statement> >( r_slave2, l3_s_body, l3_r_body );
 
     // Finish up master
     s_cond->pattern = cond_type;
@@ -438,20 +459,23 @@ DoToIfGoto::DoToIfGoto()
     // We prevent the continue transformation from acting on continues in nested 
     // blocks using the same method as seen in BreakToGoto. 
     
-    MakePatternPtr<Do> s_do;
-    MakePatternPtr<If> r_if;
-    MakePatternPtr<Statement> body;
-    MakePatternPtr<Expression> cond;
-    MakePatternPtr<Goto> r_goto, l_r_goto;
-    MakePatternPtr<Nop> r_nop;    
-    MakePatternPtr<Compound> r_comp;
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
-    MakePatternPtr<Label> r_label, r_cont_label;
-    MakePatternPtr< Stuff<Statement> > l_stuff;
-    MakePatternPtr< Delta<Statement> > l_overlay;
-    MakePatternPtr<Continue> l_s_cont;
-    MakePatternPtr< Negation<Statement> > l_s_not;
-    MakePatternPtr< Loop > l_s_loop;
+    auto s_do = MakePatternPtr<Do>();
+    auto r_if = MakePatternPtr<If>();
+    auto body = MakePatternPtr<Statement>();
+    auto cond = MakePatternPtr<Expression>();
+    auto r_goto = MakePatternPtr<Goto>();
+    auto l_r_goto = MakePatternPtr<Goto>();
+    auto r_nop = MakePatternPtr<Nop>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("NEXT");
+    auto l_r_cont_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("CONTINUE");
+    auto r_label = MakePatternPtr<Label>();
+    auto r_cont_label = MakePatternPtr<Label>();
+    auto l_stuff = MakePatternPtr< Stuff<Statement> >();
+    auto l_overlay = MakePatternPtr< Delta<Statement> >();
+    auto l_s_cont = MakePatternPtr<Continue>();
+    auto l_s_not = MakePatternPtr< Negation<Statement> >();
+    auto l_s_loop = MakePatternPtr< Loop >();
 
     l_s_not->negand = l_s_loop;
     l_overlay->through = l_s_cont;
@@ -459,7 +483,7 @@ DoToIfGoto::DoToIfGoto()
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( body, l_stuff, l_stuff );
+    auto r_slave = MakePatternPtr< SlaveCompareReplace<Statement> >( body, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;
@@ -484,15 +508,16 @@ BreakToGoto::BreakToGoto()
     // 2. The Break is reached via a Stuff node whose recurse 
     //    restriction is set to not recurse through any Breakable
     //    blocks, so we won't find a Break that is not for us.
-    MakePatternPtr<Breakable> breakable, sx_breakable;
-    MakePatternPtr< Stuff<Statement> > stuff;
-    MakePatternPtr< Delta<Statement> > overlay;
-    MakePatternPtr< Negation<Statement> > sx_not;
-    MakePatternPtr<Break> s_break;
-    MakePatternPtr<Goto> r_goto;
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("BREAK");
-    MakePatternPtr<Label> r_label;
-    MakePatternPtr<Compound> r_comp;
+    auto breakable = MakePatternPtr<Breakable>();
+    auto sx_breakable = MakePatternPtr<Breakable>();
+    auto stuff = MakePatternPtr< Stuff<Statement> >();
+    auto overlay = MakePatternPtr< Delta<Statement> >();
+    auto sx_not = MakePatternPtr< Negation<Statement> >();
+    auto s_break = MakePatternPtr<Break>();
+    auto r_goto = MakePatternPtr<Goto>();
+    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("BREAK");
+    auto r_label = MakePatternPtr<Label>();
+    auto r_comp = MakePatternPtr<Compound>();
     
     sx_not->negand = sx_breakable;
     stuff->terminus = overlay;
@@ -511,14 +536,16 @@ BreakToGoto::BreakToGoto()
 
 LogicalAndToIf::LogicalAndToIf()
 {
-    MakePatternPtr<LogicalAnd> s_and;
-    MakePatternPtr<Expression> op1, op2;
-    MakePatternPtr<StatementExpression> r_comp;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("andtemp");
-    MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr<Boolean> r_boolean;
-    MakePatternPtr<If> r_if;
-    MakePatternPtr<Assign> r_assign1, r_assign2;
+    auto s_and = MakePatternPtr<LogicalAnd>();
+    auto op1 = MakePatternPtr<Expression>();
+    auto op2 = MakePatternPtr<Expression>();
+    auto r_comp = MakePatternPtr<StatementExpression>();
+    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("andtemp");
+    auto r_temp = MakePatternPtr<Temporary>();
+    auto r_boolean = MakePatternPtr<Boolean>();
+    auto r_if = MakePatternPtr<If>();
+    auto r_assign1 = MakePatternPtr<Assign>();
+    auto r_assign2 = MakePatternPtr<Assign>();
     
     s_and->operands = (op1, op2);
     
@@ -539,14 +566,16 @@ LogicalAndToIf::LogicalAndToIf()
 
 LogicalOrToIf::LogicalOrToIf()
 {
-    MakePatternPtr<LogicalOr> s_or;
-    MakePatternPtr<Expression> op1, op2;
-    MakePatternPtr<StatementExpression> r_comp;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("ortemp");
-    MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr<Boolean> r_boolean;
-    MakePatternPtr<If> r_if;
-    MakePatternPtr<Assign> r_assign1, r_assign2;
+    auto s_or = MakePatternPtr<LogicalOr>();
+    auto op1 = MakePatternPtr<Expression>();
+    auto op2 = MakePatternPtr<Expression>();
+    auto r_comp = MakePatternPtr<StatementExpression>();
+    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("ortemp");
+    auto r_temp = MakePatternPtr<Temporary>();
+    auto r_boolean = MakePatternPtr<Boolean>();
+    auto r_if = MakePatternPtr<If>();
+    auto r_assign1 = MakePatternPtr<Assign>();
+    auto r_assign2 = MakePatternPtr<Assign>();
     
     s_or->operands = (op1, op2);
     
@@ -567,15 +596,17 @@ LogicalOrToIf::LogicalOrToIf()
 
 ConditionalOperatorToIf::ConditionalOperatorToIf()
 {
-    MakePatternPtr<ConditionalOperator> s_mux;
-    MakePatternPtr<Expression> op1, op3;
-    MakePatternPtr<StatementExpression> r_comp;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("muxtemp");
-    MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr< TransformOf<Expression> > op2( &TypeOf::instance );
-    MakePatternPtr<Type> type;
-    MakePatternPtr<If> r_if;
-    MakePatternPtr<Assign> r_assignt, r_assignf;
+    auto s_mux = MakePatternPtr<ConditionalOperator>();
+    auto op1 = MakePatternPtr<Expression>();
+    auto op3 = MakePatternPtr<Expression>();
+    auto r_comp = MakePatternPtr<StatementExpression>();
+    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("muxtemp");
+    auto r_temp = MakePatternPtr<Temporary>();
+    auto op2 = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
+    auto type = MakePatternPtr<Type>();
+    auto r_if = MakePatternPtr<If>();
+    auto r_assignt = MakePatternPtr<Assign>();
+    auto r_assignf = MakePatternPtr<Assign>();
     
     s_mux->operands = (op1, op2, op3);
     op2->pattern = type;
@@ -597,20 +628,22 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
 
 ExtractCallParams::ExtractCallParams()
 {
-    MakePatternPtr<Call> s_call, r_call;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("temp_%s");
-    MakePatternPtr<Temporary> r_temp;
-    MakePatternPtr<StatementExpression> r_ce;
-    MakePatternPtr<Assign> r_assign;
-    MakePatternPtr< Star<MapOperand> > params;
-    MakePatternPtr<MapOperand> s_param, r_param;
-    MakePatternPtr< TransformOf<Expression> > value( &TypeOf::instance );
-    MakePatternPtr<Type> type;
-    MakePatternPtr<Expression> callee;
-    MakePatternPtr<InstanceIdentifier> id;
-    MakePatternPtr< Conjunction<Expression> > all;
-    MakePatternPtr< Negation<Expression> > x_not;
-    MakePatternPtr<InstanceIdentifier> x_id;
+    auto s_call = MakePatternPtr<Call>();
+    auto r_call = MakePatternPtr<Call>();
+    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("temp_%s");
+    auto r_temp = MakePatternPtr<Temporary>();
+    auto r_ce = MakePatternPtr<StatementExpression>();
+    auto r_assign = MakePatternPtr<Assign>();
+    auto params = MakePatternPtr< Star<MapOperand> >();
+    auto s_param = MakePatternPtr<MapOperand>();
+    auto r_param = MakePatternPtr<MapOperand>();
+    auto value = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
+    auto type = MakePatternPtr<Type>();
+    auto callee = MakePatternPtr<Expression>();
+    auto id = MakePatternPtr<InstanceIdentifier>();
+    auto all = MakePatternPtr< Conjunction<Expression> >();
+    auto x_not = MakePatternPtr< Negation<Expression> >();
+    auto x_id = MakePatternPtr<InstanceIdentifier>();
     
     s_call->operands = (params, s_param);
     s_param->value = all;

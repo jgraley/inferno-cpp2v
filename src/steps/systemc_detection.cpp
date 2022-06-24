@@ -12,12 +12,13 @@ using namespace Steps;
 
 DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
 {
-    MakePatternPtr< Delta<Node> > over;
-    MakePatternPtr< Scope > s_scope, r_scope;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< UserType > s_usertype;
-    MakePatternPtr< TypeIdentifierByNameAgent > s_token( lr_scnode->GetToken() );                
-    MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, s_token, lr_scnode );    
+    auto over = MakePatternPtr< Delta<Node> >();
+    auto s_scope = MakePatternPtr< Scope >();
+    auto r_scope = MakePatternPtr< Scope >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto s_usertype = MakePatternPtr< UserType >();
+    auto s_token = MakePatternPtr< TypeIdentifierByNameAgent >( lr_scnode->GetToken() );                
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Node> >( over, s_token, lr_scnode );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -33,16 +34,18 @@ DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
 
 DetectSCBase::DetectSCBase( TreePtr< SCNamedRecord > lr_scclass )
 {
-    MakePatternPtr< Delta<Node> > over;
-    MakePatternPtr< Scope > s_scope, r_scope;
-    MakePatternPtr< Star<Declaration> > decls, l_decls;
-    MakePatternPtr< Star<Base> > l_bases;
-    MakePatternPtr< UserType > s_usertype;
-    MakePatternPtr< InheritanceRecord > ls_class;
-    MakePatternPtr< Base > ls_base;            
-    MakePatternPtr< TypeIdentifier > l_tid;
-    MakePatternPtr< TypeIdentifierByNameAgent > s_token( lr_scclass->GetToken() ); 
-    MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, ls_class, lr_scclass );    
+    auto over = MakePatternPtr< Delta<Node> >();
+    auto s_scope = MakePatternPtr< Scope >();
+    auto r_scope = MakePatternPtr< Scope >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto l_decls = MakePatternPtr< Star<Declaration> >();
+    auto l_bases = MakePatternPtr< Star<Base> >();
+    auto s_usertype = MakePatternPtr< UserType >();
+    auto ls_class = MakePatternPtr< InheritanceRecord >();
+    auto ls_base = MakePatternPtr< Base >();
+    auto l_tid = MakePatternPtr< TypeIdentifier >();
+    auto s_token = MakePatternPtr< TypeIdentifierByNameAgent >( lr_scclass->GetToken() ); 
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Node> >( over, ls_class, lr_scclass );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -65,11 +68,11 @@ DetectSCBase::DetectSCBase( TreePtr< SCNamedRecord > lr_scclass )
 
 DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicNamedFunction> r_dynamic )
 {
-    MakePatternPtr< Call > s_call;
-    MakePatternPtr< MapOperand > s_arg;            
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_dynamic->GetToken() ); 
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_param_id( "p1" ); 
-    MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+    auto s_call = MakePatternPtr< Call >();
+    auto s_arg = MakePatternPtr< MapOperand >();
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( r_dynamic->GetToken() ); 
+    auto s_param_id = MakePatternPtr< InstanceIdentifierByNameAgent >( "p1" ); 
+    auto eexpr = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance ); 
                     
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
@@ -84,8 +87,8 @@ DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicNamedFunction> r_dynamic )
 
 DetectSCStatic::DetectSCStatic( TreePtr<SCNamedFunction> r_static )
 {
-    MakePatternPtr< Call > s_call;
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_static->GetToken() ); 
+    auto s_call = MakePatternPtr< Call >();
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( r_static->GetToken() ); 
                       
     s_call->callee = s_token;   
     //s_call->operands = ();       
@@ -96,11 +99,11 @@ DetectSCStatic::DetectSCStatic( TreePtr<SCNamedFunction> r_static )
 
 DetectSCDelta::DetectSCDelta( TreePtr<SCNamedFunction> r_delta )
 {
-    MakePatternPtr< Call > s_call;
-    MakePatternPtr< MapOperand > s_arg;            
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_delta->GetToken() ); 
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_param_id( "p1" ); 
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_arg_id( "SC_ZERO_TIME" ); 
+    auto s_call = MakePatternPtr< Call >();
+    auto s_arg = MakePatternPtr< MapOperand >();
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( r_delta->GetToken() ); 
+    auto s_param_id = MakePatternPtr< InstanceIdentifierByNameAgent >( "p1" ); 
+    auto s_arg_id = MakePatternPtr< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" ); 
                     
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
@@ -113,11 +116,11 @@ DetectSCDelta::DetectSCDelta( TreePtr<SCNamedFunction> r_delta )
 
 DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunction> r_tf )
 {
-    MakePatternPtr< Expression > event;
-    MakePatternPtr< Call > s_call;
-    MakePatternPtr< MapOperand > s_arg;            
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_tf->GetToken() ); 
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_param_id( "p1" ); 
+    auto event = MakePatternPtr< Expression >();
+    auto s_call = MakePatternPtr< Call >();
+    auto s_arg = MakePatternPtr< MapOperand >();
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( r_tf->GetToken() ); 
+    auto s_param_id = MakePatternPtr< InstanceIdentifierByNameAgent >( "p1" ); 
             
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
@@ -131,25 +134,32 @@ DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunctio
 
 DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
 {
-    MakePatternPtr< Delta<Node> > over;
-    MakePatternPtr< Scope > s_scope, r_scope;
-    MakePatternPtr< Star<Declaration> > decls, l_decls, l_cdecls;
-    MakePatternPtr< Static > s_instance;
-    MakePatternPtr< Compound > ls_comp, lr_comp;
-    MakePatternPtr< Module > l_module;
-    MakePatternPtr< Call > ls_pcall;
-    MakePatternPtr< MapOperand > ls_arg;            
-    MakePatternPtr< Delta<Instance> > l_overcons;
-    MakePatternPtr< Delta<Type> > l_overtype;
-    MakePatternPtr< Instance > ls_cons, lr_cons, l_process;
-    MakePatternPtr< Star<Statement> > l_pre, l_post;
-    MakePatternPtr< InstanceIdentifier > ls_id;
-    MakePatternPtr< Star<Base> > l_bases;        
-    MakePatternPtr<Constructor> l_ctype;
-    MakePatternPtr<InstanceIdentifier> l_ident;
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( lr_scprocess->GetToken() ); 
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_arg_id( "func" );
-    MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, l_module, l_module );            
+    auto over = MakePatternPtr< Delta<Node> >();
+    auto s_scope = MakePatternPtr< Scope >();
+    auto r_scope = MakePatternPtr< Scope >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto l_decls = MakePatternPtr< Star<Declaration> >();
+    auto l_cdecls = MakePatternPtr< Star<Declaration> >();
+    auto s_instance = MakePatternPtr< Static >();
+    auto ls_comp = MakePatternPtr< Compound >();
+    auto lr_comp = MakePatternPtr< Compound >();
+    auto l_module = MakePatternPtr< Module >();
+    auto ls_pcall = MakePatternPtr< Call >();
+    auto ls_arg = MakePatternPtr< MapOperand >();
+    auto l_overcons = MakePatternPtr< Delta<Instance> >();
+    auto l_overtype = MakePatternPtr< Delta<Type> >();
+    auto ls_cons = MakePatternPtr< Instance >();
+    auto lr_cons = MakePatternPtr< Instance >();
+    auto l_process = MakePatternPtr< Instance >();
+    auto l_pre = MakePatternPtr< Star<Statement> >();
+    auto l_post = MakePatternPtr< Star<Statement> >();
+    auto ls_id = MakePatternPtr< InstanceIdentifier >();
+    auto l_bases = MakePatternPtr< Star<Base> >();
+    auto l_ctype = MakePatternPtr<Constructor>();
+    auto l_ident = MakePatternPtr<InstanceIdentifier>();
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( lr_scprocess->GetToken() ); 
+    auto s_arg_id = MakePatternPtr< InstanceIdentifierByNameAgent >( "func" );
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Node> >( over, l_module, l_module );            
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -190,12 +200,12 @@ DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
 
 DetectSCNotifyImmediate::DetectSCNotifyImmediate()
 {
-    MakePatternPtr<Call> s_call;
-    MakePatternPtr<Lookup> s_lookup;
-    MakePatternPtr<Event> s_event;
-    MakePatternPtr<NotifyImmediate> r_notify;
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_notify->GetToken() );                
-    MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+    auto s_call = MakePatternPtr<Call>();
+    auto s_lookup = MakePatternPtr<Lookup>();
+    auto s_event = MakePatternPtr<Event>();
+    auto r_notify = MakePatternPtr<NotifyImmediate>();
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
+    auto eexpr = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance ); 
     //MakePatternPtr< Expression > eexpr; 
             
     s_call->callee = s_lookup;
@@ -212,15 +222,15 @@ DetectSCNotifyImmediate::DetectSCNotifyImmediate()
 
 DetectSCNotifyDelta::DetectSCNotifyDelta()
 {
-    MakePatternPtr<Call> s_call;
-    MakePatternPtr<Lookup> s_lookup;
-    MakePatternPtr<Event> s_event;
-    MakePatternPtr<NotifyDelta> r_notify;
-    MakePatternPtr<MapOperand> s_arg;
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_zero_token( "SC_ZERO_TIME" );                
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_arg_id( "p1" ); 
-    MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_notify->GetToken() );                
-    MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+    auto s_call = MakePatternPtr<Call>();
+    auto s_lookup = MakePatternPtr<Lookup>();
+    auto s_event = MakePatternPtr<Event>();
+    auto r_notify = MakePatternPtr<NotifyDelta>();
+    auto s_arg = MakePatternPtr<MapOperand>();
+    auto s_zero_token = MakePatternPtr< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
+    auto s_arg_id = MakePatternPtr< InstanceIdentifierByNameAgent >( "p1" ); 
+    auto s_token = MakePatternPtr< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
+    auto eexpr = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance ); 
     //MakePatternPtr< Expression > eexpr; 
             
     s_call->callee = s_lookup;
@@ -239,22 +249,27 @@ DetectSCNotifyDelta::DetectSCNotifyDelta()
 
 RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 {
-    MakePatternPtr< Stuff<Scope> > stuff;
-    MakePatternPtr< Delta<Scope> > over;
-    MakePatternPtr< Star<Declaration> > decls, l_decls;
-    MakePatternPtr< Star<Statement> > l_pre, l_post;
-    MakePatternPtr< Star<MapOperand> > ls_args;
-    MakePatternPtr< Compound > s_comp, ls_comp, lr_comp;
-    MakePatternPtr< Module > s_module, r_module;
-    MakePatternPtr< Call > ls_call;
-    MakePatternPtr< Lookup > ls_lookup;
-    MakePatternPtr< Instance > s_cons;
-    MakePatternPtr< InstanceIdentifier > s_id;
-    MakePatternPtr< Star<Automatic> > s_params;
-    MakePatternPtr<Constructor> s_ctype;
-    MakePatternPtr< Star<Base> > bases;        
-    MakePatternPtr< TypeIdentifier > module_typeid;        
-    MakePatternPtr< SlaveSearchReplace<Node> > r_slave( stuff, ls_comp, lr_comp );            
+    auto stuff = MakePatternPtr< Stuff<Scope> >();
+    auto over = MakePatternPtr< Delta<Scope> >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto l_decls = MakePatternPtr< Star<Declaration> >();
+    auto l_pre = MakePatternPtr< Star<Statement> >();
+    auto l_post = MakePatternPtr< Star<Statement> >();
+    auto ls_args = MakePatternPtr< Star<MapOperand> >();
+    auto s_comp = MakePatternPtr< Compound >();
+    auto ls_comp = MakePatternPtr< Compound >();
+    auto lr_comp = MakePatternPtr< Compound >();
+    auto s_module = MakePatternPtr< Module >();
+    auto r_module = MakePatternPtr< Module >();
+    auto ls_call = MakePatternPtr< Call >();
+    auto ls_lookup = MakePatternPtr< Lookup >();
+    auto s_cons = MakePatternPtr< Instance >();
+    auto s_id = MakePatternPtr< InstanceIdentifier >();
+    auto s_params = MakePatternPtr< Star<Automatic> >();
+    auto s_ctype = MakePatternPtr<Constructor>();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto module_typeid = MakePatternPtr< TypeIdentifier >();
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Node> >( stuff, ls_comp, lr_comp );            
                     
     // dispense with an empty constructor                 
     stuff->terminus = over;
@@ -288,13 +303,14 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 
 RemoveVoidInstances::RemoveVoidInstances()
 {
-    MakePatternPtr<Program> s_scope, r_scope;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr<Static> s_instance;
-    MakePatternPtr< Disjunction<Type> > s_any;
-    MakePatternPtr<CallableParams> s_callable;
-    MakePatternPtr< Star<Instance> > s_params;
-    MakePatternPtr<Instance> s_void_param;
+    auto s_scope = MakePatternPtr<Program>();
+    auto r_scope = MakePatternPtr<Program>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto s_instance = MakePatternPtr<Static>();
+    auto s_any = MakePatternPtr< Disjunction<Type> >();
+    auto s_callable = MakePatternPtr<CallableParams>();
+    auto s_params = MakePatternPtr< Star<Instance> >();
+    auto s_void_param = MakePatternPtr<Instance>();
     
     // Eliminate the declaration that came from isystemc.h
     s_scope->members = (decls, s_instance);

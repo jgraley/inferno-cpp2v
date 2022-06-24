@@ -249,7 +249,7 @@ inline bool operator<( const TreePtrInterface &x,
 // are OK:
 // existing_shared_ptr = MakeTreePtr<X>(10); // as per Boost: construction of temporary looks like function call
 // MakeTreePtr<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a TreePtr<X>
-// But of course with the auto keyword, the benefit is smaller than the cognitive burden of introducing a new type 
+// But of course with the auto keyword, the benefit is smaller than the cognitive burden of introducing a new type #5
 template<typename VALUE_TYPE>
 struct MakeTreePtr : TreePtr<VALUE_TYPE>
 {

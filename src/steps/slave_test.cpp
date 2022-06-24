@@ -13,16 +13,16 @@ using namespace Steps;
 // Just an early test for slaves, not a valid transformation
 SlaveTest::SlaveTest()
 {
-    MakePatternPtr<For> s_for;
-    MakePatternPtr<Statement> s_body;
+    auto s_for = MakePatternPtr<For>();
+    auto s_body = MakePatternPtr<Statement>();
 
     s_for->body = s_body;
 
-    MakePatternPtr<Compound> r_comp;
-    MakePatternPtr<Statement> r_body;
-    MakePatternPtr<Continue> ss_cont;
-    MakePatternPtr<Break> sr_break;
-    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( r_body, ss_cont, sr_break );
+    auto r_comp = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Statement>();
+    auto ss_cont = MakePatternPtr<Continue>();
+    auto sr_break = MakePatternPtr<Break>();
+    auto r_slave = MakePatternPtr< SlaveCompareReplace<Statement> >( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_slave );
 
     Configure( SEARCH_REPLACE, s_for, r_comp );
@@ -59,12 +59,12 @@ SlaveTest2::SlaveTest2()
     // Ambiguity with SOONER slave S/R: is sr keyed by r_slave
     // or master? Depends whether slave hits. See #370.
     
-    MakePatternPtr<Something> t;
-    MakePatternPtr<Something> ss;
-    MakePatternPtr<Something> sr;
-    MakePatternPtr<Whenever> r_whenever;
-    MakePatternPtr< SlaveCompareReplace<Node> > r_slave( t, ss, sr );
-    MakePatternPtr<Something> s;
+    auto t = MakePatternPtr<Something>();
+    auto ss = MakePatternPtr<Something>();
+    auto sr = MakePatternPtr<Something>();
+    auto r_whenever = MakePatternPtr<Whenever>();
+    auto r_slave = MakePatternPtr< SlaveCompareReplace<Node> >( t, ss, sr );
+    auto s = MakePatternPtr<Something>();
 
     r_whenever->members = (r_slave, sr);
     
@@ -77,15 +77,15 @@ SlaveTest3::SlaveTest3()
     // In LATER slave S/R, r_whatever could invalidate r_slave2's root position
     // if it does eg builder stuff on the unwind. See #370, #378
     
-    MakePatternPtr<Something> ss;
-    MakePatternPtr<Something> sr;
-    MakePatternPtr<Whatever> r_whatever;
-    MakePatternPtr< SlaveCompareReplace<Node> > r_slave1( r_whatever, ss, sr );
+    auto ss = MakePatternPtr<Something>();
+    auto sr = MakePatternPtr<Something>();
+    auto r_whatever = MakePatternPtr<Whatever>();
+    auto r_slave1 = MakePatternPtr< SlaveCompareReplace<Node> >( r_whatever, ss, sr );
 
-    MakePatternPtr<Something> s2s;
-    MakePatternPtr<Something> s2r;
-    MakePatternPtr<Something> r;
-    MakePatternPtr< SlaveCompareReplace<Node> > r_slave2( r, s2s, s2r );
+    auto s2s = MakePatternPtr<Something>();
+    auto s2r = MakePatternPtr<Something>();
+    auto r = MakePatternPtr<Something>();
+    auto r_slave2 = MakePatternPtr< SlaveCompareReplace<Node> >( r, s2s, s2r );
     r_whatever->child = r_slave2;
     
     Configure( COMPARE_REPLACE, r_slave1 );

@@ -32,10 +32,10 @@ void CombinePatterns::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &
     {
         // Classic compare and replace with separate replace pattern, we can use
         // an Delta node to overwrite the replace pattern at replace time.
-        MakePatternPtr< Delta<Node> > overlay; 
-        overlay->through = scp;
-        overlay->overlay = rp;
-        scp = rp = overlay; 
+        auto delta = MakePatternPtr< Delta<Node> >(); 
+        delta->through = scp;
+        delta->overlay = rp;
+        scp = rp = delta; 
     }
     ASSERT( scp==rp );
 }

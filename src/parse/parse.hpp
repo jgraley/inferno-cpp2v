@@ -453,7 +453,7 @@ private:
 					if (achunk.NumElts)
 						a->size = hold_expr.FromRaw(achunk.NumElts); // number of elements was specified
 					else
-						a->size = MakeTreePtr<Uninitialised> (); // number of elements was not specified eg int a[];
+						a->size = MakeTreePtr<Uninitialised>(); // number of elements was not specified eg int a[];
 					return a;
 				}
 
@@ -739,7 +739,7 @@ private:
 			if( LastInGroup )
 			{
 			    TRACE("Chaining declarations\n");
-			    MakeTreePtr<DeclarationChain> dc;
+			    auto dc = MakeTreePtr<DeclarationChain>();
 			    dc->first = hold_decl.FromRaw(LastInGroup);
 			    dc->second = d;
 			    d = dc;
@@ -756,8 +756,7 @@ private:
 				clang::Declarator &D)
 		{
 
-			TreePtr<Instance> p = CreateInstanceNode(S, D,
-					MakeTreePtr<Public> (), true);
+			TreePtr<Instance> p = CreateInstanceNode(S, D, MakeTreePtr<Public>(), true);
 			backing_params[p] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
 			return hold_decl.ToRaw(p);
 		}

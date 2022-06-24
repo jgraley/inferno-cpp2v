@@ -25,17 +25,21 @@ GotoAfterWait::GotoAfterWait()
     // the only case that needs excluding which is a compound like in case 1 above but without
     // notting the goto. Cases 2 and 3 work because the excluded compound does not match.
     // Overall, a good example of but-not
-    MakePatternPtr<Compound> sx_comp, r_comp;
-    MakePatternPtr< Star<Declaration> > sx_decls;
-    MakePatternPtr< Star<Statement> > sx_pre, sx_post;    
-    MakePatternPtr<Wait> wait;
-    MakePatternPtr< Negation<Statement> > notmatch;
-    MakePatternPtr< Conjunction<Statement> > all;
-    MakePatternPtr< AnyNode<Statement> > anynode;
-    MakePatternPtr< Delta<Statement> > over, all_over;
-    MakePatternPtr<Goto> sx_goto, r_goto;
-    MakePatternPtr<Label> r_label;
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("YIELD");
+    auto sx_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto sx_decls = MakePatternPtr< Star<Declaration> >();
+    auto sx_pre = MakePatternPtr< Star<Statement> >();
+    auto sx_post = MakePatternPtr< Star<Statement> >();
+    auto wait = MakePatternPtr<Wait>();
+    auto notmatch = MakePatternPtr< Negation<Statement> >();
+    auto all = MakePatternPtr< Conjunction<Statement> >();
+    auto anynode = MakePatternPtr< AnyNode<Statement> >();
+    auto over = MakePatternPtr< Delta<Statement> >();
+    auto all_over = MakePatternPtr< Delta<Statement> >();
+    auto sx_goto = MakePatternPtr<Goto>();
+    auto r_goto = MakePatternPtr<Goto>();
+    auto r_label = MakePatternPtr<Label>();
+    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("YIELD");
           
     all_over->through = all;
     all_over->overlay = anynode;
@@ -58,14 +62,17 @@ GotoAfterWait::GotoAfterWait()
 GotoAfterWait::GotoAfterWait()
 {
     // TODO will miss a yield at the very end
-    MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr<Wait> wait;
-    MakePatternPtr< Negation<Statement> > notmatch;
-    MakePatternPtr<Goto> sx_goto, r_goto;
-    MakePatternPtr<Label> r_label;
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("YIELD");
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto wait = MakePatternPtr<Wait>();
+    auto notmatch = MakePatternPtr< Negation<Statement> >();
+    auto sx_goto = MakePatternPtr<Goto>();
+    auto r_goto = MakePatternPtr<Goto>();
+    auto r_label = MakePatternPtr<Label>();
+    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("YIELD");
         
     s_comp->members = (decls);
     s_comp->statements = (pre, wait, notmatch, post);
@@ -82,17 +89,25 @@ GotoAfterWait::GotoAfterWait()
 
 NormaliseConditionalGotos::NormaliseConditionalGotos()
 {
-    MakePatternPtr< If > iif;      
-    MakePatternPtr< Expression > cond;      
-    MakePatternPtr< Compound > s_comp, r_comp, sx_comp;  
-    MakePatternPtr< Goto > then_goto, s_else_goto, r_goto, sx_goto;// TODO sx_goto could be any departure, like Return or Cease etc
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, sx_pre, post, sx_post;
-    MakePatternPtr< ConditionalOperator > mult;
-    MakePatternPtr< Label > label;    
-    MakePatternPtr< BuildLabelIdentifierAgent > label_id("PROCEED");
-    MakePatternPtr< Conjunction<Statement> > s_all;
-    MakePatternPtr< Negation<Statement> > sx_not;    
+    auto iif = MakePatternPtr< If >();
+    auto cond = MakePatternPtr< Expression >();
+    auto s_comp = MakePatternPtr< Compound >();
+    auto r_comp = MakePatternPtr< Compound >();
+    auto sx_comp = MakePatternPtr< Compound >();
+    auto then_goto = MakePatternPtr< Goto >();// TODO sx_goto could be any departure, like Return or Cease etc
+    auto s_else_goto = MakePatternPtr< Goto >();
+    auto r_goto = MakePatternPtr< Goto >();
+    auto sx_goto = MakePatternPtr< Goto >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto sx_pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto sx_post = MakePatternPtr< Star<Statement> >();
+    auto mult = MakePatternPtr< ConditionalOperator >();
+    auto label = MakePatternPtr< Label >();
+    auto label_id = MakePatternPtr< BuildLabelIdentifierAgent >("PROCEED");
+    auto s_all = MakePatternPtr< Conjunction<Statement> >();
+    auto sx_not = MakePatternPtr< Negation<Statement> >();
     
     s_all->conjuncts = (s_comp, sx_not);
     sx_not->negand = sx_comp;    
@@ -114,13 +129,17 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
 
 CompactGotos::CompactGotos()
 {
-    MakePatternPtr< If > s_if;      
-    MakePatternPtr< Expression > cond;      
-    MakePatternPtr< Compound > s_comp, r_comp;  
-    MakePatternPtr< Goto > s_then_goto, s_else_goto, r_goto;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr< ConditionalOperator > mult;
+    auto s_if = MakePatternPtr< If >();
+    auto cond = MakePatternPtr< Expression >();
+    auto s_comp = MakePatternPtr< Compound >();
+    auto r_comp = MakePatternPtr< Compound >();
+    auto s_then_goto = MakePatternPtr< Goto >();
+    auto s_else_goto = MakePatternPtr< Goto >();
+    auto r_goto = MakePatternPtr< Goto >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto mult = MakePatternPtr< ConditionalOperator >();
     
     s_then_goto->destination = MakePatternPtr<Expression>();    
     s_else_goto->destination = MakePatternPtr<Expression>();
@@ -141,17 +160,23 @@ CompactGotos::CompactGotos()
 
 AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
 {
-    MakePatternPtr< If > s_if;      
-    MakePatternPtr< Expression > cond;      
-    MakePatternPtr< Compound > s_comp, r_comp, sx_comp;  
-    MakePatternPtr< Goto > r_goto;
-    MakePatternPtr< Star<Declaration> > decls, sx_decls;
-    MakePatternPtr< Star<Statement> > pre, post, sx_pre, sx_post;
-    MakePatternPtr< ConditionalOperator > mult;
-    MakePatternPtr< Label > label;    
-    MakePatternPtr< LabelIdentifier > label_id;
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Negation<Compound> > s_not;
+    auto s_if = MakePatternPtr< If >();
+    auto cond = MakePatternPtr< Expression >();
+    auto s_comp = MakePatternPtr< Compound >();
+    auto r_comp = MakePatternPtr< Compound >();
+    auto sx_comp = MakePatternPtr< Compound >();
+    auto r_goto = MakePatternPtr< Goto >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto sx_decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto sx_pre = MakePatternPtr< Star<Statement> >();
+    auto sx_post = MakePatternPtr< Star<Statement> >();
+    auto mult = MakePatternPtr< ConditionalOperator >();
+    auto label = MakePatternPtr< Label >();
+    auto label_id = MakePatternPtr< LabelIdentifier >();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto s_not = MakePatternPtr< Negation<Compound> >();
         
     s_all->conjuncts = (s_comp, s_not);
     s_not->negand = sx_comp;
@@ -171,8 +196,8 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
 
 static TreePtr<Statement> MakeResetAssignmentPattern()
 {
-    MakePatternPtr<Assign> ass;
-    MakePatternPtr< TransformOf<InstanceIdentifier> > decl( &GetDeclaration::instance );
+    auto ass = MakePatternPtr<Assign>();
+    auto decl = MakePatternPtr< TransformOf<InstanceIdentifier> >( &GetDeclaration::instance );
     decl->pattern = MakePatternPtr<LocalVariable>();
     ass->operands = (decl, MakePatternPtr<Literal>());    
     return ass;
@@ -181,19 +206,23 @@ static TreePtr<Statement> MakeResetAssignmentPattern()
 
 EnsureBootstrap::EnsureBootstrap()
 {
-    MakePatternPtr<Instance> fn;
-    MakePatternPtr<Thread> thread;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Negation<Compound> > s_not;    
-    MakePatternPtr<Compound> s_body, r_body, sx_body;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, sx_pre, post;
-    MakePatternPtr<Goto> r_goto;
-    MakePatternPtr<Label> r_label;    
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("BOOTSTRAP");
-    MakePatternPtr< Negation<Statement> > stop;
-    MakePatternPtr<Goto> sx_goto;
+    auto fn = MakePatternPtr<Instance>();
+    auto thread = MakePatternPtr<Thread>();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto s_not = MakePatternPtr< Negation<Compound> >();
+    auto s_body = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto sx_body = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto sx_pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto r_goto = MakePatternPtr<Goto>();
+    auto r_label = MakePatternPtr<Label>();
+    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("BOOTSTRAP");
+    auto stop = MakePatternPtr< Negation<Statement> >();
+    auto sx_goto = MakePatternPtr<Goto>();
         
     fn->type = thread;
     fn->initialiser = over;
@@ -222,14 +251,20 @@ EnsureBootstrap::EnsureBootstrap()
 
 AddStateLabelVar::AddStateLabelVar()
 {
-    MakePatternPtr<Compound> s_comp, r_comp, lr_compound;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr<Goto> ls_goto, lr_goto, sx_goto;
-    MakePatternPtr<Assign> lr_assign;
-    MakePatternPtr<Automatic> state_var;
-    MakePatternPtr< Negation<Expression> > sx_not, lsx_not;
-    MakePatternPtr< BuildInstanceIdentifierAgent > state_var_id("state");
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto lr_compound = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto ls_goto = MakePatternPtr<Goto>();
+    auto lr_goto = MakePatternPtr<Goto>();
+    auto sx_goto = MakePatternPtr<Goto>();
+    auto lr_assign = MakePatternPtr<Assign>();
+    auto state_var = MakePatternPtr<Automatic>();
+    auto sx_not = MakePatternPtr< Negation<Expression> >();
+    auto lsx_not = MakePatternPtr< Negation<Expression> >();
+    auto state_var_id = MakePatternPtr< BuildInstanceIdentifierAgent >("state");
     
     ls_goto->destination = lsx_not;
     lsx_not->negand = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
@@ -238,7 +273,7 @@ AddStateLabelVar::AddStateLabelVar()
     lr_assign->operands = (state_var_id, lsx_not);
     lr_goto->destination = state_var_id;
             
-    MakePatternPtr< SlaveSearchReplace<Statement> > r_slave( r_comp, ls_goto, lr_compound );
+    auto r_slave = MakePatternPtr< SlaveSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
      
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
@@ -257,17 +292,22 @@ AddStateLabelVar::AddStateLabelVar()
 
 EnsureSuperLoop::EnsureSuperLoop()
 {   
-    MakePatternPtr<Instance> fn;
-    MakePatternPtr<Thread> thread;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Negation<Statement> > sx_not, s_limit;    
-    MakePatternPtr< Stuff<Compound> > sx_stuff;
-    MakePatternPtr< Goto > sx_goto, first_goto;
-    MakePatternPtr<Compound> s_body, r_body, r_loop_body;
-    MakePatternPtr< Star<Statement> > pre, post;    
-    MakePatternPtr< Star<Declaration> > decls;    
-    MakePatternPtr<Do> r_loop;
+    auto fn = MakePatternPtr<Instance>();
+    auto thread = MakePatternPtr<Thread>();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto sx_not = MakePatternPtr< Negation<Statement> >();
+    auto s_limit = MakePatternPtr< Negation<Statement> >();
+    auto sx_stuff = MakePatternPtr< Stuff<Compound> >();
+    auto sx_goto = MakePatternPtr< Goto >();
+    auto first_goto = MakePatternPtr< Goto >();
+    auto s_body = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto r_loop_body = MakePatternPtr<Compound>();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto r_loop = MakePatternPtr<Do>();
         
     fn->type = thread;
     fn->initialiser = over;
@@ -293,14 +333,17 @@ EnsureSuperLoop::EnsureSuperLoop()
 
 ShareGotos::ShareGotos()
 {   
-    MakePatternPtr<Do> loop;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr<Compound> s_body, r_body;
-    MakePatternPtr< Star<Declaration> > decls;    
-    MakePatternPtr< Star<Statement> > pre, post;    
-    MakePatternPtr< Goto > first_goto, r_goto;
-    MakePatternPtr<Label> r_label;    
-    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("ITERATE");
+    auto loop = MakePatternPtr<Do>();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto s_body = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto first_goto = MakePatternPtr< Goto >();
+    auto r_goto = MakePatternPtr< Goto >();
+    auto r_label = MakePatternPtr<Label>();
+    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("ITERATE");
                     
     loop->body = over;
     loop->condition = MakePatternPtr<SpecificInteger>(1);
@@ -320,14 +363,19 @@ ShareGotos::ShareGotos()
 
 SwitchCleanUp::SwitchCleanUp()
 {
-    MakePatternPtr<Compound> r_comp, s_body, r_body;
-    MakePatternPtr<Switch> s_switch, r_switch;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > main, tail;
-    MakePatternPtr<Label> label;
-    MakePatternPtr<Expression> cond;
-    MakePatternPtr< Negation<Statement> > sx_not_tail, sx_not_main;
-    MakePatternPtr< Disjunction<Statement> > sx_any_tail;
+    auto r_comp = MakePatternPtr<Compound>();
+    auto s_body = MakePatternPtr<Compound>();
+    auto r_body = MakePatternPtr<Compound>();
+    auto s_switch = MakePatternPtr<Switch>();
+    auto r_switch = MakePatternPtr<Switch>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto main = MakePatternPtr< Star<Statement> >();
+    auto tail = MakePatternPtr< Star<Statement> >();
+    auto label = MakePatternPtr<Label>();
+    auto cond = MakePatternPtr<Expression>();
+    auto sx_not_tail = MakePatternPtr< Negation<Statement> >();
+    auto sx_not_main = MakePatternPtr< Negation<Statement> >();
+    auto sx_any_tail = MakePatternPtr< Disjunction<Statement> >();
 
     s_switch->condition = cond;
     s_switch->body = s_body;
@@ -351,18 +399,20 @@ SwitchCleanUp::SwitchCleanUp()
 
 InferBreak::InferBreak()
 {
-    MakePatternPtr<Goto> ls_goto;
-    MakePatternPtr<Label> label;
-    MakePatternPtr<LabelIdentifier> label_id;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post;
-    MakePatternPtr<Breakable> breakable;
-    MakePatternPtr<Break> lr_break;
-    MakePatternPtr<Compound> s_comp, r_comp;
+    auto ls_goto = MakePatternPtr<Goto>();
+    auto label = MakePatternPtr<Label>();
+    auto label_id = MakePatternPtr<LabelIdentifier>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto breakable = MakePatternPtr<Breakable>();
+    auto lr_break = MakePatternPtr<Break>();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
 
     ls_goto->destination = label_id;
 
-    MakePatternPtr< SlaveSearchReplace<Breakable> > slave( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
+    auto slave = MakePatternPtr< SlaveSearchReplace<Breakable> >( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
 
     s_comp->members = decls;
     s_comp->statements = (pre, breakable, label, post);
@@ -378,12 +428,18 @@ InferBreak::InferBreak()
 FixFallthrough::FixFallthrough()
 {
     // don't actually need a switch statement here, just look in the body, pattern contains Case statements
-    MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, cb1, cb2, post;
-    MakePatternPtr<Case> case1, case2;
-    MakePatternPtr<Break> breakk;
-    MakePatternPtr< Negation<Statement> > s_not1, s_not2;
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto pre = MakePatternPtr< Star<Statement> >();
+    auto cb1 = MakePatternPtr< Star<Statement> >();
+    auto cb2 = MakePatternPtr< Star<Statement> >();
+    auto post = MakePatternPtr< Star<Statement> >();
+    auto case1 = MakePatternPtr<Case>();
+    auto case2 = MakePatternPtr<Case>();
+    auto breakk = MakePatternPtr<Break>();
+    auto s_not1 = MakePatternPtr< Negation<Statement> >();
+    auto s_not2 = MakePatternPtr< Negation<Statement> >();
     
     s_comp->members = (decls);
     s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
@@ -400,32 +456,54 @@ FixFallthrough::FixFallthrough()
 
 AddYieldFlag::AddYieldFlag()
 {
-    MakePatternPtr<Instance> fn;
-    MakePatternPtr<InstanceIdentifier> fn_id;
-    MakePatternPtr<Callable> sub;
-    MakePatternPtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, ms_comp, mr_comp, msx_comp;
-    MakePatternPtr< Star<Declaration> > enums, decls, func_decls, m_decls, msx_decls;
-    MakePatternPtr<Instance> var_decl;
-    MakePatternPtr<InstanceIdentifier> var_id;    
-    MakePatternPtr<TypeIdentifier> enum_id;
-    MakePatternPtr< Star<Statement> > func_pre, m_pre, msx_pre, m_post, msx_post, stmts;
-    MakePatternPtr< Star<If> > l_pre, l_post;
-    MakePatternPtr<Loop> loop;
-    MakePatternPtr<If> ls_if, lr_if, ms_if, mr_if;
-    MakePatternPtr<Wait> m_wait;
-    MakePatternPtr<Enum> enum_decl;
-    MakePatternPtr<Equal> l_equal;
-    MakePatternPtr<LogicalAnd> lr_and;
-    MakePatternPtr<LogicalNot> lr_not;
-    MakePatternPtr< Delta<Compound> > func_over, over;
-    MakePatternPtr<Temporary> r_flag_decl;
-    MakePatternPtr<Assign> r_flag_init, mr_assign, msx_assign;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_flag_id("yield_flag");
-    MakePatternPtr< Conjunction<Compound> > ms_all;
-    MakePatternPtr< Negation<Compound> > ms_not;
+    auto fn = MakePatternPtr<Instance>();
+    auto fn_id = MakePatternPtr<InstanceIdentifier>();
+    auto sub = MakePatternPtr<Callable>();
+    auto s_func_comp = MakePatternPtr<Compound>();
+    auto r_func_comp = MakePatternPtr<Compound>();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto ms_comp = MakePatternPtr<Compound>();
+    auto mr_comp = MakePatternPtr<Compound>();
+    auto msx_comp = MakePatternPtr<Compound>();
+    auto enums = MakePatternPtr< Star<Declaration> >();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto func_decls = MakePatternPtr< Star<Declaration> >();
+    auto m_decls = MakePatternPtr< Star<Declaration> >();
+    auto msx_decls = MakePatternPtr< Star<Declaration> >();
+    auto var_decl = MakePatternPtr<Instance>();
+    auto var_id = MakePatternPtr<InstanceIdentifier>();
+    auto enum_id = MakePatternPtr<TypeIdentifier>();
+    auto func_pre = MakePatternPtr< Star<Statement> >();
+    auto m_pre = MakePatternPtr< Star<Statement> >();
+    auto msx_pre = MakePatternPtr< Star<Statement> >();
+    auto m_post = MakePatternPtr< Star<Statement> >();
+    auto msx_post = MakePatternPtr< Star<Statement> >();
+    auto stmts = MakePatternPtr< Star<Statement> >();
+    auto l_pre = MakePatternPtr< Star<If> >();
+    auto l_post = MakePatternPtr< Star<If> >();
+    auto loop = MakePatternPtr<Loop>();
+    auto ls_if = MakePatternPtr<If>();
+    auto lr_if = MakePatternPtr<If>();
+    auto ms_if = MakePatternPtr<If>();
+    auto mr_if = MakePatternPtr<If>();
+    auto m_wait = MakePatternPtr<Wait>();
+    auto enum_decl = MakePatternPtr<Enum>();
+    auto l_equal = MakePatternPtr<Equal>();
+    auto lr_and = MakePatternPtr<LogicalAnd>();
+    auto lr_not = MakePatternPtr<LogicalNot>();
+    auto func_over = MakePatternPtr< Delta<Compound> >();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto r_flag_decl = MakePatternPtr<Temporary>();
+    auto r_flag_init = MakePatternPtr<Assign>();
+    auto mr_assign = MakePatternPtr<Assign>();
+    auto msx_assign = MakePatternPtr<Assign>();
+    auto r_flag_id = MakePatternPtr<BuildInstanceIdentifierAgent>("yield_flag");
+    auto ms_all = MakePatternPtr< Conjunction<Compound> >();
+    auto ms_not = MakePatternPtr< Negation<Compound> >();
     
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( r_func_comp, ms_all, mr_comp );
-    MakePatternPtr< SlaveSearchReplace<Compound> > slave( r_comp, ls_if, lr_if );  
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Compound> >( r_func_comp, ms_all, mr_comp );
+    auto slave = MakePatternPtr< SlaveSearchReplace<Compound> >( r_comp, ls_if, lr_if );  
       
     fn->type = sub;
     fn->initialiser = func_over;
@@ -473,22 +551,29 @@ AddYieldFlag::AddYieldFlag()
 
 AddInferredYield::AddInferredYield()
 {
-    MakePatternPtr<Instance> fn;
-    MakePatternPtr<InstanceIdentifier> fn_id;
-    MakePatternPtr<Thread> thread; // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
-    MakePatternPtr<Compound> func_comp, s_comp, sx_comp, r_comp;
-    MakePatternPtr< Star<Declaration> > func_decls;
-    MakePatternPtr< Star<Statement> > func_pre, stmts, sx_pre;    
-    MakePatternPtr< Delta<Statement> > over;    
-    MakePatternPtr<LocalVariable> flag_decl; 
-    MakePatternPtr<InstanceIdentifier> flag_id;   
-    MakePatternPtr<WaitDelta> r_yield;
-    MakePatternPtr<Loop> loop;
-    MakePatternPtr<If> r_if, sx_if;
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Negation<Compound> > s_notmatch;
-    MakePatternPtr< LogicalNot > r_not, sx_not;
-    MakePatternPtr< Assign > assign;
+    auto fn = MakePatternPtr<Instance>();
+    auto fn_id = MakePatternPtr<InstanceIdentifier>();
+    auto thread = MakePatternPtr<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
+    auto func_comp = MakePatternPtr<Compound>();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto sx_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto func_decls = MakePatternPtr< Star<Declaration> >();
+    auto func_pre = MakePatternPtr< Star<Statement> >();
+    auto stmts = MakePatternPtr< Star<Statement> >();
+    auto sx_pre = MakePatternPtr< Star<Statement> >();
+    auto over = MakePatternPtr< Delta<Statement> >();
+    auto flag_decl = MakePatternPtr<LocalVariable>();
+    auto flag_id = MakePatternPtr<InstanceIdentifier>();
+    auto r_yield = MakePatternPtr<WaitDelta>();
+    auto loop = MakePatternPtr<Loop>();
+    auto r_if = MakePatternPtr<If>();
+    auto sx_if = MakePatternPtr<If>();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto s_notmatch = MakePatternPtr< Negation<Compound> >();
+    auto r_not = MakePatternPtr< LogicalNot >();
+    auto sx_not = MakePatternPtr< LogicalNot >();
+    auto assign = MakePatternPtr< Assign >();
           
     fn->type = thread;
     fn->initialiser = func_comp;
@@ -523,17 +608,23 @@ AddInferredYield::AddInferredYield()
 
 MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 {
-    MakePatternPtr<Instance> fn;
-    MakePatternPtr<InstanceIdentifier> fn_id;
-    MakePatternPtr<Thread> thread; // Must be SC_THREAD since we introduce SC stuff
-    MakePatternPtr< Star<Declaration> > func_decls;
-    MakePatternPtr< Star<Statement> > inits, stmts;    
-    MakePatternPtr<Loop> loop;
-    MakePatternPtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, r_if_comp;
-    MakePatternPtr<If> r_if;
-    MakePatternPtr<Equal> r_equal;
-    MakePatternPtr< Delta<Compound> > func_over, over;    
-    MakePatternPtr<Statement> first_init;
+    auto fn = MakePatternPtr<Instance>();
+    auto fn_id = MakePatternPtr<InstanceIdentifier>();
+    auto thread = MakePatternPtr<Thread>(); // Must be SC_THREAD since we introduce SC stuff
+    auto func_decls = MakePatternPtr< Star<Declaration> >();
+    auto inits = MakePatternPtr< Star<Statement> >();
+    auto stmts = MakePatternPtr< Star<Statement> >();
+    auto loop = MakePatternPtr<Loop>();
+    auto s_func_comp = MakePatternPtr<Compound>();
+    auto r_func_comp = MakePatternPtr<Compound>();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto r_if_comp = MakePatternPtr<Compound>();
+    auto r_if = MakePatternPtr<If>();
+    auto r_equal = MakePatternPtr<Equal>();
+    auto func_over = MakePatternPtr< Delta<Compound> >();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto first_init = MakePatternPtr<Statement>();
                     
     fn->type = thread;
     fn->initialiser = func_over;
@@ -566,31 +657,63 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 // rotate loops to avoid inferred yields when an explicit yield already exists
 LoopRotation::LoopRotation()
 {
-    MakePatternPtr<Instance> fn, s_var_decl;
-    MakePatternPtr<InstanceIdentifier> fn_id, s_var_id, s_cur_enum_id, s_outer_enum_id;
-    MakePatternPtr<Thread> thread; // Must be SC_THREAD since we introduce SC stuff
-    MakePatternPtr< Star<Declaration> > func_decls, s_enums;
-    MakePatternPtr< Star<Declaration> > comp_loop_decls, comp_yield_decls, x_comp_decls;
-    MakePatternPtr<Static> s_cur_enum, s_outer_enum;
-    MakePatternPtr< Star<Statement> > inits, stmts, prepre, prepost, postpre, postpost;    
-    MakePatternPtr< Star<Statement> > comp_loop_pre, comp_loop_post, comp_yield_pre, comp_yield_post;    
-    MakePatternPtr<Loop> loop;
-    MakePatternPtr<Compound> func_comp, s_comp_loop, s_comp_yield, r_comp, r_if_comp, sx_comp;
-    MakePatternPtr<If> loop_top, loop_bottom, yield, outer_bottom, outer_top;
-    MakePatternPtr< Star<If> > loop_body, pre_yield, post_yield;
-    MakePatternPtr<Equal> r_equal;
-    MakePatternPtr< Delta<Compound> > func_over, over;    
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr<Enum> s_enum;
-    MakePatternPtr<TypeIdentifier> s_enum_id;
-    MakePatternPtr< Stuff<Expression> > loop_top_stuff, outer_top_stuff;
-    MakePatternPtr<Equal> loop_top_equal, outer_top_equal;
+    auto fn = MakePatternPtr<Instance>();
+    auto s_var_decl = MakePatternPtr<Instance>();
+    auto fn_id = MakePatternPtr<InstanceIdentifier>();
+    auto s_var_id = MakePatternPtr<InstanceIdentifier>();
+    auto s_cur_enum_id = MakePatternPtr<InstanceIdentifier>();
+    auto s_outer_enum_id = MakePatternPtr<InstanceIdentifier>();
+    auto thread = MakePatternPtr<Thread>(); // Must be SC_THREAD since we introduce SC stuff
+    auto func_decls = MakePatternPtr< Star<Declaration> >();
+    auto s_enums = MakePatternPtr< Star<Declaration> >();
+    auto comp_loop_decls = MakePatternPtr< Star<Declaration> >();
+    auto comp_yield_decls = MakePatternPtr< Star<Declaration> >();
+    auto x_comp_decls = MakePatternPtr< Star<Declaration> >();
+    auto s_cur_enum = MakePatternPtr<Static>();
+    auto s_outer_enum = MakePatternPtr<Static>();
+    auto inits = MakePatternPtr< Star<Statement> >();
+    auto stmts = MakePatternPtr< Star<Statement> >();
+    auto prepre = MakePatternPtr< Star<Statement> >();
+    auto prepost = MakePatternPtr< Star<Statement> >();
+    auto postpre = MakePatternPtr< Star<Statement> >();
+    auto postpost = MakePatternPtr< Star<Statement> >();
+    auto comp_loop_pre = MakePatternPtr< Star<Statement> >();
+    auto comp_loop_post = MakePatternPtr< Star<Statement> >();
+    auto comp_yield_pre = MakePatternPtr< Star<Statement> >();
+    auto comp_yield_post = MakePatternPtr< Star<Statement> >();
+    auto loop = MakePatternPtr<Loop>();
+    auto func_comp = MakePatternPtr<Compound>();
+    auto s_comp_loop = MakePatternPtr<Compound>();
+    auto s_comp_yield = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto r_if_comp = MakePatternPtr<Compound>();
+    auto sx_comp = MakePatternPtr<Compound>();
+    auto loop_top = MakePatternPtr<If>();
+    auto loop_bottom = MakePatternPtr<If>();
+    auto yield = MakePatternPtr<If>();
+    auto outer_bottom = MakePatternPtr<If>();
+    auto outer_top = MakePatternPtr<If>();
+    auto loop_body = MakePatternPtr< Star<If> >();
+    auto pre_yield = MakePatternPtr< Star<If> >();
+    auto post_yield = MakePatternPtr< Star<If> >();
+    auto r_equal = MakePatternPtr<Equal>();
+    auto func_over = MakePatternPtr< Delta<Compound> >();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto s_enum = MakePatternPtr<Enum>();
+    auto s_enum_id = MakePatternPtr<TypeIdentifier>();
+    auto loop_top_stuff = MakePatternPtr< Stuff<Expression> >();
+    auto outer_top_stuff = MakePatternPtr< Stuff<Expression> >();
+    auto loop_top_equal = MakePatternPtr<Equal>();
+    auto outer_top_equal = MakePatternPtr<Equal>();
     MakePatternPtr< Stuff<Statement> > loop_bottom_stuff_enum, outer_bottom_stuff_enum, 
                                     loop_bottom_stuff_noyield, yield_stuff, outer_bottom_stuff_noyield;
-    MakePatternPtr< Conjunction<Statement> > loop_bottom_matchall, outer_bottom_matchall;
-    MakePatternPtr< Negation<Statement> > loop_bottom_notmatch, outer_bottom_notmatch;
-    MakePatternPtr< Negation<Compound> > s_notmatch;
-    MakePatternPtr< Disjunction<If> > inner_state;
+    auto loop_bottom_matchall = MakePatternPtr< Conjunction<Statement> >();
+    auto outer_bottom_matchall = MakePatternPtr< Conjunction<Statement> >();
+    auto loop_bottom_notmatch = MakePatternPtr< Negation<Statement> >();
+    auto outer_bottom_notmatch = MakePatternPtr< Negation<Statement> >();
+    auto s_notmatch = MakePatternPtr< Negation<Compound> >();
+    auto inner_state = MakePatternPtr< Disjunction<If> >();
     
     fn->type = thread;
     fn->initialiser = func_comp;

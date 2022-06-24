@@ -13,23 +13,27 @@ using namespace Steps;
  
 AutosToModule::AutosToModule()
 {
-    MakePatternPtr<Scope> s_rec, r_rec;
-    MakePatternPtr< Star<Declaration> > decls, vdecls;
-    MakePatternPtr< Star<Statement> > vstmts;
-    MakePatternPtr<Automatic> s_var;
-    MakePatternPtr<Field> fn, r_var;
-    MakePatternPtr<Callable> ft;
-    MakePatternPtr< Stuff<Initialiser> > stuff;
-    MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr< Star<Base> > bases;
-    MakePatternPtr<Type> type;
-    MakePatternPtr<InstanceIdentifier> var_id;
-    MakePatternPtr<Initialiser> init;
-    MakePatternPtr< Conjunction<Compound> > s_all;
-    MakePatternPtr< Negation<Compound> > sx_not;
-    MakePatternPtr< Stuff<Compound> > sx_stuff;
-    MakePatternPtr<Call> sx_call;
+    auto s_rec = MakePatternPtr<Scope>();
+    auto r_rec = MakePatternPtr<Scope>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto vdecls = MakePatternPtr< Star<Declaration> >();
+    auto vstmts = MakePatternPtr< Star<Statement> >();
+    auto s_var = MakePatternPtr<Automatic>();
+    auto fn = MakePatternPtr<Field>();
+    auto r_var = MakePatternPtr<Field>();
+    auto ft = MakePatternPtr<Callable>();
+    auto stuff = MakePatternPtr< Stuff<Initialiser> >();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto type = MakePatternPtr<Type>();
+    auto var_id = MakePatternPtr<InstanceIdentifier>();
+    auto init = MakePatternPtr<Initialiser>();
+    auto s_all = MakePatternPtr< Conjunction<Compound> >();
+    auto sx_not = MakePatternPtr< Negation<Compound> >();
+    auto sx_stuff = MakePatternPtr< Stuff<Compound> >();
+    auto sx_call = MakePatternPtr<Call>();
         
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, r_var);
@@ -63,21 +67,24 @@ AutosToModule::AutosToModule()
 
 TempsAndStaticsToModule::TempsAndStaticsToModule()
 {
-    MakePatternPtr<Scope> s_rec, r_rec;
-    MakePatternPtr< Star<Declaration> > decls, vdecls;
-    MakePatternPtr< Star<Statement> > vstmts;
-    MakePatternPtr< Disjunction<Instance> > var;
-    MakePatternPtr<Temporary> tempvar;
-    MakePatternPtr<Static> staticvar;
-    MakePatternPtr<Field> fn;
-    MakePatternPtr<Thread> ft;
-    MakePatternPtr< Stuff<Initialiser> > stuff;
-    MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr< Star<Base> > bases;
-    MakePatternPtr<Type> type;
-    MakePatternPtr<InstanceIdentifier> var_id;
-    MakePatternPtr<Initialiser> init;
+    auto s_rec = MakePatternPtr<Scope>();
+    auto r_rec = MakePatternPtr<Scope>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto vdecls = MakePatternPtr< Star<Declaration> >();
+    auto vstmts = MakePatternPtr< Star<Statement> >();
+    auto var = MakePatternPtr< Disjunction<Instance> >();
+    auto tempvar = MakePatternPtr<Temporary>();
+    auto staticvar = MakePatternPtr<Static>();
+    auto fn = MakePatternPtr<Field>();
+    auto ft = MakePatternPtr<Thread>();
+    auto stuff = MakePatternPtr< Stuff<Initialiser> >();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto bases = MakePatternPtr< Star<Base> >();
+    auto type = MakePatternPtr<Type>();
+    auto var_id = MakePatternPtr<InstanceIdentifier>();
+    auto init = MakePatternPtr<Initialiser>();
 
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, var);
@@ -100,16 +107,19 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
 
 DeclsToModule::DeclsToModule()
 {
-    MakePatternPtr<Scope> s_rec, r_rec;
-    MakePatternPtr< Star<Declaration> > decls, vdecls;
-    MakePatternPtr< Star<Statement> > vstmts;
-    MakePatternPtr<Field> fn;
-    MakePatternPtr<UserType> ut;
-    MakePatternPtr<Thread> ft;
-    MakePatternPtr< Stuff<Initialiser> > stuff;
-    MakePatternPtr<Compound> s_comp, r_comp;
-    MakePatternPtr< Delta<Compound> > over;
-    MakePatternPtr< Star<Base> > bases;
+    auto s_rec = MakePatternPtr<Scope>();
+    auto r_rec = MakePatternPtr<Scope>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto vdecls = MakePatternPtr< Star<Declaration> >();
+    auto vstmts = MakePatternPtr< Star<Statement> >();
+    auto fn = MakePatternPtr<Field>();
+    auto ut = MakePatternPtr<UserType>();
+    auto ft = MakePatternPtr<Thread>();
+    auto stuff = MakePatternPtr< Stuff<Initialiser> >();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto over = MakePatternPtr< Delta<Compound> >();
+    auto bases = MakePatternPtr< Star<Base> >();
     
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, ut);
@@ -131,32 +141,34 @@ DeclsToModule::DeclsToModule()
 
 ThreadToMethod::ThreadToMethod()
 {
-    MakePatternPtr<Instance> s_thread, r_method;
-    MakePatternPtr<Thread> s_thread_type;
-    MakePatternPtr<Method> r_method_type;
-    MakePatternPtr<Compound> s_comp, loop_comp;
-    MakePatternPtr<InstanceIdentifier> id;
-    MakePatternPtr<Do> s_loop;
-    MakePatternPtr<True> s_loop_cond;
-    MakePatternPtr< Star<Declaration> > loop_decls;
-    MakePatternPtr< Star<Statement> > loop_stmts;
-    MakePatternPtr<WaitDynamic> ls_wait_dynamic;
-    MakePatternPtr<NextTriggerDynamic> lr_nt_dynamic;
-    MakePatternPtr<WaitStatic> ms_wait_static;
-    MakePatternPtr<NextTriggerStatic> mr_nt_static;
-    MakePatternPtr<WaitDelta> ns_wait_delta;
-    MakePatternPtr<NextTriggerDelta> nr_nt_delta;
-    MakePatternPtr<Continue> os_continue;
-    MakePatternPtr<Return> or_return;
-    MakePatternPtr<Uninitialised> or_retval;
-    MakePatternPtr<Expression> l_event;
+    auto s_thread = MakePatternPtr<Instance>();
+    auto r_method = MakePatternPtr<Instance>();
+    auto s_thread_type = MakePatternPtr<Thread>();
+    auto r_method_type = MakePatternPtr<Method>();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto loop_comp = MakePatternPtr<Compound>();
+    auto id = MakePatternPtr<InstanceIdentifier>();
+    auto s_loop = MakePatternPtr<Do>();
+    auto s_loop_cond = MakePatternPtr<True>();
+    auto loop_decls = MakePatternPtr< Star<Declaration> >();
+    auto loop_stmts = MakePatternPtr< Star<Statement> >();
+    auto ls_wait_dynamic = MakePatternPtr<WaitDynamic>();
+    auto lr_nt_dynamic = MakePatternPtr<NextTriggerDynamic>();
+    auto ms_wait_static = MakePatternPtr<WaitStatic>();
+    auto mr_nt_static = MakePatternPtr<NextTriggerStatic>();
+    auto ns_wait_delta = MakePatternPtr<WaitDelta>();
+    auto nr_nt_delta = MakePatternPtr<NextTriggerDelta>();
+    auto os_continue = MakePatternPtr<Continue>();
+    auto or_return = MakePatternPtr<Return>();
+    auto or_retval = MakePatternPtr<Uninitialised>();
+    auto l_event = MakePatternPtr<Expression>();
     
     or_return->return_value = or_retval;
     
-    MakePatternPtr< SlaveSearchReplace<Compound> > slaveo( loop_comp, os_continue, or_return);
-    MakePatternPtr< SlaveSearchReplace<Compound> > slaven( slaveo, ns_wait_delta, nr_nt_delta);
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( slaven, ms_wait_static, mr_nt_static);
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_wait_dynamic, lr_nt_dynamic);
+    auto slaveo = MakePatternPtr< SlaveSearchReplace<Compound> >( loop_comp, os_continue, or_return);
+    auto slaven = MakePatternPtr< SlaveSearchReplace<Compound> >( slaveo, ns_wait_delta, nr_nt_delta);
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Compound> >( slaven, ms_wait_static, mr_nt_static);
+    auto slavel = MakePatternPtr< SlaveSearchReplace<Compound> >( slavem, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
@@ -180,26 +192,37 @@ ThreadToMethod::ThreadToMethod()
 
 ExplicitiseReturns::ExplicitiseReturns()
 {
-    MakePatternPtr<Instance> inst;
-    MakePatternPtr<Callable> s_callable;
-    MakePatternPtr<Compound> s_comp, r_comp, m_comp;
-    MakePatternPtr< Delta<Compound> > over_comp;
-    MakePatternPtr< Conjunction<Instance> > s_all;
-    MakePatternPtr< Stuff<Instance> > s_stuff;
-    MakePatternPtr<Return> s_return, ls_return, m_return;
-    MakePatternPtr< Star<Declaration> > decls, m_decls;
-    MakePatternPtr< Star<Statement> > stmts, m_pre, m_mid, m_post;
-    MakePatternPtr<Temporary> r_flag;
-    MakePatternPtr<Boolean> r_boolean;
-    MakePatternPtr<BuildInstanceIdentifierAgent> r_flag_id("enabled");
-    MakePatternPtr<False> lr_false;
-    MakePatternPtr<True> r_true;
-    MakePatternPtr<Uninitialised> s_uninit, ls_uninit, m_uninit;
-    MakePatternPtr<Assign> lr_assign;
-    MakePatternPtr< Stuff<Statement> > m_stuff;
-    MakePatternPtr< Negation<Statement> > ms_affected;
-    MakePatternPtr<If> ms_if, mr_if;
-    MakePatternPtr< Delta<Statement> > m_over;
+    auto inst = MakePatternPtr<Instance>();
+    auto s_callable = MakePatternPtr<Callable>();
+    auto s_comp = MakePatternPtr<Compound>();
+    auto r_comp = MakePatternPtr<Compound>();
+    auto m_comp = MakePatternPtr<Compound>();
+    auto over_comp = MakePatternPtr< Delta<Compound> >();
+    auto s_all = MakePatternPtr< Conjunction<Instance> >();
+    auto s_stuff = MakePatternPtr< Stuff<Instance> >();
+    auto s_return = MakePatternPtr<Return>();
+    auto ls_return = MakePatternPtr<Return>();
+    auto m_return = MakePatternPtr<Return>();
+    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto m_decls = MakePatternPtr< Star<Declaration> >();
+    auto stmts = MakePatternPtr< Star<Statement> >();
+    auto m_pre = MakePatternPtr< Star<Statement> >();
+    auto m_mid = MakePatternPtr< Star<Statement> >();
+    auto m_post = MakePatternPtr< Star<Statement> >();
+    auto r_flag = MakePatternPtr<Temporary>();
+    auto r_boolean = MakePatternPtr<Boolean>();
+    auto r_flag_id = MakePatternPtr<BuildInstanceIdentifierAgent>("enabled");
+    auto lr_false = MakePatternPtr<False>();
+    auto r_true = MakePatternPtr<True>();
+    auto s_uninit = MakePatternPtr<Uninitialised>();
+    auto ls_uninit = MakePatternPtr<Uninitialised>();
+    auto m_uninit = MakePatternPtr<Uninitialised>();
+    auto lr_assign = MakePatternPtr<Assign>();
+    auto m_stuff = MakePatternPtr< Stuff<Statement> >();
+    auto ms_affected = MakePatternPtr< Negation<Statement> >();
+    auto ms_if = MakePatternPtr<If>();
+    auto mr_if = MakePatternPtr<If>();
+    auto m_over = MakePatternPtr< Delta<Statement> >();
     
     m_comp->members = (m_decls);
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);
@@ -213,12 +236,12 @@ ExplicitiseReturns::ExplicitiseReturns()
     mr_if->body = ms_affected;
     mr_if->else_body = MakePatternPtr<Nop>();
     
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( over_comp, m_comp );
+    auto slavem = MakePatternPtr< SlaveSearchReplace<Compound> >( over_comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
     
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_return, lr_assign);
+    auto slavel = MakePatternPtr< SlaveSearchReplace<Compound> >( slavem, ls_return, lr_assign);
     
     s_all->conjuncts = (inst, s_stuff);
     inst->type = s_callable; // TODO when functions are sorted out, set return type to void

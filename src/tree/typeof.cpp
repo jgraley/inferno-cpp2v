@@ -345,7 +345,7 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     else if( TreePtr<SpecificFloat> sf = DynamicTreePtrCast<SpecificFloat>(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	MakeTreePtr<Floating> ft;
+    	auto ft = MakeTreePtr<Floating>();
     	ft->semantics = TreePtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&sf->getSemantics()) );
         return ft;
     }
@@ -362,7 +362,7 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     		n = MakeTreePtr<Unsigned>();
     	TreePtr<SpecificInteger> sz( new SpecificInteger(TypeDb::char_bits) );
     	n->width = sz;
-    	MakeTreePtr<Pointer> p;
+    	auto p = MakeTreePtr<Pointer>();
     	p->destination = n;
         return p;
     }
