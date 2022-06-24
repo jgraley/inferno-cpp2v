@@ -240,30 +240,11 @@ inline bool operator<( const TreePtrInterface &x,
 }
 
 
-// Handy typing saver for creating objects and SharedPtrs to them.
-// MakeTreePtr<X> may be constructed in the same way as X, but will then
-// masquerade as a TreePtr<X> where the pointed-to X has been allocated
-// using new. Similar to Boost's make_shared<>() except that being an object
-// with a constructor, rather than a free function, it may be used in a
-// declaration as well as in a function-like way. So both of the following
-// are OK:
-// existing_shared_ptr = MakeTreePtr<X>(10); // as per Boost: construction of temporary looks like function call
-// MakeTreePtr<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a TreePtr<X>
-// But of course with the auto keyword, the benefit is smaller than the cognitive burden of introducing a new type #5
-template<typename VALUE_TYPE>
-struct MakeTreePtr : TreePtr<VALUE_TYPE>
+// Handy typing saver for creating objects and TreePtrs to them.
+template<typename VALUE_TYPE, typename ... CP>
+TreePtr<VALUE_TYPE> MakeTreePtr(const CP& ... cp) 
 {
-	MakeTreePtr() : TreePtr<VALUE_TYPE>( new VALUE_TYPE ) {}
-	template<typename ... CP>
-	MakeTreePtr(const CP& ... cp) : TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) ) {}
-};
-
-template<>
-struct MakeTreePtr<Node> : TreePtr<Node>
-{
-	MakeTreePtr() : TreePtr<Node>( new Node ) {}
-	template<typename ... CP>
-	MakeTreePtr(const CP& ... cp) : TreePtr<Node>( new Node(cp...) ) {}
-};
+    return TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
+}
 
 #endif /* SHARED_PTR_HPP */
