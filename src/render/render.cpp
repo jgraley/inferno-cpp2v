@@ -599,7 +599,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
             }
             catch( ::Mismatch &me )
             {
-                remainder.push_back(MakeTreePtr<SpecificString>(RenderMismatchException(me)));
+                remainder.push_back(MakeTreeNode<SpecificString>(RenderMismatchException(me)));
                 continue;
             }
 		}
@@ -701,7 +701,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		}
 
 		// Render the other stuff as a Compound so we always get {} in all cases
-		auto r = MakeTreePtr<Compound>();
+		auto r = MakeTreeNode<Compound>();
 		r->members = members;
 		r->statements = remainder;
 		s += "\n" + RenderStatement(r, "");
@@ -758,7 +758,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 	if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
 		this_access = f->access;
 	else
-		this_access = MakeTreePtr<Public>();
+		this_access = MakeTreeNode<Public>();
 
 	// Now decide whether we actually need to render an access spec (ie has it changed?)
 	if( current_access && // nullptr means dont ever render access specs
@@ -797,22 +797,22 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		if( DynamicTreePtrCast< Class >(r) || scr )
 		{
 			s += "class";
-			a = MakeTreePtr<Private>();
+			a = MakeTreeNode<Private>();
 		}
 		else if( DynamicTreePtrCast< Struct >(r) )
 		{
 			s += "struct";
-			a = MakeTreePtr<Public>();
+			a = MakeTreeNode<Public>();
 		}
 		else if( DynamicTreePtrCast< Union >(r) )
 		{
 			s += "union";
-			a = MakeTreePtr<Public>();
+			a = MakeTreeNode<Public>();
 		}
 		else if( DynamicTreePtrCast< Enum >(r) )
 		{
 			s += "enum";
-			a = MakeTreePtr<Public>();
+			a = MakeTreeNode<Public>();
 			sep2 = ",\n";
 			showtype = false;
 		}
@@ -1013,7 +1013,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     if( !DynamicTreePtrCast<Public>(*access) )
     {
         s += "public:\n";
-        *access = MakeTreePtr<Public>();// note that we left the access as public
+        *access = MakeTreeNode<Public>();// note that we left the access as public
     }
     s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
     int first = true;             

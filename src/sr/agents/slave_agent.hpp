@@ -101,7 +101,7 @@ public:
 template<class PRE_RESTRICTION>
 TreePtr<Node> Slave<PRE_RESTRICTION>::EvolveIntoSlaveCompareReplace()
 {
-    return MakePatternPtr<SlaveCompareReplace<PRE_RESTRICTION>>( through, search_pattern, replace_pattern );
+    return MakePatternNode<SlaveCompareReplace<PRE_RESTRICTION>>( through, search_pattern, replace_pattern );
 }
 
 };

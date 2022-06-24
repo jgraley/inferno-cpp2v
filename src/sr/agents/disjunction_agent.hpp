@@ -75,7 +75,7 @@ private:
     
     virtual TreePtr<Node> CloneToEmpty() const override
     {
-        return MakePatternPtr<Disjunction<PRE_RESTRICTION>>();
+        return MakePatternNode<Disjunction<PRE_RESTRICTION>>();
     }
     
 };

@@ -318,8 +318,8 @@ XLink::XLink( shared_ptr<const TreePtrInterface> px,
 }              
 
 
-const XLink XLink::MMAX_Link = XLink::CreateDistinct( MakeTreePtr<XLink::MMAX>() );
-const XLink XLink::OffEndXLink = XLink::CreateDistinct( MakeTreePtr<XLink::OffEnd>() );
+const XLink XLink::MMAX_Link = XLink::CreateDistinct( MakeTreeNode<XLink::MMAX>() );
+const XLink XLink::OffEndXLink = XLink::CreateDistinct( MakeTreeNode<XLink::OffEnd>() );
               
 //////////////////////////// LocatedLink ///////////////////////////////
 

@@ -1,1 +1,1 @@
-s/TreePtr<([A-Za-z]+)>\(new\s*([A-Za-z]+)\)/MakeTreePtr<\1>()/
+s/TreePtr<([A-Za-z]+)>\(new\s*([A-Za-z]+)\)/MakeTreeNode<\1>()/

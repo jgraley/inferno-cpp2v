@@ -418,10 +418,10 @@ At present, S&R patterns are built by short C++ routines in the constructors for
 
 Vida Nova uses a template type called `TreePtr<>` to point to child nodes. This is derived from `std::shared_ptr`, but supports some extra functionality needed by Vida Nova.
 
-### 13.1 `MakePatternPtr<>()`
+### 13.1 `MakePatternNode<>()`
 
-`MakeTreePtr<>()` is similar to `std::make_shared<>()` but creates `TreePtr<>` instances. However, when building patterns you will normally use `MakePatternPtr<>()` which:
- - Invokes `MakeTreePtr<>()` directly for special nodes.
+`MakeTreeNode<>()` is similar to `std::make_shared<>()` but creates `TreePtr<>` instances. However, when building patterns you will normally use `MakePatternNode<>()` which:
+ - Invokes `MakeTreeNode<>()` directly for special nodes.
  - Wraps ordinary tree nodes in a wrapper that allows them to be used in patterns.
 
 ### 13.2 Container initialisation
@@ -445,7 +445,7 @@ Remember that a singular `TreePtr<>` in a search pattern that is set to NULL is 
 It does not make sense for a singular `TreePtr<>` to be "empty" - this is not supported in Vida Nova, and singular relationships are always 1:1 in program trees. It does make sense to wildcard a `Collection<>` or `Sequence<>` - the way to do this is to insert a single `Star<>` of the contained type. It is unfortunately impossible to write
 
 ```
-MakePatternPtr< Collection<X> > my_collection;
+MakePatternNode< Collection<X> > my_collection;
 my_collection = ();
 ```
 

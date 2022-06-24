@@ -33,40 +33,40 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
      // discard" kind of statement, and we could act on it accordingly (in the case 
      // of a SE ending in another nested SE). So we have to ensure we do outermost 
      // first.
-    auto root_stuff = MakePatternPtr< Stuff<Node> >();
-    auto root_overlay = MakePatternPtr< Delta<Node> >();
-    auto root_not = MakePatternPtr< Negation<Node> >();
-    auto root_ce = MakePatternPtr< StatementExpression >();
+    auto root_stuff = MakePatternNode< Stuff<Node> >();
+    auto root_overlay = MakePatternNode< Delta<Node> >();
+    auto root_not = MakePatternNode< Negation<Node> >();
+    auto root_ce = MakePatternNode< StatementExpression >();
           
-    auto s_all = MakePatternPtr< Conjunction<Statement> >();
-    auto sx_pointeris = MakePatternPtr< PointerIs<Statement> >();
-    auto sx_not = MakePatternPtr< Negation<Statement> >();
-    auto sx_expr = MakePatternPtr<Expression>();
+    auto s_all = MakePatternNode< Conjunction<Statement> >();
+    auto sx_pointeris = MakePatternNode< PointerIs<Statement> >();
+    auto sx_not = MakePatternNode< Negation<Statement> >();
+    auto sx_expr = MakePatternNode<Expression>();
     
-    auto stuff = MakePatternPtr< Stuff<Statement> >();
-    auto sr_not = MakePatternPtr< Negation<Statement> >();
-    auto sr_comp = MakePatternPtr<SequentialScope>();
-    auto sr_cdecls = MakePatternPtr< Star<Declaration> >();
-    auto sr_cstmts = MakePatternPtr< Star<Statement> >();
+    auto stuff = MakePatternNode< Stuff<Statement> >();
+    auto sr_not = MakePatternNode< Negation<Statement> >();
+    auto sr_comp = MakePatternNode<SequentialScope>();
+    auto sr_cdecls = MakePatternNode< Star<Declaration> >();
+    auto sr_cstmts = MakePatternNode< Star<Statement> >();
     
-    auto s_ce = MakePatternPtr<StatementExpression>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_pre = MakePatternPtr< Star<Statement> >();
-    auto s_post = MakePatternPtr< Star<Statement> >();
-    auto body = MakePatternPtr< Star<Statement> >();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto r_temp = MakePatternPtr<Temporary>();
-    auto last = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
-    auto r_temp_id = MakePatternPtr<BuildInstanceIdentifierAgent>("result");
-    auto r_assign = MakePatternPtr<Assign>();
-    auto overlay = MakePatternPtr< Delta<Expression> >();
-    auto r_type = MakePatternPtr<Type>();
+    auto s_ce = MakePatternNode<StatementExpression>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_pre = MakePatternNode< Star<Statement> >();
+    auto s_post = MakePatternNode< Star<Statement> >();
+    auto body = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto r_temp = MakePatternNode<Temporary>();
+    auto last = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("result");
+    auto r_assign = MakePatternNode<Assign>();
+    auto overlay = MakePatternNode< Delta<Expression> >();
+    auto r_type = MakePatternNode<Type>();
 
     root_stuff->terminus = root_overlay;
     root_stuff->recurse_restriction = root_not;
     root_not->negand = root_ce;
-    root_ce->members = ( MakePatternPtr< Star<Declaration> >() );
-    root_ce->statements = ( MakePatternPtr< Star<Statement> >() );
+    root_ce->members = ( MakePatternNode< Star<Declaration> >() );
+    root_ce->statements = ( MakePatternNode< Star<Statement> >() );
     root_overlay->through = s_all;
     root_overlay->overlay = r_comp;
     
@@ -86,7 +86,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     r_comp->statements = ( body, r_assign, stuff );
     r_comp->members = ( decls, r_temp );
     r_temp->identifier = r_temp_id;
-    r_temp->initialiser = MakePatternPtr<Uninitialised>();
+    r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->type = r_type;
     r_assign->operands = (r_temp_id, last);
     last->pattern = r_type;
@@ -102,14 +102,14 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
      // {x;{a;b;c}y} -> {x;a;b;c;y}
      // Find a compound block as a statement in another compound block. 
      // Merge the decls and insert the statements in the correct sequence..
-    auto s_inner = MakePatternPtr<Compound>();
-    auto s_outer = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_pre = MakePatternPtr< Star<Statement> >();
-    auto s_post = MakePatternPtr< Star<Statement> >();
-    auto s_body = MakePatternPtr< Star<Statement> >();
-    auto s_inner_decls = MakePatternPtr< Star<Declaration> >();
-    auto s_outer_decls = MakePatternPtr< Star<Declaration> >();
+    auto s_inner = MakePatternNode<Compound>();
+    auto s_outer = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_pre = MakePatternNode< Star<Statement> >();
+    auto s_post = MakePatternNode< Star<Statement> >();
+    auto s_body = MakePatternNode< Star<Statement> >();
+    auto s_inner_decls = MakePatternNode< Star<Declaration> >();
+    auto s_outer_decls = MakePatternNode< Star<Declaration> >();
 
     s_inner->statements = ( s_body );
     s_inner->members = ( s_inner_decls );
@@ -130,13 +130,13 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
-    auto all = MakePatternPtr< Conjunction<Statement> >();
-    auto sx_not = MakePatternPtr< Negation<Statement> >();
-    auto sx_instance = MakePatternPtr<Instance>();
-    auto node = MakePatternPtr< AnyNode<Statement> >();
-    auto over = MakePatternPtr< Delta<Statement> >();
-    auto s_comp = MakePatternPtr<Compound>();
-    auto body = MakePatternPtr< Statement >();
+    auto all = MakePatternNode< Conjunction<Statement> >();
+    auto sx_not = MakePatternNode< Negation<Statement> >();
+    auto sx_instance = MakePatternNode<Instance>();
+    auto node = MakePatternNode< AnyNode<Statement> >();
+    auto over = MakePatternNode< Delta<Statement> >();
+    auto s_comp = MakePatternNode<Compound>();
+    auto body = MakePatternNode< Statement >();
 
     all->conjuncts = (node, sx_not);
     node->terminus = over;
@@ -155,12 +155,12 @@ CleanupNop::CleanupNop()
 {
     // Find compound block with Nop in it, replace has the Nop removed.
     // Note: Nop is a no-effect statement, sort-of like ; on its own.
-    auto s_comp = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_nop = MakePatternPtr<Nop>();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
+    auto s_comp = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_nop = MakePatternNode<Nop>();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
 
     s_comp->members = decls;
     s_comp->statements = (pre, s_nop, post);
@@ -188,28 +188,28 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternPtr<Instance>();
-    auto r_instance = MakePatternPtr<Instance>();
-    auto stuff = MakePatternPtr< Stuff<Compound> >();
-    auto overlay = MakePatternPtr< Delta<Statement> >();
-    auto s_comp = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_label1 = MakePatternPtr<Label>(); // keep l1 and elide l2
-    auto s_label2 = MakePatternPtr<Label>();
-    auto r_label1 = MakePatternPtr<Label>();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
-    auto s_labelid1 = MakePatternPtr<LabelIdentifier>();
-    auto s_labelid2 = MakePatternPtr<LabelIdentifier>();
-    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("%s_%s", BYPASS_WHEN_IDENTICAL);
-    auto l_s_orrule = MakePatternPtr< Disjunction<LabelIdentifier> >();
-    auto identifier = MakePatternPtr<InstanceIdentifier>();
-    auto type = MakePatternPtr<Callable>();
+    auto s_instance = MakePatternNode<Instance>();
+    auto r_instance = MakePatternNode<Instance>();
+    auto stuff = MakePatternNode< Stuff<Compound> >();
+    auto overlay = MakePatternNode< Delta<Statement> >();
+    auto s_comp = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_label1 = MakePatternNode<Label>(); // keep l1 and elide l2
+    auto s_label2 = MakePatternNode<Label>();
+    auto r_label1 = MakePatternNode<Label>();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
+    auto s_labelid1 = MakePatternNode<LabelIdentifier>();
+    auto s_labelid2 = MakePatternNode<LabelIdentifier>();
+    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("%s_%s", BYPASS_WHEN_IDENTICAL);
+    auto l_s_orrule = MakePatternNode< Disjunction<LabelIdentifier> >();
+    auto identifier = MakePatternNode<InstanceIdentifier>();
+    auto type = MakePatternNode<Callable>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
-    auto r_slave = MakePatternPtr< SlaveSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
+    auto r_slave = MakePatternNode< SlaveSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -249,28 +249,28 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternPtr<Instance>();
-    auto r_instance = MakePatternPtr<Instance>();
-    auto stuff = MakePatternPtr< Stuff<Compound> >();
-    auto overlay = MakePatternPtr< Delta<Statement> >();
-    auto s_comp = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_label = MakePatternPtr<Label>(); // keep l1 and elide l2
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
-    auto s_labelid1 = MakePatternPtr<LabelIdentifier>();
-    auto s_labelid2 = MakePatternPtr<LabelIdentifier>();
-    auto r_labelid = MakePatternPtr<BuildLabelIdentifierAgent>("%s_%s", BYPASS_WHEN_IDENTICAL);
-    auto l_s_orrule = MakePatternPtr< Disjunction<LabelIdentifier> >();
-    auto identifier = MakePatternPtr<InstanceIdentifier>();
-    auto type = MakePatternPtr<Callable>();
-    auto s_goto = MakePatternPtr<Goto>();
-    auto r_goto = MakePatternPtr<Goto>();
+    auto s_instance = MakePatternNode<Instance>();
+    auto r_instance = MakePatternNode<Instance>();
+    auto stuff = MakePatternNode< Stuff<Compound> >();
+    auto overlay = MakePatternNode< Delta<Statement> >();
+    auto s_comp = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_label = MakePatternNode<Label>(); // keep l1 and elide l2
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
+    auto s_labelid1 = MakePatternNode<LabelIdentifier>();
+    auto s_labelid2 = MakePatternNode<LabelIdentifier>();
+    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("%s_%s", BYPASS_WHEN_IDENTICAL);
+    auto l_s_orrule = MakePatternNode< Disjunction<LabelIdentifier> >();
+    auto identifier = MakePatternNode<InstanceIdentifier>();
+    auto type = MakePatternNode<Callable>();
+    auto s_goto = MakePatternNode<Goto>();
+    auto r_goto = MakePatternNode<Goto>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
-    auto r_slave = MakePatternPtr< SlaveSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
+    auto r_slave = MakePatternNode< SlaveSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -299,15 +299,15 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
     // Find a compound containing a Goto and a Label where the 
     // goto goes to the label. Remove the Goto (but not the Label
     // since there may be other Gotos to it).
-    auto s_comp = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_goto = MakePatternPtr<Goto>();
-    auto s_label = MakePatternPtr<Label>();
-    auto r_label = MakePatternPtr<Label>();
-    auto labelid = MakePatternPtr<LabelIdentifier>();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
+    auto s_comp = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_goto = MakePatternNode<Goto>();
+    auto s_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<Label>();
+    auto labelid = MakePatternNode<LabelIdentifier>();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
 
     s_comp->members = decls;
     s_comp->statements = (pre, s_goto, s_label, post);
@@ -332,25 +332,25 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     // using a recurse restriction that prevents recusing through
     // the Label node, thus excluding the declaration which we want
     // to ignore.
-    auto s_instance = MakePatternPtr<Instance>();
-    auto r_instance = MakePatternPtr<Instance>();
-    auto stuff = MakePatternPtr< Stuff<Compound> >();
-    auto sx_stuff = MakePatternPtr< Stuff<Compound> >();
-    auto overlay = MakePatternPtr< Delta<Statement> >();
-    auto s_comp = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto s_label = MakePatternPtr<Label>(); // keep l1 and elide l2
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
-    auto labelid = MakePatternPtr<LabelIdentifier>();
-    auto sx_goto = MakePatternPtr<Goto>();
-    auto s_andrule = MakePatternPtr< Conjunction<Compound> >();
-    auto sx_notrule = MakePatternPtr< Negation<Compound> >();
-    auto sxx_notrule = MakePatternPtr< Negation<Node> >();
-    auto sxx_label = MakePatternPtr< Label >();
-    auto identifier = MakePatternPtr<InstanceIdentifier>();
-    auto type = MakePatternPtr<Callable>();
+    auto s_instance = MakePatternNode<Instance>();
+    auto r_instance = MakePatternNode<Instance>();
+    auto stuff = MakePatternNode< Stuff<Compound> >();
+    auto sx_stuff = MakePatternNode< Stuff<Compound> >();
+    auto overlay = MakePatternNode< Delta<Statement> >();
+    auto s_comp = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto s_label = MakePatternNode<Label>(); // keep l1 and elide l2
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
+    auto labelid = MakePatternNode<LabelIdentifier>();
+    auto sx_goto = MakePatternNode<Goto>();
+    auto s_andrule = MakePatternNode< Conjunction<Compound> >();
+    auto sx_notrule = MakePatternNode< Negation<Compound> >();
+    auto sxx_notrule = MakePatternNode< Negation<Node> >();
+    auto sxx_label = MakePatternNode< Label >();
+    auto identifier = MakePatternNode<InstanceIdentifier>();
+    auto type = MakePatternNode<Callable>();
 
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;
@@ -380,22 +380,22 @@ CleanupUnusedLabels::CleanupUnusedLabels()
 
 CleanUpDeadCode::CleanUpDeadCode()
 {
-    auto s_comp = MakePatternPtr<Compound>();
-    auto r_comp = MakePatternPtr<Compound>();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
-    auto s_dead_not = MakePatternPtr< Negation<Statement> >();
-    auto s_dead_any = MakePatternPtr< Disjunction<Statement> >();
-    auto s_exit_any = MakePatternPtr< Disjunction<Statement> >();
-    auto casee = MakePatternPtr<Case>();
-    auto breakk = MakePatternPtr<Break>();
+    auto s_comp = MakePatternNode<Compound>();
+    auto r_comp = MakePatternNode<Compound>();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
+    auto s_dead_not = MakePatternNode< Negation<Statement> >();
+    auto s_dead_any = MakePatternNode< Disjunction<Statement> >();
+    auto s_exit_any = MakePatternNode< Disjunction<Statement> >();
+    auto casee = MakePatternNode<Case>();
+    auto breakk = MakePatternNode<Break>();
      
     s_comp->members = decls;
     s_comp->statements = ( pre, s_exit_any, s_dead_not, post );
-    s_exit_any->disjuncts = (MakePatternPtr<Break>(), MakePatternPtr<Continue>(), MakePatternPtr<Return>(), MakePatternPtr<Goto>());
+    s_exit_any->disjuncts = (MakePatternNode<Break>(), MakePatternNode<Continue>(), MakePatternNode<Return>(), MakePatternNode<Goto>());
     s_dead_not->negand = s_dead_any;
-    s_dead_any->disjuncts = (MakePatternPtr<Case>(), MakePatternPtr<Default>(), MakePatternPtr<Label>());
+    s_dead_any->disjuncts = (MakePatternNode<Case>(), MakePatternNode<Default>(), MakePatternNode<Label>());
     r_comp->members = decls;
     r_comp->statements = ( pre, s_exit_any, post );
     
@@ -405,14 +405,14 @@ CleanUpDeadCode::CleanUpDeadCode()
 
 ReduceVoidStatementExpression::ReduceVoidStatementExpression()
 {
-    auto s_ce = MakePatternPtr<StatementExpression>();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto stmts = MakePatternPtr< Star<Statement> >();
-    auto last = MakePatternPtr< Negation<Statement> >();
-    auto sx_expr = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
-    auto sx_type_not = MakePatternPtr< Negation<Type> >();
-    auto sx_void = MakePatternPtr<Void>();
-    auto r_comp = MakePatternPtr<Compound>();
+    auto s_ce = MakePatternNode<StatementExpression>();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto stmts = MakePatternNode< Star<Statement> >();
+    auto last = MakePatternNode< Negation<Statement> >();
+    auto sx_expr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto sx_type_not = MakePatternNode< Negation<Type> >();
+    auto sx_void = MakePatternNode<Void>();
+    auto r_comp = MakePatternNode<Compound>();
     
     s_ce->members = (decls);
     s_ce->statements = (stmts, last);
@@ -428,24 +428,24 @@ ReduceVoidStatementExpression::ReduceVoidStatementExpression()
 
 CleanupUnusedVariables::CleanupUnusedVariables()
 {
-    auto s_all = MakePatternPtr< Conjunction<Scope> >();
-    auto s_scope = MakePatternPtr<Scope>();
-    auto r_scope = MakePatternPtr<Scope>();
-    auto over_scope = MakePatternPtr< Delta<Scope> >();
-    auto decls = MakePatternPtr< Star<Declaration> >();
-    auto inst = MakePatternPtr<Instance>();
-    auto nested_array = MakePatternPtr<NestedArrayAgent>();
-    auto sx_not = MakePatternPtr< Negation<Type> >();
-    auto sx_any = MakePatternPtr< Disjunction<Type> >();
-    auto getdecl = MakePatternPtr< TransformOf<TypeIdentifier> >( &GetDeclaration::instance ); // TODO should be modulo typedefs
-    auto id = MakePatternPtr<InstanceIdentifier>();
-    auto stuff1 = MakePatternPtr< Stuff<Scope> >();
-    auto s_stuff2 = MakePatternPtr< Stuff<Scope> >();
-    auto s_antip = MakePatternPtr< Conjunction<Node> >();
-    auto s_anynode = MakePatternPtr< AnyNode<Node> >();
-    auto s_nm = MakePatternPtr< Negation<Node> >();
-    auto sx_ir = MakePatternPtr<InheritanceRecord>();
-    auto s_nscope = MakePatternPtr< Negation<Scope> >();
+    auto s_all = MakePatternNode< Conjunction<Scope> >();
+    auto s_scope = MakePatternNode<Scope>();
+    auto r_scope = MakePatternNode<Scope>();
+    auto over_scope = MakePatternNode< Delta<Scope> >();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto inst = MakePatternNode<Instance>();
+    auto nested_array = MakePatternNode<NestedArrayAgent>();
+    auto sx_not = MakePatternNode< Negation<Type> >();
+    auto sx_any = MakePatternNode< Disjunction<Type> >();
+    auto getdecl = MakePatternNode< TransformOf<TypeIdentifier> >( &GetDeclaration::instance ); // TODO should be modulo typedefs
+    auto id = MakePatternNode<InstanceIdentifier>();
+    auto stuff1 = MakePatternNode< Stuff<Scope> >();
+    auto s_stuff2 = MakePatternNode< Stuff<Scope> >();
+    auto s_antip = MakePatternNode< Conjunction<Node> >();
+    auto s_anynode = MakePatternNode< AnyNode<Node> >();
+    auto s_nm = MakePatternNode< Negation<Node> >();
+    auto sx_ir = MakePatternNode<InheritanceRecord>();
+    auto s_nscope = MakePatternNode< Negation<Scope> >();
     
     s_all->conjuncts = (stuff1, s_nscope);
     stuff1->terminus = over_scope;
@@ -457,11 +457,11 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     inst->identifier = id;
     nested_array->terminus = sx_not;
     sx_not->negand = sx_any;
-    sx_any->disjuncts = ( MakePatternPtr<Callable>(),
+    sx_any->disjuncts = ( MakePatternNode<Callable>(),
                          getdecl );
     getdecl->pattern = sx_ir;
-    sx_ir->members = MakePatternPtr< Star<Declaration> >();
-    sx_ir->bases = MakePatternPtr< Star<Base> >();
+    sx_ir->members = MakePatternNode< Star<Declaration> >();
+    sx_ir->bases = MakePatternNode< Star<Base> >();
     s_nscope->negand = s_stuff2;
     s_stuff2->terminus = s_antip;
     s_antip->conjuncts = (s_anynode, s_nm);
@@ -474,16 +474,16 @@ CleanupUnusedVariables::CleanupUnusedVariables()
 
 CleanupNestedIf::CleanupNestedIf()
 {
-    auto s_outer_if = MakePatternPtr<If>();
-    auto s_inner_if = MakePatternPtr<If>();
-    auto r_if = MakePatternPtr<If>();
-    auto body = MakePatternPtr<Statement>();
-    auto s_inner_nop = MakePatternPtr<Nop>();
-    auto s_outer_nop = MakePatternPtr<Nop>();
-    auto r_nop = MakePatternPtr<Nop>();
-    auto inner_cond = MakePatternPtr<Expression>();
-    auto outer_cond = MakePatternPtr<Expression>();
-    auto r_and = MakePatternPtr<LogicalAnd>();
+    auto s_outer_if = MakePatternNode<If>();
+    auto s_inner_if = MakePatternNode<If>();
+    auto r_if = MakePatternNode<If>();
+    auto body = MakePatternNode<Statement>();
+    auto s_inner_nop = MakePatternNode<Nop>();
+    auto s_outer_nop = MakePatternNode<Nop>();
+    auto r_nop = MakePatternNode<Nop>();
+    auto inner_cond = MakePatternNode<Expression>();
+    auto outer_cond = MakePatternNode<Expression>();
+    auto r_and = MakePatternNode<LogicalAnd>();
     
     s_outer_if->condition = outer_cond;
     s_outer_if->body = s_inner_if;

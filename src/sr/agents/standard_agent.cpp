@@ -449,7 +449,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             
             // Star matched [xit_star_begin, xit_star_end) i.e. xit-xit_begin_star elements
             XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-            auto xss = MakeTreePtr<SubSequenceRange>( keyer_xlink.GetChildX(), xit_star_begin, xit_star_end );
+            auto xss = MakeTreeNode<SubSequenceRange>( keyer_xlink.GetChildX(), xit_star_begin, xit_star_end );
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern_seq restriction
@@ -476,7 +476,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
         XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-        auto x_subcollection = MakeTreePtr<SubCollectionRange>( keyer_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() );
+        auto x_subcollection = MakeTreeNode<SubCollectionRange>( keyer_xlink.GetChildX(), p_x_col->begin(), p_x_col->end() );
         x_subcollection->SetExclusions( excluded_x );                                                             
         query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
     }    

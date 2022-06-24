@@ -13,24 +13,24 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 	// Match a compound with an ini9tialised decl in the statements. Replace
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
-    auto sc = MakePatternPtr<Compound>();
-    auto si = MakePatternPtr<LocalVariable>();
-    auto over = MakePatternPtr< Delta<LocalVariable> >();
-    si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
-    si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
-    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto sc = MakePatternNode<Compound>();
+    auto si = MakePatternNode<LocalVariable>();
+    auto over = MakePatternNode< Delta<LocalVariable> >();
+    si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
+    si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
+    auto decls = MakePatternNode< Star<Declaration> >();
     sc->members = { decls };
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
     sc->statements = ( pre, over, post );
 
-    auto rc = MakePatternPtr<Compound>();
-    auto ri = MakePatternPtr<LocalVariable>();
+    auto rc = MakePatternNode<Compound>();
+    auto ri = MakePatternNode<LocalVariable>();
     over->through = si;
     over->overlay = ri;
-    ri->initialiser = MakePatternPtr<Uninitialised>();
+    ri->initialiser = MakePatternNode<Uninitialised>();
     rc->members = ( over, decls );
-    auto ra = MakePatternPtr<Assign>();
+    auto ra = MakePatternNode<Assign>();
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( pre, ra, post );
 
@@ -41,15 +41,15 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 MoveInstanceDeclarations::MoveInstanceDeclarations()
 {	
 	// Just move the decl to the decls collection
-    auto sc = MakePatternPtr<Compound>();
-    auto var = MakePatternPtr<LocalVariable>();
-    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto sc = MakePatternNode<Compound>();
+    auto var = MakePatternNode<LocalVariable>();
+    auto decls = MakePatternNode< Star<Declaration> >();
     sc->members = ( decls );
-    auto pre = MakePatternPtr< Star<Statement> >();
-    auto post = MakePatternPtr< Star<Statement> >();
+    auto pre = MakePatternNode< Star<Statement> >();
+    auto post = MakePatternNode< Star<Statement> >();
     sc->statements = ( pre, var, post );
 
-    auto rc = MakePatternPtr<Compound>();
+    auto rc = MakePatternNode<Compound>();
     rc->members = ( var, decls ); // Instance now in unordered decls part
     rc->statements = ( pre, post );
 
@@ -62,23 +62,23 @@ SplitInstanceDeclarations2::SplitInstanceDeclarations2()
 	// Match a compound with an ini9tialised decl in the statements. Replace
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
-    auto sc = MakePatternPtr<Compound>();
-    auto si = MakePatternPtr<LocalVariable>();
-    auto over = MakePatternPtr< Delta<LocalVariable> >();
-    si->identifier = MakePatternPtr<InstanceIdentifier>();  // Only acting on initialised Instances
-    si->initialiser = MakePatternPtr<Expression>();  // Only acting on initialised Instances
-    auto decls = MakePatternPtr< Star<Declaration> >();
+    auto sc = MakePatternNode<Compound>();
+    auto si = MakePatternNode<LocalVariable>();
+    auto over = MakePatternNode< Delta<LocalVariable> >();
+    si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
+    si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
+    auto decls = MakePatternNode< Star<Declaration> >();
     sc->members = ( decls, over );
-    auto stmts = MakePatternPtr< Star<Statement> >();
+    auto stmts = MakePatternNode< Star<Statement> >();
     sc->statements = ( stmts );
 
-    auto rc = MakePatternPtr<Compound>();
-    auto ri = MakePatternPtr<LocalVariable>();
+    auto rc = MakePatternNode<Compound>();
+    auto ri = MakePatternNode<LocalVariable>();
     over->through = si;
     over->overlay = ri;
-    ri->initialiser = MakePatternPtr<Uninitialised>();
+    ri->initialiser = MakePatternNode<Uninitialised>();
     rc->members = ( over, decls );
-    auto ra = MakePatternPtr<Assign>();
+    auto ra = MakePatternNode<Assign>();
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( ra, stmts );
 

@@ -57,7 +57,7 @@ public:
 		ASSERT( proot );
 		if (!*proot)
 		{
-			*proot = MakeTreePtr<Program>();
+			*proot = MakeTreeNode<Program>();
 		}
 		if (!context)
 			context = *proot;
@@ -115,7 +115,7 @@ private:
 				clang::IdentifierTable &IT, clang::Preprocessor &pp,
 				clang::TargetInfo &T) :
 			preprocessor(pp), target_info(T), ident_track(context),
-					global_scope(context), all_decls(MakeTreePtr<Program>()) // TODO Scope not Program
+					global_scope(context), all_decls(MakeTreeNode<Program>()) // TODO Scope not Program
 		{
 			ASSERT( context );
 			ASSERT( root_scope );
@@ -281,9 +281,9 @@ private:
 			}
 
 			if (sign)
-				i = MakeTreePtr<Signed>();
+				i = MakeTreeNode<Signed>();
 			else
-				i = MakeTreePtr<Unsigned>();
+				i = MakeTreeNode<Unsigned>();
 
 			i->width = CreateNumericConstant(bits);
 			return i;
@@ -292,8 +292,8 @@ private:
 		TreePtr<Floating> CreateFloatingType(const llvm::fltSemantics *s)
 		{
 			ASSERT(s);
-			auto sem = MakeTreePtr<SpecificFloatSemantics>(s);
-			auto f = MakeTreePtr<Floating>();
+			auto sem = MakeTreeNode<SpecificFloatSemantics>(s);
+			auto f = MakeTreeNode<Floating>();
 			f->semantics = sem;
 			return f;
 		}
@@ -343,12 +343,12 @@ private:
 				case clang::DeclSpec::TST_void:
 					TRACE("void based %d %d\n", DS.getTypeSpecWidth(),
 							DS.getTypeSpecSign());
-					return MakeTreePtr<Void>();
+					return MakeTreeNode<Void>();
 					break;
 				case clang::DeclSpec::TST_bool:
 					TRACE("bool based %d %d\n", DS.getTypeSpecWidth(),
 							DS.getTypeSpecSign());
-					return MakeTreePtr<Boolean>();
+					return MakeTreeNode<Boolean>();
 					break;
 				case clang::DeclSpec::TST_float:
 					TRACE("float based %d %d\n", DS.getTypeSpecWidth(),
@@ -395,20 +395,20 @@ private:
 					{
 					case clang::Declarator::DK_Normal:
 					{
-						auto f = MakeTreePtr<Function>();
+						auto f = MakeTreeNode<Function>();
 						FillParameters(f, fchunk);
 						f->return_type = CreateTypeNode(D, depth + 1);
 						return f;
 					}
 					case clang::Declarator::DK_Constructor:
 					{
-						auto c = MakeTreePtr<Constructor>();
+						auto c = MakeTreeNode<Constructor>();
 						FillParameters(c, fchunk);
 						return c;
 					}
 					case clang::Declarator::DK_Destructor:
 					{
-						auto d = MakeTreePtr<Destructor>();
+						auto d = MakeTreeNode<Destructor>();
 						return d;
 					}
 					default:
@@ -423,7 +423,7 @@ private:
 					TRACE("pointer to...\n");
 					const clang::DeclaratorChunk::PointerTypeInfo &pchunk =
 							chunk.Ptr;
-					auto p = MakeTreePtr<Pointer>();
+					auto p = MakeTreeNode<Pointer>();
 					p->destination = CreateTypeNode(D, depth + 1);
 					return p;
 				}
@@ -434,7 +434,7 @@ private:
 					TRACE("reference to...\n");
 					const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk =
 							chunk.Ref;
-					auto r = MakeTreePtr<Reference>();
+					auto r = MakeTreeNode<Reference>();
 					ASSERT(r);
 					r->destination = CreateTypeNode(D, depth + 1);
 					return r;
@@ -446,13 +446,13 @@ private:
 					const clang::DeclaratorChunk::ArrayTypeInfo &achunk =
 							chunk.Arr;
 					TRACE("array [%d] of...\n", achunk.NumElts);
-					auto a = MakeTreePtr<Array>();
+					auto a = MakeTreeNode<Array>();
 					ASSERT(a);
 					a->element = CreateTypeNode(D, depth + 1);
 					if (achunk.NumElts)
 						a->size = hold_expr.FromRaw(achunk.NumElts); // number of elements was specified
 					else
-						a->size = MakeTreePtr<Uninitialised>(); // number of elements was not specified eg int a[];
+						a->size = MakeTreeNode<Uninitialised>(); // number of elements was not specified eg int a[];
 					return a;
 				}
 
@@ -468,27 +468,27 @@ private:
 				clang::IdentifierInfo *ID = 0)
 		{
 			if (ID)            
-            	return MakeTreePtr<SpecificInstanceIdentifier>( ID->getName() );			
+            	return MakeTreeNode<SpecificInstanceIdentifier>( ID->getName() );			
 			else
-            	return MakeTreePtr<SpecificInstanceIdentifier>();			
+            	return MakeTreeNode<SpecificInstanceIdentifier>();			
 		}
 
 		TreePtr<TypeIdentifier> CreateTypeIdentifier(
 				clang::IdentifierInfo *ID)
 		{
-			return MakeTreePtr<SpecificTypeIdentifier>( ID->getName() );
+			return MakeTreeNode<SpecificTypeIdentifier>( ID->getName() );
 		}
 
 		TreePtr<TypeIdentifier> CreateTypeIdentifier(string s)
 		{
-			return MakeTreePtr<SpecificTypeIdentifier>(s);
+			return MakeTreeNode<SpecificTypeIdentifier>(s);
 		}
 
 		TreePtr<LabelIdentifier> CreateLabelIdentifier(
 				clang::IdentifierInfo *ID)
 		{
 			ASSERT( ID );
-			return MakeTreePtr<SpecificLabelIdentifier>( ID->getName() );
+			return MakeTreeNode<SpecificLabelIdentifier>( ID->getName() );
 		}
 
 		TreePtr<Instance> CreateInstanceNode(clang::Scope *S,
@@ -498,19 +498,19 @@ private:
 		    TRACE();
 			const clang::DeclSpec &DS = D.getDeclSpec();
 			if (!access)
-				access = MakeTreePtr<Private>(); // Most scopes are private unless specified otherwise
+				access = MakeTreeNode<Private>(); // Most scopes are private unless specified otherwise
 
 			TreePtr<Constancy> constancy;
 			if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
-				constancy = MakeTreePtr<Const>();
+				constancy = MakeTreeNode<Const>();
 			else
-				constancy = MakeTreePtr<NonConst>();
+				constancy = MakeTreeNode<NonConst>();
 
 			TreePtr<Instance> o;
 
 			if (automatic)
 			{
-				o = MakeTreePtr<Automatic>();
+				o = MakeTreeNode<Automatic>();
 			}
 			else
 			{
@@ -522,44 +522,44 @@ private:
 					TRACE("scope flags 0x%x\n", S->getFlags());
 					if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 					{
-						TreePtr<Field> no = MakeTreePtr<Field> ();
+						TreePtr<Field> no = MakeTreeNode<Field> ();
 						o = no;
 						if (DS.isVirtualSpecified())
 						{
-							no->virt = MakeTreePtr<Virtual> ();
+							no->virt = MakeTreeNode<Virtual> ();
 						}
 						else
 						{
-							no->virt = MakeTreePtr<NonVirtual> ();
+							no->virt = MakeTreeNode<NonVirtual> ();
 						}
 						no->access = access;
 						no->constancy = constancy;
 					}
 					else if (S->getFnParent()) // in code
 					{
-						o = MakeTreePtr<Automatic> ();
+						o = MakeTreeNode<Automatic> ();
 					}
 					else // top level
 					{
-						TreePtr<Static> no = MakeTreePtr<Static> ();
+						TreePtr<Static> no = MakeTreeNode<Static> ();
 						o = no;
 						no->constancy = constancy;
 					}
 					break;
 				}
 				case clang::DeclSpec::SCS_auto:
-					o = MakeTreePtr<Automatic> ();
+					o = MakeTreeNode<Automatic> ();
 					break;
 				case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
 				{
-					TreePtr<Static> no = MakeTreePtr<Static> ();
+					TreePtr<Static> no = MakeTreeNode<Static> ();
 					o = no;
 					no->constancy = constancy;
 				}
 					break;
 				case clang::DeclSpec::SCS_static:
 				{
-					TreePtr<Static> no = MakeTreePtr<Static> ();
+					TreePtr<Static> no = MakeTreeNode<Static> ();
 					o = no;
 					no->constancy = constancy;
 				}
@@ -584,7 +584,7 @@ private:
 				o->identifier = CreateInstanceIdentifier();
 			}
 			o->type = CreateTypeNode(D);
-			o->initialiser = MakeTreePtr<Uninitialised> ();
+			o->initialiser = MakeTreeNode<Uninitialised> ();
 
 			return o;
 		}
@@ -592,7 +592,7 @@ private:
 		TreePtr<Typedef> CreateTypedefNode(clang::Scope *S,
 				clang::Declarator &D)
 		{
-			auto t = MakeTreePtr<Typedef>();
+			auto t = MakeTreeNode<Typedef>();
 			all_decls->members.insert(t);
 			clang::IdentifierInfo *ID = D.getIdentifier();
 			if (ID)
@@ -608,9 +608,9 @@ private:
 		/*
 		 TreePtr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
 		 {
-		 auto l = MakeTreePtr<Label>();
+		 auto l = MakeTreeNode<Label>();
 		 all_decls->members.insert(l);
-		 l->access = MakeTreePtr<Public>();
+		 l->access = MakeTreeNode<Public>();
 		 l->identifier = CreateLabelIdentifier(ID);
 		 //TRACE("%s %p %p\n", ID->getName(), l.get(), ID );
 		 return l;
@@ -723,7 +723,7 @@ private:
 			if( LastInGroup )
 			{
 			    TRACE("Chaining declarations\n");
-			    auto dc = MakeTreePtr<DeclarationChain>();
+			    auto dc = MakeTreeNode<DeclarationChain>();
 			    dc->first = hold_decl.FromRaw(LastInGroup);
 			    dc->second = d;
 			    d = dc;
@@ -740,7 +740,7 @@ private:
 				clang::Declarator &D)
 		{
 
-			TreePtr<Instance> p = CreateInstanceNode(S, D, MakeTreePtr<Public>(), true);
+			TreePtr<Instance> p = CreateInstanceNode(S, D, MakeTreeNode<Public>(), true);
 			backing_params[p] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
 			return hold_decl.ToRaw(p);
 		}
@@ -841,7 +841,7 @@ private:
 		// ActOnFinishFunctionBody() as a hierarchy of Compounds.
 		// If we tried to do this ourselves we'd lose the nested compound
 		// statement hierarchy.
-		inferno_scope_stack.push( MakeTreePtr<Scope>() );
+		inferno_scope_stack.push( MakeTreeNode<Scope>() );
  
 		return hold_decl.ToRaw( o );
 	}
@@ -879,7 +879,7 @@ private:
 		{
 			// Operands that are not Expressions have no side effects and so
 			// they do nothing as Statements
-			auto n = MakeTreePtr<Nop>();
+			auto n = MakeTreeNode<Nop>();
 			return ToStmt( n );
 		}
 	}
@@ -887,11 +887,11 @@ private:
 	virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
 			ExprTy *RetValExp )
 	{
-		auto r = MakeTreePtr<Return>();
+		auto r = MakeTreeNode<Return>();
 		if( RetValExp )
 		r->return_value = hold_expr.FromRaw(RetValExp);
 		else
-		r->return_value = MakeTreePtr<Uninitialised>();
+		r->return_value = MakeTreeNode<Uninitialised>();
 		//TRACE("aors %p\n", r.get() );
 		return hold_stmt.ToRaw( r );
 	}
@@ -912,7 +912,7 @@ private:
 
 	TreePtr<Integer> CreateNumericConstant( int value )
 	{
-		return MakeTreePtr<SpecificInteger>( value );
+		return MakeTreeNode<SpecificInteger>( value );
 	}
 
 	TreePtr<Literal> CreateLiteral( int value )
@@ -946,7 +946,7 @@ private:
 			bool err = literal.GetIntegerValue(rv);
 
 			ASSERT( !err )( "numeric literal too big for its own type" );
-			return MakeTreePtr<SpecificInteger>( rv );
+			return MakeTreeNode<SpecificInteger>( rv );
 		}
 		else if( literal.isFloatingLiteral() )
 		{
@@ -959,7 +959,7 @@ private:
 			semantics = TypeDb::double_semantics;
 			llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
 
-			return MakeTreePtr<SpecificFloat>( rv );
+			return MakeTreeNode<SpecificFloat>( rv );
 		}
 		ASSERTFAIL("this sort of literal is not supported");
 	}
@@ -979,7 +979,7 @@ private:
 		{
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
 	        case clang::tok::TOK: \
-                o=MakeTreePtr<NODE>();\
+                o=MakeTreeNode<NODE>();\
                 break;
 #include "tree/operator_db.inc"
             default:
@@ -1011,7 +1011,7 @@ private:
 		{
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
 	        case clang::tok::TOK: \
-	            o=MakeTreePtr<NODE>(); \
+	            o=MakeTreeNode<NODE>(); \
 	            break;
 #include "tree/operator_db.inc"
             default:
@@ -1031,7 +1031,7 @@ private:
 		{
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
 	        case clang::tok::TOK:\
-                o=MakeTreePtr<NODE>(); \
+                o=MakeTreeNode<NODE>(); \
                 break;
 #include "tree/operator_db.inc"
             default:
@@ -1046,7 +1046,7 @@ private:
 			clang::SourceLocation ColonLoc,
 			ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
 	{
-		auto co = MakeTreePtr<ConditionalOperator>();
+		auto co = MakeTreeNode<ConditionalOperator>();
 		co->operands.push_back( hold_expr.FromRaw(Cond) );
 		ASSERT(LHS )( "gnu extension not supported");
 		co->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -1057,7 +1057,7 @@ private:
 	TreePtr<Call> CreateCall( Sequence<Expression> &args, TreePtr<Expression> callee )
 	{
 		// Make the Call node and fill in the called function
-		auto c = MakeTreePtr<Call>();
+		auto c = MakeTreeNode<Call>();
 		c->callee = callee;
 
 		// If CallableParams, fill in the args map based on the supplied args and original function type
@@ -1148,7 +1148,7 @@ private:
 			bool isStmtExpr)
 	{
 		// TODO helper fn for MultiStmtArg, like FromClang. Maybe.
-		auto s = MakeTreePtr<Compound>();
+		auto s = MakeTreeNode<Compound>();
 
 		for( int i=0; i<Elts.size(); i++ )
 		AddStatementToCompound( s, hold_stmt.FromRaw( Elts.get()[i] ) );
@@ -1170,7 +1170,7 @@ private:
 		}
 		else
 		{
-			auto das = MakeTreePtr<DeclarationAsStatement>();
+			auto das = MakeTreeNode<DeclarationAsStatement>();
 			das->d = d;
 			return ToStmt( das );
 		}
@@ -1188,7 +1188,7 @@ private:
 	virtual StmtResult ActOnLabelStmt(clang::SourceLocation IdentLoc, clang::IdentifierInfo *II,
 			clang::SourceLocation ColonLoc, StmtTy *SubStmt)
 	{
-		auto l = MakeTreePtr<Label>();
+		auto l = MakeTreeNode<Label>();
 		l->identifier = MaybeCreateLabelIdentifier(II);
 		backing_labels[l] = hold_stmt.FromRaw( SubStmt );
 		return hold_stmt.ToRaw( l );
@@ -1198,7 +1198,7 @@ private:
 			clang::SourceLocation LabelLoc,
 			clang::IdentifierInfo *LabelII)
 	{
-		auto g = MakeTreePtr<Goto>();
+		auto g = MakeTreeNode<Goto>();
 		g->destination = MaybeCreateLabelIdentifier(LabelII);
 		return hold_stmt.ToRaw( g );
 	}
@@ -1207,7 +1207,7 @@ private:
 			clang::SourceLocation StarLoc,
 			ExprTy *DestExp)
 	{
-		auto g = MakeTreePtr<Goto>();
+		auto g = MakeTreeNode<Goto>();
 		g->destination = hold_expr.FromRaw( DestExp );
 		return hold_stmt.ToRaw( g );
 	}
@@ -1224,20 +1224,20 @@ private:
 			StmtTy *ThenVal, clang::SourceLocation ElseLoc,
 			StmtTy *ElseVal)
 	{
-		auto i = MakeTreePtr<If>();
+		auto i = MakeTreeNode<If>();
 		i->condition = hold_expr.FromRaw( CondVal );
 		i->body = hold_stmt.FromRaw( ThenVal );
 		if( ElseVal )
 		i->else_body = hold_stmt.FromRaw( ElseVal );
 		else
-		i->else_body = MakeTreePtr<Nop>(); // empty else clause
+		i->else_body = MakeTreeNode<Nop>(); // empty else clause
 		return hold_stmt.ToRaw( i );
 	}
 
 	virtual StmtResult ActOnWhileStmt(clang::SourceLocation WhileLoc, ExprTy *Cond,
 			StmtTy *Body)
 	{
-		auto w = MakeTreePtr<While>();
+		auto w = MakeTreeNode<While>();
 		w->condition = hold_expr.FromRaw( Cond );
 		w->body = hold_stmt.FromRaw( Body );
 		return hold_stmt.ToRaw( w );
@@ -1246,7 +1246,7 @@ private:
 	virtual StmtResult ActOnDoStmt(clang::SourceLocation DoLoc, StmtTy *Body,
 			clang::SourceLocation WhileLoc, ExprTy *Cond)
 	{
-		auto d = MakeTreePtr<Do>();
+		auto d = MakeTreeNode<Do>();
 		d->body = hold_stmt.FromRaw( Body );
 		d->condition = hold_expr.FromRaw( Cond );
 		return hold_stmt.ToRaw( d );
@@ -1257,22 +1257,22 @@ private:
 			StmtTy *First, ExprTy *Second, ExprTy *Third,
 			clang::SourceLocation RParenLoc, StmtTy *Body)
 	{
-		auto f = MakeTreePtr<For>();
+		auto f = MakeTreeNode<For>();
 		if( First )
 		    f->initialisation = hold_stmt.FromRaw( First );
 		else
-		    f->initialisation = MakeTreePtr<Nop>();
+		    f->initialisation = MakeTreeNode<Nop>();
 
 		if( Second )
 	    	f->condition = hold_expr.FromRaw( Second );
 		else
-		    f->condition = MakeTreePtr<True>();
+		    f->condition = MakeTreeNode<True>();
 
 		StmtTy *third = (StmtTy *)Third; // Third is really a statement, the Actions API is wrong
 		if( third )
 		    f->increment = hold_stmt.FromRaw( third );
 		else
-		    f->increment = MakeTreePtr<Nop>();
+		    f->increment = MakeTreeNode<Nop>();
 
 		f->body = hold_stmt.FromRaw( Body );
 		return hold_stmt.ToRaw( f );
@@ -1280,7 +1280,7 @@ private:
 
 	virtual StmtResult ActOnStartOfSwitchStmt(ExprTy *Cond)
 	{
-		auto s = MakeTreePtr<Switch>();
+		auto s = MakeTreeNode<Switch>();
 		s->condition = hold_expr.FromRaw( Cond );
 		return hold_stmt.ToRaw( s );
 	}
@@ -1307,7 +1307,7 @@ private:
 
 		if( RHSVal.get() )
 		{
-			auto rc = MakeTreePtr<RangeCase>();
+			auto rc = MakeTreeNode<RangeCase>();
 			rc->value_lo = FromClang( LHSVal );
 			rc->value_hi = FromClang( RHSVal );
 			backing_targets[rc] = FromClang( SubStmt );
@@ -1315,7 +1315,7 @@ private:
 		}
 		else
 		{
-			auto c = MakeTreePtr<Case>();
+			auto c = MakeTreeNode<Case>();
 			c->value = FromClang( LHSVal );
 			backing_targets[c] = FromClang( SubStmt );
 			return ToStmt( c );
@@ -1327,7 +1327,7 @@ private:
 			clang::Scope *CurScope)
 	{
 		TRACE();
-		auto d = MakeTreePtr<Default>();
+		auto d = MakeTreeNode<Default>();
 		backing_targets[d] = FromClang( SubStmt );
 		return ToStmt( d );
 	}
@@ -1335,12 +1335,12 @@ private:
 	virtual StmtResult ActOnContinueStmt(clang::SourceLocation ContinueLoc,
 			clang::Scope *CurScope)
 	{
-		return hold_stmt.ToRaw( MakeTreePtr<Continue>() );
+		return hold_stmt.ToRaw( MakeTreeNode<Continue>() );
 	}
 
 	virtual StmtResult ActOnBreakStmt(clang::SourceLocation GotoLoc, clang::Scope *CurScope)
 	{
-		return hold_stmt.ToRaw( MakeTreePtr<Break>() );
+		return hold_stmt.ToRaw( MakeTreeNode<Break>() );
 	}
 
 	TreePtr<AccessSpec> ConvertAccess( clang::AccessSpecifier AS, TreePtr<Record> rec = TreePtr<Record>() )
@@ -1348,25 +1348,25 @@ private:
 		switch( AS )
 		{
 			case clang::AS_public:
-			return MakeTreePtr<Public>();
+			return MakeTreeNode<Public>();
 			break;
 			case clang::AS_protected:
-			return MakeTreePtr<Protected>();
+			return MakeTreeNode<Protected>();
 			break;
 			case clang::AS_private:
-			return MakeTreePtr<Private>();
+			return MakeTreeNode<Private>();
 			break;
 			case clang::AS_none:
 			ASSERT( rec )( "no access specifier and record not supplied so cannot deduce");
 			// members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
 			if( DynamicTreePtrCast<Class>(rec) )
-			return MakeTreePtr<Private>();
+			return MakeTreeNode<Private>();
 			else
-			return MakeTreePtr<Public>();
+			return MakeTreeNode<Public>();
 			break;
 			default:
 			ASSERTFAIL("Invalid access specfier");
-			return MakeTreePtr<Public>();
+			return MakeTreeNode<Public>();
 			break;
 		}
 	}
@@ -1443,16 +1443,16 @@ private:
 		switch( (clang::DeclSpec::TST)TagType )
 		{
 			case clang::DeclSpec::TST_union:
-			h = MakeTreePtr<Union>();
+			h = MakeTreeNode<Union>();
 			break;
 			case clang::DeclSpec::TST_struct:
-			h = MakeTreePtr<Struct>();
+			h = MakeTreeNode<Struct>();
 			break;
 			case clang::DeclSpec::TST_class:
-			h = MakeTreePtr<Class>();
+			h = MakeTreeNode<Class>();
 			break;
 			case clang::DeclSpec::TST_enum:
-			h = MakeTreePtr<Enum>();
+			h = MakeTreeNode<Enum>();
 			break;
 			default:
 			ASSERTFAIL("Unknown type spec type");
@@ -1531,13 +1531,13 @@ private:
 			clang::IdentifierInfo &Member)
 	{
 		TRACE("kind %d\n", OpKind);
-		auto a = MakeTreePtr<Lookup>();
+		auto a = MakeTreeNode<Lookup>();
 
 		// Turn -> into * and .
 		if( OpKind == clang::tok::arrow ) // Base->Member
 
 		{
-			auto ou = MakeTreePtr<Dereference>();
+			auto ou = MakeTreeNode<Dereference>();
 			ou->operands.push_back( hold_expr.FromRaw( Base ) );
 			a->base = ou;
 		}
@@ -1574,7 +1574,7 @@ private:
 			ExprTy *Base, clang::SourceLocation LLoc,
 			ExprTy *Idx, clang::SourceLocation RLoc)
 	{
-		auto su = MakeTreePtr<Subscript>();
+		auto su = MakeTreeNode<Subscript>();
 		su->operands.push_back( hold_expr.FromRaw( Base ) );
 		su->operands.push_back( hold_expr.FromRaw( Idx ) );
 		return hold_expr.ToRaw( su );
@@ -1589,16 +1589,16 @@ private:
 		TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
 
 		if(Kind == clang::tok::kw_true)
-		ic = MakeTreePtr<True>();
+		ic = MakeTreeNode<True>();
 		else
-		ic = MakeTreePtr<False>();
+		ic = MakeTreeNode<False>();
 		return hold_expr.ToRaw( ic );
 	}
 
 	virtual ExprResult ActOnCastExpr(clang::SourceLocation LParenLoc, TypeTy *Ty,
 			clang::SourceLocation RParenLoc, ExprTy *Op)
 	{
-		auto c = MakeTreePtr<Cast>();
+		auto c = MakeTreeNode<Cast>();
 		c->operand = hold_expr.FromRaw( Op );
 		c->type = hold_type.FromRaw( Ty );
 		return hold_expr.ToRaw( c );
@@ -1607,7 +1607,7 @@ private:
 	virtual OwningStmtResult ActOnNullStmt(clang::SourceLocation SemiLoc)
 	{
 		TRACE();
-		auto n = MakeTreePtr<Nop>();
+		auto n = MakeTreeNode<Nop>();
 		return ToStmt( n );
 	}
 
@@ -1622,7 +1622,7 @@ private:
 
 		llvm::APSInt rv(TypeDb::char_bits, !TypeDb::char_default_signed);
 		rv = literal.getValue();
-		auto nc = MakeTreePtr<SpecificInteger>( rv );
+		auto nc = MakeTreeNode<SpecificInteger>( rv );
 
 		return hold_expr.ToRaw( nc );
 	}
@@ -1636,7 +1636,7 @@ private:
 		// Assume initialiser is for an Array, and create an ArrayInitialiser node
 		// even if it's really a struct init. We'll come along later and replace with a
 		// RecordInitialiser when we can see what the struct is.
-		auto ao = MakeTreePtr<MakeArray>();
+		auto ao = MakeTreeNode<MakeArray>();
 		for(int i=0; i<NumInit; i++)
 		{
 			TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
@@ -1652,7 +1652,7 @@ private:
 			TreePtr<Record> r )
 	{
 		// Make new record initialiser and fill in the type
-		auto ri = MakeTreePtr<MakeRecord>();
+		auto ri = MakeTreeNode<MakeRecord>();
 		ri->type = r->identifier;
 
 		// Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
@@ -1690,7 +1690,7 @@ private:
 				{
 					// Get value out of array init and put it in record init together with member instance id
 					TreePtr<Expression> v = *seq_it;
-					auto mi = MakeTreePtr<MapOperand>();
+					auto mi = MakeTreeNode<MapOperand>();
 					mi->identifier = i->identifier;
 					mi->value = v;
 					mapop->operands.insert( mi );
@@ -1706,7 +1706,7 @@ private:
 
 	TreePtr<String> CreateString( const char *s )
 	{
-		return MakeTreePtr<SpecificString>( s );
+		return MakeTreeNode<SpecificString>( s );
 	}
 
 	TreePtr<String> CreateString( clang::IdentifierInfo *Id )
@@ -1728,7 +1728,7 @@ private:
 	/// ActOnCXXThis - Parse the C++ 'this' pointer.
 	virtual ExprResult ActOnCXXThis(clang::SourceLocation ThisLoc)
 	{
-		return hold_expr.ToRaw( MakeTreePtr<This>() );
+		return hold_expr.ToRaw( MakeTreeNode<This>() );
 	}
 
 	virtual DeclTy *ActOnEnumConstant(clang::Scope *S, DeclTy *EnumDecl,
@@ -1738,10 +1738,10 @@ private:
 	{
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
         TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
-		auto o = MakeTreePtr<Static>();
+		auto o = MakeTreeNode<Static>();
 		all_decls->members.insert(o);
 		o->identifier = CreateInstanceIdentifier(Id);
-		o->constancy = MakeTreePtr<Const>(); // static const member need not consume storage!!
+		o->constancy = MakeTreeNode<Const>(); // static const member need not consume storage!!
 		o->type = e->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
 		if( Val )
 		{
@@ -1752,7 +1752,7 @@ private:
 			TreePtr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
 			TreePtr<Instance> lasto( DynamicTreePtrCast<Instance>(lastd) );
 			ASSERT(lasto)( "unexpected kind of declaration inside an enum");
-			auto inf = MakeTreePtr<Add>();
+			auto inf = MakeTreeNode<Add>();
 			TreePtr<Expression> ei = lasto->identifier;
 			inf->operands.insert( ei );
 			inf->operands.insert( CreateNumericConstant( 1 ) );
@@ -1808,9 +1808,9 @@ private:
 	{
 		TreePtr<TypeOperator> p;
 		if( isSizeof )
-		    p = MakeTreePtr<SizeOf>();
+		    p = MakeTreeNode<SizeOf>();
 		else
-		    p = MakeTreePtr<AlignOf>();
+		    p = MakeTreeNode<AlignOf>();
 
 		if( isType )
 		p->operand = hold_type.FromRaw(TyOrEx);
@@ -1837,13 +1837,13 @@ private:
 		TreePtr<Record> r = DynamicTreePtrCast<Record>( d );
 		ASSERT( r );
 
-		auto base = MakeTreePtr<Base>();
+		auto base = MakeTreeNode<Base>();
 		base->record = ti;
 		/*  if( Virt )
-		 base->storage = MakeTreePtr<Virtual>();
+		 base->storage = MakeTreeNode<Virtual>();
 		 else
-		 base->storage = MakeTreePtr<NonStatic>();
-		 base->constancy = MakeTreePtr<NonConst>(); */
+		 base->storage = MakeTreeNode<NonStatic>();
+		 base->constancy = MakeTreeNode<NonConst>(); */
 		base->access = ConvertAccess( AccessSpec, r );
 		return hold_base.ToRaw( base );
 	}
@@ -1946,7 +1946,7 @@ private:
 		ASSERT( cm->identifier );
 
 		// Build a lookup to the constructor, using the speiciifed subobject and the matching constructor
-		auto lu = MakeTreePtr<Lookup>();
+		auto lu = MakeTreeNode<Lookup>();
 		lu->base = om->identifier;
 		lu->member = cm->identifier;
 
@@ -1963,7 +1963,7 @@ private:
 		TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(o->initialiser);
 		if( !comp )
 		{
-			comp = MakeTreePtr<Compound>();
+			comp = MakeTreeNode<Compound>();
 			o->initialiser = comp;
 			TRACE();
 		}
@@ -1993,15 +1993,15 @@ private:
 			ExprTy **ConstructorArgs, unsigned NumConsArgs,
 			clang::SourceLocation ConstructorRParen )
 	{
-		auto n = MakeTreePtr<New>();
+		auto n = MakeTreeNode<New>();
 		n->type = CreateTypeNode( D );
 		CollectArgs( &(n->placement_arguments), PlacementArgs, NumPlaceArgs );
 		CollectArgs( &(n->constructor_arguments), ConstructorArgs, NumConsArgs );
 
 		if( UseGlobal )
-		    n->global = MakeTreePtr<Global>();
+		    n->global = MakeTreeNode<Global>();
 		else
-		    n->global = MakeTreePtr<NonGlobal>();
+		    n->global = MakeTreeNode<NonGlobal>();
 
 		// TODO cant figure out meaning of ParenTypeId
 
@@ -2014,18 +2014,18 @@ private:
 	virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
 			bool ArrayForm, ExprTy *Expression )
 	{
-		auto d = MakeTreePtr<Delete>();
+		auto d = MakeTreeNode<Delete>();
 		d->pointer = hold_expr.FromRaw( Expression );
 
 		if( ArrayForm )
-		    d->array = MakeTreePtr<DeleteArray>();
+		    d->array = MakeTreeNode<DeleteArray>();
 		else
-		    d->array = MakeTreePtr<DeleteNonArray>();
+		    d->array = MakeTreeNode<DeleteNonArray>();
 
 		if( UseGlobal )
-		    d->global = MakeTreePtr<Global>();
+		    d->global = MakeTreeNode<Global>();
 		else
-		    d->global = MakeTreePtr<NonGlobal>();
+		    d->global = MakeTreeNode<NonGlobal>();
 
 		return hold_expr.ToRaw( d );
 	}
@@ -2055,7 +2055,7 @@ private:
 		TreePtr<Compound> cb( DynamicTreePtrCast<Compound>( hold_stmt.FromRaw( SubStmt ) ) );
         ASSERT(cb); // Let's hope the only statement Clang gives us is a compound
 
-		auto ce = MakeTreePtr<StatementExpression>();
+		auto ce = MakeTreeNode<StatementExpression>();
 		ce->statements = cb->statements;
 		return hold_expr.ToRaw( ce );
     }

@@ -83,9 +83,9 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink,
     TreePtr<SubContainer> dest;
     ContainerInterface *dest_container;
     if( dynamic_cast<SequenceInterface *>(key_node.get()) )
-        dest = MakeTreePtr<SubSequence>();
+        dest = MakeTreeNode<SubSequence>();
     else if( dynamic_cast<CollectionInterface *>(key_node.get()) )
-        dest = MakeTreePtr<SubCollection>();
+        dest = MakeTreeNode<SubCollection>();
     else
         ASSERT(0)("Please add new kind of Star");
     

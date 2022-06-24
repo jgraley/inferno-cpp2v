@@ -651,8 +651,8 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
     for( pair<int, int> int_range : int_range_list )
     {
         AllInCategoryRangeOperator::ExprBounds expr_range;
-        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.first) );
-        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreePtr<SR::TheKnowledge::CategoryMinimaxNode>(int_range.second) );        
+        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::TheKnowledge::CategoryMinimaxNode>(int_range.first) );
+        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::TheKnowledge::CategoryMinimaxNode>(int_range.second) );        
         expr_range_list.push_back( expr_range );
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(expr_range_list)("\n");

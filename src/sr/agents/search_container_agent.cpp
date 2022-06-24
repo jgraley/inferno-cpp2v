@@ -128,7 +128,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
     // underlying the current iterator, thistime.
     if( recurse_restriction )
     {
-        auto xpr_ss = MakeTreePtr<SubSequence>();
+        auto xpr_ss = MakeTreeNode<SubSequence>();
 
         // See if we are looking at a walk iterator
         const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
@@ -180,7 +180,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     XLink req_terminus_xlink = hypothesis_links->at(terminus_plink); 
     
     XLink xlink = req_terminus_xlink;
-    auto xpr_ss = MakeTreePtr<SubSequence>();
+    auto xpr_ss = MakeTreeNode<SubSequence>();
     while(xlink != keyer_xlink)
     {       
         const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );       

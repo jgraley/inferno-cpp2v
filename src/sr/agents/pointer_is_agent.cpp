@@ -22,7 +22,7 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
     {
         // Imagine that the root is pointed to by a TreePtr<Node>
         // (in this case wit.GetNodePointerInParent() would return NULL)
-        auto node = MakeTreePtr<Node>();
+        auto node = MakeTreeNode<Node>();
         XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct        
         return LocatedLink(PatternLink(this, GetPointer()), tp_xlink);
     }
@@ -55,7 +55,7 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
         // If there's no parent we must be at the root of the x tree,
         // so simulate a link that allows anything (because in fact
         // you can replace the root node with anything).
-        auto node = MakeTreePtr<Node>();
+        auto node = MakeTreeNode<Node>();
         XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct
         return { { PatternLink(this, GetPointer()), tp_xlink } };
     }

@@ -81,21 +81,21 @@ string BuildIdentifierAgent::GetNewName()
 
 TreePtr<Node> BuildInstanceIdentifierAgent::BuildNewSubtree()
 {
-    return MakeTreePtr<CPPTree::SpecificInstanceIdentifier>( GetNewName() ); 
+    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( GetNewName() ); 
 }
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
 TreePtr<Node> BuildTypeIdentifierAgent::BuildNewSubtree()
 {
-    return MakeTreePtr<CPPTree::SpecificTypeIdentifier>( GetNewName() ); 
+    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( GetNewName() ); 
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
 TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree()
 {
-    return MakeTreePtr<CPPTree::SpecificLabelIdentifier>( GetNewName() ); 
+    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( GetNewName() ); 
 }                                                   
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -201,8 +201,8 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
 
 pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MINIMUS );
-    TreePtr<Node> maximus = MakeTreePtr<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreeNode<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreeNode<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
@@ -210,8 +210,8 @@ pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetBounds( str
 
 pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MINIMUS );
-    TreePtr<Node> maximus = MakeTreePtr<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreeNode<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreeNode<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
@@ -219,8 +219,8 @@ pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetBounds( string 
 
 pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MINIMUS );
-    TreePtr<Node> maximus = MakeTreePtr<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreeNode<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreeNode<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
@@ -267,7 +267,7 @@ LocatedLink NestedAgent::RunTeleportQuery( XLink keyer_xlink ) const
         while( XLink next_xlink = Advance(xlink, &s) )
             xlink = next_xlink;
 
-        auto cur_depth = MakeTreePtr<Node>();
+        auto cur_depth = MakeTreeNode<Node>();
         XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
         tp_link = LocatedLink(PatternLink(this, &depth), new_xlink);
     }
@@ -422,7 +422,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 	ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());
 	ASSERT( new_container );
 	int size = new_container->size();
-    return MakeTreePtr<SpecificInteger>(size); 
+    return MakeTreeNode<SpecificInteger>(size); 
 }                                                   
 
 

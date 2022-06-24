@@ -25,33 +25,33 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     // does not match the type of the param in the declaration. Then we can 
     // simply insert a cast to the declaration param type at the root of the 
     // expression.
-	auto s_call = MakePatternPtr<Call>();
-	auto callee = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
+	auto s_call = MakePatternNode<Call>();
+	auto callee = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
 	s_call->callee = callee;
-	auto s_proc = MakePatternPtr<CallableParams>();
+	auto s_proc = MakePatternNode<CallableParams>();
 	callee->pattern = s_proc;
-	auto s_param = MakePatternPtr< Instance >();
-	auto param_id = MakePatternPtr< InstanceIdentifier >();
+	auto s_param = MakePatternNode< Instance >();
+	auto param_id = MakePatternNode< InstanceIdentifier >();
 	s_param->identifier = param_id;
-	auto type = MakePatternPtr< Type >();
+	auto type = MakePatternNode< Type >();
 	s_param->type = type;
-	auto s_other_params = MakePatternPtr< Star<Instance> >();
+	auto s_other_params = MakePatternNode< Star<Instance> >();
 	s_proc->members = (s_param, s_other_params);
-	auto s_arg = MakePatternPtr< MapOperand >();
+	auto s_arg = MakePatternNode< MapOperand >();
 	s_arg->identifier = param_id;
-	auto s_arg_value = MakePatternPtr< TransformOf<Expression> >( &TypeOf::instance );
+	auto s_arg_value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
 	s_arg->value = s_arg_value;
-	//s_arg_value->pattern = MakePatternPtr< Type >();
-	auto s_arg_type = MakePatternPtr< Negation<Type> >();
+	//s_arg_value->pattern = MakePatternNode< Type >();
+	auto s_arg_type = MakePatternNode< Negation<Type> >();
 	s_arg_value->pattern = s_arg_type;
 	s_arg_type->negand = type;
-	auto other_args = MakePatternPtr< Star<MapOperand> >();
+	auto other_args = MakePatternNode< Star<MapOperand> >();
 	s_call->operands = ( s_arg, other_args );
 
-	auto r_call = MakePatternPtr<Call>();
-	auto r_arg = MakePatternPtr< MapOperand >();
+	auto r_call = MakePatternNode<Call>();
+	auto r_arg = MakePatternNode< MapOperand >();
 	r_arg->identifier = param_id;
-	auto r_cast = MakePatternPtr<Cast>();
+	auto r_cast = MakePatternNode<Cast>();
 	r_arg->value = r_cast;
 	r_cast->operand = s_arg->value;
 	r_cast->type = type;

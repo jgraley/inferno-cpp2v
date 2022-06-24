@@ -48,7 +48,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
         if( TreePtr<Function> f = DynamicTreePtrCast<Function>(t) )
         	return f->return_type;
         else
-        	return MakeTreePtr<Void>();
+        	return MakeTreeNode<Void>();
     }
     else if( TreePtr<Lookup> l = DynamicTreePtrCast<Lookup>(o) ) // a.b; just return type of b
     {
@@ -66,38 +66,38 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( DynamicTreePtrCast<LabelIdentifier>(o) )
     {
-        return MakeTreePtr<Labeley>(); 
+        return MakeTreeNode<Labeley>(); 
     }
     else if( DynamicTreePtrCast<SizeOf>(o) || DynamicTreePtrCast<AlignOf>(o))
     {
     	TreePtr<Integral> n;
     	if( TypeDb::int_default_signed )
-    		n = MakeTreePtr<Signed>();
+    		n = MakeTreeNode<Signed>();
     	else
-    		n = MakeTreePtr<Unsigned>();
-    	auto sz = MakeTreePtr<SpecificInteger>( TypeDb::integral_bits[INT] );
+    		n = MakeTreeNode<Unsigned>();
+    	auto sz = MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
     	n->width = sz;
         return n;
     }
     else if( TreePtr<New> n = DynamicTreePtrCast<New>(o) )
     {
-        auto p = MakeTreePtr<Pointer>();
+        auto p = MakeTreeNode<Pointer>();
         p->destination = n->type;
         return p;
     }
     else if( DynamicTreePtrCast<Delete>(o) )
     {
-        return MakeTreePtr<Void>(); 
+        return MakeTreeNode<Void>(); 
     }
     else if( TreePtr<StatementExpression> ce = DynamicTreePtrCast<StatementExpression>(o) )
     {
         if( ce->statements.empty() )
-            return MakeTreePtr<Void>(); 
+            return MakeTreeNode<Void>(); 
         TreePtr<Statement> last = ce->statements.back();
         if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(last) )
             return Get(e);
         else
-            return MakeTreePtr<Void>(); 
+            return MakeTreeNode<Void>(); 
     }
     else 
     {
@@ -120,7 +120,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 			t = r->destination;
 		if( TreePtr<Array> a = DynamicTreePtrCast<Array>(t) )
 		{
-			auto p = MakeTreePtr<Pointer>();
+			auto p = MakeTreeNode<Pointer>();
 			p->destination = a->element;
 			t = p;
 		}
@@ -132,9 +132,9 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// Turn an array literal into an array
     if( TreePtr<MakeArray> al = DynamicTreePtrCast<MakeArray>(op) )
     {
-    	auto a = MakeTreePtr<Array>();
+    	auto a = MakeTreeNode<Array>();
     	a->element = optypes.front();
-    	auto sz = MakeTreePtr<SpecificInteger>( optypes.size() );
+    	auto sz = MakeTreeNode<SpecificInteger>( optypes.size() );
     	a->size = sz;
         return a;
     }
@@ -151,8 +151,8 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	{
 		if( DynamicTreePtrCast<Pointer>(optypes.front()) && DynamicTreePtrCast<Pointer>(optypes.back()) )
 		{
-			auto i = MakeTreePtr<Signed>();
-			auto nc = MakeTreePtr<SpecificInteger>( TypeDb::integral_bits[INT] );
+			auto i = MakeTreeNode<Signed>();
+			auto nc = MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
 			i->width = nc;
 			return i;
 		}
@@ -168,8 +168,8 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 
 #define ARITHMETIC GetStandard( optypes )
 #define BITWISE GetStandard( optypes )
-#define LOGICAL MakeTreePtr<Boolean>()
-#define COMPARISON MakeTreePtr<Boolean>()
+#define LOGICAL MakeTreeNode<Boolean>()
+#define COMPARISON MakeTreeNode<Boolean>()
 #define SHIFT optypes.front()
 #define SPECIAL GetSpecial( op, optypes )
 
@@ -218,7 +218,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
-	TreePtr<SpecificInteger> maxwidth_signed = MakeTreePtr<SpecificInteger>( TypeDb::integral_bits[INT] );
+	TreePtr<SpecificInteger> maxwidth_signed = MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
 	TreePtr<SpecificInteger> maxwidth_unsigned;
 	TreePtr<SpecificFloatSemantics> maxwidth_float;
 
@@ -268,7 +268,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 	if( maxwidth_float )
 	{
 		TreePtr<Floating> result;
-		result->semantics = MakeTreePtr<SpecificFloatSemantics>( *maxwidth_float );
+		result->semantics = MakeTreeNode<SpecificFloatSemantics>( *maxwidth_float );
 		return result;
 	}
 
@@ -276,12 +276,12 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 	TreePtr<Integral> result;
 	if( maxwidth_unsigned && *maxwidth_unsigned >= *maxwidth_signed )
 	{
-		result = MakeTreePtr<Unsigned>();
+		result = MakeTreeNode<Unsigned>();
 		result->width = maxwidth_unsigned;
 	}
 	else
 	{
-		result = MakeTreePtr<Signed>();
+		result = MakeTreeNode<Signed>();
 		result->width = maxwidth_signed;
 	}
 	return result;
@@ -302,7 +302,7 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
     }
     else if( DynamicTreePtrCast<AddressOf>(op) )
     {
-        auto p = MakeTreePtr<Pointer>();
+        auto p = MakeTreeNode<Pointer>();
         p->destination = optypes.front();
         return p;
     }
@@ -336,33 +336,33 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     	// Get the info from Clang, and make an Inferno type for it
     	TreePtr<Integral> it;
         if( si->isSigned() )
-        	it = MakeTreePtr<Signed>();
+        	it = MakeTreeNode<Signed>();
         else
-        	it = MakeTreePtr<Unsigned>();
-        it->width = MakeTreePtr<SpecificInteger>( si->getBitWidth() );
+        	it = MakeTreeNode<Unsigned>();
+        it->width = MakeTreeNode<SpecificInteger>( si->getBitWidth() );
         return it;
     }
     else if( TreePtr<SpecificFloat> sf = DynamicTreePtrCast<SpecificFloat>(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	auto ft = MakeTreePtr<Floating>();
-    	ft->semantics = MakeTreePtr<SpecificFloatSemantics>( &sf->getSemantics() );
+    	auto ft = MakeTreeNode<Floating>();
+    	ft->semantics = MakeTreeNode<SpecificFloatSemantics>( &sf->getSemantics() );
         return ft;
     }
     else if( DynamicTreePtrCast<Bool>(l) )
     {
-        return MakeTreePtr<Boolean>();
+        return MakeTreeNode<Boolean>();
     }
     else if( DynamicTreePtrCast<String>(l) )
     {
     	TreePtr<Integral> n;
     	if( TypeDb::char_default_signed )
-    		n = MakeTreePtr<Signed>();
+    		n = MakeTreeNode<Signed>();
     	else
-    		n = MakeTreePtr<Unsigned>();
-    	auto sz = MakeTreePtr<SpecificInteger>( TypeDb::char_bits );
+    		n = MakeTreeNode<Unsigned>();
+    	auto sz = MakeTreeNode<SpecificInteger>( TypeDb::char_bits );
     	n->width = sz;
-    	auto p = MakeTreePtr<Pointer>();
+    	auto p = MakeTreeNode<Pointer>();
     	p->destination = n;
         return p;
     }
