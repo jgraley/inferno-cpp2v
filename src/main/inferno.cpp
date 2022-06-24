@@ -38,114 +38,114 @@ void BuildDefaultSequence( vector< shared_ptr<VNTransformation> > *sequence )
     DetectAllSCTypes::Build(sequence);
 
     { // establish what is locally uncombable
-        sequence->push_back( shared_ptr<VNTransformation>( new DetectUncombableSwitch ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new MakeAllForUncombable ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new DetectCombableFor ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new MakeAllBreakUncombable ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupCompoundMulti ) );    // for DetectCombableBreak
-        sequence->push_back( shared_ptr<VNTransformation>( new DetectCombableBreak ) );
+        sequence->push_back( make_shared<DetectUncombableSwitch>() );
+        sequence->push_back( make_shared<MakeAllForUncombable>() );
+        sequence->push_back( make_shared<DetectCombableFor>() );
+        sequence->push_back( make_shared<MakeAllBreakUncombable>() );
+        sequence->push_back( make_shared<CleanupCompoundMulti>() );
+        sequence->push_back( make_shared<DetectCombableBreak>() );
     }    
     { // Construct lowerings
         { // function call lowering (and function merging)
-            sequence->push_back( shared_ptr<VNTransformation>( new ExtractCallParams ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new ExplicitiseReturn ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new ReturnViaTemp ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new AddLinkAddress ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new ParamsViaTemps ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new SplitInstanceDeclarations ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new MoveInstanceDeclarations ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new AutosToModule ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new GenerateStacks ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new MergeFunctions ) );
+            sequence->push_back( make_shared<ExtractCallParams>() );
+            sequence->push_back( make_shared<ExplicitiseReturn>() );
+            sequence->push_back( make_shared<ReturnViaTemp>() );
+            sequence->push_back( make_shared<AddLinkAddress>() );
+            sequence->push_back( make_shared<ParamsViaTemps>() );
+            sequence->push_back( make_shared<SplitInstanceDeclarations>() );
+            sequence->push_back( make_shared<MoveInstanceDeclarations>() );
+            sequence->push_back( make_shared<AutosToModule>() );
+            sequence->push_back( make_shared<GenerateStacks>() );
+            sequence->push_back( make_shared<MergeFunctions>() );
         }
    
-        sequence->push_back( shared_ptr<VNTransformation>( new BreakToGoto ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new ForToWhile ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new WhileToDo ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new DoToIfGoto ) ); 
+        sequence->push_back( make_shared<BreakToGoto>() );
+        sequence->push_back( make_shared<ForToWhile>() );
+        sequence->push_back( make_shared<WhileToDo>() );
+        sequence->push_back( make_shared<DoToIfGoto>() );
         
-        sequence->push_back( shared_ptr<VNTransformation>( new LogicalOrToIf ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new LogicalAndToIf ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new ConditionalOperatorToIf ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new SwitchToIfGoto ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new SplitInstanceDeclarations ) );  
-        sequence->push_back( shared_ptr<VNTransformation>( new IfToIfGoto ) ); 
+        sequence->push_back( make_shared<LogicalOrToIf>() );
+        sequence->push_back( make_shared<LogicalAndToIf>() );
+        sequence->push_back( make_shared<ConditionalOperatorToIf>() );
+        sequence->push_back( make_shared<SwitchToIfGoto>() );
+        sequence->push_back( make_shared<SplitInstanceDeclarations>() );
+        sequence->push_back( make_shared<IfToIfGoto>() );
         // All remaining uncombables at the top level and in SUSP style
     }    
     { // Initial treatment of gotos and labels
-        sequence->push_back( shared_ptr<VNTransformation>( new NormaliseConditionalGotos ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new CompactGotos ) ); // maybe put these after the label cleanups
+        sequence->push_back( make_shared<NormaliseConditionalGotos>() );
+        sequence->push_back( make_shared<CompactGotos>() );
     }        
     { // big round of cleaning up
-        sequence->push_back( shared_ptr<VNTransformation>( new ReduceVoidStatementExpression ) ); 
+        sequence->push_back( make_shared<ReduceVoidStatementExpression>() );
         //for( int i=0; i<2; i++ )
         // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
         // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
         // removal of unused labels - we must repeat because dead code removal can generate unused labels.
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupStatementExpression ) ); // TODO only safe in SSP, so don't call this a cleanup!
+        sequence->push_back( make_shared<CleanupStatementExpression>() );
         for( int i=0; i<2; i++ )
         {
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupCompoundMulti ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupCompoundSingle ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupNop ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupUnusedLabels ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupDuplicateLabels ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupIneffectualLabels ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanUpDeadCode ) ); 
+            sequence->push_back( make_shared<CleanupCompoundMulti>() );
+            sequence->push_back( make_shared<CleanupCompoundSingle>() );
+            sequence->push_back( make_shared<CleanupNop>() );
+            sequence->push_back( make_shared<CleanupUnusedLabels>() );
+            sequence->push_back( make_shared<CleanupDuplicateLabels>() );
+            sequence->push_back( make_shared<CleanupIneffectualLabels>() );
+            sequence->push_back( make_shared<CleanUpDeadCode>() );
         }
     }    
     { // transition to normalised lmap style
-        sequence->push_back( shared_ptr<VNTransformation>( new GotoAfterWait ) );     
-        sequence->push_back( shared_ptr<VNTransformation>( new AddGotoBeforeLabel ) );         
-        //sequence->push_back( shared_ptr<VNTransformation>( new EnsureBootstrap ) );     
-        sequence->push_back( shared_ptr<VNTransformation>( new EnsureResetYield ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupCompoundMulti ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new AddStateLabelVar ) ); 
-        sequence->push_back( shared_ptr<VNTransformation>( new PlaceLabelsInArray ) );  
+        sequence->push_back( make_shared<GotoAfterWait>() );
+        sequence->push_back( make_shared<AddGotoBeforeLabel>() );
+        //sequence->push_back( make_shared<EnsureBootstrap>() );
+        sequence->push_back( make_shared<EnsureResetYield>() );
+        sequence->push_back( make_shared<CleanupCompoundMulti>() );
+        sequence->push_back( make_shared<AddStateLabelVar>() );
+        sequence->push_back( make_shared<PlaceLabelsInArray>() );
 #if 1
-        sequence->push_back( shared_ptr<VNTransformation>( new LabelTypeToEnum ) ); 
+        sequence->push_back( make_shared<LabelTypeToEnum>() );
 #else
         for( int i=0; i<2; i++ )
         {
-            sequence->push_back( shared_ptr<VNTransformation>( new LabelVarsToEnum ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new SwapSubscriptConditionalOperator ) );        
+            sequence->push_back( make_shared<LabelVarsToEnum>() );
+            sequence->push_back( make_shared<SwapSubscriptConditionalOperator>() );
         }
 #endif        
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupCompoundMulti ) );
+        sequence->push_back( make_shared<CleanupCompoundMulti>() );
     }    
     { // creating fallthrough machine
         for( int i=0; i<5; i++ )
         {
-            sequence->push_back( shared_ptr<VNTransformation>( new ApplyCombGotoPolicy ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new ApplyYieldGotoPolicy ) );
+            sequence->push_back( make_shared<ApplyCombGotoPolicy>() );
+            sequence->push_back( make_shared<ApplyYieldGotoPolicy>() );
         }
-        sequence->push_back( shared_ptr<VNTransformation>( new ApplyBottomPolicy ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new ApplyLabelPolicy ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupDuplicateLabels ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new ApplyTopPolicy ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new DetectSuperLoop(false) ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new DetectSuperLoop(true) ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupUnusedVariables ) );
+        sequence->push_back( make_shared<ApplyBottomPolicy>() );
+        sequence->push_back( make_shared<ApplyLabelPolicy>() );
+        sequence->push_back( make_shared<CleanupDuplicateLabels>() );
+        sequence->push_back( make_shared<ApplyTopPolicy>() );
+        sequence->push_back( make_shared<DetectSuperLoop>(false) );
+        sequence->push_back( make_shared<DetectSuperLoop>(true) );
+        sequence->push_back( make_shared<CleanupUnusedVariables>() );
     }
     { // optimsing fall though machine
-        sequence->push_back( shared_ptr<VNTransformation>( new LoopRotation ) );
+        sequence->push_back( make_shared<LoopRotation>() );
     }
     { // transition to event driven style
-        sequence->push_back( shared_ptr<VNTransformation>( new InsertInferredYield ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new AutosToModule ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new TempsAndStaticsToModule ) ); // TODO why?
-        sequence->push_back( shared_ptr<VNTransformation>( new DeclsToModule ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new ThreadToMethod ) );
-        sequence->push_back( shared_ptr<VNTransformation>( new ExplicitiseReturns ) );   // TODO move this into Verilog phase?
-        sequence->push_back( shared_ptr<VNTransformation>( new CleanupNestedIf ) );      // and this
+        sequence->push_back( make_shared<InsertInferredYield>() );
+        sequence->push_back( make_shared<AutosToModule>() );
+        sequence->push_back( make_shared<TempsAndStaticsToModule>() );
+        sequence->push_back( make_shared<DeclsToModule>() );
+        sequence->push_back( make_shared<ThreadToMethod>() );
+        sequence->push_back( make_shared<ExplicitiseReturns>() );
+        sequence->push_back( make_shared<CleanupNestedIf>() );
     }
     { // final cleanups
         for( int i=0; i<2; i++ )
         {
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupUnusedLabels ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupDuplicateLabels ) );
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanupIneffectualLabels ) ); 
-            sequence->push_back( shared_ptr<VNTransformation>( new CleanUpDeadCode ) ); 
+            sequence->push_back( make_shared<CleanupUnusedLabels>() );
+            sequence->push_back( make_shared<CleanupDuplicateLabels>() );
+            sequence->push_back( make_shared<CleanupIneffectualLabels>() );
+            sequence->push_back( make_shared<CleanUpDeadCode>() );
         }
     }
 }
@@ -154,7 +154,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNTransformation> > *sequence )
 void BuildDocSequence( vector< shared_ptr<VNTransformation> > *sequence )
 {
     ASSERT( sequence );
-    sequence->push_back( shared_ptr<VNTransformation>( new SlaveTest ) );
+    sequence->push_back( make_shared<SlaveTest>() );
     sequence->push_back( shared_ptr<VNTransformation>( new SlaveTest2 ) );
     sequence->push_back( shared_ptr<VNTransformation>( new SlaveTest3 ) );
 }

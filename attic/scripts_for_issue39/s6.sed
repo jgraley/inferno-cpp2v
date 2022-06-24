@@ -1,0 +1,1 @@
+s/^(.*)sequence->push_back\( shared_ptr<VNTransformation>\( new ([A-Za-z]*)(\(.*\)) \) \);.*$/\1sequence->push_back( make_shared<\2>\3 );/
