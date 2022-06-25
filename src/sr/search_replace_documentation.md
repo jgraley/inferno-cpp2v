@@ -1,10 +1,12 @@
 # Vida Nova Search and Replace User Guide
 
-## 1 The `VNTransfomation` class
+This document explains how to create search and replace patterns for Vida Nova so that it will perform the transformation you require. It will be useful to all users of Vida Nova.
 
-Vida Nova uses a search and replace engine for the majority of transformation steps. The generic search and replace implementation may be found in the `VNSequence` and `VNTransformation` classes and a number of supporting classes. A `VNTransformation` object is configured by supplying a search pattern and a replace pattern, both in the form of trees. One or more `VNTransformation` objects must be placed in a `VNSequence` object. This may be used to plan and then execute a sequence of transformations.
+These patterns are thmselves trees, similar to program trees, but with a number of extensions, both in terms of additional kinds of nodes that can be used, and in terms of relaxing the rules that apply to program trees.
 
-This documentation explains how to set up the correct patterns to the `VNTransformation` class so that it will create the transformation you require.
+## 1 `VNTransfomation` and `VNSequence`
+
+The generic search and replace implementation may be found in the `VNSequence` and `VNTransformation` classes and a number of supporting classes. A `VNTransformation` object is configured by supplying a search pattern and a replace pattern, both in the form of trees. One or more `VNTransformation` objects must be placed in a `VNSequence` object. This may be used to plan and then execute a sequence of transformations.
 
 ### 1.1 Configuring `VNTransformation`
 

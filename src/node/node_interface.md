@@ -1,5 +1,7 @@
 # Vida Nova Node Interface
         
+This document explains how to define nodes for Vida Nova so that programs may be represented using trees (in the compiler sense ) made up of these nodes. It will be useful to all users of Vida Nova.
+
 ## 1 Introduction        
         
 Vida Nova tree nodes implement a set of virtual functions defined by the base class `Node`, as well as observing certain stylistic conventions (termed topology-oriented). Both of these are documented here.
