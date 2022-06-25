@@ -1,6 +1,6 @@
 # Case Studies of a Transformations
 
-This document contains examinations of the rationale behind a selection of transformations. It will be useful to all users of Vida Nova. A small example, two medium examples and one large one follow. 
+This document contains examinations of the rationale behind a selection of transformations. It will be useful to all users of Vida Nova. A small example, a medium example and one large one follow. 
 
 ## removing `Nop`
 
@@ -14,23 +14,9 @@ For replacing, we wish to preserve everything in the compound block except the `
 
 The pattern is strictly reductive: each hit will reduce the number of `Nop` statements by one, and the transformation will terminate when the program contains no `Nop` statements. The repeating nature of the Vida Nova S&R algorithm means we will keep trying until we don't get any hits. This means that a compound block containing many `Nop` statements will be correctly transformed after multiple hits. On each hit, the `Star<Statement>` nodes will match different subsequences of the statements in the compound block. For this step (and I believe in general) it does not matter whether the first `Nop` matched is the one at the top, or bottom or middle of the block.
 
-## Generate implicit casts
-
-`GenerateImplicitCasts` adds a C-style cast to every function call argument that is not of the same type as the parameter in the function declaration. 
-
-To do this we search for a call to a function (the `Call` node). Because function calls can be expressions (involving function pointers) the `Call` node specifies the function using an expression. The signature of the function is the type of this expression, and it contains the types of the parameters. To get the type of the expression, we specify `TransformOf<Expression>(Typeof)` node. The type is then compared with the pattern given as the child of `TypeOf`. Here we specify `Procedure`, which is the type for a callable entity that has parameters (but not necessarily a return value). `Function` derives from `Procedure`.
-
-Note: Vida Nova stores parameters in an unordered collection, which differs from C source language which relies on parameter ordering. Arguments to a call are then specified in the form of a map, with the key being the parameter's identifier and the value being the argument expression. Vida Nova does not support maps directly (only sequences and collections) so the tree specification for C builds a map from a collection of nodes called `MapOperand` which act as key-value pairs. A call is therefore conceptually more like a named parameter call e.g. `foo( param1:arg1, param2:arg2 ...)`. This type of structure is easy to manipulate in search and replace using couplings. Ordered parameters would be more difficult because it would require an ordinal correspondence (index coupling). However, the reason for doing it this way is not S&R simplicity, but rather a desire not to store redundant information in the tree.
-
-Since we will act on one parameter at a time, we use `Star` to match the other parameters. The one we are interested in will be an `Instance` node, since a parameter is a declaration of a variable-like construct. The identifier and type are given maximal wildcards to allow any parameter to match. In the arguments collection of the search pattern's `Call` node, we again supply a `Star` for other arguments, and a `MapOperand`, as explained above, for the argument in question. To ensure the `MapOperand` corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. 
-
-We must restrict the search to cases where the types differ, so we use the but-not pattern, by placing `TypeOf` on the argument expression, and coupling to the parameter type under a `Negation` node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
-
-The replace pattern for this transformation is relatively simple. In the replace pattern's `Call`, we couple the other args and the expression that chooses the function, so that they are the same (when you couple to a `TypeOf` node, you get the expression; to get the type, couple to its child). We replace the missing argument with a new `MapOperand`, coupling the identifier to that of the `MapOperand` in the search pattern. For the expression, we supply a `Cast` node, which corresponds to a C-style cast. Its type is the type of the parameter in the declaration. The expression is coupled to the the argument expression. This will generate a cast that casts the expression in the original call to the type of the parameter in the function's declaration, as required.
-
-Note that we see some three-way couplings around the parameter type and identifier. This works just fine, Vida Nova is cool about that sort of thing.
-
 ## For to While
+
+![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/035-ForToWhile.svg)
 
 `ForToWhile` transforms For loops into semantically equivalent `While` loops. C makes this easy and hard. Easy because the three elements of a `For` loop are general C constructs that can simply be moved to the appropriate places around a `While` loop; hard because of `Break` and `Continue`. We do not have to worry about `Break` here because it has already been handled by another step, but `Continue` requires explicit treatment (`Continue` works in While loops, but we have to be careful about the semantics: the increment could be skipped).
 
@@ -49,6 +35,8 @@ In this body, we wish to change the behaviour of `Continue`: we wish to insert a
 Note that if there was no need for a recurse restriction, we would use `SlaveSearchReplace` and get a more readable pattern.
 
 ## Generate stacks
+
+![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/032-GenerateStacks.svg)
 
 `GenerateStacks` is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
 
