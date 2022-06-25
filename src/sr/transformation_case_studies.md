@@ -40,11 +40,11 @@ Note that if there was no need for a recurse restriction, we would use `SlaveSea
 
 `GenerateStacks` is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
 
-![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/032-GenerateStacks.svg)
-
 We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep.
 
 The stacks and stack index are all local static variables. In future, these will be made members of some containing class, which will improve locality.
+
+![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/032-GenerateStacks.svg)
 
 A single static stack pointer is declared for each function. It is incremented at the top and decremented at the bottom. The master `VNTransfomation` does this. It must also be decremented before return statements. A slave does this. Another slave detects all the declarations of automatic variables in the function and replaces them with static arrays (stacks). This slave has a sub slave which finds usages of the variable, and inserts an indexing operation into the array, using the stack index.
 
