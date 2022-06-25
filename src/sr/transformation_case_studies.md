@@ -1,6 +1,6 @@
-# Worked examples
+# Case Studies of a Transformations
 
-A small example, two medium examples and one large one follow. 
+This document contains examinations of the rationale behind a selection of transformations. It will be useful to all users of Vida Nova. A small example, two medium examples and one large one follow. 
 
 ## removing `Nop`
 
