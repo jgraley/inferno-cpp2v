@@ -2,7 +2,7 @@
 
 A small example, two medium examples and one large one follow. 
 
-## 1 removing `Nop`
+## removing `Nop`
 
 `Nop` is a `Statement` node that represents "no operation". `CleanupNop` uses `VNTransfomation` to eliminate obviously redundant `Nop`s from code. The search pattern is a `Compound` statement with a `Star<Declaration>` node in the `Declaration`s collection. The sequence of `Statement`s in the `Compound` block (an ordered container) contain the following: `Star<Statement>`, `Nop`, `Star<Statement>`. All the `Star` nodes have no pre-restriction and are maximally wild, so they'll match anything. 
 
@@ -12,7 +12,7 @@ For replacing, we wish to preserve everything in the compound block except the `
 
 The pattern is strictly reductive: each hit will reduce the number of `Nop` statements by one, and the transformation will terminate when the program contains no `Nop` statements. The repeating nature of the Vida Nova S&R algorithm means we will keep trying until we don't get any hits. This means that a compound block containing many `Nop` statements will be correctly transformed after multiple hits. On each hit, the `Star<Statement>` nodes will match different subsequences of the statements in the compound block. For this step (and I believe in general) it does not matter whether the first `Nop` matched is the one at the top, or bottom or middle of the block.
 
-## 2 Generate implicit casts
+## Generate implicit casts
 
 `GenerateImplicitCasts` adds a C-style cast to every function call argument that is not of the same type as the parameter in the function declaration. 
 
@@ -28,7 +28,7 @@ The replace pattern for this transformation is relatively simple. In the replace
 
 Note that we see some three-way couplings around the parameter type and identifier. This works just fine, Vida Nova is cool about that sort of thing.
 
-## 3 For to While
+## For to While
 
 `ForToWhile` transforms For loops into semantically equivalent `While` loops. C makes this easy and hard. Easy because the three elements of a `For` loop are general C constructs that can simply be moved to the appropriate places around a `While` loop; hard because of `Break` and `Continue`. We do not have to worry about `Break` here because it has already been handled by another step, but `Continue` requires explicit treatment (`Continue` works in While loops, but we have to be careful about the semantics: the increment could be skipped).
 
@@ -46,7 +46,7 @@ In this body, we wish to change the behaviour of `Continue`: we wish to insert a
 
 Note that if there was no need for a recurse restriction, we would use `SlaveSearchReplace` and get a more readable pattern.
 
-## 4 Generate stacks
+## Generate stacks
 
 `GenerateStacks` is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
 
