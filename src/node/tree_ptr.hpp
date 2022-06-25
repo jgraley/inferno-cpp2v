@@ -203,7 +203,7 @@ inline TreePtr<VALUE_TYPE> DynamicTreePtrCast( const TreePtrInterface &g )
 }
 
 
-// Similar signature to boost shared_ptr operator==, and we restrict the pointers
+// Similar signature to shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
 template< typename X, typename Y >
 inline bool operator==( const TreePtr<X> &x,
@@ -219,7 +219,7 @@ inline bool operator!=( const TreePtr<X> &x,
 	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
-// Similar signature to boost shared_ptr operator==, and we restrict the pointers
+// Similar signature to shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
 inline bool operator==( const TreePtrInterface &x,
 		                const TreePtrInterface &y)

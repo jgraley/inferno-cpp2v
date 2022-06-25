@@ -40,7 +40,7 @@ public:
 	};
 
 public:
-	// Wrapper for iterator_interface, uses boost::shared_ptr<> and Clone() to manage the real iterator
+	// Wrapper for iterator_interface, uses std::shared_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible. These can be passed around
 	// by value, and have copy-on-write semantics, so big iterators will actually get optimised
 	class iterator : public iterator_interface
