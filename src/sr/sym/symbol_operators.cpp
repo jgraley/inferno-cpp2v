@@ -169,7 +169,7 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
-    if( !archetype_node->IsLocalMatch( ar->GetOnlyXLink().GetChildX().get() ) )
+    if( !archetype_node->IsSubcategory( ar->GetOnlyXLink().GetChildX().get() ) )
         return make_unique<SymbolResult>(SymbolResult::NOT_A_SYMBOL); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"

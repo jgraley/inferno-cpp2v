@@ -10,8 +10,6 @@ using namespace SR;
 
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
 //#define TRACE_KNOWLEDGE_DELTAS
-//#define REMOVE_FINALS_FROM_CATEGORY_ORDERING
-
 
 #ifdef TRACE_KNOWLEDGE_DELTAS
 // Global because there are different knowledges owned by different SCR Engines
@@ -33,7 +31,7 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     if( clauses.empty() )
         return;
     
-    // Extract all the non-final archetypes from the IsKindOfOperator nodes 
+    // Extract all the non-final archetypes from the IsInCategoryOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.
     Lacing::CategorySet categories;
@@ -41,17 +39,9 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     {
         clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
         {
-            if( auto ko_expr = dynamic_cast<const SYM::IsKindOfOperator *>(expr) )
+            if( auto ko_expr = dynamic_cast<const SYM::IsInCategoryOperator *>(expr) )
             { 
-                TreePtr<Node> archetype = ko_expr->GetArchetypeNode();
-                
-                // Note: excluding final categories here means that final
-                // KindOfOperators will need to range on the SimpleCompare
-                // ordering, in order to fix the node type.
-#ifdef REMOVE_FINALS_FROM_CATEGORY_ORDERING
-                if( !archetype->IsFinal() )
-#endif                
-                    categories.insert( archetype );
+                categories.insert( ko_expr->GetArchetypeNode() );
             }
         } );
     }

@@ -198,7 +198,7 @@ bool AgentCommon::IsNonTrivialPreRestriction() const
 }                                
 
 
-bool AgentCommon::ShouldGenerateKindOfClause() const
+bool AgentCommon::ShouldGenerateCategoryClause() const
 {
     // It could be argued that, from the CSP solver's point of
     // view, if we didn't need pre-restriction constraint, we would
@@ -217,15 +217,28 @@ bool AgentCommon::ShouldGenerateKindOfClause() const
 
 SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
-    if( ShouldGenerateKindOfClause() )
+    if( ShouldGenerateCategoryClause() )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-	    return MakeOver<IsKindOfOperator>(GetArchetypeNode(), keyer_expr);
+	    return MakeOver<IsInCategoryOperator>(GetArchetypeNode(), keyer_expr);
     }
     else
     {
         return MakeOver<BooleanConstant>(true);
     }
+}
+
+
+bool AgentCommon::IsPreRestrictionMatch( TreePtr<Node> x ) const
+{
+    // Pre-restriction policy defined here. 
+    return IsSubcategory( x.get() );
+}
+
+
+bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
+{
+    return IsPreRestrictionMatch( x.GetChildX() );
 }
 
 
@@ -468,11 +481,11 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
         return; // In search pattern and already keyed - we only overlay using replace-only nodes
                 
     // This is why we call on over, passing in under. The test requires
-    // that under be a non-strict subclass of over. Overlaying a super-class
-    // over a subclass means we simply update the singulars we know about
-    // in over. Under is likely to be an X node and hence final while
+    // that under be a non-strict subclass of over. Overlaying a super-category
+    // over a subcategory means we simply update the singulars we know about
+    // in over. Under is likely to be an X node and hence final, while
     // over can be StandaedAgent<some intermediate>.
-    if( !IsLocalMatch(under_plink.GetChildAgent()) ) 
+    if( !IsSubcategory(under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
     // Under must be a standard agent
@@ -625,15 +638,6 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
     }
     
     return dest;
-}
-
-
-bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
-{
-    // Pre-restriction policy defined here. Would like to be able to 
-    // export an archetype and implement the policy centrally or in
-    // the symbolic stuff.
-    return IsLocalMatch( x.GetChildX().get() );
 }
 
 

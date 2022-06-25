@@ -21,7 +21,7 @@ struct Matcher
     {
     };
 
-	virtual bool IsSubclass( const Matcher *source_archetype ) const = 0;
+	virtual bool IsSubcategory( const Matcher *source_archetype ) const = 0;
 	virtual bool IsLocalMatch( const Matcher *candidate ) const;
     virtual ~Matcher();
     template< class TARGET_TYPE >
@@ -34,7 +34,7 @@ struct Matcher
 };
 
 #define MATCHER_FUNCTION \
-    virtual bool IsSubclass( const Matcher *source_archetype ) const \
+    virtual bool IsSubcategory( const Matcher *source_archetype ) const \
     { \
         return IsSubclassStatic( this, source_archetype ); \
     }

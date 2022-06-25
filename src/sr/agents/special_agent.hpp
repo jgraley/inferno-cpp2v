@@ -18,7 +18,7 @@ namespace SR
 //    special nodes by restricting to non-strict subclasses of the
 //    pre-restrictor.
 // In order to make 2. work, we need to *avoid* overriding IsLocalMatch()
-// or IsSubclass() on special nodes, so that the behaviour of the 
+// or IsSubcategory() on special nodes, so that the behaviour of the 
 // PRE_RESTRICTION is preserved wrt comparisons. So all special nodes
 // including speicialisations of TransformTo etc should use 
 // SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.

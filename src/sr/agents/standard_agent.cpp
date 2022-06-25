@@ -537,7 +537,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         TreePtr<Node> under_node = master_scr_engine->GetReplaceKey( overlay_under_plink );
         ASSERT( under_node );
         ASSERT( under_node->IsFinal() ); 
-        ASSERT( IsLocalMatch(under_node.get()) );
+        ASSERT( IsSubcategory(under_node.get()) ); 
         return BuildReplaceOverlay( me_plink, under_node );
     }
     else if( key_node ) 
@@ -547,7 +547,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
         ASSERT( key_node->IsFinal() ); 
-        ASSERT( IsLocalMatch(key_node.get()) );
+        ASSERT( IsSubcategory(key_node.get()) ); 
         return BuildReplaceOverlay( me_plink, key_node );
     }
     else
@@ -565,7 +565,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 	INDENT("O");
     ASSERT( under_node );
     
-    ASSERT( IsLocalMatch(under_node.get()) )
+    ASSERT( IsSubcategory(under_node.get()) ) 
 		  (" must be a non-strict superclass of under_node=")
 		  (*under_node)
 		  (", so that it does not have more members");

@@ -315,7 +315,7 @@ void Lacing::BuildDecisionTree()
     TRACE(cats_to_lacing_sets)("\n");
     
     // Generate a decision tree that determines lacing index using just
-    // IsLocalMatch() on some X node (not necessarily seen here)
+    // IsSubcategory() on some X node (not necessarily seen here)
     set<int> possible_lacing_indices;
     for( int i=0; i<ncats; i++ )
         possible_lacing_indices.insert(i);
@@ -403,7 +403,7 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
     int min_lacing_index = FrontOf(possible_lacing_indices);
     int max_lacing_index = BackOf(possible_lacing_indices);
  
-    // Generate a decision node that should decide based on IsLocalMatch
+    // Generate a decision node that should decide based on IsSubcategory
     // during the unwind.
    return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no, min_lacing_index, max_lacing_index );    
 }
@@ -417,7 +417,7 @@ bool Lacing::LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r )
     else if( !l || !r )
         return false; // Null and non-NULL never match 
     else 
-        return l->IsLocalMatch( r.get() );
+        return l->IsSubcategory( r.get() );
 }
 
 

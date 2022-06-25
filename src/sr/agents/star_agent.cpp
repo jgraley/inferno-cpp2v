@@ -23,10 +23,10 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 
 SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery() const
 {
-    if( ShouldGenerateKindOfClause() )
+    if( ShouldGenerateCategoryClause() )
     {
         auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-        return MakeOver<SubcontainerKindOfOperator>(GetArchetypeNode(), keyer_expr);
+        return MakeOver<IsSubcontainerInCategoryOperator>(GetArchetypeNode(), keyer_expr);
     }
     else
     {
@@ -55,7 +55,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     TRACE("StarAgent pre-res\n");
     FOREACH( const TreePtrInterface &xe, *x_ci )
     {
-        if( !IsLocalMatch( ((TreePtr<Node>)xe).get() ) )
+        if( !IsPreRestrictionMatch( (TreePtr<Node>)xe ) )
             throw PreRestrictionMismatch();
     }
      
@@ -128,7 +128,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
 }
  
 
-unique_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate( const EvalKit &kit,
                                                                            list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
@@ -147,14 +147,14 @@ unique_ptr<BooleanResult> StarAgent::SubcontainerKindOfOperator::Evaluate( const
     // Check pre-restriction
     bool matches = true;
     FOREACH( const TreePtrInterface &xe, *x_ci )
-        matches = matches & archetype_node->IsLocalMatch( ((TreePtr<Node>)xe).get() );            
+        matches = matches & archetype_node->IsSubcategory( ((TreePtr<Node>)xe).get() );            
 
     return make_unique<BooleanResult>( matches );
 }                                   
 
          
-string StarAgent::SubcontainerKindOfOperator::RenderNF() const
+string StarAgent::IsSubcontainerInCategoryOperator::RenderNF() const
 {
-    return "SubcontainerKindOf<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
+    return "SubcontainerCAT<" + archetype_node->GetTypeName() + ">(" + a->Render() + ")"; 
 }
 

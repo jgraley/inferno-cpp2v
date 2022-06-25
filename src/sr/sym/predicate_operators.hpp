@@ -225,16 +225,16 @@ private:
     list< shared_ptr<SymbolExpression> > sa;
 };
 
-// ------------------------- IsKindOfOperator --------------------------
+// ------------------------- IsInCategoryOperator --------------------------
 
 // Note: this predicate is kept specific (rather than generalising to 
 // eg IsInCategoryRange) because it needs to be seen by knowledge planning
 // and only then can it be solved into the more generic AllInCategoryRangeOperator. 
-class IsKindOfOperator : public PredicateOperator
+class IsInCategoryOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit IsKindOfOperator( TreePtr<Node> archetype_node,
+    explicit IsInCategoryOperator( TreePtr<Node> archetype_node,
                              shared_ptr<SymbolExpression> a); 
     shared_ptr<PredicateOperator> Clone() const override;
 

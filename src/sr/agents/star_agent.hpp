@@ -43,9 +43,9 @@ public:
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;
 
-    class SubcontainerKindOfOperator : public SYM::IsKindOfOperator
+    class IsSubcontainerInCategoryOperator : public SYM::IsInCategoryOperator
     {
-        using IsKindOfOperator::IsKindOfOperator; 
+        using IsInCategoryOperator::IsInCategoryOperator; 
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
         virtual string RenderNF() const override;

@@ -604,9 +604,9 @@ Expression::Precedence IsAllDiffOperator::GetPrecedenceNF() const
     return Precedence::PREFIX;
 }
 
-// ------------------------- IsKindOfOperator --------------------------
+// ------------------------- IsInCategoryOperator --------------------------
 
-IsKindOfOperator::IsKindOfOperator( TreePtr<Node> archetype_node_,
+IsInCategoryOperator::IsInCategoryOperator( TreePtr<Node> archetype_node_,
                                 shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
     archetype_node( archetype_node_ )
@@ -614,19 +614,19 @@ IsKindOfOperator::IsKindOfOperator( TreePtr<Node> archetype_node_,
 }                                                
 
 
-shared_ptr<PredicateOperator> IsKindOfOperator::Clone() const
+shared_ptr<PredicateOperator> IsInCategoryOperator::Clone() const
 {
-    return make_shared<IsKindOfOperator>( archetype_node, a );
+    return make_shared<IsInCategoryOperator>( archetype_node, a );
 }
     
 
-list<shared_ptr<SymbolExpression> *> IsKindOfOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> IsInCategoryOperator::GetSymbolOperandPointers()
 {
     return { &a };
 }
 
 
-unique_ptr<BooleanResult> IsKindOfOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
                                                     list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
@@ -636,12 +636,12 @@ unique_ptr<BooleanResult> IsKindOfOperator::Evaluate( const EvalKit &kit,
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
-    bool matches = archetype_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() );
+    bool matches = archetype_node->IsSubcategory( ra->GetOnlyXLink().GetChildX().get() );
     return make_unique<BooleanResult>( matches );
 }
 
 
-shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
+shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
     // Get lacing index range
     const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
@@ -663,12 +663,12 @@ shared_ptr<SYM::SymbolExpression> IsKindOfOperator::TrySolveFor( const SolveKit 
 }                                                                                                                                             
                                               
                                               
-Relationship IsKindOfOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
 {
-    if( auto ko_other = dynamic_pointer_cast<IsKindOfOperator>(other) )
+    if( auto ko_other = dynamic_pointer_cast<IsInCategoryOperator>(other) )
     {
         // For implication, the SUBCATEGORY implies the SUPERCATEGORY
-        if( ko_other->GetArchetypeNode()->IsLocalMatch( archetype_node.get() ) ) // like "contains"
+        if( ko_other->GetArchetypeNode()->IsSubcategory( archetype_node.get() ) ) // like "contains"
             return Relationship::IMPLIES;
             
         // TODO could determine CONTRADICTS by studying the lacings, or by
@@ -680,7 +680,7 @@ Relationship IsKindOfOperator::GetRelationshipWith( shared_ptr<PredicateOperator
 }
 
 
-Orderable::Result IsKindOfOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Result IsInCategoryOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -691,19 +691,19 @@ Orderable::Result IsKindOfOperator::OrderCompareLocal( const Orderable *candidat
 }  
 
 
-string IsKindOfOperator::RenderNF() const
+string IsInCategoryOperator::RenderNF() const
 {
-    return "KindOf<" + archetype_node->GetTypeName() + ">" + a->RenderWithParentheses(); 
+    return "CAT<" + archetype_node->GetTypeName() + ">" + a->RenderWithParentheses(); 
 }
 
 
-Expression::Precedence IsKindOfOperator::GetPrecedenceNF() const
+Expression::Precedence IsInCategoryOperator::GetPrecedenceNF() const
 {
     return Precedence::PREFIX;
 }
 
 
-TreePtr<Node> IsKindOfOperator::GetArchetypeNode() const
+TreePtr<Node> IsInCategoryOperator::GetArchetypeNode() const
 {
     return archetype_node;
 }
@@ -750,7 +750,7 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !archetype_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() ) )
+    if( !archetype_node->IsSubcategory( ra->GetOnlyXLink().GetChildX().get() ) )
         return make_unique<BooleanResult>( false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"

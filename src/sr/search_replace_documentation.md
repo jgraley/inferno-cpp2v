@@ -22,7 +22,7 @@ The `VNTransfomation` algorithm repeatedly attempts to find a match to the searc
 
 ## 2 Topological wildcarding
 
-Vida Nova nodes are organised in an inheritance hierarchy beginning with `Node`, from which certain intermediates like `Statement` and `Type` are derived, and then the final nodes are derived from the intermediates. In many cases there are multiple levels of intermediates between `Node` and the final node type, and multiple inheritance is allowed (with virtual inheritance). This hierarchy is best understood as a Euler diagram, where subclass is synonymous with subset.
+Vida Nova nodes are organised in a hierarchy of _categories_ beginning with `Node`, from which certain intermediate categoriess like `Statement` and `Type` are derived, and then the final nodes are derived from the intermediates. In many cases there are multiple levels of intermediate categories between `Node` and the final node type, and multiple inheritance is allowed. This hierarchy is best understood as a Euler diagram, where subcategory is synonymous with subset.
 
 The trees for programs are only allowed to consist of final nodes. So `Node` and the intermediates are not allowed in program trees. They are allowed, however, in search and replace patterns as long as they would not end up in the output of the search and replace transformation. 
 
@@ -36,7 +36,7 @@ Maximally wild pointers may be considered similar to the use of `.` character in
 
 ### 2.1 Can populate the wild card's members
 
-In the Vida Nova tree, some intermediate nodes have members: C++ copies these members into derived node classes during inheritance. Members may be filled in when intermediates are used in a search pattern. These members will be matched as normal and will serve to restrict the search pattern.
+In the Vida Nova tree, some intermediate nodes have members: C++ copies these members into derived node categories during inheritance. Members may be filled in when intermediates are used in a search pattern. These members will be matched as normal and will serve to restrict the search pattern.
 
 For example, giving the node `Integral` and pointing the width member to a `SpecificInteger` of value 32 (which we could write `Integral(width:SpecificInteger(32)))` will match 32-bit signed and unsigned data types since `Signed` and `Unsigned` both derive from `Integral`.
 
@@ -50,9 +50,9 @@ We do allow NULL for singular links in in search patterns, where it serves as sh
 
 ### 2.4 Pre-restriction on special nodes
 
-When searching, all special nodes support search restriction via the base type supplied as the first template parameter (recall that special nodes derive from the supplied base type). This base type is called the pre-restriction type. Regardless of what the special node is defined to do, all searches will restrict to nodes that are of non-strict subclasses of the pre-restriction type. 
+When searching, all special nodes support search restriction via the base type supplied as the first template parameter (recall that special nodes derive from the supplied base type). This base type is called the pre-restriction type. Regardless of what the special node is defined to do, all searches will restrict to nodes that are of non-strict subcategories of the pre-restriction category. 
 
-Type-safety means that a tree pointer can only point to non-strict subclasses of the pointer type. Therefore if the pre-restriction type is the same type, the pre-restriction will be maximally wild and effectively disabled. Only if a strict subclass is given will a restriction be seen to take effect. The term _pre-restriction_ reminds us that it seems to apply before the special node's special algorithm runs (which will typically apply some further restriction independently of the pre-restriction under an "and" rule).
+Type-safety means that a tree pointer can only point to non-strict subclasses of the pointer type. Therefore if the pre-restriction type is the same type, the pre-restriction will be maximally wild and effectively disabled. Only if a strict subcategory is given will a restriction be seen to take effect. The term _pre-restriction_ reminds us that it seems to apply before the special node's special algorithm runs (which will typically apply some further restriction independently of the pre-restriction under an "and" rule).
 
 ### 2.5 Notes on topology-oriented tree
 
@@ -60,7 +60,7 @@ In order to maximise the utility of topological wildcarding (and its coupling su
 
 - the options for node `X` are expressed in a set of final nodes derived from `X`, so that `X` becomes an intermediate node. This can only be done for one field of node `X`. For example, consider nodes `Signed` and `Unsigned`, which both derive from the original node `Integral`, and indicate signedness. For a pattern in which an integral type can be signed or unsigned, `Integral` is the appropriate wildcard. `Signed` or `Unsigned` are used when the signedness matters.
 
-- a new hierarchy of nodes under a new intermediate `Y` is created, and the original node `X` contains a pointer to `Y` in place of the original field. This may be applied to any field of any given `X`. For example `Public`, `Private` and `Protected` are all subclasses of `AccessSpec`, and the `Definition` node points to `AccessSpec`.
+- a new hierarchy of nodes under a new intermediate `Y` is created, and the original node `X` contains a pointer to `Y` in place of the original field. This may be applied to any field of any given `X`. For example `Public`, `Private` and `Protected` are all subcategories of `AccessSpec`, and the `Definition` node points to `AccessSpec`.
 
 In fact, this policy leads most nodes to contain only singulars, collections and sequences. Only a small number of nodes contain other data types such as int, string etc that cannot be accommodated topologically. This is termed a topologically-oriented tree and is a reasonably consistent canonical form for program elements.
 
@@ -94,9 +94,9 @@ However, it is possible to arrange for some new subtree to appear under such a c
 
 The overlaying process is recursive, that is it can overlay a child of the node pointed to by overlay over the equivalent child of the matched input program node. Starting with pointers `PT` = `through` and `PO` = `overlay`, the rule is:
 
-- If `PO` is non-NULL (`PT` is always non-NULL) and the node at `PT` is a non-strict subclass of the node at `PO`, then we overlay, by recursing for `PO'` = each pointer member of the node at `PO`, and `PT'` = the corresponding member of the node at `PT`. This correspondence is the reason for the subclass requirement. 
+- If `PO` is non-NULL (`PT` is always non-NULL) and the node at `PT` is a non-strict subcategory of the node at `PO`, then we overlay, by recursing for `PO'` = each pointer member of the node at `PO`, and `PT'` = the corresponding member of the node at `PT`. This correspondence is the reason for the subcategory requirement. 
 
-- If `PO` is NULL or the node at `PT` is not a non-strict subclass of the node at `PO`, then we overwrite the subtree at `PT` with a copy of the subtree at `PO`. We have now finished this branch and do not need to repeat.
+- If `PO` is NULL or the node at `PT` is not a non-strict subcategory of the node at `PO`, then we overwrite the subtree at `PT` with a copy of the subtree at `PO`. We have now finished this branch and do not need to repeat.
 
 - Containers (sequences and collections) always overwrite when encountered in the node at `PO`.
 
@@ -116,7 +116,7 @@ The rule is that you cannot couple nodes in separate abnormal contexts. A coupli
 
 The Vida Nova tree supports one-to-many relationships using containers, of which two types are available: sequence, which preserves ordering and collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called `Star<>`, which is templated on the collection's element type. So a container of pointers to `Statement`s can be wildcarded using `Star<Statement>`. 
 
-If a pre-restriction is given, every container element matched by the `Star` must satisfy the pre-restriction (i.e. be a non-strict subclass of the supplied base class). Additionally, the `pattern` member may point to a subtree, which must be matched by every element that the star node matches. This pattern is an abnormal context.
+If a pre-restriction is given, every container element matched by the `Star` must satisfy the pre-restriction (i.e. be a non-strict subcategory of the supplied base class). Additionally, the `pattern` member may point to a subtree, which must be matched by every element that the star node matches. This pattern is an abnormal context.
 
 `Star` nodes may be coupled into collections in the replace pattern, in order to reproduce all the nodes that were matched by the `Star` in the search pattern. 
 

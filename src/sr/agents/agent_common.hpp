@@ -31,8 +31,10 @@ public:
     virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
     bool IsNonTrivialPreRestriction() const;
-    bool ShouldGenerateKindOfClause() const override;                                
+    bool ShouldGenerateCategoryClause() const override;                                
 	virtual SYM::Over<SYM::BooleanExpression> SymbolicPreRestriction() const;
+    bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
+    bool IsPreRestrictionMatch( XLink x ) const; // return true if matches
 	
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
@@ -48,7 +50,6 @@ public:
     virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
      
-public:
     virtual const SCREngine *GetMasterSCREngine() const;      
     virtual PatternLink GetKeyerPatternLink() const override;                                  
     virtual set<PatternLink> GetResidualPatternLinks() const override;                                  
@@ -67,7 +68,6 @@ public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
-    virtual bool IsPreRestrictionMatch( XLink x ) const override; // return true if matches
     virtual string GetTrace() const;
 
 protected:                                  

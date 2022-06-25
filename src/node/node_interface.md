@@ -10,14 +10,14 @@ Program trees are networks of nodes (actually acyclic directed graphs). We do no
 
 ## 2 Topologically-Oriented tree
 
-Vida Nova nodes are typically inheritance hierarchies under `Node`, including intermediate nodes which represent categories. It is useful to see such a hierarchy in a set-theoretical sense, where subclass is equivalent to subset. Thus the base class called `Node` is equivalent to the set of all nodes, and an intermediate node is equivalent to the subset of nodes that inherit from it. 
+Vida Nova nodes are typically inheritance hierarchies under `Node`, including intermediate nodes which represent categories. We use the term _category_ rather than _class_ to clarify that actual C++ classes needn't (in principle) be the underlying representation of a system of tree node definitions. It is useful to see such a hierarchy in a set-theoretical sense, where subcategory is equivalent to subset. Thus the base category called `Node` is equivalent to the set of all nodes, and an intermediate node is equivalent to the subset of nodes that inherit from it. 
 
 Multiple inheritance is allowed, and by convention Vida Nova trees use virtual inheritance so that diamonds do not duplicate the base (our inheritance is true specialisation and so we want the set-union of members, not composition in disguise where we would want concatenation).
 
 Only final (i.e. not intermediate) nodes may appear in the tree for a program. Intermediate nodes can, however, legally be constructed in other contexts such as search and replace patterns.
 
 In general, we try to express as much information as possible through
- - the types of nodes and their super-classes and
+ - the types of nodes and their super-categories and
  - the structure of the links between nodes.
  
 For example if a node naturally seems to contain a boolean or enum, we will prefer to either
@@ -30,32 +30,30 @@ A common practice in Vida Nova is the use of so-called archetypes. These are obj
 
 ## 3 Node Virtual Functions
 
-The `Node` base class is actually built from a collection of sub-base classes, each of which defines one element of the interface and supplies a default implementation. The important sub-bases follow:
+The `Node` class is actually built from a collection of sub-base classes, each of which defines one element of the interface and supplies a default implementation. The important sub-bases follow:
 
 ### 3.1 `Matcher`
 
 Defines 2 virtual functions:
- - `virtual bool IsSubclass( const Matcher *source_archetype ) const = 0;`
- - `virtual bool IsLocalMatch( const Matcher *candidate ) const {...};`
+ - `virtual bool IsSubcategory( const Matcher *source_archetype ) const = 0;`
+ - `virtual bool IsLocalMatch( const Matcher *candidate ) const;`
 
-`IsSubclass()` returns true if `source_archetype` is a non-strict subclass of the class upon which the method was called. This method needs to be implemented separately in each type of node due to the limitations of C++. However, the required implementation is produced by including the macro `MATCHER_FUNCTION` (no semicolon required) in the node's class definition.
+`IsSubcategory()` returns true if `source_archetype` is a non-strict subcategory of the category upon which the method was called. This method needs to be implemented separately in each type of node due to the limitations of C++. However, the required implementation is produced by including the macro `MATCHER_FUNCTION` (no semicolon required) in the node's class definition.
 
-`IsLocalMatch()` returns true if the candidate is (a) the same as or (b) a member of the category described by the object upon which the method was called. It defaults to a call to `IsSubclass()`.
+`IsLocalMatch()` returns true if the candidate is (a) the same as or (b) a member of the category described by the object upon which the method was called. It defaults to a call to `IsSubcategory()`.
 
-Under our set-theoretical view of a tree, subclass corresponds to subset. So `IsSubclass()` would be the correct implementation for `IsLocalMatch()` on nodes that do not contain any data members and are therefore entirely defined by their type. If a node has members that point to other nodes, we ignore them in the matcher, which is the reason for the word `Local` in the function name. If there are data members of other type, it may be necessary to override `IsLocalMatch()` with a new, stricter check on the data members. 
+Under our set-theoretical view of a tree, subcategory corresponds to subset. So `IsSubcategory()` would be the correct implementation for `IsLocalMatch()` on nodes that do not contain any data members and are therefore entirely defined by their type. If a node has members that point to other nodes, we ignore them in the matcher, which is the reason for the word `Local` in the function name. If there are data members of other type, it may be necessary to override `IsLocalMatch()` with a new, stricter check on the data members. 
 
 Ultimately the choice of how to override `IsLocalMatch()` lies with the user, but the semantics must be consistent across the whole node interface the presented to the generic tools.
-
-Note that transformation code can also use dynamic casts to determine whether a node is of a particular type. This avoids the need to create an archetype node where the type is known at compile time.
 
 ### 3.2 `Itemiser`
 
 Defines the following virtual function:
  - `virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const = 0;`
 
-`Itemise()` searches `itemise_object` for members derived from the class named `Itemiser::Element`, and returns them in a vector. The node on which `Itemise()` is called must be a non-strict superclass of `itemise_object`. If the two types differ, `Itemise()` will only return members of `itemise_object` for which there exists a corresponding element in the object on which `Itemise()` was called.
+`Itemise()` searches `itemise_object` for members derived from the class named `Itemiser::Element`, and returns them in a vector. The node on which `Itemise()` is called must be a non-strict supercategory of `itemise_object`. If the two types differ, `Itemise()` will only return members of `itemise_object` for which there exists a corresponding element in the object on which `Itemise()` was called.
 
-To clarify, a full itemisation of all members of node `X` is achieved using `X.Itemise(X)` (a shorthand form, `X.Itemise()` is also allowed) because the called-on object is the same as the itemise_object and so has the same members. On the other hand, `X.Itemise(Y)` is only legal if `X.IsSubclass(Y)==true`, meaning `X` is a super-class for `Y` and has some subset `{M(X)}` of the members of `Y`, `{M(Y)}`. Itemise will return the members of `Y` that correspond to members of `X` i.e. `{Y.M(X)}`. This behaviour is useful in generic algorithms because it allows (as far as possible) children of `Y` to be compared with or copied to/from the children of `X` without needing to know the internals of either `X` or `Y`.
+To clarify, a full itemisation of all members of node `X` is achieved using `X.Itemise(X)` (a shorthand form, `X.Itemise()` is also allowed) because the called-on object is the same as the itemise_object and so has the same members. On the other hand, `X.Itemise(Y)` is only legal if `X.IsSubcategory(Y)==true`, meaning `X` is a super-category for `Y` and has some subset `{M(X)}` of the members of `Y`, `{M(Y)}`. Itemise will return the members of `Y` that correspond to members of `X` i.e. `{Y.M(X)}`. This behaviour is useful in generic algorithms because it allows (as far as possible) children of `Y` to be compared with or copied to/from the children of `X` without needing to know the internals of either `X` or `Y`.
 
 `Itemise()` needs to be implemented separately in each type of node due to the limitations of C++. However, the required implementation is produced by including the macro `ITEMISE_FUNCTION` in the node's class definition.
 
@@ -139,7 +137,7 @@ struct Boolean : Type { NODE_FUNCTIONS_FINAL };
 
 Here, `Type` is an intermediate and so cannot appear in program trees (but can in patterns). It represents the set of types - a node is a type if it derives from `Type`. `Boolean` is a final node and can appear in program trees. It represents the C++ data type `bool`. 
 
-With `TreePtr<Node> T` pointing to a `Type` node and `B` pointing to a Boolean node, we have `T.IsSubclass(B)` is true and `B.IsSubclass(T)` is false. `IsLocalMatch()` would give the same results.
+With `TreePtr<Node> T` pointing to a `Type` node and `B` pointing to a Boolean node, we have `T.IsSubcategory(B)` is true and `B.IsSubcategory(T)` is false. `IsLocalMatch()` would give the same results.
 
 ### 5.2 Topologically-oriented style
 
