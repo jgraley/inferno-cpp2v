@@ -7,22 +7,6 @@
 #include "hit_count.hpp" 
 using namespace std;
 
-/*
- * How it works:
- *
- * TRACE
- * We use a functor class "Tracer" to make TRACE look like a function that works
- * just like printf(). Note that Boost provides a multi-platform "name of 
- * current function" macro, which we use.
- *
- * ASSERT
- * Boost asserts due to shared_ptr errors happen quite a lot. We compile with
- * BOOST_ENABLE_ASSERT_HANDLER defined which makes Boost call 
- * boost::assertion_failed() when its own BOOST_ASSERT() fails. We fill this
- * in to print a message (using our Tracer class), and then crash in a way
- * that assures a stack dump. We define our own ASSERT() to use BOOST_ASSERT().
- */
-
 #include <list>
 #include <set>
 #include <map>
@@ -361,27 +345,23 @@ private:
 // Note: else used to avoid ambiguating when used inside an if 
 //
 
-#define INFERNO_CURRENT_FUNCTION __func__
-// can be BOOST_CURRENT_FUNCTION if you want full signature but I find
-// it can get in the way
-
 // Plain tracing...
 #define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
-#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION )
-#define FTRACE Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
-#define TRACES if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION )
-#define FTRACES Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
+#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, GetTrace(), __func__ )
+#define FTRACE Tracer( __FILE__, __LINE__, GetTrace(), __func__, Tracer::FORCE )
+#define TRACES if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", __func__ )
+#define FTRACES Tracer( __FILE__, __LINE__, "", __func__, Tracer::FORCE )
 #define TRACEC if(!Tracer::IsEnabled()) {} else Tracer()
 #define FTRACEC Tracer{Tracer::FORCE}
 
 // Asserts and such...
-#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
-#define ASSERTS(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERTS(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
-#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, GetTrace(), INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
-#define ASSERTFAILS(MESSAGE) do { Tracer( __FILE__, __LINE__, "", INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+#define ASSERTFAILS(MESSAGE) do { Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
 #define STACK_BASE 0x7f0000000000ULL
 #define ON_STACK(POINTER) (((uint64_t)(POINTER) & STACK_BASE) == STACK_BASE)

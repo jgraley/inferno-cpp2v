@@ -229,13 +229,14 @@ public:
 };
 
 
-// Similar to MakeTreeNode<> (see node/tree_ptr.hpp) but produces a TreePtr to StandardAgentWrapper<NODE_TYPE> rather
-// than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. 
+// Similar to MakeTreeNode<> (see node/tree_ptr.hpp) but produces a TreePtr to 
+// StandardAgentWrapper<NODE_TYPE> rather than just NODE_TYPE when NODE_TYPE 
+// is not already a kind of Agent. 
 /// Utility for constructing nodes that are to be used in patterns from standard tree nodes
 template<typename NODE_TYPE, typename ... CP>
 TreePtr<NODE_TYPE> MakePatternNode(const CP &...cp)
 {
-    // Using the magic of Boost, find out at compile time whether the NODE_TYPE is already an Agent.	
+    // Find out at compile time whether the NODE_TYPE is already an Agent.	
 	return MakePatternNodeHelper<is_base_of<Agent, NODE_TYPE>::value, NODE_TYPE>::MakeNode(cp...); 
 };
 

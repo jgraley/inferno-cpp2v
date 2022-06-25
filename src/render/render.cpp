@@ -20,7 +20,7 @@ using namespace SCTree;
 // Don't like the layout of rendered code?
 // Install "indent" on your UNIX box and pipe the output through iindent.sh
 
-// TODO maybe reduce () by using a simplified scheme, ie divide operators into "high" and "low"
+// TODO maybe reduce "()" by using a simplified scheme, ie divide operators into "high" and "low"
 // categories and elide on low(high()). Note that a full scheme makes code unreadable if
 // user does not have them memorised. Maybe just encode those priorities that are well known.
 
@@ -29,7 +29,7 @@ using namespace SCTree;
     string( "\n#error " ) + \
     string( V ) + \
     string( " not supported in " ) + \
-    string( INFERNO_CURRENT_FUNCTION ) + \
+    string( __func__ ) + \
     string( "\n" );
 
 #define ERROR_UNSUPPORTED(P) \

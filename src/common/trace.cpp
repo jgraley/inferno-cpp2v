@@ -98,33 +98,14 @@ string GetTrace()
 
 ////////////////////////// Misc free functions //////////////////////////
 
-#ifdef __GLIBC__
-inline void InfernoBacktrace()
-{
-  void *return_addresses[1000];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(return_addresses, 1000);
-
-  // print out all the frames to stderr
-  backtrace_symbols_fd(return_addresses, size, STDERR_FILENO);
-}
-#endif
-
-
 inline void InfernoAbort()
 {
-#ifdef __GLIBC__
-    //InfernoBacktrace();
-    // Doesn't work :(
-#endif    
     fflush( stderr ); 
     abort(); 
 }
 
 
-// Make BOOST_ASSERT work (we don't use them but other code might)
+// Provide assertion implementations for boost
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
 {
     Tracer::MaybePrintEndl();

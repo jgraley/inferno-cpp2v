@@ -53,10 +53,10 @@ private:
 
 extern bool operator<( const HitCount::Category &l, const HitCount::Category &r );
 
-#define HIT do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, GetTrace() ); } while(false)
-#define HITP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, GetTrace(), P ); } while(false)
-#define HITS do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, "" ); } while(false)
-#define HITSP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, "", P ); } while(false)
+#define HIT do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, __func__, GetTrace() ); } while(false)
+#define HITP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, __func__, GetTrace(), P ); } while(false)
+#define HITS do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, __func__, "" ); } while(false)
+#define HITSP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, __func__, "", P ); } while(false)
 
 #endif
 
