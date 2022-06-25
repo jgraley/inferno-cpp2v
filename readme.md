@@ -4,13 +4,15 @@ Inferno is a project to convert C++ programs into practical, synthesisable Veril
 
 ## Vida Nova docs
 
-### External
+### User information
 
 [The Node Interface](src/node/node_interface.md)
 
 [Search and Replace Documentation](src/sr/search_replace_documentation.md)
 
-### Internal
+[Transformation Case Studies](src/sr/transformation_case_studies.md)
+
+### Internals
 
 [The Stages](src/sr/stages.md)
 
