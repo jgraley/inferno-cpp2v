@@ -4,9 +4,11 @@ This document contains examinations of the rationale behind a selection of trans
 
 ## removing `Nop`
 
+`Nop` is a `Statement` node that represents "no operation". `CleanupNop` uses `VNTransfomation` to eliminate obviously redundant `Nop`s from code. 
+
 ![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/050-CleanupNop.svg)
 
-`Nop` is a `Statement` node that represents "no operation". `CleanupNop` uses `VNTransfomation` to eliminate obviously redundant `Nop`s from code. The search pattern is a `Compound` statement with a `Star<Declaration>` node in the `Declaration`s collection. The sequence of `Statement`s in the `Compound` block (an ordered container) contain the following: `Star<Statement>`, `Nop`, `Star<Statement>`. All the `Star` nodes have no pre-restriction and are maximally wild, so they'll match anything. 
+The search pattern is a `Compound` statement with a `Star<Declaration>` node in the `Declaration`s collection. The sequence of `Statement`s in the `Compound` block (an ordered container) contain the following: `Star<Statement>`, `Nop`, `Star<Statement>`. All the `Star` nodes have no pre-restriction and are maximally wild, so they'll match any subsequence of nodes. 
 
 Our search can therefore match a `Compound` block with any decls, and any statements as long as there is at least one `Nop` (this transformation only deals with `Nop`s in `Compound` blocks). The `Nop` can be anywhere in the sequence of statements: the layout of `Star`, `X`, `Star` resembles `.*X.*` in regular expressions.
 
@@ -16,9 +18,9 @@ The pattern is strictly reductive: each hit will reduce the number of `Nop` stat
 
 ## For to While
 
-![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/035-ForToWhile.svg)
-
 `ForToWhile` transforms For loops into semantically equivalent `While` loops. C makes this easy and hard. Easy because the three elements of a `For` loop are general C constructs that can simply be moved to the appropriate places around a `While` loop; hard because of `Break` and `Continue`. We do not have to worry about `Break` here because it has already been handled by another step, but `Continue` requires explicit treatment (`Continue` works in While loops, but we have to be careful about the semantics: the increment could be skipped).
+
+![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/035-ForToWhile.svg)
 
 Our master search pattern describes a general `For` loop. There is a `For` node, and its expression (the test) is filled in with an `Expression` node which is a maximal wildcard that will match any expression. Its init condition, increment and body are all maximally wild `Statement` nodes. Therefore, any `For` loop will match (Vida Nova fills absent statements with `Nop`, which will match).
 
@@ -36,11 +38,11 @@ Note that if there was no need for a recurse restriction, we would use `SlaveSea
 
 ## Generate stacks
 
-![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/032-GenerateStacks.svg)
-
 `GenerateStacks` is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
 
-We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep.
+![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/032-GenerateStacks.svg)
+
+e adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep.
 
 The stacks and stack index are all local static variables. In future, these will be made members of some containing class, which will improve locality.
 
