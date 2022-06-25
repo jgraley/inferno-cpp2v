@@ -466,7 +466,7 @@ GenerateStacks::GenerateStacks()
     temp->statements = (r_slave3);
     
     // Master search - look for functions satisfying the construct limitation and get
-    s_module->members = (over, members);
+    s_module->members = (over, members); // #580 here
     r_module->members = (over, members, r_index);
     over->through = s_fi;
     over->overlay = r_fi;    
