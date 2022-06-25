@@ -1,6 +1,6 @@
 # Vida Nova Node Interface
         
-This document explains how to define nodes for Vida Nova so that programs may be represented using trees (in the compiler sense ) made up of these nodes. It will be useful to all users of Vida Nova.
+This document explains how to define nodes for Vida Nova so that programs may be represented using trees made up of these nodes. It will be useful to all users of Vida Nova.
 
 ## 1 Introduction        
         
@@ -36,7 +36,7 @@ The `Node` class is actually built from a collection of sub-base classes, each o
 
 ### 3.1 `Matcher`
 
-Defines 2 virtual functions:
+Defines two virtual functions:
  - `virtual bool IsSubcategory( const Matcher *source_archetype ) const = 0;`
  - `virtual bool IsLocalMatch( const Matcher *candidate ) const;`
 
@@ -48,7 +48,23 @@ Under our set-theoretical view of a tree, subcategory corresponds to subset. So 
 
 Ultimately the choice of how to override `IsLocalMatch()` lies with the user, but the semantics must be consistent across the whole node interface the presented to the generic tools.
 
-### 3.2 `Itemiser`
+### 3.2 `Orderable`
+
+Note: `Orderable` is a general-purpose class within Vida Nova. It's usage in the `Node` class hierarchy is simplified relative to it's general usage. Only the overloads necessry for `Node` classes is given here.
+
+Over-ride one virtual function:
+ - `virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, OrderProperty order_property ) const;`
+ 
+Override this exactly when `IsLocalMatch()` is over-ridden, and implement a comparison on _only_ the local data members (making no reference to child pointers).
+
+The comparison should be equivalent to `*this - *candidate` so that the return value is:
+ - negative if `*this` is _before_ `*candidate`;
+ - positive if `*this` is _after_ `*candidate`;
+ - zero otherwise.
+ 
+`order_property` should be checked: if `STRICT` then a strict ordering shouold be implemented, even if this requires comparison of pointers. If `REPEATABLE`, only repeatable comparisons should be included.
+
+### 3.3 `Itemiser`
 
 Defines the following virtual function:
  - `virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const = 0;`
@@ -63,7 +79,7 @@ The pre-existing `Itemiser::Elements` are: `TreePtr<>`, `Collection<>` and `Sequ
 
 The `Itemiser` class is obviously fairly flexible but to be compliant with the node interface defined here, you need to not override `Itemise()`, not add more `Itemiser::Element` types and not add new non-itemisable types that can point to nodes. You may add non-itemisable members that do not point to other nodes, i.e. ordinary data members, and the pre-existing itemisable types. This is so that generic algorithms like walk and search-replace can traverse trees.
 
-### 3.3 `Cloner`
+### 3.4 `Cloner`
 
 Defines 2 virtual functions:
  - `virtual shared_ptr<Cloner> Clone() const = 0;`
@@ -77,7 +93,7 @@ The node interface requires that if we do `X = Y->Duplicate(Y)`, then `X->IsLoca
 
 An unfortunate but necessary (I believe) wrinkle in the `Duplicate()` interface is that, to enable the function to be virtual, we must make it a non-static member of the node we wish to duplicate, *but* we cannot implement a shallow-copy version without access to the `shared_ptr<>` that manages the storage. To just create a new `shared_ptr<X>` from a `X *` would register the object `X` with the `shared_ptr<>` implementation code a second time, possibly leading to double deletion. I suspect a parasitic smart pointer scheme might not have this restriction. At present, `Duplicate()` must always be called as `PX->Duplicate(PX)`. _But see #567_ 
 
-### 3.4 Notes
+### 3.5 Notes
 
 Base classes `Magic` and `Traceable` are just for debugging - magic tests for "this" pointer corruption and/or memory corruption and Traceable provides a cast to std::string.
 
