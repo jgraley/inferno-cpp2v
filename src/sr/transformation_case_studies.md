@@ -1,4 +1,4 @@
-# Case Studies of a Transformations
+# Transformation Case Studies
 
 This document contains examinations of the rationale behind a selection of transformations. It will be useful to all users of Vida Nova. A small example, a medium example and one large one follow. 
 
