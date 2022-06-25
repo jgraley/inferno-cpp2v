@@ -50,7 +50,7 @@ We look a function inside a `Scope`, that contains at least one automatic variab
 
 Another slave detects all the declarations of automatic variables anywhere in the function and replaces them with static arrays in the `Scope` (these are the stacks). `_stack` is appended to their names. This slave has a sub-slave which finds usages of the variable, and inserts an indexing operation into the array, using the stack index.
 
-Salient points:
+#### Salient points
 
 The funciton's body is a `Compound` so that we can couple into the replace pattern, preserving the function's existing body. We add a `Conjunction` here, with a conjunct that goes though a `Stuff` node to an `Automatic` node. BEcause we will remove this `Automatic` suring replace, this ensures the master does not spin, adding more and more stack indexes forever. It also means we do not modify functions that already _do not_ have automatic variables.
 
@@ -62,7 +62,7 @@ This slave's sub-slave searches for the original variable, and replaces it with 
 
 Finally, the other first-level slave looks for `Return` and replaces with a `Compound` containing a decrement of the stack index followed by a return. We use `GreenGrass` to stop this transformation happening again to the the returns we generate (which would spin). This uses the `Temp` storage class, which is not fully defined and may not be a permanent feature of Vida Nova. At present it is a variable that makes only those guarantees made by all of `Automatic`,`Static` and `Member`.
 
-Future directions:
+#### Future directions
 
 As for enhancement, detection of non-recursive functions is complicated because it is non-local. But we can easily detect leaf functions and do a trivial `Automatic` to `Static` (or `Member` or `Temp`) conversion (perhaps in a separate step). This could be extended to detect leaf-scoped variables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - though we'd want to have "broken down" constructs in order to permit dataflow analysis for this.
 
