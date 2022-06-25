@@ -4,9 +4,9 @@ This document explains how to define nodes for Vida Nova so that programs may be
 
 ## 1 Introduction        
         
-Vida Nova tree nodes implement a set of virtual functions defined by the base class `Node`, as well as observing certain stylistic conventions (termed topology-oriented). Both of these are documented here.
+Vida Nova tree nodes implement a set of virtual functions defined by the base class `Node`, as well as observing certain stylistic conventions (termed _topology-oriented_). Both of these are documented here.
 
-The reason for defining an interface at this level is to allow algorithms to process trees (for analysis and transformation) without needing knowledge of the particular language that is being represented. In effect, a tree for a particular language is the implementation behind the node interface, and a generic algorithm is a client of the node interface. We also aim to keep nodes easy to manipulate by algorithms that are aware of the language being represented.
+The reason for defining an interface at this level is to allow algorithms to process trees (for analysis and transformation) without needing knowledge of the particular language that is being represented. In effect, a tree for a particular language is the implementation behind the node interface, and a generic algorithm is a client of the node interface. We also aim to keep nodes easy to manipulate by algorithms that _are_ aware of the language being represented.
 
 Program trees are networks of nodes (actually acyclic directed graphs). We do not attempt to place a tree within a single container object which could marshal the incoming method calls, because this approach is too inflexible - algorithms need to get "close" to the nodes themselves. So instead we expose a tree as a multiplicity of nodes and ensure that client code can move between nodes as required.
 
