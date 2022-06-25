@@ -4,7 +4,7 @@ This document contains examinations of the rationale behind a selection of trans
 
 ## removing `Nop`
 
-![Graph of CleanUpNop pattern](reference_graphs/pattern/050-CleanupNop.svg)
+![Graph of CleanUpNop pattern](/test/reference_graphs/pattern/050-CleanupNop.svg)
 
 `Nop` is a `Statement` node that represents "no operation". `CleanupNop` uses `VNTransfomation` to eliminate obviously redundant `Nop`s from code. The search pattern is a `Compound` statement with a `Star<Declaration>` node in the `Declaration`s collection. The sequence of `Statement`s in the `Compound` block (an ordered container) contain the following: `Star<Statement>`, `Nop`, `Star<Statement>`. All the `Star` nodes have no pre-restriction and are maximally wild, so they'll match anything. 
 
