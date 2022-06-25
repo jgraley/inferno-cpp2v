@@ -42,21 +42,21 @@ Note that if there was no need for a recurse restriction, we would use `SlaveSea
 
 We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep.
 
-The stacks and stack index are all local static variables. In future, these will be made members of some containing class, which will improve locality.
+The stacks and stack index are inserted into the scope that contains the function (so that methods will have per-instance stacks, making class-level concurrancy easier). 
 
 ![Graph of CleanUpNop pattern](/test/reference/graphs/pattern/032-GenerateStacks.svg)
 
-A single static stack pointer is declared for each function. It is incremented at the top and decremented at the bottom. The master `VNTransfomation` does this. It must also be decremented before return statements. A slave does this. Another slave detects all the declarations of automatic variables in the function and replaces them with static arrays (stacks). This slave has a sub slave which finds usages of the variable, and inserts an indexing operation into the array, using the stack index.
+We look a function inside a `Scope`, that contains at least one automatic variable (the `Instance` is forced to be a function because it has a `Compound` as its initialiser). A single static stack index is created in the `Scope`, named `<function name>_stack_index`. The master inserts an increment at the top of the function body and slave inserts a decrement prior to `Return` statements. 
+
+Another slave detects all the declarations of automatic variables anywhere in the function and replaces them with static arrays in the `Scope` (these are the stacks). `_stack` is appended to their names. This slave has a sub-slave which finds usages of the variable, and inserts an indexing operation into the array, using the stack index.
 
 Salient points:
 
-The `Subroutine` `Instance` at the root of the pattern is coupled, and the part we wish to change is separated out again using a `Delta` node. This is an equally effective alternative to having separate `Instance` nodes for search and replace and keying the members that do not change. It might be more tolerant of future changes in the definition of the `Instance` node.
+The funciton's body is a `Compound` so that we can couple into the replace pattern, preserving the function's existing body. We add a `Conjunction` here, with a conjunct that goes though a `Stuff` node to an `Automatic` node. BEcause we will remove this `Automatic` suring replace, this ensures the master does not spin, adding more and more stack indexes forever. It also means we do not modify functions that already _do not_ have automatic variables.
 
-The search pattern continues through the `Delta` nodes through pointer. We match a generic `Compound` so that we can couple into the replace pattern, preserving the function's existing body. We add a `Conjunction` branch which goes though a `Stuff` node to an `Automatic` node. This ensures the master does not spin, adding more and more stack indexes. It also means we do not modify functions that already do not have automatic variables.
+The first slave to act is the most-nested first-level slave, which is a `SlaveCompareReplace`. It emulates `SEARCH_REPLACE` behaviour using `Star` and `Delta`, as seen before. This time, the reason is to allow a sub-slave to be tucked in at the root of the replace pattern, above the `Stuff`. The `Delta` splits out into a search pattern for an automatic, and a replace pattern that declares an array type. Again, we build the array's identifier from that of the original variable name with `_stack` appended. 
 
-The master replace is reached by passing through the through pointers of the two first-level slaves. It produces a new compound, inserting a new declaration for the stack index into the decls collection, and placing an increment and decrement of the same variable at the top and bottom of the statements sequence. The identifier of the variable is built from the function name and `_stack_index` to make the output readable.
-
-The first slave to act is the most-nested first-level slave, which is a `SlaveCompareReplace`. It emulates `VNTransfomation` using `Star` and `Delta`, as seen before. This time, the reason is to allow a sub-slave to be tucked in at the root of the replace pattern, above the `Stuff`. The `Delta` splits out into a search pattern for an automatic, and a replace pattern that declares an array type. Again, we build the array's identifier from that of the original variable name with `_stack` appended.
+It may seem strange that the stack's declaration can be created in the `Scope`, a location somewhat less nested, i.e. shallower, than the automatic variable declaration it replaces. However, there are no slaves between the two, so they are in the same searh/replace action. The slave engine that controlls this is "located" at program root, like the master, and could in fact make changes anywhere in the `Scope`. The automatic is reached through: the `Scope`, the function, a Stuff node and a `Compound`. 
 
 This slave's sub-slave searches for the original variable, and replaces it with a subscript of the new array by the new stack index. This does not hit the declaration, because slaves operate after the pattern under through has been replaced, and the original variable has been replaced with a new one that has a different identifier (it isn't the name that makes identifiers different, just the fact that they are separate nodes).
 
@@ -64,8 +64,6 @@ Finally, the other first-level slave looks for `Return` and replaces with a `Com
 
 Future directions:
 
-The step could probably be cleaned up, for example by taking advantage of the fact that every usage of a local variable must be in or under the compound in which it was declared - this would let all the slaves be `SlaveSearchReplace` and remove the need for the `Stuff``/`Delta` combination. 
-
-As for enhancement, detection of non-recursive functions is complicated because it is non-local. But we can easily detect leaf functions and do a trivial `Automatic` to `Static` (or `Member` or `Temp`) conversion (perhaps in a separate step). This could be extended to detect leaf-scoped variables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - this would be harder in S&R but might be possible.
+As for enhancement, detection of non-recursive functions is complicated because it is non-local. But we can easily detect leaf functions and do a trivial `Automatic` to `Static` (or `Member` or `Temp`) conversion (perhaps in a separate step). This could be extended to detect leaf-scoped variables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - though we'd want to have "broken down" constructs in order to permit dataflow analysis for this.
 
 Stack overflow detection would simply require boilerplate code at the point of the increment. It would invoke some kind of intrinsic debug assert node in case of overflow.
