@@ -64,8 +64,8 @@ public:
 	inline static const vector< uintptr_t > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_archetype )
 	{
 		// Just a cache on ItemiseImpl()
-		static vector< uintptr_t > v;
-		static bool done=false;
+		static thread_local vector< uintptr_t > v;
+		static thread_local bool done=false;
 		if(!done)
 		{
 			//TRACES("Not cached *arch=")(*itemise_archetype)(", caching at %p\n", &v);
@@ -131,9 +131,9 @@ public:
 		return v.size();
 	}
 
-	static const char *dstart;
-    static const char *dend;
-    static vector<uintptr_t> v;
+	static thread_local const char *dstart;
+    static thread_local const char *dend;
+    static thread_local vector<uintptr_t> v;
     
     virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const = 0;
 };
