@@ -29,6 +29,12 @@ public:
 	SlaveTest3();
 };
 
+class FixCrazyNumber : public VNTransformation // find 29258 and turn it into 3 for #576
+{
+public:
+    FixCrazyNumber();   
+};
+
 }; // end namespace
 
 #endif

@@ -2,7 +2,7 @@
  * slave_test.cpp
  */
 
-#include "steps/slave_test.hpp"
+#include "steps/test_steps.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
@@ -91,3 +91,11 @@ SlaveTest3::SlaveTest3()
     Configure( COMPARE_REPLACE, r_slave1 );
 }
 
+
+FixCrazyNumber::FixCrazyNumber()
+{
+    // #576 should hit sctest04, which has been "fiddled".
+    Configure( SEARCH_REPLACE, 
+               MakePatternNode<SpecificInteger>(29258),
+               MakePatternNode<SpecificInteger>(5) );
+}

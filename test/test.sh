@@ -54,7 +54,7 @@ cmpres=1000
 return_code=1 
  
 echo Compile input...
-resource/script/compile.sh $infile $outpath/"$fb"_in.o
+resource/script/compile.sh --exp-run -c $infile -o $outpath/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
@@ -64,7 +64,7 @@ then
 fi
 
 echo Link input...
-resource/script/link.sh $outpath/"$fb"_in.o $outpath/"$fb"_in.exe
+resource/script/link.sh -i $outpath/"$fb"_in.o -o $outpath/"$fb"_in.exe
 l1res=$?
 if test $l1res -eq 0
 then
@@ -82,14 +82,14 @@ ires=$?
 if test $ires -eq 0
 then
  echo Compile output...
- resource/script/compile.sh $outfile $outpath/"$fb"_out.o
+ resource/script/compile.sh -c $outfile -o $outpath/"$fb"_out.o
  c2res=$?
  if test $c2res -eq 0
  then
   if test $l1res -eq 0
   then
    echo Link output...
-   resource/script/link.sh $outpath/"$fb"_out.o $outpath/"$fb"_out.exe
+   resource/script/link.sh -i $outpath/"$fb"_out.o -o $outpath/"$fb"_out.exe
    l2res=$?
    if test $l2res -eq 0
    then

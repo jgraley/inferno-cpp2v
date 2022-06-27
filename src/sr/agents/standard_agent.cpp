@@ -233,7 +233,7 @@ void StandardAgent::IncrPatternQuerySingular( const Plan::Singular &plan_sing,
                                                
 Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
-	auto expr = MakeOver<BooleanConstant>(true);
+	auto expr = MakeOver<IsLocalMatchOperator>(GetPatternPtr().get(), MakeOver<SymbolVariable>(keyer_plink));
 
     for( const Plan::Singular &plan_sing : plan.singulars )
         expr &= SymbolicNormalLinkedQuerySingular( plan_sing );

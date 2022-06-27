@@ -896,3 +896,69 @@ Expression::Precedence IsSimpleCompareEquivalentOperator::GetPrecedenceNF() cons
 {
     return Precedence::PREFIX;
 }
+
+// ------------------------- IsLocalMatchOperator --------------------------
+
+IsLocalMatchOperator::IsLocalMatchOperator( const Node *pattern_node_,
+                                            shared_ptr<SymbolExpression> a_ ) :
+    pattern_node( pattern_node_ ),
+    a( a_ )
+{
+}    
+
+
+shared_ptr<PredicateOperator> IsLocalMatchOperator::Clone() const
+{
+    return make_shared<IsLocalMatchOperator>( pattern_node, a );
+}
+    
+
+list<shared_ptr<SymbolExpression> *> IsLocalMatchOperator::GetSymbolOperandPointers()
+{
+    return { &a };
+}
+
+
+unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
+                                                          list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+{
+    ASSERT( op_results.size()==1 );        
+
+    // Evaluate operand and ensure we got an XLink
+    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
+
+    // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
+    // NaS. So like ==
+    if( !ra->IsDefinedAndUnique() )
+        return make_unique<BooleanResult>( false );
+
+    // Use IsLocalMatch on the pattern node 
+    bool match = pattern_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() );
+    return make_unique<BooleanResult>( match );
+}
+
+
+Orderable::Result IsLocalMatchOperator::OrderCompareLocal( const Orderable *candidate, 
+                                                           OrderProperty order_property ) const 
+{
+    auto c = GET_THAT_POINTER(candidate);
+    return OrderCompare( pattern_node, 
+                         c->pattern_node, 
+                         order_property);
+}  
+
+
+string IsLocalMatchOperator::RenderNF() const
+{
+    string name = pattern_node->GetName();
+
+    // Not using RenderForMe() because we always want () here
+    return name + a->RenderWithParentheses(); 
+}
+
+
+Expression::Precedence IsLocalMatchOperator::GetPrecedenceNF() const
+{
+    return Precedence::PREFIX;
+}
+

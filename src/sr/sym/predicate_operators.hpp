@@ -318,6 +318,32 @@ private:
     SR::SimpleCompareRelation equivalence_relation;
 };
 
+// ------------------------- IsLocalMatchOperator --------------------------
+
+class IsLocalMatchOperator : public PredicateOperator
+{
+public:    
+    typedef BooleanExpression NominalType;
+    explicit IsLocalMatchOperator( const Node *pattern_node, 
+                                   shared_ptr<SymbolExpression> a );
+    shared_ptr<PredicateOperator> Clone() const override;
+
+    list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
+    virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
+                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
+
+    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+                                                 OrderProperty order_property ) const override;                                                
+
+    virtual string RenderNF() const override;
+    virtual Precedence GetPrecedenceNF() const override;
+    
+private:
+    const Node *pattern_node;
+    shared_ptr<SymbolExpression> a;
+};
+
+
 };
 
 #endif // include guard

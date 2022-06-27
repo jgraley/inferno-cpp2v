@@ -11,7 +11,7 @@
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
 #include "steps/generate_stacks.hpp"
-#include "steps/slave_test.hpp"
+#include "steps/test_steps.hpp"
 #include "steps/lower_control_flow.hpp"
 #include "steps/clean_up.hpp"
 #include "steps/state_out.hpp"
@@ -33,6 +33,13 @@ using namespace Steps;
 void BuildDefaultSequence( vector< shared_ptr<VNTransformation> > *sequence )
 {
     ASSERT( sequence );
+    
+    // Test steps that change (fix) the tree - do these first so 
+    // intermediates are used (requres EXPECTATION_RUN in test examples)
+    {
+        sequence->push_back( make_shared<FixCrazyNumber>() );
+    }
+    
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we never want to process implicit SystemC.
     DetectAllSCTypes::Build(sequence);
