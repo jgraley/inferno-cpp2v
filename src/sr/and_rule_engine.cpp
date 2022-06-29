@@ -32,7 +32,8 @@
 
 #define CHECK_FOR_MASTER_KEYERS
 
-#define EXTRA_CONDENSED_CONSTRINTS
+// Enabling this is making the Karnaugh map finder slow down #586
+//#define EXTRA_CONDENSED_CONSTRINTS
 
 using namespace SR;
 

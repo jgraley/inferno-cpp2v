@@ -484,12 +484,12 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 
 // ---------------------------- Replace stuff ----------------------------------                                               
 
-void StandardAgent::PlanOverlayImpl( PatternLink me_plink, 
-                                     PatternLink under_plink ) 
+void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
+                                              PatternLink under_plink ) 
 {
     INDENT("T");
     ASSERT( under_plink.GetChildAgent() );
-    TRACE(".PlanOverlayImpl(")(under_plink)(")\n");
+    TRACE(".MaybeChildrenPlanOverlay(")(under_plink)(")\n");
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
@@ -532,8 +532,6 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // Explicit request for overlay, resulting from use of the Delta agent.
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
-        Agent *under_agent = overlay_under_plink.GetChildAgent();
-        ASSERT( under_agent );
         TreePtr<Node> under_node = master_scr_engine->GetReplaceKey( overlay_under_plink );
         ASSERT( under_node );
         ASSERT( under_node->IsFinal() ); 
@@ -558,6 +556,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
     }
 }
 
+#include "tree/cpptree.hpp"
 
 TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink, 
                                                   TreePtr<Node> under_node )  // overlaying
@@ -574,6 +573,11 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     // Make a new node, we will overlay from pattern, so resulting node will be dirty	
     // Duplicate the underneath node since it is at least as specialised (=non-strict subclass)
     dest = DuplicateNode( under_node, true );
+    
+    // Local non-child contents should come from me
+    if( auto me_si = TreePtr<CPPTree::SpecificInteger>::DynamicCast(TreePtr<Node>(const_pointer_cast<Node>(GetPatternPtr()))) )
+        if( auto dest_si = TreePtr<CPPTree::SpecificInteger>::DynamicCast(dest) )
+            *(llvm::APSInt *)(dest_si.get()) = *(llvm::APSInt *)(me_si.get());
 
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 

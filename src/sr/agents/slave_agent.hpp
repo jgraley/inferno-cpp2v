@@ -27,7 +27,7 @@ public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual const TreePtrInterface *GetThrough() const = 0;    
-    virtual void PlanOverlayImpl( PatternLink me_plink, 
+    virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );

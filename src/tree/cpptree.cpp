@@ -58,7 +58,14 @@ SpecificInteger::SpecificInteger( llvm::APSInt i ) :
 
 
 SpecificInteger::SpecificInteger( int i ) : 
-    llvm::APSInt(INTEGER_DEFAULT_WIDTH) 
+    llvm::APSInt(INTEGER_DEFAULT_WIDTH, false)  // signed
+{ 
+    *(llvm::APSInt *)this = i; 
+} 
+
+
+SpecificInteger::SpecificInteger( unsigned i ) : 
+    llvm::APSInt(INTEGER_DEFAULT_WIDTH, true)  // unsigned
 { 
     *(llvm::APSInt *)this = i; 
 } 

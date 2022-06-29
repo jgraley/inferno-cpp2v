@@ -152,7 +152,8 @@ struct SpecificInteger : Integer, llvm::APSInt
 	NODE_FUNCTIONS_FINAL
     SpecificInteger(); ///< default constructor, for making archetypes 
     SpecificInteger( llvm::APSInt i ); ///< Construct with an LLVM-style integer
-    SpecificInteger( int i ); ///< Construct with an ordinary int
+    SpecificInteger( int i ); ///< Construct with a signed int
+    SpecificInteger( unsigned i ); ///< Construct with an unsigned int
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare

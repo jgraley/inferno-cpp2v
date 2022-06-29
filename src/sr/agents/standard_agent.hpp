@@ -133,7 +133,7 @@ private:
                                       const TheKnowledge *knowledge ) const;
                                            
 public:
-    virtual void PlanOverlayImpl(      PatternLink me_plink, 
+    virtual void MaybeChildrenPlanOverlay(      PatternLink me_plink, 
                                     PatternLink under_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );

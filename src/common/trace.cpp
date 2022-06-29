@@ -58,6 +58,12 @@ string Trace(int i)
 }
 
 
+string Trace(unsigned i)
+{    
+    return to_string(i);
+}
+
+
 string Trace(size_t i)
 {    
     return to_string(i);

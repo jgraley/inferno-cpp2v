@@ -496,11 +496,11 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
     overlay_under_plink = under_plink;
 
     // Agent-specific actions
-    PlanOverlayImpl( me_plink, under_plink );
+    MaybeChildrenPlanOverlay( me_plink, under_plink );
 }
 
 
-void AgentCommon::PlanOverlayImpl( PatternLink me_plink, 
+void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                    PatternLink under_plink )
 {
     // An empty function here implies leaf-termination of the overlay process

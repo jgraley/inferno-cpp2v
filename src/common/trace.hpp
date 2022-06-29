@@ -44,6 +44,7 @@ string Trace(const StringNoQuotes &snq);
 string Trace(const KeyValuePair &kvp); 
 string Trace(bool b); 
 string Trace(int i); 
+string Trace(unsigned i); 
 string Trace(size_t i); 
 string Trace(const exception &e); 
 string Trace(const void *p); 
