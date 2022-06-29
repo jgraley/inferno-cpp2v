@@ -12,7 +12,7 @@
 const int TypeDb::char_bits = sizeof( char ) * 8;
 const bool TypeDb::int_default_signed = IS_SIGNED(int);
 const bool TypeDb::char_default_signed = IS_SIGNED(char);
-const unsigned TypeDb::integral_bits[] =
+const int TypeDb::integral_bits[] =
 {
     sizeof( int ) * 8,
     sizeof( short ) * 8,
