@@ -339,7 +339,7 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
         	it = MakeTreeNode<Signed>();
         else
         	it = MakeTreeNode<Unsigned>();
-        it->width = MakeTreeNode<SpecificInteger>( si->getBitWidth() );
+        it->width = MakeTreeNode<SpecificInteger>( (int)(si->getBitWidth()) );
         return it;
     }
     else if( TreePtr<SpecificFloat> sf = DynamicTreePtrCast<SpecificFloat>(l) )
