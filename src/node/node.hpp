@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#define FINAL_FUNCTION(F) virtual bool IsFinal() { return (F); }
+#define FINAL_FUNCTION(F) virtual bool IsFinal() const { return (F); }
 
 // Mix together the bounce classes for the benefit of the tree
 // TODO figure out how to enforce finality in NODE_FUNCTIONS_FINAL

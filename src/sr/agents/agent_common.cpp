@@ -543,6 +543,22 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink,
 }
 
 
+TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
+{
+    INDENT("D");
+
+    // Make the new node (destination node)
+    shared_ptr<Cloner> dup_dest = Clone();
+    TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
+    
+    // Source will be a pattern node, so cannot be dirty
+    if( force_dirty )
+        master_scr_engine->GetOverallMaster()->dirty_grass.insert( dest );
+        
+    return dest;
+}
+
+
 TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
                                           bool force_dirty ) const
 {

@@ -98,7 +98,7 @@ An unfortunate but necessary (I believe) wrinkle in the `Duplicate()` interface 
 Base classes `Magic` and `Traceable` are just for debugging - magic tests for "this" pointer corruption and/or memory corruption and Traceable provides a cast to std::string.
 
 Two macros, `NODE_FUNCTIONS` and `NODE_FUNCTIONS_FINAL` are defined to use in nodes. `NODE_FUNCTIONS` should be used in intermediate nodes and `NODE_FUNCTIONS_FINAL` should be used in final nodes. The macros include all the `_FUNCTIONS` macros described in the above sections as well as a function 
- - `virtual bool IsFinal() {...}`
+ - `virtual bool IsFinal() const {...}`
  
 that reports whether the node is final.
 

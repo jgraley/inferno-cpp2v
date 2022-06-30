@@ -96,11 +96,10 @@ However, it is possible to arrange for some new subtree to appear under such a c
 
 The overlaying process is recursive, that is it can overlay a child of the node pointed to by overlay over the equivalent child of the matched input program node. Starting with pointers `PT` = `through` and `PO` = `overlay`, the rule is:
 
-- If `PO` is non-NULL (`PT` is always non-NULL) and the node at `PT` is a non-strict subcategory of the node at `PO`, then we overlay, by recursing for `PO'` = each pointer member of the node at `PO`, and `PT'` = the corresponding member of the node at `PT`. This correspondence is the reason for the subcategory requirement. 
-
-- If `PO` is NULL or the node at `PT` is not a non-strict subcategory of the node at `PO`, then we overwrite the subtree at `PT` with a copy of the subtree at `PO`. We have now finished this branch and do not need to repeat.
-
-- Containers (sequences and collections) always overwrite when encountered in the node at `PO`.
+ - If `PO` is non-NULL (`PT` is always non-NULL) and the node at `PT` is a non-strict subcategory of the node at `PO`, then we overlay, by recursing for `PO'` = each pointer member of the node at `PO`, and `PT'` = the corresponding member of the node at `PT`. This correspondence is the reason for the subcategory requirement. 
+ - If `PO` is NULL or the node at `PT` is not a non-strict subcategory of the node at `PO`, then we overwrite the subtree at `PT` with a copy of the subtree at `PO`. We have now finished this branch and do not need to repeat.
+ - Containers (sequences and collections) always overwrite when encountered in the node at `PO`.
+ - Local data members are taken from `PO` if it is of the same type as the input tree node being overlaid, otherwise they are left alone. This is only OK, and #593 aims to improve.
 
 Note that the condition for overlaying versus overwriting depend only on the patterns provided for `overlay` and `though` in the `Delta` node, not on the contents of the input program tree.
 

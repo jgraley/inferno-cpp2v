@@ -556,7 +556,11 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
     }
 }
 
+#define NEW_THING
+
+#ifndef NEW_THING
 #include "tree/cpptree.hpp"
+#endif
 
 TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink, 
                                                   TreePtr<Node> under_node )  // overlaying
@@ -570,19 +574,20 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 		  (", so that it does not have more members");
     TreePtr<Node> dest;
         
-    // Make a new node, we will overlay from pattern, so resulting node will be dirty	
-    // Duplicate the underneath node since it is at least as specialised (=non-strict subclass)
-    dest = DuplicateNode( under_node, true );
-    
-    // Local non-child contents should come from me
-    if( auto me_si = TreePtr<CPPTree::SpecificInteger>::DynamicCast(TreePtr<Node>(const_pointer_cast<Node>(GetPatternPtr()))) )
-        if( auto dest_si = TreePtr<CPPTree::SpecificInteger>::DynamicCast(dest) )
-            *(llvm::APSInt *)(dest_si.get()) = *(llvm::APSInt *)(me_si.get());
-
+    // If I am the same type as under, duplicate me (and dest's local 
+    // data members will come from me) otherwise duplicate  under (and 
+    // they will appear to come from under). #593 will improve on this.
+    // Make a new node, we will overlay from pattern, so resulting node will be dirty.    
+    // Use of DuplicateNode()/CloneNode() ensures correct behaviour with identifiers. 
+    ASSERT( under_node->IsFinal() )("About to build non-final ")(*dest)("\n"); 
+    if( under_node->IsSubcategory(GetPatternPtr().get()) ) 
+        dest = AgentCommon::CloneNode( true );
+    else
+        dest = AgentCommon::DuplicateNode( under_node, true );
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
-    // Loop over the elements of pattern and dest, limited to elements
-    // present in pattern, which is a non-strict subclass of under_node and dest. // Hmmm.... superclass?
+    // Loop over the child elements of me (=over) and dest, limited to elements
+    // present in me, which is a non-strict superclass of under_node and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > my_memb = Itemise();
@@ -719,10 +724,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
     // Use clone here because we never want to place an Agent object in the output program tree.
     // Identifiers that have multiple references in the pattern will be coupled, and  
     // after the first hit, BuildReplaceOverlay() will handle the rest and it uses Duplicate()
-    shared_ptr<Cloner> dup_dest = Clone();
-    TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
-    master_scr_engine->GetOverallMaster()->dirty_grass.insert( dest );
-
+    TreePtr<Node> dest = AgentCommon::CloneNode(true);
     ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
 
     // Itemise the members. Note that the itemiser internally does a
