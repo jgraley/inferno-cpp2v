@@ -64,6 +64,13 @@ SpecificInteger::SpecificInteger( int i ) :
 } 
 
 
+SpecificInteger::SpecificInteger( int64_t i ) : 
+    llvm::APSInt(INTEGER_DEFAULT_WIDTH, false)  // 64-bit
+{ 
+    *(llvm::APSInt *)this = i; 
+} 
+
+
 SpecificInteger::SpecificInteger( unsigned i ) : 
     llvm::APSInt(INTEGER_DEFAULT_WIDTH, true)  // unsigned
 { 

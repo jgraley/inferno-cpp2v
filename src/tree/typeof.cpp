@@ -216,8 +216,8 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
-	TreePtr<SpecificInteger> maxwidth_signed = MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
-	TreePtr<SpecificInteger> maxwidth_unsigned;
+    int64_t maxwidth_signed = TypeDb::integral_bits[INT];
+	int64_t maxwidth_unsigned = 0;
 	TreePtr<SpecificFloatSemantics> maxwidth_float;
 
 	// Look at the operands in turn
@@ -241,20 +241,19 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
         //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
 
         // Do a max algorithm on the width
-		TreePtr<SpecificInteger> width = DynamicTreePtrCast<SpecificInteger>(intop->width);
-        if( !width )
+		auto siwidth = DynamicTreePtrCast<SpecificInteger>(intop->width);
+        if( !siwidth )
             throw NumericalOperatorUsageMismatch3();
-		//ASSERT( width )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
+		//ASSERT( siwidth )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
+		int64_t width = siwidth->getSExtValue();
 
 		if( DynamicTreePtrCast<Signed>(optype) )
 		{
-			if( *width >= *maxwidth_signed )
-		    	maxwidth_signed = width;
+            maxwidth_signed = max( width, maxwidth_signed );
 		}
 		else if( DynamicTreePtrCast<Unsigned>(optype) )
 		{
-			if( !maxwidth_unsigned || *width >= *maxwidth_unsigned )
-				maxwidth_unsigned = width;
+            maxwidth_unsigned = max( width, maxwidth_unsigned );
 		}
 		else
         {
@@ -272,15 +271,16 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 
 	// Build the required integral result type
 	TreePtr<Integral> result;
-	if( maxwidth_unsigned && *maxwidth_unsigned >= *maxwidth_signed )
+	if( maxwidth_unsigned && maxwidth_unsigned >= maxwidth_signed )
 	{
+        // Use the unsigned size if unsigned operand exists and at least as big as int size
 		result = MakeTreeNode<Unsigned>();
-		result->width = maxwidth_unsigned;
+		result->width = MakeTreeNode<SpecificInteger>(maxwidth_unsigned);
 	}
 	else
 	{
 		result = MakeTreeNode<Signed>();
-		result->width = maxwidth_signed;
+		result->width = MakeTreeNode<SpecificInteger>(maxwidth_signed);
 	}
 	return result;
 }

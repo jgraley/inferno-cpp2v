@@ -154,6 +154,7 @@ struct SpecificInteger : Integer, llvm::APSInt
     SpecificInteger( llvm::APSInt i ); ///< Construct with an LLVM-style integer
     SpecificInteger( int i ); ///< Construct with a signed int
     SpecificInteger( unsigned i ); ///< Construct with an unsigned int
+    SpecificInteger( int64_t i ); ///< Construct with a 64-bit int
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
