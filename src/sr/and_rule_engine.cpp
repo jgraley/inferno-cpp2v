@@ -592,7 +592,7 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 }
 
 
-void AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
+SolutionMap AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
 {
     TRACE("GetNextCSPSolution()\n");
     SolutionMap csp_solution;
@@ -601,12 +601,11 @@ void AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
         throw NoSolution();
 
     // Add the root variable/value, which is FORCED. Not sure why we have
-    // to add this and not any other FIXED variable.
+    // to add this and not any other FIXED variable. Reason: all the other 
+    // FIXED variables belong to the master.
     csp_solution.insert( root_link );
 
-    // Recreate my_coupling_keys
-    for( pair< PatternLink, XLink > pxp : csp_solution )
-        InsertSolo( basic_solution, pxp );                        
+    return csp_solution;
 }
 
 
@@ -632,7 +631,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            e->Compare( xlink, solution_for_subordinates );
+            (void)e->Compare( xlink, solution_for_subordinates );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -672,7 +671,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-            e->Compare( xe_link, solution_for_subordinates );
+            (void)e->Compare( xe_link, solution_for_subordinates );
         }
     }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
@@ -680,7 +679,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         for( XLink xe_link : xssl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            e->Compare( xe_link, solution_for_subordinates );
+            (void)e->Compare( xe_link, solution_for_subordinates );
         }
     }    
     else
@@ -691,6 +690,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 
 void AndRuleEngine::RegenerationPassAgent( Agent *agent,
+                                           SolutionMap &basic_solution,
                                            const SolutionMap &solution_for_subordinates )
 {
     // Get a list of the links we must supply to the agent for regeneration
@@ -734,7 +734,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
                 if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    e->Compare( link, &solution_for_subordinates );
+                    (void)e->Compare( link, &solution_for_subordinates );
                 }
             }                    
             
@@ -770,7 +770,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 }      
 
 
-void AndRuleEngine::RegenerationPass()
+void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution )
 {
     INDENT("R");
     const SolutionMap solution_for_subordinates = UnionOfSolo( *master_solution, basic_solution );   
@@ -781,6 +781,7 @@ void AndRuleEngine::RegenerationPass()
     for( Agent *agent : plan.my_normal_agents )
     {
         RegenerationPassAgent( agent, 
+                               basic_solution,
                                solution_for_subordinates );
     }
 
@@ -788,8 +789,8 @@ void AndRuleEngine::RegenerationPass()
 }
 
 
-void AndRuleEngine::Compare( XLink root_xlink,
-                             const SolutionMap *master_solution_ )
+SolutionMap AndRuleEngine::Compare( XLink root_xlink,
+                                    const SolutionMap *master_solution_ )
 {
     INDENT("C");
     ASSERT( root_xlink );
@@ -808,14 +809,18 @@ void AndRuleEngine::Compare( XLink root_xlink,
                      
     StartCSPSolver( root_xlink );
            
+    // These are partial solutions, and are mapped against the links
+    // into the agents (half-link model). Note: solutions can specify
+    // the MMAX node.
+    SolutionMap basic_solution; 
+
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
     //int i=0;
     while(1)
     {
-        basic_solution.clear();
         // Get a solution from the solver
-        GetNextCSPSolution(root_link);        
+        basic_solution = GetNextCSPSolution(root_link);        
 
         try
         {
@@ -824,7 +829,7 @@ void AndRuleEngine::Compare( XLink root_xlink,
             {            
                 ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
             }
-            RegenerationPass();
+            RegenerationPass( basic_solution );
         }
         catch( const ::Mismatch& e )
         {                
@@ -837,31 +842,20 @@ void AndRuleEngine::Compare( XLink root_xlink,
     }
     
     // By now, we succeeded and slave_keys is the right set of keys
+    return move(basic_solution);
 }
 
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void AndRuleEngine::Compare( TreePtr<Node> root_xnode )
+SolutionMap AndRuleEngine::Compare( TreePtr<Node> root_xnode )
 {
     SolutionMap empty_solution;
     XLink root_xlink = XLink::CreateDistinct(root_xnode);
-    Compare( root_xlink, &empty_solution );
+    return Compare( root_xlink, &empty_solution );
 }
 
 
-const SolutionMap &AndRuleEngine::GetSolution()
-{
-    return basic_solution;
-}
-
-
-void AndRuleEngine::ClearSolution()
-{
-    basic_solution.clear();
-}
-
-    
 const set<Agent *> &AndRuleEngine::GetKeyedAgents() const
 {
    // We will key all our normal agents

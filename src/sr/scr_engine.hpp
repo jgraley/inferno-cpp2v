@@ -115,7 +115,7 @@ private:
 
     void PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
     void RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x );
-    TreePtr<Node> Replace( const SolutionMap *master_solution );
+    TreePtr<Node> Replace( SolutionMap &&solution );
 
 public: // For top level engine/VN trans
     void SingleCompareReplace( TreePtr<Node> *p_root_xnode,

@@ -136,7 +136,7 @@ public:
     
 private:        
     void StartCSPSolver( XLink root_xlink );
-    void GetNextCSPSolution( LocatedLink root_link );
+    SolutionMap GetNextCSPSolution( LocatedLink root_link );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
@@ -146,16 +146,15 @@ private:
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const SolutionMap *solution_for_subordinates ); 
     void RegenerationPassAgent( Agent *agent,
+                                SolutionMap &basic_solution,
                                 const SolutionMap &solution_for_subordinates );
-    void RegenerationPass();
+    void RegenerationPass( SolutionMap &basic_solution );
     
 public:
-    void Compare( XLink root_xlink,
-                  const SolutionMap *master_solution );
-    void Compare( TreePtr<Node> root_xnode );
+    SolutionMap Compare( XLink root_xlink,
+                         const SolutionMap *master_solution );
+    SolutionMap Compare( TreePtr<Node> root_xnode );
 
-    const SolutionMap &GetSolution();
-    void ClearSolution();
     const set<Agent *> &GetKeyedAgents() const;
     const set<PatternLink> GetKeyerPatternLinks() const;
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
@@ -176,10 +175,6 @@ private:
     // couplings are not allowed to specify the MMAX node.
     const SolutionMap *master_solution;
 
-    // These are partial solutions, and are mapped against the links
-    // into the agents (half-link model). Note: solutions can specify
-    // the MMAX node.
-    SolutionMap basic_solution; 
     bool used = false;  
 };
 

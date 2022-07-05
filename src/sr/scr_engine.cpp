@@ -389,20 +389,17 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
 }
 
 
-TreePtr<Node> SCREngine::Replace( const SolutionMap *master_solution )
+TreePtr<Node> SCREngine::Replace( SolutionMap &&solution )
 {
     INDENT("R");
         
-    replace_solution = UnionOfSolo( *master_solution,
-                                    plan.and_rule_engine->GetSolution() );
-    
     slave_though_subtrees.clear();
+    replace_solution = move(solution);
     keys_available = true;
 
     // Now replace according to the couplings
     TRACE("Now replacing, root agent=")(plan.root_agent)("\n");
-    TreePtr<Node> new_root_x;
-    new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
+    TreePtr<Node> new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
     TRACE("Replace done\n");
     
     for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
@@ -437,11 +434,13 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node. 
-    plan.and_rule_engine->Compare( root_xlink, 
-                                   master_solution );
+    const SolutionMap &cs = plan.and_rule_engine->Compare( root_xlink, 
+                                                           master_solution );
     TRACE("Search got a match\n");
            
-    *p_root_xnode = Replace(master_solution);
+    // Replace will need the compare keys unioned with the master keys
+    SolutionMap rs = UnionOfSolo( *master_solution, cs );    
+    *p_root_xnode = Replace( move(rs) );
     
     // Clear out anything cached in agents now that replace is done
     FOREACH( Agent *a, plan.my_agents )
