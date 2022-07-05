@@ -69,11 +69,8 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     else if( DynamicTreePtrCast<SizeOf>(o) || DynamicTreePtrCast<AlignOf>(o) )
     {
     	TreePtr<Integral> n;
-    	if( TypeDb::int_default_signed )
-    		n = MakeTreeNode<Signed>();
-    	else
-    		n = MakeTreeNode<Unsigned>();
-       	auto sz = MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
+        n = MakeTreeNode<Unsigned>();
+       	auto sz = MakeTreeNode<SpecificInteger>( TypeDb::size_t_bits );
     	n->width = sz;
         return n;
     }

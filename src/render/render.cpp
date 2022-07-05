@@ -191,7 +191,7 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 	if( width == TypeDb::char_bits )
 		ds = TypeDb::char_default_signed;
 	else
-		ds = TypeDb::int_default_signed;
+		ds = true;
 
 	// Produce signed or unsigned if required
 	// Note: literal strings can be converted to char * but not unsigned char * or signed char *

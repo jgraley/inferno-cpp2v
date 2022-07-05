@@ -332,7 +332,7 @@ private:
 							DS.getTypeSpecSign());
 					return CreateIntegralType(
 							TypeDb::integral_bits[DS.getTypeSpecWidth()],
-							TypeDb::int_default_signed, DS.getTypeSpecSign());
+							true, DS.getTypeSpecSign());
 					break;
 				case clang::DeclSpec::TST_char:
 					TRACE("char based %d %d\n", DS.getTypeSpecWidth(),
@@ -936,11 +936,11 @@ private:
 		{
 			int bits;
 			if( literal.isLong )
-			bits = TypeDb::integral_bits[clang::DeclSpec::TSW_long];
+                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_long];
 			else if( literal.isLongLong )
-			bits = TypeDb::integral_bits[clang::DeclSpec::TSW_longlong];
+                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_longlong];
 			else
-			bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
+                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
 
 			llvm::APSInt rv(bits, literal.isUnsigned);
 			bool err = literal.GetIntegerValue(rv);
