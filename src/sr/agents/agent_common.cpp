@@ -194,7 +194,7 @@ bool AgentCommon::IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) con
 bool AgentCommon::IsNonTrivialPreRestriction() const
 {
     // Use our keyer_plink to get pptr - but only after planning!
-    return IsNonTrivialPreRestrictionNP( keyer_plink.GetPatternPtr() );
+    return IsNonTrivialPreRestrictionNP( keyer_plink.GetPatternTreePtr() );
 }                                
 
 

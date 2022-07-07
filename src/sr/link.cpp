@@ -117,7 +117,7 @@ TreePtr<Node> PatternLink::GetPattern() const
 }
 
 
-const TreePtrInterface *PatternLink::GetPatternPtr() const
+const TreePtrInterface *PatternLink::GetPatternTreePtr() const
 {
     return asp_pattern.get();
 }
@@ -391,9 +391,9 @@ Agent *LocatedLink::GetChildAgent() const
 }
 
 
-const TreePtrInterface *LocatedLink::GetPatternPtr() const
+const TreePtrInterface *LocatedLink::GetPatternTreePtr() const
 {
-    return plink.GetPatternPtr();
+    return plink.GetPatternTreePtr();
 }
 
 

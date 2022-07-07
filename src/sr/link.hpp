@@ -36,7 +36,7 @@ public:
     explicit operator bool() const;
     Agent *GetChildAgent() const;
     TreePtr<Node> GetPattern() const;
-    const TreePtrInterface *GetPatternPtr() const;
+    const TreePtrInterface *GetPatternTreePtr() const;
     void Redirect( const TreePtrInterface &new_parent_pattern );
     
     string GetTrace() const; // used for debug
@@ -117,7 +117,7 @@ public:
     explicit operator bool() const;
     operator pair<const PatternLink, XLink>() const;
     Agent *GetChildAgent() const;
-    const TreePtrInterface *GetPatternPtr() const;
+    const TreePtrInterface *GetPatternTreePtr() const;
     TreePtr<Node> GetChildX() const;
     void SetX( const XLink &xlink );
     void SetPattern( const PatternLink &plink );
