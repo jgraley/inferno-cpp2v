@@ -47,7 +47,6 @@ AndRuleEngine::AndRuleEngine( PatternLink root_plink,
 
 AndRuleEngine::~AndRuleEngine() 
 { 
-    //ASSERT( used )( plan.root_plink );
 }
 
  
@@ -575,7 +574,7 @@ void AndRuleEngine::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge 
 }
 
 
-void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes)
+void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *master_solution)
 {    
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
@@ -764,7 +763,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 }      
 
 
-void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution )
+void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const SolutionMap *master_solution )
 {
     INDENT("R");
     const SolutionMap solution_for_subordinates = UnionOfSolo( *master_solution, basic_solution );   
@@ -784,14 +783,10 @@ void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution )
 
 
 SolutionMap AndRuleEngine::Compare( XLink root_xlink,
-                                    const SolutionMap *master_solution_ )
+                                    const SolutionMap *master_solution )
 {
     INDENT("C");
-    ASSERT( root_xlink );
-    used = true;
-         
-    master_solution = master_solution_;    
-    
+    ASSERT( root_xlink );            
     TRACE("Compare root ")(root_xlink)("\n");
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
@@ -803,7 +798,7 @@ SolutionMap AndRuleEngine::Compare( XLink root_xlink,
     SolutionMap my_fixes = {{plan.root_plink, root_xlink}};
     
     // Start the CSP solver
-    StartCSPSolver( my_fixes );
+    StartCSPSolver( my_fixes, master_solution );
            
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
@@ -829,7 +824,7 @@ SolutionMap AndRuleEngine::Compare( XLink root_xlink,
             {            
                 ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
             }
-            RegenerationPass( basic_solution );
+            RegenerationPass( basic_solution, master_solution );
         }
         catch( const ::Mismatch& e )
         {                

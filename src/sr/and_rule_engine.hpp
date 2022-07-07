@@ -136,7 +136,8 @@ public:
     void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );      
     
 private:        
-    void StartCSPSolver( const SolutionMap &fixes );
+    void StartCSPSolver( const SolutionMap &fixes,
+                         const SolutionMap *master_solution );
     SolutionMap GetNextCSPSolution();
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
@@ -149,7 +150,8 @@ private:
     void RegenerationPassAgent( Agent *agent,
                                 SolutionMap &basic_solution,
                                 const SolutionMap &solution_for_subordinates );
-    void RegenerationPass( SolutionMap &basic_solution );
+    void RegenerationPass( SolutionMap &basic_solution,
+                           const SolutionMap *master_solution );
     
 public:
     SolutionMap Compare( XLink root_xlink,
@@ -169,14 +171,6 @@ public:
 private:
     // Information about the X tree
     shared_ptr<const TheKnowledge> knowledge;
-
-    // Keys are mapped agaist agents, even though one of the links into
-    // the agent is the keyer. This is well-defined and avoids merging
-    // this instance's problem into master instance's problems. Note:
-    // couplings are not allowed to specify the MMAX node.
-    const SolutionMap *master_solution;
-
-    bool used = false;  
 };
 
 #endif
