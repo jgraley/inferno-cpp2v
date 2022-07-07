@@ -115,6 +115,7 @@ public:
         set<PatternLink> coupling_keyer_links_all; // All keyers
         set<PatternLink> my_master_boundary_links; // These are ALL residuals
         set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
+        set<PatternLink> my_fixed_keyer_links; 
         map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
         map< Agent *, set<PatternLink> > parent_residual_links_to_master_boundary_agents;
         list<PatternLink> free_normal_links_ordered;
@@ -135,8 +136,8 @@ public:
     void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );      
     
 private:        
-    void StartCSPSolver( XLink root_xlink );
-    SolutionMap GetNextCSPSolution( LocatedLink root_link );
+    void StartCSPSolver( const SolutionMap &fixes );
+    SolutionMap GetNextCSPSolution();
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );

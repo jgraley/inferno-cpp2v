@@ -104,6 +104,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
         
+    my_fixed_keyer_links = { root_plink };
+    
     // ------------------ Log it ---------------------
     Dump();
     
@@ -157,7 +159,7 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> know
     // we can guarantee will be in the domain.
     solver_holder = CreateSolverAndHolder( constraints_list, 
                                            ToVector(free_normal_links_ordered), 
-                                           { root_plink },
+                                           my_fixed_keyer_links,
                                            master_boundary_keyer_links );    
                                     
     // Note: constraints_list drops out of scope and discards its 
@@ -445,7 +447,7 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 {
     for( PatternLink link : normal_and_boundary_links_preorder )
     {
-        if( link != root_plink )
+        if( my_fixed_keyer_links.count(link)==0 )
             free_normal_links_ordered.push_back( link );
         current_solve_plinks.insert( link );
     }
@@ -543,6 +545,8 @@ void AndRuleEngine::Plan::Dump()
           Trace(my_master_boundary_links) },
         { "master_boundary_keyer_links", 
           Trace(master_boundary_keyer_links) },
+        { "my_fixed_keyer_links",
+          Trace(my_fixed_keyer_links) },  
         { "parent_links_to_my_normal_agents", 
           Trace(parent_links_to_my_normal_agents) },
         { "parent_residual_links_to_master_boundary_agents",
@@ -571,20 +575,15 @@ void AndRuleEngine::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge 
 }
 
 
-void AndRuleEngine::StartCSPSolver(XLink root_xlink)
+void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes)
 {    
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
     SolutionMap master_and_root_links;
     for( PatternLink link : plan.master_boundary_keyer_links )
-    {
-        // distinct OK because this only runs once per solve
-        ASSERT( master_solution->count(link) == 1 )
-              ("Master proxy link ")(link)(" not in:\n")(master_solution)("\n");
-        // Used to use CreateDistinct, #523 case 1
         master_and_root_links[link] = master_solution->at(link);
-    }
-    master_and_root_links[plan.root_plink] = root_xlink;
+    for( PatternLink link : plan.my_fixed_keyer_links )
+        master_and_root_links[link] = fixes.at(link);
     
     TRACE("Starting solver\n");
     ASSERT( plan.solver_holder );
@@ -592,18 +591,13 @@ void AndRuleEngine::StartCSPSolver(XLink root_xlink)
 }
 
 
-SolutionMap AndRuleEngine::GetNextCSPSolution( LocatedLink root_link )
+SolutionMap AndRuleEngine::GetNextCSPSolution()
 {
     TRACE("GetNextCSPSolution()\n");
     SolutionMap csp_solution;
     bool match = plan.solver_holder->GetNextSolution( &csp_solution );        
     if( !match )
         throw NoSolution();
-
-    // Add the root variable/value, which is FORCED. Not sure why we have
-    // to add this and not any other FIXED variable. Reason: all the other 
-    // FIXED variables belong to the master.
-    csp_solution.insert( root_link );
 
     return csp_solution;
 }
@@ -798,16 +792,18 @@ SolutionMap AndRuleEngine::Compare( XLink root_xlink,
          
     master_solution = master_solution_;    
     
-    LocatedLink root_link( plan.root_plink, root_xlink );
-
-    TRACE("Compare root ")(root_link)("\n");
+    TRACE("Compare root ")(root_xlink)("\n");
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
-    if( !dynamic_cast<StarAgent*>(root_link.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
+    if( !dynamic_cast<StarAgent*>(plan.root_plink.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
         ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
-                     
-    StartCSPSolver( root_xlink );
+    
+    // Determine my fixes (just root pattern link to root x link)
+    SolutionMap my_fixes = {{plan.root_plink, root_xlink}};
+    
+    // Start the CSP solver
+    StartCSPSolver( my_fixes );
            
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
@@ -820,7 +816,11 @@ SolutionMap AndRuleEngine::Compare( XLink root_xlink,
     while(1)
     {
         // Get a solution from the solver
-        basic_solution = GetNextCSPSolution(root_link);        
+        basic_solution = GetNextCSPSolution();        
+
+        // Merge my fixes into the solution (but we're not expected to merge
+        // in master: caller can do that, if required).
+        basic_solution = UnionOfSolo( basic_solution, my_fixes );
 
         try
         {
