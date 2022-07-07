@@ -52,30 +52,48 @@ SpecificInteger::SpecificInteger()
 
 
 SpecificInteger::SpecificInteger( llvm::APSInt i ) : 
-    llvm::APSInt(i)
+    value(i)
 {
 }
 
 
 SpecificInteger::SpecificInteger( int i ) : 
-    llvm::APSInt(INTEGER_DEFAULT_WIDTH, false)  // signed
+    value(INTEGER_DEFAULT_WIDTH, false)  // signed
 { 
-    *(llvm::APSInt *)this = i; 
+    value = i; 
 } 
 
 
 SpecificInteger::SpecificInteger( int64_t i ) : 
-    llvm::APSInt(INTEGER_DEFAULT_WIDTH, false)  // 64-bit
+    value(INTEGER_DEFAULT_WIDTH, false)  // 64-bit
 { 
-    *(llvm::APSInt *)this = i; 
+    value = i; 
 } 
 
 
 SpecificInteger::SpecificInteger( unsigned i ) : 
-    llvm::APSInt(INTEGER_DEFAULT_WIDTH, true)  // unsigned
+    value(INTEGER_DEFAULT_WIDTH, true)  // unsigned
 { 
-    *(llvm::APSInt *)this = i; 
+    value = i; 
 } 
+
+
+int64_t SpecificInteger::GetInt64() const
+{
+    return value.getSExtValue();
+}
+
+
+bool SpecificInteger::IsSigned() const
+{
+    return value.isSigned();
+}
+
+
+int64_t SpecificInteger::GetWidth() const
+{
+    return value.getBitWidth();
+}
 
 
 bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
@@ -84,9 +102,9 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
     auto *c = dynamic_cast<const SpecificInteger *>(candidate);
     // A local match will require all fields to match, not just the numerical value.
     return c && 
-           c->isUnsigned() == isUnsigned() &&
-           c->getBitWidth() == getBitWidth() &&
-           *(llvm::APSInt *)c == *(llvm::APSInt *)this;
+           c->value.isUnsigned() == value.isUnsigned() &&
+           c->value.getBitWidth() == value.getBitWidth() &&
+           c->value == value;
 }
 
 
@@ -95,22 +113,21 @@ Orderable::Result SpecificInteger::OrderCompareLocal( const Orderable *candidate
 {
     auto c = GET_THAT_POINTER(candidate);
 
-    if( isUnsigned() != c->isUnsigned() )
-        return (int)(isUnsigned()) - (int)(c->isUnsigned());
-    if( getBitWidth() != c->getBitWidth() )
-        return (int)(getBitWidth()) - (int)(c->getBitWidth());
-    return (*(llvm::APSInt *)this > *(llvm::APSInt *)c) - 
-           (*(llvm::APSInt *)this < *(llvm::APSInt *)c);
+    if( value.isUnsigned() != c->value.isUnsigned() )
+        return (int)(value.isUnsigned()) - (int)(c->value.isUnsigned());
+    if( value.getBitWidth() != c->value.getBitWidth() )
+        return (int)(value.getBitWidth()) - (int)(c->value.getBitWidth());
+    return (value > c->value) - (value < c->value);
     // Note: just subtracting could overflow
 }
  
  
 string SpecificInteger::GetRender() const /// Produce a string for debug
 {
-    return string(toString(10)) + // decimal
-           (isUnsigned() ? "U" : "") +
-           (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-           (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
+    return string(value.toString(10)) + // decimal
+           (value.isUnsigned() ? "U" : "") +
+           (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+           (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
            // note, assuming longlong bigger than long, so second L appends first to get LL
 }
 

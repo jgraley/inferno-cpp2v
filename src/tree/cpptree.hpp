@@ -147,7 +147,7 @@ struct Integer : Number { NODE_FUNCTIONS };
  so that we can deal with any size of number (so this can be used for
  large bit vectors). The LLVM object also stores the signedness. The
  value must always be filled in. */
-struct SpecificInteger : Integer, llvm::APSInt
+struct SpecificInteger : Integer
 {
 	NODE_FUNCTIONS_FINAL
     SpecificInteger(); ///< default constructor, for making archetypes 
@@ -155,11 +155,18 @@ struct SpecificInteger : Integer, llvm::APSInt
     SpecificInteger( int i ); ///< Construct with a signed int
     SpecificInteger( unsigned i ); ///< Construct with an unsigned int
     SpecificInteger( int64_t i ); ///< Construct with a 64-bit int
+    int64_t GetInt64() const;
+    bool IsSigned() const;
+    int64_t GetWidth() const;
+
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
+    
+private:
+    llvm::APSInt value;    
 };
 
 /// Intermediate property node that represents a floating point number of any value. 

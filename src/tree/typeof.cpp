@@ -242,7 +242,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
         if( !siwidth )
             throw NumericalOperatorUsageMismatch3();
 		//ASSERT( siwidth )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
-		int64_t width = siwidth->getSExtValue();
+		int64_t width = siwidth->GetInt64(); // here we assume int64_t can hold the widths of integer variablkes
 
 		if( DynamicTreePtrCast<Signed>(optype) )
 		{
@@ -330,11 +330,11 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     {
     	// Get the info from Clang, and make an Inferno type for it
     	TreePtr<Integral> it;
-        if( si->isSigned() )
+        if( si->IsSigned() )
         	it = MakeTreeNode<Signed>();
         else
         	it = MakeTreeNode<Unsigned>();
-        it->width = MakeTreeNode<SpecificInteger>( (int)(si->getBitWidth()) );
+        it->width = MakeTreeNode<SpecificInteger>( si->GetWidth() );
         return it;
     }
     else if( auto sf = DynamicTreePtrCast<SpecificFloat>(l) )

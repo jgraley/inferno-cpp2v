@@ -181,12 +181,12 @@ string Render::RenderScopedIdentifier( TreePtr<Identifier> id )
 string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 {
 	bool ds;
-	unsigned width;
-	TreePtr<SpecificInteger> ic = DynamicTreePtrCast<SpecificInteger>( type->width );
+	int64_t width;
+	auto ic = DynamicTreePtrCast<SpecificInteger>( type->width );
 	ASSERT(ic)("width must be integer");
-	width = ic->getLimitedValue();
+	width = ic->GetInt64();
 
-	TRACE("width %d\n", width);
+	TRACE("width %" PRId64 "\n", width);
 
 	if( width == TypeDb::char_bits )
 		ds = TypeDb::char_default_signed;
@@ -213,8 +213,9 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 		s += "long";
 	else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
 		s += "long long";
-	else    // unmatched defaults to int for bitfields
+	else   
 	{
+        // unmatched defaults to int for bitfields
 		s += "int";
 		bitfield = true;
 	}
@@ -224,7 +225,7 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 	if( bitfield )
 	{
 	   char b[100];
-	   sprintf(b, ":%d", width);
+	   sprintf(b, ":%" PRId64, width);
 	   s += b;
 	}
 
