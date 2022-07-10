@@ -82,3 +82,6 @@ script for usage instructions. If you want to see a graph, try e.g.
 
 ./inferno.exe -itest/examples/add.cpp -gi | dotty -
 
+How to apply a gihub Personal Access Token so you can commit
+
+git remote set-url origin https://<GitHub username>:<Personal Access Token>@github.com/<GitHub username>/inferno-cpp2v.git
