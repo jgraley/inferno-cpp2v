@@ -20,7 +20,7 @@ LLVM_REVISION ?= 61726
 #
 get_libs : makefile
 	tar -zxf llvm-${LLVM_REVISION}-patched.tgz
-	ln -sf llvm-${LLVM_REVISION)-patched llvm
+	ln -sf llvm-${LLVM_REVISION}-patched llvm
 							
 #
 # Compile llvm and clang sources
@@ -110,7 +110,7 @@ clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean
 iclean : makefile 
 	-rm -rf build/*
 	-rm -f inferno.exe
-	-rm -f resource/script/* resource/lib/*
+	-rm -f resource/lib/*
 
 #
 # Subordinate makefiles included last so they don't hijack the makefile default goal
