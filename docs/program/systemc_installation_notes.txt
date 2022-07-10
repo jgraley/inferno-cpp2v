@@ -26,6 +26,9 @@ make debug # insns say gmake, but not available on ubuntu
 Additional note: repeating this with GCC4.7 onward, I needed to remove four (presumably 
 incorrect) "mutable" keywords at reference decls, as requested by the compiler.
 ------------------
+Further: on going to gcc 9.4, I also needed to fix up default values in args of
+friend declarations: defaults should be moved to the original declaration.
+------------------
 
 make install
 
