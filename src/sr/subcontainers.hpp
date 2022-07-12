@@ -37,12 +37,12 @@ struct SubContainerRange : SubContainer,
     
     SubContainerRange() {}
     TreePtr<Node> parent_x;
-    shared_ptr<iterator_interface> my_begin;
-    shared_ptr<iterator_interface> my_end;
+    iterator my_begin;
+    iterator my_end;
 public:
     SubContainerRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e );
-    virtual const iterator_interface &begin();
-    virtual const iterator_interface &end();
+    virtual const iterator &begin();
+    virtual const iterator &end();
     virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubContainerRange"); }
     virtual void clear()                                { ASSERTFAIL("Cannot modify SubContainerRange"); }    
     virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubContainerRange"); }
@@ -61,7 +61,7 @@ struct SubContainerRangeExclusions : SubContainerRange
 {
     typedef set<const TreePtrInterface *> ExclusionSet;
 
-	class exclusion_iterator : public ContainerInterface::iterator_interface
+	class exclusion_iterator : public ContainerInterface::iterator
 	{
 	public:    
 		typedef forward_iterator_tag iterator_category;
@@ -102,8 +102,8 @@ struct SubContainerRangeExclusions : SubContainerRange
                                  const iterator &e );
     void SetExclusions( const ExclusionSet &exclusions_ );
     
-    virtual const iterator_interface &begin();
-    virtual const iterator_interface &end();
+    virtual const iterator &begin();
+    virtual const iterator &end();
     string GetContentsTrace();
 
 private: 
@@ -111,8 +111,8 @@ private:
     virtual bool IsExcluded( const iterator_interface &ib ) const;  
 
     shared_ptr<const ExclusionSet> exclusions;
-    shared_ptr<iterator_interface> my_exclusive_begin;
-    shared_ptr<iterator_interface> my_exclusive_end;
+    iterator my_exclusive_begin;
+    iterator my_exclusive_end;
     
     NODE_FUNCTIONS 
 };

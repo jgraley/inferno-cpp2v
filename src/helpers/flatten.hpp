@@ -7,7 +7,7 @@
 #include <list>
 
 /// Iterator for FlattenNode
-class FlattenNode_iterator : public ContainerInterface::iterator_interface
+class FlattenNode_iterator : public ContainerInterface::iterator
 {
 public:
 	// Standard types for stl compliance (note that the iterators are implicitly const)

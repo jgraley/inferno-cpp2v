@@ -43,14 +43,15 @@ public:
 	// Wrapper for iterator_interface, uses std::shared_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible. These can be passed around
 	// by value, and have copy-on-write semantics, so big iterators will actually get optimised
-	class iterator : public iterator_interface
+	class iterator : public iterator_interface, public std::iterator<forward_iterator_tag, const TreePtrInterface>
 	{
 	public:
-		typedef forward_iterator_tag iterator_category;
+		/*typedef forward_iterator_tag iterator_category;
 		typedef TreePtrInterface value_type;
+		typedef TreePtrInterface &reference;
 		typedef int difference_type;
 		typedef const value_type *pointer;
-		typedef const value_type &reference;
+		typedef const value_type &reference;*/
 
 		iterator();
 		iterator( const iterator_interface &ib );
@@ -78,8 +79,8 @@ public:
 
 	// These direct calls to the container are designed to support co-variance.
     virtual void insert( const TreePtrInterface &gx ) = 0;
-	virtual const iterator_interface &begin() = 0;
-    virtual const iterator_interface &end() = 0;
+	virtual const iterator &begin() = 0;
+    virtual const iterator &end() = 0;
     virtual const TreePtrInterface &front();
     virtual const TreePtrInterface &back();
     virtual void erase( const iterator_interface &it ) = 0;
@@ -119,7 +120,7 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     }
     
 	struct iterator : public Impl::iterator,
-	                  public ContainerInterface::iterator_interface
+	                  public ContainerInterface::iterator
 	{
 		virtual iterator &operator++()
 		{
@@ -148,6 +149,10 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 		    const typename Impl::iterator *pi = dynamic_cast<const typename Impl::iterator *>(&ib);
 		    ASSERT(pi)("Comparing iterators of different type");
 			return *(const typename Impl::iterator *)this == *pi;
+		}
+		virtual bool operator!=( const typename ContainerInterface::iterator_interface &ib ) const
+		{
+			return !operator==(ib);
 		}
 	};
 

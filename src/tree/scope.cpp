@@ -19,11 +19,23 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	FOREACH( const TreePtrInterface &n, walkr )
 	{
     	if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
-	    FOREACH( TreePtr<Declaration> d, s->members )
+#if 1
+        {
+            auto && __range = s->members ;
+            for (Collection<Declaration>::iterator __begin = __range.begin(), __end = __range.end(); __begin != __end; ++__begin)
+            {
+                TreePtr<Declaration> d = *__begin;
+                if( id == GetIdentifier( d ) ) 
+                    return s;
+            }
+        }
+#else	    
+        FOREACH( TreePtr<Declaration> d, s->members )
 	    {            
 	        if( id == GetIdentifier( d ) ) 
 	            return s;
 	    }
+#endif
 	}
 	
 	// Special additional processing for Compounds - look for statements that are really Instance Declarations

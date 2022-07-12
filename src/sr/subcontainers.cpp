@@ -11,26 +11,26 @@ using namespace SR;
 
 SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b, const iterator &e ) : 
     parent_x( parent_x_ ),
-    my_begin(b.Clone()), 
-    my_end(e.Clone())
+    my_begin(b), 
+    my_end(e)
 {               
     if( !(*my_begin == *my_end) )
     {
-        ASSERT( **my_begin );
-        ASSERT_NOT_ON_STACK( &**my_begin )( *this ); 
+        ASSERT( *my_begin );
+        ASSERT_NOT_ON_STACK( &*my_begin )( *this ); 
     }
 }
 
 
-const ContainerInterface::iterator_interface &SubContainerRange::begin() 
+const ContainerInterface::iterator &SubContainerRange::begin() 
 { 
-    return *my_begin; 
+    return my_begin; 
 }
 
 
-const ContainerInterface::iterator_interface &SubContainerRange::end()
+const ContainerInterface::iterator &SubContainerRange::end()
 {
-    return *my_end; 
+    return my_end; 
 }
 
 
@@ -223,26 +223,26 @@ void SubContainerRangeExclusions::SetExclusions( const ExclusionSet &exclusions_
     
     weak_ptr<const SubContainerRangeExclusions> sp_this = 
         dynamic_pointer_cast<SubContainerRangeExclusions>(shared_from_this());
-    my_exclusive_begin = make_shared<exclusion_iterator>( *my_begin, sp_this );
-    my_exclusive_end = make_shared<exclusion_iterator>( *my_end, sp_this );
+    my_exclusive_begin = exclusion_iterator( my_begin, sp_this );
+    my_exclusive_end = exclusion_iterator( my_end, sp_this );
 }
 
 
-const ContainerInterface::iterator_interface &SubContainerRangeExclusions::begin() 
+const ContainerInterface::iterator &SubContainerRangeExclusions::begin() 
 { 
-    return *my_exclusive_begin; 
+    return my_exclusive_begin; 
 }
 
 
-const ContainerInterface::iterator_interface &SubContainerRangeExclusions::end()
+const ContainerInterface::iterator &SubContainerRangeExclusions::end()
 {
-    return *my_exclusive_end; 
+    return my_exclusive_end; 
 }
 
 
 bool SubContainerRangeExclusions::IsExcluded( const iterator_interface &ib ) const
 {
-    if(ib == *my_end) 
+    if(ib == my_end) 
     {
         return false; // can't dereference end iterator - but can't exclude it either
     }
