@@ -11,6 +11,8 @@
 
 using namespace std;
 
+//#define ALWAYS_CLONE
+
 //----------------------- ContainerInterface -------------------------
 
 ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::operator--() 
@@ -23,60 +25,65 @@ ContainerInterface::iterator::iterator() :
     pib( shared_ptr<iterator_interface>() ) 
 {
     //FTRACE("%p Cons noarg\n", this);
-    am_unique_owner = false;
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
 }
 
-#ifdef ADD_CC_AO
+
 ContainerInterface::iterator::iterator( const iterator &ib ) :
-    pib( ib.pib ),
-    am_unique_owner( ib.am_unique_owner )
+#ifdef ALWAYS_CLONE
+    pib( ib.Clone() )
+#else
+    pib( ib.pib )
+#endif    
 {
+    //FTRACE("%p Cons i from %p\n", this, &ib);
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
 {
+    //FTRACE("%p Assign i from %p\n", this, &ib);
     pib = ib.pib;
-    am_unique_owner = ib.am_unique_owner;
     return *this;
 }
-#endif
+
+
+ContainerInterface::iterator::~iterator()
+{
+    //FTRACE("%p Destructs\n", this);
+}
 
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
-    //FTRACE("%p Cons ii\n", this);
     if( typeid(*this)==typeid(ib) )
     {
+        //FTRACE("%p Cons ii from %p SAME\n", this, &ib);
         pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
-        am_unique_owner = false;
     }
     else
     {
+        //FTRACE("%p Cons ii from %p DIFF cloning...\n", this, &ib);
         pib = ib.Clone(); // Deep copy because from unmanaged source
+        //FTRACE("...completed clone\n");
         ASSERT( pib.unique() );
-        am_unique_owner = true;
     }
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
-    //FTRACE("%p Assign ii\n", this);
     if( typeid(*this)==typeid(ib) )
     {
+        //FTRACE("%p Assign ii from %p SAME\n", this, &ib);
         pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
-        am_unique_owner = false;
     }
     else
     {
+        //FTRACE("%p Assign ii from %p DIFF cloning...\n", this, &ib);
         pib = ib.Clone(); // Deep copy because from unmanaged source
+        //FTRACE("...completed clone\n");        
         ASSERT( pib.unique() );
-        am_unique_owner = true;
     }
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     return *this;
 }
 
@@ -86,7 +93,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator++()
     ASSERT(pib)("Attempt to increment uninitialised iterator");
     EnsureUnique();
     pib->operator++();
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     return *this;
 }
 
@@ -96,7 +102,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator--()
     ASSERT(pib)("Attempt to increment uninitialised iterator");
     EnsureUnique();
     pib->operator--();
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     return *this;
 }
 
@@ -148,7 +153,6 @@ void ContainerInterface::iterator::Overwrite( const value_type *v ) const
 {
     ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
     pib->Overwrite( v );
-    ASSERT( am_unique_owner == (pib && !pib.unique()) );
 }
         
 
@@ -169,8 +173,9 @@ ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderly
 
 shared_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
 {
-    //FTRACE("%p Clone %p %d %d\n", this, pib, pib.unique(), am_unique_owner);
-    return make_shared<iterator>(*this);
+    ASSERTFAIL(); // not allowed; can only clone a fully concrete one
+    // Clone should not be used to boot into shared_ptr ownership, instead use 
+    // eg  make_shared<ContainerInterface::iterator>(ib)
 }
 
 
@@ -185,15 +190,15 @@ ContainerInterface::iterator::operator string()
 
 void ContainerInterface::iterator::EnsureUnique()
 {
-    //FTRACE("%p EnsureUnique %p %d %d\n", this, pib, pib.unique(), am_unique_owner);
     // Call this before modifying the underlying iterator - Performs a deep copy
     // if required to make sure there are no other refs.
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     if( pib && !pib.unique() )
+    {
+        //FTRACEC("Cloning...\n");
         pib = pib->Clone();
+        //FTRACE("...completed clone\n");
+    }
     ASSERT( !pib || pib.unique() );
-    am_unique_owner = true;
-    //ASSERT( am_unique_owner == (pib && pib.unique()) );
 }
 
 

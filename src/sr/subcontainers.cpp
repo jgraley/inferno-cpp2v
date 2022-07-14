@@ -11,8 +11,8 @@ using namespace SR;
 
 SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b, const iterator &e ) : 
     parent_x( parent_x_ ),
-    my_begin(b.Clone()), 
-    my_end(e.Clone())
+    my_begin(make_shared<ContainerInterface::iterator>(b)), 
+    my_end(make_shared<ContainerInterface::iterator>(e))
 {               
     if( !(*my_begin == *my_end) )
     {
@@ -81,7 +81,7 @@ SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator( const itera
                                                                      weak_ptr<const SubContainerRangeExclusions> container_ ) :
     container(container_)
 {            
-    pib = ib.Clone(); // Note we are not clone-on-write, so clone here for in case we write later
+    pib = make_shared<ContainerInterface::iterator>(ib); // Note we are not clone-on-write, so clone here for in case we write later
     NormaliseForward();
 }
 

@@ -17,8 +17,6 @@
 #include <iterator>
 #include <algorithm>
 
-#define ADD_CC_AO
-
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
@@ -55,12 +53,11 @@ public:
 		typedef const value_type &reference;
 
 		iterator();
-#ifdef ADD_CC_AO
 		iterator( const iterator &ib );
 		iterator &operator=( const iterator &ib );
-#endif
+		virtual ~iterator();
+        
 		iterator( const iterator_interface &ib );
-
 		iterator &operator=( const iterator_interface &ib );
 		iterator &operator++();
 		iterator &operator--();
@@ -80,7 +77,6 @@ public:
 		void EnsureUnique();
 
 		shared_ptr<iterator_interface> pib;
-        bool am_unique_owner;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
 
@@ -228,6 +224,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
+            //FTRACE("%p Clone\n", this);
 			auto ni = make_shared<iterator>();
 			*ni = *this;
 			return ni;
@@ -369,6 +366,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
+            //FTRACE("%p Clone\n", this);
 			auto ni = make_shared<iterator>();
 			*ni = *this;
 			return ni;
