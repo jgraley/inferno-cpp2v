@@ -74,7 +74,6 @@ public:
 		explicit operator string();
 		explicit operator bool() const { return !!pib; }
 	private:
-		void EnsureUnique();
 
 		shared_ptr<iterator_interface> pib;
 	};

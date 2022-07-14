@@ -11,8 +11,6 @@
 
 using namespace std;
 
-#define ALWAYS_CLONE
-
 //----------------------- ContainerInterface -------------------------
 
 ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::operator--() 
@@ -29,24 +27,18 @@ ContainerInterface::iterator::iterator() :
 
 
 ContainerInterface::iterator::iterator( const iterator &ib ) :
-#ifdef ALWAYS_CLONE
     pib( ib.pib ? ib.pib->Clone() : nullptr )
-#else
-    pib( ib.pib )
-#endif    
 {
+    ASSERT( !pib || pib.unique() );    
     //FTRACE("%p Cons i from %p\n", this, &ib);
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
 {
-#ifdef ALWAYS_CLONE
     pib = ib.pib ? ib.pib->Clone() : nullptr;
-#else
-    pib = ib.pib;
-#endif    
     //FTRACE("%p Assign i from %p\n", this, &ib);
+    ASSERT( !pib || pib.unique() );    
     return *this;
 }
 
@@ -59,39 +51,19 @@ ContainerInterface::iterator::~iterator()
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
-#ifndef ALWAYS_CLONE
-    if( typeid(*this)==typeid(ib) )
-    {
-        //FTRACE("%p Cons ii from %p SAME\n", this, &ib);
-        pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
-    }
-    else
-#endif    
-    {
-        //FTRACE("%p Cons ii from %p DIFF cloning...\n", this, &ib);
-        pib = ib.Clone(); // Deep copy because from unmanaged source
-        //FTRACE("...completed clone\n");
-        ASSERT( pib.unique() );
-    }
+    //FTRACE("%p Cons ii from %p DIFF cloning...\n", this, &ib);
+    pib = ib.Clone(); // Deep copy because from unmanaged source
+    //FTRACE("...completed clone\n");
+    ASSERT( pib.unique() );
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
-#ifndef ALWAYS_CLONE
-    if( typeid(*this)==typeid(ib) )
-    {
-        //FTRACE("%p Assign ii from %p SAME\n", this, &ib);
-        pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
-    }
-    else
-#endif    
-    {
-        //FTRACE("%p Assign ii from %p DIFF cloning...\n", this, &ib);
-        pib = ib.Clone(); // Deep copy because from unmanaged source
-        //FTRACE("...completed clone\n");        
-        ASSERT( pib.unique() );
-    }
+    //FTRACE("%p Assign ii from %p DIFF cloning...\n", this, &ib);
+    pib = ib.Clone(); // Deep copy because from unmanaged source
+    //FTRACE("...completed clone\n");        
+    ASSERT( pib.unique() );
     return *this;
 }
 
@@ -99,7 +71,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator=( const ite
 ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 {
     ASSERT(pib)("Attempt to increment uninitialised iterator");
-    EnsureUnique();
     pib->operator++();
     return *this;
 }
@@ -108,7 +79,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 ContainerInterface::iterator &ContainerInterface::iterator::operator--()
 {
     ASSERT(pib)("Attempt to increment uninitialised iterator");
-    EnsureUnique();
     pib->operator--();
     return *this;
 }
@@ -191,22 +161,6 @@ ContainerInterface::iterator::operator string()
         return Traceable::TypeIdName( *pib );
     else 
         return string("UNINITIALISED");
-}
-
-
-void ContainerInterface::iterator::EnsureUnique()
-{
-#ifndef ALWAYS_CLONE
-    // Call this before modifying the underlying iterator - Performs a deep copy
-    // if required to make sure there are no other refs.
-    if( pib && !pib.unique() )
-    {
-        //FTRACEC("Cloning...\n");
-        pib = pib->Clone();
-        //FTRACE("...completed clone\n");
-    }
-#endif    
-    ASSERT( !pib || pib.unique() );    
 }
 
 
