@@ -54,8 +54,11 @@ public:
 		typedef const value_type &reference;*/
 
 		iterator();
+		iterator( const iterator &ib );
+		iterator &operator=( const iterator &ib );
+		virtual ~iterator();
+        
 		iterator( const iterator_interface &ib );
-
 		iterator &operator=( const iterator_interface &ib );
 		iterator &operator++();
 		iterator &operator--();
@@ -68,11 +71,13 @@ public:
 		void Overwrite( const value_type *v ) const;
 		const bool IsOrdered() const;
 		iterator_interface *GetUnderlyingIterator() const;
-		virtual shared_ptr<iterator_interface> Clone() const ;
 		explicit operator string();
-	protected:
-		void EnsureUnique();
-
+		explicit operator bool() const { return !!pib; }
+	
+    protected:
+   		virtual shared_ptr<iterator_interface> Clone() const;
+    
+    private:
 		shared_ptr<iterator_interface> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
@@ -225,6 +230,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
+            //FTRACE("%p Clone\n", this);
 			auto ni = make_shared<iterator>();
 			*ni = *this;
 			return ni;
@@ -366,6 +372,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
+            //FTRACE("%p Clone\n", this);
 			auto ni = make_shared<iterator>();
 			*ni = *this;
 			return ni;

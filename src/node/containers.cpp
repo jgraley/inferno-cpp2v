@@ -22,24 +22,71 @@ ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::
 ContainerInterface::iterator::iterator() :
     pib( shared_ptr<iterator_interface>() ) 
 {
+    //FTRACE("%p Cons noarg\n", this);
+}
+
+
+ContainerInterface::iterator::iterator( const iterator &ib ) :
+    ContainerInterface::iterator::iterator( (const iterator_interface &)ib )
+{
+    // This "big three" copy constructor just delegates to the iterator_interface
+    // constructor. Without this we'd get the default copy and our attempts
+    // to manage pib would go awry.
+}
+
+
+ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
+{
+    // This "big three" assign operator just delegates to the iterator_interface
+    // assign operator. Without this we'd get the default assign and our attempts
+    // to manage pib would go awry.
+    return operator=( (const iterator_interface &)ib );
+}
+
+
+ContainerInterface::iterator::~iterator()
+{
 }
 
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
+    // We always deep-copy immediately (no attempt at copy-on-write etc)    
     if( typeid(*this)==typeid(ib) )
-        pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+    {
+        // ib is the exact same type as us. We can make ourself equivalent 
+        // to ib, but we still have to clone ib's pib. Adds 0 layers of
+        // indirection.
+        shared_ptr<iterator_interface> ib_pib = dynamic_cast<const iterator &>(ib).pib;
+        pib = ib_pib ? ib_pib->Clone() : nullptr;
+    }
     else
-        pib = ib.Clone(); // Deep copy because from unmanaged source
+    {
+        // ib is a subclass of iterator_interface but not the same as us, so 
+        // the only safe thing to do is to clone ib. Adds 1 layer of indirection.
+        pib = ib.Clone(); 
+    }
+    ASSERT( !pib || pib.unique() ); 
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
     if( typeid(*this)==typeid(ib) )
-        pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+    {
+        // ib is the exact same type as us. We can make ourself equivalent 
+        // to ib, but we still have to clone ib's pib. Adds 0 layers of
+        // indirection.
+        shared_ptr<iterator_interface> b_pib = dynamic_cast<const iterator &>(ib).pib;
+        pib = b_pib ? b_pib->Clone() : nullptr;
+    }
     else
-        pib = ib.Clone(); // Deep copy because from unmanaged source
+    {
+        // ib is a subclass of iterator_interface but not the same as us, so 
+        // the only safe thing to do is to clone ib. Adds 1 layer of indirection.
+        pib = ib.Clone();
+    }
+    ASSERT( !pib || pib.unique() );
     return *this;
 }
 
@@ -47,7 +94,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator=( const ite
 ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 {
     ASSERT(pib)("Attempt to increment uninitialised iterator");
-    EnsureUnique();
     pib->operator++();
     return *this;
 }
@@ -56,7 +102,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 ContainerInterface::iterator &ContainerInterface::iterator::operator--()
 {
     ASSERT(pib)("Attempt to increment uninitialised iterator");
-    EnsureUnique();
     pib->operator--();
     return *this;
 }
@@ -139,16 +184,6 @@ ContainerInterface::iterator::operator string()
         return Traceable::TypeIdName( *pib );
     else 
         return string("UNINITIALISED");
-}
-
-
-void ContainerInterface::iterator::EnsureUnique()
-{
-    // Call this before modifying the underlying iterator - Performs a deep copy
-    // if required to make sure there are no other refs.
-    if( pib && !pib.unique() )
-        pib = pib->Clone();
-    ASSERT( !pib || pib.unique() );
 }
 
 
