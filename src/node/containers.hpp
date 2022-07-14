@@ -17,6 +17,8 @@
 #include <iterator>
 #include <algorithm>
 
+#define ADD_CC_AO
+
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
@@ -53,6 +55,10 @@ public:
 		typedef const value_type &reference;
 
 		iterator();
+#ifdef ADD_CC_AO
+		iterator( const iterator &ib );
+		iterator &operator=( const iterator &ib );
+#endif
 		iterator( const iterator_interface &ib );
 
 		iterator &operator=( const iterator_interface &ib );
@@ -69,10 +75,12 @@ public:
 		iterator_interface *GetUnderlyingIterator() const;
 		virtual shared_ptr<iterator_interface> Clone() const ;
 		explicit operator string();
-	protected:
+		explicit operator bool() const { return !!pib; }
+	private:
 		void EnsureUnique();
 
 		shared_ptr<iterator_interface> pib;
+        bool am_unique_owner;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
 

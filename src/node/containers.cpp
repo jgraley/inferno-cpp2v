@@ -22,24 +22,61 @@ ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::
 ContainerInterface::iterator::iterator() :
     pib( shared_ptr<iterator_interface>() ) 
 {
+    //FTRACE("%p Cons noarg\n", this);
+    am_unique_owner = false;
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
 }
+
+#ifdef ADD_CC_AO
+ContainerInterface::iterator::iterator( const iterator &ib ) :
+    pib( ib.pib ),
+    am_unique_owner( ib.am_unique_owner )
+{
+}
+
+
+ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
+{
+    pib = ib.pib;
+    am_unique_owner = ib.am_unique_owner;
+    return *this;
+}
+#endif
 
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
+    //FTRACE("%p Cons ii\n", this);
     if( typeid(*this)==typeid(ib) )
+    {
         pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+        am_unique_owner = false;
+    }
     else
+    {
         pib = ib.Clone(); // Deep copy because from unmanaged source
+        ASSERT( pib.unique() );
+        am_unique_owner = true;
+    }
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
+    //FTRACE("%p Assign ii\n", this);
     if( typeid(*this)==typeid(ib) )
+    {
         pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+        am_unique_owner = false;
+    }
     else
+    {
         pib = ib.Clone(); // Deep copy because from unmanaged source
+        ASSERT( pib.unique() );
+        am_unique_owner = true;
+    }
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     return *this;
 }
 
@@ -49,6 +86,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator++()
     ASSERT(pib)("Attempt to increment uninitialised iterator");
     EnsureUnique();
     pib->operator++();
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     return *this;
 }
 
@@ -58,6 +96,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator--()
     ASSERT(pib)("Attempt to increment uninitialised iterator");
     EnsureUnique();
     pib->operator--();
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     return *this;
 }
 
@@ -109,6 +148,7 @@ void ContainerInterface::iterator::Overwrite( const value_type *v ) const
 {
     ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
     pib->Overwrite( v );
+    ASSERT( am_unique_owner == (pib && !pib.unique()) );
 }
         
 
@@ -129,6 +169,7 @@ ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderly
 
 shared_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
 {
+    //FTRACE("%p Clone %p %d %d\n", this, pib, pib.unique(), am_unique_owner);
     return make_shared<iterator>(*this);
 }
 
@@ -144,11 +185,15 @@ ContainerInterface::iterator::operator string()
 
 void ContainerInterface::iterator::EnsureUnique()
 {
+    //FTRACE("%p EnsureUnique %p %d %d\n", this, pib, pib.unique(), am_unique_owner);
     // Call this before modifying the underlying iterator - Performs a deep copy
     // if required to make sure there are no other refs.
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
     if( pib && !pib.unique() )
         pib = pib->Clone();
     ASSERT( !pib || pib.unique() );
+    am_unique_owner = true;
+    //ASSERT( am_unique_owner == (pib && pib.unique()) );
 }
 
 
