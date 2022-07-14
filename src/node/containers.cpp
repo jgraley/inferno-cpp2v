@@ -124,16 +124,30 @@ const ContainerInterface::iterator::value_type *ContainerInterface::iterator::op
 bool ContainerInterface::iterator::operator==( const iterator_interface &ib ) const // isovariant param
 {
     if( typeid(*this)==typeid(ib) )
-        return operator==(dynamic_cast<const iterator &>(ib));
+    {
+        shared_ptr<iterator_interface> ib_pib = dynamic_cast<const iterator &>(ib).pib;
+        ASSERT(pib && ib_pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", ib_pib?"i":"U");
+        return pib->operator==(*ib_pib);
+    }
     else
+    {
         return pib->operator==(ib); 
+    }
 }
 
 
 bool ContainerInterface::iterator::operator==( const iterator &i ) const // covariant param
 {
-    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
-    return pib->operator==( *(i.pib) );
+    if( typeid(*this)==typeid(i) )
+    {
+        shared_ptr<iterator_interface> i_pib = dynamic_cast<const iterator &>(i).pib;
+        ASSERT(pib && i_pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i_pib?"i":"U");
+        return pib->operator==(*i_pib);
+    }
+    else
+    {
+        return pib->operator==(i); 
+    }
 }
 
 
@@ -145,7 +159,6 @@ bool ContainerInterface::iterator::operator!=( const iterator_interface &ib ) co
 
 bool ContainerInterface::iterator::operator!=( const iterator &i ) const // covariant param
 {
-    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
     return !operator==( i );
 }
 

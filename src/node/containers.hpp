@@ -46,13 +46,6 @@ public:
 	class iterator : public iterator_interface, public std::iterator<forward_iterator_tag, const TreePtrInterface>
 	{
 	public:
-		/*typedef forward_iterator_tag iterator_category;
-		typedef TreePtrInterface value_type;
-		typedef TreePtrInterface &reference;
-		typedef int difference_type;
-		typedef const value_type *pointer;
-		typedef const value_type &reference;*/
-
 		iterator();
 		iterator( const iterator &ib );
 		iterator &operator=( const iterator &ib );
@@ -222,10 +215,12 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		inline iterator() {}
 		virtual value_type &operator*() const
 		{
+            ASSERT(this);
 			return Impl::iterator::operator*();
 		}
 		virtual value_type *operator->() const
 		{
+            ASSERT(this);
 			return Impl::iterator::operator->();
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
