@@ -70,11 +70,13 @@ public:
 		void Overwrite( const value_type *v ) const;
 		const bool IsOrdered() const;
 		iterator_interface *GetUnderlyingIterator() const;
-		virtual shared_ptr<iterator_interface> Clone() const ;
 		explicit operator string();
 		explicit operator bool() const { return !!pib; }
-	private:
-
+	
+    protected:
+   		virtual shared_ptr<iterator_interface> Clone() const;
+    
+    private:
 		shared_ptr<iterator_interface> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly

@@ -11,8 +11,8 @@ using namespace SR;
 
 SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b, const iterator &e ) : 
     parent_x( parent_x_ ),
-    my_begin(b.Clone()), 
-    my_end(e.Clone())
+    my_begin(make_shared<iterator>(b)), 
+    my_end(make_shared<iterator>(e))
 {               
     if( !(*my_begin == *my_end) )
     {
