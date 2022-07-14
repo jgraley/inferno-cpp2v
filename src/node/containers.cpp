@@ -11,7 +11,7 @@
 
 using namespace std;
 
-//#define ALWAYS_CLONE
+#define ALWAYS_CLONE
 
 //----------------------- ContainerInterface -------------------------
 
@@ -30,7 +30,7 @@ ContainerInterface::iterator::iterator() :
 
 ContainerInterface::iterator::iterator( const iterator &ib ) :
 #ifdef ALWAYS_CLONE
-    pib( ib.Clone() )
+    pib( ib.pib ? ib.pib->Clone() : nullptr )
 #else
     pib( ib.pib )
 #endif    
@@ -41,8 +41,12 @@ ContainerInterface::iterator::iterator( const iterator &ib ) :
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
 {
-    //FTRACE("%p Assign i from %p\n", this, &ib);
+#ifdef ALWAYS_CLONE
+    pib = ib.pib ? ib.pib->Clone() : nullptr;
+#else
     pib = ib.pib;
+#endif    
+    //FTRACE("%p Assign i from %p\n", this, &ib);
     return *this;
 }
 
@@ -55,12 +59,14 @@ ContainerInterface::iterator::~iterator()
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
+#ifndef ALWAYS_CLONE
     if( typeid(*this)==typeid(ib) )
     {
         //FTRACE("%p Cons ii from %p SAME\n", this, &ib);
         pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
     }
     else
+#endif    
     {
         //FTRACE("%p Cons ii from %p DIFF cloning...\n", this, &ib);
         pib = ib.Clone(); // Deep copy because from unmanaged source
@@ -72,12 +78,14 @@ ContainerInterface::iterator::iterator( const iterator_interface &ib )
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
+#ifndef ALWAYS_CLONE
     if( typeid(*this)==typeid(ib) )
     {
         //FTRACE("%p Assign ii from %p SAME\n", this, &ib);
         pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
     }
     else
+#endif    
     {
         //FTRACE("%p Assign ii from %p DIFF cloning...\n", this, &ib);
         pib = ib.Clone(); // Deep copy because from unmanaged source
@@ -173,9 +181,7 @@ ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderly
 
 shared_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
 {
-    ASSERTFAIL(); // not allowed; can only clone a fully concrete one
-    // Clone should not be used to boot into shared_ptr ownership, instead use 
-    // eg  make_shared<ContainerInterface::iterator>(ib)
+    return make_shared<iterator>(*this);
 }
 
 
@@ -190,6 +196,7 @@ ContainerInterface::iterator::operator string()
 
 void ContainerInterface::iterator::EnsureUnique()
 {
+#ifndef ALWAYS_CLONE
     // Call this before modifying the underlying iterator - Performs a deep copy
     // if required to make sure there are no other refs.
     if( pib && !pib.unique() )
@@ -198,7 +205,8 @@ void ContainerInterface::iterator::EnsureUnique()
         pib = pib->Clone();
         //FTRACE("...completed clone\n");
     }
-    ASSERT( !pib || pib.unique() );
+#endif    
+    ASSERT( !pib || pib.unique() );    
 }
 
 
