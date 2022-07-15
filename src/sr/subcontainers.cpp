@@ -171,9 +171,9 @@ ContainerInterface::iterator_interface *SubContainerRangeExclusions::exclusion_i
 }
 
 
-shared_ptr<ContainerInterface::iterator_interface> SubContainerRangeExclusions::exclusion_iterator::Clone() const 
+unique_ptr<ContainerInterface::iterator_interface> SubContainerRangeExclusions::exclusion_iterator::Clone() const 
 {
-    return make_shared<exclusion_iterator>(*pib, container);
+    return make_unique<exclusion_iterator>(*pib, container);
 }
 
 

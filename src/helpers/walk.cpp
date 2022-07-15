@@ -212,9 +212,9 @@ void Walk_iterator::AdvanceOver()
 }
 
 
-shared_ptr<ContainerInterface::iterator_interface> Walk_iterator::Clone() const
+unique_ptr<ContainerInterface::iterator_interface> Walk_iterator::Clone() const
 {
-	return make_shared<Walk_iterator>( *this );
+	return make_unique<Walk_iterator>( *this );
 }
 
 
@@ -320,10 +320,9 @@ ParentWalk_iterator::ParentWalk_iterator( TreePtr<Node> &root ) :
 {
 }
 
-shared_ptr<ContainerInterface::iterator_interface> ParentWalk_iterator::Clone() const
+unique_ptr<ContainerInterface::iterator_interface> ParentWalk_iterator::Clone() const
 {
-	shared_ptr<ParentWalk_iterator> ni( new ParentWalk_iterator(*this) );
-	return ni;
+	return make_unique<ParentWalk_iterator>(*this);
 }
 
 ////////////////////////// UniqueWalk //////////////////////////
@@ -358,9 +357,9 @@ UniqueWalk_iterator::UniqueWalk_iterator( TreePtr<Node> &root ) :
 {
 }
 
-shared_ptr<ContainerInterface::iterator_interface> UniqueWalk_iterator::Clone() const
+unique_ptr<ContainerInterface::iterator_interface> UniqueWalk_iterator::Clone() const
 {
-	return make_shared<UniqueWalk_iterator>( *this );
+	return make_unique<UniqueWalk_iterator>( *this );
 }
 
 

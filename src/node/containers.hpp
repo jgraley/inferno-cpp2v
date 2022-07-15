@@ -29,7 +29,7 @@ public:
 	struct iterator_interface : public Traceable
 	{
 		// TODO const iterator and const versions of begin(), end()
-		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
+		virtual unique_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
 		virtual iterator_interface &operator--();
 		virtual const TreePtrInterface &operator*() const = 0;
@@ -40,7 +40,7 @@ public:
 	};
 
 public:
-	// Wrapper for iterator_interface, uses std::shared_ptr<> and Clone() to manage the real iterator
+	// Wrapper for iterator_interface, uses std::unique_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible. These can be passed around
 	// by value, and always-copy semantics are used for simplicity.
     // Since C++ range-for uses the return type of begin() to determine loop index type, we have
@@ -73,10 +73,10 @@ public:
 		explicit operator bool() const;
 	
     protected:
-   		virtual shared_ptr<iterator_interface> Clone() const;
+   		virtual unique_ptr<iterator_interface> Clone() const;
     
     private:
-		shared_ptr<iterator_interface> pib;
+		unique_ptr<iterator_interface> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
 
@@ -243,10 +243,10 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             ASSERT(this);
 			return Impl::iterator::operator->();
 		}
-		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
+		virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
             // Avoid delegating to ContainerInterface::iterator.
-			auto ni = make_shared<iterator>();
+			auto ni = make_unique<iterator>();
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
@@ -386,10 +386,10 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
     {
 		inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
 		inline iterator() {}
-		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
+		virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
             // Avoid delegating to ContainerInterface::iterator.
-			auto ni = make_shared<iterator>();
+			auto ni = make_unique<iterator>();
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}

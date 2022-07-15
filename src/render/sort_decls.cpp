@@ -11,9 +11,9 @@ class UniqueWalkNoBody_iterator : public UniqueWalk::iterator
 public:
     UniqueWalkNoBody_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
     UniqueWalkNoBody_iterator() : UniqueWalk::iterator() {}
-	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
+	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return make_shared<UniqueWalkNoBody_iterator>(*this);
+   	    return make_unique<UniqueWalkNoBody_iterator>(*this);
 	}      
 protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
@@ -46,9 +46,9 @@ class UniqueWalkNoBodyOrIndirection_iterator : public UniqueWalkNoBody::iterator
 public:
     UniqueWalkNoBodyOrIndirection_iterator( TreePtr<Node> &root ) : UniqueWalkNoBody::iterator(root) {}        
     UniqueWalkNoBodyOrIndirection_iterator() : UniqueWalkNoBody::iterator() {}
-	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
+	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return make_shared<UniqueWalkNoBodyOrIndirection_iterator>(*this);
+   	    return make_unique<UniqueWalkNoBodyOrIndirection_iterator>(*this);
 	}      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const

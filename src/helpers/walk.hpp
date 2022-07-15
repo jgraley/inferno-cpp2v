@@ -19,7 +19,7 @@ public:
 
 	// Copy constructor and standard iterator operations
 	Walk_iterator( const Walk_iterator & other );
-	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
+	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;
 	virtual Walk_iterator &operator++();
 	virtual reference operator*() const;
 	virtual pointer operator->() const;
@@ -95,7 +95,7 @@ public:
     ParentWalk_iterator( const ParentWalk_iterator &other );
     ParentWalk_iterator &operator=( const ParentWalk_iterator &other );
     ParentWalk_iterator( TreePtr<Node> &root );
-	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;    
+	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };
@@ -115,7 +115,7 @@ public:
     UniqueWalk_iterator( const UniqueWalk_iterator &other );        
     UniqueWalk_iterator &operator=( const UniqueWalk_iterator &other );
     UniqueWalk_iterator( TreePtr<Node> &root );
-	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;    
+	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };

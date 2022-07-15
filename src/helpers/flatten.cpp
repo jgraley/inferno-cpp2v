@@ -98,9 +98,9 @@ string FlattenNode_iterator::GetName() const
 }
 
 
-shared_ptr<ContainerInterface::iterator_interface> FlattenNode_iterator::Clone() const
+unique_ptr<ContainerInterface::iterator_interface> FlattenNode_iterator::Clone() const
 {
-	return make_shared<FlattenNode_iterator>(*this);
+	return make_unique<FlattenNode_iterator>(*this);
 }
 
 

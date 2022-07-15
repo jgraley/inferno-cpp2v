@@ -19,7 +19,7 @@ public:
 
 	// Copy constructor and standard iterator operations
 	FlattenNode_iterator( const FlattenNode_iterator & other );
-	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
+	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;
 	virtual FlattenNode_iterator &operator++();
 	virtual reference operator*() const;
 	virtual pointer operator->() const;

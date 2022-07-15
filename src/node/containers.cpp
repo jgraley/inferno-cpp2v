@@ -26,7 +26,7 @@ ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::
 
 
 ContainerInterface::iterator::iterator() :
-    pib( shared_ptr<iterator_interface>() ) 
+    pib( unique_ptr<iterator_interface>() ) 
 {
     //FTRACE("%p Cons noarg\n", this);
 }
@@ -67,7 +67,7 @@ ContainerInterface::iterator::iterator( const iterator_interface &ib )
         // ib is the exact same type as us. We can make ourself equivalent 
         // to ib, but we still have to clone ib's pib. Adds 0 layers of
         // indirection.
-        shared_ptr<iterator_interface> ib_pib = dynamic_cast<const iterator &>(ib).pib;
+        const unique_ptr<iterator_interface> &ib_pib = dynamic_cast<const iterator &>(ib).pib;
         pib = ib_pib ? ib_pib->Clone() : nullptr;
     }
     else
@@ -76,7 +76,6 @@ ContainerInterface::iterator::iterator( const iterator_interface &ib )
         // the only safe thing to do is to clone ib. Adds 1 layer of indirection.
         pib = ib.Clone(); 
     }
-    ASSERT( !pib || pib.unique() ); 
 }
 
 
@@ -89,7 +88,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator=( const ite
         // ib is the exact same type as us. We can make ourself equivalent 
         // to ib, but we still have to clone ib's pib. Adds 0 layers of
         // indirection.
-        shared_ptr<iterator_interface> b_pib = dynamic_cast<const iterator &>(ib).pib;
+        const unique_ptr<iterator_interface> &b_pib = dynamic_cast<const iterator &>(ib).pib;
         pib = b_pib ? b_pib->Clone() : nullptr;
     }
     else
@@ -98,7 +97,6 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator=( const ite
         // the only safe thing to do is to clone ib. Adds 1 layer of indirection.
         pib = ib.Clone();
     }
-    ASSERT( !pib || pib.unique() );
     return *this;
 }
 
@@ -143,7 +141,7 @@ bool ContainerInterface::iterator::operator==( const iterator_interface &ib ) co
 
     if( typeid(*this)==typeid(ib) )
     {
-        shared_ptr<iterator_interface> ib_pib = dynamic_cast<const iterator &>(ib).pib;
+        const unique_ptr<iterator_interface> &ib_pib = dynamic_cast<const iterator &>(ib).pib;
         ASSERT(pib && ib_pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", ib_pib?"i":"U");
         return pib->operator==(*ib_pib);
     }
@@ -160,7 +158,7 @@ bool ContainerInterface::iterator::operator==( const iterator &i ) const // cova
 
     if( typeid(*this)==typeid(i) )
     {
-        shared_ptr<iterator_interface> i_pib = dynamic_cast<const iterator &>(i).pib;
+        const unique_ptr<iterator_interface> &i_pib = dynamic_cast<const iterator &>(i).pib;
         ASSERT(pib && i_pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i_pib?"i":"U");
         return pib->operator==(*i_pib);
     }
@@ -210,11 +208,11 @@ ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderly
 }
 
 
-shared_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
+unique_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
 {
     CHECK_NOT_REACHED_ON_SUBCLASS
 
-    return make_shared<iterator>(*this);
+    return make_unique<iterator>(*this);
 }
 
 
