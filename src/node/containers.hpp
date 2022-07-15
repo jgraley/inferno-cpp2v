@@ -42,7 +42,7 @@ public:
 public:
 	// Wrapper for iterator_interface, uses std::shared_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible. These can be passed around
-	// by value, and have copy-on-write semantics, so big iterators will actually get optimised.
+	// by value, and always-copy semantics are used for simplicity.
     // Since C++ range-for uses the return type of begin() to determine loop index type, we have
     // to return a reference to this class (not iterator_interface) from begin() on generic container
     // types. And to retain covariant return s from begin() and end(), we have to include this class 
