@@ -120,6 +120,14 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 	struct iterator : public Impl::iterator,
 	                  public ContainerInterface::iterator
 	{
+		iterator() {}
+
+        iterator( const iterator &ib ) :
+            Impl::iterator( (typename Impl::iterator &)ib )
+        {
+            // Avoid delegating to ContainerInterface::iterator
+        }
+        
 		iterator &operator=( const iterator &ib )
         {
             Impl::iterator::operator=( (typename Impl::iterator &)ib );
@@ -232,15 +240,16 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
-            //FTRACE("%p Clone\n", this);
+            // Avoid delegating to ContainerInterface::iterator.
 			auto ni = make_shared<iterator>();
-			*ni = *this;
+            ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
     	virtual void Overwrite( const TreePtrInterface *v ) const
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
+            // Avoid delegating to ContainerInterface::iterator.
     		value_type x( value_type::InferredDynamicCast(*v) );
 		    Impl::iterator::operator*() = x;
 		}
@@ -374,9 +383,9 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
-            //FTRACE("%p Clone\n", this);
+            // Avoid delegating to ContainerInterface::iterator.
 			auto ni = make_shared<iterator>();
-			*ni = *this;
+            ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
     	virtual void Overwrite( const TreePtrInterface *v ) const
@@ -384,6 +393,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
+            // Avoid delegating to ContainerInterface::iterator.
     		value_type s( value_type::InferredDynamicCast(*v) );
     		((Impl *)owner)->erase( *this );
 		    *(typename Impl::iterator *)this = ((Impl *)owner)->insert( s ); // become an iterator for the newly inserted element
