@@ -32,8 +32,8 @@ public:
 		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
 		virtual iterator_interface &operator--();
-		const virtual TreePtrInterface &operator*() const = 0;
-		const virtual TreePtrInterface *operator->() const = 0;
+		virtual const TreePtrInterface &operator*() const = 0;
+		virtual const TreePtrInterface *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
 		virtual void Overwrite( const TreePtrInterface *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
@@ -64,8 +64,8 @@ public:
 		void Overwrite( const value_type *v ) const;
 		const bool IsOrdered() const;
 		iterator_interface *GetUnderlyingIterator() const;
-		explicit operator string();
-		explicit operator bool() const { return !!pib; }
+		explicit operator string() const;
+		explicit operator bool() const;
 	
     protected:
    		virtual shared_ptr<iterator_interface> Clone() const;
