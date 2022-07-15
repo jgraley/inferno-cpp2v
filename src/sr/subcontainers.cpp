@@ -14,11 +14,6 @@ SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b
     my_begin(b), 
     my_end(e)
 {               
-    if( !(*my_begin == *my_end) )
-    {
-        ASSERT( *my_begin );
-        ASSERT_NOT_ON_STACK( &*my_begin )( *this ); 
-    }
 }
 
 

@@ -35,6 +35,7 @@ ContainerInterface::iterator::iterator() :
 ContainerInterface::iterator::iterator( const iterator &ib ) :
     ContainerInterface::iterator::iterator( (const iterator_interface &)ib )
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     // This "big three" copy constructor just delegates to the iterator_interface
     // constructor. Without this we'd get the default copy and our attempts
     // to manage pib would go awry.
@@ -43,6 +44,7 @@ ContainerInterface::iterator::iterator( const iterator &ib ) :
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     // This "big three" assign operator just delegates to the iterator_interface
     // assign operator. Without this we'd get the default assign and our attempts
     // to manage pib would go awry.
