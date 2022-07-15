@@ -366,7 +366,7 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     {
         // Search for links to the though subtree and stitch in the new one
         int hits = 0;
-        Walk e( *p_root_x ); 
+        Walk e( *p_root_x, nullptr, nullptr ); 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
             if( *wit == through_subtree ) // found the though subtree

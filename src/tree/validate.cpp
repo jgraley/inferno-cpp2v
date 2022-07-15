@@ -26,7 +26,7 @@ void Validate::operator()( TreePtr<Node> context,
 	// First walk over the entire context counting incoming links (because
 	// incoming links from other than the subtree of interest still count
 	// when validating link counts).
-	Walk wcon( context );
+	Walk wcon( context, nullptr, nullptr );
 	for( const TreePtrInterface &x : wcon )
 	{
 		if( x )
@@ -51,7 +51,7 @@ void Validate::operator()( TreePtr<Node> context,
 	}
 
 	// Now do the actual validation, only on the specified subtree
-	Walk w( *proot );
+	Walk w( *proot, nullptr, nullptr );
 	for( Walk::iterator wit = w.begin(); wit != w.end(); ++wit )
 	{
 		const auto x = (TreePtr<Node>)*wit;

@@ -498,6 +498,8 @@ template<typename VALUE_TYPE>
 struct Sequence : virtual Sequential< VALUE_TYPE >,
                   virtual SequenceInterface
 {
+// 	using Sequential< VALUE_TYPE >::Sequential;
+
 	inline Sequence() {}
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p ) : // explicit missing due usage in steps

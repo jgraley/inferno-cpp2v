@@ -28,7 +28,7 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 
 TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
-	Walk w(context);
+	Walk w(context, nullptr, nullptr);
 	for( const TreePtrInterface &n : w )
 	{
         if( TreePtr<UserType> d = DynamicTreePtrCast<UserType>((TreePtr<Node>)n) )
@@ -41,7 +41,7 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
 
 TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
-	Walk w( context );
+	Walk w( context, nullptr, nullptr );
 	for( const TreePtrInterface &n : w )
 	{
         if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>((TreePtr<Node>)n) )

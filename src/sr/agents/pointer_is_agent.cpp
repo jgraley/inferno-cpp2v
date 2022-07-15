@@ -29,7 +29,7 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
     
     // Do a walk over context (the whole x tree)
     bool found_one_already = false;
-    Walk e( context ); 
+    Walk e( context, nullptr, nullptr ); 
     for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
     {
         if( *wit == keyer_xlink.GetChildX() ) // found ourself TODO use find()
