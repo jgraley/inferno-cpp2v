@@ -10,9 +10,6 @@
 #include <memory>
 #include <stdarg.h>
 
-// needed for get_current_dir_name() in parse.h (lol)
-#include <boost/foreach.hpp>
-
 using namespace std;
 
 // How many members in an array
