@@ -9,6 +9,12 @@
 #include <iterator>
 #include <algorithm>
 
+#define CHECK_NOT_REACHED_ON_SUBCLASS \
+    ASSERT(typeid(*this)==typeid(decltype(*this))) \
+          ("Call to proxy iterator method on (presumably concrete) iterator object.\n") \
+          ("Called on ")(typeid(*this))("\n") \
+          ("Proxy class is ")(typeid(decltype(*this)))("\n"); \
+
 using namespace std;
 
 //----------------------- ContainerInterface -------------------------
@@ -51,6 +57,8 @@ ContainerInterface::iterator::~iterator()
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+    
     // We always deep-copy immediately (no attempt at copy-on-write etc)    
     if( typeid(*this)==typeid(ib) )
     {
@@ -72,6 +80,8 @@ ContainerInterface::iterator::iterator( const iterator_interface &ib )
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     if( typeid(*this)==typeid(ib) )
     {
         // ib is the exact same type as us. We can make ourself equivalent 
@@ -93,6 +103,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator=( const ite
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to increment uninitialised iterator");
     pib->operator++();
     return *this;
@@ -101,6 +112,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator--()
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to increment uninitialised iterator");
     pib->operator--();
     return *this;
@@ -109,6 +121,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator--()
 
 const ContainerInterface::iterator::value_type &ContainerInterface::iterator::operator*() const 
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to dereference uninitialised iterator");
     return pib->operator*();
 }
@@ -116,6 +129,7 @@ const ContainerInterface::iterator::value_type &ContainerInterface::iterator::op
 
 const ContainerInterface::iterator::value_type *ContainerInterface::iterator::operator->() const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to dereference uninitialised iterator");
     return pib->operator->();
 }
@@ -123,6 +137,8 @@ const ContainerInterface::iterator::value_type *ContainerInterface::iterator::op
 
 bool ContainerInterface::iterator::operator==( const iterator_interface &ib ) const // isovariant param
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     if( typeid(*this)==typeid(ib) )
         return operator==(dynamic_cast<const iterator &>(ib));
     else
@@ -132,6 +148,8 @@ bool ContainerInterface::iterator::operator==( const iterator_interface &ib ) co
 
 bool ContainerInterface::iterator::operator==( const iterator &i ) const // covariant param
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
     return pib->operator==( *(i.pib) );
 }
@@ -139,12 +157,14 @@ bool ContainerInterface::iterator::operator==( const iterator &i ) const // cova
 
 bool ContainerInterface::iterator::operator!=( const iterator_interface &ib ) const // isovariant param
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     return !operator==( ib );
 }
 
 
 bool ContainerInterface::iterator::operator!=( const iterator &i ) const // covariant param
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
     return !operator==( i );
 }
@@ -152,6 +172,7 @@ bool ContainerInterface::iterator::operator!=( const iterator &i ) const // cova
 
 void ContainerInterface::iterator::Overwrite( const value_type *v ) const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
     pib->Overwrite( v );
 }
@@ -159,12 +180,14 @@ void ContainerInterface::iterator::Overwrite( const value_type *v ) const
 
 const bool ContainerInterface::iterator::IsOrdered() const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     return pib->IsOrdered();
 }
 
 
 ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderlyingIterator() const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     if( pib )
         return pib.get();
     else
@@ -174,16 +197,26 @@ ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderly
 
 shared_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     return make_shared<iterator>(*this);
 }
 
 
-ContainerInterface::iterator::operator string()
+ContainerInterface::iterator::operator string() const
 {   
+    CHECK_NOT_REACHED_ON_SUBCLASS
     if( pib )
         return Traceable::TypeIdName( *pib );
     else 
         return string("UNINITIALISED");
+}
+
+
+ContainerInterface::iterator::operator bool() const 
+{ 
+    CHECK_NOT_REACHED_ON_SUBCLASS 
+    return !!pib; 
 }
 
 
