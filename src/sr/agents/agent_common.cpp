@@ -122,7 +122,7 @@ list<PatternLink> AgentCommon::GetChildren() const
     // is only for search.
     
     list<PatternLink> plinks;
-    FOREACH( const TreePtrInterface &tpi, *con )
+    for( const TreePtrInterface &tpi : *con )
     {        
         if( tpi )
             plinks.push_back( PatternLink(this, &tpi) );
@@ -629,7 +629,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
             dest_con->clear();
 
             //TRACE("Duplicating container size %d\n", keynode_con->size() );
-            FOREACH( const TreePtrInterface &p, *keynode_con )
+            for( const TreePtrInterface &p : *keynode_con )
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
                 //TRACE("Duplicating ")(*p)("\n");

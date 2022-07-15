@@ -27,17 +27,17 @@ void Validate::operator()( TreePtr<Node> context,
 	// incoming links from other than the subtree of interest still count
 	// when validating link counts).
 	Walk wcon( context );
-	FOREACH( const TreePtrInterface &x, wcon )
+	for( const TreePtrInterface &x : wcon )
 	{
 		if( x )
 		{
 			// TODO use UniqueWalk for this!
 			vector< Itemiser::Element * > members = ((TreePtr<Node>)x)->Itemise();
-		    FOREACH( Itemiser::Element *m, members )
+		    for( Itemiser::Element *m : members )
 			{
 				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
 				{
-					FOREACH( const TreePtrInterface &tpi, *con )
+					for( const TreePtrInterface &tpi : *con )
 						OnLink( (TreePtr<Node>)x, (TreePtr<Node>)tpi );
 				}
 				else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(m) )

@@ -25,7 +25,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     {
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
-        FOREACH( TreePtr<Expression> o, op->operands )
+        for( TreePtr<Expression> o : op->operands )
             optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
@@ -33,7 +33,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     {
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
-        FOREACH( TreePtr<Expression> o, op->operands )
+        for( TreePtr<Expression> o : op->operands )
                  optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
@@ -109,7 +109,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
 	// - Arrays go to pointers
-	FOREACH( TreePtr<Type> &t, optypes )
+	for( TreePtr<Type> &t : optypes )
 	{
 		while( auto r = DynamicTreePtrCast<Reference>(t) )
 			t = r->destination;
@@ -156,7 +156,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// Pointer arithmetic: an add or subtract involving a pointer returns that pointer type
 	if( DynamicTreePtrCast<Add>(op) || DynamicTreePtrCast<Subtract>(op) )
 	{
-		FOREACH( TreePtr<Type> t, optypes )
+		for( TreePtr<Type> t : optypes )
 			if( TreePtr<Pointer> p = DynamicTreePtrCast<Pointer>(t) )
 		        return p;
 	}

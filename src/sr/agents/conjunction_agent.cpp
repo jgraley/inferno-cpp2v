@@ -8,7 +8,7 @@ using namespace SR;
 shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
-    // TODO don't really need iterator, so could use FOREACH, and in DQ()
+    // TODO don't really need iterator, so could use range-for, and in DQ()
     for( CollectionInterface::iterator pit = GetConjuncts().begin(); pit != GetConjuncts().end(); ++pit )                 
     {
         const TreePtrInterface *p = &*pit; 
@@ -38,7 +38,7 @@ Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
                            "", 
                            true,
                            {} } };
-    FOREACH( const TreePtrInterface &p, GetConjuncts() )
+    for( const TreePtrInterface &p : GetConjuncts() )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                   list<string>{},

@@ -136,7 +136,7 @@ bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl ) const
 SimpleCompare::Orderered SimpleCompare::GetOrdering( ContainerInterface &c ) const
 {
     Orderered ordered( *this );
-    FOREACH( const TreePtrInterface &e, c )
+    for( const TreePtrInterface &e : c )
     	ordered.insert( (TreePtr<Node>)e );
     return ordered; // hoping for a "move"
 }

@@ -30,7 +30,7 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
     ASSERT( sequences.empty() );
     ASSERT( collections.empty() );
     ASSERT( singulars.empty() );
-    FOREACH( Itemiser::Element *ie, my_memb )
+    for( Itemiser::Element *ie : my_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
             sequences.emplace_back( Sequence(ii, this, phase, pattern_seq) );
@@ -608,7 +608,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
             dest_con->clear();
 
             TRACE("Copying container size %d from my_con\n", (*my_con).size() );
-	        FOREACH( const TreePtrInterface &my_elt, *my_con )
+	        for( const TreePtrInterface &my_elt : *my_con )
 	        {
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
@@ -618,7 +618,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
                 if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-                    FOREACH( const TreePtrInterface &new_sub_elt, *new_sub_con )
+                    for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                         dest_con->insert( new_sub_elt );
                 }
                 else 
@@ -679,14 +679,14 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
             dest_con->clear();
 
             TRACE("Copying container size %d from key\n", under_con->size() );
-	        FOREACH( const TreePtrInterface &under_elt, *under_con )
+	        for( const TreePtrInterface &under_elt : *under_con )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
 		        TreePtr<Node> new_elt = DuplicateSubtree( (TreePtr<Node>)under_elt );
 		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-		            FOREACH( const TreePtrInterface &new_sub_elt, *new_sub_con )
+		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
 			            dest_con->insert( new_sub_elt );
            		}
 		        else
@@ -749,7 +749,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
             dest_con->clear();
 
             TRACE("Copying container size %d\n", my_con->size() );
-	        FOREACH( const TreePtrInterface &my_elt, *my_con )
+	        for( const TreePtrInterface &my_elt : *my_con )
 	        {
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
@@ -758,7 +758,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
 		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-		            FOREACH( const TreePtrInterface &new_sub_elt, *new_sub_con )
+		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
 			            dest_con->insert( new_sub_elt );  
            		}
 		        else

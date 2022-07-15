@@ -29,7 +29,7 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
 	Walk w(context);
-	FOREACH( const TreePtrInterface &n, w )
+	for( const TreePtrInterface &n : w )
 	{
         if( TreePtr<UserType> d = DynamicTreePtrCast<UserType>((TreePtr<Node>)n) )
             if( id == GetIdentifier( d ) )
@@ -42,7 +42,7 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
 TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
 	Walk w( context );
-	FOREACH( const TreePtrInterface &n, w )
+	for( const TreePtrInterface &n : w )
 	{
         if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>((TreePtr<Node>)n) )
             if( id == GetIdentifier( d ) )
@@ -77,7 +77,7 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
     TRACE("Record has %d members\n", r->members.size() );
     
     // Try the instance members (objects and functions) for a name match
-    FOREACH( TreePtr<Declaration> d, r->members )
+    for( TreePtr<Declaration> d : r->members )
         if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>(d) )
             if( TreePtr<SpecificInstanceIdentifier> sss = DynamicTreePtrCast<SpecificInstanceIdentifier>(i->identifier) )
                 if( sss->GetRender() == name )
@@ -85,7 +85,7 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
                 
     // Try recursing through the base classes, if there are any
     if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>( r ) )
-        FOREACH( TreePtr<Base> b, ir->bases )
+        for( TreePtr<Base> b : ir->bases )
         {
             TreePtr<Node> ut = GetDeclaration()( program, b->record );
             TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>(ut);

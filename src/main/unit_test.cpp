@@ -9,7 +9,6 @@
 
 void SelfTest()
 {
-    CommonTest();
     GenericsTest();
     SYM::TestTruthTable();
 }

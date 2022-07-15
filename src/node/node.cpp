@@ -59,7 +59,7 @@ list<Graphable::SubBlock> Node::GetSubblocks( SequenceInterface *seq,
 {
     list<SubBlock> sub_blocks;
     int j=0;
-    FOREACH( const TreePtrInterface &p, *seq )
+    for( const TreePtrInterface &p : *seq )
     {
         Graphable::SubBlock sub_block = { GetInnermostTemplateParam(seq->GetName()), 
                                           SSPrintf("[%d]", j++),
@@ -89,7 +89,7 @@ list<Graphable::SubBlock> Node::GetSubblocks( CollectionInterface *col,
                                       "{" + dots + "}",
                                       false,
                                       {} };
-    FOREACH( const TreePtrInterface &p, *col )
+    for( const TreePtrInterface &p : *col )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                                                   list<string>{},

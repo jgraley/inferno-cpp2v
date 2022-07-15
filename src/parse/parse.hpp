@@ -797,15 +797,16 @@ private:
 		{
 			ASSERT(pp);
 
-			FOREACH(TreePtr<Declaration> param, pp->members )
-{			TRACE();
-			clang::IdentifierInfo *paramII = backing_params[param];
-			backing_params.erase( param );
-			//TRACE("%p %p %s S%p\n", param.get(), paramII, paramII->getName(), FnBodyScope);
-			if( paramII )
-			ident_track.Add( paramII, param, FnBodyScope );
-		}
-	}
+			for(TreePtr<Declaration> param : pp->members )
+            {		
+                TRACE();
+                clang::IdentifierInfo *paramII = backing_params[param];
+                backing_params.erase( param );
+                //TRACE("%p %p %s S%p\n", param.get(), paramII, paramII->getName(), FnBodyScope);
+                if( paramII )
+                ident_track.Add( paramII, param, FnBodyScope );
+            }
+        }
 
 	// JSG this is like the default in Actions, except it passes the parent of the function
 	// body to ActOnDeclarator, since the function decl itself is not inside its own body.
@@ -1675,7 +1676,7 @@ private:
 
 		// Go over the entire scope, keeping track of where we are in the Sequence
 		Sequence<Expression>::iterator seq_it = seq.begin();
-		FOREACH( TreePtr<Declaration> d, scope_ordered )
+		for( TreePtr<Declaration> d : scope_ordered )
 		{
 			if( seq_it == seq.end() )
 			{
@@ -1793,7 +1794,7 @@ private:
 		// See if the declaration is already there (due to forwarding using
 		// incomplete struct). If so, do not add it again
 		Collection<Declaration> &sd = inferno_scope_stack.top()->members;
-		FOREACH( const TreePtr<Declaration> &p, sd ) // TODO find()?
+		for( const TreePtr<Declaration> &p : sd ) // TODO find()?
 		if( TreePtr<Declaration>(p) == d )
 		return hold_decl.ToRaw( d );
 
@@ -1917,7 +1918,7 @@ private:
 		ASSERT(id);
 		TreePtr<Record> r = GetRecordDeclaration( all_decls, id );
 
-		FOREACH( TreePtr<Declaration> d, r->members )
+		for( TreePtr<Declaration> d : r->members )
 		{
 			TreePtr<Instance> o( DynamicTreePtrCast<Instance>(d) );
 			if( !o )

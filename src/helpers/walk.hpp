@@ -72,7 +72,7 @@ protected:
 /*! Inferno's tree-walking class. This is a stated out depth-first tree walker.
     A walk object is constructed on a node (possibly with other params) and it acts
     like an OOStd container whose iterator walks the subtree with sucessive invocations
-    of operator++. A walking loop may be created using FOREACH as with containers. */
+    of operator++. A walking loop may be created using range-for as with containers. */
 typedef ContainerFromIterator< Walk_iterator, TreePtr<Node>, Filter *, Filter * > Walk;
 
 

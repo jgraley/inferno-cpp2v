@@ -36,7 +36,7 @@ template<typename T>
 Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
 {
     Sequence<T> sr=s1;
-    FOREACH( TreePtr<T> t, s2 )
+    for( TreePtr<T> t : s2 )
         sr.push_back(t);
     return sr;    
 }

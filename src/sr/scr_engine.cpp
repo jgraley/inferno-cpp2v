@@ -443,7 +443,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
     *p_root_xnode = Replace( move(rs) );
     
     // Clear out anything cached in agents now that replace is done
-    FOREACH( Agent *a, plan.my_agents )
+    for( Agent *a : plan.my_agents )
         a->Reset();
 }
 

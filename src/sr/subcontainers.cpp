@@ -35,7 +35,7 @@ string SubContainerRange::GetContentsTrace()
     
     bool first = true;
     string s = "SubContainerRange(";
-    FOREACH( const TreePtrInterface &e_node, *this_ci )
+    for( const TreePtrInterface &e_node : *this_ci )
     {
         if( !first )
             s += ", ";
@@ -257,7 +257,7 @@ string SubContainerRangeExclusions::GetContentsTrace()
 
     s += "(";
     bool first = true;
-    FOREACH( const TreePtrInterface &e_node, *this_ci )
+    for( const TreePtrInterface &e_node : *this_ci )
     {
         if( !first )
             s += ", ";

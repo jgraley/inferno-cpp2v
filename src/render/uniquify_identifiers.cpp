@@ -56,7 +56,7 @@ string VisibleIdentifiers::AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificI
 	{
 		// See if the number n is already used
 		tryagain = false;
-		FOREACH( unsigned u, nu )
+		for( unsigned u : nu )
 			if( u == n )
 			{
 				tryagain = true;
@@ -85,7 +85,7 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 	SplitName( i, &b, &n );
 
 	// Do we have the base name already? If so, add this new instance
-	FOREACH( NameUsagePair &p, name_usages )
+	for( NameUsagePair &p : name_usages )
 	    if( b == p.first )
 	       	return AddIdentifierNumber( p.second, i, b, n );
 
@@ -174,7 +174,7 @@ void IdentifierFingerprinter::ProcessSingularNode( const TreePtrInterface *p_x_s
 
 void IdentifierFingerprinter::ProcessSequence( SequenceInterface *x_seq, int &index )
 {
-    FOREACH( const TreePtrInterface &x, *x_seq )
+    for( const TreePtrInterface &x : *x_seq )
     {
         ProcessNode( (TreePtr<Node>)x, index );
     }
@@ -186,7 +186,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
     TreePtr<Node> prev_x;
     int index_offset = 0;
     int prev_start_index;
-    FOREACH( TreePtr<Node> x, comparer.GetOrdering(*x_col) )
+    for( TreePtr<Node> x : comparer.GetOrdering(*x_col) )
     {
         if( prev_x && comparer.Compare(x, prev_x) == Orderable::EQUAL )
         {

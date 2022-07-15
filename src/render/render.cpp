@@ -102,7 +102,7 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 bool Render::IsSystemC( TreePtr<Node> root )
 { 
     Walk e(root);
-    FOREACH( const TreePtrInterface &n, e )
+    for( const TreePtrInterface &n : e )
         if( dynamic_pointer_cast<SCConstruct>((TreePtr<Node>)n) )
             return true;
     return false;
@@ -428,7 +428,7 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 	{
 		Sequence<Expression> seq_operands;
 		// Operands are in collection, so sort them and put them in a sequence
-		FOREACH( TreePtr<Node> o, sc.GetOrdering(co->operands) )
+		for( TreePtr<Node> o : sc.GetOrdering(co->operands) )
 			seq_operands.push_back( TreePtr<Expression>::DynamicCast(o) );
 		return before +
 			   RenderOperator( co, seq_operands ) +
@@ -518,7 +518,7 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 	Sequence<Declaration> &sd = backing_ordering[r];
 	ASSERT( sd.size() == r->members.size() );
 	bool first = true;
-	FOREACH( TreePtr<Declaration> d, sd )
+	for( TreePtr<Declaration> d : sd )
 	{
 		// We only care about instances...
 		if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
@@ -527,7 +527,7 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 			if( !DynamicTreePtrCast<Callable>( i->type ) )
 			{
 				// search init for matching member (TODO could avoid O(n^2) by exploiting the map)
-				FOREACH( TreePtr<MapOperand> mi, ro->operands )
+				for( TreePtr<MapOperand> mi : ro->operands )
 				{
 					if( i->identifier == mi->identifier )
 					{
@@ -586,7 +586,7 @@ string Render::RenderStorage( TreePtr<Instance> st )
 
 void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
 {
-	FOREACH( TreePtr<Statement> s, body )
+	for( TreePtr<Statement> s : body )
 	{
 		if( TreePtr<Call> o = DynamicTreePtrCast< Call >(s) )
 		{
@@ -837,7 +837,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 				        first = false;
 				        s += "public " + scr->GetToken();
 				    }
-					FOREACH( TreePtr<Node> bn, sc.GetOrdering(ir->bases) )
+					for( TreePtr<Node> bn : sc.GetOrdering(ir->bases) )
 					{
 						if( !first )
 							s += ", ";
@@ -1019,7 +1019,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
     int first = true;             
     auto sorted_members = sc.GetOrdering(m->members);
-    FOREACH( TreePtr<Node> pd, sorted_members )
+    for( TreePtr<Node> pd : sorted_members )
     {
         // Bodge an init list that names any fields we have that are modules
         // and initialises any fields with initialisers
@@ -1060,7 +1060,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
         }                      
     }    
     s += "\n{\n";
-    FOREACH( TreePtr<Node> pd, sorted_members )
+    for( TreePtr<Node> pd : sorted_members )
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
             if( TreePtr<Process> r = DynamicTreePtrCast<Process>(f->type) )
                 s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";
@@ -1083,7 +1083,7 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 
 	// Emit an incomplete for each record
     string s;
-	FOREACH( TreePtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
+	for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
 		if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
 			if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
 				s += RenderDeclaration( r, separator, init_access ? &init_access : nullptr, showtype, true );

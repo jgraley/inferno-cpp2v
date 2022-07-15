@@ -262,7 +262,7 @@ int ContainerInterface::size() const
     // TODO support const_interator properly and get rid of this const_cast
     ContainerInterface *nct = const_cast<ContainerInterface *>(this);
     int n=0;
-    FOREACH( const TreePtrInterface &x, *nct )
+    for( const TreePtrInterface &x : *nct )
         n++;
     return n;
 }

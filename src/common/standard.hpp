@@ -13,14 +13,6 @@
 // needed for get_current_dir_name() in parse.h (lol)
 #include <boost/foreach.hpp>
 
-
-#if USE_BOOST_FOREACH
-// JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
-#define FOREACH BOOST_FOREACH
-#else
-#define FOREACH(P, Q) for(P : (Q))
-#endif
-
 using namespace std;
 
 // How many members in an array
