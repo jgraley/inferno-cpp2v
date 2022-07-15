@@ -120,7 +120,14 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 	struct iterator : public Impl::iterator,
 	                  public ContainerInterface::iterator
 	{
-		virtual iterator &operator++()
+		iterator &operator=( const iterator &ib )
+        {
+            Impl::iterator::operator=( (typename Impl::iterator &)ib );
+            // Avoid delegating to ContainerInterface::iterator
+            return *this;
+        }
+        
+        virtual iterator &operator++()
 		{
 			Impl::iterator::operator++();
 		    return *this;
