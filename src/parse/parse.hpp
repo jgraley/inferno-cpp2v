@@ -36,7 +36,7 @@
 #include "rc_hold.hpp"
 #include "identifier_tracker.hpp"
 
-#include <unistd.h>
+#include <unistd.h> // for get_current_dir_name()
 
 using namespace CPPTree; // TODO put parse in cpp file so this using does not pollute
 
