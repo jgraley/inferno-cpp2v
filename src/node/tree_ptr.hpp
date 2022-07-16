@@ -13,20 +13,6 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
-// Covariant nullptr pointer bug
-//
-// JSG: There's an unfortunate bug in GCC 3.4.4 on cygwin whereby a covariant return thunk
-// for a pointer goes wrong when the pointer is nullptr. We can end up dereferencing a nullptr (or offset-from-nullptr)
-// pointer inside the thunk itself which is opaque code, not a lot of fun overall.
-//
-// It seems to be OK on GCC4 on Linux, and c++/20746 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=20746) seems to have a fix,
-// but I think it only applies to GCC4 (4.0.2 and 4.1).
-//
-// So I've just hacked covariant returns to not be covariant whenever I get a problem (just returns same as
-// base class, is this "isovariant"? No, "invariant")
-//
-// See #268
-
 //    
 // This is the interface for TreePtr<>. It may be used like shared_ptr, with 
 // template parameter VALUE_TYPE set to the pointed-to type. Various
