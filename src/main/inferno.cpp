@@ -323,6 +323,18 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr }
     } );         
                 
+    // Analyse X tree
+    Stage stage_analyse(
+        { Progress::ANALYSING, 
+          true, true, false, false,
+          "Analysing", 
+          nullptr,
+          [this]()
+          { 
+              algo->vn_sequence->AnalysisStage(algo->program); 
+          } }
+    );
+            
     // X transformation
     Stage stage_transform_X(
         { Progress::TRANSFORMING, 
@@ -368,8 +380,13 @@ Inferno::Plan::Plan(Inferno *algo_) :
 
     stages.push_back( stage_parse_X );   
     if( ShouldIQuitAfter(stage_parse_X) ) 
-        goto FINAL_RENDER; // Now input has been parsed, we always want to render even if quitting early.    
+        goto FINAL_RENDER;         
+    // Now input has been parsed, we always want to render even if quitting early.  
     
+    stages.push_back( stage_analyse );   
+    if( ShouldIQuitAfter(stage_analyse) ) 
+        goto FINAL_RENDER; 
+        
     stages.push_back( stage_transform_X );        
     if( ShouldIQuitAfter(stage_transform_X) ) 
         goto FINAL_RENDER;
@@ -490,8 +507,8 @@ void Inferno::RunTransformationStep(const Step &sp)
 {
     if( !ReadArgs::trace_quiet )
         fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str() ); 
-    VNSequence *vp =    vn_sequence.get(); 
-    (*vp)( sp.step_index, &program );
+    VNSequence *vp = vn_sequence.get(); 
+    program = vn_sequence->TransformStep( sp.step_index, program );
     if( ReadArgs::output_all )
     {
         Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );

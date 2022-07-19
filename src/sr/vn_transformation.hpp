@@ -46,7 +46,7 @@ public:
     
     using Transformation::operator();
     
-    // Functor style interface for RepeatingSearchReplace; implements Pass interface.
+    // Functor style interface; implements InPlaceTransformation interface.
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
     

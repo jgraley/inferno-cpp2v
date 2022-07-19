@@ -47,7 +47,7 @@ OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
 # Enable gdb debugging
 OPTIONS += -ggdb3
 
-# Enable profiling (slows compile times)
+# Enable gprof profiling (slows compile times)
 #OPTIONS += -pg
 
 # Workaround compile error with SystemC

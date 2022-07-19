@@ -19,9 +19,10 @@ public:
         PLANNING_THREE,
         PLANNING_FOUR,
         PLANNING_FIVE, // See #545
-        PARSING, 
+        PARSING, // not a VN stage
+        ANALYSING,
         TRANSFORMING,
-        RENDERING
+        RENDERING // not a VN stage
     };
     
     enum Steppiness

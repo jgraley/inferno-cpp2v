@@ -1,20 +1,22 @@
 # Vida Nova Stages
 
 Note: _wind-in_ and _unwind_ are recursion styles, i.e. before recursion
-or after respectively.
+or after respectively._Steppy_ indicates that the action of the stage is 
+performed for each transformation step, more or less independently. Otherwise, 
+it's more like a "one hit" stage for the whole sequence of steps.
 
 ## Build or load patterns and sequence `B`
 
 Ends up with a `VNSequence` of `VNTransformation`s which have 
 `CompareReplace` or `SearchReplace` engines.
 
-## Pattern Transformation `X`
+## Pattern Transformation `X` (steppy)
 
 Transformations applied to the pattern before planning:
  - Implement `SearchReplace` in terms of `CompareReplace`.
  - Break up `Disjunction`s of more than 2 inputs.
 
-### Planning Stage One `P`
+### Planning Stage One `P` (steppy)
 
 In stage one, `SCREngine`s are created . There is one for master/outer and
 one for every slave/inner defined within the master/outer _(wind-in)_. The
@@ -24,13 +26,13 @@ one for every slave/inner defined within the master/outer _(wind-in)_. The
  - What order are they reached during replace?
  - Which slave/inner `SCREngine`s will be reached?
  
-### Planning Stage Two `Q`
+### Planning Stage Two `Q` (steppy)
 
 `SCREngine` configuration of the `Agent`s _(unwind)_. Informs the agent:
  - which is its owning `SCREngine` and
  - its phase.
  
-### Planning Stage Three `R`
+### Planning Stage Three `R` (steppy)
 
 Interleaved compare and replace planning across all the `SCREngine`s _(wind-in)_. 
 
@@ -56,7 +58,7 @@ for all steps):
  - Deduce lacing intervals based on analysis of all pre-restrictions/
    type-restrictions, for category ordering/index.
  
-### Planning stage Five `U`
+### Planning stage Five `U` (steppy)
 
 `AndRuleEngine`s build CSP problem _(wind-in)_:
  - Create constraints based on symbolic sat expressions:
@@ -65,6 +67,10 @@ for all steps):
  - Create constraint solver:
    - Categorise variables.
 
-## Run It `T`
+### Analysis stage Five `A` (input tree required here)
+
+Knowledge database is built based on an analysis of the input tree.
+
+## Transformations stage `T` (steppy)
 
 Off it goes!

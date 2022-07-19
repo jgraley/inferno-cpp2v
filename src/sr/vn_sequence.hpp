@@ -34,9 +34,12 @@ public:
     static void SetMaxReps( int step_index, int n, bool e );
     void SetStopAfter( int step_index, vector<int> ssa, int d=0 );    
         
-    // Functor style interface for RepeatingSearchReplace; implements Pass interface.
-    void operator()( int step_index,
-                     TreePtr<Node> *proot );
+    void AnalysisStage( TreePtr<Node> root );
+    TreePtr<Node> TransformStep( int step_index, TreePtr<Node> root );
+        
+    // Functor style interface; implements InPlaceTransformation interface. TODO would run whole sequence
+    //void operator()( TreePtr<Node> context, 
+    //                 TreePtr<Node> *proot );
     
     void ForSteps( function<void(int)> body );
     

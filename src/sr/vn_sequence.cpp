@@ -69,12 +69,18 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 }  
 
 
-void VNSequence::operator()( int step_index,
-                             TreePtr<Node> *proot )
+void VNSequence::AnalysisStage( TreePtr<Node> root )
 {
-    (*steps[step_index])(proot);
-}                                   
-                 
+    //ASSERT(false);
+}
+
+
+TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
+{
+    (*steps[step_index])(&root);
+    return root;
+}
+           
                  
 void VNSequence::ForSteps( function<void(int)> body )
 {
