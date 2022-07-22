@@ -6,6 +6,8 @@
 #include "node/tree_ptr.hpp"
 #include "link.hpp"
 
+//#define NEW_KNOWLEDGE_UPDATE
+
 class Graph;
 
 /// SR namespace contains the search and replace implementation
@@ -49,11 +51,13 @@ public:
 
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
-    void UpdateTheKnowledge( PatternLink root_plink, XLink root_xlink );
+    void UpdateTheKnowledge( XLink root_xlink );
+    void ExtendDomain( PatternLink root_plink );
 
 private:
     vector< shared_ptr<VNTransformation> > steps;
     shared_ptr<TheKnowledge> knowledge;    
+    XLink initial_root_xlink;
 };    
     
 }

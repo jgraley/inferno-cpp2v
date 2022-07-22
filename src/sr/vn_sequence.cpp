@@ -71,14 +71,32 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {
-    //ASSERT(false);
+#ifdef NEW_KNOWLEDGE_UPDATE
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");
+    initial_root_xlink = XLink::CreateDistinct(root);    
+    knowledge->Build( root_xlink );
+#endif    
 }
 
 
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
-    (*steps[step_index])(&root);
-    return root;
+#ifdef XLINK_CONTINUITY
+    if( step_index == 0 )
+    {
+        ASSERT( initial_root_xlink );
+        ASSERT( initial_root_xlink.GetChildX()==root );
+        (*steps[step_index])( initial_root_xlink );
+        initial_root_xlink = XLink();
+        return initial_root_xlink.GetChildX(); // could have changed 
+    }
+    else
+#endif
+    {        
+        ASSERT( !initial_root_xlink );
+        (*steps[step_index])( &root );
+        return root;
+    }    
 }
            
                  
@@ -121,9 +139,15 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 }
 
 
-void VNSequence::UpdateTheKnowledge( PatternLink root_plink, XLink root_xlink )
+void VNSequence::UpdateTheKnowledge( XLink root_xlink )
 {
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    knowledge->Update( root_plink, root_xlink );
+    knowledge->Update( root_xlink );
 }
 
+
+void VNSequence::ExtendDomain( PatternLink root_plink )
+{
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");
+    knowledge->ExtendDomain( root_plink );
+}

@@ -153,6 +153,21 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 }
 
 
+void CompareReplace::operator()( XLink root_xlink )
+{
+    INDENT(")");
+    TRACE("Enter S&R instance ")(*this);
+
+    SolutionMap empty_solution;    
+    TreePtr<Node> basex = root_xlink.GetChildX();
+    (void)plan.scr_engine->RepeatingCompareReplace( &basex, &empty_solution );   
+
+    dirty_grass.clear(); // save memory
+    
+    // TODO return XLink::CreateDistinct( basex );
+}
+
+
 Graphable::Block CompareReplace::GetGraphBlockInfo() const
 { 
     list<SubBlock> sub_blocks;

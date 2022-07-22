@@ -5,6 +5,7 @@
 #include "common/read_args.hpp"
 #include "helpers/transformation.hpp"
 #include "ptrans/pattern_transformation.hpp"
+#include "link.hpp"
 
 class Graph;
 
@@ -49,6 +50,8 @@ public:
     // Functor style interface; implements InPlaceTransformation interface.
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
+    
+    void operator()( XLink root_xlink );
     
     virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 

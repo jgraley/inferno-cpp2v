@@ -50,9 +50,10 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
 }
 
 
-void TheKnowledge::Build( PatternLink root_plink, XLink root_xlink )
+void TheKnowledge::Build( XLink root_xlink )
 {
-    DetermineDomain( root_plink, root_xlink );
+    Clear();
+    DetermineDomain( root_xlink );
 }
 
 
@@ -68,10 +69,9 @@ void TheKnowledge::Clear()
 }
 
 
-void TheKnowledge::Update( PatternLink root_plink, XLink root_xlink )
+void TheKnowledge::Update( XLink root_xlink )
 {
-    Clear();
-    Build( root_plink, root_xlink );
+    Build( root_xlink );
 }
 
     
@@ -186,7 +186,7 @@ bool TheKnowledge::HasNuggetOrIsSubcontainer(XLink xlink) const
 }
 
 
-void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
+void TheKnowledge::DetermineDomain( XLink root_xlink )
 {      
     // Both should be cleared together
     unordered_domain.clear();
@@ -201,26 +201,14 @@ void TheKnowledge::DetermineDomain( PatternLink root_plink, XLink root_xlink )
     
     AddAtRoot( REQUIRE_SOLO, XLink::MMAX_Link );
     AddAtRoot( REQUIRE_SOLO, XLink::OffEndXLink );
-    
-    int is = nuggets.size();
-    ExtendDomain( root_plink );
-    int es = nuggets.size();
-    
-    if( es > is )
-        TRACE("Knowledge size %d -> %d\n", is, es);
-    
+        
 #ifdef TRACE_KNOWLEDGE_DELTAS
     TRACE("Knowledge regenerated: new XLinks:\n")
          ( DifferenceOf(unordered_domain, previous_unordered_domain) )
          ("\nRemoved XLinks:\n")
          ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
     previous_unordered_domain = unordered_domain;
-#endif
-    
-#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
-    SimpleCompareRelation e;
-    e.TestProperties( unordered_domain );
-#endif
+#endif    
 }
 
 
@@ -251,6 +239,19 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     {
         ExtendDomain( child_plink );
     }
+    
+#ifdef TRACE_KNOWLEDGE_DELTAS
+    TRACE("Knowledge regenerated: new XLinks:\n")
+         ( DifferenceOf(unordered_domain, previous_unordered_domain) )
+         ("\nRemoved XLinks:\n")
+         ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
+    previous_unordered_domain = unordered_domain;
+#endif
+
+#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
+    SimpleCompareRelation e;
+    e.TestProperties( unordered_domain );
+#endif
 }
 
 

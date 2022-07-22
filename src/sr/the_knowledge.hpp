@@ -36,9 +36,9 @@ private:
     } plan;
 
 public:
-    void Build( PatternLink root_plink, XLink root_xlink );
+    void Build( XLink root_xlink );
     void Clear();
-    void Update( PatternLink root_plink, XLink root_xlink );
+    void Update( XLink root_xlink );
     
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink UniquifyDomainExtension( XLink xlink );
@@ -159,9 +159,9 @@ public:
     // we won't create X nodes on the fly.
     bool HasNuggetOrIsSubcontainer(XLink xlink) const;
 
-private:
-    void DetermineDomain( PatternLink root_plink, XLink root_xlink );
+    void DetermineDomain( XLink root_xlink );
     void ExtendDomain( PatternLink plink );
+private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 

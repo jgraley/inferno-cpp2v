@@ -110,6 +110,14 @@ void VNTransformation::operator()( TreePtr<Node> context,
 }                                   
                  
 
+void VNTransformation::operator()( XLink root_xlink )
+{
+    ASSERT( this )("Called on NULL pointer, I expect");
+    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    top_level_engine->operator()( root_xlink );
+}
+
+
 Graphable::Block VNTransformation::GetGraphBlockInfo() const
 {
     ASSERT( this )("Called on NULL pointer, I expect");

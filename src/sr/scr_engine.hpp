@@ -118,7 +118,7 @@ private:
     TreePtr<Node> Replace( SolutionMap &&solution );
 
 public: // For top level engine/VN trans
-    void SingleCompareReplace( TreePtr<Node> *p_root_xnode,
+    void SingleCompareReplace( XLink &root_xlink,
                                const SolutionMap *master_solution );
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                  const SolutionMap *master_solution );                                                                                               

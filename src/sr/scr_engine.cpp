@@ -420,31 +420,36 @@ TreePtr<Node> SCREngine::Replace( SolutionMap &&solution )
 }
 
 
-void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root_xnode,
+void SCREngine::SingleCompareReplace( XLink &root_xlink,
                                       const SolutionMap *master_solution ) 
 {
     INDENT(">");
 
-    // Cannonicalise could change root
-    XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
 
-    // Global domain of possible xlink values
-    plan.vn_sequence->UpdateTheKnowledge( plan.root_plink, root_xlink );
+#ifndef NEW_KNOWLEDGE_UPDATE
+    plan.vn_sequence->UpdateTheKnowledge( root_xlink ); 
+#endif
+    plan.vn_sequence->ExtendDomain( plan.root_plink );
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
-    // replace does so it can change the root node. 
+    // replace does so it can change the root node. Throws on mismatch.
     const SolutionMap &cs = plan.and_rule_engine->Compare( root_xlink, 
                                                            master_solution );
     TRACE("Search got a match\n");
            
     // Replace will need the compare keys unioned with the master keys
     SolutionMap rs = UnionOfSolo( *master_solution, cs );    
-    *p_root_xnode = Replace( move(rs) );
+    TreePtr<Node> root_x = Replace( move(rs) );
+    root_xlink = XLink::CreateDistinct(root_x);
     
-    // Clear out anything cached in agents now that replace is done
+    // Clear out anything cached in agents and update the knowledge 
+    // now that replace is done
     for( Agent *a : plan.my_agents )
         a->Reset();
+#ifndef NEW_KNOWLEDGE_UPDATE
+    plan.vn_sequence->UpdateTheKnowledge( root_xlink );
+#endif    
 }
 
 
@@ -476,7 +481,10 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
-            SingleCompareReplace( p_root_xnode, master_solution );
+            // Cannonicalise could change root
+            XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
+            SingleCompareReplace( root_xlink, master_solution );
+            *p_root_xnode = root_xlink.GetChildX();
         }
         catch( ::Mismatch )
         {
