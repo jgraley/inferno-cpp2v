@@ -14,11 +14,6 @@ SubContainerRange::SubContainerRange( TreePtr<Node> parent_x_, const iterator &b
     my_begin(b), 
     my_end(e)
 {               
-    if( !(*my_begin == *my_end) )
-    {
-        ASSERT( *my_begin );
-        ASSERT_NOT_ON_STACK( &*my_begin )( *this ); 
-    }
 }
 
 
@@ -40,7 +35,7 @@ string SubContainerRange::GetContentsTrace()
     
     bool first = true;
     string s = "SubContainerRange(";
-    FOREACH( const TreePtrInterface &e_node, *this_ci )
+    for( const TreePtrInterface &e_node : *this_ci )
     {
         if( !first )
             s += ", ";
@@ -262,7 +257,7 @@ string SubContainerRangeExclusions::GetContentsTrace()
 
     s += "(";
     bool first = true;
-    FOREACH( const TreePtrInterface &e_node, *this_ci )
+    for( const TreePtrInterface &e_node : *this_ci )
     {
         if( !first )
             s += ", ";

@@ -32,8 +32,8 @@ public:
 		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
 		virtual iterator_interface &operator--();
-		const virtual TreePtrInterface &operator*() const = 0;
-		const virtual TreePtrInterface *operator->() const = 0;
+		virtual const TreePtrInterface &operator*() const = 0;
+		virtual const TreePtrInterface *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
 		virtual void Overwrite( const TreePtrInterface *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
@@ -42,20 +42,21 @@ public:
 public:
 	// Wrapper for iterator_interface, uses std::shared_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible. These can be passed around
-	// by value, and have copy-on-write semantics, so big iterators will actually get optimised
+	// by value, and have copy-on-write semantics, so big iterators will actually get optimised.
+    // Since C++ range-for uses the return type of begin() to determine loop index type, we have
+    // to return a reference to this class (not iterator_interface) from begin() on generic container
+    // types. And to retain covariant return s from begin() and end(), we have to include this class 
+    // in the hierarchy of iterators. So we ensure that those iterators aren't unwittingly delegating 
+    // into our methods using CHECK_NOT_REACHED_ON_SUBCLASS.
 	class iterator : public iterator_interface, public std::iterator<forward_iterator_tag, const TreePtrInterface>
 	{
 	public:
-		/*typedef forward_iterator_tag iterator_category;
-		typedef TreePtrInterface value_type;
-		typedef TreePtrInterface &reference;
-		typedef int difference_type;
-		typedef const value_type *pointer;
-		typedef const value_type &reference;*/
-
 		iterator();
+		iterator( const iterator &ib );
+		iterator &operator=( const iterator &ib );
+		virtual ~iterator();
+        
 		iterator( const iterator_interface &ib );
-
 		iterator &operator=( const iterator_interface &ib );
 		iterator &operator++();
 		iterator &operator--();
@@ -68,11 +69,13 @@ public:
 		void Overwrite( const value_type *v ) const;
 		const bool IsOrdered() const;
 		iterator_interface *GetUnderlyingIterator() const;
-		virtual shared_ptr<iterator_interface> Clone() const ;
-		explicit operator string();
-	protected:
-		void EnsureUnique();
-
+		explicit operator string() const;
+		explicit operator bool() const;
+	
+    protected:
+   		virtual shared_ptr<iterator_interface> Clone() const;
+    
+    private:
 		shared_ptr<iterator_interface> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
@@ -122,7 +125,22 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 	struct iterator : public Impl::iterator,
 	                  public ContainerInterface::iterator
 	{
-		virtual iterator &operator++()
+		iterator() {}
+
+        iterator( const iterator &ib ) :
+            Impl::iterator( (typename Impl::iterator &)ib )
+        {
+            // Avoid delegating to ContainerInterface::iterator
+        }
+        
+		iterator &operator=( const iterator &ib )
+        {
+            Impl::iterator::operator=( (typename Impl::iterator &)ib );
+            // Avoid delegating to ContainerInterface::iterator
+            return *this;
+        }
+        
+        virtual iterator &operator++()
 		{
 			Impl::iterator::operator++();
 		    return *this;
@@ -217,22 +235,26 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		inline iterator() {}
 		virtual value_type &operator*() const
 		{
+            ASSERT(this);
 			return Impl::iterator::operator*();
 		}
 		virtual value_type *operator->() const
 		{
+            ASSERT(this);
 			return Impl::iterator::operator->();
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
+            // Avoid delegating to ContainerInterface::iterator.
 			auto ni = make_shared<iterator>();
-			*ni = *this;
+            ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
     	virtual void Overwrite( const TreePtrInterface *v ) const
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
+            // Avoid delegating to ContainerInterface::iterator.
     		value_type x( value_type::InferredDynamicCast(*v) );
 		    Impl::iterator::operator*() = x;
 		}
@@ -366,8 +388,9 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
+            // Avoid delegating to ContainerInterface::iterator.
 			auto ni = make_shared<iterator>();
-			*ni = *this;
+            ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
     	virtual void Overwrite( const TreePtrInterface *v ) const
@@ -375,6 +398,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
+            // Avoid delegating to ContainerInterface::iterator.
     		value_type s( value_type::InferredDynamicCast(*v) );
     		((Impl *)owner)->erase( *this );
 		    *(typename Impl::iterator *)this = ((Impl *)owner)->insert( s ); // become an iterator for the newly inserted element

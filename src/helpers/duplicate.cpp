@@ -53,7 +53,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
             dest_con->clear();
 
             //TRACE("Duplicating container size %d\n", keynode_con->size() );
-            FOREACH( const TreePtrInterface &p, *keynode_con )
+            for( const TreePtrInterface &p : *keynode_con )
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
                 //TRACE("Duplicating ")(*p)("\n");

@@ -30,7 +30,7 @@ public:
             {
                 uintptr_t ofs = (uintptr_t)this - (uintptr_t)dstart;
 
-                FOREACH( uintptr_t x, v )
+                for( uintptr_t x : v )
                     if( x==ofs )
                     	return *this; // don't insert if in there already, see above
                 v.push_back( ofs );
@@ -102,7 +102,7 @@ public:
 
         const ITEMISE_TYPE *target_object = dynamic_cast<const ITEMISE_TYPE *>(itemise_object);
         vector< Itemiser::Element * > vout;
-        FOREACH( uintptr_t ofs, vofs )
+        for( uintptr_t ofs : vofs )
             vout.push_back( (Element *)((const char *)target_object + ofs) );
 
         return vout;

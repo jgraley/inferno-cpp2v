@@ -40,7 +40,7 @@ string BuildIdentifierAgent::GetNewName()
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
     vector<string> vs;
     bool all_same = true;
-    FOREACH( TreePtrInterface &source, sources )
+    for( TreePtrInterface &source : sources )
     {
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will

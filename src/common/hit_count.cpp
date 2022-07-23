@@ -72,7 +72,7 @@ void HitCount::Dump()
 {
     string fmt = ReadArgs::hits_format;
     int fs = fmt.size();
-    FOREACH( pc p, counter )
+    for( pc p : counter )
     {
         for( int i=0; i<fs; i++ )
         {

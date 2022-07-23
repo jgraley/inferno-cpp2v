@@ -247,7 +247,7 @@ shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared
         }
         else
         {
-            FOREACH( shared_ptr<TNode> x, tnodes )
+            for( shared_ptr<TNode> x : tnodes )
             {
                 TRACE(ToString(x))("\n");
             }

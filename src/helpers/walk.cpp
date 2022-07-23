@@ -98,7 +98,7 @@ list< pair<TreePtr<Node>, const TreePtrInterface *> > Walk_iterator::GetCurrentP
 {
     list< pair<TreePtr<Node>, const TreePtrInterface *> > l;
     const TreePtrInterface *it_delayed = nullptr;
-    FOREACH( const StateEntry &se, state )
+    for( const StateEntry &se : state )
     {
         pair<TreePtr<Node>, const TreePtrInterface *> p( se.node, it_delayed );
         l.push_back( p );
@@ -155,7 +155,7 @@ void Walk_iterator::Push( TreePtr<Node> n )
 string Walk_iterator::GetName() const
 {
     string s;
-    FOREACH( const StateEntry &se, state )
+    for( const StateEntry &se : state )
     {
         s += (*se.node).GetTrace() + string(" ");
     }

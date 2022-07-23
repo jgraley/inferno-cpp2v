@@ -122,7 +122,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     // the dependency might be on something buried in the record.
     if( recb )
     {
-    	FOREACH( TreePtr<Declaration> memberb, recb->members )
+    	for( TreePtr<Declaration> memberb : recb->members )
     	    if( IsDependOn( a, memberb, ignore_indirection_to_record ) )
     	        return true;
     }
@@ -138,7 +138,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     
     // Our algorithm will modify the source container, so make a copy of it
     Sequence<Declaration> cc;
-    FOREACH( const TreePtrInterface &a, c )
+    for( const TreePtrInterface &a : c )
     	cc.push_back( a );
 
 	// Uncomment one of these to stress the sorter
@@ -159,10 +159,10 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 	while( !cc.empty() )
 	{
 		bool found = false; // just for ASSERT check
-		FOREACH( const TreePtr<Declaration> &a, cc )
+		for( const TreePtr<Declaration> &a : cc )
 		{
 			bool a_has_deps=false;
-			FOREACH( const TreePtr<Declaration> &b, cc )
+			for( const TreePtr<Declaration> &b : cc )
 		    {
 		        TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
 		    	a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
@@ -180,7 +180,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 		if( !found )
 		{   
 		    TRACE("\nRemaining unsequenceable decls: ");
-		    FOREACH( const TreePtr<Declaration> &a, cc )
+		    for( const TreePtr<Declaration> &a : cc )
    		        TRACE(*a)(" ");
 		}
 		ASSERT( found )("\nfailed to find a decl to add without dependencies, maybe circular\n");
@@ -224,7 +224,7 @@ Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
 	srand(99);
 	
 	Sequence<Declaration> s;
-	FOREACH( TreePtr<Declaration> to_insert, c ) // we will insert each element from the collection
+	for( TreePtr<Declaration> to_insert : c ) // we will insert each element from the collection
 	{
 		// Idea is to insert each new element just before the first exiting element that
 		// depends on it. This is the latest position we can insert the new element.
@@ -252,7 +252,7 @@ Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
 Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 {
 	Sequence<Declaration> s;
-	FOREACH( TreePtr<Declaration> to_insert, c ) // we will insert each element from the collection
+	for( TreePtr<Declaration> to_insert : c ) // we will insert each element from the collection
 	{
    	    // Insert the element. If we didn't find a dependency, we'll be off the end of
    	    // the sequence and hopefully insert() will actually push_back()

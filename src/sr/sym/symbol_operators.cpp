@@ -515,7 +515,7 @@ unique_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
     FlattenNode flat( parent_node );
 
     set<SR::XLink> child_xlinks;
-    FOREACH(const TreePtrInterface &child_node, flat )
+    for(const TreePtrInterface &child_node : flat )
     {
         SR::XLink child_xlink( parent_node, &child_node);
         child_xlinks.insert( child_xlink );

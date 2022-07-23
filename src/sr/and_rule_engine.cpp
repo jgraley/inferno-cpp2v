@@ -239,7 +239,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
     }
 
     shared_ptr<PatternQuery> pq = plink.GetChildAgent()->GetPatternQuery();
-    FOREACH( PatternLink plink, pq->GetNormalLinks() )
+    for( PatternLink plink : pq->GetNormalLinks() )
     {
         DetermineKeyersModuloDisjunction( plink, senior_agents, disjunction_agents );        
     }
@@ -266,7 +266,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
     for( Agent *ma_agent : my_disjunction_agents )
     {
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
-        FOREACH( PatternLink link, pq->GetNormalLinks() )
+        for( PatternLink link : pq->GetNormalLinks() )
         {
             DetermineKeyers( link, senior_agents );        
         }
@@ -278,7 +278,7 @@ void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
                                               set<Agent *> master_agents ) 
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternLink link, pq->GetNormalLinks() )
+    for( PatternLink link : pq->GetNormalLinks() )
     {            
         PatternLink keyer;
         for( PatternLink l : coupling_keyer_links_all )
@@ -344,7 +344,7 @@ void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents,
     normal_agents->insert(agent);
 
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
-    FOREACH( PatternLink link, pq->GetNormalLinks() )
+    for( PatternLink link : pq->GetNormalLinks() )
     {
         PopulateNormalAgents( normal_agents, normal_links, link );        
     }
@@ -364,7 +364,7 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
         if( pq->GetEvaluator() )
             my_evaluators.insert(agent);
         
-        FOREACH( PatternLink link, pq->GetAbnormalLinks() )
+        for( PatternLink link : pq->GetAbnormalLinks() )
         {        
             if( pq->GetEvaluator() )
             {
@@ -376,7 +376,7 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
             }
         }
         
-        FOREACH( PatternLink link, pq->GetMultiplicityLinks() )
+        for( PatternLink link : pq->GetMultiplicityLinks() )
         {
             my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks, surrounding_keyer_plinks );  
         }
@@ -614,7 +614,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( PatternLink link, pq->GetAbnormalLinks() )
+    for( PatternLink link : pq->GetAbnormalLinks() )
     {
         TRACE("Comparing block %d\n", i);
  
@@ -636,7 +636,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
     }
     
 	TRACE("Evaluating: ");
-	FOREACH(bool b, compare_results)
+	for(bool b : compare_results)
 	    TRACEC(b)(" ");
     TRACEC("\n");
 	if( !(*evaluator)( compare_results ) )
@@ -660,7 +660,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
         ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
         ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
         
-        FOREACH( const TreePtrInterface &xe_node, *xci )
+        for( const TreePtrInterface &xe_node : *xci )
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
@@ -716,7 +716,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             SolutionMap solution_for_evaluators;
             
             // Try matching the abnormal links (free and evaluator).
-            FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+            for( const LocatedLink &link : query->GetAbnormalLinks() )
             {
                 ASSERT( link );
                 // Actions if evaluator link
@@ -732,7 +732,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             }                    
             
             // Try matching the multiplicity links.
-            FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
+            for( const LocatedLink &link : query->GetMultiplicityLinks() )
             {
                 if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
                     InsertSolo( solution_for_evaluators, link );                
@@ -752,7 +752,7 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
         }     
                                         
         // Replace needs these keys 
-        FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+        for( const LocatedLink &link : query->GetAbnormalLinks() )
             InsertSolo( basic_solution, link );                
                 
         // If we got here, we're done!

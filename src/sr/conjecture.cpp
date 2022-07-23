@@ -14,7 +14,7 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
     if( my_agents.empty() )
         return; // no decisions at all this time!
 
-    FOREACH( const Agent *agent, my_agents )
+    for( const Agent *agent : my_agents )
     {
 		AgentRecord record;
         record.pq = agent->GetPatternQuery();

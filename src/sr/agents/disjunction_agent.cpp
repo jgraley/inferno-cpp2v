@@ -15,7 +15,7 @@ void DisjunctionAgent::SCRConfigure( const SCREngine *e,
     AgentCommon::SCRConfigure(e, phase);
 
     options = make_shared< Collection<Node> >();
-    FOREACH( const TreePtrInterface &p, GetDisjuncts() )
+    for( const TreePtrInterface &p : GetDisjuncts() )
         options->insert( p );
 }
 
@@ -44,7 +44,7 @@ SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
     
     list< shared_ptr<BooleanExpression> > is_mmax_exprs, is_keyer_exprs;
     list< shared_ptr<SymbolExpression> > disjunct_exprs;
-    FOREACH( const TreePtrInterface &p, GetDisjuncts() )           
+    for( const TreePtrInterface &p : GetDisjuncts() )           
     {
         PatternLink disjunct_plink(this, &p);
         auto disjunct_expr = MakeOver<SymbolVariable>(disjunct_plink);
@@ -80,7 +80,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
                            "", 
                            true,
                            {} } };
-    FOREACH( const TreePtrInterface &p, GetDisjuncts() )
+    for( const TreePtrInterface &p : GetDisjuncts() )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                   list<string>{},

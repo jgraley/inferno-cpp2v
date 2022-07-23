@@ -277,7 +277,7 @@ void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, Tra
 {    
     if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
     {
-        FOREACH( shared_ptr<Transformation> t, *tv ) // TODO loop backwards so they come out in the right order in graph
+        for( shared_ptr<Transformation> t : *tv ) // TODO loop backwards so they come out in the right order in graph
             PopulateFromTransformation( graphables, t.get() );
     }
     else if( VNTransformation *vnt = dynamic_cast<VNTransformation *>(root) )

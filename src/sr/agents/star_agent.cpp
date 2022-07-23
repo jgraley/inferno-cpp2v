@@ -53,7 +53,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     
     // Check pre-restriction
     TRACE("StarAgent pre-res\n");
-    FOREACH( const TreePtrInterface &xe, *x_ci )
+    for( const TreePtrInterface &xe : *x_ci )
     {
         if( !IsPreRestrictionMatch( (TreePtr<Node>)xe ) )
             throw PreRestrictionMismatch();
@@ -90,7 +90,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink,
         ASSERT(0)("Please add new kind of Star");
     
     dest_container = dynamic_cast<ContainerInterface *>(dest.get());
-    FOREACH( const TreePtrInterface &pp, *psc )
+    for( const TreePtrInterface &pp : *psc )
     {
         TRACE("Building ")(pp)("\n");
         TreePtr<Node> nn = DuplicateSubtree( (TreePtr<Node>)pp );
@@ -146,7 +146,7 @@ unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate(
     
     // Check pre-restriction
     bool matches = true;
-    FOREACH( const TreePtrInterface &xe, *x_ci )
+    for( const TreePtrInterface &xe : *x_ci )
         matches = matches & archetype_node->IsSubcategory( ((TreePtr<Node>)xe).get() );            
 
     return make_unique<BooleanResult>( matches );

@@ -9,6 +9,12 @@
 #include <iterator>
 #include <algorithm>
 
+#define CHECK_NOT_REACHED_ON_SUBCLASS \
+    ASSERT(typeid(*this)==typeid(decltype(*this))) \
+          ("Call to proxy iterator method on (presumably concrete) iterator object.\n") \
+          ("Called on ")(typeid(*this))("\n") \
+          ("Proxy class is ")(typeid(decltype(*this)))("\n"); \
+
 using namespace std;
 
 //----------------------- ContainerInterface -------------------------
@@ -22,32 +28,85 @@ ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::
 ContainerInterface::iterator::iterator() :
     pib( shared_ptr<iterator_interface>() ) 
 {
+    //FTRACE("%p Cons noarg\n", this);
+}
+
+
+ContainerInterface::iterator::iterator( const iterator &ib ) :
+    ContainerInterface::iterator::iterator( (const iterator_interface &)ib )
+{
+    CHECK_NOT_REACHED_ON_SUBCLASS
+    // This "big three" copy constructor just delegates to the iterator_interface
+    // constructor. Without this we'd get the default copy and our attempts
+    // to manage pib would go awry.
+}
+
+
+ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator &ib )
+{
+    CHECK_NOT_REACHED_ON_SUBCLASS
+    // This "big three" assign operator just delegates to the iterator_interface
+    // assign operator. Without this we'd get the default assign and our attempts
+    // to manage pib would go awry.
+    return operator=( (const iterator_interface &)ib );
+}
+
+
+ContainerInterface::iterator::~iterator()
+{
 }
 
 
 ContainerInterface::iterator::iterator( const iterator_interface &ib ) 
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+    
+    // We always deep-copy immediately (no attempt at copy-on-write etc)    
     if( typeid(*this)==typeid(ib) )
-        pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+    {
+        // ib is the exact same type as us. We can make ourself equivalent 
+        // to ib, but we still have to clone ib's pib. Adds 0 layers of
+        // indirection.
+        shared_ptr<iterator_interface> ib_pib = dynamic_cast<const iterator &>(ib).pib;
+        pib = ib_pib ? ib_pib->Clone() : nullptr;
+    }
     else
-        pib = ib.Clone(); // Deep copy because from unmanaged source
+    {
+        // ib is a subclass of iterator_interface but not the same as us, so 
+        // the only safe thing to do is to clone ib. Adds 1 layer of indirection.
+        pib = ib.Clone(); 
+    }
+    ASSERT( !pib || pib.unique() ); 
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator=( const iterator_interface &ib )
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     if( typeid(*this)==typeid(ib) )
-        pib = dynamic_cast<const iterator &>(ib).pib; // Same type so shallow copy
+    {
+        // ib is the exact same type as us. We can make ourself equivalent 
+        // to ib, but we still have to clone ib's pib. Adds 0 layers of
+        // indirection.
+        shared_ptr<iterator_interface> b_pib = dynamic_cast<const iterator &>(ib).pib;
+        pib = b_pib ? b_pib->Clone() : nullptr;
+    }
     else
-        pib = ib.Clone(); // Deep copy because from unmanaged source
+    {
+        // ib is a subclass of iterator_interface but not the same as us, so 
+        // the only safe thing to do is to clone ib. Adds 1 layer of indirection.
+        pib = ib.Clone();
+    }
+    ASSERT( !pib || pib.unique() );
     return *this;
 }
 
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to increment uninitialised iterator");
-    EnsureUnique();
     pib->operator++();
     return *this;
 }
@@ -55,8 +114,8 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator++()
 
 ContainerInterface::iterator &ContainerInterface::iterator::operator--()
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to increment uninitialised iterator");
-    EnsureUnique();
     pib->operator--();
     return *this;
 }
@@ -64,6 +123,7 @@ ContainerInterface::iterator &ContainerInterface::iterator::operator--()
 
 const ContainerInterface::iterator::value_type &ContainerInterface::iterator::operator*() const 
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to dereference uninitialised iterator");
     return pib->operator*();
 }
@@ -71,6 +131,7 @@ const ContainerInterface::iterator::value_type &ContainerInterface::iterator::op
 
 const ContainerInterface::iterator::value_type *ContainerInterface::iterator::operator->() const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to dereference uninitialised iterator");
     return pib->operator->();
 }
@@ -78,35 +139,55 @@ const ContainerInterface::iterator::value_type *ContainerInterface::iterator::op
 
 bool ContainerInterface::iterator::operator==( const iterator_interface &ib ) const // isovariant param
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     if( typeid(*this)==typeid(ib) )
-        return operator==(dynamic_cast<const iterator &>(ib));
+    {
+        shared_ptr<iterator_interface> ib_pib = dynamic_cast<const iterator &>(ib).pib;
+        ASSERT(pib && ib_pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", ib_pib?"i":"U");
+        return pib->operator==(*ib_pib);
+    }
     else
+    {
         return pib->operator==(ib); 
+    }
 }
 
 
 bool ContainerInterface::iterator::operator==( const iterator &i ) const // covariant param
 {
-    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
-    return pib->operator==( *(i.pib) );
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
+    if( typeid(*this)==typeid(i) )
+    {
+        shared_ptr<iterator_interface> i_pib = dynamic_cast<const iterator &>(i).pib;
+        ASSERT(pib && i_pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i_pib?"i":"U");
+        return pib->operator==(*i_pib);
+    }
+    else
+    {
+        return pib->operator==(i); 
+    }
 }
 
 
 bool ContainerInterface::iterator::operator!=( const iterator_interface &ib ) const // isovariant param
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     return !operator==( ib );
 }
 
 
 bool ContainerInterface::iterator::operator!=( const iterator &i ) const // covariant param
 {
-    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
+    CHECK_NOT_REACHED_ON_SUBCLASS
     return !operator==( i );
 }
 
 
 void ContainerInterface::iterator::Overwrite( const value_type *v ) const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
     pib->Overwrite( v );
 }
@@ -114,12 +195,14 @@ void ContainerInterface::iterator::Overwrite( const value_type *v ) const
 
 const bool ContainerInterface::iterator::IsOrdered() const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     return pib->IsOrdered();
 }
 
 
 ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderlyingIterator() const
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
     if( pib )
         return pib.get();
     else
@@ -129,12 +212,15 @@ ContainerInterface::iterator_interface *ContainerInterface::iterator::GetUnderly
 
 shared_ptr<ContainerInterface::iterator_interface> ContainerInterface::iterator::Clone() const 
 {
+    CHECK_NOT_REACHED_ON_SUBCLASS
+
     return make_shared<iterator>(*this);
 }
 
 
-ContainerInterface::iterator::operator string()
+ContainerInterface::iterator::operator string() const
 {   
+    CHECK_NOT_REACHED_ON_SUBCLASS
     if( pib )
         return Traceable::TypeIdName( *pib );
     else 
@@ -142,13 +228,10 @@ ContainerInterface::iterator::operator string()
 }
 
 
-void ContainerInterface::iterator::EnsureUnique()
-{
-    // Call this before modifying the underlying iterator - Performs a deep copy
-    // if required to make sure there are no other refs.
-    if( pib && !pib.unique() )
-        pib = pib->Clone();
-    ASSERT( !pib || pib.unique() );
+ContainerInterface::iterator::operator bool() const 
+{ 
+    CHECK_NOT_REACHED_ON_SUBCLASS 
+    return !!pib; 
 }
 
 
@@ -179,7 +262,7 @@ int ContainerInterface::size() const
     // TODO support const_interator properly and get rid of this const_cast
     ContainerInterface *nct = const_cast<ContainerInterface *>(this);
     int n=0;
-    FOREACH( const TreePtrInterface &x, *nct )
+    for( const TreePtrInterface &x : *nct )
         n++;
     return n;
 }

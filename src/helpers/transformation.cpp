@@ -54,7 +54,7 @@ void TransformationVector::operator()( TreePtr<Node> context,     // The whole p
     else 
         pcontext = &context;
     int i = 0;
-    FOREACH( shared_ptr<Transformation> t, *this )
+    for( shared_ptr<Transformation> t : *this )
     {
         TRACE("Transformation vector element %d ", i)(*t)("\n");
         bool stop = depth < stop_after.size() && stop_after[depth]==i;

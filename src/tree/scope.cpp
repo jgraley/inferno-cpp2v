@@ -16,7 +16,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 
     // Look through the members of all scopes (Program, Records, CallableParams, Compounds)
     Walk walkr(program);
-	FOREACH( const TreePtrInterface &n, walkr )
+	for( const TreePtrInterface &n : walkr )
 	{
     	if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
 #if 1
@@ -30,7 +30,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
             }
         }
 #else	    
-        FOREACH( TreePtr<Declaration> d, s->members )
+        for( TreePtr<Declaration> d : s->members )
 	    {            
 	        if( id == GetIdentifier( d ) ) 
 	            return s;
@@ -40,10 +40,10 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	
 	// Special additional processing for Compounds - look for statements that are really Instance Declarations
 	Walk walkc(program);
-	FOREACH( const TreePtrInterface &n, walkc )
+	for( const TreePtrInterface &n : walkc )
 	{
     	if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
-			FOREACH( TreePtr<Statement> s, c->statements )
+			for( TreePtr<Statement> s : c->statements )
 			{
 				if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
 					if( id == GetIdentifier( d ) )
