@@ -12,8 +12,8 @@ SC_METHOD(id_5);
 }
 enum id_1
 {
-id_2 = 0U,
-id_3 = 1U,
+id_2 = 0,
+id_3 = 1,
 };
 sc_event id_4;
 void id_5();
@@ -29,9 +29,9 @@ SC_METHOD(id_18);
 }
 enum id_13
 {
-id_14 = 0U,
-id_15 = 1U,
-id_16 = 2U,
+id_14 = 0,
+id_15 = 1,
+id_16 = 2,
 };
 sc_event id_11;
 sc_event id_17;
@@ -61,7 +61,7 @@ int id_8;
 void id_0::id_5()
 {
 /*temp*/ bool id_6 = true;
-if( (sc_delta_count())==(0U) )
+if( (sc_delta_count())==(0) )
 {
 next_trigger(  ::id_0::id_4 );
  ::id_0::id_7= ::id_0::id_2;
@@ -88,7 +88,7 @@ next_trigger(SC_ZERO_TIME);
 void id_12::id_18()
 {
 /*temp*/ bool id_19 = true;
-if( (sc_delta_count())==(0U) )
+if( (sc_delta_count())==(0) )
 {
 next_trigger(  ::id_12::id_17 );
  ::id_12::id_20= ::id_12::id_14;

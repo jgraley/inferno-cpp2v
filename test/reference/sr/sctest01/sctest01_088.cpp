@@ -12,8 +12,8 @@ SC_THREAD(id_5);
 }
 enum id_1
 {
-id_2 = 0U,
-id_3 = 1U,
+id_2 = 0,
+id_3 = 1,
 };
 sc_event id_4;
 void id_5();
@@ -27,9 +27,9 @@ SC_THREAD(id_17);
 }
 enum id_12
 {
-id_13 = 0U,
-id_14 = 1U,
-id_15 = 2U,
+id_13 = 0,
+id_14 = 1,
+id_15 = 2,
 };
 sc_event id_10;
 sc_event id_16;
@@ -59,7 +59,7 @@ void id_0::id_5()
 auto unsigned int id_6;
 do
 {
-if( (sc_delta_count())==(0U) )
+if( (sc_delta_count())==(0) )
 {
 wait(  ::id_0::id_4 );
 id_6= ::id_0::id_2;
@@ -79,7 +79,6 @@ if(  ::id_0::id_3==id_6 )
 (( ::id_8. ::id_20::id_9). ::id_11::id_10).notify(SC_ZERO_TIME);
 return ;
 }
-wait(SC_ZERO_TIME);
 }
 while( true );
 }
@@ -89,7 +88,7 @@ void id_11::id_17()
 auto unsigned int id_18;
 do
 {
-if( (sc_delta_count())==(0U) )
+if( (sc_delta_count())==(0) )
 {
 wait(  ::id_11::id_16 );
 id_18= ::id_11::id_13;
@@ -116,7 +115,6 @@ if(  ::id_11::id_15==id_18 )
 cease(  ::id_7 );
 return ;
 }
-wait(SC_ZERO_TIME);
 }
 while( true );
 }

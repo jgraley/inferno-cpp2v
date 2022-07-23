@@ -119,7 +119,7 @@ private:
 
 public: // For top level engine/VN trans
     void SingleCompareReplace( XLink &root_xlink,
-                               const SolutionMap *master_solution );
+                               const SolutionMap *master_solution );                                                                                              
     int RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                  const SolutionMap *master_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );

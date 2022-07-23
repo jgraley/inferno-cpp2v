@@ -8,12 +8,12 @@ class id_0 : public sc_module
 public:
 SC_CTOR( id_0 )
 {
-SC_METHOD(id_5);
+SC_THREAD(id_5);
 }
 enum id_1
 {
-id_2 = 0U,
-id_3 = 1U,
+id_2 = 0,
+id_3 = 1,
 };
 sc_event id_4;
 void id_5();
@@ -25,13 +25,13 @@ class id_11 : public sc_module
 public:
 SC_CTOR( id_11 )
 {
-SC_METHOD(id_17);
+SC_THREAD(id_17);
 }
 enum id_12
 {
-id_13 = 0U,
-id_14 = 1U,
-id_15 = 2U,
+id_13 = 0,
+id_14 = 1,
+id_15 = 2,
 };
 sc_event id_10;
 sc_event id_16;
@@ -60,19 +60,21 @@ int id_7;
 
 void id_0::id_5()
 {
-if( (sc_delta_count())==(0U) )
+do
 {
-next_trigger(  ::id_0::id_4 );
+if( (sc_delta_count())==(0) )
+{
+wait(  ::id_0::id_4 );
  ::id_0::id_6= ::id_0::id_2;
-return ;
+continue;
 }
 if(  ::id_0::id_2== ::id_0::id_6 )
 {
  ::id_7+=(2);
 (( ::id_8. ::id_20::id_9). ::id_11::id_10).notify(SC_ZERO_TIME);
-next_trigger(  ::id_0::id_4 );
+wait(  ::id_0::id_4 );
  ::id_0::id_6= ::id_0::id_3;
-return ;
+continue;
 }
 if(  ::id_0::id_3== ::id_0::id_6 )
 {
@@ -80,39 +82,45 @@ if(  ::id_0::id_3== ::id_0::id_6 )
 (( ::id_8. ::id_20::id_9). ::id_11::id_10).notify(SC_ZERO_TIME);
 return ;
 }
-next_trigger(SC_ZERO_TIME);
+wait(SC_ZERO_TIME);
+}
+while( true );
 }
 
 void id_11::id_17()
 {
-if( (sc_delta_count())==(0U) )
+do
 {
-next_trigger(  ::id_11::id_16 );
+if( (sc_delta_count())==(0) )
+{
+wait(  ::id_11::id_16 );
  ::id_11::id_18= ::id_11::id_13;
-return ;
+continue;
 }
 if(  ::id_11::id_13== ::id_11::id_18 )
 {
  ::id_7*=(5);
 (( ::id_8. ::id_20::id_19). ::id_0::id_4).notify(SC_ZERO_TIME);
-next_trigger(  ::id_11::id_10 );
+wait(  ::id_11::id_10 );
  ::id_11::id_18= ::id_11::id_14;
-return ;
+continue;
 }
 if(  ::id_11::id_14== ::id_11::id_18 )
 {
  ::id_7*=(5);
 (( ::id_8. ::id_20::id_19). ::id_0::id_4).notify(SC_ZERO_TIME);
-next_trigger(  ::id_11::id_10 );
+wait(  ::id_11::id_10 );
  ::id_11::id_18= ::id_11::id_15;
-return ;
+continue;
 }
 if(  ::id_11::id_15== ::id_11::id_18 )
 {
 cease(  ::id_7 );
 return ;
 }
-next_trigger(SC_ZERO_TIME);
+wait(SC_ZERO_TIME);
+}
+while( true );
 }
 
 void id_20::id_22()

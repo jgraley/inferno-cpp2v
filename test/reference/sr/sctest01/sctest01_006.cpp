@@ -40,12 +40,12 @@ void (id_25)();
 id_22 id_10("id_10");
 void id_9;
 int id_7;
+void (id_21)(void id_20);
 void (id_27)(void id_26);
 void (id_29)(void id_28);
 void (id_31)(void id_30);
 void (id_33)(void id_32);
 void (id_6)(void id_4);
-void (id_21)(void id_20);
 void (id_36)(void id_34, void id_35);
 
 id_0::id_0(char (*id_2))
@@ -57,10 +57,10 @@ void (id_0::id_5)()
 {
 wait(  ::id_0::id_1 );
  ::id_7+=(2);
-"ERROR: cannot analyse call";
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
 wait(  ::id_0::id_1 );
  ::id_7+=(3);
-"ERROR: cannot analyse call";
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
 }
 
 id_14::id_14(char (*id_16))
@@ -72,10 +72,10 @@ void (id_14::id_18)()
 {
 wait(  ::id_14::id_15 );
  ::id_7*=(5);
-"ERROR: cannot analyse call";
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
 wait(  ::id_14::id_12 );
  ::id_7*=(5);
-"ERROR: cannot analyse call";
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
 wait(  ::id_14::id_12 );
  ::id_21( ::id_7);
 }
@@ -88,8 +88,10 @@ id_22::id_22(char (*id_23)) : id_19("add_inst"), id_11("mul_inst")
 void (id_22::id_25)()
 {
  ::id_7=(1);
-"ERROR: cannot analyse call";
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
 }
+
+void (id_21)(void id_20);
 
 void (id_27)(void id_26);
 
@@ -100,7 +102,5 @@ void (id_31)(void id_30);
 void (id_33)(void id_32);
 
 void (id_6)(void id_4);
-
-void (id_21)(void id_20);
 
 void (id_36)(void id_34, void id_35);

@@ -12,8 +12,8 @@ SC_THREAD(id_5);
 }
 enum id_1
 {
-id_2 = 0U,
-id_3 = 1U,
+id_2 = 0,
+id_3 = 1,
 };
 sc_event id_4;
 void id_5();
@@ -27,9 +27,9 @@ SC_THREAD(id_20);
 }
 enum id_15
 {
-id_16 = 0U,
-id_17 = 1U,
-id_18 = 2U,
+id_16 = 0,
+id_17 = 1,
+id_18 = 2,
 };
 sc_event id_13;
 sc_event id_19;

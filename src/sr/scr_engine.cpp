@@ -447,7 +447,7 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
     // now that replace is done
     for( Agent *a : plan.my_agents )
         a->Reset();
-#ifndef NEW_KNOWLEDGE_UPDATE
+#ifdef NEW_KNOWLEDGE_UPDATE
     plan.vn_sequence->UpdateTheKnowledge( root_xlink );
 #endif    
 }
@@ -467,14 +467,19 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
                                 "Thank you for taking the time to read this message.\n");
     
+    
     if( depth < stop_after.size() && stop_after[depth]==0 )
     {
         TRACE("Stopping as requested before trying\n");
         return 0;
     }    
-
+    XLink root_xlink;
+    if( ReadArgs::use_conv_out_loop )
+        root_xlink = XLink::CreateDistinct(*p_root_xnode);
     for(int i=0; i<repetitions; i++) 
     {
+        if( !ReadArgs::use_conv_out_loop )
+            root_xlink = XLink::CreateDistinct(*p_root_xnode);
         bool stop = depth < stop_after.size() && stop_after[depth]==i+1;
         if( stop )
             for( const pair< RequiresSubordinateSCREngine * const, shared_ptr<SCREngine> > &p : plan.my_engines )
@@ -482,31 +487,38 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
         try
         {
             // Cannonicalise could change root
-            XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
             SingleCompareReplace( root_xlink, master_solution );
-            *p_root_xnode = root_xlink.GetChildX();
         }
         catch( ::Mismatch )
         {
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
             TRACE("Mismatched; stopping\n");
+            if( ReadArgs::use_conv_out_loop )
+                *p_root_xnode = root_xlink.GetChildX();  
             return i+1; // when the compare fails, we're done
         }
         if( stop )
         {
             TRACE("Stopping as requested after hit %d\n", stop_after[depth]);
+            if( ReadArgs::use_conv_out_loop )
+                *p_root_xnode = root_xlink.GetChildX();  
             return i+1;
-        }    
+        }          
+        if( !ReadArgs::use_conv_out_loop )
+            *p_root_xnode = root_xlink.GetChildX();  
     }
+    if( ReadArgs::use_conv_out_loop )
+        *p_root_xnode = root_xlink.GetChildX();  
+    
     TRACE("Stop after ")(stop_after)(" depth=")(depth)("\n");
     TRACE("Over the limit of %d reps\n", repetitions); 
     ASSERT(!rep_error)
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
-       
+    
     return repetitions;
-}
+}                                
 
 
 void SCREngine::SetStopAfter( vector<int> ssa, int d )

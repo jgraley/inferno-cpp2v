@@ -12,8 +12,8 @@ SC_THREAD(id_5);
 }
 enum id_1
 {
-id_2 = 0U,
-id_3 = 1U,
+id_2 = 0,
+id_3 = 1,
 };
 sc_event id_4;
 void id_5();
@@ -27,9 +27,9 @@ SC_THREAD(id_20);
 }
 enum id_15
 {
-id_16 = 0U,
-id_17 = 1U,
-id_18 = 2U,
+id_16 = 0,
+id_17 = 1,
+id_18 = 2,
 };
 sc_event id_13;
 sc_event id_19;
@@ -60,15 +60,12 @@ static const unsigned int (id_6[]) = { &&id_7, &&id_8 };
 auto unsigned int id_9;
 wait(  ::id_0::id_4 );
 id_9= ::id_0::id_2;
+goto *(id_6[id_9]);
 id_7:;
-if(  ::id_0::id_2==id_9 )
-{
  ::id_10+=(2);
 (( ::id_11. ::id_27::id_12). ::id_14::id_13).notify(SC_ZERO_TIME);
 wait(  ::id_0::id_4 );
 id_9= ::id_0::id_3;
-goto *(id_6[id_9]);
-}
 goto *(id_6[id_9]);
 id_8:;
  ::id_10+=(3);
@@ -82,24 +79,18 @@ static const unsigned int (id_21[]) = { &&id_22, &&id_23, &&id_24 };
 auto unsigned int id_25;
 wait(  ::id_14::id_19 );
 id_25= ::id_14::id_16;
+goto *(id_21[id_25]);
 id_22:;
-if(  ::id_14::id_16==id_25 )
-{
  ::id_10*=(5);
 (( ::id_11. ::id_27::id_26). ::id_0::id_4).notify(SC_ZERO_TIME);
 wait(  ::id_14::id_13 );
 id_25= ::id_14::id_17;
 goto *(id_21[id_25]);
-}
 id_23:;
-if(  ::id_14::id_17==id_25 )
-{
  ::id_10*=(5);
 (( ::id_11. ::id_27::id_26). ::id_0::id_4).notify(SC_ZERO_TIME);
 wait(  ::id_14::id_13 );
 id_25= ::id_14::id_18;
-goto *(id_21[id_25]);
-}
 goto *(id_21[id_25]);
 id_24:;
 cease(  ::id_10 );
