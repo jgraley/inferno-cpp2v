@@ -1,99 +1,99 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 ) :
-id_9(0)
+SC_CTOR( TopLevel ) :
+recurser_stack_index(0)
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-int (id_11[10]);
-void *(id_10[10]);
+int (i_stack[10]);
+void *(link_stack[10]);
 public:
-int id_2;
+int x;
 private:
-unsigned int id_9;
+unsigned int recurser_stack_index;
 public:
-/*temp*/ int id_4;
-/*temp*/ void *id_19;
-/*temp*/ void *id_5;
+/*temp*/ int recurser_i;
+/*temp*/ void *recurser_link;
+/*temp*/ void *recurser_link_1;
 };
-id_0 id_20("id_20");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(0);
+ ::TopLevel::x=(0);
 {
-/*temp*/ int id_3;
-id_3=(1);
+/*temp*/ int temp_i;
+temp_i=(1);
 {
 {
- ::id_0::id_4=id_3;
+ ::TopLevel::recurser_i=temp_i;
 {
- ::id_0::id_5=(&&id_6);
-goto id_7;
+ ::TopLevel::recurser_link=(&&LINK);
+goto ENTER_recurser;
 }
 }
-id_6:;
+LINK:;
 }
 }
-cease(  ::id_0::id_2 );
+cease(  ::TopLevel::x );
 return ;
-id_7:;
+ENTER_recurser:;
 {
 {
-/*temp*/ void *id_8;
- ::id_0::id_9++;
-( ::id_0::id_10[ ::id_0::id_9])= ::id_0::id_5;
-( ::id_0::id_11[ ::id_0::id_9])= ::id_0::id_4;
- ::id_0::id_2++;
+/*temp*/ void *temp_link;
+ ::TopLevel::recurser_stack_index++;
+( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
+ ::TopLevel::x++;
 {
-goto *((!(( ::id_0::id_11[ ::id_0::id_9])<(5))) ? (&&id_12) : (&&id_13));
-id_13:;
-{
-{
-/*temp*/ int id_14;
-id_14=((1)+( ::id_0::id_11[ ::id_0::id_9]));
+goto *((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&THEN) : (&&PROCEED));
+PROCEED:;
 {
 {
- ::id_0::id_4=id_14;
+/*temp*/ int temp_i_1;
+temp_i_1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
 {
- ::id_0::id_5=(&&id_15);
-goto id_7;
+{
+ ::TopLevel::recurser_i=temp_i_1;
+{
+ ::TopLevel::recurser_link=(&&LINK_1);
+goto ENTER_recurser;
 }
 }
-id_15:;
+LINK_1:;
 }
 }
 {
-/*temp*/ int id_16;
-id_16=((1)+( ::id_0::id_11[ ::id_0::id_9]));
+/*temp*/ int temp_i_2;
+temp_i_2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
 {
 {
- ::id_0::id_4=id_16;
+ ::TopLevel::recurser_i=temp_i_2;
 {
- ::id_0::id_5=(&&id_17);
-goto id_7;
+ ::TopLevel::recurser_link=(&&LINK_2);
+goto ENTER_recurser;
 }
 }
-id_17:;
+LINK_2:;
 }
 }
 }
-goto id_18;
-id_12:;
+goto ELSE;
+THEN:;
 ;
-id_18:;
+ELSE:;
 }
 {
-id_8=( ::id_0::id_10[ ::id_0::id_9]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
 {
- ::id_0::id_9--;
-goto *(id_8);
+ ::TopLevel::recurser_stack_index--;
+goto *(temp_link);
 }
 }
 }

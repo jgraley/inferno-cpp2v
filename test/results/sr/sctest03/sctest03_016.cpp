@@ -1,44 +1,44 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_METHOD(id_1);
+SC_METHOD(method);
 }
-void id_1();
-id_0(auto char (*id_4));
-int id_2;
-int id_3;
+void method();
+TopLevel(auto char (*name));
+int gvar;
+int tot;
 };
-id_0 id_6("id_6");
-void id_7;
-int id_8 = 0;
-int id_9 = 0;
-void (id_11)(void id_10);
-void (id_13)(void id_12);
-void (id_15)(void id_14);
-void (id_17)(void id_16);
+TopLevel top_level("top_level");
+void SC_ZERO_TIME;
+int gvar_1 = 0;
+int tot_1 = 0;
+void (cease)(void p1);
+void (exit)(void p1_1);
+void (next_trigger)(void p1_2);
+void (wait)(void p1_3);
 
-void id_0::id_1()
+void TopLevel::method()
 {
- ::id_0::id_2++;
- ::id_0::id_3+= ::id_0::id_2;
-if( (10)== ::id_0::id_2 )
-cease(  ::id_0::id_3 );
+ ::TopLevel::gvar++;
+ ::TopLevel::tot+= ::TopLevel::gvar;
+if( (10)== ::TopLevel::gvar )
+cease(  ::TopLevel::tot );
 next_trigger(SC_ZERO_TIME);
 }
 
-id_0::id_0(char (*id_4))
+TopLevel::TopLevel(char (*name))
 {
 }
 
-void (id_11)(void id_10);
+void (cease)(void p1);
 
-void (id_13)(void id_12);
+void (exit)(void p1_1);
 
-void (id_15)(void id_14);
+void (next_trigger)(void p1_2);
 
-void (id_17)(void id_16);
+void (wait)(void p1_3);

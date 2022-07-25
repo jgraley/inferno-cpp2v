@@ -1,108 +1,108 @@
-class id_17;
-class id_30;
-class id_6;
-class id_0;
-class id_18;
-class id_26;
-class id_17
+class sc_event;
+class sc_interface;
+class sc_module;
+class Adder;
+class Multiplier;
+class TopLevel;
+class sc_event
+{
+void (notify)(auto void p1_1);
+};
+class sc_interface
 {
 };
-class id_30
+class sc_module
 {
 };
-class id_6
-{
-void (id_16)(auto void id_11);
-};
-class id_0 : public id_17
+class Adder : public sc_module
 {
 public:
-id_0(auto char (*id_1));
- ::id_6 id_7;
-void (id_4)();
+Adder(auto char (*name));
+ ::sc_event proceed;
+void (T)();
 };
-class id_18 : public id_17
+class Multiplier : public sc_module
 {
 public:
-id_18(auto char (*id_19));
- ::id_6 id_15;
- ::id_6 id_22;
-void (id_21)();
+Multiplier(auto char (*name_1));
+ ::sc_event instigate;
+ ::sc_event proceed_1;
+void (T_1)();
 };
-class id_26 : public id_17
+class TopLevel : public sc_module
 {
 public:
-id_26(auto char (*id_27));
- ::id_0 id_23;
- ::id_18 id_14;
-void (id_29)();
+TopLevel(auto char (*name_2));
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
+void (T_2)();
 };
-id_26 id_13;
-void id_12;
-int id_10;
-void (id_25)(void id_24);
-void (id_32)(void id_31);
-void (id_34)(void id_33);
-void (id_9)(void id_8);
-void (id_36)(void id_35);
-void (id_5)(void id_3);
-void (id_39)(void id_37, void id_38);
+TopLevel top_level;
+void SC_ZERO_TIME;
+int gvar;
+void (cease)(void p1_2);
+void (exit)(void p1_3);
+void (next_trigger)(void p1_4);
+void (wait)(void p1);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-void (id_6::id_16)(void id_11);
+void (sc_event::notify)(void p1_1);
 
-id_0::id_0(char (*id_1))
+Adder::Adder(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::Adder::T);
 }
 
-void (id_0::id_4)()
+void (Adder::T)()
 {
- ::id_9( ::id_0::id_7);
- ::id_10+=(2);
-((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_0::id_7);
- ::id_10+=(3);
-((( ::id_13. ::id_26::id_14). ::id_18::id_15). ::id_6::id_16)( ::id_12);
+ ::wait( ::Adder::proceed);
+ ::gvar+=(2);
+((( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1). ::sc_event::notify)( ::SC_ZERO_TIME);
+ ::wait( ::Adder::proceed);
+ ::gvar+=(3);
+((( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1). ::sc_event::notify)( ::SC_ZERO_TIME);
 }
 
-id_18::id_18(char (*id_19))
+Multiplier::Multiplier(char (*name_1))
 {
- ::id_5( ::id_18::id_21);
+ ::SC_THREAD( ::Multiplier::T_1);
 }
 
-void (id_18::id_21)()
+void (Multiplier::T_1)()
 {
- ::id_9( ::id_18::id_22);
- ::id_10*=(5);
-((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_18::id_15);
- ::id_10*=(5);
-((( ::id_13. ::id_26::id_23). ::id_0::id_7). ::id_6::id_16)( ::id_12);
- ::id_9( ::id_18::id_15);
- ::id_25( ::id_10);
+ ::wait( ::Multiplier::instigate);
+ ::gvar*=(5);
+((( ::top_level. ::TopLevel::add_inst). ::Adder::proceed). ::sc_event::notify)( ::SC_ZERO_TIME);
+ ::wait( ::Multiplier::proceed_1);
+ ::gvar*=(5);
+((( ::top_level. ::TopLevel::add_inst). ::Adder::proceed). ::sc_event::notify)( ::SC_ZERO_TIME);
+ ::wait( ::Multiplier::proceed_1);
+ ::cease( ::gvar);
 }
 
-id_26::id_26(char (*id_27)) : id_23("add_inst"), id_14("mul_inst")
+TopLevel::TopLevel(char (*name_2)) : add_inst("add_inst"), mul_inst("mul_inst")
 {
- ::id_5( ::id_26::id_29);
+ ::SC_THREAD( ::TopLevel::T_2);
 }
 
-void (id_26::id_29)()
+void (TopLevel::T_2)()
 {
- ::id_10=(1);
-(( ::id_26::id_14. ::id_18::id_22). ::id_6::id_16)( ::id_12);
+ ::gvar=(1);
+(( ::TopLevel::mul_inst. ::Multiplier::instigate). ::sc_event::notify)( ::SC_ZERO_TIME);
 }
 
-void (id_25)(void id_24);
+void (cease)(void p1_2);
 
-void (id_32)(void id_31);
+void (exit)(void p1_3);
 
-void (id_34)(void id_33);
+void (next_trigger)(void p1_4);
 
-void (id_9)(void id_8);
+void (wait)(void p1);
 
-void (id_36)(void id_35);
+void (SC_METHOD)(void func_1);
 
-void (id_5)(void id_3);
+void (SC_THREAD)(void func);
 
-void (id_39)(void id_37, void id_38);
+void (SC_CTHREAD)(void clock, void func_2);

@@ -1,49 +1,49 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_4);
+SC_THREAD(U);
 }
-enum id_1
+enum UStates
 {
-id_2 = 1,
-id_3 = 0,
+U_STATE_ENTER_HelperU = 1,
+U_STATE_LINK = 0,
 };
-void id_4();
+void U();
 private:
-void *id_11;
+void *link;
 public:
-/*temp*/ void *id_10;
-/*temp*/ void *id_12;
+/*temp*/ void *HelperU_link;
+/*temp*/ void *HelperU_link_1;
 };
-id_0 id_13("id_13");
+TopLevel top_level("top_level");
 
-void id_0::id_4()
+void TopLevel::U()
 {
-/*temp*/ void *id_5;
-static const void *(id_6[]) = { &&id_7, &&id_8 };
-auto void *id_9;
- ::id_0::id_10=(id_6[ ::id_0::id_3]);
+/*temp*/ void *temp_link;
+static const void *(lmap[]) = { &&LINK, &&ENTER_HelperU };
+auto void *state;
+ ::TopLevel::HelperU_link=(lmap[ ::TopLevel::U_STATE_LINK]);
 wait(SC_ZERO_TIME);
 {
-id_9=(id_6[ ::id_0::id_2]);
-goto *(id_9);
+state=(lmap[ ::TopLevel::U_STATE_ENTER_HelperU]);
+goto *(state);
 }
-id_7:;
+LINK:;
 return ;
 {
-id_9=(id_6[ ::id_0::id_2]);
-goto *(id_9);
+state=(lmap[ ::TopLevel::U_STATE_ENTER_HelperU]);
+goto *(state);
 }
-id_8:;
- ::id_0::id_11= ::id_0::id_10;
-id_5= ::id_0::id_11;
+ENTER_HelperU:;
+ ::TopLevel::link= ::TopLevel::HelperU_link;
+temp_link= ::TopLevel::link;
 {
-id_9=id_5;
-goto *(id_9);
+state=temp_link;
+goto *(state);
 }
 }

@@ -1,119 +1,119 @@
-class id_14;
-class id_0;
-class id_15;
-class id_23;
-class id_27;
-class id_30;
-class id_14
+class sc_event;
+class sc_interface;
+class sc_module;
+class Adder;
+class Multiplier;
+class TopLevel;
+class sc_event
+{
+void (notify)(auto void p1_2);
+};
+class sc_interface
 {
 };
-class id_0 : public id_14
+class sc_module
+{
+};
+class Adder : public sc_module
 {
 public:
-id_0(auto char (*id_1));
-bool id_6;
-void (id_4)();
+Adder(auto char (*name));
+bool proceed;
+void (T)();
 };
-class id_15 : public id_14
+class Multiplier : public sc_module
 {
 public:
-id_15(auto char (*id_16));
-bool id_13;
-bool id_19;
-void (id_18)();
+Multiplier(auto char (*name_1));
+bool instigate;
+bool proceed_1;
+void (T_1)();
 };
-class id_23 : public id_14
+class TopLevel : public sc_module
 {
 public:
-id_23(auto char (*id_24));
- ::id_0 id_20;
- ::id_15 id_12;
-void (id_26)();
+TopLevel(auto char (*name_2));
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
+void (T_2)();
 };
-class id_27
-{
-void (id_29)(auto void id_28);
-};
-class id_30
-{
-};
-id_23 id_11;
-void id_8;
-int id_10;
-void (id_22)(void id_21);
-void (id_32)(void id_31);
-void (id_34)(void id_33);
-void (id_9)(void id_7);
-void (id_36)(void id_35);
-void (id_5)(void id_3);
-void (id_39)(void id_37, void id_38);
+TopLevel top_level;
+void SC_ZERO_TIME;
+int gvar;
+void (cease)(void p1_1);
+void (exit)(void p1_3);
+void (next_trigger)(void p1_4);
+void (wait)(void p1);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+void (sc_event::notify)(void p1_2);
+
+Adder::Adder(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::Adder::T);
 }
 
-void (id_0::id_4)()
+void (Adder::T)()
 {
- ::id_9( ::id_8);
-while( ! ::id_0::id_6 )
- ::id_9( ::id_8);
- ::id_0::id_6=(false);
- ::id_10+=(2);
-(( ::id_11. ::id_23::id_12). ::id_15::id_13)=(true);
-while( ! ::id_0::id_6 )
- ::id_9( ::id_8);
- ::id_0::id_6=(false);
- ::id_10+=(3);
-(( ::id_11. ::id_23::id_12). ::id_15::id_13)=(true);
+ ::wait( ::SC_ZERO_TIME);
+while( ! ::Adder::proceed )
+ ::wait( ::SC_ZERO_TIME);
+ ::Adder::proceed=(false);
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1)=(true);
+while( ! ::Adder::proceed )
+ ::wait( ::SC_ZERO_TIME);
+ ::Adder::proceed=(false);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1)=(true);
 }
 
-id_15::id_15(char (*id_16))
+Multiplier::Multiplier(char (*name_1))
 {
- ::id_5( ::id_15::id_18);
+ ::SC_THREAD( ::Multiplier::T_1);
 }
 
-void (id_15::id_18)()
+void (Multiplier::T_1)()
 {
-while( ! ::id_15::id_19 )
- ::id_9( ::id_8);
- ::id_15::id_19=(false);
- ::id_10*=(5);
-(( ::id_11. ::id_23::id_20). ::id_0::id_6)=(true);
-while( ! ::id_15::id_13 )
- ::id_9( ::id_8);
- ::id_15::id_13=(false);
- ::id_10*=(5);
-(( ::id_11. ::id_23::id_20). ::id_0::id_6)=(true);
-while( ! ::id_15::id_13 )
- ::id_9( ::id_8);
- ::id_15::id_13=(false);
- ::id_22( ::id_10);
+while( ! ::Multiplier::instigate )
+ ::wait( ::SC_ZERO_TIME);
+ ::Multiplier::instigate=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+while( ! ::Multiplier::proceed_1 )
+ ::wait( ::SC_ZERO_TIME);
+ ::Multiplier::proceed_1=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+while( ! ::Multiplier::proceed_1 )
+ ::wait( ::SC_ZERO_TIME);
+ ::Multiplier::proceed_1=(false);
+ ::cease( ::gvar);
 }
 
-id_23::id_23(char (*id_24)) : id_20("add_inst"), id_12("mul_inst")
+TopLevel::TopLevel(char (*name_2)) : add_inst("add_inst"), mul_inst("mul_inst")
 {
- ::id_5( ::id_23::id_26);
+ ::SC_THREAD( ::TopLevel::T_2);
 }
 
-void (id_23::id_26)()
+void (TopLevel::T_2)()
 {
- ::id_10=(1);
-( ::id_23::id_12. ::id_15::id_19)=(true);
+ ::gvar=(1);
+( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
 }
 
-void (id_27::id_29)(void id_28);
+void (cease)(void p1_1);
 
-void (id_22)(void id_21);
+void (exit)(void p1_3);
 
-void (id_32)(void id_31);
+void (next_trigger)(void p1_4);
 
-void (id_34)(void id_33);
+void (wait)(void p1);
 
-void (id_9)(void id_7);
+void (SC_METHOD)(void func_1);
 
-void (id_36)(void id_35);
+void (SC_THREAD)(void func);
 
-void (id_5)(void id_3);
-
-void (id_39)(void id_37, void id_38);
+void (SC_CTHREAD)(void clock, void func_2);

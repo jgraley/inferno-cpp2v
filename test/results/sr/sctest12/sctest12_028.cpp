@@ -1,71 +1,71 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_2;
-void (id_5)(auto void *id_3);
-/*temp*/ int id_6;
-/*temp*/ void *id_8;
+void T();
+int x;
+void (f)(auto void *link);
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
 };
-id_0 id_9("id_9");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(0);
+ ::TopLevel::x=(0);
 switch( 0 )
 {
 case 1:;
- ::id_0::id_2=(99);
+ ::TopLevel::x=(99);
 break;
 case 0:;
-if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
- ::id_0::id_2=((false) ? (88) : (2));
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+ ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
 switch( 0 )
 {
 case 1:;
- ::id_0::id_2=(99);
+ ::TopLevel::x=(99);
 break;
 case 4:;
- ::id_0::id_2=(44);
+ ::TopLevel::x=(44);
 case 0:;
-if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
- ::id_0::id_2=((false) ? (88) : (2));
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+ ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
 switch( 2 )
 {
 case 1:;
- ::id_0::id_2=(99);
+ ::TopLevel::x=(99);
 break;
 case 2:;
-if( ((0)== ::id_0::id_2)||((2)== ::id_0::id_2) )
- ::id_0::id_2=((false) ? (88) : ({ {
- ::id_0::id_5(&&id_4);
-id_4:;
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+ ::TopLevel::x=((false) ? (88) : ({ {
+ ::TopLevel::f(&&LINK);
+LINK:;
 }
- ::id_0::id_6; }));
+ ::TopLevel::f_return; }));
 break;
 }
-cease(  ::id_0::id_2 );
+cease(  ::TopLevel::x );
 return ;
 }
 
-void (id_0::id_5)(void *id_3)
+void (TopLevel::f)(void *link)
 {
-/*temp*/ void *id_7;
+/*temp*/ void *temp_link;
 {
- ::id_0::id_6=(3);
+ ::TopLevel::f_return=(3);
 {
-id_7=id_3;
+temp_link=link;
 return ;
 }
 }

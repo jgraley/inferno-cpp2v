@@ -1,50 +1,50 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
 }
-id_0(auto char (*id_1));
-void (id_4)();
-void (id_6)();
+TopLevel(auto char (*name));
+void (HelperU)();
+void (U)();
 };
-id_0 id_7("id_7");
-void id_8;
-void (id_10)(void id_9);
-void (id_12)(void id_11);
-void (id_14)(void id_13);
-void (id_16)(void id_15);
-void (id_18)(void id_17);
-void (id_5)(void id_3);
-void (id_21)(void id_19, void id_20);
+TopLevel top_level("top_level");
+void SC_ZERO_TIME;
+void (cease)(void p1);
+void (exit)(void p1_1);
+void (next_trigger)(void p1_2);
+void (wait)(void p1_3);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::TopLevel::U);
 }
 
-void (id_0::id_4)()
-{
- ::id_0::id_6();
-}
-
-void (id_0::id_6)()
+void (TopLevel::HelperU)()
 {
 }
 
-void (id_10)(void id_9);
+void (TopLevel::U)()
+{
+ ::TopLevel::HelperU();
+}
 
-void (id_12)(void id_11);
+void (cease)(void p1);
 
-void (id_14)(void id_13);
+void (exit)(void p1_1);
 
-void (id_16)(void id_15);
+void (next_trigger)(void p1_2);
 
-void (id_18)(void id_17);
+void (wait)(void p1_3);
 
-void (id_5)(void id_3);
+void (SC_METHOD)(void func_1);
 
-void (id_21)(void id_19, void id_20);
+void (SC_THREAD)(void func);
+
+void (SC_CTHREAD)(void clock, void func_2);

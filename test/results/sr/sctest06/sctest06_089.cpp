@@ -1,68 +1,68 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_7);
+SC_THREAD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 0,
-id_3 = 1,
-id_4 = 3,
-id_5 = 4,
-id_6 = 2,
+T_STATE_PROCEED_NEXT = 0,
+T_STATE_PROCEED_NEXT_1 = 1,
+T_STATE_PROCEED_THEN_ELSE = 2,
+T_STATE_PROCEED_THEN_ELSE_1 = 4,
+T_STATE_YIELD = 3,
 };
-void id_7();
+void T();
 };
-id_0 id_12("id_12");
-int id_10;
-int id_11;
-int id_9;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_7()
+void TopLevel::T()
 {
-auto unsigned int id_8;
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0) )
 {
- ::id_9=(1);
- ::id_10=(0);
+ ::gvar=(1);
+ ::i=(0);
 wait(SC_ZERO_TIME);
-id_8=((!( ::id_10<(4))) ?  ::id_0::id_5 :  ::id_0::id_2);
+state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT_1);
 continue;
 }
-if(  ::id_0::id_2==id_8 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT_1==state )
 {
- ::id_9+= ::id_10;
- ::id_11=(0);
-id_8=((!( ::id_11<(3))) ?  ::id_0::id_4 :  ::id_0::id_3);
+ ::gvar+= ::i;
+ ::j=(0);
+state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
-if(  ::id_0::id_3==id_8 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
 {
 wait(SC_ZERO_TIME);
-id_8= ::id_0::id_6;
+state= ::TopLevel::T_STATE_YIELD;
 continue;
 }
-if(  ::id_0::id_6==id_8 )
+if(  ::TopLevel::T_STATE_YIELD==state )
 {
- ::id_9++;
- ::id_11++;
-id_8=(( ::id_11<(3)) ?  ::id_0::id_3 :  ::id_0::id_4);
+ ::gvar++;
+ ::j++;
+state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1);
 }
-if(  ::id_0::id_4==id_8 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1==state )
 {
- ::id_9*=(2);
- ::id_10++;
-id_8=(( ::id_10<(4)) ?  ::id_0::id_2 :  ::id_0::id_5);
+ ::gvar*=(2);
+ ::i++;
+state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT_1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if(  ::id_0::id_5==id_8 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE==state )
 {
-cease(  ::id_9 );
+cease(  ::gvar );
 return ;
 }
 wait(SC_ZERO_TIME);

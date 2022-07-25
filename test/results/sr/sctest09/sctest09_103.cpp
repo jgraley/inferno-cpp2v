@@ -1,89 +1,89 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 ) :
-id_15(0)
+SC_CTOR( TopLevel ) :
+recurser_stack_index(0)
 {
-SC_METHOD(id_8);
+SC_METHOD(T);
 }
-/*temp*/ unsigned int id_1;
-enum id_2
+/*temp*/ unsigned int temp_link;
+enum TStates
 {
-id_3 = 3,
-id_4 = 0,
-id_5 = 4,
-id_6 = 1,
-id_7 = 2,
+T_STATE_ENTER_recurser = 4,
+T_STATE_LINK = 1,
+T_STATE_LINK_1 = 2,
+T_STATE_LINK_THEN_ELSE = 3,
+T_STATE_PROCEED = 0,
 };
-void id_8();
+void T();
 private:
-int (id_17[10]);
-unsigned int (id_16[10]);
+int (i_stack[10]);
+unsigned int (link_stack[10]);
 public:
-int id_10;
+int x;
 private:
-unsigned int id_14;
-unsigned int id_15;
+unsigned int recurser_stack_index;
+unsigned int state;
 public:
-/*temp*/ int id_11;
-/*temp*/ int id_12;
-/*temp*/ int id_18;
-/*temp*/ int id_19;
-/*temp*/ unsigned int id_13;
+/*temp*/ int recurser_i;
+/*temp*/ int temp_i;
+/*temp*/ int temp_i_1;
+/*temp*/ int temp_i_2;
+/*temp*/ unsigned int recurser_link;
 };
-id_0 id_20("id_20");
+TopLevel top_level("top_level");
 
-void id_0::id_8()
+void TopLevel::T()
 {
-/*temp*/ bool id_9 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0) )
 {
- ::id_0::id_10=(0);
- ::id_0::id_11=(1);
- ::id_0::id_12= ::id_0::id_11;
- ::id_0::id_13= ::id_0::id_5;
+ ::TopLevel::x=(0);
+ ::TopLevel::temp_i=(1);
+ ::TopLevel::recurser_i= ::TopLevel::temp_i;
+ ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_1;
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_14= ::id_0::id_3;
-id_9=(false);
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
+enabled=(false);
 }
-if( id_9&&( ::id_0::id_5== ::id_0::id_14) )
+if( enabled&&( ::TopLevel::T_STATE_LINK_1== ::TopLevel::state) )
 {
-cease(  ::id_0::id_10 );
-id_9=(false);
-if( id_9 )
- ::id_0::id_14= ::id_0::id_3;
+cease(  ::TopLevel::x );
+enabled=(false);
+if( enabled )
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if( id_9&&( ::id_0::id_3== ::id_0::id_14) )
+if( enabled&&( ::TopLevel::T_STATE_ENTER_recurser== ::TopLevel::state) )
 {
- ::id_0::id_15++;
-( ::id_0::id_16[ ::id_0::id_15])= ::id_0::id_13;
-( ::id_0::id_17[ ::id_0::id_15])= ::id_0::id_12;
- ::id_0::id_10++;
- ::id_0::id_14=((!(( ::id_0::id_17[ ::id_0::id_15])<(5))) ?  ::id_0::id_6 :  ::id_0::id_7);
+ ::TopLevel::recurser_stack_index++;
+( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
+ ::TopLevel::x++;
+ ::TopLevel::state=((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ?  ::TopLevel::T_STATE_LINK_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
-if( id_9&&( ::id_0::id_7== ::id_0::id_14) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED== ::TopLevel::state) )
 {
- ::id_0::id_18=((1)+( ::id_0::id_17[ ::id_0::id_15]));
- ::id_0::id_12= ::id_0::id_18;
- ::id_0::id_13= ::id_0::id_4;
- ::id_0::id_14= ::id_0::id_3;
+ ::TopLevel::temp_i_1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i= ::TopLevel::temp_i_1;
+ ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if( id_9&&( ::id_0::id_4== ::id_0::id_14) )
+if( enabled&&( ::TopLevel::T_STATE_LINK== ::TopLevel::state) )
 {
- ::id_0::id_19=((1)+( ::id_0::id_17[ ::id_0::id_15]));
- ::id_0::id_12= ::id_0::id_19;
- ::id_0::id_13= ::id_0::id_6;
- ::id_0::id_14= ::id_0::id_3;
+ ::TopLevel::temp_i_2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i= ::TopLevel::temp_i_2;
+ ::TopLevel::recurser_link= ::TopLevel::T_STATE_LINK_THEN_ELSE;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_recurser;
 }
-if( id_9&&( ::id_0::id_6== ::id_0::id_14) )
+if( enabled&&( ::TopLevel::T_STATE_LINK_THEN_ELSE== ::TopLevel::state) )
 {
- ::id_0::id_1=( ::id_0::id_16[ ::id_0::id_15]);
- ::id_0::id_15--;
- ::id_0::id_14= ::id_0::id_1;
+ ::TopLevel::temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
+ ::TopLevel::recurser_stack_index--;
+ ::TopLevel::state= ::TopLevel::temp_link;
 }
-if( id_9 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }

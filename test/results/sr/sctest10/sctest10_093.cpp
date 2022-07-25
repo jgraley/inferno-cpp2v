@@ -1,129 +1,129 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_METHOD(id_7);
+SC_METHOD(T);
 }
-/*temp*/ unsigned int id_1;
-enum id_2
+/*temp*/ unsigned int temp_link;
+enum TStates
 {
-id_3 = 2,
-id_4 = 0,
-id_5 = 1,
-id_6 = 3,
+T_STATE_ENTER_f = 2,
+T_STATE_LINK = 0,
+T_STATE_LINK_1 = 1,
+T_STATE_LINK_2 = 3,
 };
-void id_7();
+void T();
 private:
-char id_37;
-short id_36;
-int id_39;
-int id_40;
+char k;
+short j;
+int i;
+int t;
 public:
-int id_8;
+int x;
 private:
-unsigned int id_16;
-unsigned int id_38;
+unsigned int link;
+unsigned int state;
 public:
-/*temp*/ char id_14;
-/*temp*/ short id_15;
-/*temp*/ int id_10;
-/*temp*/ int id_11;
-/*temp*/ int id_12;
-/*temp*/ int id_17;
-/*temp*/ int id_18;
-/*temp*/ int id_19;
-/*temp*/ int id_20;
-/*temp*/ int id_21;
-/*temp*/ int id_22;
-/*temp*/ int id_23;
-/*temp*/ int id_24;
-/*temp*/ int id_25;
-/*temp*/ int id_26;
-/*temp*/ int id_27;
-/*temp*/ int id_28;
-/*temp*/ int id_29;
-/*temp*/ int id_30;
-/*temp*/ int id_31;
-/*temp*/ int id_32;
-/*temp*/ int id_33;
-/*temp*/ int id_34;
-/*temp*/ int id_35;
-/*temp*/ int id_9;
-/*temp*/ unsigned int id_13;
+/*temp*/ char f_k;
+/*temp*/ short f_j;
+/*temp*/ int f_i;
+/*temp*/ int f_return;
+/*temp*/ int result;
+/*temp*/ int result_1;
+/*temp*/ int result_10;
+/*temp*/ int result_11;
+/*temp*/ int result_2;
+/*temp*/ int result_3;
+/*temp*/ int result_4;
+/*temp*/ int result_5;
+/*temp*/ int result_6;
+/*temp*/ int result_7;
+/*temp*/ int result_8;
+/*temp*/ int result_9;
+/*temp*/ int temp_i;
+/*temp*/ int temp_i_1;
+/*temp*/ int temp_i_2;
+/*temp*/ int temp_j;
+/*temp*/ int temp_j_1;
+/*temp*/ int temp_j_2;
+/*temp*/ int temp_k;
+/*temp*/ int temp_k_1;
+/*temp*/ int temp_k_2;
+/*temp*/ unsigned int f_link;
 };
-id_0 id_41("id_41");
+TopLevel top_level("top_level");
 
-void id_0::id_7()
+void TopLevel::T()
 {
 if( (sc_delta_count())==(0) )
 {
- ::id_0::id_8=(0);
- ::id_0::id_9=(0);
- ::id_0::id_10=(0);
- ::id_0::id_11=(0);
- ::id_0::id_12= ::id_0::id_9;
- ::id_0::id_13= ::id_0::id_6;
- ::id_0::id_14= ::id_0::id_10;
- ::id_0::id_15= ::id_0::id_11;
+ ::TopLevel::x=(0);
+ ::TopLevel::temp_i=(0);
+ ::TopLevel::temp_j=(0);
+ ::TopLevel::temp_k=(0);
+ ::TopLevel::f_j= ::TopLevel::temp_j;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK_2;
+ ::TopLevel::f_k= ::TopLevel::temp_k;
+ ::TopLevel::f_i= ::TopLevel::temp_i;
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_16= ::id_0::id_3;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 return ;
 }
-if(  ::id_0::id_6== ::id_0::id_16 )
+if(  ::TopLevel::T_STATE_LINK_2== ::TopLevel::state )
 {
- ::id_0::id_17= ::id_0::id_18;
- ::id_0::id_19= ::id_0::id_17;
- ::id_0::id_20= ::id_0::id_19;
- ::id_0::id_21= ::id_0::id_20;
- ::id_0::id_22= ::id_0::id_21;
- ::id_0::id_23=(8);
- ::id_0::id_24=(6);
- ::id_0::id_12= ::id_0::id_22;
- ::id_0::id_13= ::id_0::id_5;
- ::id_0::id_14= ::id_0::id_23;
- ::id_0::id_15= ::id_0::id_24;
- ::id_0::id_16= ::id_0::id_3;
+ ::TopLevel::result= ::TopLevel::f_return;
+ ::TopLevel::result_1= ::TopLevel::result;
+ ::TopLevel::result_2= ::TopLevel::result_1;
+ ::TopLevel::result_3= ::TopLevel::result_2;
+ ::TopLevel::temp_i_1= ::TopLevel::result_3;
+ ::TopLevel::temp_k_1=(8);
+ ::TopLevel::temp_j_1=(6);
+ ::TopLevel::f_j= ::TopLevel::temp_j_1;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK_1;
+ ::TopLevel::f_k= ::TopLevel::temp_k_1;
+ ::TopLevel::f_i= ::TopLevel::temp_i_1;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_5== ::id_0::id_16 )
+if(  ::TopLevel::T_STATE_LINK_1== ::TopLevel::state )
 {
- ::id_0::id_25= ::id_0::id_18;
- ::id_0::id_26= ::id_0::id_25;
- ::id_0::id_27= ::id_0::id_26;
- ::id_0::id_28= ::id_0::id_27;
- ::id_0::id_8= ::id_0::id_28;
- ::id_0::id_29=(1);
- ::id_0::id_30=(3);
- ::id_0::id_31=(2);
- ::id_0::id_12= ::id_0::id_29;
- ::id_0::id_13= ::id_0::id_4;
- ::id_0::id_14= ::id_0::id_30;
- ::id_0::id_15= ::id_0::id_31;
- ::id_0::id_16= ::id_0::id_3;
+ ::TopLevel::result_4= ::TopLevel::f_return;
+ ::TopLevel::result_5= ::TopLevel::result_4;
+ ::TopLevel::result_6= ::TopLevel::result_5;
+ ::TopLevel::result_7= ::TopLevel::result_6;
+ ::TopLevel::x= ::TopLevel::result_7;
+ ::TopLevel::temp_j_2=(2);
+ ::TopLevel::temp_k_2=(3);
+ ::TopLevel::temp_i_2=(1);
+ ::TopLevel::f_j= ::TopLevel::temp_j_2;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::f_k= ::TopLevel::temp_k_2;
+ ::TopLevel::f_i= ::TopLevel::temp_i_2;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_4== ::id_0::id_16 )
+if(  ::TopLevel::T_STATE_LINK== ::TopLevel::state )
 {
- ::id_0::id_32= ::id_0::id_18;
- ::id_0::id_33= ::id_0::id_32;
- ::id_0::id_34= ::id_0::id_33;
- ::id_0::id_35= ::id_0::id_34;
-cease(  ::id_0::id_8+((2)* ::id_0::id_35) );
+ ::TopLevel::result_8= ::TopLevel::f_return;
+ ::TopLevel::result_9= ::TopLevel::result_8;
+ ::TopLevel::result_10= ::TopLevel::result_9;
+ ::TopLevel::result_11= ::TopLevel::result_10;
+cease(  ::TopLevel::x+((2)* ::TopLevel::result_11) );
 return ;
- ::id_0::id_16= ::id_0::id_3;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_3== ::id_0::id_16 )
+if(  ::TopLevel::T_STATE_ENTER_f== ::TopLevel::state )
 {
- ::id_0::id_36= ::id_0::id_15;
- ::id_0::id_37= ::id_0::id_14;
- ::id_0::id_38= ::id_0::id_13;
- ::id_0::id_39= ::id_0::id_12;
- ::id_0::id_40=( ::id_0::id_39+((3)* ::id_0::id_36));
- ::id_0::id_18=( ::id_0::id_40+((5)* ::id_0::id_37));
- ::id_0::id_1= ::id_0::id_38;
- ::id_0::id_16= ::id_0::id_1;
+ ::TopLevel::i= ::TopLevel::f_i;
+ ::TopLevel::k= ::TopLevel::f_k;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::j= ::TopLevel::f_j;
+ ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));
+ ::TopLevel::f_return=( ::TopLevel::t+((5)* ::TopLevel::k));
+ ::TopLevel::temp_link= ::TopLevel::link;
+ ::TopLevel::state= ::TopLevel::temp_link;
 }
 next_trigger(SC_ZERO_TIME);
 }

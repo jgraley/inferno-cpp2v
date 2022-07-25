@@ -1,55 +1,55 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-int id_3;
+int t;
 };
-id_0 id_12("id_12");
-int id_2;
-int id_4;
+TopLevel top_level("top_level");
+int gvar;
+int i;
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_2=(1);
- ::id_0::id_3=(5);
+ ::gvar=(1);
+ ::TopLevel::t=(5);
 {
- ::id_4=(0);
+ ::i=(0);
 {
-if( !( ::id_4< ::id_0::id_3) )
-goto id_5;
-goto id_6;
-id_6:;
+if( !( ::i< ::TopLevel::t) )
+goto THEN;
+goto PROCEED;
+PROCEED:;
 {
-id_7:;
+NEXT:;
 {
 {
- ::id_2+= ::id_4;
+ ::gvar+= ::i;
 wait(SC_ZERO_TIME);
- ::id_2*=(2);
+ ::gvar*=(2);
 }
-id_8:;
- ::id_4++;
+CONTINUE:;
+ ::i++;
 }
-id_9:;
-if(  ::id_4< ::id_0::id_3 )
-goto id_7;
-goto id_10;
-id_10:;
+CONTINUE_1:;
+if(  ::i< ::TopLevel::t )
+goto NEXT;
+goto PROCEED_1;
+PROCEED_1:;
 }
-goto id_11;
-id_5:;
+goto ELSE;
+THEN:;
 ;
-id_11:;
+ELSE:;
 }
 }
-cease(  ::id_2 );
+cease(  ::gvar );
 return ;
 }

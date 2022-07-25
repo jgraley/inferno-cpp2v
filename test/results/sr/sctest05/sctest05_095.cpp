@@ -1,67 +1,67 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_METHOD(id_7);
+SC_METHOD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 4,
-id_3 = 1,
-id_4 = 3,
-id_5 = 0,
-id_6 = 2,
+T_STATE_PROCEED = 1,
+T_STATE_PROCEED_NEXT = 2,
+T_STATE_PROCEED_THEN_ELSE = 4,
+T_STATE_THEN_ELSE = 0,
+T_STATE_YIELD = 3,
 };
-void id_7();
+void T();
 private:
-unsigned int id_11;
+unsigned int state;
 };
-id_0 id_12("id_12");
-int id_10;
-int id_9;
+TopLevel top_level("top_level");
+int gvar;
+int i;
 
-void id_0::id_7()
+void TopLevel::T()
 {
-/*temp*/ bool id_8 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0) )
 {
- ::id_9=(1);
- ::id_10=(0);
+ ::gvar=(1);
+ ::i=(0);
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_11=((!( ::id_10<(5))) ?  ::id_0::id_4 :  ::id_0::id_3);
-id_8=(false);
+ ::TopLevel::state=((!( ::i<(5))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+enabled=(false);
 }
-if( id_8&&( ::id_0::id_3== ::id_0::id_11) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state) )
 {
- ::id_9+= ::id_10;
- ::id_0::id_11=((!((0)==( ::id_10%(2)))) ?  ::id_0::id_5 :  ::id_0::id_2);
+ ::gvar+= ::i;
+ ::TopLevel::state=((!((0)==( ::i%(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
-if( id_8&&( ::id_0::id_2== ::id_0::id_11) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED== ::TopLevel::state) )
 {
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_11= ::id_0::id_6;
-id_8=(false);
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+enabled=(false);
 }
-if( id_8&&( ::id_0::id_6== ::id_0::id_11) )
+if( enabled&&( ::TopLevel::T_STATE_YIELD== ::TopLevel::state) )
 {
- ::id_9^=(1);
- ::id_0::id_11= ::id_0::id_5;
+ ::gvar^=(1);
+ ::TopLevel::state= ::TopLevel::T_STATE_THEN_ELSE;
 }
-if( id_8&&( ::id_0::id_5== ::id_0::id_11) )
+if( enabled&&( ::TopLevel::T_STATE_THEN_ELSE== ::TopLevel::state) )
 {
- ::id_9*=(2);
- ::id_10++;
- ::id_0::id_11=(( ::id_10<(5)) ?  ::id_0::id_3 :  ::id_0::id_4);
+ ::gvar*=(2);
+ ::i++;
+ ::TopLevel::state=(( ::i<(5)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( id_8&&( ::id_0::id_4== ::id_0::id_11) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state) )
 {
-cease(  ::id_9 );
-id_8=(false);
+cease(  ::gvar );
+enabled=(false);
 }
-if( id_8 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }

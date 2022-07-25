@@ -1,30 +1,30 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 };
-id_0 id_5("id_5");
-int id_3;
-int id_4;
+TopLevel top_level("top_level");
+int gvar;
+int i;
 
-void id_0::id_1()
+void TopLevel::T()
 {
-auto int id_2;
- ::id_3=(1);
-id_2=(5);
-for(  ::id_4=(0);  ::id_4<id_2;  ::id_4++ )
+auto int t;
+ ::gvar=(1);
+t=(5);
+for(  ::i=(0);  ::i<t;  ::i++ )
 {
- ::id_3+= ::id_4;
+ ::gvar+= ::i;
 wait(SC_ZERO_TIME);
- ::id_3*=(2);
+ ::gvar*=(2);
 }
-cease(  ::id_3 );
+cease(  ::gvar );
 return ;
 }

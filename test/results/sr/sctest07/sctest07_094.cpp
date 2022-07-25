@@ -1,95 +1,95 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_METHOD(id_8);
+SC_METHOD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 1,
-id_3 = 3,
-id_4 = 4,
-id_5 = 5,
-id_6 = 0,
-id_7 = 2,
+T_STATE_PROCEED_NEXT = 0,
+T_STATE_PROCEED_NEXT_1 = 3,
+T_STATE_PROCEED_THEN_ELSE = 1,
+T_STATE_PROCEED_THEN_ELSE_1 = 5,
+T_STATE_YIELD = 2,
+T_STATE_YIELD_1 = 4,
 };
-void id_8();
+void T();
 private:
-unsigned int id_12;
+unsigned int state;
 };
-id_0 id_14("id_14");
-int id_10;
-int id_11;
-int id_13;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_8()
+void TopLevel::T()
 {
-/*temp*/ bool id_9 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0) )
 {
- ::id_10=(1);
- ::id_11=(0);
+ ::gvar=(1);
+ ::i=(0);
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_12=((!( ::id_11<(4))) ?  ::id_0::id_5 :  ::id_0::id_3);
-id_9=(false);
+ ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+enabled=(false);
 }
-if( id_9 )
+if( enabled )
 {
-if(  ::id_0::id_3== ::id_0::id_12 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
 {
- ::id_10+= ::id_11;
- ::id_13=(0);
- ::id_0::id_12=((!( ::id_13<(3))) ?  ::id_0::id_4 :  ::id_0::id_2);
+ ::gvar+= ::i;
+ ::j=(0);
+ ::TopLevel::state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT_1);
 }
 }
-if( id_9 )
+if( enabled )
 {
-if(  ::id_0::id_2== ::id_0::id_12 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT_1== ::TopLevel::state )
 {
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_12= ::id_0::id_7;
-id_9=(false);
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD_1;
+enabled=(false);
 }
 }
-if( id_9 )
+if( enabled )
 {
-if(  ::id_0::id_7== ::id_0::id_12 )
+if(  ::TopLevel::T_STATE_YIELD_1== ::TopLevel::state )
 {
- ::id_10++;
- ::id_13++;
- ::id_0::id_12=(( ::id_13<(3)) ?  ::id_0::id_2 :  ::id_0::id_4);
+ ::gvar++;
+ ::j++;
+ ::TopLevel::state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT_1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
 }
-if( id_9 )
+if( enabled )
 {
-if(  ::id_0::id_4== ::id_0::id_12 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
 {
- ::id_10*=(2);
+ ::gvar*=(2);
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_12= ::id_0::id_6;
-id_9=(false);
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+enabled=(false);
 }
 }
-if( id_9 )
+if( enabled )
 {
-if(  ::id_0::id_6== ::id_0::id_12 )
+if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
 {
- ::id_11++;
- ::id_0::id_12=(( ::id_11<(4)) ?  ::id_0::id_3 :  ::id_0::id_5);
+ ::i++;
+ ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1);
 }
 }
-if( id_9 )
+if( enabled )
 {
-if(  ::id_0::id_5== ::id_0::id_12 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1== ::TopLevel::state )
 {
-cease(  ::id_10 );
-id_9=(false);
+cease(  ::gvar );
+enabled=(false);
 }
 }
-if( id_9 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }

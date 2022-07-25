@@ -19,7 +19,7 @@ MINISRCASES = small pointeris ${MINICASES}
 # results directory. This will change the make target - i.e. make will 
 # regard each different combination of arguments separately when deciding 
 # what to update. However, we don't variant the reference path, i.e. there
-# is one ref for each combination of amke args. 
+# is one ref for each combination of make args. 
 I_NO_SPACES=$(shell echo ${I} | tr -d '[:space:]')
 RESULTS_PATH=test/results${I_NO_SPACES}
 REFERENCE_PATH=test/reference

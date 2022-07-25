@@ -1,127 +1,127 @@
 #include "isystemc.h"
 
-class id_0;
-class id_11;
-class id_20;
-class id_0 : public sc_module
+class Adder;
+class Multiplier;
+class TopLevel;
+class Adder : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( Adder )
 {
-SC_THREAD(id_5);
+SC_THREAD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 0,
-id_3 = 1,
+T_STATE_YIELD = 0,
+T_STATE_YIELD_1 = 1,
 };
-sc_event id_4;
-void id_5();
+sc_event proceed;
+void T();
 };
-class id_11 : public sc_module
+class Multiplier : public sc_module
 {
 public:
-SC_CTOR( id_11 )
+SC_CTOR( Multiplier )
 {
-SC_THREAD(id_17);
+SC_THREAD(T_1);
 }
-enum id_12
+enum TStates_1
 {
-id_13 = 0,
-id_14 = 1,
-id_15 = 2,
+T_STATE_YIELD_2 = 0,
+T_STATE_YIELD_3 = 1,
+T_STATE_YIELD_4 = 2,
 };
-sc_event id_10;
-sc_event id_16;
-void id_17();
+sc_event instigate;
+sc_event proceed_1;
+void T_1();
 };
-class id_20 : public sc_module
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_20 ) :
-id_19("id_19"),
-id_9("id_9")
+SC_CTOR( TopLevel ) :
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
-SC_THREAD(id_22);
+SC_THREAD(T_2);
 }
-enum id_21
+enum TStates_2
 {
 };
-void id_22();
- ::id_0 id_19;
- ::id_11 id_9;
+void T_2();
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
 };
-id_20 id_8("id_8");
-int id_7;
+TopLevel top_level("top_level");
+int gvar;
 
-void id_0::id_5()
+void Adder::T()
 {
-auto unsigned int id_6;
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0) )
 {
-wait(  ::id_0::id_4 );
-id_6= ::id_0::id_2;
+wait(  ::Adder::proceed );
+state= ::Adder::T_STATE_YIELD;
 continue;
 }
-if(  ::id_0::id_2==id_6 )
+if(  ::Adder::T_STATE_YIELD==state )
 {
- ::id_7+=(2);
-(( ::id_8. ::id_20::id_9). ::id_11::id_10).notify(SC_ZERO_TIME);
-wait(  ::id_0::id_4 );
-id_6= ::id_0::id_3;
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
+wait(  ::Adder::proceed );
+state= ::Adder::T_STATE_YIELD_1;
 continue;
 }
-if(  ::id_0::id_3==id_6 )
+if(  ::Adder::T_STATE_YIELD_1==state )
 {
- ::id_7+=(3);
-(( ::id_8. ::id_20::id_9). ::id_11::id_10).notify(SC_ZERO_TIME);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
 return ;
 }
 }
 while( true );
 }
 
-void id_11::id_17()
+void Multiplier::T_1()
 {
-auto unsigned int id_18;
+auto unsigned int state_1;
 do
 {
 if( (sc_delta_count())==(0) )
 {
-wait(  ::id_11::id_16 );
-id_18= ::id_11::id_13;
+wait(  ::Multiplier::instigate );
+state_1= ::Multiplier::T_STATE_YIELD_4;
 continue;
 }
-if(  ::id_11::id_13==id_18 )
+if(  ::Multiplier::T_STATE_YIELD_4==state_1 )
 {
- ::id_7*=(5);
-(( ::id_8. ::id_20::id_19). ::id_0::id_4).notify(SC_ZERO_TIME);
-wait(  ::id_11::id_10 );
-id_18= ::id_11::id_14;
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed_1 );
+state_1= ::Multiplier::T_STATE_YIELD_3;
 continue;
 }
-if(  ::id_11::id_14==id_18 )
+if(  ::Multiplier::T_STATE_YIELD_3==state_1 )
 {
- ::id_7*=(5);
-(( ::id_8. ::id_20::id_19). ::id_0::id_4).notify(SC_ZERO_TIME);
-wait(  ::id_11::id_10 );
-id_18= ::id_11::id_15;
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed_1 );
+state_1= ::Multiplier::T_STATE_YIELD_2;
 continue;
 }
-if(  ::id_11::id_15==id_18 )
+if(  ::Multiplier::T_STATE_YIELD_2==state_1 )
 {
-cease(  ::id_7 );
+cease(  ::gvar );
 return ;
 }
 }
 while( true );
 }
 
-void id_20::id_22()
+void TopLevel::T_2()
 {
- ::id_7=(1);
-( ::id_20::id_9. ::id_11::id_16).notify(SC_ZERO_TIME);
+ ::gvar=(1);
+( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);
 return ;
 }

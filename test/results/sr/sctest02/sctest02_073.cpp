@@ -1,143 +1,143 @@
 #include "isystemc.h"
 
-class id_0;
-class id_18;
-class id_37;
-class id_0 : public sc_module
+class Adder;
+class Multiplier;
+class TopLevel;
+class Adder : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( Adder )
 {
-SC_THREAD(id_6);
+SC_THREAD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 1,
-id_3 = 3,
-id_4 = 0,
-id_5 = 2,
+T_STATE_PROCEED_NEXT = 0,
+T_STATE_PROCEED_NEXT_1 = 2,
+T_STATE_PROCEED_THEN_ELSE = 1,
+T_STATE_PROCEED_THEN_ELSE_1 = 3,
 };
-void id_6();
-bool id_13;
+void T();
+bool proceed;
 };
-class id_18 : public sc_module
+class Multiplier : public sc_module
 {
 public:
-SC_CTOR( id_18 )
+SC_CTOR( Multiplier )
 {
-SC_THREAD(id_26);
+SC_THREAD(T_1);
 }
-enum id_19
+enum TStates_1
 {
-id_20 = 0,
-id_21 = 1,
-id_22 = 2,
-id_23 = 3,
-id_24 = 4,
-id_25 = 5,
+T_STATE_PROCEED_NEXT_2 = 1,
+T_STATE_PROCEED_NEXT_3 = 2,
+T_STATE_PROCEED_NEXT_4 = 4,
+T_STATE_PROCEED_THEN_ELSE_2 = 0,
+T_STATE_PROCEED_THEN_ELSE_3 = 3,
+T_STATE_PROCEED_THEN_ELSE_4 = 5,
 };
-void id_26();
-bool id_17;
-bool id_35;
+void T_1();
+bool instigate;
+bool proceed_1;
 };
-class id_37 : public sc_module
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_37 ) :
-id_36("id_36"),
-id_16("id_16")
+SC_CTOR( TopLevel ) :
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
-SC_THREAD(id_39);
+SC_THREAD(T_2);
 }
-enum id_38
+enum TStates_2
 {
 };
-void id_39();
- ::id_0 id_36;
- ::id_18 id_16;
+void T_2();
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
 };
-id_37 id_15("id_15");
-int id_14;
+TopLevel top_level("top_level");
+int gvar;
 
-void id_0::id_6()
+void Adder::T()
 {
-static const unsigned int (id_7[]) = { &&id_8, &&id_9, &&id_10, &&id_11 };
-auto unsigned int id_12;
+static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED_THEN_ELSE, &&PROCEED_NEXT_1, &&PROCEED_THEN_ELSE_1 };
+auto unsigned int state;
 wait(SC_ZERO_TIME);
-id_12=((!(! ::id_0::id_13)) ?  ::id_0::id_5 :  ::id_0::id_3);
-id_11:;
-if(  ::id_0::id_3==id_12 )
+state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE_1 :  ::Adder::T_STATE_PROCEED_NEXT);
+PROCEED_NEXT:;
+if(  ::Adder::T_STATE_PROCEED_NEXT==state )
 {
 wait(SC_ZERO_TIME);
-id_12=((! ::id_0::id_13) ?  ::id_0::id_3 :  ::id_0::id_5);
-goto *(id_7[id_12]);
+state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT :  ::Adder::T_STATE_PROCEED_THEN_ELSE_1);
+goto *(lmap[state]);
 }
-id_10:;
-if(  ::id_0::id_5==id_12 )
+PROCEED_THEN_ELSE_1:;
+if(  ::Adder::T_STATE_PROCEED_THEN_ELSE_1==state )
 {
- ::id_0::id_13=(false);
- ::id_14+=(2);
-(( ::id_15. ::id_37::id_16). ::id_18::id_17)=(true);
-id_12=((!(! ::id_0::id_13)) ?  ::id_0::id_4 :  ::id_0::id_2);
+ ::Adder::proceed=(false);
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1)=(true);
+state=((!(! ::Adder::proceed)) ?  ::Adder::T_STATE_PROCEED_THEN_ELSE :  ::Adder::T_STATE_PROCEED_NEXT_1);
 }
-goto *(id_7[id_12]);
-id_9:;
+goto *(lmap[state]);
+PROCEED_NEXT_1:;
 wait(SC_ZERO_TIME);
-id_12=((! ::id_0::id_13) ?  ::id_0::id_2 :  ::id_0::id_4);
-goto *(id_7[id_12]);
-id_8:;
- ::id_0::id_13=(false);
- ::id_14+=(3);
-(( ::id_15. ::id_37::id_16). ::id_18::id_17)=(true);
+state=((! ::Adder::proceed) ?  ::Adder::T_STATE_PROCEED_NEXT_1 :  ::Adder::T_STATE_PROCEED_THEN_ELSE);
+goto *(lmap[state]);
+PROCEED_THEN_ELSE:;
+ ::Adder::proceed=(false);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1)=(true);
 return ;
 }
 
-void id_18::id_26()
+void Multiplier::T_1()
 {
-static const unsigned int (id_27[]) = { &&id_28, &&id_29, &&id_30, &&id_31, &&id_32, &&id_33 };
-auto unsigned int id_34;
+static const unsigned int (lmap_1[]) = { &&PROCEED_THEN_ELSE_2, &&PROCEED_NEXT_2, &&PROCEED_NEXT_3, &&PROCEED_THEN_ELSE_3, &&PROCEED_NEXT_4, &&PROCEED_THEN_ELSE_4 };
+auto unsigned int state_1;
 wait(SC_ZERO_TIME);
-id_34=((!(! ::id_18::id_35)) ?  ::id_18::id_23 :  ::id_18::id_21);
-id_29:;
-if(  ::id_18::id_21==id_34 )
+state_1=((!(! ::Multiplier::instigate)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_2 :  ::Multiplier::T_STATE_PROCEED_NEXT_2);
+PROCEED_NEXT_2:;
+if(  ::Multiplier::T_STATE_PROCEED_NEXT_2==state_1 )
 {
 wait(SC_ZERO_TIME);
-id_34=((! ::id_18::id_35) ?  ::id_18::id_21 :  ::id_18::id_23);
-goto *(id_27[id_34]);
+state_1=((! ::Multiplier::instigate) ?  ::Multiplier::T_STATE_PROCEED_NEXT_2 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_2);
+goto *(lmap_1[state_1]);
 }
-id_31:;
-if(  ::id_18::id_23==id_34 )
+PROCEED_THEN_ELSE_2:;
+if(  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_2==state_1 )
 {
- ::id_18::id_35=(false);
- ::id_14*=(5);
-(( ::id_15. ::id_37::id_36). ::id_0::id_13)=(true);
-id_34=((!(! ::id_18::id_17)) ?  ::id_18::id_25 :  ::id_18::id_22);
+ ::Multiplier::instigate=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+state_1=((!(! ::Multiplier::proceed_1)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_4 :  ::Multiplier::T_STATE_PROCEED_NEXT_4);
 }
-goto *(id_27[id_34]);
-id_30:;
+goto *(lmap_1[state_1]);
+PROCEED_NEXT_4:;
 wait(SC_ZERO_TIME);
-id_34=((! ::id_18::id_17) ?  ::id_18::id_22 :  ::id_18::id_25);
-goto *(id_27[id_34]);
-id_33:;
- ::id_18::id_17=(false);
- ::id_14*=(5);
-(( ::id_15. ::id_37::id_36). ::id_0::id_13)=(true);
-id_34=((!(! ::id_18::id_17)) ?  ::id_18::id_24 :  ::id_18::id_20);
-goto *(id_27[id_34]);
-id_28:;
+state_1=((! ::Multiplier::proceed_1) ?  ::Multiplier::T_STATE_PROCEED_NEXT_4 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_4);
+goto *(lmap_1[state_1]);
+PROCEED_THEN_ELSE_4:;
+ ::Multiplier::proceed_1=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
+state_1=((!(! ::Multiplier::proceed_1)) ?  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_3 :  ::Multiplier::T_STATE_PROCEED_NEXT_3);
+goto *(lmap_1[state_1]);
+PROCEED_NEXT_3:;
 wait(SC_ZERO_TIME);
-id_34=((! ::id_18::id_17) ?  ::id_18::id_20 :  ::id_18::id_24);
-goto *(id_27[id_34]);
-id_32:;
- ::id_18::id_17=(false);
-cease(  ::id_14 );
+state_1=((! ::Multiplier::proceed_1) ?  ::Multiplier::T_STATE_PROCEED_NEXT_3 :  ::Multiplier::T_STATE_PROCEED_THEN_ELSE_3);
+goto *(lmap_1[state_1]);
+PROCEED_THEN_ELSE_3:;
+ ::Multiplier::proceed_1=(false);
+cease(  ::gvar );
 return ;
 }
 
-void id_37::id_39()
+void TopLevel::T_2()
 {
-static const unsigned int (id_40[]) = {  };
- ::id_14=(1);
-( ::id_37::id_16. ::id_18::id_35)=(true);
+static const unsigned int (lmap_2[]) = {  };
+ ::gvar=(1);
+( ::TopLevel::mul_inst. ::Multiplier::instigate)=(true);
 return ;
 }

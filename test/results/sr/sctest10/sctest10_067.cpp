@@ -1,125 +1,125 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-char id_36;
-short id_35;
+char k;
+short j;
+int i;
+int t;
 public:
-int id_25;
+int x;
 private:
-int id_38;
-int id_39;
-void *id_37;
+void *link;
 public:
-/*temp*/ char id_29;
-/*temp*/ short id_30;
-/*temp*/ int id_26;
-/*temp*/ int id_32;
-/*temp*/ void *id_27;
-/*temp*/ void *id_40;
+/*temp*/ char f_k;
+/*temp*/ short f_j;
+/*temp*/ int f_i;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link_1;
 };
-id_0 id_41("id_41");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
-/*temp*/ void *id_2;
-auto void *id_3;
-/*temp*/ int id_10;
-/*temp*/ int id_11;
-/*temp*/ int id_12;
-/*temp*/ int id_13;
-/*temp*/ int id_14;
-/*temp*/ int id_15;
-/*temp*/ int id_16;
-/*temp*/ int id_17;
-/*temp*/ int id_18;
-/*temp*/ int id_19;
-/*temp*/ int id_20;
-/*temp*/ int id_21;
-/*temp*/ int id_22;
-/*temp*/ int id_23;
-/*temp*/ int id_24;
-/*temp*/ int id_4;
-/*temp*/ int id_5;
-/*temp*/ int id_6;
-/*temp*/ int id_7;
-/*temp*/ int id_8;
-/*temp*/ int id_9;
- ::id_0::id_25=(0);
-id_16=(0);
-id_22=(0);
-id_19=(0);
- ::id_0::id_26=id_16;
- ::id_0::id_27=(&&id_28);
- ::id_0::id_29=id_22;
- ::id_0::id_30=id_19;
+/*temp*/ void *temp_link;
+auto void *state;
+/*temp*/ int result;
+/*temp*/ int result_1;
+/*temp*/ int result_10;
+/*temp*/ int result_11;
+/*temp*/ int result_2;
+/*temp*/ int result_3;
+/*temp*/ int result_4;
+/*temp*/ int result_5;
+/*temp*/ int result_6;
+/*temp*/ int result_7;
+/*temp*/ int result_8;
+/*temp*/ int result_9;
+/*temp*/ int temp_i;
+/*temp*/ int temp_i_1;
+/*temp*/ int temp_i_2;
+/*temp*/ int temp_j;
+/*temp*/ int temp_j_1;
+/*temp*/ int temp_j_2;
+/*temp*/ int temp_k;
+/*temp*/ int temp_k_1;
+/*temp*/ int temp_k_2;
+ ::TopLevel::x=(0);
+temp_i=(0);
+temp_j=(0);
+temp_k=(0);
+ ::TopLevel::f_j=temp_j;
+ ::TopLevel::f_link=(&&LINK);
+ ::TopLevel::f_k=temp_k;
+ ::TopLevel::f_i=temp_i;
 wait(SC_ZERO_TIME);
 {
-id_3=(&&id_31);
-goto *(id_3);
+state=(&&ENTER_f);
+goto *(state);
 }
-id_28:;
-id_4= ::id_0::id_32;
-id_5=id_4;
-id_6=id_5;
-id_7=id_6;
-id_17=id_7;
-id_23=(8);
-id_20=(6);
- ::id_0::id_26=id_17;
- ::id_0::id_27=(&&id_33);
- ::id_0::id_29=id_23;
- ::id_0::id_30=id_20;
+LINK:;
+result= ::TopLevel::f_return;
+result_1=result;
+result_2=result_1;
+result_3=result_2;
+temp_i_1=result_3;
+temp_k_1=(8);
+temp_j_1=(6);
+ ::TopLevel::f_j=temp_j_1;
+ ::TopLevel::f_link=(&&LINK_1);
+ ::TopLevel::f_k=temp_k_1;
+ ::TopLevel::f_i=temp_i_1;
 {
-id_3=(&&id_31);
-goto *(id_3);
+state=(&&ENTER_f);
+goto *(state);
 }
-id_33:;
-id_8= ::id_0::id_32;
-id_9=id_8;
-id_10=id_9;
-id_11=id_10;
- ::id_0::id_25=id_11;
-id_18=(1);
-id_24=(3);
-id_21=(2);
- ::id_0::id_26=id_18;
- ::id_0::id_27=(&&id_34);
- ::id_0::id_29=id_24;
- ::id_0::id_30=id_21;
+LINK_1:;
+result_4= ::TopLevel::f_return;
+result_5=result_4;
+result_6=result_5;
+result_7=result_6;
+ ::TopLevel::x=result_7;
+temp_j_2=(2);
+temp_k_2=(3);
+temp_i_2=(1);
+ ::TopLevel::f_j=temp_j_2;
+ ::TopLevel::f_link=(&&LINK_2);
+ ::TopLevel::f_k=temp_k_2;
+ ::TopLevel::f_i=temp_i_2;
 {
-id_3=(&&id_31);
-goto *(id_3);
+state=(&&ENTER_f);
+goto *(state);
 }
-id_34:;
-id_12= ::id_0::id_32;
-id_13=id_12;
-id_14=id_13;
-id_15=id_14;
-cease(  ::id_0::id_25+((2)*id_15) );
+LINK_2:;
+result_8= ::TopLevel::f_return;
+result_9=result_8;
+result_10=result_9;
+result_11=result_10;
+cease(  ::TopLevel::x+((2)*result_11) );
 return ;
 {
-id_3=(&&id_31);
-goto *(id_3);
+state=(&&ENTER_f);
+goto *(state);
 }
-id_31:;
- ::id_0::id_35= ::id_0::id_30;
- ::id_0::id_36= ::id_0::id_29;
- ::id_0::id_37= ::id_0::id_27;
- ::id_0::id_38= ::id_0::id_26;
- ::id_0::id_39=( ::id_0::id_38+((3)* ::id_0::id_35));
- ::id_0::id_32=( ::id_0::id_39+((5)* ::id_0::id_36));
-id_2= ::id_0::id_37;
+ENTER_f:;
+ ::TopLevel::i= ::TopLevel::f_i;
+ ::TopLevel::k= ::TopLevel::f_k;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::j= ::TopLevel::f_j;
+ ::TopLevel::t=( ::TopLevel::i+((3)* ::TopLevel::j));
+ ::TopLevel::f_return=( ::TopLevel::t+((5)* ::TopLevel::k));
+temp_link= ::TopLevel::link;
 {
-id_3=id_2;
-goto *(id_3);
+state=temp_link;
+goto *(state);
 }
 }

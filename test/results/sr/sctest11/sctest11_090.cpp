@@ -1,152 +1,154 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_16);
+SC_THREAD(T);
 }
-enum id_1
+enum TStates
 {
-id_10 = 2,
-id_11 = 5,
-id_12 = 12,
-id_13 = 6,
-id_14 = 10,
-id_15 = 4,
-id_2 = 1,
-id_3 = 13,
-id_4 = 3,
-id_5 = 7,
-id_6 = 9,
-id_7 = 11,
-id_8 = 0,
-id_9 = 8,
+T_STATE_ELSE = 10,
+T_STATE_ENTER_f = 12,
+T_STATE_LINK = 0,
+T_STATE_LINK_1 = 4,
+T_STATE_LINK_2 = 9,
+T_STATE_LINK_3 = 11,
+T_STATE_PROCEED = 3,
+T_STATE_PROCEED_1 = 13,
+T_STATE_PROCEED_ELSE = 1,
+T_STATE_PROCEED_NEXT = 2,
+T_STATE_PROCEED_THEN_ELSE = 5,
+T_STATE_THEN = 6,
+T_STATE_THEN_1 = 7,
+T_STATE_THEN_ELSE = 8,
 };
-void id_16();
-int id_28;
-int id_33;
+void T();
 private:
-int id_35;
-unsigned int id_29;
-unsigned int id_34;
+int i;
 public:
-/*temp*/ int id_30;
-/*temp*/ int id_32;
-/*temp*/ unsigned int id_31;
+int x;
+int y;
+private:
+unsigned int link;
+unsigned int state;
+public:
+/*temp*/ int f_i;
+/*temp*/ int f_return;
+/*temp*/ unsigned int f_link;
 };
-id_0 id_36("id_36");
+TopLevel top_level("top_level");
 
-void id_0::id_16()
+void TopLevel::T()
 {
-/*temp*/ unsigned int id_17;
-/*temp*/ int id_18;
-/*temp*/ int id_19;
-/*temp*/ int id_20;
-/*temp*/ int id_21;
-/*temp*/ int id_22;
-/*temp*/ int id_23;
-/*temp*/ bool id_24;
-/*temp*/ bool id_25;
-/*temp*/ bool id_26;
-/*temp*/ bool id_27;
+/*temp*/ unsigned int temp_link;
+/*temp*/ int muxtemp;
+/*temp*/ int result;
+/*temp*/ int result_1;
+/*temp*/ int result_2;
+/*temp*/ int result_3;
+/*temp*/ int result_4;
+/*temp*/ bool andtemp;
+/*temp*/ bool ortemp;
+/*temp*/ bool result_5;
+/*temp*/ bool result_6;
 do
 {
 if( (sc_delta_count())==(0) )
 {
- ::id_0::id_28=(4);
-id_24=(++ ::id_0::id_28);
+ ::TopLevel::x=(4);
+andtemp=(++ ::TopLevel::x);
 wait(SC_ZERO_TIME);
- ::id_0::id_29=((!id_24) ?  ::id_0::id_15 :  ::id_0::id_8);
+ ::TopLevel::state=((!andtemp) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_1);
 continue;
 }
-if(  ::id_0::id_8== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_PROCEED_1== ::TopLevel::state )
 {
- ::id_0::id_30= ::id_0::id_28;
- ::id_0::id_31= ::id_0::id_4;
- ::id_0::id_29= ::id_0::id_3;
+ ::TopLevel::f_i= ::TopLevel::x;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK_3;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_4== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_LINK_3== ::TopLevel::state )
 {
-id_19= ::id_0::id_32;
-id_24=( ::id_0::id_33=id_19);
- ::id_0::id_29= ::id_0::id_15;
+result= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result);
+ ::TopLevel::state= ::TopLevel::T_STATE_THEN_ELSE;
 }
-if(  ::id_0::id_15== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_THEN_ELSE== ::TopLevel::state )
 {
-id_26=id_24;
-id_26;
-id_25=(!(++ ::id_0::id_28));
- ::id_0::id_29=((!id_25) ?  ::id_0::id_13 :  ::id_0::id_10);
+result_5=andtemp;
+result_5;
+ortemp=(!(++ ::TopLevel::x));
+ ::TopLevel::state=((!ortemp) ?  ::TopLevel::T_STATE_THEN :  ::TopLevel::T_STATE_PROCEED_ELSE);
 }
-if(  ::id_0::id_13== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_THEN== ::TopLevel::state )
 {
- ::id_0::id_30= ::id_0::id_28;
- ::id_0::id_31= ::id_0::id_5;
- ::id_0::id_29= ::id_0::id_3;
+ ::TopLevel::f_i= ::TopLevel::x;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_5== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_LINK== ::TopLevel::state )
 {
-id_20= ::id_0::id_32;
-id_25=( ::id_0::id_33+=id_20);
- ::id_0::id_29= ::id_0::id_10;
+result_1= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result_1);
+ ::TopLevel::state= ::TopLevel::T_STATE_PROCEED_ELSE;
 }
-if(  ::id_0::id_10== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_PROCEED_ELSE== ::TopLevel::state )
 {
-id_27=id_25;
-id_27;
- ::id_0::id_28=(0);
- ::id_0::id_29=((!( ::id_0::id_28<(2))) ?  ::id_0::id_12 :  ::id_0::id_11);
+result_6=ortemp;
+result_6;
+ ::TopLevel::x=(0);
+ ::TopLevel::state=((!( ::TopLevel::x<(2))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
-if(  ::id_0::id_11== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
 {
- ::id_0::id_29=((!( ::id_0::id_28++)) ?  ::id_0::id_14 :  ::id_0::id_9);
+ ::TopLevel::state=((!( ::TopLevel::x++)) ?  ::TopLevel::T_STATE_THEN_1 :  ::TopLevel::T_STATE_PROCEED);
 }
-if(  ::id_0::id_9== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_PROCEED== ::TopLevel::state )
 {
- ::id_0::id_30= ::id_0::id_28;
- ::id_0::id_31= ::id_0::id_6;
- ::id_0::id_29= ::id_0::id_3;
+ ::TopLevel::f_i= ::TopLevel::x;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK_1;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_6== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_LINK_1== ::TopLevel::state )
 {
-id_21= ::id_0::id_32;
-id_18=( ::id_0::id_33+=id_21);
- ::id_0::id_29= ::id_0::id_2;
+result_2= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y+=result_2);
+ ::TopLevel::state= ::TopLevel::T_STATE_ELSE;
 }
-if(  ::id_0::id_14== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_THEN_1== ::TopLevel::state )
 {
- ::id_0::id_30= ::id_0::id_28;
- ::id_0::id_31= ::id_0::id_7;
- ::id_0::id_29= ::id_0::id_3;
+ ::TopLevel::f_i= ::TopLevel::x;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK_2;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_7== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_LINK_2== ::TopLevel::state )
 {
-id_22= ::id_0::id_32;
-id_18=( ::id_0::id_33-=id_22);
- ::id_0::id_29= ::id_0::id_2;
+result_3= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result_3);
+ ::TopLevel::state= ::TopLevel::T_STATE_ELSE;
 }
-if(  ::id_0::id_2== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_ELSE== ::TopLevel::state )
 {
-id_23=id_18;
-id_23;
- ::id_0::id_29=(( ::id_0::id_28<(2)) ?  ::id_0::id_11 :  ::id_0::id_12);
+result_4=muxtemp;
+result_4;
+ ::TopLevel::state=(( ::TopLevel::x<(2)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if(  ::id_0::id_12== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state )
 {
-cease(  ::id_0::id_33 );
+cease(  ::TopLevel::y );
 return ;
- ::id_0::id_29= ::id_0::id_3;
+ ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 }
-if(  ::id_0::id_3== ::id_0::id_29 )
+if(  ::TopLevel::T_STATE_ENTER_f== ::TopLevel::state )
 {
- ::id_0::id_34= ::id_0::id_31;
- ::id_0::id_35= ::id_0::id_30;
- ::id_0::id_32=((100)/ ::id_0::id_35);
-id_17= ::id_0::id_34;
- ::id_0::id_29=id_17;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
+ ::TopLevel::f_return=((100)/ ::TopLevel::i);
+temp_link= ::TopLevel::link;
+ ::TopLevel::state=temp_link;
 }
 wait(SC_ZERO_TIME);
 }

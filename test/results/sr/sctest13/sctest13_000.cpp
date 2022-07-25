@@ -1,105 +1,105 @@
-class id_12;
-class id_0;
-class id_13;
-class id_16;
-class id_12
+class sc_event;
+class sc_interface;
+class sc_module;
+class TopLevel;
+class sc_event
+{
+void (notify)(auto void p1_1);
+};
+class sc_interface
 {
 };
-class id_0 : public id_12
+class sc_module
+{
+};
+class TopLevel : public sc_module
 {
 public:
-id_0(auto char (*id_1));
-int id_6;
-int id_7;
-float id_8;
-void (id_4)();
-int (id_9)();
+TopLevel(auto char (*name));
+int i;
+int x;
+float fi;
+void (T)();
+int (f)();
 };
-class id_13
-{
-void (id_15)(auto void id_14);
-};
-class id_16
-{
-};
-id_0 id_17;
-void id_18;
-void (id_11)(void id_10);
-void (id_20)(void id_19);
-void (id_22)(void id_21);
-void (id_24)(void id_23);
-void (id_26)(void id_25);
-void (id_5)(void id_3);
-void (id_29)(void id_27, void id_28);
+TopLevel top_level;
+void SC_ZERO_TIME;
+void (cease)(void p1);
+void (exit)(void p1_2);
+void (next_trigger)(void p1_3);
+void (wait)(void p1_4);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+void (sc_event::notify)(void p1_1);
+
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::TopLevel::T);
 }
 
-void (id_0::id_4)()
+void (TopLevel::T)()
 {
- ::id_0::id_7=(0);
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6++ )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<=(4);  ::id_0::id_6++ )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0); (4)!= ::id_0::id_6;  ::id_0::id_6++ )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(4);  ::id_0::id_6>(0);  ::id_0::id_6-- )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(4);  ::id_0::id_6>=(0);  ::id_0::id_6-- )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6++ )
+ ::TopLevel::x=(0);
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>=(0);  ::TopLevel::i-- )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 break;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6++ )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 switch( 0 )
 {
 case 0:;
 break;
 }
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6++ )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 continue;
-for( ;  ::id_0::id_6<(4);  ::id_0::id_6++ )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0);  ::id_0::id_6< ::id_0::id_7;  ::id_0::id_6++ )
+for( ;  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i< ::TopLevel::x;  ::TopLevel::i++ )
 {
 }
 ;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6=((1)+ ::id_0::id_6) )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6+=(1) )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(4);  ::id_0::id_6>(0);  ::id_0::id_6=( ::id_0::id_6-(1)) )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(4);  ::id_0::id_6>(0);  ::id_0::id_6-=(1) )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6=(4) )
- ::id_0::id_7+= ::id_0::id_6;
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6++ )
- ::id_0::id_6+=(0);
-for(  ::id_0::id_6=(0);  ::id_0::id_6<(4);  ::id_0::id_6++ )
- ::id_0::id_7+=( ::id_0::id_9());
- ::id_11( ::id_0::id_7);
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=((1)+ ::TopLevel::i) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i+=(1) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i=( ::TopLevel::i-(1)) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-=(1) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=(4) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::i+=(0);
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::x+=( ::TopLevel::f());
+ ::cease( ::TopLevel::x);
 }
 
-int (id_0::id_9)()
+int (TopLevel::f)()
 {
 return 3;
 }
 
-void (id_13::id_15)(void id_14);
+void (cease)(void p1);
 
-void (id_11)(void id_10);
+void (exit)(void p1_2);
 
-void (id_20)(void id_19);
+void (next_trigger)(void p1_3);
 
-void (id_22)(void id_21);
+void (wait)(void p1_4);
 
-void (id_24)(void id_23);
+void (SC_METHOD)(void func_1);
 
-void (id_26)(void id_25);
+void (SC_THREAD)(void func);
 
-void (id_5)(void id_3);
-
-void (id_29)(void id_27, void id_28);
+void (SC_CTHREAD)(void clock, void func_2);

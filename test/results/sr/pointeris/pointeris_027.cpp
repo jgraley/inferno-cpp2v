@@ -1,14 +1,14 @@
-int id_0 = (44)+((99)*({ do
+int a = (44)+((99)*({ do
 {
 }
 while( 0 ); 233; }));
-void (id_1)();
-int id_2;
+void (main)();
+int main_return;
 
-void (id_1)()
+void (main)()
 {
 {
- ::id_2=( ::id_0+((4)+((9)*({ do
+ ::main_return=( ::a+((4)+((9)*({ do
 {
 }
 while( 0 ); 23; }))));

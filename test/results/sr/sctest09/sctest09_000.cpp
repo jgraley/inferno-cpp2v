@@ -1,69 +1,69 @@
-class id_11;
-class id_0;
-class id_12;
-class id_15;
-class id_11
+class sc_event;
+class sc_interface;
+class sc_module;
+class TopLevel;
+class sc_event
+{
+void (notify)(auto void p1_1);
+};
+class sc_interface
 {
 };
-class id_0 : public id_11
+class sc_module
+{
+};
+class TopLevel : public sc_module
 {
 public:
-id_0(auto char (*id_1));
-int id_6;
-void (id_4)();
-void (id_8)(auto int id_7);
+TopLevel(auto char (*name));
+int x;
+void (T)();
+void (recurser)(auto int i);
 };
-class id_12
-{
-void (id_14)(auto void id_13);
-};
-class id_15
-{
-};
-id_0 id_16;
-void id_17;
-void (id_10)(void id_9);
-void (id_19)(void id_18);
-void (id_21)(void id_20);
-void (id_23)(void id_22);
-void (id_25)(void id_24);
-void (id_5)(void id_3);
-void (id_28)(void id_26, void id_27);
+TopLevel top_level;
+void SC_ZERO_TIME;
+void (cease)(void p1);
+void (exit)(void p1_2);
+void (next_trigger)(void p1_3);
+void (wait)(void p1_4);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+void (sc_event::notify)(void p1_1);
+
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::TopLevel::T);
 }
 
-void (id_0::id_4)()
+void (TopLevel::T)()
 {
- ::id_0::id_6=(0);
- ::id_0::id_8(1);
- ::id_10( ::id_0::id_6);
+ ::TopLevel::x=(0);
+ ::TopLevel::recurser(1);
+ ::cease( ::TopLevel::x);
 }
 
-void (id_0::id_8)(int id_7)
+void (TopLevel::recurser)(int i)
 {
- ::id_0::id_6++;
-if( id_7<(5) )
+ ::TopLevel::x++;
+if( i<(5) )
 {
- ::id_0::id_8((1)+id_7);
- ::id_0::id_8((1)+id_7);
+ ::TopLevel::recurser((1)+i);
+ ::TopLevel::recurser((1)+i);
 }
 }
 
-void (id_12::id_14)(void id_13);
+void (cease)(void p1);
 
-void (id_10)(void id_9);
+void (exit)(void p1_2);
 
-void (id_19)(void id_18);
+void (next_trigger)(void p1_3);
 
-void (id_21)(void id_20);
+void (wait)(void p1_4);
 
-void (id_23)(void id_22);
+void (SC_METHOD)(void func_1);
 
-void (id_25)(void id_24);
+void (SC_THREAD)(void func);
 
-void (id_5)(void id_3);
-
-void (id_28)(void id_26, void id_27);
+void (SC_CTHREAD)(void clock, void func_2);

@@ -1,81 +1,81 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 };
-id_0 id_19("id_19");
-int id_2;
-int id_3;
-int id_7;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_2=(1);
+ ::gvar=(1);
 {
- ::id_3=(0);
+ ::i=(0);
 {
-if( !( ::id_3<(4)) )
-goto id_4;
-goto id_5;
-id_5:;
+if( !( ::i<(4)) )
+goto THEN;
+goto PROCEED;
+PROCEED:;
 {
-id_6:;
+NEXT:;
 {
 {
- ::id_2+= ::id_3;
+ ::gvar+= ::i;
 {
- ::id_7=(0);
+ ::j=(0);
 {
-if( !( ::id_7<(3)) )
-goto id_8;
-goto id_9;
-id_9:;
+if( !( ::j<(3)) )
+goto THEN_1;
+goto PROCEED_1;
+PROCEED_1:;
 {
-id_10:;
+NEXT_1:;
 {
 {
 wait(SC_ZERO_TIME);
- ::id_2++;
+ ::gvar++;
 }
-id_11:;
- ::id_7++;
+CONTINUE:;
+ ::j++;
 }
-id_12:;
-if(  ::id_7<(3) )
-goto id_10;
-goto id_13;
-id_13:;
+CONTINUE_1:;
+if(  ::j<(3) )
+goto NEXT_1;
+goto PROCEED_2;
+PROCEED_2:;
 }
-goto id_14;
-id_8:;
+goto ELSE;
+THEN_1:;
 ;
-id_14:;
+ELSE:;
 }
 }
- ::id_2*=(2);
+ ::gvar*=(2);
 }
-id_15:;
- ::id_3++;
+CONTINUE_2:;
+ ::i++;
 }
-id_16:;
-if(  ::id_3<(4) )
-goto id_6;
-goto id_17;
-id_17:;
+CONTINUE_3:;
+if(  ::i<(4) )
+goto NEXT;
+goto PROCEED_3;
+PROCEED_3:;
 }
-goto id_18;
-id_4:;
+goto ELSE_1;
+THEN:;
 ;
-id_18:;
+ELSE_1:;
 }
 }
-cease(  ::id_2 );
+cease(  ::gvar );
 return ;
 }

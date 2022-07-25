@@ -1,135 +1,135 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_2;
+void T();
 private:
-int id_28;
+int i;
 public:
-int id_5;
+int x;
+int y;
 private:
-void *id_27;
+void *link;
 public:
-/*temp*/ int id_10;
-/*temp*/ int id_6;
-/*temp*/ void *id_29;
-/*temp*/ void *id_7;
+/*temp*/ int f_i;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link_1;
 };
-id_0 id_30("id_30");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(4);
-({ /*temp*/ bool id_3; id_3=(++ ::id_0::id_2); {
-if( !id_3 )
-goto id_4;
-id_3=( ::id_0::id_5=({ {
+ ::TopLevel::x=(4);
+({ /*temp*/ bool andtemp; andtemp=(++ ::TopLevel::x); {
+if( !andtemp )
+goto THEN;
+andtemp=( ::TopLevel::y=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_7=(&&id_8);
-goto id_9;
+ ::TopLevel::f_link=(&&LINK);
+goto ENTER_f;
 }
 }
-id_8:;
+LINK:;
 }
- ::id_0::id_10; }));
-goto id_11;
-id_4:;
+ ::TopLevel::f_return; }));
+goto ELSE;
+THEN:;
 ;
-id_11:;
+ELSE:;
 }
-id_3; });
-({ /*temp*/ bool id_12; id_12=(!(++ ::id_0::id_2)); {
-if( !id_12 )
-goto id_13;
+andtemp; });
+({ /*temp*/ bool ortemp; ortemp=(!(++ ::TopLevel::x)); {
+if( !ortemp )
+goto THEN_1;
 ;
-goto id_14;
-id_13:;
-id_12=( ::id_0::id_5+=({ {
+goto ELSE_1;
+THEN_1:;
+ortemp=( ::TopLevel::y+=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_7=(&&id_15);
-goto id_9;
+ ::TopLevel::f_link=(&&LINK_1);
+goto ENTER_f;
 }
 }
-id_15:;
+LINK_1:;
 }
- ::id_0::id_10; }));
-id_14:;
+ ::TopLevel::f_return; }));
+ELSE_1:;
 }
-id_12; });
+ortemp; });
 {
- ::id_0::id_2=(0);
+ ::TopLevel::x=(0);
 {
-if( !( ::id_0::id_2<(2)) )
-goto id_16;
+if( !( ::TopLevel::x<(2)) )
+goto THEN_2;
 {
-id_17:;
+NEXT:;
 {
-({ /*temp*/ int id_18; {
-if( !( ::id_0::id_2++) )
-goto id_19;
-id_18=( ::id_0::id_5+=({ {
+({ /*temp*/ int muxtemp; {
+if( !( ::TopLevel::x++) )
+goto THEN_3;
+muxtemp=( ::TopLevel::y+=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_7=(&&id_20);
-goto id_9;
+ ::TopLevel::f_link=(&&LINK_2);
+goto ENTER_f;
 }
 }
-id_20:;
+LINK_2:;
 }
- ::id_0::id_10; }));
-goto id_21;
-id_19:;
-id_18=( ::id_0::id_5-=({ {
+ ::TopLevel::f_return; }));
+goto ELSE_2;
+THEN_3:;
+muxtemp=( ::TopLevel::y-=({ {
 {
- ::id_0::id_6= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_7=(&&id_22);
-goto id_9;
+ ::TopLevel::f_link=(&&LINK_3);
+goto ENTER_f;
 }
 }
-id_22:;
+LINK_3:;
 }
- ::id_0::id_10; }));
-id_21:;
+ ::TopLevel::f_return; }));
+ELSE_2:;
 }
-id_18; });
-id_23:;
+muxtemp; });
+CONTINUE:;
 ;
 }
-id_24:;
-if(  ::id_0::id_2<(2) )
-goto id_17;
+CONTINUE_1:;
+if(  ::TopLevel::x<(2) )
+goto NEXT;
 }
-goto id_25;
-id_16:;
+goto ELSE_3;
+THEN_2:;
 ;
-id_25:;
+ELSE_3:;
 }
 }
-cease(  ::id_0::id_5 );
+cease(  ::TopLevel::y );
 return ;
-id_9:;
+ENTER_f:;
 {
-/*temp*/ void *id_26;
- ::id_0::id_27= ::id_0::id_7;
- ::id_0::id_28= ::id_0::id_6;
+/*temp*/ void *temp_link;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
 {
- ::id_0::id_10=((100)/ ::id_0::id_28);
+ ::TopLevel::f_return=((100)/ ::TopLevel::i);
 {
-id_26= ::id_0::id_27;
-goto *(id_26);
+temp_link= ::TopLevel::link;
+goto *(temp_link);
 }
 }
 }

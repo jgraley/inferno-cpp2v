@@ -1,16 +1,16 @@
-void (id_0)();
-int id_4;
-void *id_3;
-void *id_5;
+void (main)();
+int main_return;
+void *main_link;
+void *main_link_1;
 
-void (id_0)()
+void (main)()
 {
-/*temp*/ void *id_1;
-auto void *id_2 =  ::id_3;
+/*temp*/ void *temp_link;
+auto void *link =  ::main_link;
 {
- ::id_4=(9);
+ ::main_return=(9);
 {
-id_1=id_2;
+temp_link=link;
 return ;
 }
 }

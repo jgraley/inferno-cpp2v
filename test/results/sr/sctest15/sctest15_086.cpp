@@ -1,51 +1,51 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_4);
+SC_THREAD(U);
 }
-enum id_1
+enum UStates
 {
-id_2 = 1,
-id_3 = 0,
+U_STATE_ENTER_HelperU = 1,
+U_STATE_LINK = 0,
 };
-void id_4();
+void U();
 private:
-unsigned int id_10;
+unsigned int link;
 public:
-/*temp*/ unsigned int id_11;
-/*temp*/ unsigned int id_9;
+/*temp*/ unsigned int HelperU_link;
+/*temp*/ unsigned int HelperU_link_1;
 };
-id_0 id_12("id_12");
+TopLevel top_level("top_level");
 
-void id_0::id_4()
+void TopLevel::U()
 {
-/*temp*/ unsigned int id_5;
-static const unsigned int (id_6[]) = { &&id_7, &&id_7 };
-auto unsigned int id_8;
+/*temp*/ unsigned int temp_link;
+static const unsigned int (lmap[]) = { &&ENTER_HelperU_LINK, &&ENTER_HelperU_LINK };
+auto unsigned int state;
 do
 {
 if( (sc_delta_count())==(0) )
 {
- ::id_0::id_9= ::id_0::id_3;
+ ::TopLevel::HelperU_link= ::TopLevel::U_STATE_LINK;
 wait(SC_ZERO_TIME);
-id_8= ::id_0::id_2;
+state= ::TopLevel::U_STATE_ENTER_HelperU;
 continue;
 }
-if(  ::id_0::id_3==id_8 )
+if(  ::TopLevel::U_STATE_LINK==state )
 {
 return ;
-id_8= ::id_0::id_2;
+state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
-if(  ::id_0::id_2==id_8 )
+if(  ::TopLevel::U_STATE_ENTER_HelperU==state )
 {
- ::id_0::id_10= ::id_0::id_9;
-id_5= ::id_0::id_10;
-id_8=id_5;
+ ::TopLevel::link= ::TopLevel::HelperU_link;
+temp_link= ::TopLevel::link;
+state=temp_link;
 }
 }
 while( true );

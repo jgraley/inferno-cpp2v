@@ -1,64 +1,64 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 };
-id_0 id_12("id_12");
-int id_3;
-int id_4;
-int id_7;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_1()
+void TopLevel::T()
 {
-auto void *id_2;
- ::id_3=(1);
- ::id_4=(0);
+auto void *state;
+ ::gvar=(1);
+ ::i=(0);
 wait(SC_ZERO_TIME);
 {
-id_2=((!( ::id_4<(4))) ? (&&id_5) : (&&id_6));
-goto *(id_2);
+state=((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
+goto *(state);
 }
-id_6:;
- ::id_3+= ::id_4;
- ::id_7=(0);
+PROCEED_NEXT:;
+ ::gvar+= ::i;
+ ::j=(0);
 {
-id_2=((!( ::id_7<(3))) ? (&&id_8) : (&&id_9));
-goto *(id_2);
+state=((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE_1) : (&&PROCEED_NEXT_1));
+goto *(state);
 }
-id_9:;
+PROCEED_NEXT_1:;
 wait(SC_ZERO_TIME);
 {
-id_2=(&&id_10);
-goto *(id_2);
+state=(&&YIELD);
+goto *(state);
 }
-id_10:;
- ::id_3++;
- ::id_7++;
+YIELD:;
+ ::gvar++;
+ ::j++;
 {
-id_2=(( ::id_7<(3)) ? (&&id_9) : (&&id_8));
-goto *(id_2);
+state=(( ::j<(3)) ? (&&PROCEED_NEXT_1) : (&&PROCEED_THEN_ELSE_1));
+goto *(state);
 }
-id_8:;
- ::id_3*=(2);
+PROCEED_THEN_ELSE_1:;
+ ::gvar*=(2);
 wait(SC_ZERO_TIME);
 {
-id_2=(&&id_11);
-goto *(id_2);
+state=(&&YIELD_1);
+goto *(state);
 }
-id_11:;
- ::id_4++;
+YIELD_1:;
+ ::i++;
 {
-id_2=(( ::id_4<(4)) ? (&&id_6) : (&&id_5));
-goto *(id_2);
+state=(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE));
+goto *(state);
 }
-id_5:;
-cease(  ::id_3 );
+PROCEED_THEN_ELSE:;
+cease(  ::gvar );
 return ;
 }

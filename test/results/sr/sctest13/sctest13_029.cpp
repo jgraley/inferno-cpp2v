@@ -1,86 +1,86 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_2;
-int id_3;
-float id_8;
-void (id_6)();
-/*temp*/ int id_7;
-/*temp*/ void *id_11;
-/*temp*/ void *id_4;
+void T();
+int i;
+int x;
+float fi;
+void (f)();
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link_1;
 };
-id_0 id_12("id_12");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(0);
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3++ )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<=(4);  ::id_0::id_3++ )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0); (4)!= ::id_0::id_3;  ::id_0::id_3++ )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(4);  ::id_0::id_3>(0);  ::id_0::id_3-- )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(4);  ::id_0::id_3>=(0);  ::id_0::id_3-- )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3++ )
+ ::TopLevel::x=(0);
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>=(0);  ::TopLevel::i-- )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 break;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3++ )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 switch( 0 )
 {
 case 0:;
 break;
 }
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3++ )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 continue;
-for( ;  ::id_0::id_3<(4);  ::id_0::id_3++ )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0);  ::id_0::id_3< ::id_0::id_2;  ::id_0::id_3++ )
+for( ;  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i< ::TopLevel::x;  ::TopLevel::i++ )
 {
 }
 ;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3=((1)+ ::id_0::id_3) )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3+=(1) )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(4);  ::id_0::id_3>(0);  ::id_0::id_3=( ::id_0::id_3-(1)) )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(4);  ::id_0::id_3>(0);  ::id_0::id_3-=(1) )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3=(4) )
- ::id_0::id_2+= ::id_0::id_3;
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3++ )
- ::id_0::id_3+=(0);
-for(  ::id_0::id_3=(0);  ::id_0::id_3<(4);  ::id_0::id_3++ )
- ::id_0::id_2+=({ {
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=((1)+ ::TopLevel::i) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i+=(1) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i=( ::TopLevel::i-(1)) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-=(1) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=(4) )
+ ::TopLevel::x+= ::TopLevel::i;
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::i+=(0);
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
+ ::TopLevel::x+=({ {
 {
- ::id_0::id_4=(&&id_5);
- ::id_0::id_6();
+ ::TopLevel::f_link=(&&LINK);
+ ::TopLevel::f();
 }
-id_5:;
+LINK:;
 }
- ::id_0::id_7; });
-cease(  ::id_0::id_2 );
+ ::TopLevel::f_return; });
+cease(  ::TopLevel::x );
 return ;
 }
 
-void (id_0::id_6)()
+void (TopLevel::f)()
 {
-/*temp*/ void *id_9;
-auto void *id_10 =  ::id_0::id_4;
+/*temp*/ void *temp_link;
+auto void *link =  ::TopLevel::f_link;
 {
- ::id_0::id_7=(3);
+ ::TopLevel::f_return=(3);
 {
-id_9=id_10;
+temp_link=link;
 return ;
 }
 }

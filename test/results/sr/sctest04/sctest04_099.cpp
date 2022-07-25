@@ -1,58 +1,58 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_METHOD(id_5);
+SC_METHOD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 0,
-id_3 = 1,
-id_4 = 2,
+T_STATE_PROCEED_NEXT = 1,
+T_STATE_PROCEED_THEN_ELSE = 2,
+T_STATE_YIELD = 0,
 };
-void id_5();
+void T();
 private:
-int id_8;
-unsigned int id_10;
+int t;
+unsigned int state;
 };
-id_0 id_11("id_11");
-int id_7;
-int id_9;
+TopLevel top_level("top_level");
+int gvar;
+int i;
 
-void id_0::id_5()
+void TopLevel::T()
 {
-/*temp*/ bool id_6 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0) )
 {
- ::id_7=(1);
- ::id_0::id_8=(5);
- ::id_9=(0);
+ ::gvar=(1);
+ ::TopLevel::t=(5);
+ ::i=(0);
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_10=((!( ::id_9< ::id_0::id_8)) ?  ::id_0::id_3 :  ::id_0::id_2);
-id_6=(false);
+ ::TopLevel::state=((!( ::i< ::TopLevel::t)) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+enabled=(false);
 }
-if( id_6&&( ::id_0::id_2== ::id_0::id_10) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state) )
 {
- ::id_7+= ::id_9;
+ ::gvar+= ::i;
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_10= ::id_0::id_4;
-id_6=(false);
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+enabled=(false);
 }
-if( id_6&&( ::id_0::id_4== ::id_0::id_10) )
+if( enabled&&( ::TopLevel::T_STATE_YIELD== ::TopLevel::state) )
 {
- ::id_7*=(2);
- ::id_9++;
- ::id_0::id_10=(( ::id_9< ::id_0::id_8) ?  ::id_0::id_2 :  ::id_0::id_3);
+ ::gvar*=(2);
+ ::i++;
+ ::TopLevel::state=(( ::i< ::TopLevel::t) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( id_6&&( ::id_0::id_3== ::id_0::id_10) )
+if( enabled&&( ::TopLevel::T_STATE_PROCEED_THEN_ELSE== ::TopLevel::state) )
 {
-cease(  ::id_7 );
-id_6=(false);
+cease(  ::gvar );
+enabled=(false);
 }
-if( id_6 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }

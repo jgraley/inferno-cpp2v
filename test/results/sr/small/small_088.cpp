@@ -1,16 +1,16 @@
-void *(id_0[10]);
-unsigned int id_1 = 0;
-void (id_2)();
-int id_5;
-void *id_4;
+void *(link_stack[10]);
+unsigned int main_stack_index = 0;
+void (main)();
+int main_return;
+void *main_link;
 
-void (id_2)()
+void (main)()
 {
-/*temp*/ void *id_3;
- ::id_1++;
-( ::id_0[ ::id_1])= ::id_4;
- ::id_5=(9);
-id_3=( ::id_0[ ::id_1]);
- ::id_1--;
+/*temp*/ void *temp_link;
+ ::main_stack_index++;
+( ::link_stack[ ::main_stack_index])= ::main_link;
+ ::main_return=(9);
+temp_link=( ::link_stack[ ::main_stack_index]);
+ ::main_stack_index--;
 return ;
 }

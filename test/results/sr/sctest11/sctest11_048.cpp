@@ -1,166 +1,168 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_13;
-int id_2;
+void T();
 private:
-int id_40;
-void *id_39;
+int i;
 public:
-/*temp*/ int id_12;
-/*temp*/ int id_8;
-/*temp*/ void *id_41;
-/*temp*/ void *id_9;
+int x;
+int y;
+private:
+void *link;
+public:
+/*temp*/ int f_i;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link_1;
 };
-id_0 id_42("id_42");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(4);
+ ::TopLevel::x=(4);
 {
-/*temp*/ bool id_3;
-/*temp*/ bool id_4;
-id_3=(++ ::id_0::id_2);
+/*temp*/ bool andtemp;
+/*temp*/ bool result;
+andtemp=(++ ::TopLevel::x);
 {
-goto *((!id_3) ? (&&id_5) : (&&id_6));
-id_6:;
+goto *((!andtemp) ? (&&THEN) : (&&PROCEED));
+PROCEED:;
 {
-/*temp*/ int id_7;
+/*temp*/ int result_1;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_9=(&&id_10);
-goto id_11;
+ ::TopLevel::f_link=(&&LINK);
+goto ENTER_f;
 }
 }
-id_10:;
+LINK:;
 }
-id_7= ::id_0::id_12;
-id_3=( ::id_0::id_13=id_7);
+result_1= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result_1);
 }
-goto id_14;
-id_5:;
+goto ELSE;
+THEN:;
 ;
-id_14:;
+ELSE:;
 }
-id_4=id_3;
-id_4;
+result=andtemp;
+result;
 }
 {
-/*temp*/ bool id_15;
-/*temp*/ bool id_16;
-id_15=(!(++ ::id_0::id_2));
+/*temp*/ bool ortemp;
+/*temp*/ bool result_2;
+ortemp=(!(++ ::TopLevel::x));
 {
-goto *((!id_15) ? (&&id_17) : (&&id_18));
-id_18:;
+goto *((!ortemp) ? (&&THEN_1) : (&&PROCEED_1));
+PROCEED_1:;
 ;
-goto id_19;
-id_17:;
+goto ELSE_1;
+THEN_1:;
 {
-/*temp*/ int id_20;
+/*temp*/ int result_3;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_9=(&&id_21);
-goto id_11;
+ ::TopLevel::f_link=(&&LINK_1);
+goto ENTER_f;
 }
 }
-id_21:;
+LINK_1:;
 }
-id_20= ::id_0::id_12;
-id_15=( ::id_0::id_13+=id_20);
+result_3= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result_3);
 }
-id_19:;
+ELSE_1:;
 }
-id_16=id_15;
-id_16;
+result_2=ortemp;
+result_2;
 }
 {
- ::id_0::id_2=(0);
+ ::TopLevel::x=(0);
 {
-goto *((!( ::id_0::id_2<(2))) ? (&&id_22) : (&&id_23));
-id_23:;
+goto *((!( ::TopLevel::x<(2))) ? (&&THEN_2) : (&&PROCEED_2));
+PROCEED_2:;
 {
-id_24:;
-{
-{
-/*temp*/ int id_25;
-/*temp*/ int id_26;
-{
-goto *((!( ::id_0::id_2++)) ? (&&id_27) : (&&id_28));
-id_28:;
-{
-/*temp*/ int id_29;
+NEXT:;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+/*temp*/ int muxtemp;
+/*temp*/ int result_4;
 {
- ::id_0::id_9=(&&id_30);
-goto id_11;
+goto *((!( ::TopLevel::x++)) ? (&&THEN_3) : (&&PROCEED_3));
+PROCEED_3:;
+{
+/*temp*/ int result_5;
+{
+{
+ ::TopLevel::f_i= ::TopLevel::x;
+{
+ ::TopLevel::f_link=(&&LINK_2);
+goto ENTER_f;
 }
 }
-id_30:;
+LINK_2:;
 }
-id_29= ::id_0::id_12;
-id_25=( ::id_0::id_13+=id_29);
+result_5= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y+=result_5);
 }
-goto id_31;
-id_27:;
+goto ELSE_2;
+THEN_3:;
 {
-/*temp*/ int id_32;
+/*temp*/ int result_6;
 {
 {
- ::id_0::id_8= ::id_0::id_2;
+ ::TopLevel::f_i= ::TopLevel::x;
 {
- ::id_0::id_9=(&&id_33);
-goto id_11;
+ ::TopLevel::f_link=(&&LINK_3);
+goto ENTER_f;
 }
 }
-id_33:;
+LINK_3:;
 }
-id_32= ::id_0::id_12;
-id_25=( ::id_0::id_13-=id_32);
+result_6= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result_6);
 }
-id_31:;
+ELSE_2:;
 }
-id_26=id_25;
-id_26;
+result_4=muxtemp;
+result_4;
 }
-id_34:;
+CONTINUE:;
 ;
 }
-id_35:;
-goto *(( ::id_0::id_2<(2)) ? (&&id_24) : (&&id_36));
-id_36:;
+CONTINUE_1:;
+goto *(( ::TopLevel::x<(2)) ? (&&NEXT) : (&&PROCEED_4));
+PROCEED_4:;
 }
-goto id_37;
-id_22:;
+goto ELSE_3;
+THEN_2:;
 ;
-id_37:;
+ELSE_3:;
 }
 }
-cease(  ::id_0::id_13 );
+cease(  ::TopLevel::y );
 return ;
-id_11:;
+ENTER_f:;
 {
-/*temp*/ void *id_38;
- ::id_0::id_39= ::id_0::id_9;
- ::id_0::id_40= ::id_0::id_8;
+/*temp*/ void *temp_link;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
 {
- ::id_0::id_12=((100)/ ::id_0::id_40);
+ ::TopLevel::f_return=((100)/ ::TopLevel::i);
 {
-id_38= ::id_0::id_39;
-goto *(id_38);
+temp_link= ::TopLevel::link;
+goto *(temp_link);
 }
 }
 }

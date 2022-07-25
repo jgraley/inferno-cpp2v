@@ -5,8 +5,8 @@
 
 using namespace CPPTree;
 
-//#define UID_FORMAT_HINT "%s%u"
-#define UID_FORMAT_PURE "id_%u"
+#define UID_FORMAT_HINT "%s_%u"
+//#define UID_FORMAT_PURE "id_%u"
 
 //////////////////////////// VisibleIdentifiers ///////////////////////////////
 

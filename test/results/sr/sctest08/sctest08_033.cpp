@@ -1,96 +1,96 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 ) :
-id_13(0)
+SC_CTOR( TopLevel ) :
+helper_stack_index(0)
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-int (id_9[10]);
-void *(id_10[10]);
-void *id_11;
+int (n_stack[10]);
+void *(link_stack[10]);
+void *link;
 public:
-void (id_17)();
-void (id_8)();
+void (helper)();
+void (otherhelper)();
 private:
-unsigned int id_13;
+unsigned int helper_stack_index;
 public:
-/*temp*/ int id_5;
-/*temp*/ void *id_15;
-/*temp*/ void *id_19;
-/*temp*/ void *id_20;
-/*temp*/ void *id_6;
+/*temp*/ int helper_n;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link_1;
+/*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link_1;
 };
-id_0 id_21("id_21");
-int id_14;
-int id_2;
-int id_3;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_2=(1);
-for(  ::id_3=(0);  ::id_3<(4);  ::id_3=((1)+ ::id_3) )
+ ::gvar=(1);
+for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
 {
- ::id_2=( ::id_2+ ::id_3);
-({ /*temp*/ int id_4; id_4=(3); {
+ ::gvar=( ::gvar+ ::i);
+({ /*temp*/ int temp_n; temp_n=(3); {
 {
- ::id_0::id_5=id_4;
+ ::TopLevel::helper_link=(&&LINK);
 {
- ::id_0::id_6=(&&id_7);
- ::id_0::id_8();
+ ::TopLevel::helper_n=temp_n;
+ ::TopLevel::helper();
 }
 }
-id_7:;
+LINK:;
 }
 });
- ::id_2=((2)* ::id_2);
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
 }
-cease(  ::id_2 );
+cease(  ::gvar );
 return ;
 }
 
-void (id_0::id_17)()
+void (TopLevel::helper)()
 {
-/*temp*/ void *id_18;
- ::id_0::id_11= ::id_0::id_15;
- ::id_2=( ::id_2-(1));
 {
-id_18= ::id_0::id_11;
+/*temp*/ void *temp_link;
+ ::TopLevel::helper_stack_index++;
+( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
+( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
+for(  ::j=(0);  ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]);  ::j=((1)+ ::j) )
+{
+wait(SC_ZERO_TIME);
+ ::gvar=((1)+ ::gvar);
+}
+{
+{
+ ::TopLevel::otherhelper_link=(&&LINK_1);
+ ::TopLevel::otherhelper();
+}
+LINK_1:;
+}
+{
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+{
+ ::TopLevel::helper_stack_index--;
 return ;
+}
+}
 }
 }
 
-void (id_0::id_8)()
+void (TopLevel::otherhelper)()
 {
+/*temp*/ void *temp_link_1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::gvar=( ::gvar-(1));
 {
-/*temp*/ void *id_12;
- ::id_0::id_13++;
-( ::id_0::id_10[ ::id_0::id_13])= ::id_0::id_6;
-( ::id_0::id_9[ ::id_0::id_13])= ::id_0::id_5;
-for(  ::id_14=(0);  ::id_14<( ::id_0::id_9[ ::id_0::id_13]);  ::id_14=((1)+ ::id_14) )
-{
-wait(SC_ZERO_TIME);
- ::id_2=((1)+ ::id_2);
-}
-{
-{
- ::id_0::id_15=(&&id_16);
- ::id_0::id_17();
-}
-id_16:;
-}
-{
-id_12=( ::id_0::id_10[ ::id_0::id_13]);
-{
- ::id_0::id_13--;
+temp_link_1= ::TopLevel::link;
 return ;
-}
-}
 }
 }

@@ -1,103 +1,103 @@
 #include "isystemc.h"
 
-class id_0;
-class id_12;
-class id_18;
-class id_0 : public sc_module
+class Adder;
+class Multiplier;
+class TopLevel;
+class Adder : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( Adder )
 {
-SC_THREAD(id_2);
+SC_THREAD(T);
 }
-sc_event id_1;
-void id_2();
-id_0(auto char (*id_10));
+sc_event proceed;
+void T();
+Adder(auto char (*name));
 };
-class id_12 : public sc_module
+class Multiplier : public sc_module
 {
 public:
-SC_CTOR( id_12 )
+SC_CTOR( Multiplier )
 {
-SC_THREAD(id_14);
+SC_THREAD(T_1);
 }
-sc_event id_13;
-sc_event id_8;
-void id_14();
-id_12(auto char (*id_16));
+sc_event instigate;
+sc_event proceed_1;
+void T_1();
+Multiplier(auto char (*name_1));
 };
-class id_18 : public sc_module
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_18 ) :
-id_15("id_15"),
-id_7("id_7")
+SC_CTOR( TopLevel ) :
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
-SC_THREAD(id_19);
+SC_THREAD(T_2);
 }
-void id_19();
-id_18(auto char (*id_20));
- ::id_0 id_15;
- ::id_12 id_7;
+void T_2();
+TopLevel(auto char (*name_2));
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
 };
-id_18 id_6("id_6");
-void id_5;
-int id_3;
-void (id_23)(void id_22);
-void (id_25)(void id_24);
-void (id_27)(void id_26);
-void (id_29)(void id_28);
-void (id_31)(void id_30);
-void (id_34)(void id_32, void id_33);
+TopLevel top_level("top_level");
+void SC_ZERO_TIME;
+int gvar;
+void (cease)(void p1_1);
+void (exit)(void p1_2);
+void (next_trigger)(void p1_3);
+void (wait)(void p1_4);
+void (SC_METHOD)(void func);
+void (SC_CTHREAD)(void clock, void func_1);
 
-void id_0::id_2()
+void Adder::T()
 {
-wait(  ::id_0::id_1 );
- ::id_3+=(2);
+wait(  ::Adder::proceed );
+ ::gvar+=(2);
 "Caught:GetDeclaration::InstanceDeclarationNotFound";
-wait(  ::id_0::id_1 );
- ::id_3+=(3);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
-}
-
-id_0::id_0(char (*id_10))
-{
-}
-
-void id_12::id_14()
-{
-wait(  ::id_12::id_13 );
- ::id_3*=(5);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
-wait(  ::id_12::id_8 );
- ::id_3*=(5);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
-wait(  ::id_12::id_8 );
-cease(  ::id_3 );
-}
-
-id_12::id_12(char (*id_16))
-{
-}
-
-void id_18::id_19()
-{
- ::id_3=(1);
+wait(  ::Adder::proceed );
+ ::gvar+=(3);
 "Caught:GetDeclaration::InstanceDeclarationNotFound";
 }
 
-id_18::id_18(char (*id_20)) : id_15("add_inst"), id_7("mul_inst")
+Adder::Adder(char (*name))
 {
 }
 
-void (id_23)(void id_22);
+void Multiplier::T_1()
+{
+wait(  ::Multiplier::instigate );
+ ::gvar*=(5);
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
+wait(  ::Multiplier::proceed_1 );
+ ::gvar*=(5);
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
+wait(  ::Multiplier::proceed_1 );
+cease(  ::gvar );
+}
 
-void (id_25)(void id_24);
+Multiplier::Multiplier(char (*name_1))
+{
+}
 
-void (id_27)(void id_26);
+void TopLevel::T_2()
+{
+ ::gvar=(1);
+"Caught:GetDeclaration::InstanceDeclarationNotFound";
+}
 
-void (id_29)(void id_28);
+TopLevel::TopLevel(char (*name_2)) : add_inst("add_inst"), mul_inst("mul_inst")
+{
+}
 
-void (id_31)(void id_30);
+void (cease)(void p1_1);
 
-void (id_34)(void id_32, void id_33);
+void (exit)(void p1_2);
+
+void (next_trigger)(void p1_3);
+
+void (wait)(void p1_4);
+
+void (SC_METHOD)(void func);
+
+void (SC_CTHREAD)(void clock, void func_1);

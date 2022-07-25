@@ -1,145 +1,145 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_9;
+void T();
+int x;
 private:
-void *id_28;
+void *link;
 public:
-/*temp*/ int id_27;
-/*temp*/ void *id_24;
-/*temp*/ void *id_29;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link_1;
 };
-id_0 id_30("id_30");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
-/*temp*/ void *id_2;
-auto int id_3;
-auto int id_4;
-auto void *id_5;
-/*temp*/ int id_6;
-/*temp*/ int id_7;
-/*temp*/ int id_8;
- ::id_0::id_9=(0);
+/*temp*/ void *temp_link;
+auto int switch_value;
+auto int switch_value_1;
+auto void *state;
+/*temp*/ int muxtemp;
+/*temp*/ int result;
+/*temp*/ int result_1;
+ ::TopLevel::x=(0);
 switch( 0 )
 {
 case 1:;
- ::id_0::id_9=(99);
+ ::TopLevel::x=(99);
 break;
 case 0:;
-if( ((0)== ::id_0::id_9)||((2)== ::id_0::id_9) )
- ::id_0::id_9=((false) ? (88) : (2));
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+ ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
-id_3=(0);
+switch_value=(0);
 wait(SC_ZERO_TIME);
 {
-id_5=(((0)==id_3) ? (&&id_10) : (&&id_11));
-goto *(id_5);
+state=(((1)==switch_value) ? (&&PROCEED_CASE) : (&&PROCEED));
+goto *(state);
 }
-id_11:;
+PROCEED:;
 {
-id_5=(((1)==id_3) ? (&&id_12) : (&&id_13));
-goto *(id_5);
+state=(((0)==switch_value) ? (&&CASE) : (&&PROCEED_1));
+goto *(state);
 }
-id_13:;
+PROCEED_1:;
 {
-id_5=(((4)==id_3) ? (&&id_14) : (&&id_12));
-goto *(id_5);
+state=(((4)==switch_value) ? (&&CASE_1) : (&&PROCEED_CASE));
+goto *(state);
 }
-id_12:;
- ::id_0::id_9=(99);
+PROCEED_CASE:;
+ ::TopLevel::x=(99);
 {
-id_5=(&&id_15);
-goto *(id_5);
+state=(&&BREAK);
+goto *(state);
 }
-id_14:;
- ::id_0::id_9=(44);
+CASE_1:;
+ ::TopLevel::x=(44);
 {
-id_5=(&&id_10);
-goto *(id_5);
+state=(&&CASE);
+goto *(state);
 }
-id_10:;
-if( ((0)== ::id_0::id_9)||((2)== ::id_0::id_9) )
- ::id_0::id_9=((false) ? (88) : (2));
+CASE:;
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+ ::TopLevel::x=((false) ? (88) : (2));
 {
-id_5=(&&id_15);
-goto *(id_5);
+state=(&&BREAK);
+goto *(state);
 }
-id_15:;
-id_4=(2);
+BREAK:;
+switch_value_1=(2);
 {
-id_5=(((1)==id_4) ? (&&id_16) : (&&id_17));
-goto *(id_5);
+state=(((1)==switch_value_1) ? (&&PROCEED_CASE_1) : (&&PROCEED_2));
+goto *(state);
 }
-id_17:;
+PROCEED_2:;
 {
-id_5=(((2)==id_4) ? (&&id_18) : (&&id_16));
-goto *(id_5);
+state=(((2)==switch_value_1) ? (&&CASE_2) : (&&PROCEED_CASE_1));
+goto *(state);
 }
-id_16:;
- ::id_0::id_9=(99);
+PROCEED_CASE_1:;
+ ::TopLevel::x=(99);
 {
-id_5=(&&id_19);
-goto *(id_5);
+state=(&&THEN_ELSE_BREAK);
+goto *(state);
 }
-id_18:;
+CASE_2:;
 {
-id_5=((!(((0)== ::id_0::id_9)||((2)== ::id_0::id_9))) ? (&&id_19) : (&&id_20));
-goto *(id_5);
+state=((!(((0)== ::TopLevel::x)||((2)== ::TopLevel::x))) ? (&&THEN_ELSE_BREAK) : (&&PROCEED_3));
+goto *(state);
 }
-id_20:;
+PROCEED_3:;
 {
-id_5=((!(false)) ? (&&id_21) : (&&id_22));
-goto *(id_5);
+state=((!(false)) ? (&&THEN) : (&&PROCEED_4));
+goto *(state);
 }
-id_22:;
-id_6=(88);
+PROCEED_4:;
+muxtemp=(88);
 {
-id_5=(&&id_23);
-goto *(id_5);
+state=(&&ELSE);
+goto *(state);
 }
-id_21:;
- ::id_0::id_24=(&&id_25);
+THEN:;
+ ::TopLevel::f_link=(&&LINK);
 {
-id_5=(&&id_26);
-goto *(id_5);
+state=(&&ENTER_f);
+goto *(state);
 }
-id_25:;
-id_7= ::id_0::id_27;
-id_6=id_7;
+LINK:;
+result= ::TopLevel::f_return;
+muxtemp=result;
 {
-id_5=(&&id_23);
-goto *(id_5);
+state=(&&ELSE);
+goto *(state);
 }
-id_23:;
-id_8=id_6;
- ::id_0::id_9=id_8;
+ELSE:;
+result_1=muxtemp;
+ ::TopLevel::x=result_1;
 {
-id_5=(&&id_19);
-goto *(id_5);
+state=(&&THEN_ELSE_BREAK);
+goto *(state);
 }
-id_19:;
-cease(  ::id_0::id_9 );
+THEN_ELSE_BREAK:;
+cease(  ::TopLevel::x );
 return ;
 {
-id_5=(&&id_26);
-goto *(id_5);
+state=(&&ENTER_f);
+goto *(state);
 }
-id_26:;
- ::id_0::id_28= ::id_0::id_24;
- ::id_0::id_27=(3);
-id_2= ::id_0::id_28;
+ENTER_f:;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::f_return=(3);
+temp_link= ::TopLevel::link;
 {
-id_5=id_2;
-goto *(id_5);
+state=temp_link;
+goto *(state);
 }
 }

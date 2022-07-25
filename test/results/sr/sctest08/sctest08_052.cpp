@@ -1,83 +1,83 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 ) :
-id_16(0)
+SC_CTOR( TopLevel ) :
+helper_stack_index(0)
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-int (id_18[10]);
-void *(id_17[10]);
-void *id_28;
-unsigned int id_16;
+int (n_stack[10]);
+void *(link_stack[10]);
+void *link;
+unsigned int helper_stack_index;
 public:
-/*temp*/ int id_10;
-/*temp*/ void *id_11;
-/*temp*/ void *id_25;
-/*temp*/ void *id_29;
-/*temp*/ void *id_30;
+/*temp*/ int helper_n;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link_1;
+/*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link_1;
 };
-id_0 id_31("id_31");
-int id_19;
-int id_5;
-int id_6;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_1()
+void TopLevel::T()
 {
-/*temp*/ void *id_2;
-/*temp*/ void *id_3;
-/*temp*/ int id_4;
- ::id_5=(1);
- ::id_6=(0);
-goto *((!( ::id_6<(4))) ? (&&id_7) : (&&id_8));
-id_8:;
-id_9:;
- ::id_5=( ::id_5+ ::id_6);
-id_4=(3);
- ::id_0::id_10=id_4;
- ::id_0::id_11=(&&id_12);
-goto id_13;
-id_12:;
- ::id_5=((2)* ::id_5);
+/*temp*/ void *temp_link;
+/*temp*/ void *temp_link_1;
+/*temp*/ int temp_n;
+ ::gvar=(1);
+ ::i=(0);
+goto *((!( ::i<(4))) ? (&&THEN) : (&&PROCEED));
+PROCEED:;
+NEXT:;
+ ::gvar=( ::gvar+ ::i);
+temp_n=(3);
+ ::TopLevel::helper_link=(&&LINK);
+ ::TopLevel::helper_n=temp_n;
+goto ENTER_helper;
+LINK:;
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
- ::id_6=((1)+ ::id_6);
-goto *(( ::id_6<(4)) ? (&&id_9) : (&&id_14));
-id_14:;
-goto id_15;
-id_7:;
-id_15:;
-cease(  ::id_5 );
+ ::i=((1)+ ::i);
+goto *(( ::i<(4)) ? (&&NEXT) : (&&PROCEED_1));
+PROCEED_1:;
+goto ELSE;
+THEN:;
+ELSE:;
+cease(  ::gvar );
 return ;
-id_13:;
- ::id_0::id_16++;
-( ::id_0::id_17[ ::id_0::id_16])= ::id_0::id_11;
-( ::id_0::id_18[ ::id_0::id_16])= ::id_0::id_10;
- ::id_19=(0);
-goto *((!( ::id_19<( ::id_0::id_18[ ::id_0::id_16]))) ? (&&id_20) : (&&id_21));
-id_21:;
-id_22:;
+ENTER_helper:;
+ ::TopLevel::helper_stack_index++;
+( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
+( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
+ ::j=(0);
+goto *((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ? (&&THEN_1) : (&&PROCEED_2));
+PROCEED_2:;
+NEXT_1:;
 wait(SC_ZERO_TIME);
- ::id_5=((1)+ ::id_5);
- ::id_19=((1)+ ::id_19);
-goto *(( ::id_19<( ::id_0::id_18[ ::id_0::id_16])) ? (&&id_22) : (&&id_23));
-id_23:;
-goto id_24;
-id_20:;
-id_24:;
- ::id_0::id_25=(&&id_26);
-goto id_27;
-id_26:;
-id_2=( ::id_0::id_17[ ::id_0::id_16]);
- ::id_0::id_16--;
-goto *(id_2);
-id_27:;
- ::id_0::id_28= ::id_0::id_25;
- ::id_5=( ::id_5-(1));
-id_3= ::id_0::id_28;
-goto *(id_3);
+ ::gvar=((1)+ ::gvar);
+ ::j=((1)+ ::j);
+goto *(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ? (&&NEXT_1) : (&&PROCEED_3));
+PROCEED_3:;
+goto ELSE_1;
+THEN_1:;
+ELSE_1:;
+ ::TopLevel::otherhelper_link=(&&LINK_1);
+goto ENTER_otherhelper;
+LINK_1:;
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+ ::TopLevel::helper_stack_index--;
+goto *(temp_link);
+ENTER_otherhelper:;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::gvar=( ::gvar-(1));
+temp_link_1= ::TopLevel::link;
+goto *(temp_link_1);
 }

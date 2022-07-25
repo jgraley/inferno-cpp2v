@@ -1,84 +1,84 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-void (id_15)();
-void (id_8)();
-/*temp*/ int id_5;
-/*temp*/ void *id_13;
-/*temp*/ void *id_18;
-/*temp*/ void *id_19;
-/*temp*/ void *id_6;
+void T();
+void (helper)();
+void (otherhelper)();
+/*temp*/ int helper_n;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link_1;
+/*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link_1;
 };
-id_0 id_20("id_20");
-int id_12;
-int id_2;
-int id_3;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_2=(1);
-for(  ::id_3=(0);  ::id_3<(4);  ::id_3=((1)+ ::id_3) )
+ ::gvar=(1);
+for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
 {
- ::id_2=( ::id_2+ ::id_3);
-({ /*temp*/ int id_4; id_4=(3); {
+ ::gvar=( ::gvar+ ::i);
+({ /*temp*/ int temp_n; temp_n=(3); {
 {
- ::id_0::id_5=id_4;
+ ::TopLevel::helper_link=(&&LINK);
 {
- ::id_0::id_6=(&&id_7);
- ::id_0::id_8();
+ ::TopLevel::helper_n=temp_n;
+ ::TopLevel::helper();
 }
 }
-id_7:;
+LINK:;
 }
 });
- ::id_2=((2)* ::id_2);
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
 }
-cease(  ::id_2 );
+cease(  ::gvar );
 return ;
 }
 
-void (id_0::id_15)()
+void (TopLevel::helper)()
 {
-/*temp*/ void *id_16;
-auto void *id_17;
-id_17= ::id_0::id_13;
- ::id_2=( ::id_2-(1));
+/*temp*/ void *temp_link;
+auto int n;
+auto void *link;
+n= ::TopLevel::helper_n;
+link= ::TopLevel::helper_link;
+for(  ::j=(0);  ::j<n;  ::j=((1)+ ::j) )
 {
-id_16=id_17;
+wait(SC_ZERO_TIME);
+ ::gvar=((1)+ ::gvar);
+}
+{
+{
+ ::TopLevel::otherhelper_link=(&&LINK_1);
+ ::TopLevel::otherhelper();
+}
+LINK_1:;
+}
+{
+temp_link=link;
 return ;
 }
 }
 
-void (id_0::id_8)()
+void (TopLevel::otherhelper)()
 {
-/*temp*/ void *id_9;
-auto int id_10;
-auto void *id_11;
-id_11= ::id_0::id_6;
-id_10= ::id_0::id_5;
-for(  ::id_12=(0);  ::id_12<id_10;  ::id_12=((1)+ ::id_12) )
+/*temp*/ void *temp_link_1;
+auto void *link_1;
+link_1= ::TopLevel::otherhelper_link;
+ ::gvar=( ::gvar-(1));
 {
-wait(SC_ZERO_TIME);
- ::id_2=((1)+ ::id_2);
-}
-{
-{
- ::id_0::id_13=(&&id_14);
- ::id_0::id_15();
-}
-id_14:;
-}
-{
-id_9=id_11;
+temp_link_1=link_1;
 return ;
 }
 }

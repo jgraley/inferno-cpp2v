@@ -1,57 +1,57 @@
 #include "isystemc.h"
 
-class id_0;
-class id_13;
-class id_0 : public sc_module
+class TopLevel;
+class sc_interface;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
 }
-id_0(auto char (*id_1));
-int id_6;
-int id_7;
-void (id_4)();
+TopLevel(auto char (*name));
+int gvar;
+int tot;
+void (method)();
 };
-class id_13
+class sc_interface
 {
 };
-id_0 id_14("id_14");
-void id_11;
-int id_15 = 0;
-int id_16 = 0;
-void (id_12)(void id_10);
-void (id_18)(void id_17);
-void (id_20)(void id_19);
-void (id_9)(void id_8);
-void (id_22)(void id_21);
-void (id_5)(void id_3);
-void (id_25)(void id_23, void id_24);
+TopLevel top_level("top_level");
+void SC_ZERO_TIME;
+int gvar_1 = 0;
+int tot_1 = 0;
+void (cease)(void p1);
+void (exit)(void p1_2);
+void (next_trigger)(void p1_1);
+void (wait)(void p1_3);
+void (SC_METHOD)(void func);
+void (SC_THREAD)(void func_1);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_METHOD( ::TopLevel::method);
 }
 
-void (id_0::id_4)()
+void (TopLevel::method)()
 {
- ::id_0::id_6++;
- ::id_0::id_7+= ::id_0::id_6;
-if( (10)== ::id_0::id_6 )
- ::id_9( ::id_0::id_7);
- ::id_12( ::id_11);
+ ::TopLevel::gvar++;
+ ::TopLevel::tot+= ::TopLevel::gvar;
+if( (10)== ::TopLevel::gvar )
+ ::cease( ::TopLevel::tot);
+ ::next_trigger( ::SC_ZERO_TIME);
 }
 
-void (id_12)(void id_10);
+void (cease)(void p1);
 
-void (id_18)(void id_17);
+void (exit)(void p1_2);
 
-void (id_20)(void id_19);
+void (next_trigger)(void p1_1);
 
-void (id_9)(void id_8);
+void (wait)(void p1_3);
 
-void (id_22)(void id_21);
+void (SC_METHOD)(void func);
 
-void (id_5)(void id_3);
+void (SC_THREAD)(void func_1);
 
-void (id_25)(void id_23, void id_24);
+void (SC_CTHREAD)(void clock, void func_2);

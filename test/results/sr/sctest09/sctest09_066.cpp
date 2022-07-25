@@ -1,63 +1,63 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 ) :
-id_11(0)
+SC_CTOR( TopLevel ) :
+recurser_stack_index(0)
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-int (id_13[10]);
-void *(id_12[10]);
+int (i_stack[10]);
+void *(link_stack[10]);
 public:
-int id_6;
+int x;
 private:
-unsigned int id_11;
+unsigned int recurser_stack_index;
 public:
-/*temp*/ int id_7;
-/*temp*/ void *id_17;
-/*temp*/ void *id_8;
+/*temp*/ int recurser_i;
+/*temp*/ void *recurser_link;
+/*temp*/ void *recurser_link_1;
 };
-id_0 id_18("id_18");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
-/*temp*/ void *id_2;
-/*temp*/ int id_3;
-/*temp*/ int id_4;
-/*temp*/ int id_5;
- ::id_0::id_6=(0);
-id_3=(1);
- ::id_0::id_7=id_3;
- ::id_0::id_8=(&&id_9);
+/*temp*/ void *temp_link;
+/*temp*/ int temp_i;
+/*temp*/ int temp_i_1;
+/*temp*/ int temp_i_2;
+ ::TopLevel::x=(0);
+temp_i=(1);
+ ::TopLevel::recurser_i=temp_i;
+ ::TopLevel::recurser_link=(&&LINK);
 wait(SC_ZERO_TIME);
-goto id_10;
-id_9:;
-cease(  ::id_0::id_6 );
+goto ENTER_recurser;
+LINK:;
+cease(  ::TopLevel::x );
 return ;
-goto id_10;
-id_10:;
- ::id_0::id_11++;
-( ::id_0::id_12[ ::id_0::id_11])= ::id_0::id_8;
-( ::id_0::id_13[ ::id_0::id_11])= ::id_0::id_7;
- ::id_0::id_6++;
-goto *((!(( ::id_0::id_13[ ::id_0::id_11])<(5))) ? (&&id_14) : (&&id_15));
-id_15:;
-id_4=((1)+( ::id_0::id_13[ ::id_0::id_11]));
- ::id_0::id_7=id_4;
- ::id_0::id_8=(&&id_16);
-goto id_10;
-id_16:;
-id_5=((1)+( ::id_0::id_13[ ::id_0::id_11]));
- ::id_0::id_7=id_5;
- ::id_0::id_8=(&&id_14);
-goto id_10;
-id_14:;
-id_2=( ::id_0::id_12[ ::id_0::id_11]);
- ::id_0::id_11--;
-goto *(id_2);
+goto ENTER_recurser;
+ENTER_recurser:;
+ ::TopLevel::recurser_stack_index++;
+( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
+ ::TopLevel::x++;
+goto *((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&LINK_THEN_ELSE) : (&&PROCEED));
+PROCEED:;
+temp_i_1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i=temp_i_1;
+ ::TopLevel::recurser_link=(&&LINK_1);
+goto ENTER_recurser;
+LINK_1:;
+temp_i_2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+ ::TopLevel::recurser_i=temp_i_2;
+ ::TopLevel::recurser_link=(&&LINK_THEN_ELSE);
+goto ENTER_recurser;
+LINK_THEN_ELSE:;
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
+ ::TopLevel::recurser_stack_index--;
+goto *(temp_link);
 }

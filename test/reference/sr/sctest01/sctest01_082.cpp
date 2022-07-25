@@ -1,121 +1,121 @@
 #include "isystemc.h"
 
-class id_0;
-class id_14;
-class id_27;
-class id_0 : public sc_module
+class Adder;
+class Multiplier;
+class TopLevel;
+class Adder : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( Adder )
 {
-SC_THREAD(id_5);
+SC_THREAD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 0,
-id_3 = 1,
+T_STATE_YIELD = 0,
+T_STATE_YIELD_1 = 1,
 };
-sc_event id_4;
-void id_5();
+sc_event proceed;
+void T();
 };
-class id_14 : public sc_module
+class Multiplier : public sc_module
 {
 public:
-SC_CTOR( id_14 )
+SC_CTOR( Multiplier )
 {
-SC_THREAD(id_20);
+SC_THREAD(T_1);
 }
-enum id_15
+enum TStates_1
 {
-id_16 = 0,
-id_17 = 1,
-id_18 = 2,
+T_STATE_YIELD_2 = 0,
+T_STATE_YIELD_3 = 1,
+T_STATE_YIELD_4 = 2,
 };
-sc_event id_13;
-sc_event id_19;
-void id_20();
+sc_event instigate;
+sc_event proceed_1;
+void T_1();
 };
-class id_27 : public sc_module
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_27 ) :
-id_26("id_26"),
-id_12("id_12")
+SC_CTOR( TopLevel ) :
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
-SC_THREAD(id_29);
+SC_THREAD(T_2);
 }
-enum id_28
+enum TStates_2
 {
 };
-void id_29();
- ::id_0 id_26;
- ::id_14 id_12;
+void T_2();
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
 };
-id_27 id_11("id_11");
-int id_10;
+TopLevel top_level("top_level");
+int gvar;
 
-void id_0::id_5()
+void Adder::T()
 {
-static const unsigned int (id_6[]) = { &&id_7, &&id_8 };
-auto unsigned int id_9;
-wait(  ::id_0::id_4 );
-id_9= ::id_0::id_2;
-id_8:;
-id_7:;
-if(  ::id_0::id_2==id_9 )
+static const unsigned int (lmap[]) = { &&YIELD, &&YIELD_1 };
+auto unsigned int state;
+wait(  ::Adder::proceed );
+state= ::Adder::T_STATE_YIELD;
+YIELD_1:;
+YIELD:;
+if(  ::Adder::T_STATE_YIELD==state )
 {
- ::id_10+=(2);
-(( ::id_11. ::id_27::id_12). ::id_14::id_13).notify(SC_ZERO_TIME);
-wait(  ::id_0::id_4 );
-id_9= ::id_0::id_3;
-goto *(id_6[id_9]);
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
+wait(  ::Adder::proceed );
+state= ::Adder::T_STATE_YIELD_1;
+goto *(lmap[state]);
 }
-if(  ::id_0::id_3==id_9 )
+if(  ::Adder::T_STATE_YIELD_1==state )
 {
- ::id_10+=(3);
-(( ::id_11. ::id_27::id_12). ::id_14::id_13).notify(SC_ZERO_TIME);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
 return ;
 }
-goto *(id_6[id_9]);
+goto *(lmap[state]);
 }
 
-void id_14::id_20()
+void Multiplier::T_1()
 {
-static const unsigned int (id_21[]) = { &&id_22, &&id_23, &&id_24 };
-auto unsigned int id_25;
-wait(  ::id_14::id_19 );
-id_25= ::id_14::id_16;
-id_24:;
-id_23:;
-id_22:;
-if(  ::id_14::id_16==id_25 )
+static const unsigned int (lmap_1[]) = { &&YIELD_2, &&YIELD_3, &&YIELD_4 };
+auto unsigned int state_1;
+wait(  ::Multiplier::instigate );
+state_1= ::Multiplier::T_STATE_YIELD_4;
+YIELD_2:;
+YIELD_3:;
+YIELD_4:;
+if(  ::Multiplier::T_STATE_YIELD_4==state_1 )
 {
- ::id_10*=(5);
-(( ::id_11. ::id_27::id_26). ::id_0::id_4).notify(SC_ZERO_TIME);
-wait(  ::id_14::id_13 );
-id_25= ::id_14::id_17;
-goto *(id_21[id_25]);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed_1 );
+state_1= ::Multiplier::T_STATE_YIELD_3;
+goto *(lmap_1[state_1]);
 }
-if(  ::id_14::id_17==id_25 )
+if(  ::Multiplier::T_STATE_YIELD_3==state_1 )
 {
- ::id_10*=(5);
-(( ::id_11. ::id_27::id_26). ::id_0::id_4).notify(SC_ZERO_TIME);
-wait(  ::id_14::id_13 );
-id_25= ::id_14::id_18;
-goto *(id_21[id_25]);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed_1 );
+state_1= ::Multiplier::T_STATE_YIELD_2;
+goto *(lmap_1[state_1]);
 }
-if(  ::id_14::id_18==id_25 )
+if(  ::Multiplier::T_STATE_YIELD_2==state_1 )
 {
-cease(  ::id_10 );
+cease(  ::gvar );
 return ;
 }
-goto *(id_21[id_25]);
+goto *(lmap_1[state_1]);
 }
 
-void id_27::id_29()
+void TopLevel::T_2()
 {
-static const unsigned int (id_30[]) = {  };
- ::id_10=(1);
-( ::id_27::id_12. ::id_14::id_19).notify(SC_ZERO_TIME);
+static const unsigned int (lmap_2[]) = {  };
+ ::gvar=(1);
+( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);
 return ;
 }

@@ -1,39 +1,39 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(U);
 }
-void id_1();
-void (id_4)();
-/*temp*/ void *id_2;
-/*temp*/ void *id_7;
+void U();
+void (HelperU)();
+/*temp*/ void *HelperU_link;
+/*temp*/ void *HelperU_link_1;
 };
-id_0 id_8("id_8");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::U()
 {
 {
 {
- ::id_0::id_2=(&&id_3);
- ::id_0::id_4();
+ ::TopLevel::HelperU_link=(&&LINK);
+ ::TopLevel::HelperU();
 }
-id_3:;
+LINK:;
 }
 return ;
 }
 
-void (id_0::id_4)()
+void (TopLevel::HelperU)()
 {
-/*temp*/ void *id_5;
-auto void *id_6;
-id_6= ::id_0::id_2;
+/*temp*/ void *temp_link;
+auto void *link;
+link= ::TopLevel::HelperU_link;
 {
-id_5=id_6;
+temp_link=link;
 return ;
 }
 }

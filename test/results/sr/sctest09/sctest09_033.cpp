@@ -1,85 +1,85 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 ) :
-id_11(0)
+SC_CTOR( TopLevel ) :
+recurser_stack_index(0)
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
+void T();
 private:
-int (id_8[10]);
-void *(id_9[10]);
+int (i_stack[10]);
+void *(link_stack[10]);
 public:
-int id_2;
-void (id_7)();
+int x;
+void (recurser)();
 private:
-unsigned int id_11;
+unsigned int recurser_stack_index;
 public:
-/*temp*/ int id_4;
-/*temp*/ void *id_16;
-/*temp*/ void *id_5;
+/*temp*/ int recurser_i;
+/*temp*/ void *recurser_link;
+/*temp*/ void *recurser_link_1;
 };
-id_0 id_17("id_17");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(0);
-({ /*temp*/ int id_3; id_3=(1); {
+ ::TopLevel::x=(0);
+({ /*temp*/ int temp_i; temp_i=(1); {
 {
- ::id_0::id_4=id_3;
+ ::TopLevel::recurser_i=temp_i;
 {
- ::id_0::id_5=(&&id_6);
- ::id_0::id_7();
+ ::TopLevel::recurser_link=(&&LINK);
+ ::TopLevel::recurser();
 }
 }
-id_6:;
+LINK:;
 }
 });
-cease(  ::id_0::id_2 );
+cease(  ::TopLevel::x );
 return ;
 }
 
-void (id_0::id_7)()
+void (TopLevel::recurser)()
 {
 {
-/*temp*/ void *id_10;
- ::id_0::id_11++;
-( ::id_0::id_9[ ::id_0::id_11])= ::id_0::id_5;
-( ::id_0::id_8[ ::id_0::id_11])= ::id_0::id_4;
- ::id_0::id_2++;
-if( ( ::id_0::id_8[ ::id_0::id_11])<(5) )
+/*temp*/ void *temp_link;
+ ::TopLevel::recurser_stack_index++;
+( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_link;
+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])= ::TopLevel::recurser_i;
+ ::TopLevel::x++;
+if( ( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5) )
 {
-({ /*temp*/ int id_12; id_12=((1)+( ::id_0::id_8[ ::id_0::id_11])); {
+({ /*temp*/ int temp_i_1; temp_i_1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
 {
- ::id_0::id_4=id_12;
+ ::TopLevel::recurser_i=temp_i_1;
 {
- ::id_0::id_5=(&&id_13);
- ::id_0::id_7();
+ ::TopLevel::recurser_link=(&&LINK_1);
+ ::TopLevel::recurser();
 }
 }
-id_13:;
-}
-});
-({ /*temp*/ int id_14; id_14=((1)+( ::id_0::id_8[ ::id_0::id_11])); {
-{
- ::id_0::id_4=id_14;
-{
- ::id_0::id_5=(&&id_15);
- ::id_0::id_7();
-}
-}
-id_15:;
+LINK_1:;
 }
 });
+({ /*temp*/ int temp_i_2; temp_i_2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
+{
+ ::TopLevel::recurser_i=temp_i_2;
+{
+ ::TopLevel::recurser_link=(&&LINK_2);
+ ::TopLevel::recurser();
+}
+}
+LINK_2:;
+}
+});
 }
 {
-id_10=( ::id_0::id_9[ ::id_0::id_11]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);
 {
- ::id_0::id_11--;
+ ::TopLevel::recurser_stack_index--;
 return ;
 }
 }

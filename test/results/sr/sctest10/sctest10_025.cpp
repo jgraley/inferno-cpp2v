@@ -1,28 +1,28 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_2;
-int (id_10)(auto char id_9, auto short id_8, auto int id_7);
+void T();
+int x;
+int (f)(auto char k, auto short j, auto int i);
 };
-id_0 id_17("id_17");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(0);
- ::id_0::id_2=({ /*temp*/ int id_3; id_3=({ /*temp*/ int id_4; id_4=(0); ({ /*temp*/ int id_5; id_5=(0); ({ /*temp*/ int id_6; id_6=(0);  ::id_0::id_10(id_5, id_6, id_4); }); }); }); ({ /*temp*/ int id_11; id_11=(8); ({ /*temp*/ int id_12; id_12=(6);  ::id_0::id_10(id_11, id_12, id_3); }); }); });
-cease(  ::id_0::id_2+((2)*({ /*temp*/ int id_13; id_13=(1); ({ /*temp*/ int id_14; id_14=(3); ({ /*temp*/ int id_15; id_15=(2);  ::id_0::id_10(id_14, id_15, id_13); }); }); })) );
+ ::TopLevel::x=(0);
+ ::TopLevel::x=({ /*temp*/ int temp_i; temp_i=({ /*temp*/ int temp_i_1; temp_i_1=(0); ({ /*temp*/ int temp_j; temp_j=(0); ({ /*temp*/ int temp_k; temp_k=(0);  ::TopLevel::f(temp_k, temp_j, temp_i_1); }); }); }); ({ /*temp*/ int temp_k_1; temp_k_1=(8); ({ /*temp*/ int temp_j_1; temp_j_1=(6);  ::TopLevel::f(temp_k_1, temp_j_1, temp_i); }); }); });
+cease(  ::TopLevel::x+((2)*({ /*temp*/ int temp_j_2; temp_j_2=(2); ({ /*temp*/ int temp_k_2; temp_k_2=(3); ({ /*temp*/ int temp_i_2; temp_i_2=(1);  ::TopLevel::f(temp_k_2, temp_j_2, temp_i_2); }); }); })) );
 }
 
-int (id_0::id_10)(char id_9, short id_8, int id_7)
+int (TopLevel::f)(char k, short j, int i)
 {
-auto int id_16 = id_7+((3)*id_8);
-return id_16+((5)*id_9);
+auto int t = i+((3)*j);
+return t+((5)*k);
 }

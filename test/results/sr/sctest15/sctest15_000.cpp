@@ -1,60 +1,60 @@
-class id_11;
-class id_7;
-class id_0;
-class id_8;
-class id_11
+class sc_event;
+class sc_interface;
+class sc_module;
+class TopLevel;
+class sc_event
+{
+void (notify)(auto void p1);
+};
+class sc_interface
 {
 };
-class id_7
+class sc_module
 {
 };
-class id_0 : public id_7
+class TopLevel : public sc_module
 {
 public:
-id_0(auto char (*id_1));
-void (id_4)();
-void (id_6)();
+TopLevel(auto char (*name));
+void (HelperU)();
+void (U)();
 };
-class id_8
-{
-void (id_10)(auto void id_9);
-};
-id_0 id_12;
-void id_13;
-void (id_15)(void id_14);
-void (id_17)(void id_16);
-void (id_19)(void id_18);
-void (id_21)(void id_20);
-void (id_23)(void id_22);
-void (id_5)(void id_3);
-void (id_26)(void id_24, void id_25);
+TopLevel top_level;
+void SC_ZERO_TIME;
+void (cease)(void p1_1);
+void (exit)(void p1_2);
+void (next_trigger)(void p1_3);
+void (wait)(void p1_4);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+void (sc_event::notify)(void p1);
+
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::TopLevel::U);
 }
 
-void (id_0::id_4)()
-{
- ::id_0::id_6();
-}
-
-void (id_0::id_6)()
+void (TopLevel::HelperU)()
 {
 }
 
-void (id_8::id_10)(void id_9);
+void (TopLevel::U)()
+{
+ ::TopLevel::HelperU();
+}
 
-void (id_15)(void id_14);
+void (cease)(void p1_1);
 
-void (id_17)(void id_16);
+void (exit)(void p1_2);
 
-void (id_19)(void id_18);
+void (next_trigger)(void p1_3);
 
-void (id_21)(void id_20);
+void (wait)(void p1_4);
 
-void (id_23)(void id_22);
+void (SC_METHOD)(void func_1);
 
-void (id_5)(void id_3);
+void (SC_THREAD)(void func);
 
-void (id_26)(void id_24, void id_25);
+void (SC_CTHREAD)(void clock, void func_2);

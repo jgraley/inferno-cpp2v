@@ -1,74 +1,74 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
 }
-id_0(auto char (*id_1));
-void (id_10)();
-void (id_4)();
-void (id_9)(auto int id_8);
+TopLevel(auto char (*name));
+void (T)();
+void (otherhelper)();
+void (helper)(auto int n);
 };
-id_0 id_12("id_12");
-void id_13;
-int id_11;
-int id_6;
-int id_7;
-void (id_15)(void id_14);
-void (id_17)(void id_16);
-void (id_19)(void id_18);
-void (id_21)(void id_20);
-void (id_23)(void id_22);
-void (id_5)(void id_3);
-void (id_26)(void id_24, void id_25);
+TopLevel top_level("top_level");
+void SC_ZERO_TIME;
+int gvar;
+int i;
+int j;
+void (cease)(void p1);
+void (exit)(void p1_1);
+void (next_trigger)(void p1_2);
+void (wait)(void p1_3);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::TopLevel::T);
 }
 
-void (id_0::id_10)()
+void (TopLevel::T)()
 {
- ::id_6=( ::id_6-(1));
-}
-
-void (id_0::id_4)()
+ ::gvar=(1);
+for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
 {
- ::id_6=(1);
-for(  ::id_7=(0);  ::id_7<(4);  ::id_7=((1)+ ::id_7) )
-{
- ::id_6=( ::id_6+ ::id_7);
- ::id_0::id_9(3);
- ::id_6=((2)* ::id_6);
+ ::gvar=( ::gvar+ ::i);
+ ::TopLevel::helper(3);
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
 }
-cease(  ::id_6 );
+cease(  ::gvar );
 }
 
-void (id_0::id_9)(int id_8)
+void (TopLevel::otherhelper)()
 {
-for(  ::id_11=(0);  ::id_11<id_8;  ::id_11=((1)+ ::id_11) )
+ ::gvar=( ::gvar-(1));
+}
+
+void (TopLevel::helper)(int n)
+{
+for(  ::j=(0);  ::j<n;  ::j=((1)+ ::j) )
 {
 wait(SC_ZERO_TIME);
- ::id_6=((1)+ ::id_6);
+ ::gvar=((1)+ ::gvar);
 }
- ::id_0::id_10();
+ ::TopLevel::otherhelper();
 return ;
 }
 
-void (id_15)(void id_14);
+void (cease)(void p1);
 
-void (id_17)(void id_16);
+void (exit)(void p1_1);
 
-void (id_19)(void id_18);
+void (next_trigger)(void p1_2);
 
-void (id_21)(void id_20);
+void (wait)(void p1_3);
 
-void (id_23)(void id_22);
+void (SC_METHOD)(void func_1);
 
-void (id_5)(void id_3);
+void (SC_THREAD)(void func);
 
-void (id_26)(void id_24, void id_25);
+void (SC_CTHREAD)(void clock, void func_2);

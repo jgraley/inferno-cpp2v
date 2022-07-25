@@ -1,17 +1,17 @@
-void *(id_0[10]);
-unsigned int id_1 = 0;
-void (id_2)();
-int id_6;
-void *id_5;
+void *(link_stack[10]);
+unsigned int main_stack_index = 0;
+void (main)();
+int main_return;
+void *main_link;
 
-void (id_2)()
+void (main)()
 {
-/*temp*/ void *id_3;
-/*temp*/ bool id_4 = true;
- ::id_1++;
-( ::id_0[ ::id_1])= ::id_5;
- ::id_6=(9);
-id_3=( ::id_0[ ::id_1]);
- ::id_1--;
-id_4=(false);
+/*temp*/ void *temp_link;
+/*temp*/ bool enabled = true;
+ ::main_stack_index++;
+( ::link_stack[ ::main_stack_index])= ::main_link;
+ ::main_return=(9);
+temp_link=( ::link_stack[ ::main_stack_index]);
+ ::main_stack_index--;
+enabled=(false);
 }

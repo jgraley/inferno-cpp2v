@@ -1,128 +1,128 @@
 #include "isystemc.h"
 
-class id_0;
-class id_12;
-class id_22;
-class id_0 : public sc_module
+class Adder;
+class Multiplier;
+class TopLevel;
+class Adder : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( Adder )
 {
-SC_METHOD(id_5);
+SC_METHOD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 0,
-id_3 = 1,
+T_STATE_YIELD = 0,
+T_STATE_YIELD_1 = 1,
 };
-sc_event id_4;
-void id_5();
+sc_event proceed;
+void T();
 private:
-unsigned int id_7;
+unsigned int state;
 };
-class id_12 : public sc_module
+class Multiplier : public sc_module
 {
 public:
-SC_CTOR( id_12 )
+SC_CTOR( Multiplier )
 {
-SC_METHOD(id_18);
+SC_METHOD(T_1);
 }
-enum id_13
+enum TStates_1
 {
-id_14 = 0,
-id_15 = 1,
-id_16 = 2,
+T_STATE_YIELD_2 = 0,
+T_STATE_YIELD_3 = 1,
+T_STATE_YIELD_4 = 2,
 };
-sc_event id_11;
-sc_event id_17;
-void id_18();
+sc_event instigate;
+sc_event proceed_1;
+void T_1();
 private:
-unsigned int id_20;
+unsigned int state_1;
 };
-class id_22 : public sc_module
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_22 ) :
-id_21("id_21"),
-id_10("id_10")
+SC_CTOR( TopLevel ) :
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
-SC_THREAD(id_24);
+SC_THREAD(T_2);
 }
-enum id_23
+enum TStates_2
 {
 };
-void id_24();
- ::id_0 id_21;
- ::id_12 id_10;
+void T_2();
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
 };
-id_22 id_9("id_9");
-int id_8;
+TopLevel top_level("top_level");
+int gvar;
 
-void id_0::id_5()
+void Adder::T()
 {
-/*temp*/ bool id_6 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0) )
 {
-next_trigger(  ::id_0::id_4 );
- ::id_0::id_7= ::id_0::id_2;
-id_6=(false);
+next_trigger(  ::Adder::proceed );
+ ::Adder::state= ::Adder::T_STATE_YIELD;
+enabled=(false);
 }
-if( id_6&&( ::id_0::id_2== ::id_0::id_7) )
+if( enabled&&( ::Adder::T_STATE_YIELD== ::Adder::state) )
 {
- ::id_8+=(2);
-(( ::id_9. ::id_22::id_10). ::id_12::id_11).notify(SC_ZERO_TIME);
-next_trigger(  ::id_0::id_4 );
- ::id_0::id_7= ::id_0::id_3;
-id_6=(false);
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
+next_trigger(  ::Adder::proceed );
+ ::Adder::state= ::Adder::T_STATE_YIELD_1;
+enabled=(false);
 }
-if( id_6&&( ::id_0::id_3== ::id_0::id_7) )
+if( enabled&&( ::Adder::T_STATE_YIELD_1== ::Adder::state) )
 {
- ::id_8+=(3);
-(( ::id_9. ::id_22::id_10). ::id_12::id_11).notify(SC_ZERO_TIME);
-id_6=(false);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
+enabled=(false);
 }
-if( id_6 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }
 
-void id_12::id_18()
+void Multiplier::T_1()
 {
-/*temp*/ bool id_19 = true;
+/*temp*/ bool enabled_1 = true;
 if( (sc_delta_count())==(0) )
 {
-next_trigger(  ::id_12::id_17 );
- ::id_12::id_20= ::id_12::id_14;
-id_19=(false);
+next_trigger(  ::Multiplier::instigate );
+ ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_4;
+enabled_1=(false);
 }
-if( id_19&&( ::id_12::id_14== ::id_12::id_20) )
+if( enabled_1&&( ::Multiplier::T_STATE_YIELD_4== ::Multiplier::state_1) )
 {
- ::id_8*=(5);
-(( ::id_9. ::id_22::id_21). ::id_0::id_4).notify(SC_ZERO_TIME);
-next_trigger(  ::id_12::id_11 );
- ::id_12::id_20= ::id_12::id_15;
-id_19=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+next_trigger(  ::Multiplier::proceed_1 );
+ ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_3;
+enabled_1=(false);
 }
-if( id_19&&( ::id_12::id_15== ::id_12::id_20) )
+if( enabled_1&&( ::Multiplier::T_STATE_YIELD_3== ::Multiplier::state_1) )
 {
- ::id_8*=(5);
-(( ::id_9. ::id_22::id_21). ::id_0::id_4).notify(SC_ZERO_TIME);
-next_trigger(  ::id_12::id_11 );
- ::id_12::id_20= ::id_12::id_16;
-id_19=(false);
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+next_trigger(  ::Multiplier::proceed_1 );
+ ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_2;
+enabled_1=(false);
 }
-if( id_19&&( ::id_12::id_16== ::id_12::id_20) )
+if( enabled_1&&( ::Multiplier::T_STATE_YIELD_2== ::Multiplier::state_1) )
 {
-cease(  ::id_8 );
-id_19=(false);
+cease(  ::gvar );
+enabled_1=(false);
 }
-if( id_19 )
+if( enabled_1 )
 next_trigger(SC_ZERO_TIME);
 }
 
-void id_22::id_24()
+void TopLevel::T_2()
 {
-/*temp*/ bool id_25 = true;
- ::id_8=(1);
-( ::id_22::id_10. ::id_12::id_17).notify(SC_ZERO_TIME);
-id_25=(false);
+/*temp*/ bool enabled_2 = true;
+ ::gvar=(1);
+( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);
+enabled_2=(false);
 }

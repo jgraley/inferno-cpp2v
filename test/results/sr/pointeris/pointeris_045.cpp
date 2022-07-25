@@ -1,43 +1,43 @@
-void *(id_0[10]);
-unsigned int id_1 = 0;
-int id_2 = (44)+((99)*({ {
-id_3:;
+void *(link_stack[10]);
+unsigned int main_stack_index = 0;
+int a = (44)+((99)*({ {
+NEXT:;
 {
 }
-id_4:;
+CONTINUE:;
 if( 0 )
-goto id_3;
-goto id_5;
-id_5:;
+goto NEXT;
+goto PROCEED;
+PROCEED:;
 }
 233; }));
-void (id_6)();
-int id_9;
-void *id_13;
-void *id_8;
+void (main)();
+int main_return;
+void *main_link;
+void *main_link_1;
 
-void (id_6)()
+void (main)()
 {
 {
-/*temp*/ void *id_7;
- ::id_1++;
-( ::id_0[ ::id_1])= ::id_8;
+/*temp*/ void *temp_link;
+ ::main_stack_index++;
+( ::link_stack[ ::main_stack_index])= ::main_link;
 {
- ::id_9=( ::id_2+((4)+((9)*({ {
-id_10:;
+ ::main_return=( ::a+((4)+((9)*({ {
+NEXT_1:;
 {
 }
-id_11:;
+CONTINUE_1:;
 if( 0 )
-goto id_10;
-goto id_12;
-id_12:;
+goto NEXT_1;
+goto PROCEED_1;
+PROCEED_1:;
 }
 23; }))));
 {
-id_7=( ::id_0[ ::id_1]);
+temp_link=( ::link_stack[ ::main_stack_index]);
 {
- ::id_1--;
+ ::main_stack_index--;
 return ;
 }
 }

@@ -1,10 +1,10 @@
-void (id_0)();
-int id_1;
+void (main)();
+int main_return;
 
-void (id_0)()
+void (main)()
 {
 {
- ::id_1=(9);
+ ::main_return=(9);
 return ;
 }
 }

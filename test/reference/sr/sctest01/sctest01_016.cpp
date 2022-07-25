@@ -1,97 +1,97 @@
 #include "isystemc.h"
 
-class id_0;
-class id_9;
-class id_15;
-class id_0 : public sc_module
+class Adder;
+class Multiplier;
+class TopLevel;
+class Adder : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( Adder )
 {
-SC_THREAD(id_2);
+SC_THREAD(T);
 }
-sc_event id_1;
-void id_2();
-id_0(auto char (*id_7));
+sc_event proceed;
+void T();
+Adder(auto char (*name));
 };
-class id_9 : public sc_module
+class Multiplier : public sc_module
 {
 public:
-SC_CTOR( id_9 )
+SC_CTOR( Multiplier )
 {
-SC_THREAD(id_11);
+SC_THREAD(T_1);
 }
-sc_event id_10;
-sc_event id_6;
-void id_11();
-id_9(auto char (*id_13));
+sc_event instigate;
+sc_event proceed_1;
+void T_1();
+Multiplier(auto char (*name_1));
 };
-class id_15 : public sc_module
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_15 ) :
-id_12("id_12"),
-id_5("id_5")
+SC_CTOR( TopLevel ) :
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
-SC_THREAD(id_16);
+SC_THREAD(T_2);
 }
-void id_16();
-id_15(auto char (*id_17));
- ::id_0 id_12;
- ::id_9 id_5;
+void T_2();
+TopLevel(auto char (*name_2));
+ ::Adder add_inst;
+ ::Multiplier mul_inst;
 };
-id_15 id_4("id_4");
-void id_19;
-int id_3;
-void (id_21)(void id_20);
-void (id_23)(void id_22);
-void (id_25)(void id_24);
-void (id_27)(void id_26);
+TopLevel top_level("top_level");
+void SC_ZERO_TIME;
+int gvar;
+void (cease)(void p1);
+void (exit)(void p1_1);
+void (next_trigger)(void p1_2);
+void (wait)(void p1_3);
 
-void id_0::id_2()
+void Adder::T()
 {
-wait(  ::id_0::id_1 );
- ::id_3+=(2);
-(( ::id_4. ::id_15::id_5). ::id_9::id_6).notify(SC_ZERO_TIME);
-wait(  ::id_0::id_1 );
- ::id_3+=(3);
-(( ::id_4. ::id_15::id_5). ::id_9::id_6).notify(SC_ZERO_TIME);
+wait(  ::Adder::proceed );
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
+wait(  ::Adder::proceed );
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed_1).notify(SC_ZERO_TIME);
 }
 
-id_0::id_0(char (*id_7))
-{
-}
-
-void id_9::id_11()
-{
-wait(  ::id_9::id_10 );
- ::id_3*=(5);
-(( ::id_4. ::id_15::id_12). ::id_0::id_1).notify(SC_ZERO_TIME);
-wait(  ::id_9::id_6 );
- ::id_3*=(5);
-(( ::id_4. ::id_15::id_12). ::id_0::id_1).notify(SC_ZERO_TIME);
-wait(  ::id_9::id_6 );
-cease(  ::id_3 );
-}
-
-id_9::id_9(char (*id_13))
+Adder::Adder(char (*name))
 {
 }
 
-void id_15::id_16()
+void Multiplier::T_1()
 {
- ::id_3=(1);
-( ::id_15::id_5. ::id_9::id_10).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::instigate );
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed_1 );
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed_1 );
+cease(  ::gvar );
 }
 
-id_15::id_15(char (*id_17)) : id_12("add_inst"), id_5("mul_inst")
+Multiplier::Multiplier(char (*name_1))
 {
 }
 
-void (id_21)(void id_20);
+void TopLevel::T_2()
+{
+ ::gvar=(1);
+( ::TopLevel::mul_inst. ::Multiplier::instigate).notify(SC_ZERO_TIME);
+}
 
-void (id_23)(void id_22);
+TopLevel::TopLevel(char (*name_2)) : add_inst("add_inst"), mul_inst("mul_inst")
+{
+}
 
-void (id_25)(void id_24);
+void (cease)(void p1);
 
-void (id_27)(void id_26);
+void (exit)(void p1_1);
+
+void (next_trigger)(void p1_2);
+
+void (wait)(void p1_3);

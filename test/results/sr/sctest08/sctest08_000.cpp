@@ -1,84 +1,84 @@
-class id_17;
-class id_0;
-class id_18;
-class id_21;
-class id_17
+class sc_event;
+class sc_interface;
+class sc_module;
+class TopLevel;
+class sc_event
+{
+void (notify)(auto void p1_2);
+};
+class sc_interface
 {
 };
-class id_0 : public id_17
+class sc_module
+{
+};
+class TopLevel : public sc_module
 {
 public:
-id_0(auto char (*id_1));
-void (id_15)();
-void (id_4)();
-void (id_9)(auto int id_8);
+TopLevel(auto char (*name));
+void (T)();
+void (otherhelper)();
+void (helper)(auto int n);
 };
-class id_18
-{
-void (id_20)(auto void id_19);
-};
-class id_21
-{
-};
-id_0 id_22;
-void id_11;
-int id_16;
-int id_6;
-int id_7;
-void (id_12)(void id_10);
-void (id_14)(void id_13);
-void (id_24)(void id_23);
-void (id_26)(void id_25);
-void (id_28)(void id_27);
-void (id_5)(void id_3);
-void (id_31)(void id_29, void id_30);
+TopLevel top_level;
+void SC_ZERO_TIME;
+int gvar;
+int i;
+int j;
+void (cease)(void p1_1);
+void (exit)(void p1_3);
+void (next_trigger)(void p1_4);
+void (wait)(void p1);
+void (SC_METHOD)(void func_1);
+void (SC_THREAD)(void func);
+void (SC_CTHREAD)(void clock, void func_2);
 
-id_0::id_0(char (*id_1))
+void (sc_event::notify)(void p1_2);
+
+TopLevel::TopLevel(char (*name))
 {
- ::id_5( ::id_0::id_4);
+ ::SC_THREAD( ::TopLevel::T);
 }
 
-void (id_0::id_15)()
+void (TopLevel::T)()
 {
- ::id_6=( ::id_6-(1));
+ ::gvar=(1);
+for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
+{
+ ::gvar=( ::gvar+ ::i);
+ ::TopLevel::helper(3);
+ ::gvar=((2)* ::gvar);
+ ::wait( ::SC_ZERO_TIME);
+}
+ ::cease( ::gvar);
 }
 
-void (id_0::id_4)()
+void (TopLevel::otherhelper)()
 {
- ::id_6=(1);
-for(  ::id_7=(0);  ::id_7<(4);  ::id_7=((1)+ ::id_7) )
-{
- ::id_6=( ::id_6+ ::id_7);
- ::id_0::id_9(3);
- ::id_6=((2)* ::id_6);
- ::id_12( ::id_11);
-}
- ::id_14( ::id_6);
+ ::gvar=( ::gvar-(1));
 }
 
-void (id_0::id_9)(int id_8)
+void (TopLevel::helper)(int n)
 {
-for(  ::id_16=(0);  ::id_16<id_8;  ::id_16=((1)+ ::id_16) )
+for(  ::j=(0);  ::j<n;  ::j=((1)+ ::j) )
 {
- ::id_12( ::id_11);
- ::id_6=((1)+ ::id_6);
+ ::wait( ::SC_ZERO_TIME);
+ ::gvar=((1)+ ::gvar);
 }
- ::id_0::id_15();
+ ::TopLevel::otherhelper();
 return ;
 }
 
-void (id_18::id_20)(void id_19);
+void (cease)(void p1_1);
 
-void (id_12)(void id_10);
+void (exit)(void p1_3);
 
-void (id_14)(void id_13);
+void (next_trigger)(void p1_4);
 
-void (id_24)(void id_23);
+void (wait)(void p1);
 
-void (id_26)(void id_25);
+void (SC_METHOD)(void func_1);
 
-void (id_28)(void id_27);
+void (SC_THREAD)(void func);
 
-void (id_5)(void id_3);
-
-void (id_31)(void id_29, void id_30);
+void (SC_CTHREAD)(void clock, void func_2);

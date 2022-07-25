@@ -1,6 +1,6 @@
-int (id_0)();
+int (main)();
 
-int (id_0)()
+int (main)()
 {
 return 9;
 }

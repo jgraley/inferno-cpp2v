@@ -1,50 +1,50 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_METHOD(id_5);
+SC_METHOD(U);
 }
-/*temp*/ unsigned int id_1;
-enum id_2
+/*temp*/ unsigned int temp_link;
+enum UStates
 {
-id_3 = 1,
-id_4 = 0,
+U_STATE_ENTER_HelperU = 1,
+U_STATE_LINK = 0,
 };
-void id_5();
+void U();
 private:
-unsigned int id_8;
-unsigned int id_9;
+unsigned int link;
+unsigned int state;
 public:
-/*temp*/ unsigned int id_7;
+/*temp*/ unsigned int HelperU_link;
 };
-id_0 id_10("id_10");
+TopLevel top_level("top_level");
 
-void id_0::id_5()
+void TopLevel::U()
 {
-/*temp*/ bool id_6 = true;
+/*temp*/ bool enabled = true;
 if( (sc_delta_count())==(0) )
 {
- ::id_0::id_7= ::id_0::id_4;
+ ::TopLevel::HelperU_link= ::TopLevel::U_STATE_LINK;
 next_trigger(SC_ZERO_TIME);
- ::id_0::id_8= ::id_0::id_3;
-id_6=(false);
+ ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
+enabled=(false);
 }
-if( id_6&&( ::id_0::id_4== ::id_0::id_8) )
+if( enabled&&( ::TopLevel::U_STATE_LINK== ::TopLevel::state) )
 {
-id_6=(false);
-if( id_6 )
- ::id_0::id_8= ::id_0::id_3;
+enabled=(false);
+if( enabled )
+ ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 }
-if( id_6&&( ::id_0::id_3== ::id_0::id_8) )
+if( enabled&&( ::TopLevel::U_STATE_ENTER_HelperU== ::TopLevel::state) )
 {
- ::id_0::id_9= ::id_0::id_7;
- ::id_0::id_1= ::id_0::id_9;
- ::id_0::id_8= ::id_0::id_1;
+ ::TopLevel::link= ::TopLevel::HelperU_link;
+ ::TopLevel::temp_link= ::TopLevel::link;
+ ::TopLevel::state= ::TopLevel::temp_link;
 }
-if( id_6 )
+if( enabled )
 next_trigger(SC_ZERO_TIME);
 }

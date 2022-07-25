@@ -1,74 +1,74 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_8);
+SC_THREAD(T);
 }
-enum id_1
+enum TStates
 {
-id_2 = 1,
-id_3 = 3,
-id_4 = 4,
-id_5 = 5,
-id_6 = 0,
-id_7 = 2,
+T_STATE_PROCEED_NEXT = 0,
+T_STATE_PROCEED_NEXT_1 = 3,
+T_STATE_PROCEED_THEN_ELSE = 1,
+T_STATE_PROCEED_THEN_ELSE_1 = 5,
+T_STATE_YIELD = 2,
+T_STATE_YIELD_1 = 4,
 };
-void id_8();
+void T();
 };
-id_0 id_20("id_20");
-int id_17;
-int id_18;
-int id_19;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+int j;
 
-void id_0::id_8()
+void TopLevel::T()
 {
-static const void *(id_9[]) = { &&id_10, &&id_11, &&id_12, &&id_13, &&id_14, &&id_15 };
-auto void *id_16;
- ::id_17=(1);
- ::id_18=(0);
+static const void *(lmap[]) = { &&PROCEED_NEXT, &&PROCEED_THEN_ELSE, &&YIELD, &&PROCEED_NEXT_1, &&YIELD_1, &&PROCEED_THEN_ELSE_1 };
+auto void *state;
+ ::gvar=(1);
+ ::i=(0);
 wait(SC_ZERO_TIME);
 {
-id_16=((!( ::id_18<(4))) ? (id_9[ ::id_0::id_5]) : (id_9[ ::id_0::id_3]));
-goto *(id_16);
+state=((!( ::i<(4))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]));
+goto *(state);
 }
-id_13:;
- ::id_17+= ::id_18;
- ::id_19=(0);
+PROCEED_NEXT:;
+ ::gvar+= ::i;
+ ::j=(0);
 {
-id_16=((!( ::id_19<(3))) ? (id_9[ ::id_0::id_4]) : (id_9[ ::id_0::id_2]));
-goto *(id_16);
+state=((!( ::j<(3))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT_1]));
+goto *(state);
 }
-id_11:;
+PROCEED_NEXT_1:;
 wait(SC_ZERO_TIME);
 {
-id_16=(id_9[ ::id_0::id_7]);
-goto *(id_16);
+state=(lmap[ ::TopLevel::T_STATE_YIELD_1]);
+goto *(state);
 }
-id_12:;
- ::id_17++;
- ::id_19++;
+YIELD_1:;
+ ::gvar++;
+ ::j++;
 {
-id_16=(( ::id_19<(3)) ? (id_9[ ::id_0::id_2]) : (id_9[ ::id_0::id_4]));
-goto *(id_16);
+state=(( ::j<(3)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT_1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]));
+goto *(state);
 }
-id_14:;
- ::id_17*=(2);
+PROCEED_THEN_ELSE:;
+ ::gvar*=(2);
 wait(SC_ZERO_TIME);
 {
-id_16=(id_9[ ::id_0::id_6]);
-goto *(id_16);
+state=(lmap[ ::TopLevel::T_STATE_YIELD]);
+goto *(state);
 }
-id_10:;
- ::id_18++;
+YIELD:;
+ ::i++;
 {
-id_16=(( ::id_18<(4)) ? (id_9[ ::id_0::id_3]) : (id_9[ ::id_0::id_5]));
-goto *(id_16);
+state=(( ::i<(4)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1]));
+goto *(state);
 }
-id_15:;
-cease(  ::id_17 );
+PROCEED_THEN_ELSE_1:;
+cease(  ::gvar );
 return ;
 }

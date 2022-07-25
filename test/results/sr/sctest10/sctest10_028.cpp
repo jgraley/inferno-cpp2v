@@ -1,49 +1,49 @@
 #include "isystemc.h"
 
-class id_0;
-class id_0 : public sc_module
+class TopLevel;
+class TopLevel : public sc_module
 {
 public:
-SC_CTOR( id_0 )
+SC_CTOR( TopLevel )
 {
-SC_THREAD(id_1);
+SC_THREAD(T);
 }
-void id_1();
-int id_2;
-void (id_12)(auto char id_9, auto short id_8, auto int id_7, auto void *id_10);
-/*temp*/ int id_13;
-/*temp*/ void *id_23;
+void T();
+int x;
+void (f)(auto char k, auto short j, auto int i, auto void *link);
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
 };
-id_0 id_24("id_24");
+TopLevel top_level("top_level");
 
-void id_0::id_1()
+void TopLevel::T()
 {
- ::id_0::id_2=(0);
- ::id_0::id_2=({ /*temp*/ int id_3; id_3=({ /*temp*/ int id_4; id_4=(0); ({ /*temp*/ int id_5; id_5=(0); ({ /*temp*/ int id_6; id_6=(0); ({ {
- ::id_0::id_12(id_5, id_6, id_4, &&id_11);
-id_11:;
+ ::TopLevel::x=(0);
+ ::TopLevel::x=({ /*temp*/ int temp_i; temp_i=({ /*temp*/ int temp_i_1; temp_i_1=(0); ({ /*temp*/ int temp_j; temp_j=(0); ({ /*temp*/ int temp_k; temp_k=(0); ({ {
+ ::TopLevel::f(temp_k, temp_j, temp_i_1, &&LINK);
+LINK:;
 }
- ::id_0::id_13; }); }); }); }); ({ /*temp*/ int id_14; id_14=(8); ({ /*temp*/ int id_15; id_15=(6); ({ {
- ::id_0::id_12(id_14, id_15, id_3, &&id_16);
-id_16:;
+ ::TopLevel::f_return; }); }); }); }); ({ /*temp*/ int temp_k_1; temp_k_1=(8); ({ /*temp*/ int temp_j_1; temp_j_1=(6); ({ {
+ ::TopLevel::f(temp_k_1, temp_j_1, temp_i, &&LINK_1);
+LINK_1:;
 }
- ::id_0::id_13; }); }); }); });
-cease(  ::id_0::id_2+((2)*({ /*temp*/ int id_17; id_17=(1); ({ /*temp*/ int id_18; id_18=(3); ({ /*temp*/ int id_19; id_19=(2); ({ {
- ::id_0::id_12(id_18, id_19, id_17, &&id_20);
-id_20:;
+ ::TopLevel::f_return; }); }); }); });
+cease(  ::TopLevel::x+((2)*({ /*temp*/ int temp_j_2; temp_j_2=(2); ({ /*temp*/ int temp_k_2; temp_k_2=(3); ({ /*temp*/ int temp_i_2; temp_i_2=(1); ({ {
+ ::TopLevel::f(temp_k_2, temp_j_2, temp_i_2, &&LINK_2);
+LINK_2:;
 }
- ::id_0::id_13; }); }); }); })) );
+ ::TopLevel::f_return; }); }); }); })) );
 return ;
 }
 
-void (id_0::id_12)(char id_9, short id_8, int id_7, void *id_10)
+void (TopLevel::f)(char k, short j, int i, void *link)
 {
-/*temp*/ void *id_21;
-auto int id_22 = id_7+((3)*id_8);
+/*temp*/ void *temp_link;
+auto int t = i+((3)*j);
 {
- ::id_0::id_13=(id_22+((5)*id_9));
+ ::TopLevel::f_return=(t+((5)*k));
 {
-id_21=id_10;
+temp_link=link;
 return ;
 }
 }
