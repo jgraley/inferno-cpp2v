@@ -64,7 +64,7 @@ for file in $(find $outdir -type f -name '*.cpp' | sort); do
         printf "\n" 
         echo "${file/#$outdir\//} output differs from reference (stopping here):"
         set -x
-        diff --color ${file/#$outdir/$refdir} $file || :
+        diff --color --context=3 ${file/#$outdir/$refdir} $file || :
         set +x
         printf "\n" 
         dres=1

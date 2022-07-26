@@ -15,6 +15,7 @@ using namespace std;
 #include <exception>
 	
 #define CONTAINER_SEP ", "    
+#define SUPPRESS_ADDRESSES    
     
 ////////////////////////// Trace() free functions //////////////////////////
     
@@ -56,6 +57,7 @@ string Trace(const T *p)
 {
     if( p )
     {
+        // Note: already does SUPPRESS_ADDRESSES
         return string("&") + Trace(*p);        
     }
     else

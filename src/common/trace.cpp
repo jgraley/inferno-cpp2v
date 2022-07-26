@@ -79,7 +79,11 @@ string Trace(const exception &e)
 string Trace(const void *p)
 {
     if( p )
+#ifdef SUPPRESS_ADDRESSES
+        return "void-ptr";
+#else    
         return SSPrintf("%p", p);
+#endif        
     else
         return "NULL";
 }

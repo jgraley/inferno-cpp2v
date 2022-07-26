@@ -106,7 +106,7 @@ Orderable::Result GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( cons
 
 string GreenGrassAgent::IsGreenGrassOperator::RenderNF() const
 {
-    return "IsGreenGrass<" + SSPrintf("%p", dirty_grass)  + ">(" + a->Render() + ")"; 
+    return "IsGreenGrass<" + Trace(dirty_grass)  + ">(" + a->Render() + ")"; 
 }
 
 
