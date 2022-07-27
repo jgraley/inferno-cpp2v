@@ -135,6 +135,13 @@ string SatelliteSerial::GetSerialString() const
 }
 
 
+bool SatelliteSerial::operator<( const SatelliteSerial &other ) const
+{
+    return serial < other.serial;
+}
+
+
+
 SatelliteSerial::BlocksByMotherSerial SatelliteSerial::blocks_by_mother_serial;    
 
 //////////////////////////// free functions ///////////////////////////////

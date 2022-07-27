@@ -66,9 +66,33 @@ PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
               
 bool PatternLink::operator<(const PatternLink &other) const
 {
+    ASSERT( this );
+    ASSERT( &other );
     // PatternLink is unique across parent-child links in
     // the pattern. This operator will permit PatternLink to 
     // act as keys in maps.
+        
+    // Child node serial number is primary ordering
+    ASSERT( asp_pattern );
+    ASSERT( other.asp_pattern );
+    ASSERT( *asp_pattern );
+    ASSERT( *other.asp_pattern );
+    auto tp_this = TreePtr<Node>(*asp_pattern);
+    auto tp_other = TreePtr<Node>(*other.asp_pattern);
+    ASSERT( tp_this );
+    ASSERT( tp_other );
+    if( tp_this->Node::operator<(*tp_other) )
+        return true;
+    if( tp_other->Node::operator<(*tp_this) )
+        return false;
+
+    // Satellite serial number aka arrow-head number is secondary ordering
+    if( this->SatelliteSerial::operator<(other) )
+        return true;
+    if( other.SatelliteSerial::operator<(*this) )
+        return false;
+       
+    // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
     return asp_pattern < other.asp_pattern;
 }
 
@@ -232,6 +256,26 @@ XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
               
 bool XLink::operator<(const XLink &other) const
 {
+    ASSERT( this );
+    ASSERT( &other );
+    
+    // Child node serial number is primary ordering
+    auto tp_this = TreePtr<Node>(*asp_x);
+    auto tp_other = TreePtr<Node>(*other.asp_x);
+    ASSERT( tp_this );
+    ASSERT( tp_other );
+    if( tp_this->Node::operator<(*tp_other) )
+        return true;
+    if( tp_other->Node::operator<(*tp_this) )
+        return false;
+
+    // Satellite serial number aka arrow-head number is secondary ordering
+    if( this->SatelliteSerial::operator<(other) )
+        return true;
+    if( other.SatelliteSerial::operator<(*this) )
+        return false;
+       
+    // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
     return asp_x < other.asp_x;      
 }
 

@@ -13,14 +13,11 @@ public:
     }
     void T()
     {
-        x = 0;
-        x = f( f(0,0,0), 6, 8);
-        cease( x + f(1, 2, 3)*2 );
+        cease( f(1) );
     }
-    int f( int i, short j, char k )
+    int f( int i )
     {
-        int t = i+j*3;
-        return t+k*5;
+        return i;
     }
 };
 

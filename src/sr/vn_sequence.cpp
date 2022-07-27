@@ -42,6 +42,8 @@ void VNSequence::PlanningStageFour()
     for( shared_ptr<VNTransformation> vnt : steps )
     {
         const SCREngine *root_scr_engine = vnt->GetTopLevelEngine()->GetRootEngine();
+        if( !root_scr_engine )
+            continue; // apparently wasn't planned, probably due to -q being specified.
         set< shared_ptr<SYM::BooleanExpression> > step_exprs = root_scr_engine->GetExpressions();
         expressions = UnionOfSolo( expressions, step_exprs );
     }

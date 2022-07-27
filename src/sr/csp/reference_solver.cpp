@@ -213,7 +213,7 @@ void ReferenceSolver::Run( const SolutionReportFunction &solution_report_functio
 
 void ReferenceSolver::Solve()
 {     
-    TRACE("SS%d solving...\n");
+    TRACE("ReferenceSolver solving...\n");
     TRACEC("Free vars ")(plan.free_variables)("\n");
     TRACEC("Starting at X")(current_var_index)("\n");
     

@@ -90,7 +90,9 @@ protected:
         // Identity semantics: ignore "other"
         return *this;
     }
-    inline bool operator<( const SerialNumber &o )
+
+public:
+    bool operator<( const SerialNumber &o ) const
     {
         if( progress != o.progress )
             return progress < o.progress;
@@ -98,7 +100,6 @@ protected:
             return serial < o.serial;
     }
     
-public:
     inline pair<SNType, SNType> GetSerialNumber() const 
     {
         return make_pair(0, serial); // This is enough for uniqueness
@@ -127,6 +128,7 @@ public:
     explicit SatelliteSerial( const SerialNumber *mother, const void *satellite );
 
     string GetSerialString() const;
+    bool operator<( const SatelliteSerial &other ) const;
     
 private:
     struct MotherBlock
