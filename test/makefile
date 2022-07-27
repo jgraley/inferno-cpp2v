@@ -10,7 +10,7 @@ CASES += sctest01 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 #CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
 
 # Use pointeris (very quick to test) as "canary" even more so "small"
-SRCASES = small pointeris ${CASES} 
+SRCASES = small pointeris sc10_reduce ${CASES} 
 MINICASES = sctest02 sctest03 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15
 MINISRCASES = small pointeris ${MINICASES} 
 
