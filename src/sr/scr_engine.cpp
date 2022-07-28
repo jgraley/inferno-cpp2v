@@ -599,8 +599,7 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 
 TreePtr<Node> SCREngine::GetReplaceKey( PatternLink plink ) const
 {
-    if( !plink )
-        return TreePtr<Node>(); // TODO there should not be NULL plinks coming in here see #605
+    ASSERT( plink );
     ASSERT( keys_available );
     if( replace_solution.count(plink) == 1 )
         return replace_solution.at(plink).GetChildX();

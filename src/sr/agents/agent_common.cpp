@@ -523,8 +523,12 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
 
-    TreePtr<Node> keynode = master_scr_engine->GetReplaceKey( keyer_plink );
-    ASSERT( !keynode || keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
+    TreePtr<Node> keynode;
+    if( keyer_plink )
+    {
+        keynode = master_scr_engine->GetReplaceKey( keyer_plink );
+        ASSERT( !keynode || keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
+    }
     
     TreePtr<Node> dest = BuildReplaceImpl(me_plink, keynode);
    
