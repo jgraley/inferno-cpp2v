@@ -215,7 +215,6 @@ void ReferenceSolver::Solve()
 {     
     TRACE("ReferenceSolver solving...\n");
     TRACEC("Free vars ")(plan.free_variables)("\n");
-    TRACEC("Starting at X")(current_var_index)("\n");
     
     // Selector for first variable    
     current_var_index = 0;
@@ -225,7 +224,7 @@ void ReferenceSolver::Solve()
                                     assignments, 
                                     plan.free_variables.at(current_var_index) );
     success_count[current_var_index] = 0; 
-    TRACEC("Made selector for X")(current_var_index)("\n");
+    TRACEC("Starting at and made selector for X")(current_var_index)("\n");
 
     while(true)
     {
