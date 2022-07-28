@@ -72,11 +72,15 @@ bool PatternLink::operator<(const PatternLink &other) const
     // the pattern. This operator will permit PatternLink to 
     // act as keys in maps.
         
-    // Child node serial number is primary ordering
-    ASSERT( asp_pattern );
-    ASSERT( other.asp_pattern );
+    // NULLness is super-primary ordering
+    if( !other.asp_pattern )
+        return false; // for == and > case
+    else if( !asp_pattern )
+        return true; // for remaining < case
     ASSERT( *asp_pattern );
     ASSERT( *other.asp_pattern );
+    
+    // Child node serial number is primary ordering
     auto tp_this = TreePtr<Node>(*asp_pattern);
     auto tp_other = TreePtr<Node>(*other.asp_pattern);
     ASSERT( tp_this );
@@ -258,6 +262,14 @@ bool XLink::operator<(const XLink &other) const
 {
     ASSERT( this );
     ASSERT( &other );
+    
+    // NULLness is super-primary ordering
+    if( !other.asp_x )
+        return false; // for == and > case
+    else if( !asp_x )
+        return true; // for remaining < case
+    ASSERT( *asp_x );
+    ASSERT( *other.asp_x );
     
     // Child node serial number is primary ordering
     auto tp_this = TreePtr<Node>(*asp_x);
