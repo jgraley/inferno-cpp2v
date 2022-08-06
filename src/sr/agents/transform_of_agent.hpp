@@ -23,17 +23,20 @@ class TransformOfAgent : public virtual TeleportAgent
 public:
     class TransformationFailedMismatch : public Mismatch {};
 
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                
-
-    virtual Block GetGraphBlockInfo() const;
-    TreePtr<Node> pattern; 
-    Transformation *transformation;
     TransformOfAgent( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
     	transformation(t),
     	pattern(p)
     {
     }
+
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
+    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const;                
+
+    virtual Block GetGraphBlockInfo() const;
+    string GetName() const override;
+    
+    TreePtr<Node> pattern; 
+    Transformation *transformation;
 
 protected: 
     TransformOfAgent() {}    

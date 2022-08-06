@@ -48,8 +48,9 @@ void SolverHolder::Start( const Assignments &forces,
         {            
             solver->Run( solution_report_lambda, Solver::RejectionReportFunction() );
         }
-        catch(const exception& e)
+        catch(const exception &e)
         {
+			// Don't log the exception because we'll re-throw
             solver_exception = current_exception();
             (*sink)( {} );
         }

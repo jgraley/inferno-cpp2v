@@ -17,19 +17,28 @@ LocatedLink TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
     TreePtr<Node> base_x = keyer_xlink.GetChildX();
-    TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
-    if( trans_x )
+    try
     {
-        ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
-        XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
-        return LocatedLink(PatternLink(this, &pattern), tp_xlink);
-    }
-    else
+		TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
+		if( trans_x )
+		{
+			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
+			XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
+			return LocatedLink(PatternLink(this, &pattern), tp_xlink);
+		}
+		else
+		{
+			// Transformation returned nullptr, probably because the candidate was incompatible
+			// with the transformation - a search MISS.
+			TRACE("Got NULL; query fails\n");
+			return LocatedLink();  
+		}
+	}
+    catch( const ::Mismatch &e )
     {
-        // Transformation returned nullptr, probably because the candidate was incompatible
-        // with the transformation - a search MISS.
-        return LocatedLink();  
-    }
+		TRACE("Caught ")(e)("; query fails\n");
+		return LocatedLink();  
+	}
 }
 
 
@@ -54,3 +63,10 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
                            { link } } };
     return block;
 }
+
+
+string TransformOfAgent::GetName() const
+{
+	return transformation->GetName() + GetSerialString();
+}
+

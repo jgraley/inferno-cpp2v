@@ -147,7 +147,7 @@ ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constrai
 void ReferenceSolver::Start( const Assignments &forces,
                              const SR::TheKnowledge *knowledge_ )
 {
-    TRACE("Simple solver begins\n");
+    TRACE("Reference solver begins\n");
     INDENT("S");
     forced_assignments = forces;
     knowledge = knowledge_;
@@ -187,7 +187,7 @@ void ReferenceSolver::Run( const SolutionReportFunction &solution_report_functio
     
     if( !get<0>(t) )
     {
-        TRACE("Simple solver mismatched on forced variables only\n");
+        TRACE("Reference solver mismatched on forced variables only\n");
         // Current assignments are believed to be a no-good set so reject
         // them (for a test harness to check).
         if( rejection_report_function )
@@ -197,17 +197,17 @@ void ReferenceSolver::Run( const SolutionReportFunction &solution_report_functio
     
     if( plan.free_variables.empty() )
     {
-        TRACE("Simple solver matched on forced variables and no frees\n");  
+        TRACE("Reference solver matched on forced variables and no frees\n");  
         // No free vars, so we've got a solution
         solution_report_function( Assignments{} );
     }
     else
     {                
-        TRACE("Simple solver matched on forced variables; solving for frees\n");          
+        TRACE("Reference solver matched on forced variables; solving for frees\n");          
         Solve();    
     }
 
-    TRACE("Simple solver ends\n");    
+    TRACE("Reference solver ends\n");    
 }
 
 
@@ -260,17 +260,17 @@ void ReferenceSolver::AssignSuccessful()
     current_var_index++;
     if( current_var_index < plan.free_variables.size() ) // new variable
     {
+        TRACEC("Success: Advance to and make selector for X")(current_var_index)("\n");
         value_selectors[current_var_index] = 
             make_shared<ValueSelector>( plan.affected_constraints.at(current_var_index), 
                                         knowledge, 
                                         assignments, 
                                         plan.free_variables.at(current_var_index) );     
         success_count[current_var_index] = 0;
-        TRACEC("Advanced to and made selector for X")(current_var_index)("\n");
     }
     else // complete
     {
-        TRACEC("Reporting solution\n");
+        TRACEC("Success: Reporting solution\n");
         // Engine wants free assignments only, don't annoy it.
         Assignments free_assignments = DifferenceOfSolo( assignments, 
                                                          forced_assignments );

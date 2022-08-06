@@ -489,11 +489,11 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
             // Cannonicalise could change root
             SingleCompareReplace( root_xlink, master_solution );
         }
-        catch( ::Mismatch )
+        catch( const ::Mismatch &e )
         {
+            TRACE("Caught ")(e)("; stopping\n");
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
-            TRACE("Mismatched; stopping\n");
             if( ReadArgs::use_conv_out_loop )
                 *p_root_xnode = root_xlink.GetChildX();  
             return i+1; // when the compare fails, we're done

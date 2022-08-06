@@ -12,6 +12,8 @@ using namespace SR;
  
 #define ALIGNMENT_BITS 3 
 
+#define SUPPRESS_SATELLITE_NUMBERS_XLINK
+
 // Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
 
@@ -179,7 +181,12 @@ string PatternLink::GetTrace() const
 
 string PatternLink::GetName() const
 {
+#ifdef SUPPRESS_SATELLITE_NUMBERS_PLINK	
+    string s = "#?->";
+#else
     string s = GetSerialString() + "->";
+#endif    
+
     if(asp_pattern==nullptr)
         s += "NULL";
     else
@@ -190,7 +197,12 @@ string PatternLink::GetName() const
 
 string PatternLink::GetShortName() const
 {
+#ifdef SUPPRESS_SATELLITE_NUMBERS_PLINK	
+    string s = "#?->";
+#else
     string s = GetSerialString() + "->";
+#endif  
+
     if(asp_pattern==nullptr)
         s += "NULL";
     else
@@ -340,7 +352,12 @@ string XLink::GetTrace() const
 
 string XLink::GetName() const 
 {
+#ifdef SUPPRESS_SATELLITE_NUMBERS_XLINK	
+    string s = "#?->";
+#else
     string s = GetSerialString() + "->";
+#endif    
+
     if(asp_x==nullptr)
         s += "NULL";
     else
@@ -351,7 +368,12 @@ string XLink::GetName() const
 
 string XLink::GetShortName() const 
 {
+#ifdef SUPPRESS_SATELLITE_NUMBERS_XLINK	
+    string s = "#?->";
+#else
     string s = GetSerialString() + "->";
+#endif    
+
     if(asp_x==nullptr)
         s += "NULL";
     else

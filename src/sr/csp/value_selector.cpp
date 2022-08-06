@@ -27,10 +27,12 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
     constraints_to_query( constraints_to_query_ )
 {
     INDENT("V");
+	TRACE("Making value selector for ")(my_var)("\n"); 		
        
     list<unique_ptr<SYM::SetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_query )
-    {                               
+    {                        
+		TRACEC("Querying ")(c)(" for suggestion set\n");       
         unique_ptr<SYM::SetResult> r = c->GetSuggestedValues( assignments, my_var );
         ASSERT( r );
         rl.push_back(move(r));
@@ -52,9 +54,15 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
 #endif       
               
     if( sok )
+    {
+		TRACEC("Got suggestion ")(*s)(" - make queue from suggestion sets union\n"); 		
         SetupSuggestionGenerator( s );
+	}
     else
+    {
+		TRACEC("No suggestion - make default queue\n"); 		
         SetupDefaultGenerator();
+	}
 }
 
        
@@ -87,7 +95,6 @@ void ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value>> suggested )
      // alive without copying it. Even if we could deal with the slowness of a copy, 
      // we'd still get a crash because the initial suggestion_iterator would be
      // invalid for the copy. Could be unique_ptr in C++14 when we can move-capture
-    TRACE("At ")(my_var)(", got suggestion ")(*suggested)(" - rewriting queue\n"); 
     // Taking hint means new generator that only reveals the hint
     set<Value>::iterator suggestion_iterator = suggested->begin();
     values_generator = [=]() mutable -> Value

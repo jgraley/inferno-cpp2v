@@ -627,8 +627,9 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
             (void)e->Compare( xlink, solution_for_subordinates );
             compare_results.push_back( true );
         }
-        catch( ::Mismatch & )
+        catch( const ::Mismatch &e )
         {
+			TRACE("Caught ")(e)("\n");
             compare_results.push_back( false );
         }
 
@@ -745,9 +746,9 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
             if( plan.my_evaluators.count( agent ) )
                 CompareEvaluatorLinks( agent, &solution_for_subordinates, &solution_for_evaluators );                    
         }
-        catch( const ::Mismatch& mismatch )
+        catch( const ::Mismatch &e )
         {
-            TRACE("Caught Mismatch exception, retrying the lambda\n", i);    
+            TRACE("Caught ")(e)(", retrying the lambda\n");    
             continue; // deal with exception by iterating the loop 
         }     
                                         
@@ -826,9 +827,9 @@ SolutionMap AndRuleEngine::Compare( XLink root_xlink,
             }
             RegenerationPass( basic_solution, master_solution );
         }
-        catch( const ::Mismatch& e )
+        catch( const ::Mismatch &e )
         {                
-            TRACE(e)(" after recursion, trying next solution\n");
+            TRACE("Caught ")(e)(" after recursion, trying next solution\n");
             continue; // Get another solution from the solver
         }
         // We got a match so we're done. 

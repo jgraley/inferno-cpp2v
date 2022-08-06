@@ -137,7 +137,7 @@ Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orde
 
 string TeleportAgent::TeleportOperator::Render() const
 {
-    return "Teleport<" + agent->GetName() + ">(" + keyer->Render() + ")"; 
+    return agent->GetName() + "(" + keyer->Render() + ")"; 
 }
 
 
