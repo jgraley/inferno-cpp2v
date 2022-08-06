@@ -335,16 +335,15 @@ string DecidedQueryCommon::Range::GetTrace() const
 {
     string s;
     s += "Range(";
-    s += SSPrintf("container={%d}", container->size()) + ", ";
-            
     if( container )
+    {
+		s += SSPrintf("container-size=%d", container->size()) + ", ";    
         s += "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) + ", ";
-    
-    if( container )
         s += "end=@" + (end==container->end() ? string("END") : Trace(*end)) + ", ";
+    }
     
     s += "inclusive=" + Trace(inclusive) + ", ";
-        
+
     s += "which is [";
     bool first = true;
     for( ContainerInterface::iterator it = begin;
