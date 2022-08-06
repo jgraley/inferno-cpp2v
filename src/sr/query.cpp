@@ -333,32 +333,26 @@ bool DecidedQueryCommon::Range::operator==(const Range &o) const // Only require
 
 string DecidedQueryCommon::Range::GetTrace() const 
 {
-    string s;
-    s += "Range(";
+    list<string> vs;
     if( container )
     {
-		s += SSPrintf("container-size=%d", container->size()) + ", ";    
-        s += "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) + ", ";
-        s += "end=@" + (end==container->end() ? string("END") : Trace(*end)) + ", ";
+		vs.push_back( SSPrintf("container-size=%d", container->size()) );    
+        vs.push_back( "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) );
+        vs.push_back( "end=@" + (end==container->end() ? string("END") : Trace(*end)) );
     }
-    
-    s += "inclusive=" + Trace(inclusive) + ", ";
-
-    s += "which is [";
-    bool first = true;
+        
+    vs.push_back( "inclusive=" + Trace(inclusive) );
+	
+    list<string> vs2;
     for( ContainerInterface::iterator it = begin;
          it != end;
          ++it )
-    {
-        if( !first )
-            s += ", ";
-        first = false;
-        s += Trace(*it);
-    }
-    s += "] ";
+        vs2.push_back( Trace(*it) );
+    
+    vs.push_back( "which is "+Join(vs2, ", ", "[", "]" ) );
 
-    s += ")";
-    return s;
+    return "Range" + Join(vs, ", ", "(", ")" );
+
 }
 
 
