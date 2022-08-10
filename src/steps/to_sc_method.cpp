@@ -3,7 +3,7 @@
 #include "tree/sctree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
-#include "tree/typeof.hpp"
+#include "tree/hastype.hpp"
 #include "tree/misc.hpp"
 #include "inferno_agents.hpp"
 

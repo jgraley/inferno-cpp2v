@@ -4,7 +4,7 @@
 #include "tree/sctree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
-#include "tree/typeof.hpp"
+#include "tree/hastype.hpp"
 #include "steps/uncombable.hpp"
 #include "inferno_agents.hpp"
 
@@ -108,7 +108,7 @@ DetectCombableFor::DetectCombableFor()
     auto assignop = MakePatternNode<AssignmentOperator>();
     
     auto r_for = MakePatternNode<CombableFor>();
-    auto loopvar = MakePatternNode< TransformOf<InstanceIdentifier> >( &TypeOf::instance );
+    auto loopvar = MakePatternNode< TransformOf<InstanceIdentifier> >( &HasType::instance );
     auto type = MakePatternNode<Integral>();
     
     s_ufor->initialisation = init;
@@ -347,7 +347,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto cond_type = MakePatternNode<Type>();
     auto r_decl = MakePatternNode<Automatic>();
     auto id = MakePatternNode<BuildInstanceIdentifierAgent>("switch_value");
-    auto s_cond = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto s_cond = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
     
     // SlaveSearchReplace for default
     auto l1_s_body = MakePatternNode<Compound>();
@@ -602,7 +602,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     auto r_comp = MakePatternNode<StatementExpression>();
     auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("muxtemp");
     auto r_temp = MakePatternNode<Temporary>();
-    auto op2 = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto op2 = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
     auto type = MakePatternNode<Type>();
     auto r_if = MakePatternNode<If>();
     auto r_assignt = MakePatternNode<Assign>();
@@ -637,7 +637,7 @@ ExtractCallParams::ExtractCallParams()
     auto params = MakePatternNode< Star<MapOperand> >();
     auto s_param = MakePatternNode<MapOperand>();
     auto r_param = MakePatternNode<MapOperand>();
-    auto value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto value = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
     auto type = MakePatternNode<Type>();
     auto callee = MakePatternNode<Expression>();
     auto id = MakePatternNode<InstanceIdentifier>();

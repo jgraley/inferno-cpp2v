@@ -23,6 +23,6 @@ private:
 };
 
 // TODO
-// - All expressions to be TypeOf()-able
+// - All expressions to be HasType()-able
 
 #endif

@@ -7,17 +7,14 @@
 
 TreePtr<CPPTree::Identifier> GetIdentifier( TreePtr<CPPTree::Declaration> d );
 
-class GetDeclaration : public OutOfPlaceTransformation
+class HasDeclaration : public OutOfPlaceTransformation
 {
 public:
-    class TypeDeclarationNotFound : public ::Mismatch
-    {
-    };
-    class InstanceDeclarationNotFound : public ::Mismatch
-    {
-    };
+    class TypeDeclarationNotFound : public ::Mismatch {};
+    class InstanceDeclarationNotFound : public ::Mismatch {};
+    
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
-    static GetDeclaration instance;
+    static HasDeclaration instance;
 private:
 	TreePtr<CPPTree::UserType> Get( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
 	TreePtr<CPPTree::Instance> Get( TreePtr<Node> context, TreePtr<CPPTree::InstanceIdentifier> id );

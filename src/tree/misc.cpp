@@ -16,7 +16,7 @@ TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d )
         return TreePtr<Identifier>(); // was a declaration without an identifier, ie a base class
 }
 
-TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> root )
+TreePtr<Node> HasDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
 	if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>( root ) )
 		return Get( context, tid );
@@ -26,7 +26,7 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 		return TreePtr<Node>();
 }
 
-TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
+TreePtr<UserType> HasDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
 	Walk w(context, nullptr, nullptr);
 	for( const TreePtrInterface &n : w )
@@ -39,7 +39,7 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
 	throw TypeDeclarationNotFound();
 }
 
-TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
+TreePtr<Instance> HasDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
 	Walk w( context, nullptr, nullptr );
 	for( const TreePtrInterface &n : w )
@@ -52,17 +52,17 @@ TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceId
 	throw InstanceDeclarationNotFound();
 }
 
-GetDeclaration GetDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
+HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
-	TreePtr<Node> ut = GetDeclaration()( context, id );
+	TreePtr<Node> ut = HasDeclaration()( context, id );
 	while( TreePtr<Typedef> td = DynamicTreePtrCast<Typedef>(ut) )
 	{
 	    TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(td->type);
 	    if(ti)
-	        ut = GetDeclaration()( context, ti);
+	        ut = HasDeclaration()( context, ti);
 	    else
 	        return TreePtr<Record>(); // not a record
 	}
@@ -87,7 +87,7 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
     if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>( r ) )
         for( TreePtr<Base> b : ir->bases )
         {
-            TreePtr<Node> ut = GetDeclaration()( program, b->record );
+            TreePtr<Node> ut = HasDeclaration()( program, b->record );
             TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>(ut);
             ASSERT(ir);
             if( TreePtr<Instance> i = FindMemberByName( program, ir, name ) )

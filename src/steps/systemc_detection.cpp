@@ -1,7 +1,7 @@
 
 #include "systemc_detection.hpp"
 #include "tree/cpptree.hpp"
-#include "tree/typeof.hpp"
+#include "tree/hastype.hpp"
 #include "inferno_agents.hpp"
 #include "sr/agents/all.hpp"
 
@@ -72,7 +72,7 @@ DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicNamedFunction> r_dynamic )
     auto s_arg = MakePatternNode< MapOperand >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_dynamic->GetToken() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode< TransformOf<Expression> >( &HasType::instance ); 
                     
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
@@ -205,7 +205,7 @@ DetectSCNotifyImmediate::DetectSCNotifyImmediate()
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyImmediate>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode< TransformOf<Expression> >( &HasType::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
     s_call->callee = s_lookup;
@@ -230,7 +230,7 @@ DetectSCNotifyDelta::DetectSCNotifyDelta()
     auto s_zero_token = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode< TransformOf<Expression> >( &HasType::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
     s_call->callee = s_lookup;

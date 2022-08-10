@@ -3,20 +3,32 @@
 #include "type_db.hpp"
 #include "helpers/walk.hpp"
 #include "misc.hpp"
-#include "typeof.hpp"
+#include "hastype.hpp"
 
 using namespace CPPTree;
 
 
 #define INT 0
 
-TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
+TreePtr<Node> HasType::operator()( TreePtr<Node> c, TreePtr<Node> root )
+{
+	context = c;
+	auto e = TreePtr<CPPTree::Expression>::DynamicCast(root);
+	TreePtr<Node> n;
+	if( e ) // if the tree at root is not an expression, return nullptr
+		n = Get( e );
+	context = TreePtr<Node>();
+	return n;
+}
+
+
+TreePtr<Type> HasType::Get( TreePtr<Expression> o )
 {
     ASSERT(o);
     
     if( auto ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
-        TreePtr<Node> n = GetDeclaration()(context, ii);
+        TreePtr<Node> n = HasDeclaration()(context, ii);
         TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
         ASSERT(i);
         return i->type; 
@@ -97,14 +109,14 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     else 
     {
         throw UnsupportedExpressionMismatch();
-        //ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");
+        //ASSERT(0)("Unknown expression ")(*o)(", please add to HasType class");
         //ASSERTFAIL("");
     }
 }
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
+TreePtr<Type> HasType::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -185,13 +197,13 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
     else
     {
         throw UnsupportedOperatorMismatch();
-        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_db.inc), please add to TypeOf class");
+        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_db.inc), please add to HasType class");
         //ASSERTFAIL("");
     }
 }
 
 
-TreePtr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
+TreePtr<Type> HasType::GetStandard( Sequence<Type> &optypes )
 {
 	Sequence<Numeric> nums;
 	for( TreePtr<Type> optype : optypes )
@@ -202,14 +214,14 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 
     throw NumericalOperatorUsageMismatch1();
 //	if( optypes.size() == 2 )
-//		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
+//		ASSERT(0)("Standard operator unknown usage, please add to HasType class");
 //	else
-//		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
+//		ASSERT(0)("Standard operator unknown usage, please add to HasType class");
 //    ASSERTFAIL();
 }
 
 
-TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
+TreePtr<Type> HasType::GetStandard( Sequence<Numeric> &optypes )
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
@@ -235,7 +247,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 		TreePtr<Integral> intop = DynamicTreePtrCast<Integral>(optype);
         if( !intop )
             throw NumericalOperatorUsageMismatch2();
-        //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
+        //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to HasType class" );
 
         // Do a max algorithm on the width
 		auto siwidth = DynamicTreePtrCast<SpecificInteger>(intop->width);
@@ -255,7 +267,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 		else
         {
             throw NumericalOperatorUsageMismatch4();
-			//ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to TypeOf class");
+			//ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to HasType class");
         }
 	}
 
@@ -283,7 +295,7 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 }
 
 
-TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes )
+TreePtr<Type> HasType::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes )
 {
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
@@ -319,12 +331,12 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
     else
     {
         throw UnsupportedSpecialMismatch();
-        //ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to TypeOf class");
+        //ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to HasType class");
         //ASSERTFAIL("");
     }
 }
 
-TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
+TreePtr<Type> HasType::GetLiteral( TreePtr<Literal> l )
 {
     if( auto si = DynamicTreePtrCast<SpecificInteger>(l) )
     {
@@ -364,7 +376,7 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     else
     {
         throw UnsupportedLiteralMismatch();
-        //ASSERT(0)("Unknown literal ")(*l)(", please add to TypeOf class");
+        //ASSERT(0)("Unknown literal ")(*l)(", please add to HasType class");
         //ASSERTFAIL("");
     }
 }
@@ -372,7 +384,7 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-TreePtr<Expression> TypeOf::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call )
+TreePtr<Expression> HasType::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call )
 {
 	context = c;
 	TreePtr<Expression> e;
@@ -388,5 +400,5 @@ TreePtr<Expression> TypeOf::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> ca
     return e;
 }
 
-TypeOf TypeOf::instance; 
+HasType HasType::instance; 
 

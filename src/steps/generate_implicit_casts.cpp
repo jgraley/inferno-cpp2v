@@ -9,7 +9,7 @@
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
-#include "tree/typeof.hpp"
+#include "tree/hastype.hpp"
 
 using namespace CPPTree;
 using namespace Steps;
@@ -26,7 +26,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     // simply insert a cast to the declaration param type at the root of the 
     // expression.
 	auto s_call = MakePatternNode<Call>();
-	auto callee = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+	auto callee = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
 	s_call->callee = callee;
 	auto s_proc = MakePatternNode<CallableParams>();
 	callee->pattern = s_proc;
@@ -39,7 +39,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	s_proc->members = (s_param, s_other_params);
 	auto s_arg = MakePatternNode< MapOperand >();
 	s_arg->identifier = param_id;
-	auto s_arg_value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+	auto s_arg_value = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
 	s_arg->value = s_arg_value;
 	//s_arg_value->pattern = MakePatternNode< Type >();
 	auto s_arg_type = MakePatternNode< Negation<Type> >();

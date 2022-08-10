@@ -6,7 +6,7 @@
  */
 
 #include "validate.hpp"
-#include "typeof.hpp"
+#include "hastype.hpp"
 #include "misc.hpp"
 #include "cpptree.hpp"
 
@@ -65,13 +65,13 @@ void Validate::operator()( TreePtr<Node> context,
             TRACE("validating finality of ")(*x)(" as %d\n", (int)x->IsFinal() );
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(wit);
 
-			// Check that we can successfully call TypeOf on every Expression
+			// Check that we can successfully call HasType on every Expression
 			if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(x) )
-			    (void)TypeOf::instance(context, e);
+			    (void)HasType::instance(context, e);
 
 			// Check that every identifier has a declaration
 			if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast<InstanceIdentifier>(x) )
-			    (void)GetDeclaration()(context, ii);
+			    (void)HasDeclaration()(context, ii);
 
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.

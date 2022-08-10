@@ -4,7 +4,7 @@
 #include "tree/sctree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
-#include "tree/typeof.hpp"
+#include "tree/hastype.hpp"
 #include "tree/misc.hpp"
 #include "inferno_agents.hpp"
 
@@ -197,7 +197,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
 static TreePtr<Statement> MakeResetAssignmentPattern()
 {
     auto ass = MakePatternNode<Assign>();
-    auto decl = MakePatternNode< TransformOf<InstanceIdentifier> >( &GetDeclaration::instance );
+    auto decl = MakePatternNode< TransformOf<InstanceIdentifier> >( &HasDeclaration::instance );
     decl->pattern = MakePatternNode<LocalVariable>();
     ass->operands = (decl, MakePatternNode<Literal>());    
     return ass;
