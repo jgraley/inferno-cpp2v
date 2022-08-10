@@ -12,7 +12,7 @@ using namespace SR;
  
 #define ALIGNMENT_BITS 3 
 
-#define SUPPRESS_SATELLITE_NUMBERS_XLINK
+//#define SUPPRESS_SATELLITE_NUMBERS_XLINK
 
 // Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
