@@ -9,5 +9,12 @@ that some parts of the logs are unimportant.
 
 ### A full serial number
 
+Eg `#T12-561`
+
 `#[A-Z]?\d*-\d+`
 
+### A satellite serial number
+
+Eg `#3->`
+
+`#\d+->`
