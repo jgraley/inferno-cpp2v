@@ -5,7 +5,7 @@
 # the result cpp diverges from the reference cpp after a certain step.
 # You will need beyond compare 4 pro for this.
 #
-# Run as bc_show_divergent_sr_step.sh <test base name> <before step> <after step>
+# Run as bc/show_divergent_sr_step.sh <test base name> <before step> <after step>
 # <before step> is 0-padded step number from before the divergence
 # <after step> is 0-padded step number from after the divergence
 #
