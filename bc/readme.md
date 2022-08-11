@@ -1,6 +1,16 @@
-# Beyond Compare utilities
+# Beyond Compare stuff
 
 For users of Beyond Compare (assumes v4 pro)
+
+## Scripts
+
+### `show_divergent_sr_step.sh`
+
+For when an srtest fails after a certain step. Shows a 3-way diff of the cpp outputs in BC. See script for details.
+
+### `show_feature_logs.sh`
+
+To see the effect of a feature flag on the contents of the logs. See script for details.
 
 ## Regexes
 
