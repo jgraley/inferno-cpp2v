@@ -6,7 +6,7 @@ For users of Beyond Compare (assumes v4 pro)
 
 ### `show_divergent_sr_step.sh`
 
-For when an srtest fails after a certain step. Shows a 3-way diff of the cpp outputs in BC. See script for details.
+For when an `srtest` fails after a certain step. Shows a 3-way diff of the cpp outputs in BC. See script for details.
 
 ### `show_feature_logs.sh`
 
