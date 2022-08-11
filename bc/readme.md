@@ -26,7 +26,7 @@ that some parts of the logs are unimportant.
  - Check Regular Expression
  - and add a regex
 
-### A full serial number
+### A normal serial number
 
 Eg `#T12-561`
 
