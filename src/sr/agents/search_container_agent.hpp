@@ -24,7 +24,6 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             TreePtr<Node> key_node );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const = 0;
-    virtual XLink GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const {};
     virtual Block GetGraphBlockInfo() const;
@@ -46,7 +45,6 @@ class AnyNodeAgent : public SearchContainerAgent
 {
     class NoParentMismatch : public Mismatch {};
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const;
-    virtual XLink GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const;                                                                                        
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual Block GetGraphBlockInfo() const;
 };
@@ -82,7 +80,6 @@ class StuffAgent : public SearchContainerAgent
 {
 public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const;
-    virtual XLink GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const;                                          
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       

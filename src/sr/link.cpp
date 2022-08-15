@@ -50,15 +50,6 @@ PatternLink::PatternLink(const Agent *parent_agent,
 }
 
 
-PatternLink PatternLink::FromWalkIterator( const Walk::iterator &wit, PatternLink root, int generations )
-{
-    TreePtr<Node> parent_pattern = wit.GetParent(generations);
-    const TreePtrInterface *pparent = wit.GetNodePointerInParent(generations);
-    ASSERTS( root || (parent_pattern && pparent) );
-    return parent_pattern ? PatternLink( parent_pattern, pparent ) : root;    
-}
-
-              
 PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
 {
     shared_ptr< TreePtr<Node> > sp_tp_pattern = make_shared< TreePtr<Node> >( tp_pattern ); 
@@ -254,15 +245,6 @@ XLink::XLink( const LocatedLink &l ) :
 }
 
 
-XLink XLink::FromWalkIterator( const Walk::iterator &wit, XLink root, int generations )
-{
-    TreePtr<Node> parent_x = wit.GetParent(generations);
-    const TreePtrInterface *px = wit.GetNodePointerInParent(generations);
-    ASSERTS( root || (parent_x && px) );
-    return parent_x ? XLink( parent_x, px, WHODAT() ) : root;    
-}
-
-              
 XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 {
     shared_ptr< TreePtr<Node> > sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 

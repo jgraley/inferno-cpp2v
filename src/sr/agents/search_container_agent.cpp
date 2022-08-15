@@ -73,12 +73,6 @@ shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink keyer_
 }
 
 
-XLink AnyNodeAgent::GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const
-{
-    return XLink(keyer_xlink.GetChildX(), &*it);
-}
-
-
 SYM::Over<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
 {
     PatternLink terminus_plink(this, &terminus);
@@ -104,14 +98,6 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink keyer_xl
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
     return make_shared<Walk>( keyer_xlink.GetChildX(), nullptr, nullptr );
-}
-
-
-XLink StuffAgent::GetXLinkFromIterator( XLink keyer_xlink, ContainerInterface::iterator it ) const
-{
-    const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(it.GetUnderlyingIterator());
-    ASSERT( pwtt );
-    return XLink::FromWalkIterator( *pwtt, keyer_xlink );
 }
 
 
