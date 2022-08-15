@@ -50,15 +50,6 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
         }
     }
     
-    if(!found_one_already)
-    {
-        // If there's no parent we must be at the root of the x tree,
-        // so simulate a link that allows anything (because in fact
-        // you can replace the root node with anything).
-        auto node = MakeTreeNode<Node>();
-        XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct
-        return { { PatternLink(this, GetPointer()), tp_xlink } };
-    }
     ASSERTFAIL("Failed to generate a link\n");
 }
 
