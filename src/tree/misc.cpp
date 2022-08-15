@@ -72,7 +72,7 @@ TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentif
 
 
 // Hunt through a record and its bases to find the named member (actually, render string)
-TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r, string name )
+TreePtr<Instance> FindMemberByName( TreePtr<Node> context, TreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
     
@@ -87,10 +87,10 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
     if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>( r ) )
         for( TreePtr<Base> b : ir->bases )
         {
-            TreePtr<Node> ut = HasDeclaration()( program, b->record );
+            TreePtr<Node> ut = HasDeclaration()( context, b->record );
             TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>(ut);
             ASSERT(ir);
-            if( TreePtr<Instance> i = FindMemberByName( program, ir, name ) )
+            if( TreePtr<Instance> i = FindMemberByName( context, ir, name ) )
                 return i;
         }
     

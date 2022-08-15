@@ -25,7 +25,7 @@ private:
 TreePtr<CPPTree::Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
-TreePtr<CPPTree::Instance> FindMemberByName( TreePtr<CPPTree::Program> program, TreePtr<CPPTree::Record> r, string name );
+TreePtr<CPPTree::Instance> FindMemberByName( TreePtr<Node> context, TreePtr<CPPTree::Record> r, string name );
 
 // concatenate sequences by adding them, like strings etc
 // TODO move to common/
