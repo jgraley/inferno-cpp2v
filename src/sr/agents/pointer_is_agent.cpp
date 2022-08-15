@@ -25,10 +25,10 @@ LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
 	TreePtr<Node> ptr_arch = px->MakeValueArchetype();
 
 	// We need an XLink to the archetype
-	XLink tp_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
+	XLink arch_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
 	
 	// Return a located link
-	return { { PatternLink(this, GetPointer()), tp_xlink } };
+	return { { PatternLink(this, GetPointer()), arch_xlink } };
 }
 
 
