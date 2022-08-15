@@ -17,40 +17,18 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 
 LocatedLink PointerIsAgent::RunTeleportQuery( XLink keyer_xlink ) const
 {
-    TreePtr<Node> context = master_scr_engine->GetOverallMaster()->GetContext();
-    if( keyer_xlink.GetChildX() == context )
-    {
-        // Imagine that the root is pointed to by a TreePtr<Node>
-        // (in this case wit.GetNodePointerInParent() would return NULL)
-        auto node = MakeTreeNode<Node>();
-        XLink tp_xlink = XLink::CreateDistinct(node);	// Cache will un-distinct        
-        return LocatedLink(PatternLink(this, GetPointer()), tp_xlink);
-    }
-    
-    // Do a walk over context (the whole x tree)
-    bool found_one_already = false;
-    Walk e( context, nullptr, nullptr ); 
-    for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
-    {
-        if( *wit == keyer_xlink.GetChildX() ) // found ourself TODO use find()
-        {            
-            if(found_one_already)
-                throw Mismatch(); // X has multiple parents - ambiguous, so don't match
-            found_one_already = true;
-                
-            // Get the pointer that points to us
-            const TreePtrInterface *px = wit.GetNodePointerInParent();    
-            ASSERT(px);     
-            // Make an architypical node matching the pointer's type
-            TreePtr<Node> ptr_arch = px->MakeValueArchetype();
+    // Get the pointer that points to us - now from the keyer x link
+    const TreePtrInterface *px = keyer_xlink.GetXPtr();
+	ASSERT(px);     
+	
+	// Make an archetypical node matching the pointer's type
+	TreePtr<Node> ptr_arch = px->MakeValueArchetype();
 
-            // Stick that in your pipe + smoke it
-            XLink tp_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
-            return { { PatternLink(this, GetPointer()), tp_xlink } };
-        }
-    }
-    
-    ASSERTFAIL("Failed to generate a link\n");
+	// We need an XLink to the archetype
+	XLink tp_xlink = XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
+	
+	// Return a located link
+	return { { PatternLink(this, GetPointer()), tp_xlink } };
 }
 
 
