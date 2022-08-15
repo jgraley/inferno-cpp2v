@@ -14,10 +14,6 @@
 
 #include <list>
 
-#define ENABLE_UNIQUIFY_DOMAIN_EXTENSION
-
-//#define RUN_SLAVES_LATER
-
 using namespace SR;
 using namespace std;
 
