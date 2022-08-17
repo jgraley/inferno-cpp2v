@@ -147,6 +147,9 @@ public:
         // queries.
         ContainerInterface::iterator my_container_it;
         
+        // Does this XLink declare the child?
+        bool declarative_link;
+               
         string GetTrace() const;
     };
     

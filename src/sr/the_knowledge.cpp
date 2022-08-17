@@ -262,6 +262,8 @@ void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
     nugget.containment_context = Nugget::ROOT;
     nugget.my_container_front = root_xlink;
     nugget.my_container_back = root_xlink;
+    nugget.declarative_link = false;
+    
     AddLink( mode, root_xlink, nugget );
 }
 
@@ -337,6 +339,8 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
     nugget.parent_xlink = xlink;
     nugget.my_container_front = child_xlink;
     nugget.my_container_back = child_xlink;
+    set<const TreePtrInterface *> declared = xlink.GetChildX()->GetDeclared();
+    nugget.declarative_link = (declared.count( p_x_singular ) > 0);
     AddLink( mode, child_xlink, nugget );
 }
 
@@ -366,6 +370,9 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
         else
             nugget.my_sequence_successor = XLink::OffEndXLink;        
             
+        set<const TreePtrInterface *> declared = xlink.GetChildX()->GetDeclared();
+        nugget.declarative_link = (declared.count( &*xit ) > 0);
+
         AddLink( mode, child_xlink, nugget );
         
         xit_predecessor = xit;
@@ -387,6 +394,10 @@ void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, 
         nugget.my_container_front = XLink( xlink.GetChildX(), &*(x_col->begin()) );
         // Note: in real STL containers, one would use *(x_col->rbegin())
         nugget.my_container_back = XLink( xlink.GetChildX(), &(x_col->back()) );
+        
+        set<const TreePtrInterface *> declared = xlink.GetChildX()->GetDeclared();
+        nugget.declarative_link = (declared.count( &*xit ) > 0);
+
         AddLink( mode, child_xlink, nugget );
     }
 }
