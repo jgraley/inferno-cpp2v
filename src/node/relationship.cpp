@@ -3,9 +3,9 @@
 
 #include <set>
 
-#include "properties.hpp"
+#include "relationship.hpp"
 
-set<const TreePtrInterface *> Properties::GetDeclared() 
+set<const TreePtrInterface *> ChildRelationship::GetDeclared() 
 {
 	// By default none of the children are declared
 	return set<const TreePtrInterface *> {};

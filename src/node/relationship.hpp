@@ -1,6 +1,5 @@
-#ifndef PROPERTIES_HPP
-#define PROPERTIES_HPP
-
+#ifndef RELATIONSHIP_HPP
+#define RELATIONSHIP_HPP
 
 #include <set>
 
@@ -8,7 +7,7 @@ using namespace std;
 
 class TreePtrInterface;
 
-class Properties
+class ChildRelationship
 {
 public:	
 	// Return double pointers (via TreePtrInterface) to disambiguate in 

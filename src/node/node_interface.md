@@ -24,7 +24,7 @@ In general, we try to express as much information as possible through
  
 For example if a node naturally seems to contain a boolean or enum, we will prefer to either
  - redefine the node as intermediate, and derive a final node for each option or
- - create a new intermediate and final nodes called eg `Properties`, and add a child pointer to the new intermediate to our node
+ - create a new intermediate and final nodes called eg `Properties` or `Attributes`, and add a child pointer to the new intermediate to our node
  
 Both of these approaches remove the need for a bool/enum _within_ a node. The information has been represented in the topological aspect of the tree. Sometimes it is inconvenient to represent data topologically, for example with int, float and string. So to be topologically-oriented it is sufficient to minimise the number of nodes defined with such data members.
 
@@ -93,7 +93,7 @@ The node interface requires that if we do `X = Y->Duplicate(Y)`, then `X->IsLoca
 
 An unfortunate but necessary (I believe) wrinkle in the `Duplicate()` interface is that, to enable the function to be virtual, we must make it a non-static member of the node we wish to duplicate, *but* we cannot implement a shallow-copy version without access to the `shared_ptr<>` that manages the storage. To just create a new `shared_ptr<X>` from a `X *` would register the object `X` with the `shared_ptr<>` implementation code a second time, possibly leading to double deletion. I suspect a parasitic smart pointer scheme might not have this restriction. At present, `Duplicate()` must always be called as `PX->Duplicate(PX)`. _But see #567_ 
 
-### 3.5 `Properties`
+### 3.5 `Relationship`
 
 Interface enables nodes to indicate special status of child nodes, eg current node declares identifier child node. _In development._
 
