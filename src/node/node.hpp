@@ -9,6 +9,7 @@
 #include "renderable.hpp"
 #include "graphable.hpp"
 #include "coloured.hpp"
+#include "properties.hpp"
 #include "common/serial.hpp"
 #include "common/orderable.hpp"
 
@@ -29,7 +30,8 @@ struct NodeBases : Magic,
                    Orderable,
                    Itemiser,
                    Cloner,
-                   SerialNumber
+                   SerialNumber,
+                   Properties
 {
 };
 
