@@ -93,7 +93,11 @@ The node interface requires that if we do `X = Y->Duplicate(Y)`, then `X->IsLoca
 
 An unfortunate but necessary (I believe) wrinkle in the `Duplicate()` interface is that, to enable the function to be virtual, we must make it a non-static member of the node we wish to duplicate, *but* we cannot implement a shallow-copy version without access to the `shared_ptr<>` that manages the storage. To just create a new `shared_ptr<X>` from a `X *` would register the object `X` with the `shared_ptr<>` implementation code a second time, possibly leading to double deletion. I suspect a parasitic smart pointer scheme might not have this restriction. At present, `Duplicate()` must always be called as `PX->Duplicate(PX)`. _But see #567_ 
 
-### 3.5 Notes
+### 3.5 `Properties`
+
+Interface enables nodes to indicate special status of child nodes, eg current node declares identifier child node. _In development._
+
+### 3.6 Notes
 
 Base classes `Magic` and `Traceable` are just for debugging - magic tests for "this" pointer corruption and/or memory corruption and Traceable provides a cast to std::string.
 
