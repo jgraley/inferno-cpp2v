@@ -354,6 +354,8 @@ struct Instance : Declaration,
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
+    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
+
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -446,6 +448,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
 	NODE_FUNCTIONS_FINAL
     TreePtr<LabelIdentifier> identifier; ///< a handle for the label to be referenced elewhere
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
+    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 };
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -598,6 +601,7 @@ struct UserType : Declaration
 { 
     NODE_FUNCTIONS
     TreePtr<TypeIdentifier> identifier; ///< The handle to the type that has been declared
+    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 };
 
 /// Represents a typedef. 
