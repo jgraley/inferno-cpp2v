@@ -146,21 +146,29 @@ public:
         // IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
         // queries.
         ContainerInterface::iterator my_container_it;
-        
-        // Does this XLink declare the child?
-        bool declarative_link;
                
         string GetTrace() const;
     };
     
+    class NodeNugget : public Traceable
+    {
+    public:		
+		// Declarative XLinks onto our node. Note that our node is the
+		// child X of this link. To get the declarer node, you'll need 
+		// to use eg Nugget::parent_xlink.GetChildX(). Why have I done 
+		// this? So that this info is unambiguous across parallel links:
+		// We'll uniquely specify the correct one if only one is a 
+		// declaring link. Taking parent discards that info.
+		set<XLink> declarers;
+		
+        string GetTrace() const;
+    };
+
     const Nugget &GetNugget(XLink xlink) const;
     bool HasNugget(XLink xlink) const;
-    
-    // Bit of a hack: we're going to allow subcontainers to be used in
-    // symbolic evaluation for a while, even though we can't get
-    // nuggets for them because they are created on the fly. Ideally,
-    // we won't create X nodes on the fly.
-    bool HasNuggetOrIsSubcontainer(XLink xlink) const;
+
+    const NodeNugget &GetNodeNugget(TreePtr<Node> node) const;
+    bool HasNodeNugget(TreePtr<Node> node) const;
 
     void DetermineDomain( XLink root_xlink );
     void ExtendDomain( PatternLink plink );
@@ -191,8 +199,11 @@ public:
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
     
-    // Child-to-nugget-of-knowledge map
+    // XLink-to-nugget-of-knowledge map
     unordered_map<XLink, Nugget> nuggets;
+
+    // Node-to-nugget-of-knowledge map
+    map<TreePtr<Node>, NodeNugget> node_nuggets;
 
 private:    
     // Depth-first ordering
