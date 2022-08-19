@@ -17,7 +17,7 @@ static void Output( TreePtr<Node> root, string name )
     string path = ReadArgs::outfile + name + string(".dot");
     TRACE("Generating graph ")(path)("\n");    
     Graph g( path, __FILE__ );
-    g( root ); 
+    g.GenerateGraph( root ); 
 }
 
 /// Output a graph for search and replace documentation. For eg section 2.3a use major=2

@@ -74,9 +74,9 @@ public:
 
     Graph( string of, string title );
     ~Graph();
-    void operator()( SR::VNTransformation *root ); // Graph the search/replace pattern
-	void operator()( const Figure &figure ); // graph just the specified ojects
-    TreePtr<Node> operator()( TreePtr<Node> root ); // graph the subtree under root node
+    void GenerateGraph( SR::VNTransformation *root ); // Graph the search/replace pattern
+	void GenerateGraph( const Figure &figure ); // graph just the specified ojects
+    TreePtr<Node> GenerateGraph( TreePtr<Node> root ); // graph the subtree under root node
 
 private:
     struct MyBlock : Graphable::Block

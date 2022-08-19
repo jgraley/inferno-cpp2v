@@ -986,6 +986,6 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 	TRACE("   Subordinates (my multiplicity engines):\n");    
     subordinates_lambda( plan.my_multiplicity_engines, Graph::LINK_MULTIPLICITY );
 	TRACE("Ready to render\n");
-	graph(figure);
+	graph.GenerateGraph(figure);
 }
 

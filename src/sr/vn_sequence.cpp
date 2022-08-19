@@ -111,7 +111,7 @@ void VNSequence::ForSteps( function<void(int)> body )
 
 void VNSequence::DoGraph( int step_index, Graph &graph ) const
 {
-    graph( steps[step_index].get() );
+    graph.GenerateGraph( steps[step_index].get() );
 }
 
 

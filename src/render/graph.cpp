@@ -69,7 +69,7 @@ Graph::~Graph()
 }
 
 
-void Graph::operator()( SR::VNTransformation *root )
+void Graph::GenerateGraph( SR::VNTransformation *root )
 {
     string s;
     s += "// -------------------- transformation figure --------------------\n";
@@ -91,7 +91,7 @@ void Graph::operator()( SR::VNTransformation *root )
 }
 
 
-void Graph::operator()( const Figure &figure )
+void Graph::GenerateGraph( const Figure &figure )
 {        
     // Compile handy "all"s: Figure::Agents and Graphables
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
@@ -247,7 +247,7 @@ void Graph::operator()( const Figure &figure )
 }
 
 
-TreePtr<Node> Graph::operator()( TreePtr<Node> root )
+TreePtr<Node> Graph::GenerateGraph( TreePtr<Node> root )
 {
     string s;
     s += "// -------------------- node figure --------------------\n";
@@ -1056,6 +1056,3 @@ string Graph::MakeHTMLForGraphViz(string html)
 {
     return "<" + html + ">";
 }
-
-
-

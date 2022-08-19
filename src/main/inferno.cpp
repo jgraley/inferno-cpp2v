@@ -251,7 +251,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr, 
           [this]()
           { 
-              Graph( ReadArgs::outfile, ReadArgs::outfile )( algo->program ); 
+              Graph( ReadArgs::outfile, ReadArgs::outfile ).GenerateGraph( algo->program ); 
           } }
     );
     
@@ -515,7 +515,7 @@ void Inferno::RunTransformationStep(const Step &sp)
         r( &program );     
         Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
                  ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
-        g( program );    
+        g.GenerateGraph( program );    
     }           
 }
 
