@@ -2,7 +2,7 @@
 #define SPLIT_DISJUNCTIONS_HPP
 
 #include "pattern_transformation_common.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "search_replace.hpp"
 #include "scr_engine.hpp"
 #include "agents/agent.hpp"

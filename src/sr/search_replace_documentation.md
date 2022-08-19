@@ -6,11 +6,11 @@ These patterns are thmselves trees, similar to program trees, but with a number 
 
 ## 1 `VNTransfomation` and `VNSequence`
 
-The generic search and replace implementation may be found in the `VNSequence` and `VNTransformation` classes and a number of supporting classes. A `VNTransformation` object is configured by supplying a search pattern and a replace pattern, both in the form of trees. One or more `VNTransformation` objects must be placed in a `VNSequence` object. This may be used to plan and then execute a sequence of transformations.
+The generic search and replace implementation may be found in the `VNSequence` and `VNStep` classes and a number of supporting classes. A `VNStep` object is configured by supplying a search pattern and a replace pattern, both in the form of trees. One or more `VNStep` objects must be placed in a `VNSequence` object. This may be used to plan and then execute a sequence of transformations.
 
-### 1.1 Configuring `VNTransformation`
+### 1.1 Configuring `VNStep`
 
-The first two argument to `VNTransformation::Configure()` must be one of `SEARCH_REPLACE` or `COMPARE_REPLACE`. This is followed by the search pattern and the replace pattern. Each pattern is a pointer to the root of a subtree of nodes. As with Vida Nova program trees, branches are allowed to merge, making them strictly speaking acyclic directed graphs, but we call them trees in line with compiler parlance. 
+The first two argument to `VNStep::Configure()` must be one of `SEARCH_REPLACE` or `COMPARE_REPLACE`. This is followed by the search pattern and the replace pattern. Each pattern is a pointer to the root of a subtree of nodes. As with Vida Nova program trees, branches are allowed to merge, making them strictly speaking acyclic directed graphs, but we call them trees in line with compiler parlance. 
 
 If `SEARCH_REPLACE` is specified, `VNTransfomation` will search input trees for an occurrence of the search pattern and replace it with a duplicate of the replace pattern if found. If `COMPARE_REPLACE` is specified, `VNTransfomation` will compare input trees with the search pattern and replace it with a duplicate of the replace pattern if it matches.
 

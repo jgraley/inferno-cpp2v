@@ -7,7 +7,7 @@
 
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
-#include "sr/vn_transformation.hpp"
+#include "sr/vn_step.hpp"
 
 namespace Steps {
 
@@ -17,7 +17,7 @@ using namespace SR;
 /** We look for the decl and remeove it since the inferno
  Node does not require declaration. Then just switch each appearance
  over to the new node, using a slave */
-class DetectSCType : public VNTransformation 
+class DetectSCType : public VNStep 
 {
 public:
     DetectSCType( TreePtr< SCTree::SCNamedConstruct > lr_scnode );
@@ -29,28 +29,28 @@ public:
  Node does not require declaration. Then replace all class nodes
  that inherit from the suppleid base with the new inferno node and 
  remove the base */
-class DetectSCBase : public VNTransformation 
+class DetectSCBase : public VNStep 
 {
 public:
     DetectSCBase( TreePtr< SCTree::SCNamedRecord > lr_scclass );
 };
 
 
-class DetectSCDynamic : public VNTransformation
+class DetectSCDynamic : public VNStep
 {
 public:
     DetectSCDynamic( TreePtr<SCTree::SCDynamicNamedFunction> r_dynamic );
 };
 
 
-class DetectSCStatic : public VNTransformation
+class DetectSCStatic : public VNStep
 {
 public:
     DetectSCStatic( TreePtr<SCTree::SCNamedFunction> r_static );
 };
 
 
-class DetectSCDelta : public VNTransformation
+class DetectSCDelta : public VNStep
 {
 public:
     DetectSCDelta( TreePtr<SCTree::SCNamedFunction> r_delta );
@@ -62,14 +62,14 @@ public:
  Node does not require declaration. Then replace all calls to 
  the function with the explicit statement node. Bring arguments
  across by name match as per Inferno's MapOperator style. */
-class DetectTerminationFunction : public VNTransformation
+class DetectTerminationFunction : public VNStep
 {
 public:
     DetectTerminationFunction( TreePtr<SCTree::TerminationFunction> r_tf );    
 };
 
 
-class DetectSCProcess : public VNTransformation
+class DetectSCProcess : public VNStep
 {
 public:
     DetectSCProcess( TreePtr< SCTree::Process > lr_scprocess );
@@ -80,7 +80,7 @@ public:
 /// spot SystemC notify() method by its name and replace with inferno node 
 /** Look for myevent.notify() and replace with Notify->myevent. No need to 
     eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotifyImmediate : public VNTransformation  
+class DetectSCNotifyImmediate : public VNStep  
 {
 public:
     DetectSCNotifyImmediate();
@@ -90,7 +90,7 @@ public:
 /// spot SystemC notify(SC_ZERO_TIME) method by its name and replace with inferno node 
 /** Look for myevent.notify(SC_ZERO_TIME) and replace with Notify->myevent. No need to 
     eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotifyDelta : public VNTransformation  
+class DetectSCNotifyDelta : public VNStep  
 {
 public:
     DetectSCNotifyDelta();
@@ -99,7 +99,7 @@ public:
 
 /// Remove constructors in SC modules that are now empty thanks to earlier steps
 /// Must also remove explicit calls to constructor (which would not do anything)
-class RemoveEmptyModuleConstructors : public VNTransformation
+class RemoveEmptyModuleConstructors : public VNStep
 {
 public:
     RemoveEmptyModuleConstructors();
@@ -109,7 +109,7 @@ public:
 /// Remove top-level instances that are of type void
 /** isystemc.h declares void variables to satisfy parser. Hoover them all up
     efficiently here. */
-class RemoveVoidInstances : public VNTransformation
+class RemoveVoidInstances : public VNStep
 {
 public:
     RemoveVoidInstances();
@@ -123,7 +123,7 @@ public:
 class DetectAllSCTypes
 {
 public:
-    static void Build( vector< shared_ptr<VNTransformation> > *sequence );
+    static void Build( vector< shared_ptr<VNStep> > *sequence );
 };
 
 };

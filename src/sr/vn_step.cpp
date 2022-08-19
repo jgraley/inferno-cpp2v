@@ -1,4 +1,4 @@
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "search_replace.hpp"
 #include "scr_engine.hpp"
 #include "ptrans/combine_patterns.hpp"
@@ -8,7 +8,7 @@
 
 using namespace SR;
 
-void VNTransformation::Configure( TransformationType type,
+void VNStep::Configure( StepType type,
                                   TreePtr<Node> scp,
                                   TreePtr<Node> rp )
 {
@@ -30,7 +30,7 @@ void VNTransformation::Configure( TransformationType type,
 }                                  
 
 
-PatternTransformationVector VNTransformation::GetAllPatternTrans()
+PatternTransformationVector VNStep::GetAllPatternTrans()
 {
     PatternTransformationVector ptv;
     // Transformations to make life easier for the user
@@ -43,104 +43,104 @@ PatternTransformationVector VNTransformation::GetAllPatternTrans()
 }
 
 
-void VNTransformation::PatternTransformations()
+void VNStep::PatternTransformations()
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     PatternTransformationVector ptv = GetAllPatternTrans();
     
     ptv(*this);
 }
 
 
-void VNTransformation::PlanningStageOne( VNSequence *vn_sequence_ )
+void VNStep::PlanningStageOne( VNSequence *vn_sequence_ )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( vn_sequence_ );
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     vn_sequence = vn_sequence_;
     top_level_engine->PlanningStageOne(vn_sequence);
 }
 
 
-void VNTransformation::PlanningStageTwo()
+void VNStep::PlanningStageTwo()
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->PlanningStageTwo();
 }
 
 
-void VNTransformation::PlanningStageThree()
+void VNStep::PlanningStageThree()
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->PlanningStageThree();
 }
 
 
-void VNTransformation::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+void VNStep::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->PlanningStageFive(knowledge);
 }
 
 
-void VNTransformation::SetMaxReps( int n, bool e ) 
+void VNStep::SetMaxReps( int n, bool e ) 
 { 
     SCREngine::SetMaxReps(n, e); 
 }
 
 
-void VNTransformation::SetStopAfter( vector<int> ssa, int d )
+void VNStep::SetStopAfter( vector<int> ssa, int d )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->SetStopAfter( ssa, d );
 }  
 
 
-void VNTransformation::Transform( TreePtr<Node> *proot )
+void VNStep::Transform( TreePtr<Node> *proot )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->operator()( *proot, proot );
 }                                   
 
-Graphable::Block VNTransformation::GetGraphBlockInfo() const
+Graphable::Block VNStep::GetGraphBlockInfo() const
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     return top_level_engine->GetGraphBlockInfo();
 }  
 
 
-string VNTransformation::GetGraphId() const
+string VNStep::GetGraphId() const
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     return top_level_engine->GetGraphId();
 }  
 
 
-void VNTransformation::GenerateGraphRegions( Graph &graph ) const
+void VNStep::GenerateGraphRegions( Graph &graph ) const
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     return top_level_engine->GenerateGraphRegions( graph );
 }  
 
 
-shared_ptr<CompareReplace> VNTransformation::GetTopLevelEngine() const
+shared_ptr<CompareReplace> VNStep::GetTopLevelEngine() const
 {
     ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
+    ASSERT( top_level_engine )("VNStep needs to be configured before use");
     return top_level_engine;
 }
 
 
-void VNTransformation::SetTopLevelEngine( shared_ptr<CompareReplace> tle )
+void VNStep::SetTopLevelEngine( shared_ptr<CompareReplace> tle )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( tle )("Bad tle ptr");

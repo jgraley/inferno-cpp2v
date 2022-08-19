@@ -1,5 +1,5 @@
-#ifndef VN_TRANSFORMATION_HPP
-#define VN_TRANSFORMATION_HPP
+#ifndef VN_STEP_HPP
+#define VN_STEP_HPP
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -20,16 +20,16 @@ class TheKnowledge;
 /**
  * Vida Nova Transformation    
  */
-class VNTransformation : public virtual Graphable
+class VNStep : public virtual Graphable
 {
 public:    
-    enum TransformationType
+    enum StepType
     {
         SEARCH_REPLACE, ///< Search pattern can match anywhere
         COMPARE_REPLACE ///< Compare pattern must match at root
     };
 
-    virtual void Configure( TransformationType type,
+    virtual void Configure( StepType type,
                             TreePtr<Node> scp,
                             TreePtr<Node> rp = TreePtr<Node>() );
     

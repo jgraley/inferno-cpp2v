@@ -325,7 +325,7 @@ RemoveVoidInstances::RemoveVoidInstances()
 }
 
 
-void DetectAllSCTypes::Build( vector< shared_ptr<VNTransformation> > *sequence )
+void DetectAllSCTypes::Build( vector< shared_ptr<VNStep> > *sequence )
 {
     sequence->push_back( make_shared<DetectSCType>( MakePatternNode<Event>() ) );
     sequence->push_back( make_shared<DetectSCBase>( MakePatternNode<Module>() ) );

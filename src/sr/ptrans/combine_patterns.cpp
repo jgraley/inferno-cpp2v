@@ -1,5 +1,5 @@
 #include "combine_patterns.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/delta_agent.hpp"
 #include "agents/slave_agent.hpp"

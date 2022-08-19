@@ -9,7 +9,7 @@
 namespace SR 
 {
 
-class VNTransformation;
+class VNStep;
 class Agent;
 class SlaveAgent;
 
@@ -19,14 +19,14 @@ protected:
     class PatternKnowledge
     {
     public:
-        PatternKnowledge( VNTransformation &vnt );
+        PatternKnowledge( VNStep &vnt );
     
     private:
         void WalkPattern( set<PatternLink> &all_plinks, 
                           PatternLink plink ) const;
                           
     public:
-        VNTransformation *vn_transformation;
+        VNStep *vn_transformation;
         shared_ptr<CompareReplace> top_level_engine;
         TreePtr<Node> search_compare_root_pattern;
         Agent *search_compare_root_agent = nullptr;
@@ -41,7 +41,7 @@ protected:
     };
 
 public:
-    virtual void operator()( VNTransformation &vnt ) override;   
+    virtual void operator()( VNStep &vnt ) override;   
     
 protected:    
     virtual void DoPatternTransformation( const PatternKnowledge &pk ) = 0;

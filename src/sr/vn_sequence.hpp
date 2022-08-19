@@ -14,7 +14,7 @@ class Graph;
 namespace SR 
 {
 
-class VNTransformation;
+class VNStep;
 class TheKnowledge;
 
 /**
@@ -23,7 +23,7 @@ class TheKnowledge;
 class VNSequence
 {
 public:    
-    VNSequence( const vector< shared_ptr<VNTransformation> > &sequence );
+    VNSequence( const vector< shared_ptr<VNStep> > &sequence );
     
     void PatternTransformations( int step_index );
 
@@ -55,7 +55,7 @@ public:
     void ExtendDomain( PatternLink root_plink );
 
 private:
-    vector< shared_ptr<VNTransformation> > steps;
+    vector< shared_ptr<VNStep> > steps;
     shared_ptr<TheKnowledge> knowledge;    
     XLink initial_root_xlink;
 };    

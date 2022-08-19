@@ -1,10 +1,10 @@
 #include "pattern_transformation_common.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "agents/slave_agent.hpp"
 
 using namespace SR;
 
-PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNTransformation &vnt )
+PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt )
 {
     vn_transformation = &vnt;
     top_level_engine = vnt.GetTopLevelEngine();
@@ -50,7 +50,7 @@ void PatternTransformationCommon::PatternKnowledge::WalkPattern( set<PatternLink
 }
 
    
-void PatternTransformationCommon::operator()( VNTransformation &vnt )
+void PatternTransformationCommon::operator()( VNStep &vnt )
 {
     const PatternKnowledge pk( vnt );
     

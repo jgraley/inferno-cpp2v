@@ -30,7 +30,7 @@ using namespace Steps;
 
 // Build a vector of transformations, in the order that we will run them
 // (ordered by hand for now, until the auto sequencer is ready)
-void BuildDefaultSequence( vector< shared_ptr<VNTransformation> > *sequence )
+void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 {
     ASSERT( sequence );
     
@@ -158,12 +158,12 @@ void BuildDefaultSequence( vector< shared_ptr<VNTransformation> > *sequence )
 }
 
 
-void BuildDocSequence( vector< shared_ptr<VNTransformation> > *sequence )
+void BuildDocSequence( vector< shared_ptr<VNStep> > *sequence )
 {
     ASSERT( sequence );
     sequence->push_back( make_shared<SlaveTest>() );
-    sequence->push_back( shared_ptr<VNTransformation>( new SlaveTest2 ) );
-    sequence->push_back( shared_ptr<VNTransformation>( new SlaveTest3 ) );
+    sequence->push_back( shared_ptr<VNStep>( new SlaveTest2 ) );
+    sequence->push_back( shared_ptr<VNStep>( new SlaveTest3 ) );
 }
 
 
@@ -555,7 +555,7 @@ int main( int argc, char *argv[] )
         { Progress::BUILDING_STEPS }
     );
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
-    vector< shared_ptr<SR::VNTransformation> > sequence;
+    vector< shared_ptr<SR::VNStep> > sequence;
     if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Building patterns\n"); 
     if( ReadArgs::documentation_graphs )

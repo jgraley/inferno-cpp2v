@@ -8,7 +8,7 @@
 #ifndef GENERATE_IMPLICIT_CASTS_HPP
 #define GENERATE_IMPLICIT_CASTS_HPP
 
-#include "sr/vn_transformation.hpp"
+#include "sr/vn_step.hpp"
 
 namespace Steps {
 
@@ -17,7 +17,7 @@ using namespace SR;
 /** Wherever an argument to a function call differs in type from
     the funciton's declaration, insert a cast to the declared
     type. */
-class GenerateImplicitCasts : public VNTransformation
+class GenerateImplicitCasts : public VNStep
 {
 public:
 	GenerateImplicitCasts();

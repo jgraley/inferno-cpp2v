@@ -8,14 +8,14 @@
 namespace SR 
 {
 
-class VNTransformation;
+class VNStep;
 class Agent;
 class SlaveAgent;
 
 class PatternTransformation
 {
 public:
-    virtual void operator()( VNTransformation &vnt ) = 0;   
+    virtual void operator()( VNStep &vnt ) = 0;   
 };
 
 
@@ -23,7 +23,7 @@ class PatternTransformationVector : public vector< shared_ptr<PatternTransformat
                                     public PatternTransformation
 {
 public:
-    virtual void operator()( VNTransformation &vnt ) override;
+    virtual void operator()( VNStep &vnt ) override;
 };
 
 }

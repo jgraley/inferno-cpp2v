@@ -2,14 +2,14 @@
 #define INFERNO_HPP
 
 #include "helpers/transformation.hpp"
-#include "sr/vn_transformation.hpp"
+#include "sr/vn_step.hpp"
 
 #include <vector>
 #include <functional>
 
 namespace SR
 {
-    class VNTransformation;
+    class VNStep;
     class VNSequence;
 };
 

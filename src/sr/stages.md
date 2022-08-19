@@ -7,7 +7,7 @@ it's more like a "one hit" stage for the whole sequence of steps.
 
 ## Build or load patterns and sequence `B`
 
-Ends up with a `VNSequence` of `VNTransformation`s which have 
+Ends up with a `VNSequence` of `VNStep`s which have 
 `CompareReplace` or `SearchReplace` engines.
 
 ## Pattern Transformation `X` (steppy)

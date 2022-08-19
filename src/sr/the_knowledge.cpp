@@ -1,7 +1,7 @@
 #include "the_knowledge.hpp"
 #include "sc_relation.hpp"
 #include "agents/agent.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "sym/expression.hpp"
 #include "sym/predicate_operators.hpp"
 #include "lacing.hpp"

@@ -19,7 +19,7 @@ namespace SYM
 namespace SR 
 {
 class SimpleCompareQuotientSet;
-class VNTransformation;
+class VNStep;
 class Lacing;
     
 class TheKnowledge : public Traceable

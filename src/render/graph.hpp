@@ -29,7 +29,7 @@
 */
 namespace SR
 {
-class VNTransformation;
+class VNStep;
 };
 
 class Graph
@@ -74,7 +74,7 @@ public:
 
     Graph( string of, string title );
     ~Graph();
-    void GenerateGraph( SR::VNTransformation *root ); // Graph the search/replace pattern
+    void GenerateGraph( SR::VNStep *root ); // Graph the search/replace pattern
 	void GenerateGraph( const Figure &figure ); // graph just the specified ojects
     TreePtr<Node> GenerateGraph( TreePtr<Node> root ); // graph the subtree under root node
 
@@ -114,7 +114,7 @@ private:
 
     typedef map<string, string> Atts;
 
-    void PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNTransformation *root );
+    void PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root );
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 

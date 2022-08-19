@@ -10,42 +10,42 @@
 
 #include "tree/hastype.hpp"
 #include "tree/misc.hpp"
-#include "sr/vn_transformation.hpp"
+#include "sr/vn_step.hpp"
 
 namespace Steps {
 
 using namespace SR;
 
 /** Ensure an actual return statement is present in void-returning functions */
-class ExplicitiseReturn : public VNTransformation
+class ExplicitiseReturn : public VNStep
 {
 public:
 	ExplicitiseReturn();
 };
 
 /** Convey return value through a module-level variable */
-class UseTempForReturnValue : public VNTransformation
+class UseTempForReturnValue : public VNStep
 {
 public:
 	UseTempForReturnValue();
 };
 
 /** Pass parameters in to functions via class-level temps */
-class ReturnViaTemp : public VNTransformation
+class ReturnViaTemp : public VNStep
 {
 public:
     ReturnViaTemp();
 };
 
 /** Add a parameter to non-process functions giving the link address */
-class AddLinkAddress : public VNTransformation
+class AddLinkAddress : public VNStep
 {
 public:
     AddLinkAddress();
 };
 
 /** Pass parameters in to functions via class-level temps */
-class ParamsViaTemps : public VNTransformation
+class ParamsViaTemps : public VNStep
 {
 public:
     ParamsViaTemps();
@@ -53,7 +53,7 @@ public:
 
 /** Replace automatic variables with stacks based on arrays and 
     maintain the stack pointer correctly, supporting recursion. */
-class GenerateStacks : public VNTransformation
+class GenerateStacks : public VNStep
 {
 public:
 	GenerateStacks();
@@ -63,7 +63,7 @@ public:
     this is not inlining, because a function only need be merged
     once for all the call points in the thread. Turn calls and
     return into gotos. */
-class MergeFunctions : public VNTransformation
+class MergeFunctions : public VNStep
 {
 public:
 	MergeFunctions();

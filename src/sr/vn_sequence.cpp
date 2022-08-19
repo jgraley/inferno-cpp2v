@@ -1,11 +1,11 @@
 #include "vn_sequence.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "render/graph.hpp"
 #include "the_knowledge.hpp"
 
 using namespace SR;
 
-VNSequence::VNSequence( const vector< shared_ptr<VNTransformation> > &sequence ) :
+VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
 {
 }                                  
@@ -39,7 +39,7 @@ void VNSequence::PlanningStageFour()
 {
     // Determine the full set of expressions across all the steps
     set< shared_ptr<SYM::BooleanExpression> > expressions;
-    for( shared_ptr<VNTransformation> vnt : steps )
+    for( shared_ptr<VNStep> vnt : steps )
     {
         const SCREngine *root_scr_engine = vnt->GetTopLevelEngine()->GetRootEngine();
         if( !root_scr_engine )
@@ -61,7 +61,7 @@ void VNSequence::PlanningStageFive( int step_index )
 
 void VNSequence::SetMaxReps( int step_index, int n, bool e ) 
 { 
-    VNTransformation::SetMaxReps(n, e);
+    VNStep::SetMaxReps(n, e);
 }
 
 

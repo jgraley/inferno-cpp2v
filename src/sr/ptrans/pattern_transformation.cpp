@@ -1,10 +1,10 @@
 #include "pattern_transformation.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "agents/slave_agent.hpp"
 
 using namespace SR;
    
-void PatternTransformationVector::operator()( VNTransformation &vnt ) 
+void PatternTransformationVector::operator()( VNStep &vnt ) 
 {
     for( shared_ptr<PatternTransformation> t : *this )
     {

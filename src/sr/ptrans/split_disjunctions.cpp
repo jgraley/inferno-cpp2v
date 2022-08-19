@@ -1,5 +1,5 @@
 #include "split_disjunctions.hpp"
-#include "vn_transformation.hpp"
+#include "vn_step.hpp"
 #include "agents/disjunction_agent.hpp"
    
 using namespace SR;

@@ -6,7 +6,7 @@
  */
 
 #include "tree/cpptree.hpp"
-#include "sr/vn_transformation.hpp"
+#include "sr/vn_step.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/scr_engine.hpp"
 #include "common/trace.hpp"
@@ -69,7 +69,7 @@ Graph::~Graph()
 }
 
 
-void Graph::GenerateGraph( SR::VNTransformation *root )
+void Graph::GenerateGraph( SR::VNStep *root )
 {
     string s;
     s += "// -------------------- transformation figure --------------------\n";
@@ -271,7 +271,7 @@ TreePtr<Node> Graph::GenerateGraph( TreePtr<Node> root )
 }
 
 
-void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNTransformation *root )
+void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root )
 {    
 	reached.clear();
 	PopulateFrom( graphables, root );

@@ -14,7 +14,7 @@ class SimpleCompare;
 namespace SR 
 {
 class SimpleCompareQuotientSet;
-class VNTransformation;
+class VNStep;
     
 /*
  * Lacing provides the tools and data structures required to create an ordering 
