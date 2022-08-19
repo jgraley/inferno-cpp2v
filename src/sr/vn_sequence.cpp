@@ -88,7 +88,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
     {
         ASSERT( initial_root_xlink );
         ASSERT( initial_root_xlink.GetChildX()==root );
-        (*steps[step_index])( initial_root_xlink );
+        steps[step_index]->Transform( initial_root_xlink );
         initial_root_xlink = XLink();
         return initial_root_xlink.GetChildX(); // could have changed 
     }
@@ -96,7 +96,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 #endif
     {        
         ASSERT( !initial_root_xlink );
-        (*steps[step_index])( &root );
+        steps[step_index]->Transform( &root );
         return root;
     }    
 }

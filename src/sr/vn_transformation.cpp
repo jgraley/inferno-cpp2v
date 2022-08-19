@@ -101,22 +101,12 @@ void VNTransformation::SetStopAfter( vector<int> ssa, int d )
 }  
 
 
-void VNTransformation::operator()( TreePtr<Node> context, 
-                                   TreePtr<Node> *proot )
+void VNTransformation::Transform( TreePtr<Node> *proot )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    top_level_engine->operator()( context, proot );
+    top_level_engine->operator()( *proot, proot );
 }                                   
-                 
-
-void VNTransformation::operator()( XLink root_xlink )
-{
-    ASSERT( this )("Called on NULL pointer, I expect");
-    ASSERT( top_level_engine )("VNTransformation needs to be configured before use");
-    top_level_engine->operator()( root_xlink );
-}
-
 
 Graphable::Block VNTransformation::GetGraphBlockInfo() const
 {

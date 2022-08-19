@@ -6,7 +6,6 @@
  */
 
 #include "tree/cpptree.hpp"
-#include "helpers/transformation.hpp"
 #include "sr/vn_transformation.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/scr_engine.hpp"
@@ -70,7 +69,7 @@ Graph::~Graph()
 }
 
 
-void Graph::operator()( Transformation *root )
+void Graph::operator()( SR::VNTransformation *root )
 {
     string s;
     s += "// -------------------- transformation figure --------------------\n";
@@ -173,7 +172,7 @@ void Graph::operator()( const Figure &figure )
             for( const Figure::Link &figure_link : agent.incoming_links )
             {
                 // Note: we don't actually know the phase, could be IN_COMPARE_ONLY or IN_COMPARE_AND_REPLACE
-                links_info.push_back( make_tuple(agent.g, figure_link.short_name, IN_COMPARE_ONLY) );
+                links_info.push_back( make_tuple(agent.g, figure_link.short_name, Graphable::IN_COMPARE_ONLY) );
             }
         }
         interior_blocks.push_back( CreateInvisibleBlock( "IRIP", links_info, &figure ) ); 
@@ -248,13 +247,12 @@ void Graph::operator()( const Figure &figure )
 }
 
 
-TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
+TreePtr<Node> Graph::operator()( TreePtr<Node> root )
 {
     string s;
     s += "// -------------------- node figure --------------------\n";
     list<const Graphable *> my_graphables;
     list<MyBlock> my_blocks;
-	(void)context; // Not needed!!
 
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
@@ -273,22 +271,10 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 }
 
 
-void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root )
+void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNTransformation *root )
 {    
-    if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
-    {
-        for( shared_ptr<Transformation> t : *tv ) // TODO loop backwards so they come out in the right order in graph
-            PopulateFromTransformation( graphables, t.get() );
-    }
-    else if( VNTransformation *vnt = dynamic_cast<VNTransformation *>(root) )
-    {
-		reached.clear();
-		PopulateFrom( graphables, vnt );
-	}
-	else
-    {
-        ASSERTFAIL("Unknown kind of transformation in graph plotter");
-    }
+	reached.clear();
+	PopulateFrom( graphables, root );
 }
 
                    
@@ -608,7 +594,7 @@ void Graph::PostProcessBlock( MyBlock &block )
     // Can we hide sub-blocks?    
     bool sub_blocks_hideable = all_of( block.sub_blocks.begin(), 
                                        block.sub_blocks.end(), 
-                                       [](const SubBlock &sb){return sb.hideable;} );
+                                       [](const Graphable::SubBlock &sb){return sb.hideable;} );
 
     // If not, make sure we're using a shape that allows for sub_blocks
     if( block.block_type == Graphable::NODE_SHAPED && !sub_blocks_hideable )
@@ -1000,12 +986,12 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
     
     switch( phase )
     {
-    case UNDEFINED:
-    case IN_COMPARE_ONLY:
-    case IN_COMPARE_AND_REPLACE:
+    case Graphable::UNDEFINED:
+    case Graphable::IN_COMPARE_ONLY:
+    case Graphable::IN_COMPARE_AND_REPLACE:
         //atts += "style=\"solid\"\n";
         break;
-    case IN_REPLACE_ONLY:
+    case Graphable::IN_REPLACE_ONLY:
         atts += "style=\"dashed\"\n";
         break;
     }

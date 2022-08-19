@@ -20,8 +20,7 @@ class TheKnowledge;
 /**
  * Vida Nova Transformation    
  */
-class VNTransformation : public InPlaceTransformation,
-                         public virtual Graphable
+class VNTransformation : public virtual Graphable
 {
 public:    
     enum TransformationType
@@ -44,15 +43,9 @@ public:
     
     static void SetMaxReps( int n, bool e );
     void SetStopAfter( vector<int> ssa, int d=0 );    
-    
-    using Transformation::operator();
-    
-    // Functor style interface; implements InPlaceTransformation interface.
-    void operator()( TreePtr<Node> context, 
-                     TreePtr<Node> *proot );
-    
-    void operator()( XLink root_xlink );
-    
+            
+    void Transform( TreePtr<Node> *proot );
+        
     virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 
     void GenerateGraphRegions( Graph &graph ) const;

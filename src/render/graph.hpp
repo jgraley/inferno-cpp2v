@@ -2,7 +2,6 @@
 #define GRAPH_HPP
 
 #include "tree/cpptree.hpp"
-#include "helpers/transformation.hpp"
 #include "sr/scr_engine.hpp"
 
 /**
@@ -28,11 +27,14 @@
  * 
  * TODO put stringize capabilities into the Property nodes as virtual methods    
 */
-class Graph : public OutOfPlaceTransformation
+namespace SR
+{
+class VNTransformation;
+};
+
+class Graph
 {
 public:
-	using Transformation::operator();
-
     enum LinkPlannedAs
     {
         LINK_DEFAULT,
@@ -72,9 +74,9 @@ public:
 
     Graph( string of, string title );
     ~Graph();
-    void operator()( Transformation *root ); // Graph the search/replace pattern
+    void operator()( SR::VNTransformation *root ); // Graph the search/replace pattern
 	void operator()( const Figure &figure ); // graph just the specified ojects
-    TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
+    TreePtr<Node> operator()( TreePtr<Node> root ); // graph the subtree under root node
 
 private:
     struct MyBlock : Graphable::Block
@@ -112,7 +114,7 @@ private:
 
     typedef map<string, string> Atts;
 
-    void PopulateFromTransformation( list<const Graphable *> &graphables, Transformation *root );
+    void PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNTransformation *root );
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
 	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
