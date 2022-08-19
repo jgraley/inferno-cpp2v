@@ -105,7 +105,7 @@ void VNStep::Transform( TreePtr<Node> *proot )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->operator()( *proot, proot );
+    top_level_engine->Transform( proot );
 }                                   
 
 Graphable::Block VNStep::GetGraphBlockInfo() const

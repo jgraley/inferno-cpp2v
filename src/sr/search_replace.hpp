@@ -21,7 +21,6 @@ class VNSequence;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
 class CompareReplace : public virtual Graphable,
-                       virtual public InPlaceTransformation,
                        public SerialNumber
 {  
 public:
@@ -60,14 +59,11 @@ public:
     void PlanningStageTwo();
     void PlanningStageThree();
     void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
-                                
-    using Transformation::operator();
-    
+                                    
     // Functor style interface for RepeatingSearchReplace; implements InPlaceTransformation interface.
-    void operator()( TreePtr<Node> context, 
-                     TreePtr<Node> *proot );
+    void Transform( TreePtr<Node> *proot );
 
-    void operator()( XLink root_xlink );
+    void Transform( XLink root_xlink );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse

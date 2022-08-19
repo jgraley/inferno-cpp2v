@@ -119,11 +119,10 @@ void CompareReplace::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge
 
 
 // Do a search and replace based on patterns stored in our members
-void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
+void CompareReplace::Transform( TreePtr<Node> *proot )
 {
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
-    ASSERT(c==*proot);
     
     // If the initial root and context are the same node, then arrange for the context
     // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
@@ -140,10 +139,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     // If *proot is under context, then we're OK as long as proot points to the actual
     // tree node - then the walk at context will follow the new *proot pointer and get
     // into the new subtree.
-    if( c == *proot )
-	    pcontext = proot;
-    else
-	    pcontext = &c;
+	pcontext = proot;
     
     SolutionMap empty_solution;    
     (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty_solution );   
@@ -153,7 +149,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 }
 
 
-void CompareReplace::operator()( XLink root_xlink )
+void CompareReplace::Transform( XLink root_xlink )
 {
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
