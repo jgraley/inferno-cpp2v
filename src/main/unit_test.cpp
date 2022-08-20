@@ -13,8 +13,5 @@ void SelfTest()
     SYM::TestTruthTable();
 }
 
-
-// TODO Make Filter a functor. 
-// TODO Consider merging Filter into Transformation.
 // TODO Consider multi-terminus Stuff and multi-root (StarStuff)
 
