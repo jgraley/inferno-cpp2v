@@ -4,7 +4,7 @@
 
 using namespace CPPTree;
 
-TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d )
+TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 {
     if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
         return i->identifier;
@@ -18,38 +18,16 @@ TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d )
 
 TreePtr<Node> HasDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
-	if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>( root ) )
-		return Get( context, tid );
-	else if( TreePtr<InstanceIdentifier> iid = DynamicTreePtrCast<InstanceIdentifier>( root ) )
-		return Get( context, iid );
-	else
-		return TreePtr<Node>();
-}
-
-TreePtr<UserType> HasDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
-{
 	Walk w(context, nullptr, nullptr);
 	for( const TreePtrInterface &n : w )
 	{
-        if( TreePtr<UserType> d = DynamicTreePtrCast<UserType>((TreePtr<Node>)n) )
-            if( id == GetIdentifier( d ) )
-	            return d;
+		set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
+		for( const TreePtrInterface *pd : declared )
+            if( root == (TreePtr<Node>)( *pd ) )
+	            return (TreePtr<Node>)n;
 	}
     
 	throw TypeDeclarationNotFound();
-}
-
-TreePtr<Instance> HasDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
-{
-	Walk w( context, nullptr, nullptr );
-	for( const TreePtrInterface &n : w )
-	{
-        if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>((TreePtr<Node>)n) )
-            if( id == GetIdentifier( d ) )
-	            return d;
-	}
-	
-	throw InstanceDeclarationNotFound();
 }
 
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
@@ -97,17 +75,3 @@ TreePtr<Instance> FindMemberByName( TreePtr<Node> context, TreePtr<Record> r, st
     // We failed. Hang our head in shame.                
     return TreePtr<Instance>();
 }                
-
-
-TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
-{
-	if( TreePtr<Instance> di = DynamicTreePtrCast<Instance>(d) )
-		return di->identifier;
-	else if( TreePtr<UserType> dut = DynamicTreePtrCast<UserType>(d) )
-		return dut->identifier;
-	else if( TreePtr<Label> dl = DynamicTreePtrCast<Label>(d) )
-		return dl->identifier;
-	else
-		return TreePtr<Identifier>(); // no identifier, maybe because d is a Base node
-}
-

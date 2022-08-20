@@ -83,7 +83,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 
     // Actually, we really want to see whether declaration a depends on the identifier of b
     // since the rest of b is irrelevent (apart from the above).
-    TreePtr<Identifier> ib = GetIdentifier( b );
+    TreePtr<Identifier> ib = GetIdentifierOfDeclaration( b );
     ASSERT(ib);
           
   	//TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      

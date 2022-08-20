@@ -19,23 +19,13 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	for( const TreePtrInterface &n : walkr )
 	{
     	if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
-#if 1
         {
-            auto && __range = s->members ;
-            for (Collection<Declaration>::iterator __begin = __range.begin(), __end = __range.end(); __begin != __end; ++__begin)
+            for( TreePtr<Declaration> d : s->members )
             {
-                TreePtr<Declaration> d = *__begin;
-                if( id == GetIdentifier( d ) ) 
+                if( id == GetIdentifierOfDeclaration( d ) ) 
                     return s;
             }
         }
-#else	    
-        for( TreePtr<Declaration> d : s->members )
-	    {            
-	        if( id == GetIdentifier( d ) ) 
-	            return s;
-	    }
-#endif
 	}
 	
 	// Special additional processing for Compounds - look for statements that are really Instance Declarations
@@ -46,7 +36,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 			for( TreePtr<Statement> s : c->statements )
 			{
 				if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
-					if( id == GetIdentifier( d ) )
+					if( id == GetIdentifierOfDeclaration( d ) )
 						return c;
 			}
 	}

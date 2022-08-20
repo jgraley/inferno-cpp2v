@@ -5,7 +5,10 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 
-TreePtr<CPPTree::Identifier> GetIdentifier( TreePtr<CPPTree::Declaration> d );
+// Really, Declaration should point to an Identifier and that would be that, but at present
+// there are differnent kinds of Declaration that point to different kinds of Node.
+// TODO refactor this away
+TreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( TreePtr<CPPTree::Declaration> d );
 
 class HasDeclaration : public OutOfPlaceTransformation
 {
@@ -15,9 +18,6 @@ public:
     
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
     static HasDeclaration instance;
-private:
-	TreePtr<CPPTree::UserType> Get( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
-	TreePtr<CPPTree::Instance> Get( TreePtr<Node> context, TreePtr<CPPTree::InstanceIdentifier> id );
 };
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
@@ -38,10 +38,6 @@ Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
     return sr;    
 }
 
-// Really, Declaration should point to an Identifier and that would be that, but at present
-// there are differnent kinds of Declaration that point to different kinds of Node.
-// TODO refactor this away
-TreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( TreePtr<CPPTree::Declaration> d );
 
 #endif
 
