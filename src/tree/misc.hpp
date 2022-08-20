@@ -10,7 +10,7 @@
 // TODO refactor this away
 TreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( TreePtr<CPPTree::Declaration> d );
 
-class HasDeclaration : public OutOfPlaceTransformation
+class HasDeclaration : public Transformation
 {
 public:
     class TypeDeclarationNotFound : public ::Mismatch {};

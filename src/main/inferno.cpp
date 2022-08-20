@@ -216,7 +216,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr, 
           [this]()
           { 
-              Parse{ ReadArgs::infile }( algo->program, &algo->program ); 
+              Parse p( ReadArgs::infile );
+              algo->program = p.DoParse(); 
           } }
     );
     

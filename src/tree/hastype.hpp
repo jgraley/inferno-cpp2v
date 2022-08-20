@@ -5,7 +5,7 @@
 #include "cpptree.hpp"
 
 // Really a GetTypeOf class, but named for the way it appears in pattern graphs
-class HasType : public OutOfPlaceTransformation
+class HasType : public Transformation
 {
 public:
     class UnsupportedMismatch : public Mismatch {};

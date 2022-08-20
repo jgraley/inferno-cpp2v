@@ -172,7 +172,7 @@ void Walk_iterator::AdvanceInto()
 	if( element ) // must be non-nullptr
 	{
 		if( recurse_filter ) // is there a filter on recursion?
-			recurse = recurse_filter->IsMatch( element ); // must pass the restriction
+			recurse = recurse_filter->IsMatch( element, element ); // must pass the restriction
 		else
             recurse = true; // no filter so try to recurse into node
 	}
@@ -259,7 +259,7 @@ void Walk_iterator::DoNodeFilter()
         // TODO pass NULLs to filter, let it decide what to do
         bool ok = true;
         if( out_filter )
-            if( !element || !out_filter->IsMatch( element) ) 
+            if( !element || !out_filter->IsMatch( element, element ) ) 
                 ok = false;
          
         if( ok )

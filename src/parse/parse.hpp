@@ -42,28 +42,19 @@ using namespace CPPTree; // TODO put parse in cpp file so this using does not po
 
 #define INFERNO_TRIPLE "arm-linux"
 
-class Parse: public InPlaceTransformation
+class Parse
 {
 public:
-	using Transformation::operator();
 	Parse(string i) :
 		infile(i)
 	{
         ASSERT( infile!="" );
 	}
 
-	void operator()(TreePtr<Node> context, TreePtr<Node> *proot)
+	TreePtr<Node> DoParse()
 	{
-		// Allow proot to point to a nullptr TreePtr; in this case we will create a Program node and parse into it.
-		// Otherwise *proot must be a Scope, and we will append whatever we parse into that scope.
-		ASSERT( proot );
-		if (!*proot)
-		{
-			*proot = MakeTreeNode<Program>();
-		}
-		if (!context)
-			context = *proot;
-		TreePtr<Scope> root_scope = DynamicTreePtrCast<Scope> (*proot);
+		auto root = MakeTreeNode<Program>();
+		TreePtr<Scope> root_scope = DynamicTreePtrCast<Scope>(root);
 		ASSERT(root_scope)("Can only parse into a scope");
 
 		clang::FileManager fm;
@@ -99,12 +90,13 @@ public:
 		pp.EnterMainSourceFile();
 
 		clang::IdentifierTable it(opts);
-		InfernoAction actions(context, root_scope, it, pp, *ptarget);
+		InfernoAction actions(root, root_scope, it, pp, *ptarget);
 		clang::Parser parser(pp, actions);
 		TRACE("Start parse\n");
 		parser.ParseTranslationUnit();
         ASSERT( !diags.hasErrorOccurred() )("Will not proceed into inferno because clang reported errors\n");
 		TRACE("End parse\n");
+		return root;
 	}
 
 private:
