@@ -45,7 +45,7 @@ Render::Render( string of ) :
 // Note: this does not modify the program tree, and that can be checked by 
 // defining TEST_FOR_UNMODIFIED_TREE and retesting everything.
 //#define TEST_FOR_UNMODIFIED_TREE
-TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
+TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root )
 {
 	// Render can only work on a whole program
 	ASSERT( context == root );

@@ -227,7 +227,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
           "Rendering output to code", 
           nullptr, [&]()
           { 
-              Render{ ReadArgs::outfile }( &algo->program ); 
+              Render r( ReadArgs::outfile );
+              r.GenerateRender( algo->program, algo->program ); 
           } }
     );
 
@@ -251,7 +252,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr, 
           [this]()
           { 
-              Graph( ReadArgs::outfile, ReadArgs::outfile ).GenerateGraph( algo->program ); 
+              Graph g( ReadArgs::outfile, ReadArgs::outfile );
+              g.GenerateGraph( algo->program ); 
           } }
     );
     
@@ -512,7 +514,7 @@ void Inferno::RunTransformationStep(const Step &sp)
     if( ReadArgs::output_all )
     {
         Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
-        r( &program );     
+        r.GenerateRender( program, program );     
         Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
                  ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
         g.GenerateGraph( program );    

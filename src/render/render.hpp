@@ -7,12 +7,11 @@
 #include "helpers/simple_compare.hpp"
 
 
-class Render : public OutOfPlaceTransformation
+class Render
 {
 public:
-	using Transformation::operator();
     Render( string of = string() );
-    TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
+    TreePtr<Node> GenerateRender( TreePtr<Node> context, TreePtr<Node> root );
     
 private:
     TreePtr<CPPTree::Program> program, temp_old_program;

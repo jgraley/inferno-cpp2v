@@ -4,7 +4,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 
-class Validate : public InPlaceTransformation
+class Validate
 {
 public:
 	Validate( bool p=false ) :
