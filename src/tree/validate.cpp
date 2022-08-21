@@ -66,12 +66,13 @@ void Validate::operator()( TreePtr<Node> context,
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(wit);
 
 			// Check that we can successfully call HasType on every Expression
+			ReferenceTreeKit kit(context);
 			if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(x) )
-			    (void)HasType::instance(context, e);
+			    (void)HasType::instance(kit, e);
 
 			// Check that every identifier has a declaration
 			if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast<InstanceIdentifier>(x) )
-			    (void)HasDeclaration()(context, ii);
+			    (void)HasDeclaration()(kit, ii);
 
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.

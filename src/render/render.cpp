@@ -371,7 +371,8 @@ string Render::RenderCall( TreePtr<Call> call )
 
 	// Render the expression that resolves to the function name unless this is
 	// a constructor call in which case just the name of the thing being constructed.
-	if( TreePtr<Expression> base = HasType::instance.IsConstructorCall( program, call ) )
+	ReferenceTreeKit kit(program);
+	if( TreePtr<Expression> base = HasType::instance.IsConstructorCall( kit, call ) )
 		s += RenderExpression( base, true );
 	else
 		s += RenderExpression( call->callee, true );
@@ -379,7 +380,7 @@ string Render::RenderCall( TreePtr<Call> call )
 	s += "(";
 
 	// If CallableParams, generate some arguments, resolving the order using the original function type
-	TreePtr<Node> ctype = HasType::instance( program, call->callee );
+	TreePtr<Node> ctype = HasType::instance( kit, call->callee );
 	ASSERT( ctype );
 	if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
 		s += RenderMapInOrder( call, cp, ", ", false );
@@ -490,7 +491,9 @@ string Render::RenderMakeRecord( TreePtr<MakeRecord> ro )
 	// Get the record
 	TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(ro->type);
 	ASSERT(id);
-	TreePtr<Record> r = GetRecordDeclaration(program, id);
+	
+	ReferenceTreeKit kit(program);
+	TreePtr<Record> r = GetRecordDeclaration(kit, id);
 
 	s += "(";
 	s += RenderType( ro->type, "" );
@@ -592,7 +595,8 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 		{
             try
             {
-                if( HasType::instance.IsConstructorCall( program, o ) )
+				ReferenceTreeKit kit(program);
+                if( HasType::instance.IsConstructorCall( kit, o ) )
                 {
                     inits.push_back(s);
                     continue;
@@ -656,9 +660,10 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
     // If object is really a module, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderDeclarationCollection()
+    ReferenceTreeKit kit(program);
 	if( !DynamicTreePtrCast<Field>(o) )
 	    if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-	        if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
+	        if( TreePtr<Record> r = GetRecordDeclaration(kit, tid) )
 	            if( DynamicTreePtrCast<Module>(r) )
 	            {
 	                s += "(\"" + RenderIdentifier(o->identifier) + "\")" + sep;
@@ -733,8 +738,9 @@ bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 {
 	bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
 	bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
+    ReferenceTreeKit kit(program);
     if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-        if( DynamicTreePtrCast<Enum>( GetRecordDeclaration(program, ti) ) )
+        if( DynamicTreePtrCast<Enum>( GetRecordDeclaration(kit, ti) ) )
             isnumber = 1; // enum is like a number        
 	bool split_var = false;
 	if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
@@ -1023,9 +1029,10 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     {
         // Bodge an init list that names any fields we have that are modules
         // and initialises any fields with initialisers
+        ReferenceTreeKit kit(program);
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
             if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(f->type) )
-                if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
+                if( TreePtr<Record> r = GetRecordDeclaration(kit, tid) )
                     if( DynamicTreePtrCast<Module>(r) )
                     {
                         if( first )

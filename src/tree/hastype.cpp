@@ -10,12 +10,6 @@ using namespace CPPTree;
 
 #define INT 0
 
-TreePtr<Node> HasType::operator()( TreePtr<Node> c, TreePtr<Node> node )
-{
-	ReferenceTreeKit kit_(c);
-	return operator()( kit_, node );
-}
-
 
 TreePtr<Node> HasType::operator()( const TreeKit &kit_, TreePtr<Node> node )
 {
@@ -386,14 +380,6 @@ TreePtr<Type> HasType::GetLiteral( TreePtr<Literal> l )
         //ASSERT(0)("Unknown literal ")(*l)(", please add to HasType class");
         //ASSERTFAIL("");
     }
-}
-
-
-
-TreePtr<Expression> HasType::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call )
-{
-	ReferenceTreeKit kit_(c);
-	return IsConstructorCall( kit_, call );
 }
 
 

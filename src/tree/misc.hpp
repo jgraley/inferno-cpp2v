@@ -16,17 +16,16 @@ public:
     class TypeDeclarationNotFound : public ::Mismatch {};
     class InstanceDeclarationNotFound : public ::Mismatch {};
     
-    virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> node );
     virtual TreePtr<Node> operator()( const TreeKit &kit, TreePtr<Node> node );
     static HasDeclaration instance;
 };
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 // TODO make this a Transformation
-TreePtr<CPPTree::Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
+TreePtr<CPPTree::Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<CPPTree::TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
-TreePtr<CPPTree::Instance> FindMemberByName( TreePtr<Node> context, TreePtr<CPPTree::Record> r, string name );
+TreePtr<CPPTree::Instance> FindMemberByName( const TreeKit &kit, TreePtr<CPPTree::Record> r, string name );
 
 // concatenate sequences by adding them, like strings etc
 // TODO move to common/

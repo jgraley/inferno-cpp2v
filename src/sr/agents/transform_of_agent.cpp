@@ -19,7 +19,8 @@ LocatedLink TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
     TreePtr<Node> base_x = keyer_xlink.GetChildX();
     try
     {
-		TreePtr<Node> trans_x = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), base_x );
+		ReferenceTreeKit kit(master_scr_engine->GetOverallMaster()->GetContext());
+		TreePtr<Node> trans_x = (*transformation)( kit, base_x );
 		if( trans_x )
 		{
 			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
