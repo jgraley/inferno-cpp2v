@@ -1,5 +1,6 @@
 #include "cpptree.hpp"
 #include "helpers/walk.hpp"
+
 #include "misc.hpp"
 
 using namespace CPPTree;
@@ -16,18 +17,24 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
         return TreePtr<Identifier>(); // was a declaration without an identifier, ie a base class
 }
 
-TreePtr<Node> HasDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> root )
+TreePtr<Node> HasDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> node )
 {
-	Walk w(context, nullptr, nullptr);
-	for( const TreePtrInterface &n : w )
-	{
-		set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
-		for( const TreePtrInterface *pd : declared )
-            if( root == (TreePtr<Node>)( *pd ) )
-	            return (TreePtr<Node>)n;
-	}
-    
-	throw TypeDeclarationNotFound();
+	ReferenceTreeKit kit(context);
+	return operator()( kit, node );
+}	
+	
+	
+TreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node )
+{
+	set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
+	
+	if( infos.empty() )
+		throw TypeDeclarationNotFound();
+	
+	// function decl/def are folded, so we expect only one declarer
+	TreeKit::LinkInfo info = OnlyElementOf( infos );
+	
+	return info.first;
 }
 
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)

@@ -23,11 +23,13 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
-    virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root );
+    virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> node );
+    virtual TreePtr<Node> operator()( const TreeKit &kit_, TreePtr<Node> node );
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
     TreePtr<CPPTree::Expression> IsConstructorCall( TreePtr<Node> c, TreePtr<CPPTree::Call> call );
+    TreePtr<CPPTree::Expression> IsConstructorCall( const TreeKit &kit_, TreePtr<CPPTree::Call> call );
 
 private:    
     // TODO make these private
@@ -38,7 +40,7 @@ private:
     TreePtr<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Type> &optypes );
     TreePtr<CPPTree::Type> GetLiteral( TreePtr<CPPTree::Literal> l );
 
-     TreePtr<Node> context;
+	const TreeKit *kit = nullptr;
     
 public:
     static HasType instance; 

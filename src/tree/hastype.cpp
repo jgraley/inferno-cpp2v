@@ -10,14 +10,21 @@ using namespace CPPTree;
 
 #define INT 0
 
-TreePtr<Node> HasType::operator()( TreePtr<Node> c, TreePtr<Node> root )
+TreePtr<Node> HasType::operator()( TreePtr<Node> c, TreePtr<Node> node )
 {
-	context = c;
-	auto e = TreePtr<CPPTree::Expression>::DynamicCast(root);
+	ReferenceTreeKit kit_(c);
+	return operator()( kit_, node );
+}
+
+
+TreePtr<Node> HasType::operator()( const TreeKit &kit_, TreePtr<Node> node )
+{
+	kit = &kit_;
+	auto e = TreePtr<CPPTree::Expression>::DynamicCast(node);
 	TreePtr<Node> n;
 	if( e ) // if the tree at root is not an expression, return nullptr
 		n = Get( e );
-	context = TreePtr<Node>();
+	kit = nullptr;
 	return n;
 }
 
@@ -28,7 +35,7 @@ TreePtr<Type> HasType::Get( TreePtr<Expression> o )
     
     if( auto ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
-        TreePtr<Node> n = HasDeclaration()(context, ii);
+        TreePtr<Node> n = HasDeclaration()(*kit, ii);
         TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
         ASSERT(i);
         return i->type; 
@@ -382,11 +389,19 @@ TreePtr<Type> HasType::GetLiteral( TreePtr<Literal> l )
 }
 
 
-// Is this call really a constructor call? If so return the object being
-// constructed. Otherwise, return nullptr
+
 TreePtr<Expression> HasType::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call )
 {
-	context = c;
+	ReferenceTreeKit kit_(c);
+	return IsConstructorCall( kit_, call );
+}
+
+
+// Is this call really a constructor call? If so return the object being
+// constructed. Otherwise, return nullptr
+TreePtr<Expression> HasType::IsConstructorCall( const TreeKit &kit_, TreePtr<Call> call )
+{
+	kit = &kit_;
 	TreePtr<Expression> e;
 
     if( auto lf = DynamicTreePtrCast<Lookup>(call->callee) )
@@ -396,7 +411,7 @@ TreePtr<Expression> HasType::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> c
 			e = lf->base;
     }
 
-    context = TreePtr<Node>();
+    kit = nullptr;
     return e;
 }
 

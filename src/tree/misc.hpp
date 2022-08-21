@@ -16,7 +16,8 @@ public:
     class TypeDeclarationNotFound : public ::Mismatch {};
     class InstanceDeclarationNotFound : public ::Mismatch {};
     
-    virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
+    virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> node );
+    virtual TreePtr<Node> operator()( const TreeKit &kit, TreePtr<Node> node );
     static HasDeclaration instance;
 };
 
