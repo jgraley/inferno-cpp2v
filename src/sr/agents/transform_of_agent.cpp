@@ -1,6 +1,9 @@
 #include "transform_of_agent.hpp"
 #include "../scr_engine.hpp"
 #include "link.hpp"
+#include "the_knowledge.hpp"
+
+#define KNOWLEDGE_IS_TREE_KIT
 
 using namespace SR;
 
@@ -12,15 +15,27 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-LocatedLink TransformOfAgent::RunTeleportQuery( XLink keyer_xlink ) const
+LocatedLink TransformOfAgent::RunTeleportQuery( const TheKnowledge &knowledge, XLink keyer_xlink ) const
 {
-    // Transform the candidate expression, sharing the overall S&R context so that
-    // things like GetDeclaration can work (they search the whole program tree).
+    // Transform the candidate expression, sharing the knowledge as a TreeKit
+    // so that implementations can use handy features without needing to search
+    // the tree. Note that transformations work on nodes, not XLinks, so some
+    // precision is lost.
+    
+    // Policy: Don't convert MMAX link to a node (will evaluate to NOT_A_SYMBOL)
+    if( keyer_xlink == XLink::MMAX_Link )
+         return LocatedLink(); 
+         
     TreePtr<Node> base_x = keyer_xlink.GetChildX();
+
     try
     {
-		ReferenceTreeKit kit(master_scr_engine->GetOverallMaster()->GetContext());
+#ifdef KNOWLEDGE_IS_TREE_KIT		
+		TreePtr<Node> trans_x = (*transformation)( knowledge, base_x );
+#else
+        ReferenceTreeKit kit(master_scr_engine->GetOverallMaster()->GetContext());
 		TreePtr<Node> trans_x = (*transformation)( kit, base_x );
+#endif        
 		if( trans_x )
 		{
 			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             

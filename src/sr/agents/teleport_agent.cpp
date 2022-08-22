@@ -18,11 +18,11 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-LocatedLink TeleportAgent::TeleportUniqueAndCache( XLink keyer_xlink, bool expect_in_domain ) const
+LocatedLink TeleportAgent::TeleportUniqueAndCache( const TheKnowledge &knowledge, XLink keyer_xlink, bool expect_in_domain ) const
 {
     auto op = [&](XLink keyer_xlink) -> LocatedLink
     {
-        LocatedLink tp_link = RunTeleportQuery( keyer_xlink );
+        LocatedLink tp_link = RunTeleportQuery( knowledge, keyer_xlink );
         if( !tp_link )
             return tp_link;
         
@@ -54,19 +54,19 @@ SYM::Over<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<XLink> TeleportAgent::ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks )
+set<XLink> TeleportAgent::ExpandNormalDomain( const TheKnowledge &knowledge, const unordered_set<XLink> &keyer_xlinks )
 {
     set<XLink> extra_xlinks;
     for( XLink keyer_xlink : keyer_xlinks )
     {
         if( keyer_xlink == XLink::MMAX_Link )
-            continue; // MMAX at base never expands domain because all child patterns are also MMAX
+            continue; // MMAX at base never expands domain because then, all child patterns are also MMAX
         if( !IsPreRestrictionMatch(keyer_xlink) )
             continue; // Failed pre-restriction so can't expand domain
 
         try
         {
-            LocatedLink cached_link = TeleportUniqueAndCache( keyer_xlink, false );
+            LocatedLink cached_link = TeleportUniqueAndCache( knowledge, keyer_xlink, false );
             if( cached_link )
                 extra_xlinks.insert( (XLink)cached_link );
         }
@@ -105,7 +105,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     if( !keyer_result->IsDefinedAndUnique() )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
-    LocatedLink cached_link = agent->TeleportUniqueAndCache( keyer_xlink, true );        
+    LocatedLink cached_link = agent->TeleportUniqueAndCache( *(kit.knowledge), keyer_xlink, true );        
     if( (XLink)cached_link )
         return make_unique<SymbolResult>( (XLink)cached_link );
     else 

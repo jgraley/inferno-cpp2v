@@ -64,6 +64,7 @@ void TheKnowledge::Clear()
     category_ordered_domain.clear();
     simple_compare_ordered_domain.clear();
     nuggets.clear();
+    node_nuggets.clear();
     if( domain_extension_classes )
         domain_extension_classes->Clear();
 }
@@ -225,7 +226,7 @@ void TheKnowledge::DetermineDomain( XLink root_xlink )
 void TheKnowledge::ExtendDomain( PatternLink plink )
 {
     // Extend locally first and then pass that into children.
-    set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( unordered_domain );    
+    set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( *this, unordered_domain );    
     if( !extra_xlinks.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
     for( XLink extra_xlink : extra_xlinks )
@@ -475,3 +476,28 @@ string TheKnowledge::NodeNugget::GetTrace() const
 }
 
 
+set<TreeKit::LinkInfo> TheKnowledge::GetDeclarers( TreePtr<Node> node ) const
+{
+    set<LinkInfo> infos;
+    
+    ASSERT( node_nuggets.count(node) == 1 )(node)(" is the node and the node nuggets are:\n")(node_nuggets);
+    NodeNugget nn = node_nuggets.at(node);
+    // Note that nn.declarers is "precise", i.e. the XLinks are the actual
+    // declaring xlinks, not just arbitrary parent links to the declaree.
+    // Also correct for parallel links where only some declare.
+    for( XLink declarer_xlink : nn.declarers )
+    {
+        LinkInfo info;
+        
+        // first is TreePtr to the declarer node. Loses info about which 
+        // link declared (in case of parallel links) but gets you the declarer node.
+        info.first = nuggets.at(declarer_xlink).parent_xlink.GetChildX();
+
+        // second is TreePtrInterface * to the declarer's pointer to declaree
+        // Retains precise info about which link.
+        info.second = declarer_xlink.GetXPtr();
+        
+        infos.insert( info );
+    }
+    return infos;
+}

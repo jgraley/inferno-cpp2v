@@ -14,12 +14,12 @@ namespace SR
 class TeleportAgent : public PreRestrictedAgent
 {
 public:    
-    virtual LocatedLink TeleportUniqueAndCache( XLink keyer_xlink, bool expect_in_domain ) const;                  
+    virtual LocatedLink TeleportUniqueAndCache( const TheKnowledge &knowledge, XLink keyer_xlink, bool expect_in_domain ) const;                  
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    virtual LocatedLink RunTeleportQuery( XLink keyer_xlink ) const { ASSERTFAIL(); }
+    virtual LocatedLink RunTeleportQuery( const TheKnowledge &knowledge, XLink keyer_xlink ) const { ASSERTFAIL(); }
     
-    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks );
+    virtual set<XLink> ExpandNormalDomain( const TheKnowledge &knowledge, const unordered_set<XLink> &keyer_xlinks );
 
     virtual void Reset();    
 

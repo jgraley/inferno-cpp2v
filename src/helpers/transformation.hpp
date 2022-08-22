@@ -11,6 +11,7 @@ public:
 	typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 	
 	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;
+    virtual ~TreeKit();
 };
 
 

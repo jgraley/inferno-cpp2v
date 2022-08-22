@@ -4,6 +4,11 @@
 
 #include "transformation.hpp"
 
+TreeKit::~TreeKit()
+{
+}
+
+
 ReferenceTreeKit::ReferenceTreeKit( TreePtr<Node> context_ ) :
 	context( context_ )
 {

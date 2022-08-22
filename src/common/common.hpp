@@ -375,7 +375,7 @@ pair<typename T::value_type, typename T::value_type> ToPair( const T&c )
 template<typename T>
 const typename T::value_type &OnlyElementOf( const T&c )
 {
-    ASSERT( c.size()==1 );
+    ASSERT( c.size()==1 )("Size is %d:\n", c.size())(c)("\n");
     return *(c.begin());
 }
 

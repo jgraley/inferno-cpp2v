@@ -61,7 +61,7 @@ public:
                                                 bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const TheKnowledge *knowledge ) const = 0;
-    virtual set<XLink> ExpandNormalDomain( const unordered_set<XLink> &keyer_xlinks ) = 0;
+    virtual set<XLink> ExpandNormalDomain( const TheKnowledge &knowledge, const unordered_set<XLink> &keyer_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      

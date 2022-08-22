@@ -5,6 +5,7 @@
 #include "common/standard.hpp"
 #include "sc_relation.hpp"
 #include "../helpers/simple_compare.hpp"
+#include "../helpers/transformation.hpp"
 
 #include <unordered_set>
 
@@ -22,7 +23,8 @@ class SimpleCompareQuotientSet;
 class VNStep;
 class Lacing;
     
-class TheKnowledge : public Traceable
+class TheKnowledge : public Traceable, 
+                     public TreeKit
 {
 public:
     explicit TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
@@ -211,6 +213,9 @@ private:
     
     // Last node to be reached and given a nugget
     XLink last_xlink;
+    
+    // TreeKit implementation
+  	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
 };    
     
 };
