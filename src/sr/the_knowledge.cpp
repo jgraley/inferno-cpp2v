@@ -480,7 +480,6 @@ set<TreeKit::LinkInfo> TheKnowledge::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
     
-    ASSERT( node_nuggets.count(node) == 1 )(node)(" is the node and the node nuggets are:\n")(node_nuggets);
     NodeNugget nn = node_nuggets.at(node);
     // Note that nn.declarers is "precise", i.e. the XLinks are the actual
     // declaring xlinks, not just arbitrary parent links to the declaree.

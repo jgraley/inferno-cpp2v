@@ -13,8 +13,7 @@ TreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( TreePtr<CPPTree::Declar
 class HasDeclaration : public Transformation
 {
 public:
-    class TypeDeclarationNotFound : public ::Mismatch {};
-    class InstanceDeclarationNotFound : public ::Mismatch {};
+    class DeclarationNotFound : public ::Mismatch {};
     
     virtual TreePtr<Node> operator()( const TreeKit &kit, TreePtr<Node> node );
     static HasDeclaration instance;

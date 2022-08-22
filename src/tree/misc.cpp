@@ -23,7 +23,12 @@ TreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node
 	set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
 	
 	if( infos.empty() )
-		throw TypeDeclarationNotFound();
+    {
+#ifdef WARN_UNFOUND_DECL
+        FTRACE("Warning: declaration of ")(node)(" not found\n");
+#endif        
+		throw DeclarationNotFound();
+    }
 	
 	// function decl/def are folded, so we expect only one declarer
 	TreeKit::LinkInfo info = OnlyElementOf( infos );
