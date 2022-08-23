@@ -3,8 +3,6 @@
 #include "link.hpp"
 #include "the_knowledge.hpp"
 
-#define KNOWLEDGE_IS_TREE_KIT
-
 using namespace SR;
 
 shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
@@ -30,12 +28,7 @@ LocatedLink TransformOfAgent::RunTeleportQuery( const TheKnowledge &knowledge, X
 
     try
     {
-#ifdef KNOWLEDGE_IS_TREE_KIT		
-		TreePtr<Node> trans_x = (*transformation)( knowledge, base_x );
-#else
-        ReferenceTreeKit kit(master_scr_engine->GetOverallMaster()->GetContext());
-		TreePtr<Node> trans_x = (*transformation)( kit, base_x );
-#endif        
+		TreePtr<Node> trans_x = (*transformation)( knowledge, base_x );      
 		if( trans_x )
 		{
 			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             

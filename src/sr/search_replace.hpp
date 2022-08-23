@@ -68,7 +68,6 @@ public:
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
-    TreePtr<Node> GetContext() const { ASSERT(pcontext && *pcontext); return *pcontext; }
     mutable set< TreePtr<Node> > dirty_grass;
     
     virtual Block GetGraphBlockInfo() const;
@@ -80,8 +79,6 @@ public:
     TreePtr<Node> GetSearchComparePattern();
     TreePtr<Node> GetReplacePattern();
     string GetTrace() const;
-    
-    TreePtr<Node> *pcontext;   
 private:
 };
 

@@ -124,27 +124,9 @@ void CompareReplace::Transform( TreePtr<Node> *proot )
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
     
-    // If the initial root and context are the same node, then arrange for the context
-    // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
-    // new declarations can be found in slave searches. 
-    //
-    // TODO but does not work for sub-slaves, because the first level slave's proot
-    // is not the same as pcontext. When slave finishes a singe CR, only the locally-created
-    // *proot is updated, not the top level *proot or *pcontext, so the updates do not appear 
-    // in the context until the first level slave completes, the local *proot is copied over
-    // the TL *proot (and hence *pcontext) and the mechanism described here kicks in
-    //  
-    // We could get the
-    // same effect by taking the context as a reference, but leave it like this for now.
-    // If *proot is under context, then we're OK as long as proot points to the actual
-    // tree node - then the walk at context will follow the new *proot pointer and get
-    // into the new subtree.
-	pcontext = proot;
-    
     SolutionMap empty_solution;    
     (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty_solution );   
 
-    pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
     dirty_grass.clear(); // save memory
 }
 
