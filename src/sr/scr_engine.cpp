@@ -458,6 +458,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
 {
     INDENT("}");
     TRACE("Begin RCR\n");
+    XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
         
     ASSERT( plan.root_pattern )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
@@ -469,13 +470,9 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
         TRACE("Stopping as requested before trying\n");
         return 0;
     }    
-    XLink root_xlink;
-    if( ReadArgs::use_conv_out_loop )
-        root_xlink = XLink::CreateDistinct(*p_root_xnode);
+    
     for(int i=0; i<repetitions; i++) 
     {
-        if( !ReadArgs::use_conv_out_loop )
-            root_xlink = XLink::CreateDistinct(*p_root_xnode);
         bool stop = depth < stop_after.size() && stop_after[depth]==i+1;
         if( stop )
             for( const pair< RequiresSubordinateSCREngine * const, shared_ptr<SCREngine> > &p : plan.my_engines )
@@ -490,22 +487,16 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
             TRACE("Caught ")(e)("; stopping\n");
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
-            if( ReadArgs::use_conv_out_loop )
-                *p_root_xnode = root_xlink.GetChildX();  
+            *p_root_xnode = root_xlink.GetChildX();  
             return i+1; // when the compare fails, we're done
         }
         if( stop )
         {
             TRACE("Stopping as requested after hit %d\n", stop_after[depth]);
-            if( ReadArgs::use_conv_out_loop )
-                *p_root_xnode = root_xlink.GetChildX();  
-            return i+1;
-        }          
-        if( !ReadArgs::use_conv_out_loop )
             *p_root_xnode = root_xlink.GetChildX();  
+            return i+1;
+        }           
     }
-    if( ReadArgs::use_conv_out_loop )
-        *p_root_xnode = root_xlink.GetChildX();  
     
     TRACE("Stop after ")(stop_after)(" depth=")(depth)("\n");
     TRACE("Over the limit of %d reps\n", repetitions); 
@@ -513,6 +504,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
     
+    *p_root_xnode = root_xlink.GetChildX();  
     return repetitions;
 }                                
 
