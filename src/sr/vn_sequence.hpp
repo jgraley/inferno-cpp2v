@@ -38,10 +38,6 @@ public:
         
     void AnalysisStage( TreePtr<Node> root );
     TreePtr<Node> TransformStep( int step_index, TreePtr<Node> root );
-        
-    // Functor style interface; implements InPlaceTransformation interface. TODO would run whole sequence
-    //void operator()( TreePtr<Node> context, 
-    //                 TreePtr<Node> *proot );
     
     void ForSteps( function<void(int)> body );
     
