@@ -18,23 +18,32 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-TreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node )
+TreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
 {
-	set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
-	
-	if( infos.empty() )
+    set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
+    
+    if( infos.empty() )
     {
 #ifdef WARN_UNFOUND_DECL
-        FTRACE("Warning: declaration of ")(node)(" not found\n");
+        FTRACE("Warning: declaration of ")(node)(" not found (has no declarer links)\n");
 #endif        
-		throw DeclarationNotFound();
+        throw DeclarationNotFound();
     }
-	
-	// function decl/def are folded, so we expect only one declarer
-	TreeKit::LinkInfo info = OnlyElementOf( infos );
-	
-	return info.first;
+    
+    // function decl/def are folded, so we expect only one declarer
+    TreeKit::LinkInfo info = OnlyElementOf( infos );
+    
+    return info.first;
 }
+catch( TreeKit::UnknownNode &) 
+{
+#ifdef WARN_UNFOUND_DECL
+    FTRACE("Warning: declaration of ")(node)(" not found (UnknownNode)\n");
+#endif        
+    throw DeclarationNotFound();
+}
+    
+
 
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 

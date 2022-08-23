@@ -479,7 +479,10 @@ string TheKnowledge::NodeNugget::GetTrace() const
 set<TreeKit::LinkInfo> TheKnowledge::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
-    
+   
+    if( node_nuggets.count(node)==0 ) // not found
+        throw UnknownNode();
+        
     NodeNugget nn = node_nuggets.at(node);
     // Note that nn.declarers is "precise", i.e. the XLinks are the actual
     // declaring xlinks, not just arbitrary parent links to the declaree.

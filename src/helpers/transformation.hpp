@@ -8,6 +8,7 @@
 class TreeKit
 {
 public:	
+    class UnknownNode : public Exception {};
 	typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 	
 	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;

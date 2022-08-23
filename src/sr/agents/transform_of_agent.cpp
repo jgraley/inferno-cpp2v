@@ -3,7 +3,7 @@
 #include "link.hpp"
 #include "the_knowledge.hpp"
 
-//#define KNOWLEDGE_IS_TREE_KIT
+#define KNOWLEDGE_IS_TREE_KIT
 
 using namespace SR;
 
