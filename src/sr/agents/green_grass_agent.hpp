@@ -24,7 +24,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
     {
     public:    
         typedef BooleanExpression NominalType;
-        explicit IsGreenGrassOperator( const set< TreePtr<Node> > *dirty_grass,
+        explicit IsGreenGrassOperator( const CompareReplace *overall_master,
                                        shared_ptr<SYM::SymbolExpression> a); 
         shared_ptr<SYM::PredicateOperator> Clone() const override;
                                        
@@ -40,7 +40,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
         
     protected:
         shared_ptr<SYM::SymbolExpression> a;
-        const set< TreePtr<Node> > * const dirty_grass;
+        const CompareReplace *overall_master;
     };
 };
 

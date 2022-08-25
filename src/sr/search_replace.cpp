@@ -214,9 +214,15 @@ TreePtr<Node> CompareReplace::GetReplacePattern()
 }
 
 
-set< TreePtr<Node> > *CompareReplace::GetDirtyGrass() const
+bool CompareReplace::IsDirtyGrass( TreePtr<Node> node ) const
 {
-	return &dirty_grass;
+	return dirty_grass.count(node) > 0;
+}
+
+
+void CompareReplace::AddDirtyGrass( TreePtr<Node> node ) const
+{
+	dirty_grass.insert(node);
 }
 
 

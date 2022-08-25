@@ -557,7 +557,7 @@ TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
     
     // Source will be a pattern node, so cannot be dirty
     if( force_dirty )
-        master_scr_engine->GetOverallMaster()->GetDirtyGrass()->insert( dest );
+        master_scr_engine->GetOverallMaster()->AddDirtyGrass( dest );
         
     return dest;
 }
@@ -573,12 +573,12 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERT(dest);
 
-    bool source_dirty = master_scr_engine->GetOverallMaster()->GetDirtyGrass()->count( source ) > 0;
+    bool source_dirty = master_scr_engine->GetOverallMaster()->IsDirtyGrass( source );
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
         //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-        master_scr_engine->GetOverallMaster()->GetDirtyGrass()->insert( dest );
+        master_scr_engine->GetOverallMaster()->AddDirtyGrass( dest );
     }
     
     return dest;    
