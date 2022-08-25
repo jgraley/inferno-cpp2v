@@ -125,21 +125,22 @@ void CompareReplace::Transform( TreePtr<Node> *proot )
     TRACE("Enter S&R instance ")(*this);
     
     SolutionMap empty_solution;    
-    (void)plan.scr_engine->RepeatingCompareReplace( proot, &empty_solution );   
-
+    XLink root_xlink = XLink::CreateDistinct(*proot);
+    (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );   
+    *proot = root_xlink.GetChildX();
+    
     dirty_grass.clear(); // save memory
 }
 
 
-void CompareReplace::Transform( XLink root_xlink )
+void CompareReplace::Transform( XLink &root_xlink )
 {
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
 
     SolutionMap empty_solution;    
-    TreePtr<Node> basex = root_xlink.GetChildX();
-    (void)plan.scr_engine->RepeatingCompareReplace( &basex, &empty_solution );   
-
+    (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );   
+    
     dirty_grass.clear(); // save memory
     
     // TODO return XLink::CreateDistinct( basex );

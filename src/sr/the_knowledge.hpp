@@ -38,10 +38,6 @@ private:
     } plan;
 
 public:
-    void Build( XLink root_xlink );
-    void Clear();
-    void Update( XLink root_xlink );
-    
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink UniquifyDomainExtension( XLink xlink );
 
@@ -172,7 +168,7 @@ public:
     const NodeNugget &GetNodeNugget(TreePtr<Node> node) const;
     bool HasNodeNugget(TreePtr<Node> node) const;
 
-    void DetermineDomain( XLink root_xlink );
+    void Build( XLink root_xlink );
     void ExtendDomain( PatternLink plink );
 private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );

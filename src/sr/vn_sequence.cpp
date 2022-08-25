@@ -141,10 +141,10 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 }
 
 
-void VNSequence::UpdateTheKnowledge( XLink root_xlink )
+void VNSequence::BuildTheKnowledge( XLink root_xlink )
 {
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    knowledge->Update( root_xlink );
+    knowledge->Build( root_xlink );
 }
 
 

@@ -47,7 +47,7 @@ public:
 
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
-    void UpdateTheKnowledge( XLink root_xlink );
+    void BuildTheKnowledge( XLink root_xlink );
     void ExtendDomain( PatternLink root_plink );
 
 private:

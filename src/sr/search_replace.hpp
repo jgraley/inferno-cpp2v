@@ -63,7 +63,7 @@ public:
     // Functor style interface for RepeatingSearchReplace; implements InPlaceTransformation interface.
     void Transform( TreePtr<Node> *proot );
 
-    void Transform( XLink root_xlink );
+    void Transform( XLink &root_xlink );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse

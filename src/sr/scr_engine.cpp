@@ -346,17 +346,17 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     ASSERT( through_subtree );
     
     // Run the slave's engine on this subtree
-    TreePtr<Node> new_subtree = through_subtree;
-    int hits = slave_engine->RepeatingCompareReplace( &new_subtree, &replace_solution );
+    XLink new_xlink = XLink::CreateDistinct(through_subtree);
+    int hits = slave_engine->RepeatingCompareReplace( new_xlink, &replace_solution );
     if( !hits )
         return;
         
-    TRACE("Slave ")(slave_engine)(" succeeded, need to implant new subtree ")(new_subtree)("\n");
+    TRACE("Slave ")(slave_engine)(" succeeded, need to implant new subtree ")(new_xlink)("\n");
     // Special case when slave is at root of my SCR region: switch the whole tree
     if( through_subtree == *p_root_x )
     {
         TRACEC("Implanting at root over ")(*p_root_x)("\n");
-        *p_root_x = new_subtree;
+        *p_root_x = new_xlink.GetChildX();
     }
     else
     {
@@ -373,19 +373,19 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
                 if( px ) // ps is NULL at root 
                 {
                     TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(px))("\n");
-                    *const_cast<TreePtrInterface *>(px) = new_subtree;
+                    *const_cast<TreePtrInterface *>(px) = new_xlink.GetChildX();
                     hits++;
                 }
             }
         }
-        ASSERT( hits==1 )("Trying to implant ")(new_subtree)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
+        ASSERT( hits==1 )("Trying to implant ")(new_xlink)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
     }
 
-    PostSlaveFixup( through_subtree, new_subtree );
+    PostSlaveFixup( through_subtree, new_xlink.GetChildX() );
 }
 
 
-TreePtr<Node> SCREngine::Replace( SolutionMap &&solution )
+XLink SCREngine::Replace( SolutionMap &&solution )
 {
     INDENT("R");
         
@@ -411,8 +411,11 @@ TreePtr<Node> SCREngine::Replace( SolutionMap &&solution )
     // Need a duplicate here in case we're a slave replacing an identifier
     // with a non-identifier. Otherwise our subtree would look fine, but 
     // global X tree would be incorrect (multiple links to non-identifier)
-    // and that would break knowledge building. See #217
-    {Tracer::RAIIDisable silencer;return plan.root_agent->DuplicateSubtree(new_root_x);}
+    // and that would break knowledge building. See rule #217
+    {
+        Tracer::RAIIDisable silencer;
+        return XLink::CreateDistinct(plan.root_agent->DuplicateSubtree(new_root_x));
+    }
 }
 
 
@@ -423,7 +426,7 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
 
 
 #ifndef NEW_KNOWLEDGE_UPDATE
-    plan.vn_sequence->UpdateTheKnowledge( root_xlink ); 
+    plan.vn_sequence->BuildTheKnowledge( root_xlink ); 
 #endif
     plan.vn_sequence->ExtendDomain( plan.root_plink );
 
@@ -432,19 +435,18 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
     // replace does so it can change the root node. Throws on mismatch.
     const SolutionMap &cs = plan.and_rule_engine->Compare( root_xlink, 
                                                            master_solution );
-    TRACE("Search got a match\n");
+    TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the master keys
     SolutionMap rs = UnionOfSolo( *master_solution, cs );    
-    TreePtr<Node> root_x = Replace( move(rs) );
-    root_xlink = XLink::CreateDistinct(root_x);
+    root_xlink = Replace( move(rs) );
     
     // Clear out anything cached in agents and update the knowledge 
     // now that replace is done
     for( Agent *a : plan.my_agents )
         a->Reset();
 #ifdef NEW_KNOWLEDGE_UPDATE
-    plan.vn_sequence->UpdateTheKnowledge( root_xlink );
+    plan.vn_sequence->BuildTheKnowledge( root_xlink );
 #endif    
 }
 
@@ -453,12 +455,11 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
+int SCREngine::RepeatingCompareReplace( XLink &root_xlink,
                                         const SolutionMap *master_solution )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
-    XLink root_xlink = XLink::CreateDistinct(*p_root_xnode);
         
     ASSERT( plan.root_pattern )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
@@ -486,14 +487,12 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
         {
             TRACE("Caught ")(e)("; stopping\n");
             if( depth < stop_after.size() )
-                ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
-            *p_root_xnode = root_xlink.GetChildX();  
+                ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);            
             return i+1; // when the compare fails, we're done
         }
         if( stop )
         {
             TRACE("Stopping as requested after hit %d\n", stop_after[depth]);
-            *p_root_xnode = root_xlink.GetChildX();  
             return i+1;
         }           
     }
@@ -504,7 +503,6 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *p_root_xnode,
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
     
-    *p_root_xnode = root_xlink.GetChildX();  
     return repetitions;
 }                                
 

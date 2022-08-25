@@ -49,32 +49,6 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
     lacing->Build(categories);
 }
 
-
-void TheKnowledge::Build( XLink root_xlink )
-{
-    Clear();
-    DetermineDomain( root_xlink );
-}
-
-
-void TheKnowledge::Clear()
-{
-    unordered_domain.clear();
-    depth_first_ordered_domain.clear();
-    category_ordered_domain.clear();
-    simple_compare_ordered_domain.clear();
-    nuggets.clear();
-    node_nuggets.clear();
-    if( domain_extension_classes )
-        domain_extension_classes->Clear();
-}
-
-
-void TheKnowledge::Update( XLink root_xlink )
-{
-    Build( root_xlink );
-}
-
     
 XLink TheKnowledge::UniquifyDomainExtension( XLink xlink )
 {
@@ -197,15 +171,16 @@ bool TheKnowledge::HasNodeNugget(TreePtr<Node> node) const
 }
 
 
-void TheKnowledge::DetermineDomain( XLink root_xlink )
+void TheKnowledge::Build( XLink root_xlink )
 {      
-    // Both should be cleared together
+    // Clear everything 
     unordered_domain.clear();
     depth_first_ordered_domain.clear();
     category_ordered_domain.clear();
     simple_compare_ordered_domain.clear();
     domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     nuggets.clear();
+    node_nuggets.clear();    
     current_index = 0;
     
     AddAtRoot( REQUIRE_SOLO, root_xlink );
