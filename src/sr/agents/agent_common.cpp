@@ -573,7 +573,7 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERT(dest);
 
-    bool source_dirty = master_scr_engine->GetOverallMaster()->GetDirtyGrass()->find( source ) != master_scr_engine->GetOverallMaster()->GetDirtyGrass()->end();
+    bool source_dirty = master_scr_engine->GetOverallMaster()->GetDirtyGrass()->count( source ) > 0;
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
