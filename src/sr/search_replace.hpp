@@ -64,11 +64,6 @@ public:
     void Transform( TreePtr<Node> *proot );
 
     void Transform( XLink &root_xlink );
-
-    // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
-    // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
-    // back into the general search algorithm.
-    mutable set< TreePtr<Node> > dirty_grass;
     
     virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 
@@ -78,8 +73,12 @@ public:
     SCREngine *GetRootEngine();
     TreePtr<Node> GetSearchComparePattern();
     TreePtr<Node> GetReplacePattern();
+    set< TreePtr<Node> > *GetDirtyGrass() const;
     string GetTrace() const;
+
 private:
+    VNSequence *vn_sequence = nullptr;
+    mutable set< TreePtr<Node> > dirty_grass;
 };
 
 

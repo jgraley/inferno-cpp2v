@@ -19,7 +19,7 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    const set< TreePtr<Node> > *dirty_grass = &master_scr_engine->GetOverallMaster()->dirty_grass;    
+    const set< TreePtr<Node> > *dirty_grass = master_scr_engine->GetOverallMaster()->GetDirtyGrass();    
     return MakeOver<IsGreenGrassOperator>(dirty_grass, keyer_expr);
 }
 
@@ -36,7 +36,7 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 	block.shape = "cylinder";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>( GetThrough()->get()), 
+    auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>( GetThrough()->get() ), 
               list<string>{},
               list<string>{},
               phase,

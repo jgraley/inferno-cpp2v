@@ -122,7 +122,7 @@ Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orde
     switch( order_property )
     {
     case STRICT:
-        // Unique order uses address to ensure different dirty_grass sets compare differently
+        // Unique order is unique by owning agent
         r = (int)(agent > c->agent) - (int)(agent < c->agent);
         // Note: just subtracting could overflow
         break;

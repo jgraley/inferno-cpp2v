@@ -94,8 +94,9 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 }
 
 
-void CompareReplace::PlanningStageOne(VNSequence *vn_sequence)
+void CompareReplace::PlanningStageOne(VNSequence *vn_sequence_)
 {
+	vn_sequence = vn_sequence_;
     plan.PlanningStageOne(vn_sequence);
 }
 
@@ -210,6 +211,12 @@ TreePtr<Node> CompareReplace::GetSearchComparePattern()
 TreePtr<Node> CompareReplace::GetReplacePattern()
 {
     return plan.replace_pattern;
+}
+
+
+set< TreePtr<Node> > *CompareReplace::GetDirtyGrass() const
+{
+	return &dirty_grass;
 }
 
 

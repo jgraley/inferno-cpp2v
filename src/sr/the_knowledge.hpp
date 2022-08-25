@@ -170,6 +170,7 @@ public:
 
     void Build( XLink root_xlink );
     void ExtendDomain( PatternLink plink );
+    
 private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
