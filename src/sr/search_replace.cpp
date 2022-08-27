@@ -129,8 +129,6 @@ void CompareReplace::Transform( TreePtr<Node> *proot )
     XLink root_xlink = XLink::CreateDistinct(*proot);
     (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );   
     *proot = root_xlink.GetChildX();
-    
-    dirty_grass.clear(); // save memory
 }
 
 
@@ -140,9 +138,7 @@ void CompareReplace::Transform( XLink &root_xlink )
     TRACE("Enter S&R instance ")(*this);
 
     SolutionMap empty_solution;    
-    (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );   
-    
-    dirty_grass.clear(); // save memory
+    (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );       
     
     // TODO return XLink::CreateDistinct( basex );
 }
@@ -211,18 +207,6 @@ TreePtr<Node> CompareReplace::GetSearchComparePattern()
 TreePtr<Node> CompareReplace::GetReplacePattern()
 {
     return plan.replace_pattern;
-}
-
-
-bool CompareReplace::IsDirtyGrass( TreePtr<Node> node ) const
-{
-	return dirty_grass.count(node) > 0;
-}
-
-
-void CompareReplace::AddDirtyGrass( TreePtr<Node> node ) const
-{
-	dirty_grass.insert(node);
 }
 
 

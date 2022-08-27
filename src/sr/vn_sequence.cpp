@@ -83,6 +83,8 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
+    dirty_grass.clear();
+
 #ifdef XLINK_CONTINUITY
     if( step_index == 0 )
     {
@@ -153,3 +155,16 @@ void VNSequence::ExtendDomain( PatternLink root_plink )
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
     knowledge->ExtendDomain( root_plink );
 }
+
+
+bool VNSequence::IsDirtyGrass( TreePtr<Node> node )
+{
+	return dirty_grass.count(node) > 0;
+}
+
+
+void VNSequence::AddDirtyGrass( TreePtr<Node> node )
+{
+	dirty_grass.insert(node);
+}
+

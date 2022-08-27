@@ -49,10 +49,14 @@ public:
     XLink FindDomainExtension( XLink xlink ) const;
     void BuildTheKnowledge( XLink root_xlink );
     void ExtendDomain( PatternLink root_plink );
-
+    
+    bool IsDirtyGrass( TreePtr<Node> node );
+    void AddDirtyGrass( TreePtr<Node> node );
+    
 private:
     vector< shared_ptr<VNStep> > steps;
     shared_ptr<TheKnowledge> knowledge;    
+    mutable set< TreePtr<Node> > dirty_grass;
     XLink initial_root_xlink;
 };    
     

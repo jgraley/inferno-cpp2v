@@ -73,13 +73,10 @@ public:
     SCREngine *GetRootEngine();
     TreePtr<Node> GetSearchComparePattern();
     TreePtr<Node> GetReplacePattern();
-    bool IsDirtyGrass( TreePtr<Node> node ) const;
-    void AddDirtyGrass( TreePtr<Node> node ) const;
     string GetTrace() const;
 
 private:
     VNSequence *vn_sequence = nullptr;
-    mutable set< TreePtr<Node> > dirty_grass;
 };
 
 
