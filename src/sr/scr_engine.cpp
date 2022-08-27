@@ -354,31 +354,31 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
         
     TRACE("Slave ")(slave_engine)(" succeeded, need to implant new subtree ")(new_xlink)("\n");
     // Special case when slave is at root of my SCR region: switch the whole tree
+    const TreePtrInterface *p_through_x = nullptr; 
     if( through_subtree == *p_root_x )
     {
         TRACEC("Implanting at root over ")(*p_root_x)("\n");
-        *p_root_x = new_xlink.GetChildX();
+        p_through_x = p_root_x;
     }
     else
     {
-        // Search for links to the though subtree 
+        // Search for link to the though subtree 
         Walk e( *p_root_x, nullptr, nullptr );
-        const TreePtrInterface *px = nullptr; 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
             if( *wit == through_subtree ) // found the though subtree
 			{
                 // Get the pointer that points to the though subtree
-                px = wit.GetNodePointerInParent();  
+                p_through_x = wit.GetNodePointerInParent();  
                 break;  
 			}
 		}
+	}
 		
-		// Update it to point to the new subtree
-		ASSERT( px ); // px is NULL at root but we handle that case separately.
-		TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(px))("\n");
-		*const_cast<TreePtrInterface *>(px) = new_xlink.GetChildX();
-    }
+	// Update it to point to the new subtree
+	ASSERT( p_through_x ); // px is NULL at root but we handle that case separately.
+	TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(p_through_x))("\n");
+	*const_cast<TreePtrInterface *>(p_through_x) = new_xlink.GetChildX();
 
     UpdateSlaveActionRequests( through_subtree, new_xlink.GetChildX() );
 }
