@@ -346,15 +346,9 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     slave_action_requests.erase(slave_agent); // not needed any more
     ASSERT( through_subtree );
     
-    // Run the slave's engine on this subtree
-    XLink new_xlink = XLink::CreateDistinct(through_subtree);
-    int hits = slave_engine->RepeatingCompareReplace( new_xlink, &replace_solution );
-    if( !hits )
-        return;
-        
-    TRACE("Slave ")(slave_engine)(" succeeded, need to implant new subtree ")(new_xlink)("\n");
-    // Special case when slave is at root of my SCR region: switch the whole tree
-    const TreePtrInterface *p_through_x = nullptr; 
+    // Obtain a pointer to the though link that will be updated by the 
+    // slave. TODO use knowledge, see #620
+    TreePtrInterface *p_through_x = nullptr; 
     if( through_subtree == *p_root_x )
     {
         TRACEC("Implanting at root over ")(*p_root_x)("\n");
@@ -369,16 +363,17 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
             if( *wit == through_subtree ) // found the though subtree
 			{
                 // Get the pointer that points to the though subtree
-                p_through_x = wit.GetNodePointerInParent();  
+                p_through_x = const_cast<TreePtrInterface *>(wit.GetNodePointerInParent());  
                 break;  
 			}
 		}
 	}
-		
-	// Update it to point to the new subtree
-	ASSERT( p_through_x ); // px is NULL at root but we handle that case separately.
-	TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(p_through_x))("\n");
-	*const_cast<TreePtrInterface *>(p_through_x) = new_xlink.GetChildX();
+	ASSERT( p_through_x ); 
+
+    // Run the slave's engine on this subtree and overwrite through ptr via p_through_x
+    XLink new_xlink = XLink::CreateDistinct(through_subtree);
+    int hits = slave_engine->RepeatingCompareReplace( new_xlink, &replace_solution );
+	*p_through_x = new_xlink.GetChildX();
 
     UpdateSlaveActionRequests( through_subtree, new_xlink.GetChildX() );
 }
