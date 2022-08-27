@@ -19,7 +19,7 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
     auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    return MakeOver<IsGreenGrassOperator>(master_scr_engine->GetOverallMaster(), keyer_expr);
+    return MakeOver<IsGreenGrassOperator>(this, keyer_expr);
 }
 
 
@@ -48,17 +48,17 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 }
 
 
-GreenGrassAgent::IsGreenGrassOperator::IsGreenGrassOperator( const CompareReplace *overall_master_,
+GreenGrassAgent::IsGreenGrassOperator::IsGreenGrassOperator( const GreenGrassAgent *agent_,
                                                              shared_ptr<SymbolExpression> a_ ) :
     a( a_ ),
-    overall_master( overall_master_ )
+    agent( agent_ )
 {    
 }                                                
 
 
 shared_ptr<PredicateOperator> GreenGrassAgent::IsGreenGrassOperator::Clone() const
 {
-    return make_shared<IsGreenGrassOperator>( overall_master, a );
+    return make_shared<IsGreenGrassOperator>( agent, a );
 }
     
 
@@ -76,7 +76,7 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
-    bool green = !( overall_master->IsDirtyGrass( ra->GetOnlyXLink().GetChildX() ) ); 
+    bool green = !( agent->master_scr_engine->IsDirtyGrass( ra->GetOnlyXLink().GetChildX() ) ); 
     return make_unique<BooleanResult>( green );         
 }
 
@@ -90,9 +90,8 @@ Orderable::Result GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( cons
     switch( order_property )
     {
     case STRICT:
-        // Unique order uses address to ensure different overall master engines sets compare differently
-        // TODO agent would be better
-        r = (int)(overall_master > c->overall_master) - (int)(overall_master < c->overall_master);
+        // Unique order uses agent address to ensure different agents compare different
+        r = (int)(agent > c->agent) - (int)(agent < c->agent);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:

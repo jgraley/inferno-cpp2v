@@ -143,6 +143,8 @@ public: // For agents
     const CompareReplace * GetOverallMaster() const;
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
+    bool IsDirtyGrass( TreePtr<Node> node ) const;
+    void AddDirtyGrass( TreePtr<Node> node ) const;
     
     friend class Conjecture; 
 

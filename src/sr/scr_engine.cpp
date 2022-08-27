@@ -637,6 +637,18 @@ XLink SCREngine::FindDomainExtension( XLink xlink ) const
 }
 
 
+bool SCREngine::IsDirtyGrass( TreePtr<Node> node ) const
+{
+	return plan.overall_master_ptr->IsDirtyGrass( node );
+}
+
+
+void SCREngine::AddDirtyGrass( TreePtr<Node> node ) const
+{
+	plan.overall_master_ptr->AddDirtyGrass( node );
+}
+
+
 string SCREngine::GetTrace() const
 {
     string s = Traceable::GetName() + GetSerialString();
