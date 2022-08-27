@@ -308,23 +308,24 @@ string SCREngine::Plan::GetTrace() const
 }
 
     
-void SCREngine::PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
+void SCREngine::UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
 {
     INDENT("F");
     
-    // Fix up for remaining slaves if required.
-    for( auto &p : slave_though_subtrees ) // ref important - we're modifying!
+	// We need to fix up any remaining action requests at the same level as the one
+	// that just ran if they have the same through node as the one we just changed.
+    for( auto &p : slave_action_requests ) // ref important - we're modifying!
     {
-        TRACE("Trying fixup of ")(through_subtree)(": ")(p.first)(", ")(p.second)("\n");
         if( p.second == through_subtree )
         {
-            TRACEC("Fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
+            TRACE("Fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
             p.second = new_subtree;
         }
     }
     
-    if( plan.master_ptr ) // recurse down to overall master
-        plan.master_ptr->PostSlaveFixup( through_subtree, new_subtree );
+    // Master SCREngines may also have pending action requests with matvhing through node
+    if( plan.master_ptr ) 
+        plan.master_ptr->UpdateSlaveActionRequests( through_subtree, new_subtree );
 }
 
 
@@ -338,11 +339,11 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
    
     TRACE("Going to run slave on ")(*slave_engine)
          (" agent ")(slave_agent)
-         (" and slave_though_subtrees are\n")(slave_though_subtrees)("\n");
+         (" and slave_action_requests are\n")(slave_action_requests)("\n");
    
     // Recall the base node of the subtree under through (after master replace)
-    TreePtr<Node> through_subtree = slave_though_subtrees.at(slave_agent);
-    slave_though_subtrees.erase(slave_agent); // not needed any more
+    TreePtr<Node> through_subtree = slave_action_requests.at(slave_agent);
+    slave_action_requests.erase(slave_agent); // not needed any more
     ASSERT( through_subtree );
     
     // Run the slave's engine on this subtree
@@ -360,28 +361,26 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     }
     else
     {
-        // Search for links to the though subtree and stitch in the new one
-        int hits = 0;
-        Walk e( *p_root_x, nullptr, nullptr ); 
+        // Search for links to the though subtree 
+        Walk e( *p_root_x, nullptr, nullptr );
+        const TreePtrInterface *px = nullptr; 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
             if( *wit == through_subtree ) // found the though subtree
-            {            
+			{
                 // Get the pointer that points to the though subtree
-                const TreePtrInterface *px = wit.GetNodePointerInParent();    
-                // Update it to point to the new subtree
-                if( px ) // ps is NULL at root 
-                {
-                    TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(px))("\n");
-                    *const_cast<TreePtrInterface *>(px) = new_xlink.GetChildX();
-                    hits++;
-                }
-            }
-        }
-        ASSERT( hits==1 )("Trying to implant ")(new_xlink)(" into ")(*p_root_x)(" at ")(through_subtree)(" got %d hits, expecting one", hits);
+                px = wit.GetNodePointerInParent();  
+                break;  
+			}
+		}
+		
+		// Update it to point to the new subtree
+		ASSERT( px ); // px is NULL at root but we handle that case separately.
+		TRACEC("Implanting at non-root over ")(*const_cast<TreePtrInterface *>(px))("\n");
+		*const_cast<TreePtrInterface *>(px) = new_xlink.GetChildX();
     }
 
-    PostSlaveFixup( through_subtree, new_xlink.GetChildX() );
+    UpdateSlaveActionRequests( through_subtree, new_xlink.GetChildX() );
 }
 
 
@@ -389,7 +388,7 @@ XLink SCREngine::Replace( SolutionMap &&solution )
 {
     INDENT("R");
         
-    slave_though_subtrees.clear();
+    slave_action_requests.clear();
     replace_solution = move(solution);
     keys_available = true;
 
@@ -563,16 +562,10 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::RecurseInto( RequiresSubordinateSCREngine *slave_agent,
-                             TreePtr<Node> *p_slave_through_subtree ) const
+void SCREngine::RequestSlaveAction( RequiresSubordinateSCREngine *slave_agent,
+                                    TreePtr<Node> slave_through_subtree ) const
 {
-    ASSERT( keys_available );
-    //Tracer::RAIIDisable silencer( false );    // bring back trace again
-    
-    // p_root_xnode cannot be stored: it points to a local of our caller
-    TreePtr<Node> slave_through_subtree = *p_slave_through_subtree; 
-    
-    InsertSolo( slave_though_subtrees, make_pair( slave_agent, slave_through_subtree ) );
+    InsertSolo( slave_action_requests, make_pair( slave_agent, slave_through_subtree ) );
 }
 
 

@@ -113,7 +113,7 @@ private:
         list<PatternLink> my_subordinate_plinks_postorder;
     } plan;
 
-    void PostSlaveFixup( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
+    void UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
     void RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x );
     XLink Replace( SolutionMap &&solution );
 
@@ -133,8 +133,8 @@ public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the slave_engine's one - and that pointer is not const.
-    void RecurseInto( RequiresSubordinateSCREngine *slave_agent, 
-                      TreePtr<Node> *p_root_xnode ) const;    
+    void RequestSlaveAction( RequiresSubordinateSCREngine *slave_agent, 
+                             TreePtr<Node> slave_through_subtree ) const;    
     void SetReplaceKey( LocatedLink keyer_link ) const;
     TreePtr<Node> GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
@@ -161,7 +161,7 @@ private:
     
     mutable SolutionMap replace_solution;
     bool keys_available = false;    
-    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_though_subtrees;
+    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_action_requests;
 };
 
 };

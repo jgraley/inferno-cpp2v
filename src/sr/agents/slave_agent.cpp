@@ -42,7 +42,7 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink,
     ASSERT( my_through_subtree );
     
     // And then recurse into slaves
-    master_scr_engine->RecurseInto( this, &my_through_subtree );   
+    master_scr_engine->RequestSlaveAction( this, my_through_subtree );   
     ASSERT( my_through_subtree );
     
     return my_through_subtree;

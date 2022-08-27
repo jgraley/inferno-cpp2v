@@ -56,7 +56,7 @@ public:
 private:
     vector< shared_ptr<VNStep> > steps;
     shared_ptr<TheKnowledge> knowledge;    
-    mutable set< TreePtr<Node> > dirty_grass;
+    set< TreePtr<Node> > dirty_grass;
     XLink initial_root_xlink;
 };    
     
