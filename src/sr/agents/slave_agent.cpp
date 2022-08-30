@@ -22,7 +22,7 @@ shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
 
 
 void SlaveAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                  PatternLink under_plink )
+                                           PatternLink under_plink )
 {    
     // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());

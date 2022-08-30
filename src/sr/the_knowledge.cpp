@@ -328,9 +328,12 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
     nugget.parent_xlink = xlink;
     nugget.my_container_front = child_xlink;
     nugget.my_container_back = child_xlink;
+    
+    node_nuggets[child_x].parents.insert( child_xlink );
     set<const TreePtrInterface *> declared = x->GetDeclared();
     if( declared.count( p_x_singular ) > 0 )
 		node_nuggets[child_x].declarers.insert( child_xlink );
+		
     AddLink( mode, child_xlink, nugget );
 }
 
@@ -363,6 +366,7 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
         else
             nugget.my_sequence_successor = XLink::OffEndXLink;        
             
+        node_nuggets[child_x].parents.insert( child_xlink );
         set<const TreePtrInterface *> declared = x->GetDeclared();
         if( declared.count( &*xit ) > 0 )
 			node_nuggets[child_x].declarers.insert( child_xlink );
@@ -392,6 +396,7 @@ void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, 
         // Note: in real STL containers, one would use *(x_col->rbegin())
         nugget.my_container_back = XLink( x, &(x_col->back()) );
         
+		node_nuggets[child_x].parents.insert( child_xlink );
         set<const TreePtrInterface *> declared = x->GetDeclared();
         if( declared.count( &*xit ) > 0 )
 			node_nuggets[child_x].declarers.insert( child_xlink );

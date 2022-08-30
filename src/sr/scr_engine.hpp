@@ -95,6 +95,7 @@ private:
         
         SCREngine * const algo;
         VNSequence *vn_sequence;
+        shared_ptr<const TheKnowledge> knowledge;
         const CompareReplace *overall_master_ptr;
         TreePtr<Node> root_pattern;
         PatternLink root_plink;
@@ -115,7 +116,7 @@ private:
 
     void UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
     void RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x );
-    XLink Replace( SolutionMap &&solution );
+    TreePtr<Node> Replace();
 
 public: // For top level engine/VN trans
     void SingleCompareReplace( XLink &root_xlink,

@@ -20,6 +20,8 @@ using namespace std;
 int SCREngine::repetitions;
 bool SCREngine::rep_error;
 
+// #620
+//#define USE_KNOWLEDGE_FOR_SLAVE_APPLY_POINT
 
 // The master_plinks argument is a set of plinks to agents that we should not
 // configure because they were already configured by a master, and masters take 
@@ -247,15 +249,17 @@ void SCREngine::Plan::PlanReplace()
 }
 
 
-void SCREngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+void SCREngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge_ )
 {    
     TRACE("Planning stage five\n");
 
-    and_rule_engine->PlanningStageFive(knowledge);
+    and_rule_engine->PlanningStageFive(knowledge_);
     
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageFive(knowledge);    
+        p.second->PlanningStageFive(knowledge_);    
         
+    knowledge = knowledge_;
+    
     Dump();
 } 
 
@@ -356,7 +360,12 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     }
     else
     {
-        // Search for link to the though subtree 
+#if USE_KNOWLEDGE_FOR_SLAVE_APPLY_POINT
+		TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
+		XLink x = OnlyElementOf(nn.parents);
+		p_through_x = const_cast<TreePtrInterface *>( x.GetXPtr() );
+#else		
+        // Search for link to the through subtree 
         Walk e( *p_root_x, nullptr, nullptr );
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
@@ -367,6 +376,7 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
                 break;  
 			}
 		}
+#endif		
 	}
 	ASSERT( p_through_x ); 
 
@@ -379,37 +389,16 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
 }
 
 
-XLink SCREngine::Replace( SolutionMap &&solution )
+TreePtr<Node> SCREngine::Replace()
 {
     INDENT("R");
-        
-    slave_action_requests.clear();
-    replace_solution = move(solution);
-    keys_available = true;
-
+    
     // Now replace according to the couplings
     TRACE("Now replacing, root agent=")(plan.root_agent)("\n");
     TreePtr<Node> new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
     TRACE("Replace done\n");
-    
-    for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
-    {
-        TRACE("Running slave ")(plink_to_slave)(" root x=")(new_root_x)("\n");
-        RunSlave(plink_to_slave, &new_root_x);       
-    }
-    TRACE("Slaves done\n");
-    
-    keys_available = false;
-    replace_solution.clear();
-    
-    // Need a duplicate here in case we're a slave replacing an identifier
-    // with a non-identifier. Otherwise our subtree would look fine, but 
-    // global X tree would be incorrect (multiple links to non-identifier)
-    // and that would break knowledge building. See rule #217
-    {
-        Tracer::RAIIDisable silencer;
-        return XLink::CreateDistinct(plan.root_agent->DuplicateSubtree(new_root_x));
-    }
+
+    return new_root_x;
 }
 
 
@@ -433,15 +422,42 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
            
     // Replace will need the compare keys unioned with the master keys
     SolutionMap rs = UnionOfSolo( *master_solution, cs );    
-    root_xlink = Replace( move(rs) );
+    slave_action_requests.clear();
+    replace_solution = move(rs);
+    keys_available = true;
+
+    // Now replace according to the couplings
+    TreePtr<Node> new_root_x = Replace();
+        
+#ifdef NEW_KNOWLEDGE_UPDATE
+    plan.vn_sequence->BuildTheKnowledge( root_xlink );
+#endif    
+
+    for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
+    {
+        TRACE("Running slave ")(plink_to_slave)(" root x=")(new_root_x)("\n");
+        RunSlave(plink_to_slave, &new_root_x);       
+    }
+    TRACE("Slaves done\n");
+    
+    keys_available = false;
+    replace_solution.clear();
+    
+    // Need a duplicate here in case we're a slave replacing an identifier
+    // with a non-identifier. Otherwise our subtree would look fine, but 
+    // global X tree would be incorrect (multiple links to non-identifier)
+    // and that would break knowledge building. See rule #217
+    {
+        Tracer::RAIIDisable silencer;
+        new_root_x = plan.root_agent->DuplicateSubtree(new_root_x);
+    }
+   
+    root_xlink = XLink::CreateDistinct(new_root_x);
     
     // Clear out anything cached in agents and update the knowledge 
     // now that replace is done
     for( Agent *a : plan.my_agents )
         a->Reset();
-#ifdef NEW_KNOWLEDGE_UPDATE
-    plan.vn_sequence->BuildTheKnowledge( root_xlink );
-#endif    
 }
 
 

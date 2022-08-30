@@ -151,8 +151,11 @@ public:
     class NodeNugget : public Traceable
     {
     public:		
-		// Declarative XLinks onto our node. Note that our node is the
-		// child X of these links. To get the declarer node, you'll need 
+		// Our node is the child of these links.
+		set<XLink> parents;
+
+		// Declarative XLinks onto our node. 
+		// A subset of parents, so to get the declarer node, you'll need 
 		// to use eg Nugget::parent_xlink.GetChildX(). Why have I done 
 		// this? So that this info is unambiguous across parallel links:
 		// We'll uniquely specify the correct one if only one is a 
