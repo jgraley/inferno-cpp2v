@@ -261,11 +261,29 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     if( mode==STOP_IF_ALREADY_IN && nuggets.count(xlink) > 0 )
         return; // Terminate into the existing domain
     
-    // Update domains 
+    // Check for badness
+    if( nuggets.count(xlink) )
+    {
+		Nugget old_nugget = nuggets.at(xlink);
+		// remember that nugget is incomplete because 
+		// we have not been able to fill everything in yet
+		if( nugget.parent_xlink != old_nugget.parent_xlink )
+		{
+			ASSERT(false)
+			      ("Rule #217 violation or cycle: node with child should have only one parent\n")
+			      ("From parents: ")(nugget.parent_xlink)(" and ")(old_nugget.parent_xlink)
+			      ("\nTo child: ")(xlink);
+		}
+		
+		// Otherwise why did the parents not fail the check?
+		ASSERTFAIL("Unknown trouble");				
+	}
+    
+    // Update domains
     InsertSolo( unordered_domain, xlink );
-    depth_first_ordered_domain.push_back(xlink);
-    category_ordered_domain.insert(xlink);
-    simple_compare_ordered_domain.insert(xlink);
+    depth_first_ordered_domain.push_back( xlink );
+    category_ordered_domain.insert( xlink );
+    simple_compare_ordered_domain.insert( xlink );
     
     DepthFirstOrderedIt it = depth_first_ordered_domain.end();
     --it; // I know this is OK because we just pushed to ordered_domain
