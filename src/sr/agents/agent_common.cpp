@@ -543,6 +543,9 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
                                              XLink key_xlink )
 {
+	// This default implementation gives us a "search-only" agent
+	// that can only be in replace path replace if keyed, and then 
+	// simply duplicates the key subtree
     ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
     return DuplicateSubtree(key_xlink.GetChildX());   
 }
