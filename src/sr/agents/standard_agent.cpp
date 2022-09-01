@@ -25,12 +25,12 @@ void StandardAgent::SCRConfigure( const SCREngine *e,
 void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 {
     algo = algo_;
-    const vector< Itemiser::Element * > my_memb = algo->Itemise();
+    const vector< Itemiser::Element * > my_items = algo->Itemise();
     int ii=0;
     ASSERT( sequences.empty() );
     ASSERT( collections.empty() );
     ASSERT( singulars.empty() );
-    for( Itemiser::Element *ie : my_memb )
+    for( Itemiser::Element *ie : my_items )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        
             sequences.emplace_back( Sequence(ii, this, phase, pattern_seq) );
@@ -363,16 +363,16 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     // Get the members of x corresponding to pattern's class
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     ASSERT( keyer_xlink != XLink::MMAX_Link );
-    vector< Itemiser::Element * > x_memb = Itemise( keyer_xlink.GetChildX().get() );   
+    vector< Itemiser::Element * > x_items = Itemise( keyer_xlink.GetChildX().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )
     {
-        auto p_x_col = dynamic_cast<CollectionInterface *>(x_memb[plan_col.itemise_index]);
+        auto p_x_col = dynamic_cast<CollectionInterface *>(x_items[plan_col.itemise_index]);
         RegenerationQueryCollection( query, p_x_col, plan_col, hypothesis_links, knowledge );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
-        auto p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[plan_seq.itemise_index]);
+        auto p_x_seq = dynamic_cast<SequenceInterface *>(x_items[plan_seq.itemise_index]);
         RegenerationQuerySequence( query, p_x_seq, plan_seq, hypothesis_links, knowledge );
     }
 }
@@ -493,22 +493,22 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
-    vector< Itemiser::Element * > my_memb = Itemise(); 
-    vector< Itemiser::Element * > under_memb = Itemise( under_plink.GetChildAgent() ); 
+    vector< Itemiser::Element * > my_items = Itemise(); 
+    vector< Itemiser::Element * > under_items = Itemise( under_plink.GetChildAgent() ); 
     
     // Loop over all the members of under (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<my_memb.size(); i++ )
+    for( int i=0; i<my_items.size(); i++ )
     {
-        ASSERT( my_memb[i] )( "itemise returned null element" );
-        ASSERT( under_memb[i] )( "itemise returned null element" );
+        ASSERT( my_items[i] )( "itemise returned null element" );
+        ASSERT( under_items[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
         // Act only on singular members that are non-null in the pattern (i.e. this) 
-        if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_memb[i]) )
+        if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
-            TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_memb[i]);
+            TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]);
             if( *my_singular )
             {
                 ASSERT(*under_singular)("Cannot key ")(*my_singular)(" because correpsonding child of ")(*under_plink.GetChildAgent())(" is nullptr");
@@ -532,8 +532,9 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // Explicit request for overlay, resulting from use of the Delta agent.
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
-        TreePtr<Node> under_node = master_scr_engine->GetReplaceKey( overlay_under_plink );
-        ASSERT( under_node );
+        XLink under_xlink = master_scr_engine->GetReplaceKey( overlay_under_plink );
+        ASSERT( under_xlink );
+        TreePtr<Node> under_node = under_xlink.GetChildX();
         ASSERT( under_node->IsFinal() ); 
         ASSERT( IsSubcategory(under_node.get()) ); 
         return BuildReplaceOverlay( me_plink, under_node );
@@ -590,20 +591,20 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     // present in me, which is a non-strict superclass of under_node and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
-    vector< Itemiser::Element * > my_memb = Itemise();
-    vector< Itemiser::Element * > dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
-    ASSERT( my_memb.size() == dest_memb.size() );
+    vector< Itemiser::Element * > my_items = Itemise();
+    vector< Itemiser::Element * > dest_items = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
+    ASSERT( my_items.size() == dest_items.size() );
     set< Itemiser::Element * > present_in_overlay; // Repeatability audit: OK since only checking for existance 
     
-    TRACE("Copying %d members from pattern=", dest_memb.size())(*this)(" dest=")(*dest)("\n");
-    for( int i=0; i<dest_memb.size(); i++ )
+    TRACE("Copying %d members from pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
+    for( int i=0; i<dest_items.size(); i++ )
     {
     	TRACE("member %d from pattern\n", i );
-        ASSERT( my_memb[i] )( "itemise returned null element" );
-        ASSERT( dest_memb[i] )( "itemise returned null element" );
-        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_memb[i]) )                
+        ASSERT( my_items[i] )( "itemise returned null element" );
+        ASSERT( dest_items[i] )( "itemise returned null element" );
+        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[i]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
             dest_con->clear();
 
@@ -628,12 +629,12 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
                     dest_con->insert( new_elt );
                 }
 	        }
-	        present_in_overlay.insert( dest_memb[i] );
+	        present_in_overlay.insert( dest_items[i] );
         }            
-        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_memb[i]) )
+        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
         	TRACE();
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
                        
             if( *my_singular )
@@ -643,7 +644,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
                 ASSERT( new_dest_singular );                
                 ASSERT( new_dest_singular->IsFinal() );
                 *dest_singular = new_dest_singular;
-                present_in_overlay.insert( dest_memb[i] );
+                present_in_overlay.insert( dest_items[i] );
             }
         }
         else
@@ -654,28 +655,28 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
-    vector< Itemiser::Element * > under_memb = under_node->Itemise();
-    dest_memb = under_node->Itemise( dest.get() ); 
+    vector< Itemiser::Element * > under_items = under_node->Itemise();
+    dest_items = under_node->Itemise( dest.get() ); 
 
-    TRACE("Copying %d members from under_node=", dest_memb.size())(*under_node)(" dest=")(*dest)("\n");
+    TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // Loop over all the members of under_node (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<dest_memb.size(); i++ )
+    for( int i=0; i<dest_items.size(); i++ )
     {
-        ASSERT( under_memb[i] )( "itemise returned null element" );
-        ASSERT( dest_memb[i] )( "itemise returned null element" );
+        ASSERT( under_items[i] )( "itemise returned null element" );
+        ASSERT( dest_items[i] )( "itemise returned null element" );
         
-        if( present_in_overlay.count(dest_memb[i]) > 0 )
+        if( present_in_overlay.count(dest_items[i]) > 0 )
             continue; // already did this one in the above loop
 
     	TRACE("Member %d from key\n", i );
-        if( ContainerInterface *under_con = dynamic_cast<ContainerInterface *>(under_memb[i]) )                
+        if( ContainerInterface *under_con = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
             // Note: we get here when a wildcard is coupled that does not have the container
             // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
             // not have "bases".
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             dest_con->clear();
 
             TRACE("Copying container size %d from key\n", under_con->size() );
@@ -697,9 +698,9 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 		        }
 	        }
         }            
-        else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_memb[i]) )
+        else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *under_singular );
             *dest_singular = DuplicateSubtree( (TreePtr<Node>)*under_singular );
             ASSERT( *dest_singular );
@@ -730,22 +731,22 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
     // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > my_memb = Itemise();
-    vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
+    vector< Itemiser::Element * > my_items = Itemise();
+    vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
-    TRACE("Copying %d members pattern=", dest_memb.size())(*this)(" dest=")(*dest)("\n");
+    TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<dest_memb.size(); i++ )
+    for( int i=0; i<dest_items.size(); i++ )
     {
     	TRACE("Copying member %d\n", i );
-        ASSERT( my_memb[i] )( "itemise returned null element" );
-        ASSERT( dest_memb[i] )( "itemise returned null element" );
+        ASSERT( my_items[i] )( "itemise returned null element" );
+        ASSERT( dest_items[i] )( "itemise returned null element" );
         
-        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_memb[i]) )                
+        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[i]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             dest_con->clear();
 
             TRACE("Copying container size %d\n", my_con->size() );
@@ -768,10 +769,10 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
 		        }
 	        }
         }            
-        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_memb[i]) )
+        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
             PatternLink my_singular_plink( this, my_singular );                    
             TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(my_singular_plink);

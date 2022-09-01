@@ -174,11 +174,11 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ar->GetOnlyXLink().GetChildX().get() );   
-    ASSERT( item_index < keyer_itemised.size() );     
+    vector< Itemiser::Element * > keyer_items = archetype_node->Itemise( ar->GetOnlyXLink().GetChildX().get() );   
+    ASSERT( item_index < keyer_items.size() );     
     
     // Extract the item indicated by item_index. 
-    return EvalFromItem( ar->GetOnlyXLink(), keyer_itemised[item_index] );
+    return EvalFromItem( ar->GetOnlyXLink(), keyer_items[item_index] );
 }
 
 

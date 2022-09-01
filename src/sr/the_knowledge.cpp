@@ -313,8 +313,8 @@ void TheKnowledge::AddLink( SubtreeMode mode,
 void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
-    vector< Itemiser::Element * > x_memb = x->Itemise();
-    for( Itemiser::Element *xe : x_memb )
+    vector< Itemiser::Element * > x_items = x->Itemise();
+    for( Itemiser::Element *xe : x_items )
     {
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
             AddSequence( mode, x_seq, xlink );

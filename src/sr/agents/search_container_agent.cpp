@@ -32,15 +32,15 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
                                                       TreePtr<Node> key_node ) 
 {
     INDENT("#");
-    TreePtr<Node> terminus_keynode = master_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
-    ASSERT(terminus_keynode);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
+    XLink terminus_key_xlink = master_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
+    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")
-         (*(terminus))(", term=")(*(terminus_keynode))("\n");
+         (*(terminus))(", term=")(terminus_key_xlink)("\n");
          
     PatternLink terminus_plink(this, &terminus);
     TreePtr<Node> new_terminus_subtree = terminus_plink.GetChildAgent()->BuildReplace(terminus_plink);
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(key_node, terminus_keynode, new_terminus_subtree);   
+    return DuplicateSubtree(key_node, terminus_key_xlink.GetChildX(), new_terminus_subtree);   
 }
 
 

@@ -755,11 +755,11 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_itemised = archetype_node->Itemise( ra->GetOnlyXLink().GetChildX().get() );   
-    ASSERT( item_index < keyer_itemised.size() );     
+    vector< Itemiser::Element * > keyer_items = archetype_node->Itemise( ra->GetOnlyXLink().GetChildX().get() );   
+    ASSERT( item_index < keyer_items.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
-    auto p_x_col = dynamic_cast<CollectionInterface *>(keyer_itemised[item_index]);    
+    auto p_x_col = dynamic_cast<CollectionInterface *>(keyer_items[item_index]);    
     ASSERT( p_x_col )("item_index didn't lead to a collection");
     
     // Check that the size is as required

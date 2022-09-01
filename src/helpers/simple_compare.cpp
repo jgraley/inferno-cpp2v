@@ -34,37 +34,37 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y ) con
         return cr;
 
     // Itemise them both and chuck out if sizes do not match
-    vector< Itemiser::Element * > x_memb = x->Itemise();
-    vector< Itemiser::Element * > y_memb = y->Itemise();
-    int sd = (int)(x_memb.size()) - (int)(y_memb.size());
+    vector< Itemiser::Element * > x_items = x->Itemise();
+    vector< Itemiser::Element * > y_items = y->Itemise();
+    int sd = (int)(x_items.size()) - (int)(y_items.size());
     if( sd != Orderable::EQUAL )
         return sd; 
     
-    for( int i=0; i<x_memb.size(); i++ )
+    for( int i=0; i<x_items.size(); i++ )
     {
         bool r;
-        ASSERT( y_memb[i] )( "itemise returned null element");
-        ASSERT( x_memb[i] )( "itemise returned null element");
+        ASSERT( y_items[i] )( "itemise returned null element");
+        ASSERT( x_items[i] )( "itemise returned null element");
 
-        if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]) )
+        if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_items[i]) )
         {
-            SequenceInterface *y_seq = dynamic_cast<SequenceInterface *>(y_memb[i]);
+            SequenceInterface *y_seq = dynamic_cast<SequenceInterface *>(y_items[i]);
             ASSERT( y_seq );
             Orderable::Result cr = Compare( *x_seq, *y_seq );
             if( cr != Orderable::EQUAL )
                 return cr;                
         }
-        else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]) )
+        else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_items[i]) )
         {
-            CollectionInterface *y_col = dynamic_cast<CollectionInterface *>(y_memb[i]);
+            CollectionInterface *y_col = dynamic_cast<CollectionInterface *>(y_items[i]);
             ASSERT( y_col );
             Orderable::Result cr = Compare( *x_col, *y_col );
             if( cr != Orderable::EQUAL )
                 return cr;                
         }
-        else if( TreePtrInterface *x_singular = dynamic_cast<TreePtrInterface *>(x_memb[i]) )
+        else if( TreePtrInterface *x_singular = dynamic_cast<TreePtrInterface *>(x_items[i]) )
         {
-            TreePtrInterface *y_singular = dynamic_cast<TreePtrInterface *>(y_memb[i]);
+            TreePtrInterface *y_singular = dynamic_cast<TreePtrInterface *>(y_items[i]);
             ASSERT( y_singular );
             
             // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)

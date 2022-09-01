@@ -407,7 +407,6 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
 {
     INDENT(">");
 
-
 #ifndef NEW_KNOWLEDGE_UPDATE
     plan.vn_sequence->BuildTheKnowledge( root_xlink ); 
 #endif
@@ -587,14 +586,14 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 }
 
 
-TreePtr<Node> SCREngine::GetReplaceKey( PatternLink plink ) const
+XLink SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( plink );
     ASSERT( keys_available );
     if( replace_solution.count(plink) == 1 )
-        return replace_solution.at(plink).GetChildX();
+        return replace_solution.at(plink);
     else
-        return TreePtr<Node>();
+        return XLink();
 }
 
 

@@ -137,7 +137,7 @@ public: // For agents
     void RequestSlaveAction( RequiresSubordinateSCREngine *slave_agent, 
                              TreePtr<Node> slave_through_subtree ) const;    
     void SetReplaceKey( LocatedLink keyer_link ) const;
-    TreePtr<Node> GetReplaceKey( PatternLink plink ) const;
+    XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     bool IsKeyed( PatternLink plink ) const; 
     bool IsKeyed( Agent *agent ) const; 

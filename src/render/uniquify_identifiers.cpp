@@ -151,8 +151,8 @@ void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 
 void IdentifierFingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
 {
-    vector< Itemiser::Element * > x_memb = x->Itemise();
-    for( Itemiser::Element *xe : x_memb )
+    vector< Itemiser::Element * > x_items = x->Itemise();
+    for( Itemiser::Element *xe : x_items )
     {
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
             ProcessSequence( x_seq, index );

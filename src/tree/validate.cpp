@@ -32,15 +32,15 @@ void Validate::operator()( TreePtr<Node> context,
 		if( x )
 		{
 			// TODO use UniqueWalk for this!
-			vector< Itemiser::Element * > members = ((TreePtr<Node>)x)->Itemise();
-		    for( Itemiser::Element *m : members )
+			vector< Itemiser::Element * > items = ((TreePtr<Node>)x)->Itemise();
+		    for( Itemiser::Element *item : items )
 			{
-				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
+				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(item) )
 				{
 					for( const TreePtrInterface &tpi : *con )
 						OnLink( (TreePtr<Node>)x, (TreePtr<Node>)tpi );
 				}
-				else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(m) )
+				else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(item) )
 				{
 					OnLink( (TreePtr<Node>)x, (TreePtr<Node>)*singular );
 				}

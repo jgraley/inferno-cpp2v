@@ -526,8 +526,12 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     TreePtr<Node> keynode;
     if( keyer_plink )
     {
-        keynode = master_scr_engine->GetReplaceKey( keyer_plink );
-        ASSERT( !keynode || keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
+        XLink key_xlink = master_scr_engine->GetReplaceKey( keyer_plink );
+        if( key_xlink )
+		{
+			keynode = key_xlink.GetChildX();
+			ASSERT( keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
+		}
     }
     
     TreePtr<Node> dest = BuildReplaceImpl(me_plink, keynode);
@@ -589,6 +593,8 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                                              TreePtr<Node> source_terminus,
                                              TreePtr<Node> dest_terminus ) const
 {
+	INDENT("D");
+	
     ASSERT( source );
     if( source_terminus )
         ASSERT( dest_terminus );
@@ -613,22 +619,22 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
     // be dynamic_castable to source's type.
-    vector< Itemiser::Element * > keynode_memb = source->Itemise();
-    vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
+    vector< Itemiser::Element * > keynode_items = source->Itemise();
+    vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
-    TRACE("Duplicating %d members source=", dest_memb.size())(*source)(" dest=")(*dest)("\n");
+    TRACE("Duplicating %d members source=", dest_items.size())(*source)(" dest=")(*dest)("\n");
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<dest_memb.size(); i++ )
+    for( int i=0; i<dest_items.size(); i++ )
     {
         //TRACE("Duplicating member %d\n", i );
-        ASSERT( keynode_memb[i] )( "itemise returned null element" );
-        ASSERT( dest_memb[i] )( "itemise returned null element" );
+        ASSERT( keynode_items[i] )( "itemise returned null element" );
+        ASSERT( dest_items[i] )( "itemise returned null element" );
         
-        if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]) )                
+        if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_items[i]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
 
             dest_con->clear();
 
@@ -642,10 +648,10 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                 dest_con->insert( n );
             }
         }            
-        else if( TreePtrInterface *keynode_singular = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
+        else if( TreePtrInterface *keynode_singular = dynamic_cast<TreePtrInterface *>(keynode_items[i]) )
         {
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *keynode_singular )("source should be non-nullptr");
             *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular, source_terminus, dest_terminus );
             ASSERT( *dest_singular );
