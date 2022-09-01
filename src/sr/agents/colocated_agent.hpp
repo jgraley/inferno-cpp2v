@@ -24,8 +24,8 @@ public:
     
     virtual void RunColocatedQuery(XLink common_xlink) const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
-    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> key_node );
+    TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+                                    XLink key_xlink ) override;
 };
 
 };

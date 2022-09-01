@@ -523,18 +523,15 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
 
-    TreePtr<Node> keynode;
+    XLink key_xlink;
     if( keyer_plink )
     {
-        XLink key_xlink = master_scr_engine->GetReplaceKey( keyer_plink );
-        if( key_xlink )
-		{
-			keynode = key_xlink.GetChildX();
-			ASSERT( keynode->IsFinal() )(*this)(" keyed with non-final node ")(keynode)("\n"); 
-		}
+        key_xlink = master_scr_engine->GetReplaceKey( keyer_plink );
+		ASSERT( !key_xlink || key_xlink.GetChildX()->IsFinal() )
+		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
     
-    TreePtr<Node> dest = BuildReplaceImpl(me_plink, keynode);
+    TreePtr<Node> dest = BuildReplaceImpl(me_plink, key_xlink);
    
     ASSERT( dest );
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
@@ -544,11 +541,19 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 
 
 TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
-                                             TreePtr<Node> key_node )
+                                             XLink key_xlink )
 {
-    ASSERT(key_node)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(key_node);   
+    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(key_xlink.GetChildX());   
 }
+
+
+//TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
+//                                             TreePtr<Node> key_node )
+//{
+//    ASSERT(key_node)("Unkeyed search-only agent seen in replace context");
+//    return DuplicateSubtree(key_node);   
+//}
 
 
 TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const

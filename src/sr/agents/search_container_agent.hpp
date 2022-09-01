@@ -21,8 +21,8 @@ public:
     class TerminusMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                            TreePtr<Node> key_node );
+    TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+                                    XLink key_xlink ) final;
     virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
     virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const {};

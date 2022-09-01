@@ -523,7 +523,7 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 
 
 TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                               TreePtr<Node> key_node ) 
+                                               XLink key_xlink ) 
 {
     INDENT("B");
 
@@ -535,19 +535,19 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         XLink under_xlink = master_scr_engine->GetReplaceKey( overlay_under_plink );
         ASSERT( under_xlink );
         TreePtr<Node> under_node = under_xlink.GetChildX();
-        ASSERT( under_node->IsFinal() ); 
-        ASSERT( IsSubcategory(under_node.get()) ); 
-        return BuildReplaceOverlay( me_plink, under_node );
+        ASSERT( under_xlink.GetChildX()->IsFinal() ); 
+        ASSERT( IsSubcategory(under_xlink.GetChildX().get()) ); 
+        return BuildReplaceOverlay( me_plink, under_xlink );
     }
-    else if( key_node ) 
+    else if( key_xlink ) 
     {
         // Overlay required due to coupling from compare to replace. 
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        ASSERT( key_node->IsFinal() ); 
-        ASSERT( IsSubcategory(key_node.get()) ); 
-        return BuildReplaceOverlay( me_plink, key_node );
+        ASSERT( key_xlink.GetChildX()->IsFinal() ); 
+        ASSERT( IsSubcategory(key_xlink.GetChildX().get()) ); 
+        return BuildReplaceOverlay( me_plink, key_xlink );
     }
     else
     {
@@ -564,10 +564,11 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
 #endif
 
 TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink, 
-                                                  TreePtr<Node> under_node )  // overlaying
+                                                  XLink under_xlink )  // overlaying
 {
 	INDENT("O");
-    ASSERT( under_node );
+    ASSERT( under_xlink );
+    TreePtr<Node> under_node = under_xlink.GetChildX();
     
     ASSERT( IsSubcategory(under_node.get()) ) 
 		  (" must be a non-strict superclass of under_node=")

@@ -21,7 +21,7 @@ public:
     bool ReplaceKeyerQuery( PatternLink me_plink, 
                             set<PatternLink> keyer_plinks ) final;                                  
 	TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-                                    TreePtr<Node> key_node ) final;  
+                                    XLink key_xlink ) final;  
                                             
     virtual TreePtr<Node> BuildNewSubtree() = 0;
 };

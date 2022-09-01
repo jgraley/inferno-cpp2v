@@ -32,13 +32,13 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
  
  
 TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                              TreePtr<Node> key_node ) 
+                                              XLink key_xlink ) 
 {
     INDENT("%");
 
     if( me_plink == keyer_plink )
     {
-        ASSERT( !key_node ); // we're on keyer plink
+        ASSERT( !key_xlink ); // we're on keyer plink
         // Call the soft pattern impl 
         TreePtr<Node> new_node = BuildNewSubtree();
           
@@ -49,7 +49,7 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink,
     }
     else
     {
-        ASSERT( key_node ); // we're on residual plink
-        return AgentCommon::BuildReplaceImpl( me_plink, key_node );   
+        ASSERT( key_xlink ); // we're on residual plink
+        return DuplicateSubtree( key_xlink.GetChildX() ); // default action
     }
 }

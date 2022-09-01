@@ -37,7 +37,7 @@ SYM::Over<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
 
 
 TreePtr<Node> ColocatedAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                                TreePtr<Node> key_node ) 
+                                                XLink key_xlink ) 
 {
     auto plinks = pattern_query->GetNormalLinks();
     PatternLink replace_plink = plinks.front();
