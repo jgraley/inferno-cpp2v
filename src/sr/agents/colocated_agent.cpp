@@ -47,7 +47,7 @@ TreePtr<Node> ColocatedAgent::BuildReplaceImpl( PatternLink me_plink,
 
 TreePtr<Node> ColocatedAgent::BuildReplaceImpl( PatternLink me_plink )
 {
-	// We use OnlyEmenetOf() as default impl because otherwise 
+	// We use OnlyElementOf() as default impl because otherwise 
 	// it's not clear which of multiple child links should be used for 
 	// replace.
     auto plinks = pattern_query->GetNormalLinks();
