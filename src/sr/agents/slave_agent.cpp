@@ -30,8 +30,7 @@ void SlaveAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink, 
-                                            XLink key_xlink )
+TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   
