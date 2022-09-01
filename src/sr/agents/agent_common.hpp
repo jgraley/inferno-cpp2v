@@ -63,8 +63,6 @@ public:
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                             XLink key_xlink );
-    //virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
-    //                                        TreePtr<Node> key_node );
     TreePtr<Node> CloneNode( bool force_dirty ) const;
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;

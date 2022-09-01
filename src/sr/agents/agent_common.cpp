@@ -548,14 +548,6 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink,
 }
 
 
-//TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
-//                                             TreePtr<Node> key_node )
-//{
-//    ASSERT(key_node)("Unkeyed search-only agent seen in replace context");
-//    return DuplicateSubtree(key_node);   
-//}
-
-
 TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
 {
     INDENT("D");
