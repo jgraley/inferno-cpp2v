@@ -75,23 +75,22 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink,
     ASSERT( key_xlink );
     TreePtr<Node> key_node = key_xlink.GetChildX();
     
+    // Key needs to implement ContainerInterface
     ContainerInterface *key_container = dynamic_cast<ContainerInterface *>(key_node.get());
     ASSERT( key_container )("Star node ")(*this)(" keyed to ")(*key_node)(" which should implement ContainerInterface");  
-    TRACE("Walking container length %d\n", key_container->size() );
     
-    if( auto key_subcontainer = dynamic_cast<SubContainer *>(key_node.get()) )    
-        TRACE("SubContainer found ")(key_subcontainer->GetContentsTrace())("\n");
-        
+    // Make a subcontainer of the corresponding type
     TreePtr<SubContainer> dest;
-    ContainerInterface *dest_container;
-    if( dynamic_cast<SequenceInterface *>(key_node.get()) )
+    if( dynamic_cast<SequenceInterface *>(key_container) )
         dest = MakeTreeNode<SubSequence>();
-    else if( dynamic_cast<CollectionInterface *>(key_node.get()) )
+    else if( dynamic_cast<CollectionInterface *>(key_container) )
         dest = MakeTreeNode<SubCollection>();
     else
-        ASSERT(0)("Please add new kind of Star");
+        ASSERT(0)("Please add new kind of container");
     
-    dest_container = dynamic_cast<ContainerInterface *>(dest.get());
+    // Copy elements into dest subcontainer, duplicating all the subtrees
+    TRACE("Walking container length %d\n", key_container->size() );
+    ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
         TRACE("Building ")(key_elt)("\n");
