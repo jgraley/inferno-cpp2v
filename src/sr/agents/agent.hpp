@@ -77,7 +77,8 @@ public:
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
     virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                             TreePtr<Node> source_terminus = TreePtr<Node>(),
-                                            TreePtr<Node> dest_terminus = TreePtr<Node>() ) const = 0;
+                                            TreePtr<Node> dest_terminus = TreePtr<Node>(),
+                                            int *terminus_hit_count = nullptr ) const = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                

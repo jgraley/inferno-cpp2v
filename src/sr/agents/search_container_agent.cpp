@@ -40,7 +40,10 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
     PatternLink terminus_plink(this, &terminus);
     TreePtr<Node> new_terminus_subtree = terminus_plink.GetChildAgent()->BuildReplace(terminus_plink);
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(key_xlink.GetChildX(), terminus_key_xlink.GetChildX(), new_terminus_subtree);   
+    int c = 0;
+    TreePtr<Node> t = DuplicateSubtree(key_xlink.GetChildX(), terminus_key_xlink.GetChildX(), new_terminus_subtree, &c);   
+    ASSERT( c>0 )(terminus_key_xlink);
+    return t;
 }
 
 

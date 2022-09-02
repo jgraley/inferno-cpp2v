@@ -68,7 +68,8 @@ public:
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
-                                    TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
+                                    TreePtr<Node> dest_terminus = TreePtr<Node>(),
+                                    int *terminus_hit_count = nullptr ) const final;
     virtual string GetTrace() const;
 
 protected:                                  
