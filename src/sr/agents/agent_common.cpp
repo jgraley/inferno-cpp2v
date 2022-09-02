@@ -622,9 +622,9 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
     // in place of all copies of source terminus (directly, without duplicating).
     //if( source_terminus )
 		//FTRACE(source);
-    if( source_terminus && source == source_terminus ) 
+    if( source_terminus_xlink && source_xlink == source_terminus_xlink ) 
     {
-        TRACE("Reached source terminus ")(source_terminus)
+        TRACE("Reached source terminus ")(source_terminus_xlink)
              (" and substituting ")(dest_terminus)("\n");
         if( terminus_hit_count )
 			(*terminus_hit_count)++;
