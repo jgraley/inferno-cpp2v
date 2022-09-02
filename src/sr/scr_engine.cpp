@@ -448,7 +448,7 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
     // and that would break knowledge building. See rule #217
     {
         Tracer::RAIIDisable silencer;
-        new_root_x = plan.root_agent->DuplicateSubtree(new_root_x);
+        //new_root_x = plan.root_agent->DuplicateSubtree(new_root_x);
     }
    
     root_xlink = XLink::CreateDistinct(new_root_x);
