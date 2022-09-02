@@ -642,7 +642,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
     // be dynamic_castable to source's type.
-    vector< Itemiser::Element * > keynode_items = source->Itemise();
+    vector< Itemiser::Element * > source_items = source->Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
     TRACE("Duplicating %d members source=", dest_items.size())(*source)(" dest=")(*dest)("\n");
@@ -652,34 +652,34 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
     for( int i=0; i<dest_items.size(); i++ )
     {
         //TRACE("Duplicating member %d\n", i );
-        ASSERT( keynode_items[i] )( "itemise returned null element" );
+        ASSERT( source_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
         
-        if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_items[i]) )                
+        if( ContainerInterface *source_container = dynamic_cast<ContainerInterface *>(source_items[i]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+            ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest_items[i]);
 
-            dest_con->clear();
+            dest_container->clear();
 
             //TRACE("Duplicating container size %d\n", keynode_con->size() );
-            for( const TreePtrInterface &p : *keynode_con )
+            for( const TreePtrInterface &source_elt : *source_container )
             {
-                ASSERT( p ); // present simplified scheme disallows nullptr
-                //TRACE("Duplicating ")(*p)("\n");
-                TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p, 
-                                                    source_terminus, 
-                                                    dest_terminus,
-                                                    terminus_hit_count );
-                //TRACE("inserting ")(*n)(" directly\n");
-                dest_con->insert( n );
+                ASSERT( source_elt ); // present simplified scheme disallows nullptr
+                //TRACE("Duplicating ")(*source_elt)("\n");
+                TreePtr<Node> dest_elt = DuplicateSubtree( (TreePtr<Node>)source_elt, 
+                                                           source_terminus, 
+                                                           dest_terminus,
+                                                           terminus_hit_count );
+                //TRACE("inserting ")(*dest_elt)(" directly\n");
+                dest_container->insert( dest_elt );
             }
         }            
-        else if( TreePtrInterface *keynode_singular = dynamic_cast<TreePtrInterface *>(keynode_items[i]) )
+        else if( TreePtrInterface *source_singular = dynamic_cast<TreePtrInterface *>(source_items[i]) )
         {
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            ASSERT( *keynode_singular )("source should be non-nullptr");
-            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular, 
+            ASSERT( *source_singular )("source should be non-nullptr");
+            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*source_singular, 
                                                source_terminus, 
                                                dest_terminus,
                                                terminus_hit_count );
