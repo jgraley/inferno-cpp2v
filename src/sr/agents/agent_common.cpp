@@ -547,7 +547,7 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink,
 	// that can only be in replace path replace if keyed, and then 
 	// simply duplicates the key subtree
     ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(key_xlink.GetChildX());   
+    return DuplicateSubtree(key_xlink);   
 }
 
 
@@ -587,12 +587,6 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
     
     return dest;    
 }                                                     
-
-
-TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source ) const
-{
-	return DuplicateSubtree( XLink::CreateDistinct( source ) );
-}
 
                                              
 TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,

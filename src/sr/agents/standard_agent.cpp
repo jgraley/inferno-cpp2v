@@ -672,30 +672,30 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
             continue; // already did this one in the above loop
 
     	TRACE("Member %d from key\n", i );
-        if( ContainerInterface *under_con = dynamic_cast<ContainerInterface *>(under_items[i]) )                
+        if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
             // Note: we get here when a wildcard is coupled that does not have the container
             // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
             // not have "bases".
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
-            dest_con->clear();
+            ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest_items[i]);
+            dest_container->clear();
 
-            TRACE("Copying container size %d from key\n", under_con->size() );
-	        for( const TreePtrInterface &under_elt : *under_con )
+            TRACE("Copying container size %d from key\n", under_container->size() );
+	        for( const TreePtrInterface &under_elt : *under_container )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
-		        TreePtr<Node> new_elt = DuplicateSubtree( (TreePtr<Node>)under_elt );
-		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
+		        TreePtr<Node> new_elt = DuplicateSubtree( XLink(under_node, &under_elt) );
+		        if( ContainerInterface *new_sub_container = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
-			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-			            dest_con->insert( new_sub_elt );
+			        TRACE("Walking SubContainer length %d\n", new_sub_container->size() );
+		            for( const TreePtrInterface &new_sub_elt : *new_sub_container )
+			            dest_container->insert( new_sub_elt );
            		}
 		        else
 		        {
                     ASSERT( new_elt->IsFinal() );
 			        TRACE("inserting ")(*new_elt)(" directly\n");
-			        dest_con->insert( new_elt );
+			        dest_container->insert( new_elt );
 		        }
 	        }
         }            
@@ -703,7 +703,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *under_singular );
-            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*under_singular );
+            *dest_singular = DuplicateSubtree( XLink(under_node, under_singular) );
             ASSERT( *dest_singular );
             ASSERT( (**dest_singular).IsFinal() );            
         }

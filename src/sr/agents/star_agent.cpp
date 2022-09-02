@@ -75,12 +75,12 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink,
     ASSERT( key_xlink );
     TreePtr<Node> key_node = key_xlink.GetChildX();
     
-    ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key_node.get());
-    ASSERT( psc )("Star node ")(*this)(" keyed to ")(*key_node)(" which should implement ContainerInterface");  
-    TRACE("Walking container length %d\n", psc->size() );
+    ContainerInterface *key_container = dynamic_cast<ContainerInterface *>(key_node.get());
+    ASSERT( key_container )("Star node ")(*this)(" keyed to ")(*key_node)(" which should implement ContainerInterface");  
+    TRACE("Walking container length %d\n", key_container->size() );
     
-    if( auto sc = dynamic_cast<SubContainer *>(key_node.get()) )    
-        TRACE("SubContainer found ")(sc->GetContentsTrace())("\n");
+    if( auto key_subcontainer = dynamic_cast<SubContainer *>(key_node.get()) )    
+        TRACE("SubContainer found ")(key_subcontainer->GetContentsTrace())("\n");
         
     TreePtr<SubContainer> dest;
     ContainerInterface *dest_container;
@@ -92,11 +92,11 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink,
         ASSERT(0)("Please add new kind of Star");
     
     dest_container = dynamic_cast<ContainerInterface *>(dest.get());
-    for( const TreePtrInterface &pp : *psc )
+    for( const TreePtrInterface &key_elt : *key_container )
     {
-        TRACE("Building ")(pp)("\n");
-        TreePtr<Node> nn = DuplicateSubtree( (TreePtr<Node>)pp );
-        dest_container->insert( nn );
+        TRACE("Building ")(key_elt)("\n");
+        TreePtr<Node> dest_elt = DuplicateSubtree( XLink(key_node, &key_elt) );
+        dest_container->insert( dest_elt );
     }
     
     return dest;

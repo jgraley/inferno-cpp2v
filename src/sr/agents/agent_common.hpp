@@ -66,7 +66,6 @@ public:
     TreePtr<Node> CloneNode( bool force_dirty ) const;
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
-    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source ) const final;
     TreePtr<Node> DuplicateSubtree( XLink source_xlink,
                                     XLink source_terminus_xlink = XLink(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>(),

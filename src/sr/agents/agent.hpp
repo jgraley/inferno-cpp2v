@@ -75,7 +75,6 @@ public:
                                     set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
-    virtual TreePtr<Node> DuplicateSubtree( TreePtr<Node> source ) const = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                

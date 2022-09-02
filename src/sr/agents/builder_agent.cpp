@@ -45,11 +45,11 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink,
         LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
         master_scr_engine->SetReplaceKey( new_link );
         
-        return DuplicateSubtree(new_node);   
+        return DuplicateSubtree( new_link );   
     }
     else
     {
         ASSERT( key_xlink ); // we're on residual plink
-        return DuplicateSubtree( key_xlink.GetChildX() ); // default action
+        return DuplicateSubtree( key_xlink ); // default action
     }
 }
