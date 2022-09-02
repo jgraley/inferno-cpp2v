@@ -594,16 +594,29 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                                              TreePtr<Node> dest_terminus,
                                              int *terminus_hit_count ) const
 {
+	return DuplicateSubtree( XLink::CreateDistinct( source ),
+							 source_terminus ? XLink::CreateDistinct( source_terminus ) : XLink(),
+							 dest_terminus,
+							 terminus_hit_count );
+}
+
+                                             
+TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
+                                             XLink source_terminus_xlink,
+                                             TreePtr<Node> dest_terminus,
+                                             int *terminus_hit_count ) const
+{
 	INDENT("D");
 	
-    ASSERT( source );
-    if( source_terminus )
+    ASSERT( source_xlink );
+	TreePtr<Node> source = source_xlink.GetChildX();
+        
+    TreePtr<Node> source_terminus;
+    if( source_terminus_xlink )
+    {
+		source_terminus = source_terminus_xlink.GetChildX();
         ASSERT( dest_terminus );
-
-     // Under substitution, we should be duplicating a subtree of the input
-    // program, which should not contain any special nodes
-    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source)) )
-          ("Cannot duplicate special node ")(*source);
+	}
     
     // If source_terminus and dest_terminus are supplied, substitute dest_terminus node
     // in place of all copies of source terminus (directly, without duplicating).
@@ -617,6 +630,11 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 			(*terminus_hit_count)++;
         return dest_terminus;
     }
+
+    // Under substitution, we should be duplicating a subtree of the input
+    // program, which should not contain any special nodes
+    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source)) )
+          ("Cannot duplicate special node ")(*source);
 
     // Make a new node, since we're substituting, preserve dirtyness        
     TreePtr<Node> dest = DuplicateNode( source, false );

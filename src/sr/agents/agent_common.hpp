@@ -70,6 +70,10 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>(),
                                     int *terminus_hit_count = nullptr ) const final;
+    TreePtr<Node> DuplicateSubtree( XLink source_xlink,
+                                    XLink source_terminus_xlink = XLink(),
+                                    TreePtr<Node> dest_terminus = TreePtr<Node>(),
+                                    int *terminus_hit_count = nullptr ) const;
     virtual string GetTrace() const;
 
 protected:                                  
