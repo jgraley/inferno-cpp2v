@@ -441,16 +441,7 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
     
     keys_available = false;
     replace_solution.clear();
-    
-    // Need a duplicate here in case we're a slave replacing an identifier
-    // with a non-identifier. Otherwise our subtree would look fine, but 
-    // global X tree would be incorrect (multiple links to non-identifier)
-    // and that would break knowledge building. See rule #217
-    {
-        Tracer::RAIIDisable silencer;
-        //new_root_x = plan.root_agent->DuplicateSubtree(new_root_x);
-    }
-   
+      
     root_xlink = XLink::CreateDistinct(new_root_x);
     
     // Clear out anything cached in agents and update the knowledge 
