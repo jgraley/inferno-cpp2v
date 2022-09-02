@@ -42,7 +42,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
     TRACE( "Stuff node: Substituting stuff");
     int c = 0;
     TreePtr<Node> t = DuplicateSubtree(key_xlink, terminus_key_xlink, new_terminus_subtree, &c);   
-    ASSERT( c==1 )(terminus_key_xlink); // TODO should be c==1 after #621
+    ASSERT( c==1 )(terminus_key_xlink); 
     return t;
 }
 

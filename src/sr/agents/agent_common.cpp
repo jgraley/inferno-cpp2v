@@ -589,15 +589,9 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
 }                                                     
 
 
-TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
-                                             TreePtr<Node> source_terminus,
-                                             TreePtr<Node> dest_terminus,
-                                             int *terminus_hit_count ) const
+TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source ) const
 {
-	return DuplicateSubtree( XLink::CreateDistinct( source ),
-							 source_terminus ? XLink::CreateDistinct( source_terminus ) : XLink(),
-							 dest_terminus,
-							 terminus_hit_count );
+	return DuplicateSubtree( XLink::CreateDistinct( source ) );
 }
 
                                              
