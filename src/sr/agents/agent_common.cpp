@@ -666,8 +666,8 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
             {
                 ASSERT( source_elt ); // present simplified scheme disallows nullptr
                 //TRACE("Duplicating ")(*source_elt)("\n");
-                TreePtr<Node> dest_elt = DuplicateSubtree( (TreePtr<Node>)source_elt, 
-                                                           source_terminus, 
+                TreePtr<Node> dest_elt = DuplicateSubtree( XLink( source, &source_elt ), 
+                                                           source_terminus_xlink, 
                                                            dest_terminus,
                                                            terminus_hit_count );
                 //TRACE("inserting ")(*dest_elt)(" directly\n");
@@ -679,8 +679,8 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *source_singular )("source should be non-nullptr");
-            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*source_singular, 
-                                               source_terminus, 
+            *dest_singular = DuplicateSubtree( XLink(source, source_singular), 
+                                               source_terminus_xlink, 
                                                dest_terminus,
                                                terminus_hit_count );
             ASSERT( *dest_singular );
