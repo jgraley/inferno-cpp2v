@@ -20,7 +20,7 @@ unordered_set<XLink> previous_unordered_domain;
 TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses ),
     category_ordered_domain( plan.lacing )
-{
+{ 
 }
 
 

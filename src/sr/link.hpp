@@ -5,7 +5,7 @@
 #include "node/specialise_oostd.hpp"
 #include "helpers/walk.hpp"
 
-//#define KEEP_WHODAT_INFO
+#define KEEP_WHODAT_INFO
 
 
 namespace SR

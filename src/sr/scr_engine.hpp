@@ -115,7 +115,7 @@ private:
     } plan;
 
     void UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
-    void RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x );
+    void RunSlave( PatternLink plink_to_slave, XLink &root_xlink );
     TreePtr<Node> Replace();
 
 public: // For top level engine/VN trans

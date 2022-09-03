@@ -333,7 +333,7 @@ void SCREngine::UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePt
 }
 
 
-void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
+void SCREngine::RunSlave( PatternLink plink_to_slave, XLink &root_xlink )
 {         
     INDENT("L");
     auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_slave.GetChildAgent());
@@ -352,40 +352,42 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, TreePtr<Node> *p_root_x )
     
     // Obtain a pointer to the though link that will be updated by the 
     // slave. TODO use knowledge, see #620
-    TreePtrInterface *p_through_x = nullptr; 
-    if( through_subtree == *p_root_x )
+    XLink through_xlink; 
+    if( through_subtree == root_xlink.GetChildX() )
     {
-        TRACEC("Implanting at root over ")(*p_root_x)("\n");
-        p_through_x = p_root_x;
+        TRACEC("Implanting at root over ")(root_xlink)("\n");
+        through_xlink = root_xlink;
     }
     else
     {
 #if USE_KNOWLEDGE_FOR_SLAVE_APPLY_POINT
 		TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
-		XLink x = OnlyElementOf(nn.parents);
-		p_through_x = const_cast<TreePtrInterface *>( x.GetXPtr() );
+		through_xlink = OnlyElementOf(nn.parents);
 #else		
         // Search for link to the through subtree 
-        Walk e( *p_root_x, nullptr, nullptr );
+        Walk e( root_xlink.GetChildX(), nullptr, nullptr );
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
             if( *wit == through_subtree ) // found the though subtree
 			{
                 // Get the pointer that points to the though subtree
-                p_through_x = const_cast<TreePtrInterface *>(wit.GetNodePointerInParent());  
+                through_xlink = XLink( wit.GetParent(), wit.GetNodePointerInParent() );
                 break;  
 			}
 		}
 #endif		
 	}
-	ASSERT( p_through_x ); 
+
+	// RepeatingCompareReplace() will CreateDistinct() onto through_xlink
+    auto p_through_x = const_cast<TreePtrInterface *>(through_xlink.GetXPtr());  
 
     // Run the slave's engine on this subtree and overwrite through ptr via p_through_x
-    XLink new_xlink = XLink::CreateDistinct(through_subtree);
-    int hits = slave_engine->RepeatingCompareReplace( new_xlink, &replace_solution );
-	*p_through_x = new_xlink.GetChildX();
+    int hits = slave_engine->RepeatingCompareReplace( through_xlink, &replace_solution );
+    
+    // Update tree using ORIGINAL double ptr
+	*p_through_x = through_xlink.GetChildX();
 
-    UpdateSlaveActionRequests( through_subtree, new_xlink.GetChildX() );
+    UpdateSlaveActionRequests( through_subtree, through_xlink.GetChildX() );
 }
 
 
@@ -427,6 +429,7 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
 
     // Now replace according to the couplings
     TreePtr<Node> new_root_x = Replace();
+    root_xlink = XLink::CreateDistinct(new_root_x);
         
 #ifdef NEW_KNOWLEDGE_UPDATE
     plan.vn_sequence->BuildTheKnowledge( root_xlink );
@@ -435,15 +438,13 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
     for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
     {
         TRACE("Running slave ")(plink_to_slave)(" root x=")(new_root_x)("\n");
-        RunSlave(plink_to_slave, &new_root_x);       
+        RunSlave(plink_to_slave, root_xlink);       
     }
     TRACE("Slaves done\n");
     
     keys_available = false;
     replace_solution.clear();
-      
-    root_xlink = XLink::CreateDistinct(new_root_x);
-    
+          
     // Clear out anything cached in agents and update the knowledge 
     // now that replace is done
     for( Agent *a : plan.my_agents )
