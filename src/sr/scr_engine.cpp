@@ -333,7 +333,7 @@ void SCREngine::UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePt
 }
 
 
-void SCREngine::RunSlave( PatternLink plink_to_slave, XLink &root_xlink )
+void SCREngine::RunSlave( PatternLink plink_to_slave, XLink root_xlink )
 {         
     INDENT("L");
     auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_slave.GetChildAgent());
@@ -398,14 +398,14 @@ TreePtr<Node> SCREngine::Replace()
 }
 
 
-void SCREngine::SingleCompareReplace( XLink &root_xlink,
+void SCREngine::SingleCompareReplace( XLink root_xlink,
                                       const SolutionMap *master_solution ) 
 {
     INDENT(">");
 
-#ifndef NEW_KNOWLEDGE_UPDATE
-    plan.vn_sequence->BuildTheKnowledge( root_xlink ); 
-#endif
+    if( !ReadArgs::use_new_knowledge_update )
+		plan.vn_sequence->BuildTheKnowledge( root_xlink ); 
+
     plan.vn_sequence->ExtendDomain( plan.root_plink );
 
     TRACE("Begin search\n");
@@ -424,9 +424,8 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
     // Now replace according to the couplings
     root_xlink.SetXPtr( Replace() );
         
-#ifdef NEW_KNOWLEDGE_UPDATE
-    plan.vn_sequence->BuildTheKnowledge( root_xlink );
-#endif    
+	if( ReadArgs::use_new_knowledge_update )
+		plan.vn_sequence->BuildTheKnowledge( root_xlink );  
 
     for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
     {
@@ -449,7 +448,7 @@ void SCREngine::SingleCompareReplace( XLink &root_xlink,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int SCREngine::RepeatingCompareReplace( XLink &root_xlink,
+int SCREngine::RepeatingCompareReplace( XLink root_xlink,
                                         const SolutionMap *master_solution )
 {
     INDENT("}");

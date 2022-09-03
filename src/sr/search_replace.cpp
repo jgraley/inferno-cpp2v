@@ -119,7 +119,7 @@ void CompareReplace::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge
 }
 
 
-void CompareReplace::Transform( XLink &root_xlink )
+void CompareReplace::Transform( XLink root_xlink )
 {
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);

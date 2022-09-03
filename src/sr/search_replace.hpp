@@ -60,7 +60,7 @@ public:
     void PlanningStageThree();
     void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
 
-    void Transform( XLink &root_xlink );
+    void Transform( XLink root_xlink );
     
     virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 

@@ -115,13 +115,13 @@ private:
     } plan;
 
     void UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
-    void RunSlave( PatternLink plink_to_slave, XLink &root_xlink );
+    void RunSlave( PatternLink plink_to_slave, XLink root_xlink );
     TreePtr<Node> Replace();
 
 public: // For top level engine/VN trans
-    void SingleCompareReplace( XLink &root_xlink,
+    void SingleCompareReplace( XLink root_xlink,
                                const SolutionMap *master_solution );                                                                                              
-    int RepeatingCompareReplace( XLink &root_xlink,
+    int RepeatingCompareReplace( XLink root_xlink,
                                  const SolutionMap *master_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );

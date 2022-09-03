@@ -74,10 +74,11 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {
     current_root_xlink = XLink::CreateDistinct(root);    
-#ifdef NEW_KNOWLEDGE_UPDATE
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    knowledge->Build( current_root_xlink );
-#endif    
+    if( ReadArgs::use_new_knowledge_update )
+    {
+		ASSERT( knowledge )("Planning stage four should have created knowledge object");
+		knowledge->Build( current_root_xlink );
+	}
 }
 
 
@@ -134,12 +135,15 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 void VNSequence::BuildTheKnowledge( XLink root_xlink )
 {
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
-#ifdef NEW_KNOWLEDGE_UPDATE
-    ASSERT( current_root_xlink );
-    knowledge->Build( current_root_xlink );
-#else    
-    knowledge->Build( root_xlink );
-#endif
+	if( ReadArgs::use_new_knowledge_update )
+	{
+		ASSERT( current_root_xlink );
+		knowledge->Build( current_root_xlink );
+	}
+	else
+	{
+		knowledge->Build( root_xlink );
+	}
 }
 
 

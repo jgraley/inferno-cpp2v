@@ -44,7 +44,7 @@ public:
     static void SetMaxReps( int n, bool e );
     void SetStopAfter( vector<int> ssa, int d=0 );    
             
-    void Transform( XLink &root_xlink );
+    void Transform( XLink root_xlink );
         
     virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 

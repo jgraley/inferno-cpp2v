@@ -101,7 +101,7 @@ void VNStep::SetStopAfter( vector<int> ssa, int d )
 }  
 
 
-void VNStep::Transform( XLink &root_xlink )
+void VNStep::Transform( XLink root_xlink )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNStep needs to be configured before use");

@@ -6,8 +6,6 @@
 #include "node/tree_ptr.hpp"
 #include "link.hpp"
 
-//#define NEW_KNOWLEDGE_UPDATE
-
 class Graph;
 
 /// SR namespace contains the search and replace implementation
