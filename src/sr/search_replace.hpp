@@ -59,9 +59,6 @@ public:
     void PlanningStageTwo();
     void PlanningStageThree();
     void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
-                                    
-    // Functor style interface for RepeatingSearchReplace; implements InPlaceTransformation interface.
-    void Transform( TreePtr<Node> *proot );
 
     void Transform( XLink &root_xlink );
     

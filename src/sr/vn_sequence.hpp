@@ -58,6 +58,7 @@ private:
     shared_ptr<TheKnowledge> knowledge;    
     set< TreePtr<Node> > dirty_grass;
     XLink initial_root_xlink;
+    XLink current_root_xlink;
 };    
     
 }

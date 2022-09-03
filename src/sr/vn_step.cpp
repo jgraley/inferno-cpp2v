@@ -101,12 +101,13 @@ void VNStep::SetStopAfter( vector<int> ssa, int d )
 }  
 
 
-void VNStep::Transform( TreePtr<Node> *proot )
+void VNStep::Transform( XLink &root_xlink )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->Transform( proot );
+    top_level_engine->Transform( root_xlink );
 }                                   
+
 
 Graphable::Block VNStep::GetGraphBlockInfo() const
 {

@@ -119,19 +119,6 @@ void CompareReplace::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge
 }
 
 
-// Do a search and replace based on patterns stored in our members
-void CompareReplace::Transform( TreePtr<Node> *proot )
-{
-    INDENT(")");
-    TRACE("Enter S&R instance ")(*this);
-    
-    SolutionMap empty_solution;    
-    XLink root_xlink = XLink::CreateDistinct(*proot);
-    (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );   
-    *proot = root_xlink.GetChildX();
-}
-
-
 void CompareReplace::Transform( XLink &root_xlink )
 {
     INDENT(")");
@@ -139,8 +126,6 @@ void CompareReplace::Transform( XLink &root_xlink )
 
     SolutionMap empty_solution;    
     (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );       
-    
-    // TODO return XLink::CreateDistinct( basex );
 }
 
 

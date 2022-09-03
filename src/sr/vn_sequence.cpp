@@ -5,6 +5,8 @@
 
 using namespace SR;
 
+//#define UNIVERSAL_KNOWLEDGE
+
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
 {
@@ -83,22 +85,28 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
-    dirty_grass.clear();
-
+    dirty_grass.clear();	
+	
 #ifdef XLINK_CONTINUITY
     if( step_index == 0 )
     {
         ASSERT( initial_root_xlink );
         ASSERT( initial_root_xlink.GetChildX()==root );
+        current_root_xlink = initial_root_xlink;
         steps[step_index]->Transform( initial_root_xlink );
         initial_root_xlink = XLink();
+        current_root_xlink = XLink();
         return initial_root_xlink.GetChildX(); // could have changed 
     }
     else
 #endif
     {        
         ASSERT( !initial_root_xlink );
-        steps[step_index]->Transform( &root );
+        XLink root_xlink = XLink::CreateDistinct(root);
+        current_root_xlink = root_xlink;
+        steps[step_index]->Transform( root_xlink );
+        root = root_xlink.GetChildX();
+        current_root_xlink = XLink();
         return root;
     }    
 }
@@ -146,13 +154,18 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 void VNSequence::BuildTheKnowledge( XLink root_xlink )
 {
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
+#ifdef UNIVERSAL_KNOWLEDGE
+    ASSERT( current_root_xlink );
+    knowledge->Build( current_root_xlink );
+#else    
     knowledge->Build( root_xlink );
+#endif
 }
 
 
 void VNSequence::ExtendDomain( PatternLink root_plink )
 {
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
+    ASSERT( knowledge )("Planning stage four should have created knowledge object");  
     knowledge->ExtendDomain( root_plink );
 }
 

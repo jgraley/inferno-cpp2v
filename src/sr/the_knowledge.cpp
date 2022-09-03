@@ -141,8 +141,8 @@ const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
 {
     ASSERT( xlink );
     ASSERT( HasNugget(xlink) )
-          ("Knowledge: no nugget for ")(xlink)("\n");
-    //      ("Nuggets: ")(nuggets);
+          ("Knowledge: no nugget for ")(xlink)("\n")
+          ("Nuggets: ")(nuggets);
     return nuggets.at(xlink);
 }
 
@@ -173,6 +173,8 @@ bool TheKnowledge::HasNodeNugget(TreePtr<Node> node) const
 
 void TheKnowledge::Build( XLink root_xlink )
 {      
+	ASSERT( root_xlink );
+	
     // Clear everything 
     unordered_domain.clear();
     depth_first_ordered_domain.clear();
