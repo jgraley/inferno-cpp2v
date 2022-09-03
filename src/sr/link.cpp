@@ -323,6 +323,13 @@ const TreePtrInterface *XLink::GetXPtr() const
 }
 
 
+void XLink::SetXPtr(const TreePtrInterface &x)
+{
+	// TODO try to get rid of the const cast
+	const_cast<TreePtrInterface &>(*asp_x) = x;
+}
+
+
 string XLink::GetTrace() const
 {
     string s = GetName();

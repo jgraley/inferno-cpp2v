@@ -74,6 +74,7 @@ public:
     explicit operator bool() const;
     TreePtr<Node> GetChildX() const;
     const TreePtrInterface *GetXPtr() const;
+    void SetXPtr(const TreePtrInterface &x);
     
     string GetTrace() const; // used for debug
     string GetName() const;

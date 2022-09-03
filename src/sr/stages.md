@@ -67,7 +67,7 @@ for all steps):
  - Create constraint solver:
    - Categorise variables.
 
-### Analysis stage Five `A` (input tree required here)
+### Analysis stage `A` (input tree required here)
 
 Knowledge database is built based on an analysis of the input tree.
 

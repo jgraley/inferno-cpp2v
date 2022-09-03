@@ -5,8 +5,6 @@
 
 using namespace SR;
 
-//#define UNIVERSAL_KNOWLEDGE
-
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
 {
@@ -78,7 +76,7 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
     current_root_xlink = XLink::CreateDistinct(root);    
 #ifdef NEW_KNOWLEDGE_UPDATE
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    knowledge->Build( root_xlink );
+    knowledge->Build( current_root_xlink );
 #endif    
 }
 
@@ -136,7 +134,7 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 void VNSequence::BuildTheKnowledge( XLink root_xlink )
 {
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
-#ifdef UNIVERSAL_KNOWLEDGE
+#ifdef NEW_KNOWLEDGE_UPDATE
     ASSERT( current_root_xlink );
     knowledge->Build( current_root_xlink );
 #else    
