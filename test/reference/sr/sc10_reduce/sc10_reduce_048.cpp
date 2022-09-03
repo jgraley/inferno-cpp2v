@@ -33,9 +33,9 @@ temp_i=(1);
 /*temp*/ int result_1;
 {
 {
- ::TopLevel::f_link=(&&LINK);
-{
  ::TopLevel::f_i=temp_i;
+{
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 }
@@ -50,8 +50,8 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
 {
  ::TopLevel::f_return= ::TopLevel::i;
 {

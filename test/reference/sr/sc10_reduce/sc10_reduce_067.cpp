@@ -31,8 +31,8 @@ auto void *state;
 /*temp*/ int result_1;
 /*temp*/ int temp_i;
 temp_i=(1);
- ::TopLevel::f_link=(&&LINK);
  ::TopLevel::f_i=temp_i;
+ ::TopLevel::f_link=(&&LINK);
 wait(SC_ZERO_TIME);
 {
 state=(&&ENTER_f);
@@ -48,8 +48,8 @@ state=(&&ENTER_f);
 goto *(state);
 }
 ENTER_f:;
- ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::f_return= ::TopLevel::i;
 temp_link= ::TopLevel::link;
 {

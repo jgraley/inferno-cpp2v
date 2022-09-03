@@ -22,9 +22,9 @@ void TopLevel::T()
 {
 cease( ({ /*temp*/ int temp_i; temp_i=(1); ({ {
 {
- ::TopLevel::f_link=(&&LINK);
-{
  ::TopLevel::f_i=temp_i;
+{
+ ::TopLevel::f_link=(&&LINK);
  ::TopLevel::f();
 }
 }
@@ -37,8 +37,8 @@ return ;
 void (TopLevel::f)()
 {
 /*temp*/ void *temp_link;
-auto int i =  ::TopLevel::f_i;
 auto void *link =  ::TopLevel::f_link;
+auto int i =  ::TopLevel::f_i;
 {
  ::TopLevel::f_return=i;
 {

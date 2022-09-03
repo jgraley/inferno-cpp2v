@@ -88,10 +88,10 @@ void Multiplier::T_1()
 if( (sc_delta_count())==(0) )
 {
 next_trigger(  ::Multiplier::instigate );
- ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_4;
+ ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_2;
 return ;
 }
-if(  ::Multiplier::T_STATE_YIELD_4== ::Multiplier::state_1 )
+if(  ::Multiplier::T_STATE_YIELD_2== ::Multiplier::state_1 )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
@@ -104,10 +104,10 @@ if(  ::Multiplier::T_STATE_YIELD_3== ::Multiplier::state_1 )
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 next_trigger(  ::Multiplier::proceed_1 );
- ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_2;
+ ::Multiplier::state_1= ::Multiplier::T_STATE_YIELD_4;
 return ;
 }
-if(  ::Multiplier::T_STATE_YIELD_2== ::Multiplier::state_1 )
+if(  ::Multiplier::T_STATE_YIELD_4== ::Multiplier::state_1 )
 {
 cease(  ::gvar );
 return ;

@@ -37,8 +37,8 @@ auto unsigned int state;
 /*temp*/ int result_1;
 /*temp*/ int temp_i;
 temp_i=(1);
- ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
  ::TopLevel::f_i=temp_i;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_ENTER_f;
 LINK:;
@@ -53,8 +53,8 @@ state= ::TopLevel::T_STATE_ENTER_f;
 ENTER_f:;
 if(  ::TopLevel::T_STATE_ENTER_f==state )
 {
- ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::f_return= ::TopLevel::i;
 temp_link= ::TopLevel::link;
 state=temp_link;

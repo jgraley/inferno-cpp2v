@@ -35,7 +35,7 @@ bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
 bool ReadArgs::use_new_knowledge_update = false;
-
+ 
 
 void ReadArgs::Usage(string msg)
 {

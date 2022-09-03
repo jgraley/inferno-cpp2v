@@ -81,9 +81,9 @@ void Multiplier::T_1()
 static const unsigned int (lmap_1[]) = { &&YIELD_2, &&YIELD_3, &&YIELD_4 };
 auto unsigned int state_1;
 wait(  ::Multiplier::instigate );
-state_1= ::Multiplier::T_STATE_YIELD_4;
-YIELD_4:;
-if(  ::Multiplier::T_STATE_YIELD_4==state_1 )
+state_1= ::Multiplier::T_STATE_YIELD_2;
+YIELD_2:;
+if(  ::Multiplier::T_STATE_YIELD_2==state_1 )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
@@ -97,11 +97,11 @@ if(  ::Multiplier::T_STATE_YIELD_3==state_1 )
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed_1 );
-state_1= ::Multiplier::T_STATE_YIELD_2;
+state_1= ::Multiplier::T_STATE_YIELD_4;
 goto *(lmap_1[state_1]);
 }
 goto *(lmap_1[state_1]);
-YIELD_2:;
+YIELD_4:;
 cease(  ::gvar );
 return ;
 }

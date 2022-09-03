@@ -53,10 +53,10 @@ void Adder::T()
 {
 wait(  ::Adder::proceed );
  ::gvar+=(2);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
+"Caught:HasDeclaration::DeclarationNotFound";
 wait(  ::Adder::proceed );
  ::gvar+=(3);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
+"Caught:HasDeclaration::DeclarationNotFound";
 }
 
 Adder::Adder(char (*name))
@@ -67,10 +67,10 @@ void Multiplier::T_1()
 {
 wait(  ::Multiplier::instigate );
  ::gvar*=(5);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
+"Caught:HasDeclaration::DeclarationNotFound";
 wait(  ::Multiplier::proceed_1 );
  ::gvar*=(5);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
+"Caught:HasDeclaration::DeclarationNotFound";
 wait(  ::Multiplier::proceed_1 );
 cease(  ::gvar );
 }
@@ -82,7 +82,7 @@ Multiplier::Multiplier(char (*name_1))
 void TopLevel::T_2()
 {
  ::gvar=(1);
-"Caught:GetDeclaration::InstanceDeclarationNotFound";
+"Caught:HasDeclaration::DeclarationNotFound";
 }
 
 TopLevel::TopLevel(char (*name_2)) : add_inst("add_inst"), mul_inst("mul_inst")

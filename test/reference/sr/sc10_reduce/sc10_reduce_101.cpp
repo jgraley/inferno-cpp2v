@@ -35,8 +35,8 @@ void TopLevel::T()
 if( (sc_delta_count())==(0) )
 {
  ::TopLevel::temp_i=(1);
- ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
  ::TopLevel::f_i= ::TopLevel::temp_i;
+ ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
 next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_ENTER_f;
 enabled=(false);
@@ -52,8 +52,8 @@ if( enabled )
 }
 if( enabled&&( ::TopLevel::T_STATE_ENTER_f== ::TopLevel::state) )
 {
- ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
  ::TopLevel::f_return= ::TopLevel::i;
  ::TopLevel::temp_link= ::TopLevel::link;
  ::TopLevel::state= ::TopLevel::temp_link;

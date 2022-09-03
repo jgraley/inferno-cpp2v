@@ -25,34 +25,29 @@ TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-    cease( 
-        ({ /*temp*/ int temp_i; temp_i=(1); 
-            ({ 
-                {
-                    {
-                        ::TopLevel::f_link=(&&LINK);
-                        {
-                            ::TopLevel::f_i=temp_i;
-                            goto ENTER_f;
-                        }
-                    }
-                    LINK:;
-                }
-                ::TopLevel::f_return; 
-            }); 
-        }) );
-    return ;
-    ENTER_f:;
-    {
-        /*temp*/ void *temp_link;
-         ::TopLevel::i= ::TopLevel::f_i;
-         ::TopLevel::link= ::TopLevel::f_link;
-        {
-             ::TopLevel::f_return= ::TopLevel::i;
-            {
-                temp_link= ::TopLevel::link;
-                goto *(temp_link);
-            }
-        }
-    }
+cease( ({ /*temp*/ int temp_i; temp_i=(1); ({ {
+{
+ ::TopLevel::f_i=temp_i;
+{
+ ::TopLevel::f_link=(&&LINK);
+goto ENTER_f;
+}
+}
+LINK:;
+}
+ ::TopLevel::f_return; }); }) );
+return ;
+ENTER_f:;
+{
+/*temp*/ void *temp_link;
+ ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::i= ::TopLevel::f_i;
+{
+ ::TopLevel::f_return= ::TopLevel::i;
+{
+temp_link= ::TopLevel::link;
+goto *(temp_link);
+}
+}
+}
 }
