@@ -6,7 +6,10 @@
 #include "helpers/walk.hpp"
 
 #define KEEP_WHODAT_INFO
-
+// Note: you may wish to try subtracting 1 or 8 or something 
+// from the address to get a better indication of where the 
+// call itself came from.
+// The gdb magic you require is eg "info line *b.whodat"
 
 namespace SR
 { 
@@ -47,7 +50,7 @@ private: friend class LocatedLink;
 
     shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
-    void *whodat; // the gdb magic you require is eg "info line *b.whodat"
+    void *whodat; 
 #endif
 }; 
 
@@ -82,7 +85,7 @@ private: friend class LocatedLink;
            
     shared_ptr<const TreePtrInterface> asp_x;
 #ifdef KEEP_WHODAT_INFO
-    void *whodat; // the gdb magic you require is eg "info line *b.whodat"
+    void *whodat; 
 #endif
 
     struct MMAX : virtual Node { NODE_FUNCTIONS_FINAL }; 

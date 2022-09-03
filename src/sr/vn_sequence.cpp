@@ -75,9 +75,9 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {
+    current_root_xlink = XLink::CreateDistinct(root);    
 #ifdef NEW_KNOWLEDGE_UPDATE
     ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    initial_root_xlink = XLink::CreateDistinct(root);    
     knowledge->Build( root_xlink );
 #endif    
 }
@@ -86,29 +86,11 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
     dirty_grass.clear();	
-	
-#ifdef XLINK_CONTINUITY
-    if( step_index == 0 )
-    {
-        ASSERT( initial_root_xlink );
-        ASSERT( initial_root_xlink.GetChildX()==root );
-        current_root_xlink = initial_root_xlink;
-        steps[step_index]->Transform( initial_root_xlink );
-        initial_root_xlink = XLink();
-        current_root_xlink = XLink();
-        return initial_root_xlink.GetChildX(); // could have changed 
-    }
-    else
-#endif
-    {        
-        ASSERT( !initial_root_xlink );
-        XLink root_xlink = XLink::CreateDistinct(root);
-        current_root_xlink = root_xlink;
-        steps[step_index]->Transform( root_xlink );
-        root = root_xlink.GetChildX();
-        current_root_xlink = XLink();
-        return root;
-    }    
+	    
+    ASSERT( current_root_xlink.GetChildX()==root );
+    steps[step_index]->Transform( current_root_xlink );
+    root = current_root_xlink.GetChildX();
+    return root;   
 }
            
                  
