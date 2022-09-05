@@ -234,6 +234,7 @@ void ReferenceSolver::Solve()
 
         if( !value ) // no consistent value
         {
+            TRACEC("No-good set size %d:\n", assignments.size())(assignments)("\n");
             bool cease = AssignUnsuccessful();
           
             // Current assignments are believed to be a no-good set so reject
@@ -249,7 +250,6 @@ void ReferenceSolver::Solve()
             AssignSuccessful();
         }
     }        
-    CEASE:
     TRACEC("Finished solving\n");
 }
 
@@ -285,7 +285,7 @@ bool ReferenceSolver::AssignUnsuccessful()
 {
     value_selectors.erase(current_var_index);   
     assignments.erase( plan.free_variables.at(current_var_index) );         
-    TRACEC("Killed selector for X")(current_var_index)("\n");
+    TRACE("Killed selector for X")(current_var_index)("\n");
     
     if( current_var_index == 0 )
         return true; // no more solutions

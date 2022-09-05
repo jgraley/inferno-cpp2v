@@ -8,15 +8,24 @@
 
 using namespace CSP;
 
+//#define USE_REF_SOLVER_ONLY
+
 shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr<Constraint> > &constraints, 
                                                           const vector<VariableId> &free_variables, 
                                                           const set<VariableId> &domain_forced_variables, 
                                                           const set<VariableId> &arbitrary_forced_variables )
 {
+#ifdef USE_REF_SOLVER_ONLY
+    auto salg = make_shared<CSP::ReferenceSolver>( constraints, 
+                                                   free_variables, 
+                                                   domain_forced_variables, 
+                                                   arbitrary_forced_variables );
+#else                                                   
     auto salg = make_shared<CSP::BackjumpingSolver>( constraints, 
                                                      free_variables, 
                                                      domain_forced_variables, 
                                                      arbitrary_forced_variables );
+#endif
 
     if( ReadArgs::csp_test )
     {

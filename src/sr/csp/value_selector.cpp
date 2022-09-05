@@ -15,6 +15,8 @@
 // was empty).
 //#define CHECK_NONEMPTY_RESIDUAL
 
+#define LOG_INDIVIDUAL_SUGGESTION_SETS
+
 using namespace CSP;
 
 ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_, 
@@ -28,19 +30,26 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
 {
     INDENT("V");
 	TRACE("Making value selector for ")(my_var)("\n"); 		
-       
+#ifdef LOG_INDIVIDUAL_SUGGESTION_SETS
+    TRACEC("given assignments:\n")(assignments)("\n");
+#endif    
     list<unique_ptr<SYM::SetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_query )
     {                        
 		TRACEC("Querying ")(c)(" for suggestion set\n");       
         unique_ptr<SYM::SetResult> r = c->GetSuggestedValues( assignments, my_var );
         ASSERT( r );
+#ifdef LOG_INDIVIDUAL_SUGGESTION_SETS
+        TRACEC("got suggestion ")(r)("\n");
+        auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
+        bool sok = r->TryGetAsSetOfXLinks(*s);
+#endif    
         rl.push_back(move(r));
     }
 
-    auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
     unique_ptr<SYM::SetResult> result = SYM::SetResult::GetIntersection(move(rl));
     ASSERT( result );
+    auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
     bool sok = result->TryGetAsSetOfXLinks(*s);
        
 #ifdef GATHER_GSV
@@ -55,7 +64,7 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
               
     if( sok )
     {
-		TRACEC("Got suggestion ")(*s)(" - make queue from suggestion sets union\n"); 		
+		TRACEC("Intersection of suggstions is ")(*s)(" - make queue from this\n"); 		
         SetupSuggestionGenerator( s );
 	}
     else
