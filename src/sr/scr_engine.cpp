@@ -419,10 +419,14 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
     SolutionMap rs = UnionOfSolo( *master_solution, cs );    
     slave_action_requests.clear();
     replace_solution = move(rs);
-    keys_available = true;
+    replace_solution_available = true;
+
+    ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
 
     // Now replace according to the couplings
     root_xlink.SetXPtr( Replace() );
+
+    ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
         
 	if( ReadArgs::use_new_knowledge_update )
 		plan.vn_sequence->BuildTheKnowledge( root_xlink );  
@@ -434,7 +438,7 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
     }
     TRACE("Slaves done\n");
     
-    keys_available = false;
+    replace_solution_available = false;
     replace_solution.clear();
           
     // Clear out anything cached in agents and update the knowledge 
@@ -565,7 +569,7 @@ void SCREngine::RequestSlaveAction( RequiresSubordinateSCREngine *slave_agent,
 
 void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
-    ASSERT( keys_available );
+    ASSERT( replace_solution_available );
     InsertSolo( replace_solution, keyer_link );
 }
 
@@ -573,7 +577,7 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 XLink SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( plink );
-    ASSERT( keys_available );
+    ASSERT( replace_solution_available );
     if( replace_solution.count(plink) == 1 )
         return replace_solution.at(plink);
     else

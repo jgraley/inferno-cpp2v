@@ -161,7 +161,7 @@ private:
     int depth;    
     
     mutable SolutionMap replace_solution;
-    bool keys_available = false;    
+    bool replace_solution_available = false;    
     mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_action_requests;
 };
 
