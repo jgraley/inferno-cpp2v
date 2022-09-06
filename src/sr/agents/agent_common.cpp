@@ -633,7 +633,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
     vector< Itemiser::Element * > source_items = source->Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
-    TRACE("Duplicating %d members source=", dest_items.size())(*source)(" dest=")(*dest)("\n");
+    TRACE("Duplicating %d members source=", dest_items.size())(source_xlink)(" dest=")(*dest)("\n");
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.

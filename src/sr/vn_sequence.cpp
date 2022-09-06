@@ -5,6 +5,10 @@
 
 using namespace SR;
 
+
+// Make trace easier to follow
+#define KNOWLEDGE_EACH_STEP
+
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
 {
@@ -77,16 +81,21 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
     if( ReadArgs::use_new_knowledge_update )
     {
 		ASSERT( knowledge )("Planning stage four should have created knowledge object");
+#ifndef KNOWLEDGE_EACH_STEP
 		knowledge->Build( current_root_xlink );
+#endif        
 	}
 }
 
 
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
+    ASSERT( current_root_xlink.GetChildX()==root );
     dirty_grass.clear();	
 	    
-    ASSERT( current_root_xlink.GetChildX()==root );
+#ifdef KNOWLEDGE_EACH_STEP
+	knowledge->Build( current_root_xlink );
+#endif        
     steps[step_index]->Transform( current_root_xlink );
     root = current_root_xlink.GetChildX();
     return root;   

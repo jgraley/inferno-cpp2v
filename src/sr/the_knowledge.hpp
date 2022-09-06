@@ -65,10 +65,13 @@ public:
     class CategoryRelation
     {
     public:
+        CategoryRelation();
         CategoryRelation( shared_ptr<Lacing> lacing );
+        CategoryRelation& operator=(const CategoryRelation &other);
+        
         bool operator() (const XLink& x_link, const XLink& y_link) const;
     private:
-        const shared_ptr<Lacing> lacing;
+        shared_ptr<Lacing> lacing;
     };
 
     // Create a node here so that a regular XLink can be used and passed
@@ -172,6 +175,7 @@ public:
     bool HasNodeNugget(TreePtr<Node> node) const;
 
     void Build( XLink root_xlink );
+    void ExtendDomainWorker( PatternLink plink );
     void ExtendDomain( PatternLink plink );
     
 private:

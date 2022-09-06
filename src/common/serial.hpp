@@ -129,8 +129,11 @@ public:
 
     string GetSerialString() const;
     bool operator<( const SatelliteSerial &other ) const;
+    void Redetermine( const SerialNumber *mother, const void *satellite );
     
 private:
+    static SatelliteSNType DetermineSerialNumber( const SerialNumber *mother, const void *satellite );
+
     struct MotherBlock
     {
         map<const void *, SatelliteSNType> serial_by_satellite;

@@ -9,11 +9,11 @@
 using namespace SR;    
 
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
-//#define TRACE_KNOWLEDGE_DELTAS
+#define TRACE_KNOWLEDGE_DELTAS
 
 #ifdef TRACE_KNOWLEDGE_DELTAS
 // Global because there are different knowledges owned by different SCR Engines
-unordered_set<XLink> previous_unordered_domain;
+TheKnowledge::CategoryOrderedDomain previous_category_ordered_domain;
 #endif    
 
 
@@ -84,9 +84,21 @@ const Lacing *TheKnowledge::GetLacing() const
 }
 
 
+TheKnowledge::CategoryRelation::CategoryRelation()
+{
+}
+
+
 TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
     lacing( lacing_ )
 {
+}
+
+
+TheKnowledge::CategoryRelation& TheKnowledge::CategoryRelation::operator=(const CategoryRelation &other)
+{
+    lacing = other.lacing;
+    return *this;
 }
 
 
@@ -191,16 +203,17 @@ void TheKnowledge::Build( XLink root_xlink )
     AddAtRoot( REQUIRE_SOLO, XLink::OffEndXLink );
         
 #ifdef TRACE_KNOWLEDGE_DELTAS
-    TRACE("Knowledge regenerated: new XLinks:\n")
-         ( DifferenceOf(unordered_domain, previous_unordered_domain) )
-         ("\nRemoved XLinks:\n")
-         ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
-    previous_unordered_domain = unordered_domain;
+    if( Tracer::IsEnabled() ) 
+    {        
+        TRACE("Knowledge rebuilt at ")(root_xlink)(":\n")
+             ( category_ordered_domain )("\n");
+        previous_category_ordered_domain = category_ordered_domain;
+    }
 #endif    
 }
 
 
-void TheKnowledge::ExtendDomain( PatternLink plink )
+void TheKnowledge::ExtendDomainWorker( PatternLink plink )
 {
     // Extend locally first and then pass that into children.
     set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( *this, unordered_domain );    
@@ -217,23 +230,31 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
     auto pq = plink.GetChildAgent()->GetPatternQuery();    
     for( PatternLink child_plink : pq->GetNormalLinks() )
     {
-        ExtendDomain( child_plink );
+        ExtendDomainWorker( child_plink );
     }
     for( PatternLink child_plink : pq->GetAbnormalLinks() )
     {
-        ExtendDomain( child_plink );
+        ExtendDomainWorker( child_plink );
     }
     for( PatternLink child_plink : pq->GetMultiplicityLinks() )
     {
-        ExtendDomain( child_plink );
+        ExtendDomainWorker( child_plink );
     }
-    
+}
+
+
+void TheKnowledge::ExtendDomain( PatternLink plink )
+{
+    ExtendDomainWorker(plink);
 #ifdef TRACE_KNOWLEDGE_DELTAS
-    TRACE("Knowledge regenerated: new XLinks:\n")
-         ( DifferenceOf(unordered_domain, previous_unordered_domain) )
-         ("\nRemoved XLinks:\n")
-         ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
-    previous_unordered_domain = unordered_domain;
+    if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
+    {
+        TRACE("Domain extended for ")(plink)(", new XLinks:\n")
+             ( DifferenceOf(category_ordered_domain, previous_category_ordered_domain) )
+             ("\nRemoved XLinks:\n")
+             ( DifferenceOf(previous_category_ordered_domain, category_ordered_domain) )("\n");
+        previous_category_ordered_domain = category_ordered_domain;
+    }
 #endif
 
 #ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
