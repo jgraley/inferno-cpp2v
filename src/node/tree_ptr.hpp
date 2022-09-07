@@ -53,17 +53,21 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 };
 
 template<typename VALUE_TYPE>
-struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
+struct TreePtr : virtual TreePtrInterface, 
+                 shared_ptr<VALUE_TYPE>,
+                 SatelliteSerial
 {
     inline TreePtr() {}
 
     explicit inline TreePtr( VALUE_TYPE *o ) : // dangerous - make explicit
-        shared_ptr<VALUE_TYPE>( o )
+        shared_ptr<VALUE_TYPE>( o ),
+        SatelliteSerial( o, this )
     {
     }
 
     inline TreePtr( nullptr_t o ) : // safe - leave implicit
-        shared_ptr<VALUE_TYPE>( o )
+        shared_ptr<VALUE_TYPE>( nullptr ),
+        SatelliteSerial( nullptr, this )
     {
     }
 
@@ -129,6 +133,16 @@ struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
     {
     	(void)shared_ptr<VALUE_TYPE>::operator=( (n) );
     	return *this;
+    }
+
+    bool operator<(const TreePtr<VALUE_TYPE> &other) const
+    {
+#ifdef TREE_PTR_ORDERING_USE_SERIAL
+        return SatelliteSerial::operator<(other);
+#else 
+        // Fall back to shared_ptr which I think just uses address
+        return this->get() < other.get();
+#endif        
     }
 
     virtual operator bool() const
