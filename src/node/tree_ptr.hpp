@@ -75,13 +75,15 @@ struct TreePtr : virtual TreePtrInterface,
 
     template< typename OTHER >
     explicit inline TreePtr( const shared_ptr<OTHER> &o ) :
-        shared_ptr<VALUE_TYPE>( o )
+        shared_ptr<VALUE_TYPE>( o ),
+        SatelliteSerial( o.get(), this )
     {
     }
 
     template< typename OTHER >
     inline TreePtr( const TreePtr<OTHER> &o ) :
-        shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) )
+        shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) ),
+        SatelliteSerial(o)
     {
     }
 
@@ -110,7 +112,7 @@ struct TreePtr : virtual TreePtrInterface,
 
     virtual TreePtr &operator=( const TreePtrInterface &n )
     {
-    	(void)TreePtr::operator=( shared_ptr<Node>(n) );
+    	(void)TreePtr::operator=( shared_ptr<Node>(n) );        
     	return *this;
     }
 
@@ -127,6 +129,7 @@ struct TreePtr : virtual TreePtrInterface,
         {
             (void)shared_ptr<VALUE_TYPE>::operator=( shared_ptr<VALUE_TYPE>() );
         }
+        (void)SatelliteSerial::operator=( SatelliteSerial( n.get(), this ) );
     	return *this;
     }
 
