@@ -13,6 +13,8 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
+#define TREE_PTR_ORDERING_USE_SERIAL
+
 //    
 // This is the interface for TreePtr<>. It may be used like shared_ptr, with 
 // template parameter VALUE_TYPE set to the pointed-to type. Various
@@ -138,7 +140,19 @@ struct TreePtr : virtual TreePtrInterface,
     bool operator<(const TreePtr<VALUE_TYPE> &other) const
     {
 #ifdef TREE_PTR_ORDERING_USE_SERIAL
-        return SatelliteSerial::operator<(other);
+        // Nullness is primary ordering
+        if( !other.get() )
+            return false; // for == and > case
+        else if( !get() )
+            return true; // for remaining < case
+            
+        // Pointed-to node serial number is secondary ordering
+        if( get()->VALUE_TYPE::operator<(*(other.get())) )
+            return true;
+        if( other.get()->VALUE_TYPE::operator<(*get()) )
+            return false;
+
+        return false; // they are equal under this ordering
 #else 
         // Fall back to shared_ptr which I think just uses address
         return this->get() < other.get();
