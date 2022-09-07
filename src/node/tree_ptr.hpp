@@ -37,6 +37,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 
     virtual explicit operator bool() const = 0; // for testing against nullptr
     virtual const SatelliteSerial &GetSS() const = 0;
+    virtual string GetSerialString() const = 0;
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual Node &operator *() const = 0; 
     virtual TreePtrInterface &operator=( const TreePtrInterface &o )
@@ -109,6 +110,11 @@ struct TreePtr : virtual TreePtrInterface,
     const SatelliteSerial &GetSS() const override
     {
         return *this;
+    }
+
+    virtual string GetSerialString() const
+    {
+        return SatelliteSerial::GetSerialString();
     }
 
     virtual VALUE_TYPE *get() const 

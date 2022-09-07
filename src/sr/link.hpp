@@ -17,8 +17,7 @@ class Agent;
 class LocatedLink;
 class XLink;
 
-class PatternLink : public Traceable, 
-                    public SatelliteSerial
+class PatternLink : public Traceable
 {
 public:
     PatternLink();
@@ -55,8 +54,7 @@ private: friend class LocatedLink;
 }; 
 
 
-class XLink : public Traceable, 
-              public SatelliteSerial
+class XLink : public Traceable
 {
 public:
     XLink();

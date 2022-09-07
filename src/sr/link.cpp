@@ -30,7 +30,6 @@ PatternLink::PatternLink()
 PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
                          const TreePtrInterface *ppattern, 
                          void *whodat_) :
-    SatelliteSerial( ppattern ? ppattern->get() : nullptr, ppattern ),
     asp_pattern( parent_pattern, ppattern )
 {
     ASSERT( parent_pattern );
@@ -84,9 +83,10 @@ bool PatternLink::operator<(const PatternLink &other) const
         return false;
 
     // Satellite serial number aka arrow-head number is secondary ordering
-    if( this->SatelliteSerial::operator<(other) )
+    // Use ordering on the TreePtrs themselves #625
+    if( asp_pattern->TreePtrInterface::operator<(*other.asp_pattern) )
         return true;
-    if( other.SatelliteSerial::operator<(*this) )
+    if( other.asp_pattern->TreePtrInterface::operator<(*asp_pattern) )
         return false;
        
     // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
@@ -172,39 +172,40 @@ string PatternLink::GetTrace() const
 
 string PatternLink::GetName() const
 {
+    if(asp_pattern==nullptr)
+        return "NULL";
+
 #ifdef SUPPRESS_SATELLITE_NUMBERS_PLINK	
     string s = "#?->";
 #else
-    string s = GetSerialString() + "->";
+    // Use the serial string of the TreePtr itself #625
+    string s = asp_pattern->GetSerialString() + "->";
 #endif    
 
-    if(asp_pattern==nullptr)
-        s += "NULL";
-    else
-        s += GetChildAgent()->GetTrace();
+    s += GetChildAgent()->GetTrace();
     return s;
 }
 
 
 string PatternLink::GetShortName() const
 {
+    if(asp_pattern==nullptr)
+        return "NULL";
+    
 #ifdef SUPPRESS_SATELLITE_NUMBERS_PLINK	
     string s = "#?->";
 #else
-    string s = GetSerialString() + "->";
+    // Use the serial string of the TreePtr itself #625
+    string s = asp_pattern->GetSerialString() + "->";
 #endif  
 
-    if(asp_pattern==nullptr)
-        s += "NULL";
-    else
-        s += GetChildAgent()->GetSerialString();
+    s += GetChildAgent()->GetSerialString();
     return s;
 }
 
 
 PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
                          void *whodat_) :
-    SatelliteSerial( ppattern ? ppattern->get() : nullptr, ppattern.get() ),
     asp_pattern( ppattern )
 {
 #ifdef KEEP_WHODAT_INFO
@@ -226,7 +227,6 @@ XLink::XLink() :
 XLink::XLink( shared_ptr<const Node> parent_x,
               const TreePtrInterface *px,
               void *whodat_ ) :
-    SatelliteSerial( px ? px->get() : nullptr, px ),
     asp_x( parent_x, px )              
 {
     ASSERT( parent_x );
@@ -277,6 +277,7 @@ bool XLink::operator<(const XLink &other) const
         return false;
 
     // Satellite serial number aka arrow-head number is secondary ordering
+    // Use ordering on the TreePtrs themselves #625
     if( asp_x->TreePtrInterface::operator<(*other.asp_x) )
         return true;
     if( other.asp_x->TreePtrInterface::operator<(*asp_x) )
@@ -342,39 +343,40 @@ string XLink::GetTrace() const
 
 string XLink::GetName() const 
 {
+    if(asp_x==nullptr)
+        return "NULL";
+        
 #ifdef SUPPRESS_SATELLITE_NUMBERS_XLINK	
     string s = "#?->";
 #else
-    string s = GetSerialString() + "->";
+    // Use the serial string of the TreePtr itself #625
+    string s = asp_x->GetSerialString() + "->";
 #endif    
 
-    if(asp_x==nullptr)
-        s += "NULL";
-    else
-        s += GetChildX()->GetTrace();
+    s += GetChildX()->GetTrace();
     return s;
 }
 
 
 string XLink::GetShortName() const 
 {
+    if(asp_x==nullptr)
+        return "NULL";
+
 #ifdef SUPPRESS_SATELLITE_NUMBERS_XLINK	
     string s = "#?->";
 #else
-    string s = GetSerialString() + "->";
+    // Use the serial string of the TreePtr itself #625
+    string s = asp_x->GetSerialString() + "->";
 #endif    
 
-    if(asp_x==nullptr)
-        s += "NULL";
-    else
-        s += GetChildX()->GetSerialString();
+    s += GetChildX()->GetSerialString();
     return s;
 }
 
 
 XLink::XLink( shared_ptr<const TreePtrInterface> px,
               void *whodat_ ) :
-    SatelliteSerial( px ? px->get() : nullptr, px.get() ),
     asp_x( px )
 {
     ASSERT(px);
