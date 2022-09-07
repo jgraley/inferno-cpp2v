@@ -36,6 +36,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 	virtual explicit operator TreePtr<Node>() const = 0; // TODO dangerous; see #201
 
     virtual explicit operator bool() const = 0; // for testing against nullptr
+    virtual const SatelliteSerial &GetSS() const = 0;
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual Node &operator *() const = 0; 
     virtual TreePtrInterface &operator=( const TreePtrInterface &o )
@@ -44,6 +45,12 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     	(void)Traceable::operator=( o );
     	return *this;
     }
+    
+    bool operator<(const TreePtrInterface &other) const
+    {
+        return GetSS() < other.GetSS();
+    }
+    
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetTrace() const
     {
@@ -99,6 +106,11 @@ struct TreePtr : virtual TreePtrInterface,
         return TreePtr<Node>( p1 );
 	}
 
+    const SatelliteSerial &GetSS() const override
+    {
+        return *this;
+    }
+
     virtual VALUE_TYPE *get() const 
     {
     	VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
@@ -121,7 +133,7 @@ struct TreePtr : virtual TreePtrInterface,
         if( n )
         {
             shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(n);
-            ASSERT( p )("OOStd inferred dynamic cast has failed: from ")(*n)
+            ASSERT( p )("TreePtr inferred dynamic cast has failed: from ")(*n)
 			           (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
          	(void)shared_ptr<VALUE_TYPE>::operator=( p );
         }

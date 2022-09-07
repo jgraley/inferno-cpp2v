@@ -277,9 +277,9 @@ bool XLink::operator<(const XLink &other) const
         return false;
 
     // Satellite serial number aka arrow-head number is secondary ordering
-    if( this->SatelliteSerial::operator<(other) )
+    if( asp_x->TreePtrInterface::operator<(*other.asp_x) )
         return true;
-    if( other.SatelliteSerial::operator<(*this) )
+    if( other.asp_x->TreePtrInterface::operator<(*asp_x) )
         return false;
        
     // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
