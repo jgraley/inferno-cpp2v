@@ -174,16 +174,7 @@ string PatternLink::GetName() const
 {
     if(asp_pattern==nullptr)
         return "NULL";
-
-#ifdef SUPPRESS_SATELLITE_NUMBERS_PLINK	
-    string s = "#?->";
-#else
-    // Use the serial string of the TreePtr itself #625
-    string s = asp_pattern->GetSerialString() + "->";
-#endif    
-
-    s += GetChildAgent()->GetTrace();
-    return s;
+    return asp_pattern->GetName();
 }
 
 
@@ -191,16 +182,7 @@ string PatternLink::GetShortName() const
 {
     if(asp_pattern==nullptr)
         return "NULL";
-    
-#ifdef SUPPRESS_SATELLITE_NUMBERS_PLINK	
-    string s = "#?->";
-#else
-    // Use the serial string of the TreePtr itself #625
-    string s = asp_pattern->GetSerialString() + "->";
-#endif  
-
-    s += GetChildAgent()->GetSerialString();
-    return s;
+    return asp_pattern->GetShortName();
 }
 
 
@@ -345,16 +327,7 @@ string XLink::GetName() const
 {
     if(asp_x==nullptr)
         return "NULL";
-        
-#ifdef SUPPRESS_SATELLITE_NUMBERS_XLINK	
-    string s = "#?->";
-#else
-    // Use the serial string of the TreePtr itself #625
-    string s = asp_x->GetSerialString() + "->";
-#endif    
-
-    s += GetChildX()->GetTrace();
-    return s;
+    return asp_x->GetName();
 }
 
 
@@ -362,16 +335,7 @@ string XLink::GetShortName() const
 {
     if(asp_x==nullptr)
         return "NULL";
-
-#ifdef SUPPRESS_SATELLITE_NUMBERS_XLINK	
-    string s = "#?->";
-#else
-    // Use the serial string of the TreePtr itself #625
-    string s = asp_x->GetSerialString() + "->";
-#endif    
-
-    s += GetChildX()->GetSerialString();
-    return s;
+    return asp_x->GetShortName();
 }
 
 

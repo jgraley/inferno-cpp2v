@@ -53,13 +53,12 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     }
     
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
-    virtual string GetTrace() const
+    virtual string GetName() const = 0;
+    virtual string GetShortName() const = 0;
+    string GetTrace() const override
     {
-        if( operator bool() )           
-            return string("&") + operator*().GetTrace();
-        else 
-            return string("NULL");
-    }  
+        return GetName();
+    }    
 };
 
 template<typename VALUE_TYPE>
@@ -220,14 +219,38 @@ struct TreePtr : virtual TreePtrInterface,
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }
 
-    //inline bool operator<( const TreePtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
-    //{
-    //    return SerialNumber::operator<(other);
-    //}    
-    //string GetSerialString() const
-    //{
-    //    return SerialNumber::GetSerialString(); // avoiding the need for virtual inheritance
-   // }
+    string GetName() const override
+    {
+        if( !operator bool() )           
+            return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+        string s = "#?->";
+#else
+        // Use the serial string of the TreePtr itself #625
+        string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+        
+        s += get()->GetName();
+        s += get()->GetSerialString();
+        return s;
+    }  
+    
+    string GetShortName() const override
+    {
+        if( !operator bool() )           
+            return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+        string s = "#?->";
+#else
+        // Use the serial string of the TreePtr itself #625
+        string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+        
+        s += get()->GetSerialString(); 
+        return s;
+    }  
 };
 
 
