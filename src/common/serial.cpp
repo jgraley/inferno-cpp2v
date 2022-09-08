@@ -125,7 +125,7 @@ SatelliteSerial::SatelliteSNType SatelliteSerial::DetermineSerialNumber( const S
     if( !mother )
         return 0;
     
-    pair<SerialNumber::SNType, SerialNumber::SNType> sn = mother->GetSerialNumber();
+    SerialNumber::SNType sn = mother->GetSerialNumber();
     MotherBlock &mother_block = blocks_by_mother_serial[sn];
     if( mother_block.serial_by_satellite.count(satellite) == 0 )
     {
@@ -139,20 +139,7 @@ SatelliteSerial::SatelliteSNType SatelliteSerial::DetermineSerialNumber( const S
         return mother_block.serial_by_satellite.at(satellite);
     }
 }
-/*
-    pair<SerialNumber::SNType, SerialNumber::SNType> sn = mother->GetSerialNumber();
-    SerialBySatelliteInstance &serial_by_link = serial_by_child_node[sn.first][sn.second];
-    if( serial_by_link.count(satellite) == 0 )
-    {
-        int ns = (SatelliteSNType)(serial_by_link.size());
-        serial_by_link[satellite] = ns;
-        return ns;
-    }
-    else
-    {
-        return serial_by_link.at(satellite);
-    }
-*/
+
 
 SatelliteSerial::BlocksByMotherSerial SatelliteSerial::blocks_by_mother_serial;    
 

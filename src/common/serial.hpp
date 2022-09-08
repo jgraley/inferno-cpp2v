@@ -100,9 +100,9 @@ public:
             return serial < o.serial;
     }
     
-    inline pair<SNType, SNType> GetSerialNumber() const 
+    inline SNType GetSerialNumber() const 
     {
-        return make_pair(0, serial); // This is enough for uniqueness
+        return serial; // This is enough for uniqueness
     }
     string GetSerialString() const; 
     
@@ -141,9 +141,8 @@ private:
     };
     // Index by location, then serial. Serial scales with input tree size so
     // use unordered_map for that.
-    typedef unordered_map< pair<SerialNumber::SNType, SerialNumber::SNType>, 
-                           MotherBlock, 
-                           PairHash > BlocksByMotherSerial;
+    typedef unordered_map< SerialNumber::SNType, 
+                           MotherBlock > BlocksByMotherSerial;
     static BlocksByMotherSerial blocks_by_mother_serial;    
 
     SatelliteSNType serial;
