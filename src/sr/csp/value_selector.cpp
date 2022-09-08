@@ -15,7 +15,7 @@
 // was empty).
 //#define CHECK_NONEMPTY_RESIDUAL
 
-#define LOG_INDIVIDUAL_SUGGESTION_SETS
+//#define LOG_INDIVIDUAL_SUGGESTION_SETS
 
 using namespace CSP;
 
