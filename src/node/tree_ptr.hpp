@@ -13,7 +13,6 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
-#define TREE_PTR_ORDERING_USE_SERIAL
 
 //    
 // This is the interface for TreePtr<>. It may be used like shared_ptr, with 
@@ -49,36 +48,102 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     string GetTrace() const override;
 };
 
+
+struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
+{
+	TreePtrCommon() {}
+	
+	explicit TreePtrCommon( Node *o ) : // dangerous - make explicit
+        SatelliteSerial( o, this )
+    {
+    }
+
+    TreePtrCommon( nullptr_t o ) : // safe - leave implicit
+        SatelliteSerial( nullptr, this )
+    {
+    }
+
+    template< typename OTHER >
+    explicit TreePtrCommon( const shared_ptr<OTHER> &o ) :
+        SatelliteSerial( o.get(), this )
+    {
+    }
+
+    template< typename OTHER >
+    TreePtrCommon( const TreePtr<OTHER> &o ) :
+        SatelliteSerial(o)
+    {
+    }
+
+    const SatelliteSerial &GetSS() const override
+    {
+        return *this;
+    }
+
+    string GetName() const final
+    {
+        if( !operator bool() )           
+            return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+        string s = "#?->";
+#else
+        // Use the serial string of the TreePtr itself #625
+        string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+        
+        s += get()->GetName();
+        s += get()->GetSerialString();
+        return s;
+    }  
+    
+    string GetShortName() const final
+    {
+        if( !operator bool() )           
+            return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+        string s = "#?->";
+#else
+        // Use the serial string of the TreePtr itself #625
+        string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+        
+        s += get()->GetSerialString(); 
+        return s;
+    }  
+};
+
+
 template<typename VALUE_TYPE>
-struct TreePtr : virtual TreePtrInterface, 
-                 shared_ptr<VALUE_TYPE>,
-                 SatelliteSerial
+struct TreePtr : virtual TreePtrCommon, 
+                 shared_ptr<VALUE_TYPE>
 {
     TreePtr() {}
 
     explicit TreePtr( VALUE_TYPE *o ) : // dangerous - make explicit
         shared_ptr<VALUE_TYPE>( o ),
-        SatelliteSerial( o, this )
+        TreePtrCommon( o )
     {
     }
 
     TreePtr( nullptr_t o ) : // safe - leave implicit
         shared_ptr<VALUE_TYPE>( nullptr ),
-        SatelliteSerial( nullptr, this )
+        TreePtrCommon( o )
     {
     }
 
     template< typename OTHER >
     explicit TreePtr( const shared_ptr<OTHER> &o ) :
         shared_ptr<VALUE_TYPE>( o ),
-        SatelliteSerial( o.get(), this )
+        TreePtrCommon( o )
     {
     }
 
     template< typename OTHER >
     TreePtr( const TreePtr<OTHER> &o ) :
         shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) ),
-        SatelliteSerial(o)
+        TreePtrCommon( o )
     {
     }
 
@@ -94,11 +159,6 @@ struct TreePtr : virtual TreePtrInterface,
         return TreePtr<Node>( p1 );
 	}
 
-    const SatelliteSerial &GetSS() const override
-    {
-        return *this;
-    }
-
     VALUE_TYPE *get() const final
     {
     	VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
@@ -108,12 +168,6 @@ struct TreePtr : virtual TreePtrInterface,
     VALUE_TYPE &operator *() const final
     {
     	return shared_ptr<VALUE_TYPE>::operator *();
-    }
-
-    TreePtr &operator=( const TreePtrInterface &n ) final
-    {
-    	(void)TreePtr::operator=( shared_ptr<Node>(n) );        
-    	return *this;
     }
 
     TreePtr &operator=( const shared_ptr<Node> &n )
@@ -139,7 +193,13 @@ struct TreePtr : virtual TreePtrInterface,
     	(void)shared_ptr<VALUE_TYPE>::operator=( (n) );
     	return *this;
     }
-
+    
+    TreePtr &operator=( const TreePtrInterface &n ) final
+    {
+    	(void)TreePtr::operator=( shared_ptr<Node>(n) );        
+    	return *this;
+    }
+    
     bool operator<(const TreePtr<VALUE_TYPE> &other) const
     {
 #ifdef TREE_PTR_ORDERING_USE_SERIAL
@@ -201,39 +261,6 @@ struct TreePtr : virtual TreePtrInterface,
 	{
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }
-
-    string GetName() const final
-    {
-        if( !operator bool() )           
-            return string("NULL");
-
-#ifdef SUPPRESS_SATELLITE_NUMBERS
-        string s = "#?->";
-#else
-        // Use the serial string of the TreePtr itself #625
-        string s = SatelliteSerial::GetSerialString() + "->";
-#endif  
-        
-        s += get()->GetName();
-        s += get()->GetSerialString();
-        return s;
-    }  
-    
-    string GetShortName() const final
-    {
-        if( !operator bool() )           
-            return string("NULL");
-
-#ifdef SUPPRESS_SATELLITE_NUMBERS
-        string s = "#?->";
-#else
-        // Use the serial string of the TreePtr itself #625
-        string s = SatelliteSerial::GetSerialString() + "->";
-#endif  
-        
-        s += get()->GetSerialString(); 
-        return s;
-    }  
 };
 
 

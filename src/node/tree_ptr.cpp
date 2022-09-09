@@ -35,3 +35,5 @@ string TreePtrInterface::GetTrace() const
 {
 	return GetName();
 }    
+
+
