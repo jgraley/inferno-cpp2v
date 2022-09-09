@@ -403,9 +403,6 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
 {
     INDENT(">");
 
-    if( !ReadArgs::use_new_knowledge_update )
-		plan.vn_sequence->BuildTheKnowledge( root_xlink ); 
-
     plan.vn_sequence->ExtendDomain( plan.root_plink );
 
     TRACE("Begin search\n");
@@ -425,11 +422,9 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
 
     // Now replace according to the couplings
     root_xlink.SetXPtr( Replace() );
-
     ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
-        
-	if( ReadArgs::use_new_knowledge_update )
-		plan.vn_sequence->BuildTheKnowledge( root_xlink );  
+    plan.vn_sequence->BuildTheKnowledge();  
+    ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
 
     for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
     {

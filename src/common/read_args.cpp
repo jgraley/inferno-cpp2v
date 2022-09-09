@@ -34,7 +34,7 @@ bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::use_new_knowledge_update = false;
+bool ReadArgs::use_x = false;
  
 
 void ReadArgs::Usage(string msg)
@@ -227,8 +227,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         else if( option=='u' )
         {
             char use_option = argv[curarg][2];
-            if( use_option=='k' )
-                use_new_knowledge_update = true;
+            if( use_option=='x' )
+                use_x = true;
             else 
                 Usage("Unknown argument after -u");
         }

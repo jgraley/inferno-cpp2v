@@ -45,7 +45,7 @@ public:
 
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
-    void BuildTheKnowledge( XLink root_xlink );
+    void BuildTheKnowledge();
     void ExtendDomain( PatternLink root_plink );
     
     bool IsDirtyGrass( TreePtr<Node> node );
