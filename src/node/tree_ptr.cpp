@@ -37,3 +37,59 @@ string TreePtrInterface::GetTrace() const
 }    
 
 
+TreePtrCommon::TreePtrCommon()
+{
+}
+
+
+TreePtrCommon::TreePtrCommon( Node *o ) : // dangerous - make explicit
+	SatelliteSerial( o, this )
+{
+}
+
+
+TreePtrCommon::TreePtrCommon( nullptr_t o ) : // safe - leave implicit
+	SatelliteSerial( nullptr, this )
+{
+}
+
+
+const SatelliteSerial &TreePtrCommon::GetSS() const
+{
+	return *this;
+}
+
+
+string TreePtrCommon::GetName() const
+{
+	if( !operator bool() )           
+		return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+	string s = "#?->";
+#else
+	// Use the serial string of the TreePtr itself #625
+	string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+	
+	s += get()->GetName();
+	s += get()->GetSerialString();
+	return s;
+}  
+
+
+string TreePtrCommon::GetShortName() const
+{
+	if( !operator bool() )           
+		return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+	string s = "#?->";
+#else
+	// Use the serial string of the TreePtr itself #625
+	string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+	
+	s += get()->GetSerialString(); 
+	return s;
+}  

@@ -51,18 +51,11 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 
 struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 {
-	TreePtrCommon() {}
+	TreePtrCommon();
 	
-	explicit TreePtrCommon( Node *o ) : // dangerous - make explicit
-        SatelliteSerial( o, this )
-    {
-    }
-
-    TreePtrCommon( nullptr_t o ) : // safe - leave implicit
-        SatelliteSerial( nullptr, this )
-    {
-    }
-
+	explicit TreePtrCommon( Node *o );
+    TreePtrCommon( nullptr_t o );
+    
     template< typename OTHER >
     explicit TreePtrCommon( const shared_ptr<OTHER> &o ) :
         SatelliteSerial( o.get(), this )
@@ -75,43 +68,9 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
     {
     }
 
-    const SatelliteSerial &GetSS() const override
-    {
-        return *this;
-    }
-
-    string GetName() const final
-    {
-        if( !operator bool() )           
-            return string("NULL");
-
-#ifdef SUPPRESS_SATELLITE_NUMBERS
-        string s = "#?->";
-#else
-        // Use the serial string of the TreePtr itself #625
-        string s = SatelliteSerial::GetSerialString() + "->";
-#endif  
-        
-        s += get()->GetName();
-        s += get()->GetSerialString();
-        return s;
-    }  
-    
-    string GetShortName() const final
-    {
-        if( !operator bool() )           
-            return string("NULL");
-
-#ifdef SUPPRESS_SATELLITE_NUMBERS
-        string s = "#?->";
-#else
-        // Use the serial string of the TreePtr itself #625
-        string s = SatelliteSerial::GetSerialString() + "->";
-#endif  
-        
-        s += get()->GetSerialString(); 
-        return s;
-    }  
+    const SatelliteSerial &GetSS() const override;
+    string GetName() const final;
+    string GetShortName() const;
 };
 
 
