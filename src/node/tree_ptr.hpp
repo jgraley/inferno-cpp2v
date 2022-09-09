@@ -41,6 +41,8 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     virtual Node &operator *() const = 0; 
     virtual TreePtrInterface &operator=( const TreePtrInterface &o );
     bool operator<(const TreePtrInterface &other) const;
+    bool operator==(const TreePtrInterface &other) const;
+    bool operator!=(const TreePtrInterface &other) const;
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;
@@ -246,7 +248,7 @@ TreePtr<VALUE_TYPE> DynamicTreePtrCast( const TreePtrInterface &g )
 // to having the same subbase and base target
 template< typename X, typename Y >
 bool operator==( const TreePtr<X> &x,
-		                const TreePtr<Y> &y)
+		         const TreePtr<Y> &y)
 {
 	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
@@ -254,20 +256,10 @@ bool operator==( const TreePtr<X> &x,
 
 template< typename X, typename Y >
 bool operator!=( const TreePtr<X> &x,
-		                const TreePtr<Y> &y)
+		         const TreePtr<Y> &y)
 {
 	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
-
-
-// Similar signature to shared_ptr operator==, and we restrict the pointers
-// to having the same subbase and base target
-bool operator==( const TreePtrInterface &x,
-		         const TreePtrInterface &y);
-bool operator!=( const TreePtrInterface &x,
-		         const TreePtrInterface &y);
-bool operator<( const TreePtrInterface &x,
-		        const TreePtrInterface &y);
 
 
 // Handy typing saver for creating objects and TreePtrs to them.

@@ -19,28 +19,19 @@ bool TreePtrInterface::operator<(const TreePtrInterface &other) const
 }
 
 
+bool TreePtrInterface::operator==(const TreePtrInterface &other) const
+{
+	return get() == other.get();
+}
+
+
+bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
+{
+	return get() != other.get();
+}
+
+
 string TreePtrInterface::GetTrace() const
 {
 	return GetName();
 }    
-
-
-// Similar signature to shared_ptr operator==, and we restrict the pointers
-// to having the same subbase and base target
-bool operator==( const TreePtrInterface &x,
-		         const TreePtrInterface &y)
-{
-	return x.get() == y.get();
-}
-
-bool operator!=( const TreePtrInterface &x,
-		         const TreePtrInterface &y)
-{
-	return x.get() != y.get();
-}
-
-bool operator<( const TreePtrInterface &x,
-		        const TreePtrInterface &y)
-{
-	return x.get() < y.get();
-}
