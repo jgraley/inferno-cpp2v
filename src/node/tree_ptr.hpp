@@ -25,6 +25,9 @@
 template<typename VALUE_TYPE>
 struct TreePtr;
 
+// -------------------------- TreePtrInterface ----------------------------    
+
+
 // An interface for our TreePtr object. This interface works regardless of pointed-to
 // type; it also masquerades as a TreePtr to Node type, which should be the
 // base class of the pointed-to things.
@@ -48,6 +51,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     string GetTrace() const override;
 };
 
+// -------------------------- TreePtrCommon ----------------------------    
 
 struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 {
@@ -73,6 +77,7 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
     string GetShortName() const;
 };
 
+// -------------------------- TreePtr template ----------------------------    
 
 template<typename VALUE_TYPE>
 struct TreePtr : virtual TreePtrCommon, 
@@ -80,13 +85,13 @@ struct TreePtr : virtual TreePtrCommon,
 {
     TreePtr() {}
 
-    explicit TreePtr( VALUE_TYPE *o ) : // dangerous - make explicit
+    explicit TreePtr( VALUE_TYPE *o ) : 
         shared_ptr<VALUE_TYPE>( o ),
         TreePtrCommon( o )
     {
     }
 
-    TreePtr( nullptr_t o ) : // safe - leave implicit
+    TreePtr( nullptr_t o ) : 
         shared_ptr<VALUE_TYPE>( nullptr ),
         TreePtrCommon( o )
     {
@@ -222,6 +227,7 @@ struct TreePtr : virtual TreePtrCommon,
     }
 };
 
+// -------------------------- Extra bits ----------------------------    
 
 template<typename VALUE_TYPE>
 TreePtr<VALUE_TYPE> DynamicTreePtrCast( const TreePtrInterface &g )

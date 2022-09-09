@@ -5,6 +5,8 @@
 
 #include "tree_ptr.hpp"
 
+// -------------------------- TreePtrInterface ----------------------------    
+
 TreePtrInterface &TreePtrInterface::operator=( const TreePtrInterface &o )
 {
 	(void)Itemiser::Element::operator=( o ); 
@@ -36,19 +38,20 @@ string TreePtrInterface::GetTrace() const
 	return GetName();
 }    
 
+// -------------------------- TreePtrCommon ----------------------------    
 
 TreePtrCommon::TreePtrCommon()
 {
 }
 
 
-TreePtrCommon::TreePtrCommon( Node *o ) : // dangerous - make explicit
+TreePtrCommon::TreePtrCommon( Node *o ) :
 	SatelliteSerial( o, this )
 {
 }
 
 
-TreePtrCommon::TreePtrCommon( nullptr_t o ) : // safe - leave implicit
+TreePtrCommon::TreePtrCommon( nullptr_t o ) :
 	SatelliteSerial( nullptr, this )
 {
 }
