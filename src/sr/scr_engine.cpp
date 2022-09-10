@@ -325,7 +325,7 @@ void SCREngine::UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePt
         }
     }
     
-    // Master SCREngines may also have pending action requests with matvhing through node
+    // Master SCREngines may also have pending action requests with matching through node
     if( plan.master_ptr ) 
         plan.master_ptr->UpdateSlaveActionRequests( through_subtree, new_subtree );
 }

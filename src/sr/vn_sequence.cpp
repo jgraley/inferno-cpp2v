@@ -7,7 +7,7 @@ using namespace SR;
 
 
 // Make trace easier to follow
-#define KNOWLEDGE_EACH_STEP
+//#define KNOWLEDGE_EACH_STEP
 
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
