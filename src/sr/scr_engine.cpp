@@ -20,8 +20,6 @@ using namespace std;
 int SCREngine::repetitions;
 bool SCREngine::rep_error;
 
-// #620
-//#define USE_KNOWLEDGE_FOR_SLAVE_APPLY_POINT
 
 // The master_plinks argument is a set of plinks to agents that we should not
 // configure because they were already configured by a master, and masters take 
@@ -360,22 +358,8 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, XLink root_xlink )
     }
     else
     {
-#if USE_KNOWLEDGE_FOR_SLAVE_APPLY_POINT
 		TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
 		target_xlink = OnlyElementOf(nn.parents);
-#else		
-        // Search for link to the through subtree 
-        Walk e( root_xlink.GetChildX(), nullptr, nullptr );
-        for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
-        {
-            if( *wit == through_subtree ) // found the though subtree
-			{
-                // Get the pointer that points to the though subtree
-                target_xlink = XLink( wit.GetParent(), wit.GetNodePointerInParent() );
-                break;  
-			}
-		}
-#endif		
 	}
 
     // Run the slave's engine on this subtree and overwrite through ptr via p_through_x
