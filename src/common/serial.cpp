@@ -149,10 +149,32 @@ SatelliteSerial::SatelliteSNType SatelliteSerial::DetermineSerialNumber( const S
 
 //////////////////////////// LeakCheck ///////////////////////////////
 
+LeakCheck::LeakCheck() :
+	origin( GetOrigin() )
+{ 
+	Construct();       
+}
+
+
+LeakCheck::LeakCheck( const LeakCheck &other ) :
+	origin( GetOrigin() )
+{
+	// Identity semantics: ignore "other"
+	Construct();        
+}
+
+
 LeakCheck::~LeakCheck()
 {
     instance_counts.at(origin).count--;
     instance_counts.at(origin).destructs.insert( GetOrigin() );
+}
+
+
+LeakCheck &LeakCheck::operator=( const LeakCheck &other )
+{
+    // Identity semantics: ignore "other"
+    return *this;
 }
 
 

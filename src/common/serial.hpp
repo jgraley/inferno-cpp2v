@@ -95,23 +95,10 @@ private:
 class LeakCheck
 {
 public:
-    inline LeakCheck() :
-        origin( GetOrigin() )
-    { 
-        Construct();       
-    }
-    inline LeakCheck( const LeakCheck &other ) :
-        origin( GetOrigin() )
-    {
-        // Identity semantics: ignore "other"
-        Construct();        
-    }
+    LeakCheck();
+    LeakCheck( const LeakCheck &other );
     ~LeakCheck();
-    inline LeakCheck &operator=( const LeakCheck &other )
-    {
-        // Identity semantics: ignore "other"
-        return *this;
-    }
+    LeakCheck &operator=( const LeakCheck &other );
     void Construct();
     static void DumpCounts( int min );
     
