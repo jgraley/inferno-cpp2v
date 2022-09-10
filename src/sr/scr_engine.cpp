@@ -403,8 +403,6 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
 {
     INDENT(">");
 
-    plan.vn_sequence->ExtendDomain( plan.root_plink );
-
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node. Throws on mismatch.
@@ -424,6 +422,8 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
     root_xlink.SetXPtr( Replace() );
     ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
     plan.vn_sequence->BuildTheKnowledge();  
+    // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
+    plan.vn_sequence->ExtendDomain( plan.root_plink ); 
     ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
 
     for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
@@ -463,6 +463,10 @@ int SCREngine::RepeatingCompareReplace( XLink root_xlink,
         TRACE("Stopping as requested before trying\n");
         return 0;
     }    
+    // Domain extend required on sight of new pattern OR x. This call is 
+    // due to the introduction of a new pattern. It also stops at slaves
+    // So we do it in SCREngine.
+    plan.vn_sequence->ExtendDomain( plan.root_plink );     
     
     for(int i=0; i<repetitions; i++) 
     {
