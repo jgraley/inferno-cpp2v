@@ -165,6 +165,7 @@ public:
 		// declaring link (precision). Taking parent discards that info.
 		set<XLink> declarers;
 		
+        void Merge( const NodeNugget &nn );
         string GetTrace() const;
     };
 
@@ -182,7 +183,7 @@ private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
-                  Nugget nugget );
+                  Nugget &nugget );
     void AddChildren( SubtreeMode mode, XLink xlink );
     void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink );
     void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
