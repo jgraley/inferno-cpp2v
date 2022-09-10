@@ -273,16 +273,14 @@ void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
     nugget.my_container_back = root_xlink;
     
     NodeNugget node_nugget;
-    node_nugget.parents.insert( root_xlink );
-	node_nuggets[root_xlink.GetChildX()].Merge( node_nugget );	
-
-    AddLink( mode, root_xlink, nugget );
+    AddLink( mode, root_xlink, nugget, node_nugget );
 }
 
 
 void TheKnowledge::AddLink( SubtreeMode mode, 
                             XLink xlink, 
-                            Nugget &nugget )
+                            Nugget &nugget,
+                            NodeNugget &node_nugget )
 {
     // This will also prevent recursion into xlink
     if( mode==STOP_IF_ALREADY_IN && nuggets.count(xlink) > 0 )
@@ -317,6 +315,8 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     nugget.depth_first_ordered_it = it;
     nugget.depth_first_index = current_index++;  
         
+    node_nugget.parents.insert( xlink );    
+        
     // Keep track of the last added on the way in.
     // AddChildren() may recuse back here and update last_link.
     last_xlink = xlink;
@@ -329,6 +329,9 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     
     // Add a nugget of knowledge
     InsertSolo( nuggets, make_pair(xlink, nugget) );
+
+	// Merge in the node nugget
+	node_nuggets[xlink.GetChildX()].Merge( node_nugget );	
 
     // Here, elements go into quotient set, but it does not 
     // uniquify: every link in the input X tree must appear 
@@ -375,13 +378,11 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
     nugget.my_container_back = child_xlink;
     
     NodeNugget node_nugget;
-    node_nugget.parents.insert( child_xlink );
     set<const TreePtrInterface *> declared = x->GetDeclared();
     if( declared.count( p_x_singular ) > 0 )
 		node_nugget.declarers.insert( child_xlink );
-	node_nuggets[child_x].Merge( node_nugget );	
 		
-    AddLink( mode, child_xlink, nugget );
+    AddLink( mode, child_xlink, nugget, node_nugget );
 }
 
 
@@ -414,13 +415,11 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
             nugget.my_sequence_successor = XLink::OffEndXLink;        
             
         NodeNugget node_nugget;
-        node_nugget.parents.insert( child_xlink );
         set<const TreePtrInterface *> declared = x->GetDeclared();
         if( declared.count( &*xit ) > 0 )
 			node_nugget.declarers.insert( child_xlink );
-		node_nuggets[child_x].Merge( node_nugget );
 
-        AddLink( mode, child_xlink, nugget );
+        AddLink( mode, child_xlink, nugget, node_nugget );
         
         xit_predecessor = xit;
     }
@@ -446,13 +445,11 @@ void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, 
         nugget.my_container_back = XLink( x, &(x_col->back()) );
         
         NodeNugget node_nugget;
-		node_nugget.parents.insert( child_xlink );
         set<const TreePtrInterface *> declared = x->GetDeclared();
         if( declared.count( &*xit ) > 0 )
 			node_nugget.declarers.insert( child_xlink );
-		node_nuggets[child_x].Merge( node_nugget );
 
-        AddLink( mode, child_xlink, nugget );
+        AddLink( mode, child_xlink, nugget, node_nugget );
     }
 }
 

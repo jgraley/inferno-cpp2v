@@ -183,7 +183,8 @@ private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
-                  Nugget &nugget );
+                  Nugget &nugget,
+                  NodeNugget &node_nugget );
     void AddChildren( SubtreeMode mode, XLink xlink );
     void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink );
     void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
