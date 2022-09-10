@@ -349,18 +349,9 @@ void SCREngine::RunSlave( PatternLink plink_to_slave, XLink root_xlink )
     ASSERT( through_subtree );
     
     // Obtain a pointer to the though link that will be updated by the 
-    // slave. TODO use knowledge, see #620
-    XLink target_xlink;
-    if( through_subtree == root_xlink.GetChildX() )
-    {
-        TRACEC("Implanting at root over ")(root_xlink)("\n");
-        target_xlink = root_xlink;
-    }
-    else
-    {
-		TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
-		target_xlink = OnlyElementOf(nn.parents);
-	}
+    // slave. 
+	TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
+	XLink target_xlink = OnlyElementOf(nn.parents);
 
     // Run the slave's engine on this subtree and overwrite through ptr via p_through_x
     int hits = slave_engine->RepeatingCompareReplace( target_xlink, &replace_solution );
