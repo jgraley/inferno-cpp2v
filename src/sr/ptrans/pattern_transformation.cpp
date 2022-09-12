@@ -1,6 +1,6 @@
 #include "pattern_transformation.hpp"
 #include "vn_step.hpp"
-#include "agents/slave_agent.hpp"
+#include "agents/embedded_scr_agent.hpp"
 
 using namespace SR;
    

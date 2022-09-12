@@ -9,7 +9,7 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
-#include "agents/slave_agent.hpp"
+#include "agents/embedded_scr_agent.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/delta_agent.hpp"
 #include "agents/search_container_agent.hpp"

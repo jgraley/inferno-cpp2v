@@ -7,7 +7,7 @@
 #include "star_agent.hpp"
 #include "green_grass_agent.hpp"
 #include "delta_agent.hpp"
-#include "slave_agent.hpp"
+#include "embedded_scr_agent.hpp"
 #include "conjunction_agent.hpp"
 #include "disjunction_agent.hpp"
 #include "negation_agent.hpp"

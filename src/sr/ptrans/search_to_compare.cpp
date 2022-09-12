@@ -2,7 +2,7 @@
 #include "vn_step.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/search_container_agent.hpp"
-#include "agents/slave_agent.hpp"
+#include "agents/embedded_scr_agent.hpp"
    
 using namespace SR;
 

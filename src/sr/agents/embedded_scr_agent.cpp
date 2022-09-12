@@ -1,4 +1,4 @@
-#include "slave_agent.hpp"
+#include "embedded_scr_agent.hpp"
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
 #include "link.hpp"
