@@ -11,7 +11,7 @@ namespace SR
 
 class VNStep;
 class Agent;
-class SlaveAgent;
+class EmbeddedSCRAgent;
 
 class PatternTransformationCommon : public PatternTransformation
 {
@@ -37,7 +37,7 @@ protected:
         set<PatternLink> all_plinks;
         set<Agent *> all_agents;
         map< Agent *, set<PatternLink> > plinks_to_agents;                
-        set<SlaveAgent *> slave_agents;
+        set<EmbeddedSCRAgent *> slave_agents;
     };
 
 public:

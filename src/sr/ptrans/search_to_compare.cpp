@@ -16,7 +16,7 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
     new_tle->Configure( scp, rp );
     pk.vn_transformation->SetTopLevelEngine(new_tle); // install the new one
     
-    for( SlaveAgent *sa : pk.slave_agents )    
+    for( EmbeddedSCRAgent *sa : pk.slave_agents )    
     {
         if( sa->IsSearch() )
         {                    

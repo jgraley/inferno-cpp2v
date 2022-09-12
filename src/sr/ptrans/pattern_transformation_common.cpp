@@ -35,7 +35,7 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt )
     
     slave_agents.clear();
     for( Agent *agent : all_agents )        
-        if( auto sa = dynamic_cast<SlaveAgent *>(agent) )
+        if( auto sa = dynamic_cast<EmbeddedSCRAgent *>(agent) )
             slave_agents.insert( sa );
 }
 

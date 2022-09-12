@@ -10,7 +10,7 @@ namespace SR
 
 class VNStep;
 class Agent;
-class SlaveAgent;
+class EmbeddedSCRAgent;
 
 class PatternTransformation
 {

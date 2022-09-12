@@ -254,7 +254,7 @@ The optional flags field permits the following changes to behaviour:
 
 Usages of the new variable elsewhere in the replace pattern can just couple directly to the `BuildInstanceIdentifier` node.
 
-## 10 Slave search and replace
+## 10 EmbeddedSCR search and replace
 
 It can be useful to build a 1:n relationship between two search and replace patterns. For example, we may wish to perform a transformation on a variable that modifies the declaration and all the usages of the variable. In this example, we would want each match to a variable's declaration (the master) to correspond with n matches to usages (the slaves), where n can be zero or more.
 

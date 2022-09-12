@@ -28,7 +28,7 @@ class Constraint;
 namespace SR 
 {
 class Agent;
-class SlaveAgent;
+class EmbeddedSCRAgent;
 class Conjecture;
 class SpecialBase;
 class CompareReplace;

@@ -5,7 +5,7 @@
 
 using namespace SR;
 
-SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
+EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
     is_search( is_search_ ),
     search_pattern( sp ),
     replace_pattern( rp )
@@ -13,7 +13,7 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
 }
 
 
-shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
@@ -21,7 +21,7 @@ shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
 }
 
 
-void SlaveAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
+void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                            PatternLink under_plink )
 {    
     // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
@@ -30,7 +30,7 @@ void SlaveAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink )
+TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( PatternLink me_plink )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   
@@ -48,7 +48,7 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( PatternLink me_plink )
 }
 
 
-list<PatternLink> SlaveAgent::GetVisibleChildren( Path v ) const
+list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 {
 	// it's a slave, so set up a container containing only "through", not "compare" or "replace"
 	list<PatternLink> plinks;
@@ -57,7 +57,7 @@ list<PatternLink> SlaveAgent::GetVisibleChildren( Path v ) const
 }
 
 
-Graphable::Block SlaveAgent::GetGraphBlockInfo() const
+Graphable::Block EmbeddedSCRAgent::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;
     // Actually much simpler in graph trace mode - just show the root node and plink
