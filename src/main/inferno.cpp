@@ -161,9 +161,9 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 void BuildDocSequence( vector< shared_ptr<VNStep> > *sequence )
 {
     ASSERT( sequence );
-    sequence->push_back( make_shared<SlaveTest>() );
-    sequence->push_back( shared_ptr<VNStep>( new SlaveTest2 ) );
-    sequence->push_back( shared_ptr<VNStep>( new SlaveTest3 ) );
+    sequence->push_back( make_shared<EmbeddedSCRTest>() );
+    sequence->push_back( shared_ptr<VNStep>( new EmbeddedSCRTest2 ) );
+    sequence->push_back( shared_ptr<VNStep>( new EmbeddedSCRTest3 ) );
 }
 
 

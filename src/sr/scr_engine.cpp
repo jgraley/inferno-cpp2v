@@ -74,16 +74,16 @@ SCREngine::Plan::Plan( SCREngine *algo_,
 void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks, 
                                         CompareReplace::AgentPhases &in_progress_agent_phases )
 {
-    // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
-    // So that the compare and replace subtrees of slaves are "obsucured" and not visible. Determine 
+    // Walkers for compare and replace patterns that do not recurse beyond embeddeds (except via "through")
+    // So that the compare and replace subtrees of embeddeds are "obsucured" and not visible. Determine 
     // compare and replace sets separately.
     set<PatternLink> visible_compare_plinks, visible_replace_plinks;
     list<PatternLink> visible_replace_plinks_postorder;
     WalkVisible( visible_compare_plinks, nullptr, root_plink, Agent::COMPARE_PATH );
     WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, root_plink, Agent::REPLACE_PATH );
     
-    // Determine all the agents we can see (can only see though slave "through", 
-    // not into the slave's pattern)
+    // Determine all the agents we can see (can only see though embedded "through", 
+    // not into the embeddeds's pattern)
     set<PatternLink> visible_plinks = UnionOf( visible_compare_plinks, visible_replace_plinks );
     
     for( PatternLink plink : visible_plinks )
@@ -123,7 +123,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks,
     for( PatternLink plink : my_plinks )
         my_agents.insert( plink.GetChildAgent() );
 
-    // Determine who our slaves are
+    // Determine who our embeddeds are
     my_overlay_starter_engines.clear();
     for( Agent *a : my_agents )
     {
@@ -153,7 +153,7 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 
 void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases )
 {
-    // Determine which agents our slaves should not configure
+    // Determine which agents our embeddeds should not configure
     set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
             
     for( PatternLink plink : my_subordinate_plinks_postorder )
@@ -201,7 +201,7 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
-    // COMPARE, REPLACE, RECURSE, RECURSE (this is LATER slave S/R)
+    // COMPARE, REPLACE, RECURSE, RECURSE (this is LATER embedded S/R)
     TRACE("Planning stage three\n");
  
     all_keyer_plinks = master_keyers;
@@ -310,13 +310,13 @@ string SCREngine::Plan::GetTrace() const
 }
 
     
-void SCREngine::UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
+void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
 {
     INDENT("F");
     
 	// We need to fix up any remaining action requests at the same level as the one
 	// that just ran if they have the same through node as the one we just changed.
-    for( auto &p : slave_action_requests ) // ref important - we're modifying!
+    for( auto &p : embedded_action_requests ) // ref important - we're modifying!
     {
         if( p.second == through_subtree )
         {
@@ -327,36 +327,36 @@ void SCREngine::UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePt
     
     // Master SCREngines may also have pending action requests with matching through node
     if( plan.master_ptr ) 
-        plan.master_ptr->UpdateSlaveActionRequests( through_subtree, new_subtree );
+        plan.master_ptr->UpdateEmbeddedActionRequests( through_subtree, new_subtree );
 }
 
 
-void SCREngine::RunSlave( PatternLink plink_to_slave, XLink root_xlink )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink root_xlink )
 {         
     INDENT("L");
-    auto slave_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_slave.GetChildAgent());
-    ASSERT( slave_agent );    
-    shared_ptr<SCREngine> slave_engine = plan.my_engines.at(slave_agent);
-    ASSERT( slave_engine );
+    auto embedded_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_embedded.GetChildAgent());
+    ASSERT( embedded_agent );    
+    shared_ptr<SCREngine> embedded_engine = plan.my_engines.at(embedded_agent);
+    ASSERT( embedded_engine );
    
-    TRACE("Going to run slave on ")(*slave_engine)
-         (" agent ")(slave_agent)
-         (" and slave_action_requests are\n")(slave_action_requests)("\n");
+    TRACE("Going to run embedded on ")(*embedded_engine)
+         (" agent ")(embedded_agent)
+         (" and embedded_action_requests are\n")(embedded_action_requests)("\n");
    
     // Recall the base node of the subtree under through (after master replace)
-    TreePtr<Node> through_subtree = slave_action_requests.at(slave_agent);
-    slave_action_requests.erase(slave_agent); // not needed any more
+    TreePtr<Node> through_subtree = embedded_action_requests.at(embedded_agent);
+    embedded_action_requests.erase(embedded_agent); // not needed any more
     ASSERT( through_subtree );
     
     // Obtain a pointer to the though link that will be updated by the 
-    // slave. 
+    // embedded. 
 	TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
 	XLink target_xlink = OnlyElementOf(nn.parents);
 
-    // Run the slave's engine on this subtree and overwrite through ptr via p_through_x
-    int hits = slave_engine->RepeatingCompareReplace( target_xlink, &replace_solution );
+    // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
+    int hits = embedded_engine->RepeatingCompareReplace( target_xlink, &replace_solution );
 
-    UpdateSlaveActionRequests( through_subtree, target_xlink.GetChildX() );
+    UpdateEmbeddedActionRequests( through_subtree, target_xlink.GetChildX() );
 }
 
 
@@ -387,7 +387,7 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
            
     // Replace will need the compare keys unioned with the master keys
     SolutionMap rs = UnionOfSolo( *master_solution, cs );    
-    slave_action_requests.clear();
+    embedded_action_requests.clear();
     replace_solution = move(rs);
     replace_solution_available = true;
 
@@ -401,12 +401,12 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
     plan.vn_sequence->ExtendDomain( plan.root_plink ); 
     ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
 
-    for( PatternLink plink_to_slave : plan.my_subordinate_plinks_postorder )
+    for( PatternLink plink_to_embedded : plan.my_subordinate_plinks_postorder )
     {
-        TRACE("Running slave ")(plink_to_slave)(" root xlink=")(root_xlink)("\n");
-        RunSlave(plink_to_slave, root_xlink);       
+        TRACE("Running embedded ")(plink_to_embedded)(" root xlink=")(root_xlink)("\n");
+        RunEmbedded(plink_to_embedded, root_xlink);       
     }
-    TRACE("Slaves done\n");
+    TRACE("Embedded SCRs done\n");
     
     replace_solution_available = false;
     replace_solution.clear();
@@ -439,7 +439,7 @@ int SCREngine::RepeatingCompareReplace( XLink root_xlink,
         return 0;
     }    
     // Domain extend required on sight of new pattern OR x. This call is 
-    // due to the introduction of a new pattern. It also stops at slaves
+    // due to the introduction of a new pattern. It also stops at embeddeds
     // So we do it in SCREngine.
     plan.vn_sequence->ExtendDomain( plan.root_plink );     
     
@@ -534,10 +534,10 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::RequestSlaveAction( RequiresSubordinateSCREngine *slave_agent,
-                                    TreePtr<Node> slave_through_subtree ) const
+void SCREngine::RequestEmbeddedAction( RequiresSubordinateSCREngine *embedded_agent,
+                                       TreePtr<Node> embedded_through_subtree ) const
 {
-    InsertSolo( slave_action_requests, make_pair( slave_agent, slave_through_subtree ) );
+    InsertSolo( embedded_action_requests, make_pair( embedded_agent, embedded_through_subtree ) );
 }
 
 

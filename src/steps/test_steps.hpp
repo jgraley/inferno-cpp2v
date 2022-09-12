@@ -2,8 +2,8 @@
  * slave_test
  */
 
-#ifndef SLAVE_TEST_HPP
-#define SLAVE_TEST_HPP
+#ifndef EMBEDDED_SCR_TEST_HPP
+#define EMBEDDED_SCR_TEST_HPP
 
 #include "sr/vn_step.hpp"
 
@@ -11,22 +11,22 @@ namespace Steps {
 
 using namespace SR;
 
-class SlaveTest : public VNStep
+class EmbeddedSCRTest : public VNStep
 {
 public:
-	SlaveTest();
+	EmbeddedSCRTest();
 };
 
-class SlaveTest2 : public VNStep
+class EmbeddedSCRTest2 : public VNStep
 {
 public:
-	SlaveTest2();
+	EmbeddedSCRTest2();
 };
 
-class SlaveTest3 : public VNStep
+class EmbeddedSCRTest3 : public VNStep
 {
 public:
-	SlaveTest3();
+	EmbeddedSCRTest3();
 };
 
 class FixCrazyNumber : public VNStep // find 29258 and turn it into 3 for #576

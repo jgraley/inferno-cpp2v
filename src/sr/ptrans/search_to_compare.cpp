@@ -22,7 +22,7 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
         {                    
             FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
 
-            TreePtr<Node> nn = sa->EvolveIntoSlaveCompareReplace();            
+            TreePtr<Node> nn = sa->EvolveIntoEmbeddedCompareReplace();            
             for( PatternLink plink : pk.plinks_to_agents.at(sa) )
                 plink.Redirect(nn);           
         }

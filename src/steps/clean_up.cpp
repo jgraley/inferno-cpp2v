@@ -209,7 +209,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -270,7 +270,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;

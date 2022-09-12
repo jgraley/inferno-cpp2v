@@ -18,7 +18,7 @@ DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
     auto decls = MakePatternNode< Star<Declaration> >();
     auto s_usertype = MakePatternNode< UserType >();
     auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_scnode->GetToken() );                
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Node> >( over, s_token, lr_scnode );    
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Node> >( over, s_token, lr_scnode );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -45,7 +45,7 @@ DetectSCBase::DetectSCBase( TreePtr< SCNamedRecord > lr_scclass )
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();
     auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_scclass->GetToken() ); 
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Node> >( over, ls_class, lr_scclass );    
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Node> >( over, ls_class, lr_scclass );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -159,7 +159,7 @@ DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
     auto l_ident = MakePatternNode<InstanceIdentifier>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( lr_scprocess->GetToken() ); 
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "func" );
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Node> >( over, l_module, l_module );            
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Node> >( over, l_module, l_module );            
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -269,7 +269,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_ctype = MakePatternNode<Constructor>();
     auto bases = MakePatternNode< Star<Base> >();
     auto module_typeid = MakePatternNode< TypeIdentifier >();
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Node> >( stuff, ls_comp, lr_comp );            
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, ls_comp, lr_comp );            
                     
     // dispense with an empty constructor                 
     stuff->terminus = over;

@@ -254,38 +254,42 @@ The optional flags field permits the following changes to behaviour:
 
 Usages of the new variable elsewhere in the replace pattern can just couple directly to the `BuildInstanceIdentifier` node.
 
-## 10 EmbeddedSCR search and replace
+## 10 Embedded Search/Compare and Replace
 
-It can be useful to build a 1:n relationship between two search and replace patterns. For example, we may wish to perform a transformation on a variable that modifies the declaration and all the usages of the variable. In this example, we would want each match to a variable's declaration (the master) to correspond with n matches to usages (the slaves), where n can be zero or more.
+It can be useful to build a 1:n relationship between two search and replace patterns. For example, we may wish to perform a transformation on a variable that modifies the declaration and all the usages of the variable. In this example, we would want each match to a variable's declaration to correspond with n matches to usages, where n can be zero or more.
 
-This is achieved by constructing the search and replace pattens for the master (the variable declaration in the example) and then placing a special node called `SlaveSearchReplace` into the master's replace pattern. The `SlaveSearchReplace` node is filled in with search and replace patterns for the slave (a usage of the variable in the example). For each match that master finds, the slave will operate repeatedly and will perform zero or more replace operations depending on how many matches it finds.
+This is achieved by constructing the search and replace pattens for the root (the variable declaration in the example) and then placing a special node called `EmbeddedSearchReplace` into the root replace pattern. The `EmbeddedSearchReplace` node is filled in with search and replace patterns (a usage of the variable in the example). For each match of the root search/compare pattern, the replace pattern will be applied, _and then_ the embedded search/compare patterns will be applied to the result repeatedly until no match, for all embedded patterns in the root pattern. This works recursively: we will say that an embedded pattern node is embedded within its _enclosing_ pattern. 
 
-`SlaveSearchReplace` has three members:
- - `through`, which simply points to the remainder of the master's replace pattern;
+`EmbeddedSearchReplace` has three members:
+ - `through`, which simply points to the remainder of the enclosing replace pattern;
  - `search` and
- - `replace` which specify the slave's behaviour as documented for `VNTransfomation`.
+ - `replace` which specify the embedded behaviour as documented for `VNTransfomation`.
 
- You can also use `SlaveCompareReplace`, which has `through`, `compare` and `replace` members and behaves as per `CompareReplace` described above.
+You can also use `EmbeddedCompareReplace`, which has `through`, `compare` and `replace` members and behaves as per `CompareReplace` described above.
 
-What makes slaves useful (as opposed to just running the program through the master and then the slave as two separate transformations) is the ability to restrict what the slave can match based on the context of a particular match in the master. This is achieved in two ways:
+What makes embedded pattern useful (as opposed to eg sequencing multiple root transformations) is the ability to restrict what the embedded pattern can match based on the context of a particular match in the enclosing pattern. This is achieved in two ways:
 
-1. Nodes in the slave search pattern may be coupled into nodes in the master pattern. Each such coupling must be keyed in the master (that is, it must include a node in a normal context in the master search pattern or a builder node in the master replace pattern). In the example, the variable modified by the master would be coupled into the slave to ensure it only finds usages of the same variable.
+1. Nodes in the embedded search pattern may be coupled into nodes in the enclosing pattern. Each such coupling must be keyed in the enclosing pattern. In the example, the variable modified in the enclosing pattern would be coupled into the embedded pattern to ensure it only finds usages of the same variable.
 
-2. The slave node is placed within the master replace pattern. Now the slave will only match at (`SlaveCompareReplace`) or under (`SlaveSearchReplace`) the position where it is found in the master replace pattern. In the example, the slave pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
+2. The embdeded node is placed within the enclosing replace pattern. Now the embedded node will only match at (`EmbeddedCompareReplace`) or under (`EmbeddedSearchReplace`) the position where it is found in the enclosing replace pattern. In the example, the embedded pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
 
 ### 10.1 Nested
 
-It is possible to use more than one slave in a pattern, they appear nested (that is as direct or indirect children of each other) and can nest in two distinct ways:
+It is possible to use more than one embedded pattern. They always appear nested in a graph of the pattern (that is as direct or indirect children of each other) and can nest in two distinct ways:
 
-1. A second slave may be pointed to by the `through` member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order. The relationship here is 1:n+m.
+1. A second embedded pattern may be pointed to by the `through` member of the first. These embedded pattern are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both embedded patterns operate for each match of the enclosing pattern in the prescribed order. The relationship here is 1:n+m.
 
-2. A second slave may be pointed to by the `replace` member of the first. This creates a sub-slave, which has the relationship described above to the first slave (so the first slave now acts as master to the second). The second slave acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
+2. A second embedded pattern may be pointed to by the `replace` member of the first. This is truly recursive, and embeds the second pattern into the first embedded pattern. The second embedded pattern acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
 
 Note: having these two nesting options can be confusing: the first style looks too much like the second and can be easily confused when studying graphs, so it's important to look out for this.
 
 ### 10.2 Important note
 
-The patterns under slaves must be fully assembled before the slave is constructed or configured. This is because configuration (which is triggered by construction with pattern pointers) examines the patterns and may cache information about them or set hidden properties on them. 
+Conceptually there can be at least two policies for when embedded agents act. Defined for Vida Nova, we have:
+ - `SOONER` - embedded search/compare and replace acts and runs to completion during enclosing replace, at the time replace reaches that node
+ - `LATER` - embedded search/compare and replace acts and runs to completion only after enclosing replace has completed
+ 
+We use the `LATER` policy, since `SOONER` can leave the run-time sequence of events ambiguous, and may not even be meaningful if the idea of a "replace sequence of events" stops being meaningful.
 
 ## 11 Spinning prevention
 
@@ -297,7 +301,7 @@ As a practical matter, a (buggy) search and replace pattern that spins forever m
 
 Typically, one uses the `-rn<x>` command-line option to permit repeating some finite number of times before terminating without error. In the resulting output program, the results of many (say 10 to 100) repetitions of the pattern should be obvious due to the repeted structures and possibly extreme nesting depth. 
 
-There follow some methods for preventing spinning - these must be applied separately to the master and to any slaves. This is unlikely to be a complete list.
+There follow some methods for preventing spinning - these must be applied separately to the root and any embedded patterns. This is unlikely to be a complete list.
 
 ### 11.1 Reductive patterns
 
@@ -326,10 +330,10 @@ To modify just `my_node`, insert a `Delta` node before it in the `AnyNode` branc
 ### 11.3 `GreenGrass` node
 
 Vida Nova S&R supports a special node called `GreenGrass` to help in tricky termination cases. It is inserted into a search pattern via its through member. The immediate child node will be matched as normal, but only if it is a node from the input program tree. `GreenGrass` restricts the search to not match the node if it was produced by an earlier iteration of the replace algorithm. The specific rules for `GreenGrass` are as follows:
-- During the first search in any `VNTransfomation` or slave, the `GreenGrass` node does not restrict at all
+- During the first search in any `VNTransfomation` or embedded pattern, the `GreenGrass` node does not restrict at all
 - During successive passes, `GreenGrass` restricts to nodes that reached the input program tree via `Stuff` node substitution in the previous pass. Note this includes the portion outside of the match when `VNTransfomation` is used.
 - In cases where one pass creates a new node (that `GreenGrass` would reject) and then a later pass preserves it via `Stuff` node substitution, `GreenGrass` will still reject it.
-- `GreenGrass` will restrict nodes created by the parent, even when located in a slave search pattern.
+- `GreenGrass` will restrict nodes created by the enclosing pattern, even when located in an embedded search pattern.
 
 Broadly speaking, `GreenGrass` assumes that `Stuff` substitution is not really changing the nodes, just moving them around. It restricts matches to nodes from the original input tree that may be been moved around. 
 
@@ -353,11 +357,9 @@ Vida Nova containers (sequence and collection) support initialisation directly f
 
 When building a `Container` from `TreePtr`s using the comma operator, it is good style to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to separate function arguments.
 
-Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used `s_` for search pattern nodes and `r_` for replace pattern nodes, with no prefix for nodes coupled into both (or `c_` could be used here). I prepend `l_` for slaves and sometimes insert `x` into nodes under a `Negation` node, such as with the but-not pattern. Further slaves at the same level (reached via `through`) are named `m_`, `n_`, `o_` etc. Sub-slaves recieve two letters, eg `ll_` or `nm_`. In this case `n` is master and `m` is second level slave.
+Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used `s_` for search pattern nodes and `r_` for replace pattern nodes, with no prefix for nodes coupled into both (or `c_` could be used here). I prepend `l_` for embedded and sometimes insert `x` into nodes under a `Negation` node, such as with the but-not pattern. Further embedded at the same level (reached via `through`) are named `m_`, `n_`, `o_` etc. Recusing embedded recieve two letters, eg `ll_` or `nm_`. In this case `n` is root and `m` is second level embedded pattern.
 
 I usually leave numbers and strings that are passed into `SpecificX` or `Builder` nodes as magic, possibly with a comment. Any macros, enums etc will be reduced to the raw number in a graph plot anyway.
-
-The order in which pattern nodes are created and connected together is mostly flexible, since members are mostly assigned via direct member assignment. It is mostly possible to declare all the nodes and then connect them all together. One exception is the slave nodes, which are actually instances of the `VNTransfomation` engine, and require either to be constructed using a constructor call or via `Configure()`.
 
 ### 12.4 Warning about empty versus maximally wild
 

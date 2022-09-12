@@ -18,13 +18,13 @@ Transformations applied to the pattern before planning:
 
 ### Planning Stage One `P` (steppy)
 
-In stage one, `SCREngine`s are created . There is one for master/outer and
-one for every slave/inner defined within the master/outer _(wind-in)_. The
+In stage one, `SCREngine`s are created . There is one for root and
+one for every embedded SCR agent defined within, etc _(wind-in)_. The
 `SCREngine`s scan their pattern tree and categorise the agents:
  - Which pattern nodes really belong to me and not some outer/master?
  - Which are reached during search, replace or both (the _phases_)?
  - What order are they reached during replace?
- - Which slave/inner `SCREngine`s will be reached?
+ - Which embedded `SCREngine`s will be reached?
  
 ### Planning Stage Two `Q` (steppy)
 

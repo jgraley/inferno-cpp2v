@@ -41,7 +41,7 @@ public:
     virtual void StartPlanOverlay() = 0;
 };
 
-/// Common implementation for search+replace, compare+replace and slaves
+/// Common implementation for search+replace, compare+replace and embeddeds
 class SCREngine : public virtual GraphIdable,
                   public SerialNumber
 {      
@@ -114,8 +114,8 @@ private:
         list<PatternLink> my_subordinate_plinks_postorder;
     } plan;
 
-    void UpdateSlaveActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
-    void RunSlave( PatternLink plink_to_slave, XLink root_xlink );
+    void UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
+    void RunEmbedded( PatternLink plink_to_embedded, XLink root_xlink );
     TreePtr<Node> Replace();
 
 public: // For top level engine/VN trans
@@ -133,9 +133,9 @@ public: // For top level engine/VN trans
 public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
-    // the slave_engine's one - and that pointer is not const.
-    void RequestSlaveAction( RequiresSubordinateSCREngine *slave_agent, 
-                             TreePtr<Node> slave_through_subtree ) const;    
+    // the embedded_engine's one - and that pointer is not const.
+    void RequestEmbeddedAction( RequiresSubordinateSCREngine *embedded_agent, 
+                             TreePtr<Node> embedded_through_subtree ) const;    
     void SetReplaceKey( LocatedLink keyer_link ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
@@ -162,7 +162,7 @@ private:
     
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
-    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > slave_action_requests;
+    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > embedded_action_requests;
 };
 
 };

@@ -117,7 +117,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lls_not2->negand = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 
-    auto slavell = MakePatternNode< SlaveSearchReplace<Scope> >( l_module, ll_all_over );    
+    auto slavell = MakePatternNode< EmbeddedSearchReplace<Scope> >( l_module, ll_all_over );    
     
     l_func->identifier = func_id;
     l_func->initialiser = l_comp;
@@ -156,7 +156,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_state_label->identifier = ls_label_id;
     l_state_label->state = lr_state_id;
 
-    auto slavel = MakePatternNode< SlaveCompareReplace<Scope> >( r_module, l_module, slavell );
+    auto slavel = MakePatternNode< EmbeddedCompareReplace<Scope> >( r_module, l_module, slavell );
     
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
@@ -240,11 +240,11 @@ LabelTypeToEnum::LabelTypeToEnum()
     l_over->overlay = l_enum; 
     l_enum->width = MakePatternNode<SpecificInteger>(32);
             
-    auto slavel = MakePatternNode< SlaveSearchReplace<Scope> >( record, l_apall_over );   
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Scope> >( record, l_apall_over );   
 
     ms_sub->operands = (lmap_id, m_state_id);
     
-    auto slavem = MakePatternNode< SlaveSearchReplace<Scope> >( slavel, ms_sub, m_state_id );   
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Scope> >( slavel, ms_sub, m_state_id );   
 
     ns_goto->destination = n_dest_expr;
     nr_goto->destination = nr_sub;
@@ -252,7 +252,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     n_dest_expr->negand = nsx_sub;
     nsx_sub->operands = (lmap_id, MakePatternNode<Expression>());
     
-    auto slaven = MakePatternNode< SlaveSearchReplace<Scope> >( slavem, ns_goto, nr_goto );   
+    auto slaven = MakePatternNode< EmbeddedSearchReplace<Scope> >( slavem, ns_goto, nr_goto );   
     
     all->conjuncts = (record, stuff_labeley, stuff_lmap);
     stuff_lmap->terminus = lmap;
@@ -298,7 +298,7 @@ RemoveLabelSubscript::RemoveLabelSubscript()
     auto decls = MakePatternNode< Star<Declaration> >();
     
     ms_sub->operands = (lmap_id, m_state_id);    
-    auto slavem = MakePatternNode< SlaveSearchReplace<Scope> >( slavel, ms_sub, m_state_id );       
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Scope> >( slavel, ms_sub, m_state_id );       
     Configure( SEARCH_REPLACE, all, slaven );
 }
 
@@ -340,7 +340,7 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     l_over->overlay = l_enum; 
     l_enum->width = MakePatternNode<SpecificInteger>(32);
             
-    auto slavel = MakePatternNode< SlaveSearchReplace<Scope> >( record, l_apall );   
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Scope> >( record, l_apall );   
 
     all->conjuncts = (record, stuff_labeley, stuff_lmap);
     stuff_lmap->terminus = lmap;
@@ -411,7 +411,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     ls_sub->operands = (lmap_id, l_index);
     l_over->overlay = l_index;    
    
-    auto slavel = MakePatternNode< SlaveSearchReplace<Scope> >( scope, l_assign );   
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Scope> >( scope, l_assign );   
    
     ms_all->conjuncts = (ms_anynode, msx_not, msx_not2, msx_not3);
     msx_not2->negand = msx_inst;
@@ -429,7 +429,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     msx_sub->operands = (lmap_id, m_nested_subscript);
     mr_sub->operands = (lmap_id, m_nested_subscript);
     
-    auto slavem = MakePatternNode< SlaveSearchReplace<Scope> >( slavel, ms_all, ms_anynode );   
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Scope> >( slavel, ms_all, ms_anynode );   
    
     s_all->conjuncts = (scope, s_stuff, sx_not1, lmap_stuff);
     scope->terminus = var;
@@ -521,7 +521,7 @@ AddStateEnumVar::AddStateEnumVar()
     lr_goto->destination = lr_sub;
     lr_sub->operands = (array, state_var_id);
             
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
      
     s_gg->through = s_comp;
     s_comp->members = (decls);
@@ -804,7 +804,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     auto r_do = MakePatternNode<Do>();
     auto over = MakePatternNode< Delta<Compound> >();
     
-    auto slavell = MakePatternNode< SlaveSearchReplace<Statement> >( r_body_comp, MakePatternNode<Goto>(), MakePatternNode<Continue>() );    
+    auto slavell = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_body_comp, MakePatternNode<Goto>(), MakePatternNode<Continue>() );    
     
     inst->type = MakePatternNode<Callable>();
     inst->initialiser = over;

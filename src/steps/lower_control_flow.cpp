@@ -236,7 +236,7 @@ ForToWhile::ForToWhile()
     l_overlay->overlay = lr_goto;
     lr_goto->destination = r_cont_labelid;
     l_s_not->negand = l_s_loop;
-    auto r_slave = MakePatternNode< SlaveCompareReplace<Statement> >( forbody, l_stuff, l_stuff );
+    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Statement> >( forbody, l_stuff, l_stuff );
     
     s_for->body = forbody;
     s_for->initialisation = init;
@@ -349,7 +349,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto id = MakePatternNode<BuildInstanceIdentifierAgent>("switch_value");
     auto s_cond = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
     
-    // SlaveSearchReplace for default
+    // EmbeddedSearchReplace for default
     auto l1_s_body = MakePatternNode<Compound>();
     auto l1_r_body = MakePatternNode<Compound>();
     auto l1_decls = MakePatternNode< Star<Declaration> >();
@@ -368,7 +368,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
     
-    auto r_slave1 = MakePatternNode< SlaveCompareReplace<Statement> >( body, l1_s_body, l1_r_body );
+    auto r_slave1 = MakePatternNode< EmbeddedCompareReplace<Statement> >( body, l1_s_body, l1_r_body );
 
     // slave for normal case statements (single value)
     auto l2_s_body = MakePatternNode<Compound>();
@@ -398,9 +398,9 @@ SwitchToIfGoto::SwitchToIfGoto()
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
     
-    auto r_slave2 = MakePatternNode< SlaveCompareReplace<Statement> >( r_slave1, l2_s_body, l2_r_body );
+    auto r_slave2 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_slave1, l2_s_body, l2_r_body );
     
-    // SlaveSearchReplace for range cases (GCC extension) eg case 5..7:    
+    // EmbeddedSearchReplace for range cases (GCC extension) eg case 5..7:    
     auto l3_s_body = MakePatternNode<Compound>();
     auto l3_r_body = MakePatternNode<Compound>();
     auto l3_decls = MakePatternNode< Star<Declaration> >();
@@ -434,7 +434,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l3_r_goto->destination = l3_r_labelid;
     l3_r_label->identifier = l3_r_labelid;
     
-    auto r_slave3 = MakePatternNode< SlaveCompareReplace<Statement> >( r_slave2, l3_s_body, l3_r_body );
+    auto r_slave3 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_slave2, l3_s_body, l3_r_body );
 
     // Finish up master
     s_cond->pattern = cond_type;
@@ -483,7 +483,7 @@ DoToIfGoto::DoToIfGoto()
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    auto r_slave = MakePatternNode< SlaveCompareReplace<Statement> >( body, l_stuff, l_stuff );
+    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Statement> >( body, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;

@@ -273,7 +273,7 @@ AddStateLabelVar::AddStateLabelVar()
     lr_assign->operands = (state_var_id, lsx_not);
     lr_goto->destination = state_var_id;
             
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
      
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
@@ -412,7 +412,7 @@ InferBreak::InferBreak()
 
     ls_goto->destination = label_id;
 
-    auto slave = MakePatternNode< SlaveSearchReplace<Breakable> >( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
+    auto slave = MakePatternNode< EmbeddedSearchReplace<Breakable> >( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
 
     s_comp->members = decls;
     s_comp->statements = (pre, breakable, label, post);
@@ -502,8 +502,8 @@ AddYieldFlag::AddYieldFlag()
     auto ms_all = MakePatternNode< Conjunction<Compound> >();
     auto ms_not = MakePatternNode< Negation<Compound> >();
     
-    auto slavem = MakePatternNode< SlaveSearchReplace<Compound> >( r_func_comp, ms_all, mr_comp );
-    auto slave = MakePatternNode< SlaveSearchReplace<Compound> >( r_comp, ls_if, lr_if );  
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_func_comp, ms_all, mr_comp );
+    auto slave = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_comp, ls_if, lr_if );  
       
     fn->type = sub;
     fn->initialiser = func_over;

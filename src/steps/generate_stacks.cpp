@@ -130,7 +130,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto overcp = MakePatternNode< Delta<Type> >();
     auto overi = MakePatternNode< Delta<Initialiser> >();
     
-    auto slavel = MakePatternNode< SlaveSearchReplace<Compound> >( r_body, ls_return, lr_comp );
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_body, ls_return, lr_comp );
     ls_return->return_value = l_return_value; // note this also pre-restricts away Return<Uninitialised>
     lr_comp->statements = (lr_assign, lr_return);
     lr_assign->operands = (r_temp_id, l_return_value);
@@ -140,7 +140,7 @@ ReturnViaTemp::ReturnViaTemp()
     m_call->callee = func_id;
     m_call->operands = (m_operands);
     mr_comp->statements = (m_call, r_temp_id);
-    auto slavem = MakePatternNode< SlaveSearchReplace<Scope> >( r_module, ms_gg, mr_comp );
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, ms_gg, mr_comp );
     
     s_module->members = (decls, func);
     r_module->members = (decls, func, r_temp);
@@ -230,7 +230,7 @@ AddLinkAddress::AddLinkAddress()
     llr_comp->statements = (llr_assign, ll_return);
     llr_assign->operands = (lr_temp_retaddr_id, lr_retaddr_id);
    
-    auto slavell = MakePatternNode< SlaveSearchReplace<Compound> >( lr_comp, ll_gg, llr_comp );   
+    auto slavell = MakePatternNode< EmbeddedSearchReplace<Compound> >( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = ms_call;
     ms_call->operands = (MakePatternNode< Star<MapOperand> >());
@@ -242,7 +242,7 @@ AddLinkAddress::AddLinkAddress()
     mr_operand->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
     
-    auto slavem = MakePatternNode< SlaveSearchReplace<Scope> >( r_module, m_gg, mr_comp );
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, m_gg, mr_comp );
     
     l_inst->type = l_func_over;
     l_func_over->through = ls_func;
@@ -321,7 +321,7 @@ ParamsViaTemps::ParamsViaTemps()
     mr_assign->operands = (r_temp_id, m_expr);
     mr_call->callee = func_id;
     mr_call->operands = (m_operands);
-    auto slavem = MakePatternNode< SlaveSearchReplace<Scope> >( r_module, ms_call, mr_comp );
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, ms_call, mr_comp );
     
     s_module->members = (decls, over);
     r_module->members = (decls, over, r_temp);
@@ -422,9 +422,9 @@ GenerateStacks::GenerateStacks()
     // Sub-slave replace with a subscript into the array
     l_r_sub->operands = ( r_identifier, r_index_identifier );
 
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Statement> >( r_vcomp, s_identifier, l_r_sub );
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_vcomp, s_identifier, l_r_sub );
 
-    // SlaveSearchReplace search to find automatic variables within the function
+    // EmbeddedSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
     overlay->through = s_vcomp;
     s_vcomp->members = (vdecls, s_instance);
@@ -433,7 +433,7 @@ GenerateStacks::GenerateStacks()
     s_instance->initialiser = MakePatternNode<Uninitialised>(); 
     s_instance->type = MakePatternNode<Type>();
 
-    // SlaveSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
+    // EmbeddedSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
     r_instance->constancy = MakePatternNode<NonConst>();
     r_instance->initialiser = MakePatternNode<Uninitialised>();
     overlay->overlay = r_slave;
@@ -447,10 +447,10 @@ GenerateStacks::GenerateStacks()
     r_array->element = s_instance->type;
     r_array->size = MakePatternNode<SpecificInteger>(10);
 
-    // SlaveSearchReplace to find early returns in the function
+    // EmbeddedSearchReplace to find early returns in the function
     s_gg->through = ret;
 
-    // SlaveSearchReplace replace with a decrement of the stack index coming before the return
+    // EmbeddedSearchReplace replace with a decrement of the stack index coming before the return
     //r_ret_comp->members = ( r_ret_decls );
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
@@ -460,9 +460,9 @@ GenerateStacks::GenerateStacks()
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
     
-    auto r_mid = MakePatternNode< SlaveCompareReplace<Scope> >( r_module, ls_module, lr_module ); // stuff, stuff
+    auto r_mid = MakePatternNode< EmbeddedCompareReplace<Scope> >( r_module, ls_module, lr_module ); // stuff, stuff
 
-    auto r_slave3 = MakePatternNode< SlaveSearchReplace<Statement> >( r_top_comp, s_gg, r_ret_comp );
+    auto r_slave3 = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
     
     // Master search - look for functions satisfying the construct limitation and get
@@ -562,9 +562,9 @@ GenerateStacks::GenerateStacks()
     s_and->conjuncts = ( s_top_comp, cs_stuff );
 
     // Master replace - insert index variable, inc and dec into function at top level
-    auto r_slave = MakePatternNode< SlaveSearchReplace<Statement> >( stuff, s_identifier, l_r_sub );
-    auto r_mid = MakePatternNode< SlaveCompareReplace<Statement> >( r_top_comp, stuff, r_slave );
-    auto r_slave3 = MakePatternNode< SlaveSearchReplace<Statement> >( r_mid, s_gg, r_ret_comp );
+    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Statement> >( stuff, s_identifier, l_r_sub );
+    auto r_mid = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_top_comp, stuff, r_slave );
+    auto r_slave3 = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_mid, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
     oinit->overlay = temp;//r_slave3; 
 
@@ -583,14 +583,14 @@ GenerateStacks::GenerateStacks()
     r_inc->operands = ( r_index_identifier );
     r_top_comp->statements = ( r_inc, top_pre );
 
-    // SlaveSearchReplace search to find automatic variables within the function
+    // EmbeddedSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
     overlay->through = s_instance;
     s_instance->identifier = s_identifier;
     s_instance->initialiser = MakePatternNode<Uninitialised>(); // can't handle initialisers!
     s_instance->type = MakePatternNode<Type>();
 
-    // SlaveSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
+    // EmbeddedSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
     r_instance->constancy = MakePatternNode<NonConst>();
     r_instance->initialiser = MakePatternNode<Uninitialised>();
     overlay->overlay = r_instance;
@@ -605,10 +605,10 @@ GenerateStacks::GenerateStacks()
     // Sub-slave replace with a subscript into the array
     l_r_sub->operands = ( r_identifier, r_index_identifier );
 
-    // SlaveSearchReplace to find early returns in the function
+    // EmbeddedSearchReplace to find early returns in the function
     s_gg->through = ret;
 
-    // SlaveSearchReplace replace with a decrement of the stack index coming before the return
+    // EmbeddedSearchReplace replace with a decrement of the stack index coming before the return
     //r_ret_comp->members = ( r_ret_decls );
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
@@ -651,12 +651,12 @@ MergeFunctions::MergeFunctions()
     
     mr_goto->destination = retaddr_id;
      
-    auto slavem = MakePatternNode< SlaveSearchReplace<Compound> >( func_stuff, ms_return, mr_goto );        
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( func_stuff, ms_return, mr_goto );        
     
     ls_call->callee = func_id;
     lr_goto->destination = r_label_id;
         
-    auto slavel = MakePatternNode< SlaveSearchReplace<Compound> >( r_thread_comp, ls_call, lr_goto );    
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_thread_comp, ls_call, lr_goto );    
     
     s_module->members = (members, thread, s_func);
     r_module->members = (members, thread);

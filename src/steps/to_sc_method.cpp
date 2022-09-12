@@ -165,10 +165,10 @@ ThreadToMethod::ThreadToMethod()
     
     or_return->return_value = or_retval;
     
-    auto slaveo = MakePatternNode< SlaveSearchReplace<Compound> >( loop_comp, os_continue, or_return);
-    auto slaven = MakePatternNode< SlaveSearchReplace<Compound> >( slaveo, ns_wait_delta, nr_nt_delta);
-    auto slavem = MakePatternNode< SlaveSearchReplace<Compound> >( slaven, ms_wait_static, mr_nt_static);
-    auto slavel = MakePatternNode< SlaveSearchReplace<Compound> >( slavem, ls_wait_dynamic, lr_nt_dynamic);
+    auto slaveo = MakePatternNode< EmbeddedSearchReplace<Compound> >( loop_comp, os_continue, or_return);
+    auto slaven = MakePatternNode< EmbeddedSearchReplace<Compound> >( slaveo, ns_wait_delta, nr_nt_delta);
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( slaven, ms_wait_static, mr_nt_static);
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Compound> >( slavem, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
@@ -236,12 +236,12 @@ ExplicitiseReturns::ExplicitiseReturns()
     mr_if->body = ms_affected;
     mr_if->else_body = MakePatternNode<Nop>();
     
-    auto slavem = MakePatternNode< SlaveSearchReplace<Compound> >( over_comp, m_comp );
+    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( over_comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
     
-    auto slavel = MakePatternNode< SlaveSearchReplace<Compound> >( slavem, ls_return, lr_assign);
+    auto slavel = MakePatternNode< EmbeddedSearchReplace<Compound> >( slavem, ls_return, lr_assign);
     
     s_all->conjuncts = (inst, s_stuff);
     inst->type = s_callable; // TODO when functions are sorted out, set return type to void

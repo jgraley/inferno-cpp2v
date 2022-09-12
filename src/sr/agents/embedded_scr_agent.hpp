@@ -1,5 +1,5 @@
-#ifndef SLAVE_AGENT_HPP
-#define SLAVE_AGENT_HPP
+#ifndef EMBEDDED_SCR_AGENT_HPP
+#define EMBEDDED_SCR_AGENT_HPP
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
@@ -35,7 +35,7 @@ public:
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
 	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
     virtual Block GetGraphBlockInfo() const;
-    virtual TreePtr<Node> EvolveIntoSlaveCompareReplace() = 0;
+    virtual TreePtr<Node> EvolveIntoEmbeddedCompareReplace() = 0;
 
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
@@ -58,7 +58,7 @@ public:
         return shared_from_this();
     }
     
-    // SlaveSearchReplace must be constructed using constructor
+    // EmbeddedSearchReplace must be constructed using constructor
     EmbeddedSCR( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
         through( t ),
         EmbeddedSCRAgent( sp, rp, is_search )
@@ -71,36 +71,36 @@ public:
         return &through;
     }
     
-    TreePtr<Node> EvolveIntoSlaveCompareReplace() override;
+    TreePtr<Node> EvolveIntoEmbeddedCompareReplace() override;
 };
 
 
 /// EmbeddedSCR that performs a seperate compare and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
-class SlaveCompareReplace : public EmbeddedSCR<PRE_RESTRICTION>
+class EmbeddedCompareReplace : public EmbeddedSCR<PRE_RESTRICTION>
 {
 public:
-    SlaveCompareReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, false ) {}      
-    SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+    EmbeddedCompareReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, false ) {}      
+    EmbeddedCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, false ) {}
 };
 
 
 /// EmbeddedSCR that performs a seperate search and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
-class SlaveSearchReplace : public EmbeddedSCR<PRE_RESTRICTION>
+class EmbeddedSearchReplace : public EmbeddedSCR<PRE_RESTRICTION>
 {
 public:
-    SlaveSearchReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, true ) {}      
-    SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+    EmbeddedSearchReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, true ) {}      
+    EmbeddedSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, true ) {}
 };
 
 
 template<class PRE_RESTRICTION>
-TreePtr<Node> EmbeddedSCR<PRE_RESTRICTION>::EvolveIntoSlaveCompareReplace()
+TreePtr<Node> EmbeddedSCR<PRE_RESTRICTION>::EvolveIntoEmbeddedCompareReplace()
 {
-    return MakePatternNode<SlaveCompareReplace<PRE_RESTRICTION>>( through, search_pattern, replace_pattern );
+    return MakePatternNode<EmbeddedCompareReplace<PRE_RESTRICTION>>( through, search_pattern, replace_pattern );
 }
 
 };

@@ -11,7 +11,7 @@ using namespace CPPTree;
 using namespace Steps;
 
 // Just an early test for slaves, not a valid transformation
-SlaveTest::SlaveTest()
+EmbeddedSCRTest::EmbeddedSCRTest()
 {
     auto s_for = MakePatternNode<For>();
     auto s_body = MakePatternNode<Statement>();
@@ -22,7 +22,7 @@ SlaveTest::SlaveTest()
     auto r_body = MakePatternNode<Statement>();
     auto ss_cont = MakePatternNode<Continue>();
     auto sr_break = MakePatternNode<Break>();
-    auto r_slave = MakePatternNode< SlaveCompareReplace<Statement> >( r_body, ss_cont, sr_break );
+    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_slave );
 
     Configure( SEARCH_REPLACE, s_for, r_comp );
@@ -54,7 +54,7 @@ struct Whenever : virtual Node
 };
 
 
-SlaveTest2::SlaveTest2() 
+EmbeddedSCRTest2::EmbeddedSCRTest2() 
 {    
     // Ambiguity with SOONER slave S/R: is sr keyed by r_slave
     // or master? Depends whether slave hits. See #370.
@@ -63,7 +63,7 @@ SlaveTest2::SlaveTest2()
     auto ss = MakePatternNode<Something>();
     auto sr = MakePatternNode<Something>();
     auto r_whenever = MakePatternNode<Whenever>();
-    auto r_slave = MakePatternNode< SlaveCompareReplace<Node> >( t, ss, sr );
+    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Node> >( t, ss, sr );
     auto s = MakePatternNode<Something>();
 
     r_whenever->members = (r_slave, sr);
@@ -72,7 +72,7 @@ SlaveTest2::SlaveTest2()
 }
 
 
-SlaveTest3::SlaveTest3() 
+EmbeddedSCRTest3::EmbeddedSCRTest3() 
 {    
     // In LATER slave S/R, r_whatever could invalidate r_slave2's root position
     // if it does eg builder stuff on the unwind. See #370, #378
@@ -80,12 +80,12 @@ SlaveTest3::SlaveTest3()
     auto ss = MakePatternNode<Something>();
     auto sr = MakePatternNode<Something>();
     auto r_whatever = MakePatternNode<Whatever>();
-    auto r_slave1 = MakePatternNode< SlaveCompareReplace<Node> >( r_whatever, ss, sr );
+    auto r_slave1 = MakePatternNode< EmbeddedCompareReplace<Node> >( r_whatever, ss, sr );
 
     auto s2s = MakePatternNode<Something>();
     auto s2r = MakePatternNode<Something>();
     auto r = MakePatternNode<Something>();
-    auto r_slave2 = MakePatternNode< SlaveCompareReplace<Node> >( r, s2s, s2r );
+    auto r_slave2 = MakePatternNode< EmbeddedCompareReplace<Node> >( r, s2s, s2r );
     r_whatever->child = r_slave2;
     
     Configure( COMPARE_REPLACE, r_slave1 );
