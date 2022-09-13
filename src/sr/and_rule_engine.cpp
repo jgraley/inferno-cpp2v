@@ -87,10 +87,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         parent_links_to_my_normal_agents[plink.GetChildAgent()].insert(plink);
     // my_normal_agents should be same set of agents as those reached by my_normal_links (uniquified)
     ASSERT( parent_links_to_my_normal_agents.size() == my_normal_agents.size() );
-    for( PatternLink plink : my_master_boundary_links )
-        parent_residual_links_to_master_boundary_agents[plink.GetChildAgent()].insert(plink);
-    // master_boundary_agents should be same set of agents as those reached by my_master_boundary_links (uniquified)
-    ASSERT( parent_residual_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
+    for( PatternLink plink : my_boundary_links )
+        parent_residual_links_to_boundary_agents[plink.GetChildAgent()].insert(plink);
+    // boundary_agents should be same set of agents as those reached by my_boundary_links (uniquified)
+    ASSERT( parent_residual_links_to_boundary_agents.size() == boundary_agents.size() );
         
     DetermineKeyers( base_plink, master_agents );
     DetermineResiduals( base_agent, master_agents );
@@ -98,10 +98,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // Turns out these two are the same
     my_normal_links_unique_by_agent = coupling_keyer_links_all;
 
-    master_boundary_keyer_links.clear();
+    boundary_keyer_links.clear();
     for( PatternLink plink : master_keyer_plinks )
-        if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
-            master_boundary_keyer_links.insert( plink );
+        if( boundary_agents.count(plink.GetChildAgent()) == 1 )
+            boundary_keyer_links.insert( plink );
         
     my_fixed_keyer_links = { base_plink };
     
@@ -117,9 +117,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     {        
         ASSERT( my_normal_agents.empty() );
         // Root link obviously isn't in my_normal_links because that's empty, 
-        // so it needs to be found in my_master_boundary_links
-        ASSERT( my_master_boundary_links.count(base_plink) == 1 )
-              ("\nmbrl:\n")(my_master_boundary_links);
+        // so it needs to be found in my_boundary_links
+        ASSERT( my_boundary_links.count(base_plink) == 1 )
+              ("\nmbrl:\n")(my_boundary_links);
     }
     else
     {
@@ -159,7 +159,7 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> know
     solver_holder = CreateSolverAndHolder( constraints_list, 
                                            ToVector(free_normal_links_ordered), 
                                            my_fixed_keyer_links,
-                                           master_boundary_keyer_links );    
+                                           boundary_keyer_links );    
                                     
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
@@ -193,7 +193,7 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
     
     // Note: here, we WILL see root if root is a master agent (i.e. trivial pattern)
     if( master_agents.count( agent ) )
-        my_master_boundary_links.insert( link );
+        my_boundary_links.insert( link );
 
     normal_and_boundary_links_preorder.push_back( link );    
 
@@ -205,7 +205,7 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
     if( master_agents.count( agent ) > 0 )
     {
         // At master boundary so don't recurse
-        master_boundary_agents.insert( agent );
+        boundary_agents.insert( agent );
     } 
     else
     {
@@ -318,7 +318,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
     // Where we have a link to a master agent (= master boundary link)
     // it will be residual because master always keys. Agent needs to 
     // know because we'll query it, so tell it.
-    for( PatternLink master_boundary_plink : my_master_boundary_links )
+    for( PatternLink master_boundary_plink : my_boundary_links )
     {
         ASSERT( master_boundary_plink );
         Agent *agent = master_boundary_plink.GetChildAgent();
@@ -399,18 +399,18 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
 {
 #ifdef CHECK_FOR_MASTER_KEYERS
     // First do some checking
-    for( PatternLink residual_plink : my_master_boundary_links )
+    for( PatternLink residual_plink : my_boundary_links )
     {
         Agent *agent = residual_plink.GetChildAgent();
         bool found_keyer = false;
-        for( PatternLink keyer_plink : master_boundary_keyer_links )
+        for( PatternLink keyer_plink : boundary_keyer_links )
             if( keyer_plink.GetChildAgent()==agent )
                 found_keyer = true;
         ASSERT( found_keyer )("Master boundary residual plink ")(residual_plink)(" has no keyer\n");
     }
 #endif
     
-    for( PatternLink keyer_plink : master_boundary_keyer_links )
+    for( PatternLink keyer_plink : boundary_keyer_links )
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
 		SYM::Over<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
@@ -451,7 +451,7 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
         current_solve_plinks.insert( link );
     }
     
-    for( PatternLink link : master_boundary_keyer_links )
+    for( PatternLink link : boundary_keyer_links )
         current_solve_plinks.insert( link );    
 }
 
@@ -534,22 +534,22 @@ void AndRuleEngine::Plan::Dump()
           Trace(my_evaluator_abnormal_engines) },
         { "my_multiplicity_engines", 
           Trace(my_multiplicity_engines) },
-        { "master_boundary_agents", 
-          Trace(master_boundary_agents) },
+        { "boundary_agents", 
+          Trace(boundary_agents) },
         { "coupling_residual_links", 
           Trace(coupling_residual_links) },
         { "coupling_keyer_links_all", 
           Trace(coupling_keyer_links_all) },
-        { "my_master_boundary_links", 
-          Trace(my_master_boundary_links) },
-        { "master_boundary_keyer_links", 
-          Trace(master_boundary_keyer_links) },
+        { "my_boundary_links", 
+          Trace(my_boundary_links) },
+        { "boundary_keyer_links", 
+          Trace(boundary_keyer_links) },
         { "my_fixed_keyer_links",
           Trace(my_fixed_keyer_links) },  
         { "parent_links_to_my_normal_agents", 
           Trace(parent_links_to_my_normal_agents) },
-        { "parent_residual_links_to_master_boundary_agents",
-          Trace(parent_residual_links_to_master_boundary_agents) },
+        { "parent_residual_links_to_boundary_agents",
+          Trace(parent_residual_links_to_boundary_agents) },
         { "normal_and_boundary_links_preorder", 
           Trace(normal_and_boundary_links_preorder) },
         { "free_normal_links_ordered",
@@ -579,7 +579,7 @@ void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
     SolutionMap master_and_base_links;
-    for( PatternLink link : plan.master_boundary_keyer_links )
+    for( PatternLink link : plan.boundary_keyer_links )
         master_and_base_links[link] = master_solution->at(link);
     for( PatternLink link : plan.my_fixed_keyer_links )
         master_and_base_links[link] = fixes.at(link);
@@ -918,8 +918,8 @@ void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) c
 
 void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) const
 {
-    TRACE(" parent_residual_links_to_master_boundary_agents ")( plan.parent_residual_links_to_master_boundary_agents )("\n");
-    TRACE(" master_boundary_agents ")( plan.master_boundary_agents )("\n");
+    TRACE(" parent_residual_links_to_boundary_agents ")( plan.parent_residual_links_to_boundary_agents )("\n");
+    TRACE(" boundary_agents ")( plan.boundary_agents )("\n");
 	TRACE("Specifying figure nodes for ")(*this)("\n");
 	Graph::Figure figure;
 	figure.id = GetGraphId();
@@ -957,9 +957,9 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                                             plan.coupling_keyer_links_all,
                                             plan.coupling_residual_links );
 	TRACE("   Exterior (master boundary agents/links):\n");    
-    figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_master_boundary_agents,
-                                            plan.master_boundary_keyer_links, // Won't show up as not in p_r_l_t_m_b_a, but could generate invisible nodes and links?
-                                            plan.my_master_boundary_links );       
+    figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_boundary_agents,
+                                            plan.boundary_keyer_links, // Won't show up as not in p_r_l_t_m_b_a, but could generate invisible nodes and links?
+                                            plan.my_boundary_links );       
         
 	auto subordinates_lambda = [&](const map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
     {

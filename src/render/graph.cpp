@@ -96,7 +96,7 @@ void Graph::GenerateGraph( const Figure &figure )
     // Compile handy "all"s: Figure::Agents and Graphables
     list<const Graphable *> interior_gs, exterior_gs, all_gs;
     list<Figure::Agent> all_agents = figure.interior_agents + figure.exterior_agents;
-    for( auto engine_agent : figure.subordinate_engines_and_root_agents )
+    for( auto engine_agent : figure.subordinate_engines_and_base_agents )
         all_agents.push_back(engine_agent.second);      
     for( const Figure::Agent &agent : all_agents )
         all_gs.push_back(agent.g);
@@ -127,7 +127,7 @@ void Graph::GenerateGraph( const Figure &figure )
     // agents (invisible): get blocks for them, remove links to graphables 
     // not in this SUB-REGION, make them invisible.    
     map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
-    for( auto engine_agent : figure.subordinate_engines_and_root_agents )
+    for( auto engine_agent : figure.subordinate_engines_and_base_agents )
     {
         list<const Graphable *> sub_gs = { engine_agent.second.g };
 
@@ -197,18 +197,18 @@ void Graph::GenerateGraph( const Figure &figure )
                                              Graphable::IN_COMPARE_AND_REPLACE };
     TrimLinksByPhase( exterior_blocks, phases_to_keep );
     TrimLinksByPhase( interior_blocks, phases_to_keep );
-    for( auto p : figure.subordinate_engines_and_root_agents )
+    for( auto p : figure.subordinate_engines_and_base_agents )
         TrimLinksByPhase( subordinate_blocks[p.first], phases_to_keep );
 
     // Post-process blocks
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
-    for( auto p : figure.subordinate_engines_and_root_agents ) 
+    for( auto p : figure.subordinate_engines_and_base_agents ) 
 		PostProcessBlocks( subordinate_blocks[p.first] );
     
     // Check for broken links (no block with matching child id)
     list<MyBlock> all_blocks = interior_blocks + exterior_blocks;
-    for( auto p : figure.subordinate_engines_and_root_agents )
+    for( auto p : figure.subordinate_engines_and_base_agents )
         all_blocks = all_blocks + subordinate_blocks.at(p.first);
     // Links must be checked for a whole figure because figures dont link to each other
     CheckLinks(all_blocks);    
@@ -223,7 +223,7 @@ void Graph::GenerateGraph( const Figure &figure )
     interior_region.background_colour = ReadArgs::graph_dark ? "gray15" : "antiquewhite2";
     string s_interior = DoBlocks(interior_blocks, interior_region); // Interior blocks
 
-    for( auto p : figure.subordinate_engines_and_root_agents )
+    for( auto p : figure.subordinate_engines_and_base_agents )
     {
 		RegionAppearance subordinate_region = interior_region;
 		subordinate_region.title = p.first->GetGraphId();

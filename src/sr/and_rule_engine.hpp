@@ -110,14 +110,14 @@ public:
         map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        set<Agent *> master_boundary_agents;
+        set<Agent *> boundary_agents;
         set<PatternLink> coupling_residual_links;
         set<PatternLink> coupling_keyer_links_all; // All keyers
-        set<PatternLink> my_master_boundary_links; // These are ALL residuals
-        set<PatternLink> master_boundary_keyer_links; // Keyers linked from master
+        set<PatternLink> my_boundary_links; // These are ALL residuals
+        set<PatternLink> boundary_keyer_links; // Keyers linked from master
         set<PatternLink> my_fixed_keyer_links; 
         map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
-        map< Agent *, set<PatternLink> > parent_residual_links_to_master_boundary_agents;
+        map< Agent *, set<PatternLink> > parent_residual_links_to_boundary_agents;
         list<PatternLink> free_normal_links_ordered;
         set<PatternLink> current_solve_plinks;
         set< shared_ptr<SYM::BooleanExpression> > expressions_from_agents;

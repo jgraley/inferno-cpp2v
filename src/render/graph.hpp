@@ -69,7 +69,7 @@ public:
         };
 		list<Agent> interior_agents;
 		list<Agent> exterior_agents;
-        list< pair<GraphIdable *, Agent> > subordinate_engines_and_root_agents;
+        list< pair<GraphIdable *, Agent> > subordinate_engines_and_base_agents;
 	};
 
     Graph( string of, string title );
