@@ -81,8 +81,8 @@ public:
                                    set<PatternLink> *my_normal_links,
                                    PatternLink link );
         void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                       const set<PatternLink> &surrounding_plinks, 
-                                       const set<PatternLink> &surrounding_keyer_plinks );
+                                       const set<PatternLink> &subordinate_surrounding_plinks, 
+                                       const set<PatternLink> &subordinate_surrounding_keyer_plinks );
         void CreateMyFullSymbolics();
         void CreateSurroundingCouplingSymbolics();
 

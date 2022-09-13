@@ -352,8 +352,8 @@ void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents,
 
 
 void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                                    const set<PatternLink> &surrounding_plinks, 
-                                                    const set<PatternLink> &surrounding_keyer_plinks )
+                                                    const set<PatternLink> &subordinate_surrounding_plinks, 
+                                                    const set<PatternLink> &subordinate_surrounding_keyer_plinks )
 {
     for( PatternLink plink : my_normal_links_unique_by_agent )
     {
@@ -368,17 +368,23 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
         {        
             if( pq->GetEvaluator() )
             {
-                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks, surrounding_keyer_plinks );  
+                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
+                                                                                  subordinate_surrounding_plinks, 
+                                                                                  subordinate_surrounding_keyer_plinks );  
             }
             else
             {
-                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks, surrounding_keyer_plinks );  
+                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
+                                                                             subordinate_surrounding_plinks, 
+                                                                             subordinate_surrounding_keyer_plinks );  
             }
         }
         
         for( PatternLink link : pq->GetMultiplicityLinks() )
         {
-            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, surrounding_plinks, surrounding_keyer_plinks );  
+            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, 
+                                                                        subordinate_surrounding_plinks, 
+                                                                        subordinate_surrounding_keyer_plinks );  
         }
     }
 }
