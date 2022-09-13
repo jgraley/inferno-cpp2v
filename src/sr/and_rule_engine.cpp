@@ -30,7 +30,7 @@
 
 //#define NLQ_TEST
 
-#define CHECK_FOR_MASTER_KEYERS
+#define CHECK_FOR_SURROUNDING_KEYERS
 
 // Enabling this is making the Karnaugh map finder slow down #586
 //#define EXTRA_CONDENSED_CONSTRINTS
@@ -38,9 +38,9 @@
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( PatternLink base_plink, 
-                              const set<PatternLink> &master_plinks,
-                              const set<PatternLink> &master_keyer_plinks ) :
-    plan( this, base_plink, master_plinks, master_keyer_plinks )
+                              const set<PatternLink> &surrounding_plinks,
+                              const set<PatternLink> &surrounding_keyer_plinks ) :
+    plan( this, base_plink, surrounding_plinks, surrounding_keyer_plinks )
 {
 }    
 
@@ -52,35 +52,35 @@ AndRuleEngine::~AndRuleEngine()
  
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
                            PatternLink base_plink_, 
-                           const set<PatternLink> &master_plinks_,
-                           const set<PatternLink> &master_keyer_plinks_ ) :
+                           const set<PatternLink> &surrounding_plinks_,
+                           const set<PatternLink> &surrounding_keyer_plinks_ ) :
     algo( algo_ ),
     base_plink( base_plink_ ),
     base_pattern( base_plink.GetPattern() ),
     base_agent( base_plink.GetChildAgent() ),
-    master_plinks( master_plinks_ ),
-    master_keyer_plinks( master_keyer_plinks_ )
+    surrounding_plinks( surrounding_plinks_ ),
+    surrounding_keyer_plinks( surrounding_keyer_plinks_ )
 {    
     INDENT("P");
     TRACE(algo->GetTrace())(" planning\n");
     
     // ------------------ Fill in the plan ---------------------
-    master_agents.clear();
-    for( PatternLink plink : master_plinks )
-        master_agents.insert( plink.GetChildAgent() );
+    surrounding_agents.clear();
+    for( PatternLink plink : surrounding_plinks )
+        surrounding_agents.insert( plink.GetChildAgent() );
 
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
     PopulateNormalAgents( &normal_agents, &normal_links, base_plink );    
     for( PatternLink plink : normal_links )
-        if( master_agents.count( plink.GetChildAgent() ) == 0 )
+        if( surrounding_agents.count( plink.GetChildAgent() ) == 0 )
             my_normal_links.insert( plink );
             
-    my_normal_agents = DifferenceOf( normal_agents, master_agents );       
+    my_normal_agents = DifferenceOf( normal_agents, surrounding_agents );       
     reached_agents.clear();
     reached_links.clear();    
-    PopulateMasterBoundaryStuff( base_plink, 
-                                 master_agents );
+    PopulateBoundaryStuff( base_plink, 
+                           surrounding_agents );
 
     // Collect together the parent links to agents
     for( PatternLink plink : my_normal_links )
@@ -92,14 +92,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // boundary_agents should be same set of agents as those reached by my_boundary_links (uniquified)
     ASSERT( parent_residual_links_to_boundary_agents.size() == boundary_agents.size() );
         
-    DetermineKeyers( base_plink, master_agents );
-    DetermineResiduals( base_agent, master_agents );
+    DetermineKeyers( base_plink, surrounding_agents );
+    DetermineResiduals( base_agent, surrounding_agents );
     
     // Turns out these two are the same
     my_normal_links_unique_by_agent = coupling_keyer_links_all;
 
     boundary_keyer_links.clear();
-    for( PatternLink plink : master_keyer_plinks )
+    for( PatternLink plink : surrounding_keyer_plinks )
         if( boundary_agents.count(plink.GetChildAgent()) == 1 )
             boundary_keyer_links.insert( plink );
         
@@ -132,16 +132,16 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // ------------------ Set up Symbolics ---------------------
     DeduceCSPVariables(); 
     CreateMyFullSymbolics();
-    CreateMasterCouplingSymbolics();    
+    CreateSurroundingCouplingSymbolics();    
     SymbolicRewrites();
     
     // ------------------ Configure subordinates ---------------------
     // Do this last to keep all the rest of the planning trace/dumps
     // all together in the same pre-order sequence instead of mixed pre 
     // and post order
-    set<PatternLink> surrounding_plinks = UnionOf( my_normal_links, master_plinks );         
-    set<PatternLink> surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, master_keyer_plinks );         
-    CreateSubordniateEngines( my_normal_agents, surrounding_plinks, surrounding_keyer_plinks );          
+    set<PatternLink> subordinate_surrounding_plinks = UnionOf( my_normal_links, surrounding_plinks );         
+    set<PatternLink> subordinate_surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, surrounding_keyer_plinks );         
+    CreateSubordniateEngines( my_normal_agents, subordinate_surrounding_plinks, subordinate_surrounding_keyer_plinks );          
 }
 
 
@@ -153,8 +153,8 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> know
     list< shared_ptr<CSP::Constraint> > constraints_list;
     CreateMyConstraints(constraints_list, knowledge_);
     
-    // Master boundary links may not be in our domain if eg they got 
-    // deleted by master replace. So base_plink is the only one that
+    // Boundary links may not be in our domain if eg they got 
+    // deleted by the enclosing replace. So base_plink is the only one that
     // we can guarantee will be in the domain.
     solver_holder = CreateSolverAndHolder( constraints_list, 
                                            ToVector(free_normal_links_ordered), 
@@ -176,12 +176,12 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> know
 }
 
 
-void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
-                                                       const set<Agent *> &master_agents )
+void AndRuleEngine::Plan::PopulateBoundaryStuff( PatternLink link,
+                                                 const set<Agent *> &surrounding_agents )
 {
-    // Definition: it's a master boundary link/agent if:
-    // 1. It's a master agent
-    // 2. It's not the child of a master agent (we don't recurse on them)
+    // Definition: it's a boundary link/agent if:
+    // 1. It's a surrounding agent
+    // 2. It's not the child of a surrounding agent (we don't recurse on them)
     // See #125
     
     if( reached_links.count(link) > 0 )    
@@ -191,8 +191,8 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
 
     Agent *agent = link.GetChildAgent();
     
-    // Note: here, we WILL see root if root is a master agent (i.e. trivial pattern)
-    if( master_agents.count( agent ) )
+    // Note: here, we WILL see root if root is a surrounding agent (i.e. trivial pattern)
+    if( surrounding_agents.count( agent ) )
         my_boundary_links.insert( link );
 
     normal_and_boundary_links_preorder.push_back( link );    
@@ -202,17 +202,17 @@ void AndRuleEngine::Plan::PopulateMasterBoundaryStuff( PatternLink link,
     reached_agents.insert(agent);
     // ------------ Now unique by agent (stronger) -------------
 
-    if( master_agents.count( agent ) > 0 )
+    if( surrounding_agents.count( agent ) > 0 )
     {
-        // At master boundary so don't recurse
+        // At boundary so don't recurse
         boundary_agents.insert( agent );
     } 
     else
     {
-        // Not yet at master boundary so recurse
+        // Not yet at boundary so recurse
         shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
         for( PatternLink link : pq->GetNormalLinks() )
-            PopulateMasterBoundaryStuff( link, master_agents );        
+            PopulateBoundaryStuff( link, surrounding_agents );        
     }
 }
 
@@ -256,8 +256,8 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
     set<Agent *> my_disjunction_agents;
     DetermineKeyersModuloDisjunction( plink, &senior_agents, &my_disjunction_agents );
     // After this:
-    // - my_master_agents has union of master_agents and all the identified keyed agents
-    // - my_match_any_agents has the Disjunction agents that we saw, BUT SKIPPED
+    // - senior_agents has union of surrounding_agents and all the identified keyed agents
+    // - my_disjunction_agents has the Disjunction agents that we saw, BUT SKIPPED
     
     // Now do all the links under the Disjunction nodes' links. Keying is allowed in each
     // of these junior regions individually, but no cross-keying is allowed if not keyed already.
@@ -275,7 +275,7 @@ void AndRuleEngine::Plan::DetermineKeyers( PatternLink plink,
         
         
 void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
-                                              set<Agent *> master_agents ) 
+                                              set<Agent *> surrounding_agents ) 
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     for( PatternLink link : pq->GetNormalLinks() )
@@ -294,7 +294,7 @@ void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
             continue; // Coupling residuals do not recurse (keyer does that and it only needs to be done once)
         }
         
-        DetermineResiduals( link.GetChildAgent(), master_agents );        
+        DetermineResiduals( link.GetChildAgent(), surrounding_agents );        
     }
 }
 
@@ -315,8 +315,8 @@ void AndRuleEngine::Plan::ConfigureAgents()
     }
 
     // New coupling planning
-    // Where we have a link to a master agent (= master boundary link)
-    // it will be residual because master always keys. Agent needs to 
+    // Where we have a link to a surrounding agent (= boundary link)
+    // it will be residual because surrounding engine always keys. Agent needs to 
     // know because we'll query it, so tell it.
     for( PatternLink boundary_plink : my_boundary_links )
     {
@@ -395,9 +395,9 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
 }
 
 
-void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
+void AndRuleEngine::Plan::CreateSurroundingCouplingSymbolics()
 {
-#ifdef CHECK_FOR_MASTER_KEYERS
+#ifdef CHECK_FOR_SURROUNDING_KEYERS
     // First do some checking
     for( PatternLink residual_plink : my_boundary_links )
     {
@@ -406,7 +406,7 @@ void AndRuleEngine::Plan::CreateMasterCouplingSymbolics()
         for( PatternLink keyer_plink : boundary_keyer_links )
             if( keyer_plink.GetChildAgent()==agent )
                 found_keyer = true;
-        ASSERT( found_keyer )("Master boundary residual plink ")(residual_plink)(" has no keyer\n");
+        ASSERT( found_keyer )("Boundary residual plink ")(residual_plink)(" has no keyer\n");
     }
 #endif
     
@@ -514,12 +514,12 @@ void AndRuleEngine::Plan::Dump()
           Trace(base_pattern) },
         { "base_agent", 
           Trace(base_agent) },
-        { "master_plinks", 
-          Trace(master_plinks) },
-        { "master_keyer_plinks", 
-          Trace(master_keyer_plinks) },
-        { "master_agents", 
-          Trace(master_agents) },
+        { "surrounding_plinks", 
+          Trace(surrounding_plinks) },
+        { "surrounding_keyer_plinks", 
+          Trace(surrounding_keyer_plinks) },
+        { "surrounding_agents", 
+          Trace(surrounding_agents) },
         { "my_normal_agents", 
           Trace(my_normal_agents) },
         { "my_normal_links", 
@@ -574,19 +574,19 @@ void AndRuleEngine::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge 
 }
 
 
-void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *master_solution)
+void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *surrounding_solution)
 {    
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
-    SolutionMap master_and_base_links;
+    SolutionMap surrounding_and_base_links;
     for( PatternLink link : plan.boundary_keyer_links )
-        master_and_base_links[link] = master_solution->at(link);
+        surrounding_and_base_links[link] = surrounding_solution->at(link);
     for( PatternLink link : plan.my_fixed_keyer_links )
-        master_and_base_links[link] = fixes.at(link);
+        surrounding_and_base_links[link] = fixes.at(link);
     
     TRACE("Starting solver\n");
     ASSERT( plan.solver_holder );
-    plan.solver_holder->Start( master_and_base_links, knowledge.get() );
+    plan.solver_holder->Start( surrounding_and_base_links, knowledge.get() );
 }
 
 
@@ -764,10 +764,10 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 }      
 
 
-void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const SolutionMap *master_solution )
+void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const SolutionMap *surrounding_solution )
 {
     INDENT("R");
-    const SolutionMap solution_for_subordinates = UnionOfSolo( *master_solution, basic_solution );   
+    const SolutionMap solution_for_subordinates = UnionOfSolo( *surrounding_solution, basic_solution );   
     TRACE("---------------- Regeneration ----------------\n");      
     //TRACEC("Subordinate keys ")(keys_for_subordinates)("\n");       
     TRACEC("Basic solution ")(basic_solution)("\n");    
@@ -784,7 +784,7 @@ void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const Solutio
 
 
 SolutionMap AndRuleEngine::Compare( XLink base_xlink,
-                                    const SolutionMap *master_solution )
+                                    const SolutionMap *surrounding_solution )
 {
     INDENT("C");
     ASSERT( base_xlink );            
@@ -799,7 +799,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     SolutionMap my_fixes = {{plan.base_plink, base_xlink}};
     
     // Start the CSP solver
-    StartCSPSolver( my_fixes, master_solution );
+    StartCSPSolver( my_fixes, surrounding_solution );
            
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
@@ -815,7 +815,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
         basic_solution = GetNextCSPSolution();        
 
         // Merge my fixes into the solution (but we're not expected to merge
-        // in master: caller can do that, if required).
+        // in surrounding solution: caller can do that, if required).
         basic_solution = UnionOfSolo( basic_solution, my_fixes );
 
         try
@@ -825,7 +825,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
             {            
                 ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
             }
-            RegenerationPass( basic_solution, master_solution );
+            RegenerationPass( basic_solution, surrounding_solution );
         }
         catch( const ::Mismatch &e )
         {                
@@ -843,7 +843,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 
 
 // This one operates from base for a stand-alone compare operation and
-// no master keys.
+// no surrounding keys.
 SolutionMap AndRuleEngine::Compare( TreePtr<Node> base_xnode )
 {
     SolutionMap empty_solution;
@@ -956,9 +956,9 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
     figure.interior_agents = agents_lambda( plan.parent_links_to_my_normal_agents,
                                             plan.coupling_keyer_links_all,
                                             plan.coupling_residual_links );
-	TRACE("   Exterior (master boundary agents/links):\n");    
+	TRACE("   Exterior (boundary agents/links):\n");    
     figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_boundary_agents,
-                                            plan.boundary_keyer_links, // Won't show up as not in p_r_l_t_m_b_a, but could generate invisible nodes and links?
+                                            plan.boundary_keyer_links, // Won't show up as not in p_r_l_t_b_a, but could generate invisible nodes and links?
                                             plan.my_boundary_links );       
         
 	auto subordinates_lambda = [&](const map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )

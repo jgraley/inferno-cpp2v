@@ -55,8 +55,8 @@ public:
     };
     
     AndRuleEngine( PatternLink base_plink, 
-                   const set<PatternLink> &master_plinks,
-                   const set<PatternLink> &master_keyer_plinks );
+                   const set<PatternLink> &surrounding_plinks,
+                   const set<PatternLink> &surrounding_keyer_plinks );
     
     ~AndRuleEngine();
     
@@ -64,18 +64,18 @@ public:
     {
         Plan( AndRuleEngine *algo,  
               PatternLink base_plink, 
-              const set<PatternLink> &master_plinks,
-              const set<PatternLink> &master_keyer_plinks );
+              const set<PatternLink> &surrounding_plinks,
+              const set<PatternLink> &surrounding_keyer_plinks );
         void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
-        void PopulateMasterBoundaryStuff( PatternLink link,
-                                          const set<Agent *> &master_agents );
+        void PopulateBoundaryStuff( PatternLink link,
+                                    const set<Agent *> &surrounding_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
                                                set<Agent *> *senior_agents,
                                                set<Agent *> *disjunction_agents );
         void DetermineKeyers( PatternLink plink,
-                              set<Agent *> master_agents );
+                              set<Agent *> surrounding_agents );
         void DetermineResiduals( Agent *agent,
-                                 set<Agent *> master_agents );
+                                 set<Agent *> surrounding_agents );
         void ConfigureAgents();
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
                                    set<PatternLink> *my_normal_links,
@@ -84,7 +84,7 @@ public:
                                        const set<PatternLink> &surrounding_plinks, 
                                        const set<PatternLink> &surrounding_keyer_plinks );
         void CreateMyFullSymbolics();
-        void CreateMasterCouplingSymbolics();
+        void CreateSurroundingCouplingSymbolics();
 
         void SymbolicRewrites();
 
@@ -100,9 +100,9 @@ public:
         const PatternLink base_plink;
         const TreePtr<Node> base_pattern;
         Agent * const base_agent;
-        const set<PatternLink> master_plinks;
-        const set<PatternLink> master_keyer_plinks;
-        set<Agent *> master_agents;
+        const set<PatternLink> surrounding_plinks;
+        const set<PatternLink> surrounding_keyer_plinks;
+        set<Agent *> surrounding_agents;
         set<Agent *> my_normal_agents;   
         set<PatternLink> my_normal_links;
         set<PatternLink> my_normal_links_unique_by_agent;
@@ -114,7 +114,7 @@ public:
         set<PatternLink> coupling_residual_links;
         set<PatternLink> coupling_keyer_links_all; // All keyers
         set<PatternLink> my_boundary_links; // These are ALL residuals
-        set<PatternLink> boundary_keyer_links; // Keyers linked from master
+        set<PatternLink> boundary_keyer_links; // Keyers linked from surroundings
         set<PatternLink> my_fixed_keyer_links; 
         map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
         map< Agent *, set<PatternLink> > parent_residual_links_to_boundary_agents;
@@ -137,7 +137,7 @@ public:
     
 private:        
     void StartCSPSolver( const SolutionMap &fixes,
-                         const SolutionMap *master_solution );
+                         const SolutionMap *surrounding_solution );
     SolutionMap GetNextCSPSolution();
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
@@ -151,11 +151,11 @@ private:
                                 SolutionMap &basic_solution,
                                 const SolutionMap &solution_for_subordinates );
     void RegenerationPass( SolutionMap &basic_solution,
-                           const SolutionMap *master_solution );
+                           const SolutionMap *surrounding_solution );
     
 public:
     SolutionMap Compare( XLink base_xlink,
-                         const SolutionMap *master_solution );
+                         const SolutionMap *surrounding_solution );
     SolutionMap Compare( TreePtr<Node> base_xnode );
 
     const set<Agent *> &GetKeyedAgents() const;
