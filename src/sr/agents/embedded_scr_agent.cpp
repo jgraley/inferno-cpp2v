@@ -15,7 +15,7 @@ EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_
 
 shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
 	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }

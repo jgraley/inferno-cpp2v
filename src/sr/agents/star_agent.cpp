@@ -11,7 +11,7 @@ using namespace SYM;
 
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
     if( *GetRestriction() )
     {
         pq->RegisterMultiplicityLink( PatternLink(this, GetRestriction()) );

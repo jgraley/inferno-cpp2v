@@ -16,7 +16,7 @@ using namespace SYM;
 
 shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
     
 	pq->RegisterDecision( false ); // Exclusive, please.
 	pq->RegisterNormalLink( PatternLink(this, &terminus) );

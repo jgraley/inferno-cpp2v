@@ -22,7 +22,7 @@ void DisjunctionAgent::SCRConfigure( const SCREngine *e,
 
 shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
     pq->RegisterDecision(false); // Exclusive, please
     for( const TreePtrInterface &p : GetDisjuncts() )                 
 	    pq->RegisterNormalLink( PatternLink(this, &p) );    

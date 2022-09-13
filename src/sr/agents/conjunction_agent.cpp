@@ -7,7 +7,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
     for( const TreePtrInterface &p : GetConjuncts() )                 
 	    pq->RegisterNormalLink( PatternLink(this, &p) );
         

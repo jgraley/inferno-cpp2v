@@ -7,7 +7,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
 	pq->RegisterNormalLink( PatternLink(this, &pattern) );
     return pq;
 }
@@ -24,14 +24,14 @@ LocatedLink TransformOfAgent::RunTeleportQuery( const TheKnowledge &knowledge, X
     if( keyer_xlink == XLink::MMAX_Link )
          return LocatedLink(); 
          
-    TreePtr<Node> base_x = keyer_xlink.GetChildX();
+    TreePtr<Node> keyer_x = keyer_xlink.GetChildX();
 
     try
     {
-		TreePtr<Node> trans_x = (*transformation)( knowledge, base_x );      
+		TreePtr<Node> trans_x = (*transformation)( knowledge, keyer_x );      
 		if( trans_x )
 		{
-			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(base_x)("\n");             
+			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(keyer_x)("\n");             
 			XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
 			return LocatedLink(PatternLink(this, &pattern), tp_xlink);
 		}

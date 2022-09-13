@@ -42,6 +42,6 @@ SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryM
 
 shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
 { 
-    return make_shared<PatternQuery>(this);
+    return make_shared<PatternQuery>();
 }
 

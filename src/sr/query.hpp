@@ -20,7 +20,7 @@ class Agent;
 class PatternQuery 
 {
 public:    
-    PatternQuery( const Agent *base_agent );
+    PatternQuery();
     struct Decision
     {
         bool inclusive; // If true, include "end" as a possible choice
@@ -48,12 +48,9 @@ public:
 
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
-    const Agent *GetBaseAgent() const { return base_agent; }
-
 private:
-    const Agent *base_agent;
     Decisions decisions; // ha ha!
-    Links normal_links; 
+    Links normal_links;
     Links abnormal_links; 
     Links multiplicity_links; 
     shared_ptr<BooleanEvaluator> evaluator;
@@ -193,11 +190,9 @@ public:
     void Invalidate( int bc );
     void SetChoice( int bc, Choice newc );
     void PushBackChoice( Choice newc );    
-    const Agent *GetBaseAgent() const { return base_agent; }
     string GetTrace() const;    
     
 private: friend class Conjecture;
-    const Agent *base_agent;
     Links normal_links; 
     Links abnormal_links; 
     Links multiplicity_links; 

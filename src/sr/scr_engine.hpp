@@ -81,7 +81,7 @@ private:
                                CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( set<PatternLink> &visible, 
                           list<PatternLink> *visible_postorder,
-                          PatternLink base_plink, 
+                          PatternLink plink, 
                           Agent::Path path ) const;
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor

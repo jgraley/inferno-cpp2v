@@ -135,19 +135,19 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks,
 
 void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
                                    list<PatternLink> *visible_postorder, // optional
-                                   PatternLink base_plink, 
+                                   PatternLink plink, 
                                    Agent::Path path ) const
 {
-    visible.insert( base_plink );    
+    visible.insert( plink );    
     
     // Gee, I sure hope recovers children in the same order as BuildReplaceImpl()    
-    list<PatternLink> plinks = base_plink.GetChildAgent()->GetVisibleChildren(path); 
+    list<PatternLink> visible_child_plinks = plink.GetChildAgent()->GetVisibleChildren(path); 
     
-    for( PatternLink plink : plinks )
-        WalkVisible( visible, visible_postorder, plink, path );    
+    for( PatternLink visible_child_plink : visible_child_plinks )
+        WalkVisible( visible, visible_postorder, visible_child_plink, path );    
 
     if( visible_postorder )
-        visible_postorder->push_back( base_plink );
+        visible_postorder->push_back( plink );
 }
 
 

@@ -10,7 +10,7 @@ using namespace SYM;
 
 shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
     pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }

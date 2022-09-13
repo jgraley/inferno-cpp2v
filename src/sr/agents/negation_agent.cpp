@@ -11,7 +11,7 @@ using namespace SYM;
 
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
 	pq->RegisterAbnormalLink( PatternLink(this, GetNegand()) );
     
     auto evaluator = make_shared<BooleanEvaluator>( [this](list<bool> inputs) -> bool

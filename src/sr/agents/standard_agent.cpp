@@ -165,7 +165,7 @@ string StandardAgent::Plan::GetTrace() const
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     // Clear it just in case
-    auto pattern_query = make_shared<PatternQuery>(this);
+    auto pattern_query = make_shared<PatternQuery>();
 
     // Note on the order of checks: We seem to have to register the collection's
     // link before the sequences' otherwise LoopRotation becaomes very slow.

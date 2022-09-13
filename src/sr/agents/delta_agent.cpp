@@ -7,7 +7,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
 	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }

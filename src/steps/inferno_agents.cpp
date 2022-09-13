@@ -228,7 +228,7 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
 
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>(this);
+    auto pq = make_shared<PatternQuery>();
 	pq->RegisterNormalLink( PatternLink(this, &terminus) );
 	if( depth )
 		pq->RegisterNormalLink( PatternLink(this, &depth) ); // local

@@ -10,8 +10,7 @@ using namespace SR;
 
 //////////////////////////// PatternQuery ///////////////////////////////
 
-PatternQuery::PatternQuery( const Agent *base_agent_ ) :
-    base_agent( base_agent_ )
+PatternQuery::PatternQuery()
 {
 }
  
@@ -134,7 +133,6 @@ string DecidedQuery::GetTrace() const
 
 
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
-    base_agent( pq->GetBaseAgent() ),
     decisions( pq->GetDecisions().size() ),
     next_decision( decisions.begin() ), 
     choices( pq->GetDecisions().size() ),
