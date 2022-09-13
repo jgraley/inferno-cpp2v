@@ -29,14 +29,14 @@ public:
 	};
 
 public:
-    Conjecture( set<Agent *> my_agents, const Agent *root_agent );
+    Conjecture( set<Agent *> my_agents, const Agent *base_agent );
     Conjecture( const Agent *agent, shared_ptr<DecidedQuery> query = nullptr );
     
     ~Conjecture();
 
     const struct Plan
     {
-        Plan( set<Agent *> my_agents, const Agent *root_agent );
+        Plan( set<Agent *> my_agents, const Agent *base_agent );
         Plan( const Agent *agent, shared_ptr<DecidedQuery> query = nullptr );
         void RecordWalk( AgentRecords::iterator rit );
         

@@ -97,9 +97,9 @@ private:
         VNSequence *vn_sequence;
         shared_ptr<const TheKnowledge> knowledge;
         const CompareReplace *overall_master_ptr;
-        TreePtr<Node> root_pattern;
-        PatternLink root_plink;
-        Agent *root_agent;
+        TreePtr<Node> base_pattern;
+        PatternLink base_plink;
+        Agent *base_agent;
         const SCREngine *master_ptr;
         const set<PatternLink> master_plinks;
         set<Agent *> master_agents;
@@ -115,13 +115,13 @@ private:
     } plan;
 
     void UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
-    void RunEmbedded( PatternLink plink_to_embedded, XLink root_xlink );
+    void RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink );
     TreePtr<Node> Replace();
 
 public: // For top level engine/VN trans
-    void SingleCompareReplace( XLink root_xlink,
+    void SingleCompareReplace( XLink base_xlink,
                                const SolutionMap *master_solution );                                                                                              
-    int RepeatingCompareReplace( XLink root_xlink,
+    int RepeatingCompareReplace( XLink base_xlink,
                                  const SolutionMap *master_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );

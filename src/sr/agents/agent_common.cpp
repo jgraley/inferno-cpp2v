@@ -65,7 +65,7 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
                                      set<PatternLink> residual_plinks_ )
 {  
     ASSERT(e);
-    // Enforcing rule #149 - breaking that rule will cause the same root node to appear in
+    // Enforcing rule #149 - breaking that rule will cause the same base node to appear in
     // more than one subordinate and-rule engine, so that it will get configured more than once.
     // Also see #316
     ASSERT(!coupling_master_engine)("Detected repeat coupling configuration of ")(*this)

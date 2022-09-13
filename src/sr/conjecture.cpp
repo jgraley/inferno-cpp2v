@@ -7,7 +7,7 @@
 
 namespace SR 
 {
-Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
+Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *base_agent )
 {
     last_agent = agent_records.end();
 
@@ -21,9 +21,9 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
         record.query = agent->CreateDecidedQuery();
 		agent_records[agent] = record;
 	}        
-    AgentRecords::iterator root_rit = agent_records.find(root_agent);
-    ASSERT( root_rit != agent_records.end() );
-    RecordWalk( root_rit );
+    AgentRecords::iterator base_rit = agent_records.find(base_agent);
+    ASSERT( base_rit != agent_records.end() );
+    RecordWalk( base_rit );
 }
 
 
@@ -36,9 +36,9 @@ Conjecture::Plan::Plan( const Agent *agent, shared_ptr<DecidedQuery> query )
     record.query = query ? query : agent->CreateDecidedQuery();
     agent_records[agent] = record;
 
-    AgentRecords::iterator root_rit = agent_records.find(agent);
-    ASSERT( root_rit != agent_records.end() );
-    RecordWalk( root_rit );
+    AgentRecords::iterator base_rit = agent_records.find(agent);
+    ASSERT( base_rit != agent_records.end() );
+    RecordWalk( base_rit );
 }
 
 
@@ -71,8 +71,8 @@ void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
 }
 
 
-Conjecture::Conjecture( set<Agent *> my_agents, const Agent *root_agent ) :
-    plan( my_agents, root_agent )
+Conjecture::Conjecture( set<Agent *> my_agents, const Agent *base_agent ) :
+    plan( my_agents, base_agent )
 {
 }
 

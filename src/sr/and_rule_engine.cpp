@@ -37,10 +37,10 @@
 
 using namespace SR;
 
-AndRuleEngine::AndRuleEngine( PatternLink root_plink, 
+AndRuleEngine::AndRuleEngine( PatternLink base_plink, 
                               const set<PatternLink> &master_plinks,
                               const set<PatternLink> &master_keyer_plinks ) :
-    plan( this, root_plink, master_plinks, master_keyer_plinks )
+    plan( this, base_plink, master_plinks, master_keyer_plinks )
 {
 }    
 
@@ -51,13 +51,13 @@ AndRuleEngine::~AndRuleEngine()
 
  
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
-                           PatternLink root_plink_, 
+                           PatternLink base_plink_, 
                            const set<PatternLink> &master_plinks_,
                            const set<PatternLink> &master_keyer_plinks_ ) :
     algo( algo_ ),
-    root_plink( root_plink_ ),
-    root_pattern( root_plink.GetPattern() ),
-    root_agent( root_plink.GetChildAgent() ),
+    base_plink( base_plink_ ),
+    base_pattern( base_plink.GetPattern() ),
+    base_agent( base_plink.GetChildAgent() ),
     master_plinks( master_plinks_ ),
     master_keyer_plinks( master_keyer_plinks_ )
 {    
@@ -71,7 +71,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
-    PopulateNormalAgents( &normal_agents, &normal_links, root_plink );    
+    PopulateNormalAgents( &normal_agents, &normal_links, base_plink );    
     for( PatternLink plink : normal_links )
         if( master_agents.count( plink.GetChildAgent() ) == 0 )
             my_normal_links.insert( plink );
@@ -79,7 +79,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     my_normal_agents = DifferenceOf( normal_agents, master_agents );       
     reached_agents.clear();
     reached_links.clear();    
-    PopulateMasterBoundaryStuff( root_plink, 
+    PopulateMasterBoundaryStuff( base_plink, 
                                  master_agents );
 
     // Collect together the parent links to agents
@@ -92,8 +92,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // master_boundary_agents should be same set of agents as those reached by my_master_boundary_links (uniquified)
     ASSERT( parent_residual_links_to_master_boundary_agents.size() == master_boundary_agents.size() );
         
-    DetermineKeyers( root_plink, master_agents );
-    DetermineResiduals( root_agent, master_agents );
+    DetermineKeyers( base_plink, master_agents );
+    DetermineResiduals( base_agent, master_agents );
     
     // Turns out these two are the same
     my_normal_links_unique_by_agent = coupling_keyer_links_all;
@@ -103,7 +103,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         if( master_boundary_agents.count(plink.GetChildAgent()) == 1 )
             master_boundary_keyer_links.insert( plink );
         
-    my_fixed_keyer_links = { root_plink };
+    my_fixed_keyer_links = { base_plink };
     
     // ------------------ Log it ---------------------
     Dump();
@@ -118,7 +118,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( my_normal_agents.empty() );
         // Root link obviously isn't in my_normal_links because that's empty, 
         // so it needs to be found in my_master_boundary_links
-        ASSERT( my_master_boundary_links.count(root_plink) == 1 )
+        ASSERT( my_master_boundary_links.count(base_plink) == 1 )
               ("\nmbrl:\n")(my_master_boundary_links);
     }
     else
@@ -154,7 +154,7 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> know
     CreateMyConstraints(constraints_list, knowledge_);
     
     // Master boundary links may not be in our domain if eg they got 
-    // deleted by master replace. So root_plink is the only one that
+    // deleted by master replace. So base_plink is the only one that
     // we can guarantee will be in the domain.
     solver_holder = CreateSolverAndHolder( constraints_list, 
                                            ToVector(free_normal_links_ordered), 
@@ -508,12 +508,12 @@ void AndRuleEngine::Plan::Dump()
 {
     list<KeyValuePair> plan_as_strings = 
     {
-        { "root_plink", 
-          Trace(root_plink) },
-        { "root_pattern", 
-          Trace(root_pattern) },
-        { "root_agent", 
-          Trace(root_agent) },
+        { "base_plink", 
+          Trace(base_plink) },
+        { "base_pattern", 
+          Trace(base_pattern) },
+        { "base_agent", 
+          Trace(base_agent) },
         { "master_plinks", 
           Trace(master_plinks) },
         { "master_keyer_plinks", 
@@ -578,15 +578,15 @@ void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *
 {    
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
-    SolutionMap master_and_root_links;
+    SolutionMap master_and_base_links;
     for( PatternLink link : plan.master_boundary_keyer_links )
-        master_and_root_links[link] = master_solution->at(link);
+        master_and_base_links[link] = master_solution->at(link);
     for( PatternLink link : plan.my_fixed_keyer_links )
-        master_and_root_links[link] = fixes.at(link);
+        master_and_base_links[link] = fixes.at(link);
     
     TRACE("Starting solver\n");
     ASSERT( plan.solver_holder );
-    plan.solver_holder->Start( master_and_root_links, knowledge.get() );
+    plan.solver_holder->Start( master_and_base_links, knowledge.get() );
 }
 
 
@@ -783,20 +783,20 @@ void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const Solutio
 }
 
 
-SolutionMap AndRuleEngine::Compare( XLink root_xlink,
+SolutionMap AndRuleEngine::Compare( XLink base_xlink,
                                     const SolutionMap *master_solution )
 {
     INDENT("C");
-    ASSERT( root_xlink );            
-    TRACE("Compare root ")(root_xlink)("\n");
+    ASSERT( base_xlink );            
+    TRACE("Compare base ")(base_xlink)("\n");
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
-    if( !dynamic_cast<StarAgent*>(plan.root_plink.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( knowledge->domain.count(root_xlink) > 0 )(root_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
+    if( !dynamic_cast<StarAgent*>(plan.base_plink.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
+        ASSERT( knowledge->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
 #endif
     
-    // Determine my fixes (just root pattern link to root x link)
-    SolutionMap my_fixes = {{plan.root_plink, root_xlink}};
+    // Determine my fixes (just root pattern link to base x link)
+    SolutionMap my_fixes = {{plan.base_plink, base_xlink}};
     
     // Start the CSP solver
     StartCSPSolver( my_fixes, master_solution );
@@ -842,13 +842,13 @@ SolutionMap AndRuleEngine::Compare( XLink root_xlink,
 }
 
 
-// This one operates from root for a stand-alone compare operation and
+// This one operates from base for a stand-alone compare operation and
 // no master keys.
-SolutionMap AndRuleEngine::Compare( TreePtr<Node> root_xnode )
+SolutionMap AndRuleEngine::Compare( TreePtr<Node> base_xnode )
 {
     SolutionMap empty_solution;
-    XLink root_xlink = XLink::CreateDistinct(root_xnode);
-    return Compare( root_xlink, &empty_solution );
+    XLink base_xlink = XLink::CreateDistinct(base_xnode);
+    return Compare( base_xlink, &empty_solution );
 }
 
 
@@ -969,14 +969,14 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             ASSERT( reached.count(p.second) == 0 );
             reached.insert( p.second );
             
-            Graph::Figure::Agent root_agent;
-            root_agent.g = p.second->plan.root_agent;
+            Graph::Figure::Agent base_agent;
+            base_agent.g = p.second->plan.base_agent;
             Graph::Figure::Link incoming_link;
             incoming_link.details.planned_as = incoming_link_planned_as;
             incoming_link.short_name = p.first.GetShortName();
-            root_agent.incoming_links.push_back( incoming_link );
-            TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(root_agent.g->GetGraphId())(" )\n");
-            figure.subordinate_engines_and_root_agents.push_back( make_pair(p.second.get(), root_agent) );
+            base_agent.incoming_links.push_back( incoming_link );
+            TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(base_agent.g->GetGraphId())(" )\n");
+            figure.subordinate_engines_and_base_agents.push_back( make_pair(p.second.get(), base_agent) );
         }
 	};
 	TRACE("   Subordinates (my free abnormals):\n");    

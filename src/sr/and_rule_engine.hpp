@@ -54,7 +54,7 @@ public:
     {
     };
     
-    AndRuleEngine( PatternLink root_plink, 
+    AndRuleEngine( PatternLink base_plink, 
                    const set<PatternLink> &master_plinks,
                    const set<PatternLink> &master_keyer_plinks );
     
@@ -63,7 +63,7 @@ public:
     struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo,  
-              PatternLink root_plink, 
+              PatternLink base_plink, 
               const set<PatternLink> &master_plinks,
               const set<PatternLink> &master_keyer_plinks );
         void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
@@ -97,9 +97,9 @@ public:
         string GetTrace() const; // used for debug
         
         AndRuleEngine * const algo;
-        const PatternLink root_plink;
-        const TreePtr<Node> root_pattern;
-        Agent * const root_agent;
+        const PatternLink base_plink;
+        const TreePtr<Node> base_pattern;
+        Agent * const base_agent;
         const set<PatternLink> master_plinks;
         const set<PatternLink> master_keyer_plinks;
         set<Agent *> master_agents;
@@ -154,9 +154,9 @@ private:
                            const SolutionMap *master_solution );
     
 public:
-    SolutionMap Compare( XLink root_xlink,
+    SolutionMap Compare( XLink base_xlink,
                          const SolutionMap *master_solution );
-    SolutionMap Compare( TreePtr<Node> root_xnode );
+    SolutionMap Compare( TreePtr<Node> base_xnode );
 
     const set<Agent *> &GetKeyedAgents() const;
     const set<PatternLink> GetKeyerPatternLinks() const;

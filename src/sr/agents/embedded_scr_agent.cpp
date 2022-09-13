@@ -60,7 +60,7 @@ list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 Graphable::Block EmbeddedSCRAgent::GetGraphBlockInfo() const
 {
     list<SubBlock> sub_blocks;
-    // Actually much simpler in graph trace mode - just show the root node and plink
+    // Actually much simpler in graph trace mode - just show the base node and plink
     auto compare_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(search_pattern.get()),
                                                       list<string>{},
                                                       list<string>{""},

@@ -16,8 +16,7 @@ namespace SR
 /// implementation to be "injected" into the search and replace operation.
 /// The transformation should be invarient during any single search operation
 /// but can change when replace acts to change the tree. Thus it can depend on
-/// the tree. The overall root of the tree is supplied as context to the 
-/// transformation, even when processing slaves.
+/// the tree.
 class TransformOfAgent : public virtual TeleportAgent
 {
 public:

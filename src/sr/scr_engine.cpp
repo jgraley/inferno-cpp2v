@@ -59,10 +59,10 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     ASSERT( cp )("Compare pattern must always be provided\n");
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
-    root_pattern = cp; 
-    root_agent = Agent::AsAgent(root_pattern);
+    base_pattern = cp; 
+    base_agent = Agent::AsAgent(base_pattern);
     // For closure under full arrowhead model, we need a link to root
-    root_plink = PatternLink::CreateDistinct( root_pattern );   
+    base_plink = PatternLink::CreateDistinct( base_pattern );   
             
     CategoriseAgents( master_plinks, in_progress_agent_phases );    
 
@@ -79,8 +79,8 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks,
     // compare and replace sets separately.
     set<PatternLink> visible_compare_plinks, visible_replace_plinks;
     list<PatternLink> visible_replace_plinks_postorder;
-    WalkVisible( visible_compare_plinks, nullptr, root_plink, Agent::COMPARE_PATH );
-    WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, root_plink, Agent::REPLACE_PATH );
+    WalkVisible( visible_compare_plinks, nullptr, base_plink, Agent::COMPARE_PATH );
+    WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, base_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though embedded "through", 
     // not into the embeddeds's pattern)
@@ -222,7 +222,7 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(root_plink, master_plinks, all_keyer_plinks);
+    and_rule_engine = make_shared<AndRuleEngine>(base_plink, master_plinks, all_keyer_plinks);
     
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
                                     and_rule_engine->GetKeyerPatternLinks() );
@@ -268,12 +268,12 @@ void SCREngine::Plan::Dump()
     {
         { "overall_master_ptr", 
           Trace(overall_master_ptr) },
-        { "root_pattern", 
-          Trace(root_pattern) },
-        { "root_plink", 
-          Trace(root_plink) },
-        { "root_agent", 
-          Trace(root_agent) },
+        { "base_pattern", 
+          Trace(base_pattern) },
+        { "base_plink", 
+          Trace(base_plink) },
+        { "base_agent", 
+          Trace(base_agent) },
         { "master_ptr", 
           Trace(master_ptr) },
         { "master_plinks", 
@@ -331,7 +331,7 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
 }
 
 
-void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink root_xlink )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 {         
     INDENT("L");
     auto embedded_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_embedded.GetChildAgent());
@@ -365,23 +365,23 @@ TreePtr<Node> SCREngine::Replace()
     INDENT("R");
     
     // Now replace according to the couplings
-    TRACE("Now replacing, root agent=")(plan.root_agent)("\n");
-    TreePtr<Node> new_root_x = plan.root_agent->BuildReplace(plan.root_plink);
+    TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
+    TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
     TRACE("Replace done\n");
 
-    return new_root_x;
+    return new_base_x;
 }
 
 
-void SCREngine::SingleCompareReplace( XLink root_xlink,
+void SCREngine::SingleCompareReplace( XLink base_xlink,
                                       const SolutionMap *master_solution ) 
 {
     INDENT(">");
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
-    // replace does so it can change the root node. Throws on mismatch.
-    const SolutionMap &cs = plan.and_rule_engine->Compare( root_xlink, 
+    // replace does so it can change the base node. Throws on mismatch.
+    const SolutionMap &cs = plan.and_rule_engine->Compare( base_xlink, 
                                                            master_solution );
     TRACE("Search got a match (otherwise throws)\n");
            
@@ -391,20 +391,20 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
     replace_solution = move(rs);
     replace_solution_available = true;
 
-    ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
+    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
 
     // Now replace according to the couplings
-    root_xlink.SetXPtr( Replace() );
-    ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
+    base_xlink.SetXPtr( Replace() );
+    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
     plan.vn_sequence->BuildTheKnowledge();  
     // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
-    plan.vn_sequence->ExtendDomain( plan.root_plink ); 
-    ASSERT( replace_solution.at( plan.root_plink ) == root_xlink );
+    plan.vn_sequence->ExtendDomain( plan.base_plink ); 
+    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
 
     for( PatternLink plink_to_embedded : plan.my_subordinate_plinks_postorder )
     {
-        TRACE("Running embedded ")(plink_to_embedded)(" root xlink=")(root_xlink)("\n");
-        RunEmbedded(plink_to_embedded, root_xlink);       
+        TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(base_xlink)("\n");
+        RunEmbedded(plink_to_embedded, base_xlink);       
     }
     TRACE("Embedded SCRs done\n");
     
@@ -422,13 +422,13 @@ void SCREngine::SingleCompareReplace( XLink root_xlink,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int SCREngine::RepeatingCompareReplace( XLink root_xlink,
+int SCREngine::RepeatingCompareReplace( XLink base_xlink,
                                         const SolutionMap *master_solution )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
         
-    ASSERT( plan.root_pattern )("SCREngine object was not configured before invocation.\n"
+    ASSERT( plan.base_pattern )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
                                 "Thank you for taking the time to read this message.\n");
     
@@ -441,7 +441,7 @@ int SCREngine::RepeatingCompareReplace( XLink root_xlink,
     // Domain extend required on sight of new pattern OR x. This call is 
     // due to the introduction of a new pattern. It also stops at embeddeds
     // So we do it in SCREngine.
-    plan.vn_sequence->ExtendDomain( plan.root_plink );     
+    plan.vn_sequence->ExtendDomain( plan.base_plink );     
     
     for(int i=0; i<repetitions; i++) 
     {
@@ -451,8 +451,8 @@ int SCREngine::RepeatingCompareReplace( XLink root_xlink,
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
-            // Cannonicalise could change root
-            SingleCompareReplace( root_xlink, master_solution );
+            // Cannonicalise could change base
+            SingleCompareReplace( base_xlink, master_solution );
         }
         catch( const ::Mismatch &e )
         {
