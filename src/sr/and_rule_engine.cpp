@@ -318,11 +318,11 @@ void AndRuleEngine::Plan::ConfigureAgents()
     // Where we have a link to a master agent (= master boundary link)
     // it will be residual because master always keys. Agent needs to 
     // know because we'll query it, so tell it.
-    for( PatternLink master_boundary_plink : my_boundary_links )
+    for( PatternLink boundary_plink : my_boundary_links )
     {
-        ASSERT( master_boundary_plink );
-        Agent *agent = master_boundary_plink.GetChildAgent();
-        agent->AddResiduals( {master_boundary_plink} );
+        ASSERT( boundary_plink );
+        Agent *agent = boundary_plink.GetChildAgent();
+        agent->AddResiduals( {boundary_plink} );
     }
 }
 
