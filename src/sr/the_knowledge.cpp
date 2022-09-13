@@ -9,7 +9,7 @@
 using namespace SR;    
 
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
-#define TRACE_KNOWLEDGE_DELTAS
+//#define TRACE_KNOWLEDGE_DELTAS
 
 #ifdef TRACE_KNOWLEDGE_DELTAS
 // Global because there are different knowledges owned by different SCR Engines
