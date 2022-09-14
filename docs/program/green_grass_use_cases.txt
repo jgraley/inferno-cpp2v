@@ -40,8 +40,8 @@ a stack pointer before the return.
 src/steps/generate_stacks.cpp:505:    MakePatternPtr< GreenGrass<Statement> > s_gg;
 OLD GenerateStacks (out of use)
 
-src/steps/lower_control_flow.cpp:211:    // We have to use the GreenGrass hack to prevent the slave spinning 
-src/steps/lower_control_flow.cpp:212:    // forever. The continue in the slave search pattern has a GreenGrass
+src/steps/lower_control_flow.cpp:211:    // We have to use the GreenGrass hack to prevent the embedded spinning 
+src/steps/lower_control_flow.cpp:212:    // forever. The continue in the embedded search pattern has a GreenGrass
 (comments)
 
 src/steps/state_out.cpp:665:    MakePatternPtr< GreenGrass<Type> > gg;

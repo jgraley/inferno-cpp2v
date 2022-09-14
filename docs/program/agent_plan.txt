@@ -2,7 +2,7 @@ Detailed plan for refactoring into agent patterns
 
 ---NOTE: all steps here to be applied equally to search as well as replace---
 ---NOTE: ignore the numbers, the order as listed is believed correct---
-1. all patterns wrapped by NormalAgentWrapper (except slaves, which jump ahead to 4) DONE
+1. all patterns wrapped by NormalAgentWrapper (except embeddeds, which jump ahead to 4) DONE
 2. initial invocation via agent interface  DONE
 11. Better method of deciding whether wrapper needed (prefer not to need a pure virtual in Node class for this) DONE
 - Derive all special nodes from NormalAgent instead of relying on NormalAgentWrapper (mostly to smoke out problems) DONE
@@ -12,11 +12,11 @@ Detailed plan for refactoring into agent patterns
   --- actually no, hopping between different kinds of smart pointers to the same things breaks smart pointer rules. We must only
       convert TreePtr<Node> into Agent * (and only for immediate use). We should never convert back again
 - Walk all pattern nodes and Configure() with sr and couplingkeys - do this during SR Configure(). DONE
-  NOTE: Set current sr on slave node itself and recurse into through, but not slave_search or slave_replace (slave's own walk should do them)
-- EXTRA STEP: mend configure-happening-too-soon-on-saves by configuring slaves during master config (but check for any explicit calls on slaves in the steps) DONE
+  NOTE: Set current sr on embedded node itself and recurse into through, but not embedded_search or embedded_replace (embedded's own walk should do them)
+- EXTRA STEP: mend configure-happening-too-soon-on-saves by configuring embeddeds during enclosing config (but check for any explicit calls on embeddeds in the steps) DONE
   NOTE: use shaken-down recursive style here, to set a precident for how the main algo will eventually work
-  NOTE: shaken down means note what the 1-st level slaves are in a list, and recurse directly from master Configure to slave Configure AFTER the pattern walk, not during.
-  NOTE ALSO: Got to do slave before master because some nodes appear in both and master should get priority
+  NOTE: shaken down means note what the 1-st level embeddeds are in a list, and recurse directly from enclosing Configure to embedded Configure AFTER the pattern walk, not during.
+  NOTE ALSO: Got to do embedded before enclosing because some nodes appear in both and enclosing should get priority
 - EXTRA STEP: do not pass NULL as a pattern into DecidedCompare (as in NULL wildcarding) DONE
 3. all invocations via agent interface, use AsAgent and call on the agent, not self DONE 
 - Remove "const" from all agent API functions DONE
@@ -46,14 +46,14 @@ Detailed plan for refactoring into agent patterns
 8. Central couplingkeys object to be pensioned off, and remove from Configure(). DONE
 - Same for the dirty grass, try to keep the state locally. Check for other state in SR that should be in the agents
 ---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
-- Slave tidy-up. Introduce Engine class containing the parts of CompareReplace needed by slaves and invoke from slave agent. DONE
-- Slaves: try to invoke them from SR AFTER master replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
-  This probably means filtering the immediate_agents set to slaves only and holding on to it.
-  NOTE: this is shaken down style, wher slave SR is invoked directly from master SR, AFTER the replace walk not during
+- Slave tidy-up. Introduce Engine class containing the parts of CompareReplace needed by embeddeds and invoke from embedded agent. DONE
+- Slaves: try to invoke them from SR AFTER enclosing replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
+  This probably means filtering the immediate_agents set to embeddeds only and holding on to it.
+  NOTE: this is shaken down style, wher embedded SR is invoked directly from enclosing SR, AFTER the replace walk not during
 - Conjecture: add fu to allow abnormal context compares in all the styles currently in use with just calling DecidedCompare()
   These include: calls to Compare() as seen in MatchAny, a local DecidedCompare as used in NotMatch, a local DecidedCompare 
-  with init during configure as seen in slave recurse restriction. Actully provided a single AbnormalCompare() in agent
-  common and mapped them all through that except slave which goes to Comapre in Engine. Now 2 seperate
+  with init during configure as seen in embedded recurse restriction. Actully provided a single AbnormalCompare() in agent
+  common and mapped them all through that except embedded which goes to Comapre in Engine. Now 2 seperate
   comparison top-levels, which is clearer (undoing false refactor). DONE
 - Use clean_grass list rather than dirty_grass - then can use the SR::DuplicateNode and DuplicateSubtree in src/helpers/ and remove from AgentCommon
 ---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
@@ -76,17 +76,17 @@ Detailed plan for refactoring into agent patterns
  - Pass the vectors of choices into KeyReplace(), and get Stuff to key itself here. DONE
  - Prove that Stuff and no other nodes require keying beyond what AgentCommon does for them DONE with some refactoring
  - Move keying out of agents and into Engine, using a map of agent onto key for now DONE
- - Pass master's coupling set to slaves, so we do not rely on the KeyReplace() keyings for slaves, so that
-   KeyReplace() keyings are only relied on for the imminent replace, not for slave searches. DONE
- - Use const ref for the master couplings when passed around in Engine DONE
- - Find and try removing the self-keying in the search side (master replace - was only being used to pick up master)
+ - Pass enclosing's coupling set to embeddeds, so we do not rely on the KeyReplace() keyings for embeddeds, so that
+   KeyReplace() keyings are only relied on for the imminent replace, not for embedded searches. DONE
+ - Use const ref for the enclosing couplings when passed around in Engine DONE
+ - Find and try removing the self-keying in the search side (enclosing replace - was only being used to pick up enclosing)
  - Check that the Agent's query functions are "const" (choices and links member mutable). DONE
  - Check for modifiers of Engine (via engine ptr) too - hopefully does not need to be mutable. - WAS const ALREADY
 --- Agents may now be queried idempotently ---
    **UNSURE ABOUT THESE...**
 12. (done before documentation)
  - Add evaluator objects for boolean nodes other than AND. Invoke it in Engine.
- - Do not union the master and local keys - treat seperately
+ - Do not union the enclosing and local keys - treat seperately
  - Track agents seen in a particular pass. This permits early-out on couplings whether matching or not
  - Move couplings check down into parent's DC
  - Remove soft agents
@@ -106,7 +106,7 @@ Detailed plan for refactoring into agent patterns
  - Then just use a local Engine instance and tuck away in a wrapper around DecidedQuery (so abnormal flag never gets out as true)
 15. Regions for evaluators
  - Create a Configure pass that substitutes RegionAgents for evaluator contexts up to couplings.
- - Leave outgoing links unchanged - just fill in the master keys for them and the Engine will stop
+ - Leave outgoing links unchanged - just fill in the enclosing keys for them and the Engine will stop
 16. ???  
 
 QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePtr<Node>? 
@@ -118,7 +118,7 @@ to tie the existance of theses (maybe indirectly) back to the agents.
 What are the Agent configs used for?
  - Configure couplingkeys is used to get to the central CouplingKeys for storing and retrieving keyings. Step 8 removes need.
  - Configure sr is used for :
-	 - reaching common GetContext() for slaves replace (context is true program root, and this passes it into slave SR)
+	 - reaching common GetContext() for embeddeds replace (context is true program root, and this passes it into embedded SR)
      - passed to soft search pattern nodes, for calling back into search I think, eventually want to pass the Agent for step 3
 	   NOTE: also needed for GetContext() which is the "true" program root, needed by eg GetDeclaration() 
 	 - to get to a central dirty grass list - again, could dirtiness be stored locally?
@@ -133,13 +133,13 @@ ONLY IF the NormalAgentWrapper uses (derives from) PreRestrictionAgent, so that 
 where special nodes expose members that point to children (through, terminus etc) these remain the same and are already safe. AsAgent() 
 converts them as required (it drops the node type but don't care; already safe)
 
-[1] The anatomy of a slave
+[1] The anatomy of a embedded
 SlaveCompareReplace is a special Node, Agent and CompareReplace object in its own right.
 The Agent/special Node is understood to be a part of some other CompareReplace's pattern (the
-master), and "surrounds" its own CompareReplace object. However, we don't need to hide the slave SR
-from the master SR as they're both the same class... So the plan is for the master sr to "seek out"
-slaves in the tree and invoke them as required. Slave will need to tell master SR where to act
-in the newly generated output program tree. Could multiple slaves of the same master be run
+enclosing), and "surrounds" its own CompareReplace object. However, we don't need to hide the embedded SR
+from the enclosing SR as they're both the same class... So the plan is for the enclosing sr to "seek out"
+embeddeds in the tree and invoke them as required. Slave will need to tell enclosing SR where to act
+in the newly generated output program tree. Could multiple embeddeds of the same enclosing be run
 concurrently? Yeah, probably, lol.
 TODO make CompareReplace a member, on the end of a pointer or shared_ptr. Then it will not interfere 
 with Itemise(), and an ordinary walk will not go into the children.

@@ -57,7 +57,7 @@ private:
     static struct Cache
     {
         ~Cache();
-        map<Progress, SNType> master_serial_by_progress;        
+        map<Progress, SNType> main_serial_by_progress;        
     } cache;
     
     mutable shared_ptr<Hook> hook;

@@ -14,10 +14,10 @@
 SerialNumber::SerialNumber()
 {    
     progress = Progress::GetCurrent();    
-    serial = cache.master_serial_by_progress[progress];
+    serial = cache.main_serial_by_progress[progress];
     
     // produce a new construction serial number
-    cache.master_serial_by_progress[progress]++;      
+    cache.main_serial_by_progress[progress]++;      
 }    
 
 
