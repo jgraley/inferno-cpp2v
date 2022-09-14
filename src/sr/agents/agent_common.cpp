@@ -24,7 +24,7 @@ using namespace SYM;
 //---------------------------------- AgentCommon ------------------------------------    
 
 AgentCommon::AgentCommon() :
-    master_scr_engine(nullptr)
+    my_scr_engine(nullptr)
 {
 }
 
@@ -41,9 +41,9 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
     // Stronger reason: siblings each hit multiple times with respect to parent
     // and not necessarily the same number of times, so there's no single
     // well defined key.
-    ASSERT(!master_scr_engine)("Detected repeat configuration of ")(*this)
+    ASSERT(!my_scr_engine)("Detected repeat configuration of ")(*this)
                               ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
-    master_scr_engine = e;
+    my_scr_engine = e;
     phase = phase_;
 
 	ASSERT( (int)phase != 0 );
@@ -68,12 +68,12 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     // Enforcing rule #149 - breaking that rule will cause the same base node to appear in
     // more than one subordinate and-rule engine, so that it will get configured more than once.
     // Also see #316
-    ASSERT(!coupling_master_engine)("Detected repeat coupling configuration of ")(*this)
+    ASSERT(!my_keyer_engine)("Detected repeat coupling configuration of ")(*this)
                                    ("\nCould be result of coupling abnormal links - not allowed :(\n")
-                                   (coupling_master_engine)(" with keyer ")(keyer_plink)("\n")
+                                   (my_keyer_engine)(" with keyer ")(keyer_plink)("\n")
                                    (e)(" with keyer ")(keyer_plink_);                                   
-    ASSERT(master_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
-    coupling_master_engine = e;
+    ASSERT(my_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
+    my_keyer_engine = e;
                                            
     if( keyer_plink_ )
     {
@@ -139,7 +139,7 @@ list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 
 shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 {
-    ASSERT( master_scr_engine ); // check we have been configured
+    ASSERT( my_scr_engine ); // check we have been configured
     
     return make_shared<DecidedQuery>( pattern_query );
 }
@@ -158,7 +158,7 @@ Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 
 Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
-    ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
+    ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
 	
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
@@ -444,14 +444,14 @@ void AgentCommon::ResetNLQConjecture()
 
 const SCREngine *AgentCommon::GetMasterSCREngine() const
 {
-    return master_scr_engine;
+    return my_scr_engine;
 }      
 
 
 PatternLink AgentCommon::GetKeyerPatternLink() const
 {
-    ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
-    ASSERT( keyer_plink )(*this)(" has no keyer_plink, engine=")(coupling_master_engine)("\n");
+    ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
+    ASSERT( keyer_plink )(*this)(" has no keyer_plink, engine=")(my_keyer_engine)("\n");
     
     return keyer_plink;
 }
@@ -459,7 +459,7 @@ PatternLink AgentCommon::GetKeyerPatternLink() const
 
 set<PatternLink> AgentCommon::GetResidualPatternLinks() const
 {
-    ASSERT( coupling_master_engine )(*this)(" has not been configured for couplings");
+    ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
     
     return residual_plinks;
 }                                  
@@ -477,7 +477,7 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
     // This function is called on nodes in the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...
       
-    if( master_scr_engine->IsKeyedByAndRuleEngine(this) ) 
+    if( my_scr_engine->IsKeyedByAndRuleEngine(this) ) 
         return; // In search pattern and already keyed - we only overlay using replace-only nodes
                 
     // This is why we call on over, passing in under. The test requires
@@ -520,13 +520,13 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
     ASSERT( me_plink.GetChildAgent() == this );
 
     ASSERT(this);
-    ASSERT(master_scr_engine)("Agent ")(*this)(" appears not to have been configured");
+    ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
 
     XLink key_xlink;
     if( keyer_plink )
     {
-        key_xlink = master_scr_engine->GetReplaceKey( keyer_plink );
+        key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
 		ASSERT( !key_xlink || key_xlink.GetChildX()->IsFinal() )
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
@@ -561,7 +561,7 @@ TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
     
     // Source will be a pattern node, so cannot be dirty
     if( force_dirty )
-        master_scr_engine->AddDirtyGrass( dest );
+        my_scr_engine->AddDirtyGrass( dest );
         
     return dest;
 }
@@ -577,12 +577,12 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERT(dest);
 
-    bool source_dirty = master_scr_engine->IsDirtyGrass( source );
+    bool source_dirty = my_scr_engine->IsDirtyGrass( source );
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
         //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-        master_scr_engine->AddDirtyGrass( dest );
+        my_scr_engine->AddDirtyGrass( dest );
     }
     
     return dest;    
@@ -700,10 +700,10 @@ string AgentCommon::GetPlanAsString() const
 {
     list<KeyValuePair> plan_as_strings = 
     {
-        { "master_scr_engine", 
-          Trace(master_scr_engine) },
-        { "coupling_master_engine", 
-          Trace(coupling_master_engine) },
+        { "my_scr_engine", 
+          Trace(my_scr_engine) },
+        { "my_keyer_engine", 
+          Trace(my_keyer_engine) },
         //{ "pattern_query", 
         //  Trace(pattern_query) }, // TODO should be traceable?
         { "keyer_plink", 
@@ -715,7 +715,7 @@ string AgentCommon::GetPlanAsString() const
         { "keyer_and_normal_plinks", 
           Trace(keyer_and_normal_plinks) },
         { "SymbolicCouplingQuery()", 
-          coupling_master_engine ? Trace(SymbolicCouplingQuery()) : string("<not configured for couplings>") },
+          my_keyer_engine ? Trace(SymbolicCouplingQuery()) : string("<not configured for couplings>") },
         { "SymbolicNormalLinkedQuery()", 
           pattern_query ? Trace(SymbolicNormalLinkedQuery()) : string("<no pattern_query>") }
     };

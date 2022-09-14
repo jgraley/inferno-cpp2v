@@ -18,8 +18,8 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
                                       set<PatternLink> keyer_plinks )
 {
     ASSERT( me_plink.GetChildAgent() == this );
-    ASSERT( !master_scr_engine->IsKeyed(me_plink) ); // should only be reached once for each plink
-    bool should_key = !master_scr_engine->IsKeyed(this);
+    ASSERT( !my_scr_engine->IsKeyed(me_plink) ); // should only be reached once for each plink
+    bool should_key = !my_scr_engine->IsKeyed(this);
     
     if( should_key )
     {
@@ -43,7 +43,7 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink,
         TreePtr<Node> new_node = BuildNewSubtree();
           
         LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
-        master_scr_engine->SetReplaceKey( new_link );
+        my_scr_engine->SetReplaceKey( new_link );
         
         return DuplicateSubtree( new_link );   
     }

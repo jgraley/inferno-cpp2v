@@ -73,8 +73,8 @@ public:
     virtual string GetTrace() const;
 
 protected:                                  
-    const SCREngine *master_scr_engine = nullptr;    
-    const Traceable *coupling_master_engine = nullptr;    
+    const SCREngine *my_scr_engine = nullptr;    
+    const Traceable *my_keyer_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink keyer_plink;
     set<PatternLink> residual_plinks;

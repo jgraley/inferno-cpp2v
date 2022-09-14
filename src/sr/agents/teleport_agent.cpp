@@ -29,9 +29,9 @@ LocatedLink TeleportAgent::TeleportUniqueAndCache( const TheKnowledge &knowledge
         // We will uniquify the link against the domain and then cache it against keyer_xlink
         XLink domain_xlink;
         if( expect_in_domain )
-            domain_xlink = master_scr_engine->FindDomainExtension(tp_link);
+            domain_xlink = my_scr_engine->FindDomainExtension(tp_link);
         else
-            domain_xlink = master_scr_engine->UniquifyDomainExtension(tp_link);
+            domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_link);
         
         LocatedLink ude_link( (PatternLink)tp_link, domain_xlink ); 
                    

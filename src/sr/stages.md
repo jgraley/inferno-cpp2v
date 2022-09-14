@@ -21,7 +21,7 @@ Transformations applied to the pattern before planning:
 In stage one, `SCREngine`s are created . There is one for root and
 one for every embedded SCR agent defined within, etc _(wind-in)_. The
 `SCREngine`s scan their pattern tree and categorise the agents:
- - Which pattern nodes really belong to me and not some outer/master?
+ - Which pattern nodes really belong to me and not enclosing engine?
  - Which are reached during search, replace or both (the _phases_)?
  - What order are they reached during replace?
  - Which embedded `SCREngine`s will be reached?
@@ -41,7 +41,7 @@ pattern:
  - And-rule regions: child `AndRuleEngine`s are generated for detected
    sub-regions.
  - Determine keyers and residuals.
- - Determine my, master/outer and master/outer boundary `Agent`s.
+ - Determine my, surrounding and boundary `Agent`s.
  - `AndRuleEngine` configuration of the `Agent`s: informs the agent:
    - keyer and residual links for coupled agents.
  - Extracts symbolics (satisfiability expressions) from agents.

@@ -532,7 +532,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // Explicit request for overlay, resulting from use of the Delta agent.
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
-        XLink under_xlink = master_scr_engine->GetReplaceKey( overlay_under_plink );
+        XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
         ASSERT( under_xlink );
         TreePtr<Node> under_node = under_xlink.GetChildX();
         ASSERT( under_xlink.GetChildX()->IsFinal() ); 

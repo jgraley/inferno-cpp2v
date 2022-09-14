@@ -76,7 +76,7 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
-    bool green = !( agent->master_scr_engine->IsDirtyGrass( ra->GetOnlyXLink().GetChildX() ) ); 
+    bool green = !( agent->my_scr_engine->IsDirtyGrass( ra->GetOnlyXLink().GetChildX() ) ); 
     return make_unique<BooleanResult>( green );         
 }
 

@@ -41,7 +41,7 @@ TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( PatternLink me_plink )
     ASSERT( my_through_subtree );
     
     // And then recurse into slaves
-    master_scr_engine->RequestEmbeddedAction( this, my_through_subtree );   
+    my_scr_engine->RequestEmbeddedAction( this, my_through_subtree );   
     ASSERT( my_through_subtree );
     
     return my_through_subtree;
