@@ -47,19 +47,19 @@ class SCREngine : public virtual GraphIdable,
 {      
 public:
     SCREngine( VNSequence *vn_sequence,
-               const CompareReplace *overall_master,
+               const CompareReplace *root_engine,
                CompareReplace::AgentPhases &in_progress_agent_phases,
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
-               const set<PatternLink> &master_plinks = set<PatternLink>(),                            
-               const SCREngine *master = nullptr); /* if null, you are overall master */ 
+               const set<PatternLink> &enclosing_plinks = set<PatternLink>(),                            
+               const SCREngine *enclosing_engine = nullptr); /* if null, you are root SCR engine */ 
     void PlanningStageTwo( const CompareReplace::AgentPhases &in_progress_agent_phases )
     {
         plan.PlanningStageTwo(in_progress_agent_phases); 
     }
-    void PlanningStageThree(set<PatternLink> master_keyers)
+    void PlanningStageThree(set<PatternLink> enclosing_keyers)
     {
-        plan.PlanningStageThree(master_keyers); 
+        plan.PlanningStageThree(enclosing_keyers); 
     }
     void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
     {
@@ -71,13 +71,13 @@ private:
     {            
         Plan( SCREngine *algo,
               VNSequence *vn_sequence,
-              const CompareReplace *overall_master,
+              const CompareReplace *root_engine,
               CompareReplace::AgentPhases &in_progress_agent_phases,
               TreePtr<Node> cp,
               TreePtr<Node> rp,
-              const set<PatternLink> &master_plinks,                            
-              const SCREngine *master ); /* if null, you are overall master */ 
-        void CategoriseAgents( const set<PatternLink> &master_plinks, 
+              const set<PatternLink> &enclosing_plinks,                            
+              const SCREngine *enclosing_engine ); /* if null, you are root SCR engine */ 
+        void CategoriseAgents( const set<PatternLink> &enclosing_plinks, 
                                CompareReplace::AgentPhases &in_progress_agent_phases );
         void WalkVisible( set<PatternLink> &visible, 
                           list<PatternLink> *visible_postorder,
@@ -86,7 +86,7 @@ private:
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
-        void PlanningStageThree(set<PatternLink> master_keyers);
+        void PlanningStageThree(set<PatternLink> enclosing_keyers);
         void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
         void PlanCompare();
         void PlanReplace();
@@ -96,13 +96,13 @@ private:
         SCREngine * const algo;
         VNSequence *vn_sequence;
         shared_ptr<const TheKnowledge> knowledge;
-        const CompareReplace *overall_master_ptr;
+        const CompareReplace *root_engine;
         TreePtr<Node> base_pattern;
         PatternLink base_plink;
         Agent *base_agent;
-        const SCREngine *master_ptr;
-        const set<PatternLink> master_plinks;
-        set<Agent *> master_agents;
+        const SCREngine *enclosing_engine;
+        const set<PatternLink> enclosing_plinks;
+        set<Agent *> enclosing_agents;
         set<PatternLink> my_plinks;   
         set<Agent *> my_agents;   
         set<PatternLink> all_keyer_plinks;   
@@ -120,9 +120,9 @@ private:
 
 public: // For top level engine/VN trans
     void SingleCompareReplace( XLink base_xlink,
-                               const SolutionMap *master_solution );                                                                                              
+                               const SolutionMap *enclosing_solution );                                                                                              
     int RepeatingCompareReplace( XLink base_xlink,
-                                 const SolutionMap *master_solution );                                                                                               
+                                 const SolutionMap *enclosing_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;

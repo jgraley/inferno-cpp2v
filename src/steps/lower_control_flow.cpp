@@ -436,7 +436,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     
     auto r_slave3 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_slave2, l3_s_body, l3_r_body );
 
-    // Finish up master
+    // Finish up top-level
     s_cond->pattern = cond_type;
     s_switch->body = body; // will only match when body is a compound
     s_switch->condition = s_cond;

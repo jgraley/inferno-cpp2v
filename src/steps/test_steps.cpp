@@ -22,8 +22,8 @@ EmbeddedSCRTest::EmbeddedSCRTest()
     auto r_body = MakePatternNode<Statement>();
     auto ss_cont = MakePatternNode<Continue>();
     auto sr_break = MakePatternNode<Break>();
-    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_body, ss_cont, sr_break );
-    r_comp->statements = ( r_slave );
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_body, ss_cont, sr_break );
+    r_comp->statements = ( r_embedded );
 
     Configure( SEARCH_REPLACE, s_for, r_comp );
 }
@@ -56,17 +56,17 @@ struct Whenever : virtual Node
 
 EmbeddedSCRTest2::EmbeddedSCRTest2() 
 {    
-    // Ambiguity with SOONER slave S/R: is sr keyed by r_slave
-    // or master? Depends whether slave hits. See #370.
+    // Ambiguity with SOONER model: is sr keyed by r_embedded
+    // or enclosing? Depends whether embedded search hits. See #370.
     
     auto t = MakePatternNode<Something>();
     auto ss = MakePatternNode<Something>();
     auto sr = MakePatternNode<Something>();
     auto r_whenever = MakePatternNode<Whenever>();
-    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Node> >( t, ss, sr );
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<Node> >( t, ss, sr );
     auto s = MakePatternNode<Something>();
 
-    r_whenever->members = (r_slave, sr);
+    r_whenever->members = (r_embedded, sr);
     
     Configure( COMPARE_REPLACE, s, r_whenever );
 }
@@ -74,7 +74,7 @@ EmbeddedSCRTest2::EmbeddedSCRTest2()
 
 EmbeddedSCRTest3::EmbeddedSCRTest3() 
 {    
-    // In LATER slave S/R, r_whatever could invalidate r_slave2's root position
+    // In LATER model, r_whatever could invalidate r_embedded_2's root position
     // if it does eg builder stuff on the unwind. See #370, #378
     
     auto ss = MakePatternNode<Something>();
@@ -85,8 +85,8 @@ EmbeddedSCRTest3::EmbeddedSCRTest3()
     auto s2s = MakePatternNode<Something>();
     auto s2r = MakePatternNode<Something>();
     auto r = MakePatternNode<Something>();
-    auto r_slave2 = MakePatternNode< EmbeddedCompareReplace<Node> >( r, s2s, s2r );
-    r_whatever->child = r_slave2;
+    auto r_embedded_2 = MakePatternNode< EmbeddedCompareReplace<Node> >( r, s2s, s2r );
+    r_whatever->child = r_embedded_2;
     
     Configure( COMPARE_REPLACE, r_slave1 );
 }

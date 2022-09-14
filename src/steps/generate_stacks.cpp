@@ -479,7 +479,7 @@ GenerateStacks::GenerateStacks()
     s_top_comp->members = ( top_decls );
     s_top_comp->statements = ( top_pre );
 
-    // Construct limitation - restrict master search to functions that contain an automatic variable
+    // Construct limitation - restrict top-level search to functions that contain an automatic variable
     cs_stuff->terminus = cs_instance;
     s_and->conjuncts = ( s_top_comp, cs_stuff );
 
@@ -557,7 +557,7 @@ GenerateStacks::GenerateStacks()
     s_top_comp->members = ( top_decls );
     s_top_comp->statements = ( top_pre );
 
-    // Construct limitation - restrict master search to functions that contain an automatic variable
+    // Construct limitation - restrict top-level search to functions that contain an automatic variable
     cs_stuff->terminus = cs_instance;
     s_and->conjuncts = ( s_top_comp, cs_stuff );
 

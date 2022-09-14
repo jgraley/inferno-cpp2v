@@ -10,9 +10,10 @@ namespace SR
 { 
 
 /// Agent that only matches if the subtree at `through` is part of the original
-/// input tree, i.e. durng the second and later hits of the master or any slave,
+/// input tree, i.e. during the second and later hits within the current step,
 /// it does not match any part of the working graph that was created by an earlier
-/// pass. This departs from the reductive style, so should be used with care.
+/// replace operation in the same step. This departs from the reductive style, 
+/// so should be used with care.
 class GreenGrassAgent : public virtual ColocatedAgent 
 {               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;

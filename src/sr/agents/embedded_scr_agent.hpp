@@ -13,13 +13,12 @@ namespace SR
 class SearchReplace;
 
 /// EmbeddedSCR agents provide an instance of a search and replace engine within 
-/// a pattern as an agent in a replace context. This engine acts as a "slave"
-/// to the surounding pattern which is termed the "master". During the master's
+/// an enclosing pattern as an agent in a replace context. During the enclosing
 /// replace operation, the sub-pattern at `through` is used to replace at the 
-/// current location. After that subtree has been created, the slave engine
-/// operates on the resulting subtree, performing search and replace operations
-/// via the `search_pattern` and `replace_pattern` pointers until no more 
-/// matches are found (the usual reductive style).  
+/// current location. After enclosing replace has completed ("LATER" model), 
+/// the embedded SCR engines operate on the tree at the position of the EmbeddedSCR
+/// agent, performing search and replace operations via the `search_pattern` and 
+/// `replace_pattern` pointers until no more matches are found (the usual reductive style).  
 class EmbeddedSCRAgent : public virtual ColocatedAgent, 
                    public RequiresSubordinateSCREngine 
 {

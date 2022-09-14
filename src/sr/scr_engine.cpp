@@ -21,18 +21,18 @@ int SCREngine::repetitions;
 bool SCREngine::rep_error;
 
 
-// The master_plinks argument is a set of plinks to agents that we should not
-// configure because they were already configured by a master, and masters take 
+// The enclosing_plinks argument is a set of plinks to agents that we should not
+// configure because they were already configured, and enclosing engines take 
 // higher priority for configuration (so when an agent is reached from multiple
-// engines, it's the most masterish one that "owns" it).
+// engines, it's the one closest to root that "owns" it).
 SCREngine::SCREngine( VNSequence *vn_sequence,
-                      const CompareReplace *overall_master,
+                      const CompareReplace *root_engine,
                       CompareReplace::AgentPhases &in_progress_agent_phases,
                       TreePtr<Node> cp,
                       TreePtr<Node> rp,
-                      const set<PatternLink> &master_plinks,
-                      const SCREngine *master ) :
-    plan(this, vn_sequence, overall_master, in_progress_agent_phases, cp, rp, master_plinks, master),
+                      const set<PatternLink> &enclosing_plinks,
+                      const SCREngine *enclosing_engine ) :
+    plan(this, vn_sequence, root_engine, in_progress_agent_phases, cp, rp, enclosing_plinks, enclosing_engine),
     depth( 0 )
 {
 }
@@ -40,22 +40,22 @@ SCREngine::SCREngine( VNSequence *vn_sequence,
     
 SCREngine::Plan::Plan( SCREngine *algo_,
                        VNSequence *vn_sequence_,
-                       const CompareReplace *overall_master,
+                       const CompareReplace *root_engine_,
                        CompareReplace::AgentPhases &in_progress_agent_phases,
                        TreePtr<Node> cp,
                        TreePtr<Node> rp,
-                       const set<PatternLink> &master_plinks_,
-                       const SCREngine *master ) : // Note: Is planning stage one
+                       const set<PatternLink> &enclosing_plinks_,
+                       const SCREngine *enclosing_engine_ ) : // Note: Is planning stage one
     algo( algo_ ),
     vn_sequence( vn_sequence_ ),
-    master_ptr( nullptr ),
-    master_plinks( master_plinks_ )
+    enclosing_engine( nullptr ),
+    enclosing_plinks( enclosing_plinks_ )
 {
     INDENT("}");
     TRACE("Planning stage one\n");
-    ASSERT(!master_ptr)("Calling configure on already-configured");
-    overall_master_ptr = overall_master;
-    master_ptr = master;
+    ASSERT(!enclosing_engine)("Calling configure on already-configured");
+    root_engine = root_engine_;
+    enclosing_engine = enclosing_engine_;
     
     ASSERT( cp )("Compare pattern must always be provided\n");
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
@@ -64,14 +64,14 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     // For closure under full arrowhead model, we need a link to root
     base_plink = PatternLink::CreateDistinct( base_pattern );   
             
-    CategoriseAgents( master_plinks, in_progress_agent_phases );    
+    CategoriseAgents( enclosing_plinks, in_progress_agent_phases );    
 
     // This recurses SCR engine planning stage 1
     CreateMyEngines( in_progress_agent_phases );    
 }
 
     
-void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks, 
+void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks, 
                                         CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Walkers for compare and replace patterns that do not recurse beyond embeddeds (except via "through")
@@ -98,21 +98,21 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &master_plinks,
         in_progress_agent_phases[plink.GetChildAgent()] = (Agent::Phase)phase;
     }
         
-    master_agents.clear();
-    for( PatternLink plink : master_plinks )
-        master_agents.insert( plink.GetChildAgent() );
+    enclosing_agents.clear();
+    for( PatternLink plink : enclosing_plinks )
+        enclosing_agents.insert( plink.GetChildAgent() );
 
-    // Determine which ones really belong to us (some might be visible from one of our masters, 
-    // in which case it should be in the supplied set.      
+    // Determine which ones really belong to us (some might be visible in 
+    // an enclosing pattern, in which case it should be in enclosing_plinks.)      
     my_plinks.clear();
-    //my_plinks = DifferenceOf( visible_plinks, master_plinks );
+    //my_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
     for( PatternLink plink : visible_plinks )
-        if( master_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
+        if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks.insert( plink );
 
     // Need the replace plinks in the same order that BuildReplace() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
-        if( master_plinks.count(plink) == 0 ) // exclude by plink
+        if( enclosing_plinks.count(plink) == 0 ) // exclude by plink
         {
             my_replace_plinks_postorder.push_back( plink );
             if( dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
@@ -154,14 +154,14 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Determine which agents our embeddeds should not configure
-    set<PatternLink> surrounding_plinks = UnionOf( master_plinks, my_plinks ); 
+    set<PatternLink> surrounding_plinks = UnionOf( enclosing_plinks, my_plinks ); 
             
     for( PatternLink plink : my_subordinate_plinks_postorder )
     {
         auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent());
         ASSERT( ae );    
         my_engines[ae] = make_shared<SCREngine>( vn_sequence,
-                                                 overall_master_ptr, 
+                                                 root_engine, 
                                                  in_progress_agent_phases,
                                                  ae->GetSearchPattern(),
                                                  ae->GetReplacePattern(),
@@ -197,14 +197,14 @@ void SCREngine::Plan::ConfigureAgents()
 }
 
 
-void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
+void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
     // COMPARE, REPLACE, RECURSE, RECURSE (this is LATER embedded S/R)
     TRACE("Planning stage three\n");
  
-    all_keyer_plinks = master_keyers;
+    all_keyer_plinks = enclosing_keyers;
     
     // COMPARE
     PlanCompare();
@@ -222,7 +222,7 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> master_keyers)
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(base_plink, master_plinks, all_keyer_plinks);
+    and_rule_engine = make_shared<AndRuleEngine>(base_plink, enclosing_plinks, all_keyer_plinks);
     
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
                                     and_rule_engine->GetKeyerPatternLinks() );
@@ -266,20 +266,20 @@ void SCREngine::Plan::Dump()
 {
     list<KeyValuePair> plan_as_strings = 
     {
-        { "overall_master_ptr", 
-          Trace(overall_master_ptr) },
+        { "root_engine", 
+          Trace(root_engine) },
         { "base_pattern", 
           Trace(base_pattern) },
         { "base_plink", 
           Trace(base_plink) },
         { "base_agent", 
           Trace(base_agent) },
-        { "master_ptr", 
-          Trace(master_ptr) },
-        { "master_plinks", 
-          Trace(master_plinks) },
-        { "master_agents", 
-          Trace(master_agents) },
+        { "enclosing_engine", 
+          Trace(enclosing_engine) },
+        { "enclosing_plinks", 
+          Trace(enclosing_plinks) },
+        { "enclosing_agents", 
+          Trace(enclosing_agents) },
         { "my_plinks", 
           Trace(my_plinks) },
         { "my_agents", 
@@ -326,8 +326,8 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
     }
     
     // Master SCREngines may also have pending action requests with matching through node
-    if( plan.master_ptr ) 
-        plan.master_ptr->UpdateEmbeddedActionRequests( through_subtree, new_subtree );
+    if( plan.enclosing_engine ) 
+        plan.enclosing_engine->UpdateEmbeddedActionRequests( through_subtree, new_subtree );
 }
 
 
@@ -343,7 +343,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
          (" agent ")(embedded_agent)
          (" and embedded_action_requests are\n")(embedded_action_requests)("\n");
    
-    // Recall the base node of the subtree under through (after master replace)
+    // Recall the base node of the subtree under through (after replace)
     TreePtr<Node> through_subtree = embedded_action_requests.at(embedded_agent);
     embedded_action_requests.erase(embedded_agent); // not needed any more
     ASSERT( through_subtree );
@@ -374,7 +374,7 @@ TreePtr<Node> SCREngine::Replace()
 
 
 void SCREngine::SingleCompareReplace( XLink base_xlink,
-                                      const SolutionMap *master_solution ) 
+                                      const SolutionMap *enclosing_solution ) 
 {
     INDENT(">");
 
@@ -382,11 +382,11 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the base node. Throws on mismatch.
     const SolutionMap &cs = plan.and_rule_engine->Compare( base_xlink, 
-                                                           master_solution );
+                                                           enclosing_solution );
     TRACE("Search got a match (otherwise throws)\n");
            
-    // Replace will need the compare keys unioned with the master keys
-    SolutionMap rs = UnionOfSolo( *master_solution, cs );    
+    // Replace will need the compare keys unioned with the enclosing keys
+    SolutionMap rs = UnionOfSolo( *enclosing_solution, cs );    
     embedded_action_requests.clear();
     replace_solution = move(rs);
     replace_solution_available = true;
@@ -423,7 +423,7 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( XLink base_xlink,
-                                        const SolutionMap *master_solution )
+                                        const SolutionMap *enclosing_solution )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
@@ -452,7 +452,7 @@ int SCREngine::RepeatingCompareReplace( XLink base_xlink,
         try
         {
             // Cannonicalise could change base
-            SingleCompareReplace( base_xlink, master_solution );
+            SingleCompareReplace( base_xlink, enclosing_solution );
         }
         catch( const ::Mismatch &e )
         {
@@ -586,7 +586,7 @@ bool SCREngine::IsKeyed( Agent *agent ) const
 
 const CompareReplace * SCREngine::GetOverallMaster() const
 {
-    return plan.overall_master_ptr;
+    return plan.root_engine;
 }
 
 
