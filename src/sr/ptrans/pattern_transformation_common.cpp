@@ -33,10 +33,10 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt )
         plinks_to_agents[plink.GetChildAgent()].insert(plink);
     }
     
-    slave_agents.clear();
+    embedded_scr_agents.clear();
     for( Agent *agent : all_agents )        
         if( auto sa = dynamic_cast<EmbeddedSCRAgent *>(agent) )
-            slave_agents.insert( sa );
+            embedded_scr_agents.insert( sa );
 }
 
 

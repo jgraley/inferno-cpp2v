@@ -24,7 +24,7 @@ shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                            PatternLink under_plink )
 {    
-    // Make slaves "invisible" to Delta key propagation (i.e. Colocated see #342)
+    // Make embedded engines "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());
     through_plink.GetChildAgent()->PlanOverlay(through_plink, under_plink);   
 }
@@ -40,7 +40,6 @@ TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( PatternLink me_plink )
     TreePtr<Node> my_through_subtree = through_plink.GetChildAgent()->BuildReplace(through_plink);
     ASSERT( my_through_subtree );
     
-    // And then recurse into slaves
     my_scr_engine->RequestEmbeddedAction( this, my_through_subtree );   
     ASSERT( my_through_subtree );
     
@@ -50,7 +49,7 @@ TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( PatternLink me_plink )
 
 list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 {
-	// it's a slave, so set up a container containing only "through", not "compare" or "replace"
+	// it's an embedded engines, so set up a container containing only "through", not "compare" or "replace"
 	list<PatternLink> plinks;
 	plinks.push_back( PatternLink(this, GetThrough()) );
 	return plinks;

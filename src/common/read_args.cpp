@@ -54,7 +54,7 @@ void ReadArgs::Usage(string msg)
     		        "-sc         Enable CSV solver self-test.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
-                    "               for transformation 12, master match 2, first slave match 3.\n"    
+                    "               for transformation 12, root match 2, first embedded match 3.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"
                     "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
                     "               Note: if quitting after parse or later, output is attempted.\n"     
@@ -240,7 +240,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
 }
 
 // quitafter syntax
-// "<stage><step>.<sub0>.<sub1>.<sub2>.<master>.<slave1>.<slave2>.<slave3>"
+// "<stage><step>.<sub0>.<sub1>.<sub2>.<root>.<embedded1>.<embedded2>.<embedded3>"
 // or "p" for parse
 void ReadArgs::ParseQuitAfter(string arg)
 {

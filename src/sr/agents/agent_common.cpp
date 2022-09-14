@@ -36,13 +36,15 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
     // rule enforcement.
-    // Why no coupling across sibling slaves? Would need an ordering for keying
-    // but ordering not defined on sibling slaves.
+    // Why no coupling across sibling embedded engines? Would need an ordering for keying
+    // but ordering not defined on sibling embedded engines.
     // Stronger reason: siblings each hit multiple times with respect to parent
     // and not necessarily the same number of times, so there's no single
     // well defined key.
-    ASSERT(!my_scr_engine)("Detected repeat configuration of ")(*this)
-                              ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
+    ASSERT(!my_scr_engine)
+          ("Detected repeat configuration of ")
+          (*this)
+          ("\nCould be result of coupling this node across sibling embedded engines - not allowed :(");
     my_scr_engine = e;
     phase = phase_;
 

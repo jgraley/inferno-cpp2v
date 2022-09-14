@@ -236,7 +236,7 @@ ForToWhile::ForToWhile()
     l_overlay->overlay = lr_goto;
     lr_goto->destination = r_cont_labelid;
     l_s_not->negand = l_s_loop;
-    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Statement> >( forbody, l_stuff, l_stuff );
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<Statement> >( forbody, l_stuff, l_stuff );
     
     s_for->body = forbody;
     s_for->initialisation = init;
@@ -246,7 +246,7 @@ ForToWhile::ForToWhile()
     r_outer->statements = (init, r_while);
     r_while->body = r_body;
     r_while->condition = cond;
-    r_body->statements = (r_slave, r_cont_label, inc);
+    r_body->statements = (r_embedded, r_cont_label, inc);
     r_cont_label->identifier = r_cont_labelid;
 
     Configure( SEARCH_REPLACE, MakeCheckUncombable(s_for), r_outer );
@@ -329,7 +329,7 @@ IfToIfGoto::IfToIfGoto()
 SwitchToIfGoto::SwitchToIfGoto()
 {
     // Add a surrounding compound that declares a variable switch_value which 
-    // will hold the value passed to switch. Using slaves, replace case/default 
+    // will hold the value passed to switch. Using embedded patterns, replace case/default 
     // with ordinary labels and, for each one, add a conditional goto (plain goto
     // for default) at the top of the funciton. Condition tests switch_value
     // against the case value or range where GCC's range-case has been used.
@@ -368,9 +368,9 @@ SwitchToIfGoto::SwitchToIfGoto()
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
     
-    auto r_slave1 = MakePatternNode< EmbeddedCompareReplace<Statement> >( body, l1_s_body, l1_r_body );
+    auto r_embedded_1 = MakePatternNode< EmbeddedCompareReplace<Statement> >( body, l1_s_body, l1_r_body );
 
-    // slave for normal case statements (single value)
+    // embedded pattern for normal case statements (single value)
     auto l2_s_body = MakePatternNode<Compound>();
     auto l2_r_body = MakePatternNode<Compound>();
     auto l2_decls = MakePatternNode< Star<Declaration> >();
@@ -398,7 +398,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
     
-    auto r_slave2 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_slave1, l2_s_body, l2_r_body );
+    auto r_embedded_2 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_embedded_1, l2_s_body, l2_r_body );
     
     // EmbeddedSearchReplace for range cases (GCC extension) eg case 5..7:    
     auto l3_s_body = MakePatternNode<Compound>();
@@ -434,7 +434,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l3_r_goto->destination = l3_r_labelid;
     l3_r_label->identifier = l3_r_labelid;
     
-    auto r_slave3 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_slave2, l3_s_body, l3_r_body );
+    auto r_embedded_3 = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_embedded_2, l3_s_body, l3_r_body );
 
     // Finish up top-level
     s_cond->pattern = cond_type;
@@ -444,7 +444,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     r_decl->identifier = id;
     r_decl->type = cond_type;
     r_decl->initialiser = s_cond;
-    r_comp->statements = (r_decl, r_slave3);
+    r_comp->statements = (r_decl, r_embedded_3);
     
     Configure( SEARCH_REPLACE, MakeCheckUncombable(s_switch), r_comp );
 }
@@ -483,13 +483,13 @@ DoToIfGoto::DoToIfGoto()
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    auto r_slave = MakePatternNode< EmbeddedCompareReplace<Statement> >( body, l_stuff, l_stuff );
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<Statement> >( body, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;
     s_do->body = body;
     
-    r_comp->statements = (r_label, r_slave, r_cont_label, r_if);
+    r_comp->statements = (r_label, r_embedded, r_cont_label, r_if);
     r_label->identifier = r_labelid;
     r_cont_label->identifier = l_r_cont_labelid;
     r_if->condition = cond;

@@ -37,7 +37,7 @@ protected:
         set<PatternLink> all_plinks;
         set<Agent *> all_agents;
         map< Agent *, set<PatternLink> > plinks_to_agents;                
-        set<EmbeddedSCRAgent *> slave_agents;
+        set<EmbeddedSCRAgent *> embedded_scr_agents;
     };
 
 public:

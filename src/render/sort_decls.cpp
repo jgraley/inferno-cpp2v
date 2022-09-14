@@ -32,7 +32,6 @@ protected:
                 seq->push_back( i->identifier );
                 return seq;
             }
-        // it's not a slave, so proceed as for UniqueWalk
         //TRACE("defaulting ")(*n)("\n");
         return UniqueWalk::iterator::GetChildContainer(n);
     }
@@ -61,7 +60,6 @@ private:
             return make_shared< Sequence<Node> >();
         }
         //TRACE("defaulting ")(*n)("\n");
-        // it's not a slave, so proceed as for UniqueWalk
         return UniqueWalkNoBody::iterator::GetChildContainer(n);
     }
 };

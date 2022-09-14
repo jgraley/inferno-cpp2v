@@ -1,7 +1,3 @@
-/*
- * slave_test.cpp
- */
-
 #include "steps/test_steps.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
@@ -10,7 +6,7 @@
 using namespace CPPTree;
 using namespace Steps;
 
-// Just an early test for slaves, not a valid transformation
+// Just an early test for embedded patterns, not a valid transformation
 EmbeddedSCRTest::EmbeddedSCRTest()
 {
     auto s_for = MakePatternNode<For>();
@@ -80,7 +76,7 @@ EmbeddedSCRTest3::EmbeddedSCRTest3()
     auto ss = MakePatternNode<Something>();
     auto sr = MakePatternNode<Something>();
     auto r_whatever = MakePatternNode<Whatever>();
-    auto r_slave1 = MakePatternNode< EmbeddedCompareReplace<Node> >( r_whatever, ss, sr );
+    auto r_embedded_1 = MakePatternNode< EmbeddedCompareReplace<Node> >( r_whatever, ss, sr );
 
     auto s2s = MakePatternNode<Something>();
     auto s2r = MakePatternNode<Something>();
@@ -88,7 +84,7 @@ EmbeddedSCRTest3::EmbeddedSCRTest3()
     auto r_embedded_2 = MakePatternNode< EmbeddedCompareReplace<Node> >( r, s2s, s2r );
     r_whatever->child = r_embedded_2;
     
-    Configure( COMPARE_REPLACE, r_slave1 );
+    Configure( COMPARE_REPLACE, r_embedded_1 );
 }
 
 

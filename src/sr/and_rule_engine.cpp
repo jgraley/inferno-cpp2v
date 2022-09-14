@@ -843,7 +843,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
         break; // Success
     }
     
-    // By now, we succeeded and slave_keys is the right set of keys
+    // By now, we succeeded and basic_solution is the right set of keys
     return move(basic_solution);
 }
 

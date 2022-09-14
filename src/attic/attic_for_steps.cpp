@@ -17,9 +17,9 @@ InsertSwitch::InsertSwitch()
     MakePatternPtr< Compound > ls_func_comp, lr_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, l_comp, ls_switch_comp, lr_switch_comp;
     MakePatternPtr< Star<Declaration> > func_decls, decls, l_enum_vals;
     MakePatternPtr< Star<Statement> > func_pre, func_post, pre, body, l_func_pre, l_func_post, l_pre, l_post;
-    MakePatternPtr< Stuff<Statement> > stuff, l_stuff; // TODO these are parallel stuffs, which is bad. Use two first-level slaves 
-                                                    // and modify S&R to allow couplings between them. This means running slaves 
-                                                    // in a post-pass and doing existing passes across all same-level slaves
+    MakePatternPtr< Stuff<Statement> > stuff, l_stuff; // TODO these are parallel stuffs, which is bad. Use two first-level embeddeds 
+                                                    // and modify S&R to allow couplings between them. This means running embeddeds 
+                                                    // in a post-pass and doing existing passes across all same-level embeddeds
     MakePatternPtr<Goto> s_first_goto; 
     MakePatternPtr<Label> ls_label; 
     MakePatternPtr<Switch> r_switch, l_switch;     
@@ -77,12 +77,12 @@ InsertSwitch::InsertSwitch()
     r_switch_comp->statements = (body);
     r_switch->condition = var_id;
 
-    MakePatternPtr< SlaveSearchReplace<Compound> > lr_sub_slave( lr_func_comp, ll_all );    
-    MakePatternPtr< SlaveCompareReplace<Compound> > r_slave( r_func_comp, ls_func_comp, lr_sub_slave );
-    func_over->overlay = r_slave;
+    MakePatternPtr< SlaveSearchReplace<Compound> > lr_sub_embedded( lr_func_comp, ll_all );    
+    MakePatternPtr< SlaveCompareReplace<Compound> > r_embedded( r_func_comp, ls_func_comp, lr_sub_embedded );
+    func_over->overlay = r_embedded;
     ls_func_comp->members = (func_decls, ls_enum, l_var_decl);
     ls_enum->members = (l_enum_vals);
-    ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during slave
+    ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during embedded
     ls_func_comp->statements = (l_func_pre, l_stuff, l_func_post);
     l_stuff->terminus = l_comp;
     l_comp->members = (decls);
@@ -107,11 +107,11 @@ InsertSwitch::InsertSwitch()
     lr_func_comp->statements = (l_func_pre, l_stuff, l_func_post);
     l_over->overlay = lr_switch_comp;
     lr_switch_comp->statements = (l_pre, lr_case, /*ls_label,*/ l_post); 
-    // TODO retain the label for direct gotos, BUT we are spinning at 1st slave because we think the
+    // TODO retain the label for direct gotos, BUT we are spinning at 1st embedded because we think the
     // label is still a state, because we think it reaches state var, because the LABEL->STATE_LABEL change 
-    // is not being seen by IsLabelReachedAgent, because this is done by 2nd slave and stays in temps until
+    // is not being seen by IsLabelReachedAgent, because this is done by 2nd embedded and stays in temps until
     // the master's SingleCompareReplace() completes. Uh-oh!
-    // Only fix after fixing S&R to ensure slave output goes into context
+    // Only fix after fixing S&R to ensure embedded output goes into context
     lr_case->value = lr_state_id;
 
     ll_all->patterns = (ll_any, lls_not1, lls_not2);

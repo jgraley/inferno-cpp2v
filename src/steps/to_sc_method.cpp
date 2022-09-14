@@ -165,10 +165,10 @@ ThreadToMethod::ThreadToMethod()
     
     or_return->return_value = or_retval;
     
-    auto slaveo = MakePatternNode< EmbeddedSearchReplace<Compound> >( loop_comp, os_continue, or_return);
-    auto slaven = MakePatternNode< EmbeddedSearchReplace<Compound> >( slaveo, ns_wait_delta, nr_nt_delta);
-    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( slaven, ms_wait_static, mr_nt_static);
-    auto slavel = MakePatternNode< EmbeddedSearchReplace<Compound> >( slavem, ls_wait_dynamic, lr_nt_dynamic);
+    auto embedded_o = MakePatternNode< EmbeddedSearchReplace<Compound> >( loop_comp, os_continue, or_return);
+    auto embedded_n = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_o, ns_wait_delta, nr_nt_delta);
+    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_n, ms_wait_static, mr_nt_static);
+    auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
@@ -180,7 +180,7 @@ ThreadToMethod::ThreadToMethod()
     loop_comp->members = (loop_decls);
     loop_comp->statements = (loop_stmts);
     r_method->type = r_method_type;
-    r_method->initialiser = slavel;
+    r_method->initialiser = embedded_l;
     r_method->identifier = id;
     
     ls_wait_dynamic->event = l_event;
@@ -236,16 +236,16 @@ ExplicitiseReturns::ExplicitiseReturns()
     mr_if->body = ms_affected;
     mr_if->else_body = MakePatternNode<Nop>();
     
-    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( over_comp, m_comp );
+    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( over_comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
     
-    auto slavel = MakePatternNode< EmbeddedSearchReplace<Compound> >( slavem, ls_return, lr_assign);
+    auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_m, ls_return, lr_assign);
     
     s_all->conjuncts = (inst, s_stuff);
     inst->type = s_callable; // TODO when functions are sorted out, set return type to void
-    inst->initialiser = slavel;
+    inst->initialiser = embedded_l;
     s_stuff->terminus = s_return;
     s_return->return_value = s_uninit;
     over_comp->through = s_comp;

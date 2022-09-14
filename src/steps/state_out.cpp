@@ -273,7 +273,7 @@ AddStateLabelVar::AddStateLabelVar()
     lr_assign->operands = (state_var_id, lsx_not);
     lr_goto->destination = state_var_id;
             
-    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
+    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
      
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
@@ -286,7 +286,7 @@ AddStateLabelVar::AddStateLabelVar()
     state_var->type = MakePatternNode<Labeley>();    
     state_var->initialiser = MakePatternNode<Uninitialised>();
 
-    Configure( SEARCH_REPLACE, s_comp, r_slave );
+    Configure( SEARCH_REPLACE, s_comp, r_embedded );
 }
 
 
@@ -412,14 +412,14 @@ InferBreak::InferBreak()
 
     ls_goto->destination = label_id;
 
-    auto slave = MakePatternNode< EmbeddedSearchReplace<Breakable> >( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
+    auto embedded = MakePatternNode< EmbeddedSearchReplace<Breakable> >( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
 
     s_comp->members = decls;
     s_comp->statements = (pre, breakable, label, post);
     label->identifier = label_id;
     
     r_comp->members = decls;
-    r_comp->statements = (pre, slave, post); 
+    r_comp->statements = (pre, embedded, post); 
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );        
 }
@@ -502,8 +502,8 @@ AddYieldFlag::AddYieldFlag()
     auto ms_all = MakePatternNode< Conjunction<Compound> >();
     auto ms_not = MakePatternNode< Negation<Compound> >();
     
-    auto slavem = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_func_comp, ms_all, mr_comp );
-    auto slave = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_comp, ls_if, lr_if );  
+    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_func_comp, ms_all, mr_comp );
+    auto embedded = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_comp, ls_if, lr_if );  
       
     fn->type = sub;
     fn->initialiser = func_over;
@@ -516,14 +516,14 @@ AddYieldFlag::AddYieldFlag()
     s_comp->members = decls;
     s_comp->statements = (stmts);
     stmts->restriction = MakePatternNode<If>(); // anti-spin
-    func_over->overlay = slavem; 
+    func_over->overlay = embedded_m; 
     r_func_comp->members = (func_decls);
     r_flag_init->operands = (r_flag_id, MakePatternNode<False>());
     r_func_comp->statements = (func_pre, loop);
     r_flag_decl->identifier = r_flag_id;
     r_flag_decl->type = MakePatternNode<Boolean>();
     r_flag_decl->initialiser = MakePatternNode<Uninitialised>();
-    over->overlay = slave;
+    over->overlay = embedded;
     r_comp->members = (decls, r_flag_decl);
     r_comp->statements = (r_flag_init, stmts);
 

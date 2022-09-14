@@ -1,6 +1,3 @@
-/*
- * slave_test
- */
 
 #ifndef EMBEDDED_SCR_TEST_HPP
 #define EMBEDDED_SCR_TEST_HPP

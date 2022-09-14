@@ -16,7 +16,7 @@ using namespace SR;
 /// spot SystemC type by its name and replace with inferno node 
 /** We look for the decl and remeove it since the inferno
  Node does not require declaration. Then just switch each appearance
- over to the new node, using a slave */
+ over to the new node, using an embedded pattern */
 class DetectSCType : public VNStep 
 {
 public:

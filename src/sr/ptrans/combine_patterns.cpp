@@ -13,7 +13,7 @@ void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
     FixupPointers( pk, scp, rp );
     pk.top_level_engine->Configure( scp, rp );
     
-    for( EmbeddedSCRAgent *sa : pk.slave_agents )    
+    for( EmbeddedSCRAgent *sa : pk.embedded_scr_agents )    
     {
         FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
     }

@@ -177,11 +177,11 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // two labels in succession. Replace the pair of labels with a single
     // one.
     //
-    // Using a slave, find references to either one of the original labels 
+    // Using an embedded pattern, find references to either one of the original labels 
     // and replace by a reference to the new label.
     //
     // Notes:
-    // - The slave must operate over the entire function, not just the 
+    // - The embedded pattern must operate over the entire function, not just the 
     // compound that containes the labels, because labels have function 
     // scope and the gotos can be anywhere.
     // - Do not assume the usages of the labels will be gotos. We support
@@ -209,7 +209,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
-    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
+    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -219,7 +219,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     s_label1->identifier = s_labelid1;
     s_label2->identifier = s_labelid2;
     
-    r_instance->initialiser = r_slave;
+    r_instance->initialiser = r_embedded;
     r_instance->identifier = identifier;
     r_instance->type = type;
     stuff->terminus = overlay;           
@@ -238,11 +238,11 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     // Search for a function that contains a compound block that has 
     // a label followed by a goto. Remove the label, leaving the goto.
     //
-    // Using a slave, find references to either one of the original labels 
+    // Using an embedded pattern, find references to either one of the original labels 
     // and replace by a reference to a new merged one.
     //
     // Notes:
-    // - The slave must operate over the entire function, not just the 
+    // - The embedded pattern must operate over the entire function, not just the 
     // compound that containes the labels, because labels have function 
     // scope and the gotos can be anywhere.
     // - Do not assume the usages of the labels will be gotos. We support
@@ -270,7 +270,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
-    auto r_slave = MakePatternNode< EmbeddedSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
+    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Compound> >( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -280,7 +280,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     s_label->identifier = s_labelid1;
     s_goto->destination = s_labelid2;
     
-    r_instance->initialiser = r_slave;
+    r_instance->initialiser = r_embedded;
     r_instance->identifier = identifier;
     r_instance->type = type;
     stuff->terminus = overlay;           
