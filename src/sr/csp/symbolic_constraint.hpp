@@ -53,12 +53,12 @@ private:
         typedef map< set<VariableId>, shared_ptr<SYM::SymbolExpression>> GivensToExpression;
         map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;       
-        SYM::Expression::VariablesRequiringNuggets required_x_tree_db_level; 
+        SYM::Expression::VariablesRequiringRows required_x_tree_db_level; 
         shared_ptr<const SR::XTreeDatabase> x_tree_db;
     } plan;
 
     const set<VariableId> &GetVariables() const override;
-    SYM::Expression::VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
+    SYM::Expression::VariablesRequiringRows GetVariablesRequiringRows() const override;
     virtual void Start();    
     bool IsSatisfied( const Assignments &assignments ) const override;
     unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,

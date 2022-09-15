@@ -172,8 +172,8 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     auto xpr_ss = MakeTreeNode<SubSequence>();
     while(xlink != keyer_xlink)
     {       
-        const XTreeDatabase::Nugget &nugget( x_tree_db->GetNugget(xlink) );       
-        xlink = nugget.parent_xlink;
+        const XTreeDatabase::Row &row( x_tree_db->GetRow(xlink) );       
+        xlink = row.parent_xlink;
         
         // Putting this here excludes the terminus, as required
         TRACEC("Move to parent ")(xlink)("\n");

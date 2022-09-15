@@ -296,24 +296,24 @@ bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     
     if( lower )
     {
-        it_lower = x_tree_db->GetNugget(lower).depth_first_ordered_it;
+        it_lower = x_tree_db->GetRow(lower).depth_first_ordered_it;
         if( !lower_incl )
             ++it_lower;
     }
     else
     {
-        it_lower = x_tree_db->depth_first_ordered_domain.begin();
+        it_lower = x_tree_db->depth_first_ordered_index.begin();
     }
     
     if( upper )
     {
-        it_upper = x_tree_db->GetNugget(upper).depth_first_ordered_it;
-        if( upper_incl && it_upper != x_tree_db->depth_first_ordered_domain.end() )
+        it_upper = x_tree_db->GetRow(upper).depth_first_ordered_it;
+        if( upper_incl && it_upper != x_tree_db->depth_first_ordered_index.end() )
             ++it_upper;
     }
     else
     {
-        it_upper = x_tree_db->depth_first_ordered_domain.end();
+        it_upper = x_tree_db->depth_first_ordered_index.end();
     }
     
     links = set<SR::XLink>( it_lower, it_upper );
@@ -380,25 +380,25 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
     if( lower )
     {
         if( lower_incl )
-            it_lower = x_tree_db->simple_compare_ordered_domain.lower_bound(lower);
+            it_lower = x_tree_db->simple_compare_ordered_index.lower_bound(lower);
         else
-            it_lower = x_tree_db->simple_compare_ordered_domain.upper_bound(lower);
+            it_lower = x_tree_db->simple_compare_ordered_index.upper_bound(lower);
     }
     else
     {
-        it_lower = x_tree_db->simple_compare_ordered_domain.begin();
+        it_lower = x_tree_db->simple_compare_ordered_index.begin();
     }
     
     if( upper )
     {
         if( upper_incl )
-            it_upper = x_tree_db->simple_compare_ordered_domain.upper_bound(upper);
+            it_upper = x_tree_db->simple_compare_ordered_index.upper_bound(upper);
         else
-            it_upper = x_tree_db->simple_compare_ordered_domain.lower_bound(upper);
+            it_upper = x_tree_db->simple_compare_ordered_index.lower_bound(upper);
     }
     else
     {
-        it_upper = x_tree_db->simple_compare_ordered_domain.begin();
+        it_upper = x_tree_db->simple_compare_ordered_index.begin();
     }
 
     links = set<SR::XLink>( it_lower, it_upper );
@@ -457,15 +457,15 @@ bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
         ASSERT( &bounds );
         ASSERT( bounds.first );
         if( lower_incl )
-            it_lower = x_tree_db->category_ordered_domain.lower_bound(*bounds.first);
+            it_lower = x_tree_db->category_ordered_index.lower_bound(*bounds.first);
         else
-            it_lower = x_tree_db->category_ordered_domain.upper_bound(*bounds.first);
+            it_lower = x_tree_db->category_ordered_index.upper_bound(*bounds.first);
 
         ASSERT( bounds.second );
         if( upper_incl )
-            it_upper = x_tree_db->category_ordered_domain.upper_bound(*bounds.second);
+            it_upper = x_tree_db->category_ordered_index.upper_bound(*bounds.second);
         else
-            it_upper = x_tree_db->category_ordered_domain.lower_bound(*bounds.second);
+            it_upper = x_tree_db->category_ordered_index.lower_bound(*bounds.second);
 
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
     }

@@ -54,7 +54,7 @@ public:
      * 
      * @return A list of variables affected by this constraint.
      */
-    virtual SYM::Expression::VariablesRequiringNuggets GetVariablesRequiringNuggets() const = 0;
+    virtual SYM::Expression::VariablesRequiringRows GetVariablesRequiringRows() const = 0;
 
     /**
      * Set the values of the forced varibles

@@ -101,16 +101,16 @@ Over<BooleanExpression> operator==( Over<SymbolExpression> a, Over<SymbolExpress
 
 Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b );
 
-// ------------------------- IndexComparisonOperator --------------------------
+// ------------------------- DepthFirstComparisonOperator --------------------------
 
 // Use depth-first index from the x_tree_db to effect inequalities
-class IndexComparisonOperator : public PredicateOperator
+class DepthFirstComparisonOperator : public PredicateOperator
 {
 public:    
     typedef BooleanExpression NominalType;
-    explicit IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
+    explicit DepthFirstComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
-    VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
+    VariablesRequiringRows GetVariablesRequiringRows() const override;
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
@@ -127,9 +127,9 @@ protected:
 
 // ------------------------- IsGreaterOperator --------------------------
 
-class IsGreaterOperator : public IndexComparisonOperator
+class IsGreaterOperator : public DepthFirstComparisonOperator
 {
-    using IndexComparisonOperator::IndexComparisonOperator;
+    using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
@@ -146,9 +146,9 @@ Over<BooleanExpression> operator>( Over<SymbolExpression> a, Over<SymbolExpressi
 
 // ------------------------- IsLessOperator --------------------------
 
-class IsLessOperator : public IndexComparisonOperator
+class IsLessOperator : public DepthFirstComparisonOperator
 {
-    using IndexComparisonOperator::IndexComparisonOperator;
+    using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
@@ -165,9 +165,9 @@ Over<BooleanExpression> operator<( Over<SymbolExpression> a, Over<SymbolExpressi
 
 // ------------------------- IsGreaterOrEqualOperator --------------------------
 
-class IsGreaterOrEqualOperator : public IndexComparisonOperator
+class IsGreaterOrEqualOperator : public DepthFirstComparisonOperator
 {
-    using IndexComparisonOperator::IndexComparisonOperator;
+    using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
@@ -184,9 +184,9 @@ Over<BooleanExpression> operator>=( Over<SymbolExpression> a, Over<SymbolExpress
 
 // ------------------------- IsLessOrEqualOperator --------------------------
 
-class IsLessOrEqualOperator : public IndexComparisonOperator
+class IsLessOrEqualOperator : public DepthFirstComparisonOperator
 {
-    using IndexComparisonOperator::IndexComparisonOperator;
+    using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
     virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,

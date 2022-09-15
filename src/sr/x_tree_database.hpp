@@ -80,31 +80,31 @@ public:
     {
     public:
         NODE_FUNCTIONS_FINAL
-        CategoryMinimaxNode( int lacing_index );
+        CategoryMinimaxNode( int lacing_ordinal );
         CategoryMinimaxNode(); ///< default constructor, for making archetypes 
-        int GetLacingIndex() const;
+        int GetLacingOrdinal() const;
         string GetTrace() const override;
     private:
-        int lacing_index;
+        int lacing_ordinal;
     };
 
     // Domain ordered by depth-first walk
     // Don't use a vector for this:
     // (a) you'd need the size in advance otherwise the iterators in
-    // the nuggets will go bad while populating and
+    // the xlink_table will go bad while populating and
     // (b) incremental domain update will be hard
-    typedef list<XLink> DepthFirstOrderedDomain;    
-    typedef DepthFirstOrderedDomain::const_iterator DepthFirstOrderedIt;    
+    typedef list<XLink> DepthFirstOrderedIndex;    
+    typedef DepthFirstOrderedIndex::const_iterator DepthFirstOrderedIt;    
     
     // Category ordering TODO merge with SimpleCompare ordering
-    typedef multiset<XLink, CategoryRelation> CategoryOrderedDomain;
-    typedef CategoryOrderedDomain::iterator CategoryOrderedIt;
+    typedef multiset<XLink, CategoryRelation> CategoryOrderedIndex;
+    typedef CategoryOrderedIndex::iterator CategoryOrderedIt;
 
     // We will provide a SimpleCompare ordered version of the domain
-    typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedDomain;
-    typedef SimpleCompareOrderedDomain::iterator SimpleCompareOrderedIt;
+    typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedIndex;
+    typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
     
-    class Nugget : public Traceable
+    class Row : public Traceable
     {
     public:
         enum ContainmentContext
@@ -119,7 +119,7 @@ public:
         
         // Parent X link if not ROOT
         // Note that the parent is unique because:
-        // - nugget is relative to a link, not a node,
+        // - row is relative to a link, not a node,
         // - multiple parents only allowed at leaf, and parent is 
         //   (at least) one level back from that.
         XLink parent_xlink = XLink();
@@ -138,7 +138,7 @@ public:
         XLink my_sequence_successor = XLink();
 
         // Index in a depth-first walk
-        IndexType depth_first_index = -1;
+        IndexType depth_first_ordinal = -1;
         
         // Iterator in a depth-first walk
         DepthFirstOrderedIt depth_first_ordered_it;
@@ -151,7 +151,7 @@ public:
         string GetTrace() const;
     };
     
-    class NodeNugget : public Traceable
+    class NodeRow : public Traceable
     {
     public:		
 		// Our node is the child of these links.
@@ -159,21 +159,21 @@ public:
 
 		// Declarative XLinks onto our node. 
 		// A subset of parents, so to get the declarer node, you'll need 
-		// to use eg Nugget::parent_xlink.GetChildX(). Why have I done 
+		// to use eg Row::parent_xlink.GetChildX(). Why have I done 
 		// this? So that this info is unambiguous across parallel links:
 		// We'll uniquely specify the correct one if only one is a 
 		// declaring link (precision). Taking parent discards that info.
 		set<XLink> declarers;
 		
-        void Merge( const NodeNugget &nn );
+        void Merge( const NodeRow &nn );
         string GetTrace() const;
     };
 
-    const Nugget &GetNugget(XLink xlink) const;
-    bool HasNugget(XLink xlink) const;
+    const Row &GetRow(XLink xlink) const;
+    bool HasRow(XLink xlink) const;
 
-    const NodeNugget &GetNodeNugget(TreePtr<Node> node) const;
-    bool HasNodeNugget(TreePtr<Node> node) const;
+    const NodeRow &GetNodeRow(TreePtr<Node> node) const;
+    bool HasNodeRow(TreePtr<Node> node) const;
 
     void Build( XLink root_xlink );
     void ExtendDomainWorker( PatternLink plink );
@@ -183,8 +183,8 @@ private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
-                  Nugget &nugget,
-                  NodeNugget &node_nugget );
+                  Row &row,
+                  NodeRow &node_row );
     void AddChildren( SubtreeMode mode, XLink xlink );
     void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink );
     void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
@@ -195,29 +195,29 @@ public:
     unordered_set<XLink> unordered_domain;            
     
     // Global domain of possible xlink values - ordered
-    DepthFirstOrderedDomain depth_first_ordered_domain;            
+    DepthFirstOrderedIndex depth_first_ordered_index;            
     
     // Domain ordered by category
-    CategoryOrderedDomain category_ordered_domain;
+    CategoryOrderedIndex category_ordered_index;
     
     // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
     // Should be the other way around, as an indication of policy
-    SimpleCompareOrderedDomain simple_compare_ordered_domain;
+    SimpleCompareOrderedIndex simple_compare_ordered_index;
     
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
     
-    // XLink-to-nugget-of-x_tree_db map
-    unordered_map<XLink, Nugget> nuggets;
+    // XLink-to-row-of-x_tree_db map
+    unordered_map<XLink, Row> xlink_table;
 
-    // Node-to-nugget-of-x_tree_db map
-    map<TreePtr<Node>, NodeNugget> node_nuggets;
+    // Node-to-row-of-x_tree_db map
+    map<TreePtr<Node>, NodeRow> node_table;
 
 private:    
     // Depth-first ordering
-    int current_index;
+    int current_ordinal;
     
-    // Last node to be reached and given a nugget
+    // Last node to be reached and given a row
     XLink last_xlink;
     
     // TreeKit implementation

@@ -13,13 +13,13 @@ using namespace SR;
 
 #ifdef TRACE_X_TREE_DB_DELTAS
 // Global because there are different x_tree_dbs owned by different SCR Engines
-XTreeDatabase::CategoryOrderedDomain previous_category_ordered_domain;
+XTreeDatabase::CategoryOrderedIndex previous_category_ordered_domain;
 #endif    
 
 
 XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses ),
-    category_ordered_domain( plan.lacing )
+    category_ordered_index( plan.lacing )
 { 
 }
 
@@ -110,76 +110,76 @@ bool XTreeDatabase::CategoryRelation::operator() (const XLink& x_link, const XLi
     auto cat_y = TreePtr<CategoryMinimaxNode>::DynamicCast( y );
 
     if( !cat_x && !cat_y )
-        return lacing->IsIndexLess( x, y );    
+        return lacing->IsOrdinalLess( x, y );    
    
     int xi, yi;
     if( cat_x )
-        xi = cat_x->GetLacingIndex();
+        xi = cat_x->GetLacingOrdinal();
     else
-        xi = lacing->GetIndexForNode( x );
+        xi = lacing->GetOrdinalForNode( x );
     if( cat_y )
-        yi = cat_y->GetLacingIndex();
+        yi = cat_y->GetLacingOrdinal();
     else
-        yi = lacing->GetIndexForNode( y );
+        yi = lacing->GetOrdinalForNode( y );
     return xi < yi;   
 }
 
 
-XTreeDatabase::CategoryMinimaxNode::CategoryMinimaxNode( int lacing_index_ ) :
-    lacing_index( lacing_index_ )
+XTreeDatabase::CategoryMinimaxNode::CategoryMinimaxNode( int lacing_ordinal_ ) :
+    lacing_ordinal( lacing_ordinal_ )
 {
 }
     
 
 XTreeDatabase::CategoryMinimaxNode::CategoryMinimaxNode() :
-    lacing_index( 0 )
+    lacing_ordinal( 0 )
 {
 }
     
 
-int XTreeDatabase::CategoryMinimaxNode::GetLacingIndex() const
+int XTreeDatabase::CategoryMinimaxNode::GetLacingOrdinal() const
 {
-    return lacing_index;
+    return lacing_ordinal;
 }
  
 
 string XTreeDatabase::CategoryMinimaxNode::GetTrace() const
 {
-    return GetTypeName() + SSPrintf("(%d)", lacing_index);
+    return GetTypeName() + SSPrintf("(%d)", lacing_ordinal);
 }
 
 
-const XTreeDatabase::Nugget &XTreeDatabase::GetNugget(XLink xlink) const
+const XTreeDatabase::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
     ASSERT( xlink );
-    ASSERT( HasNugget(xlink) )
-          ("X tree database: no nugget for ")(xlink)("\n")
-          ("Nuggets: ")(nuggets);
-    return nuggets.at(xlink);
+    ASSERT( HasRow(xlink) )
+          ("X tree database: no row for ")(xlink)("\n")
+          ("Rows: ")(xlink_table);
+    return xlink_table.at(xlink);
 }
 
 
-bool XTreeDatabase::HasNugget(XLink xlink) const
+bool XTreeDatabase::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
-    return nuggets.count(xlink) > 0;
+    return xlink_table.count(xlink) > 0;
 }
 
 
-const XTreeDatabase::NodeNugget &XTreeDatabase::GetNodeNugget(TreePtr<Node> node) const
+const XTreeDatabase::NodeRow &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 {
     ASSERT( node );
-    ASSERT( HasNodeNugget(node) )
-          ("X tree database: no node nugget for ")(node)("\n")
-          ("Node nuggets: ")(node_nuggets);
-    return node_nuggets.at(node);
+    ASSERT( HasNodeRow(node) )
+          ("X tree database: no node row for ")(node)("\n")
+          ("Node xlink_table: ")(node_table);
+    return node_table.at(node);
 }
 
 
-bool XTreeDatabase::HasNodeNugget(TreePtr<Node> node) const
+bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 {
     ASSERT( node );
-    return node_nuggets.count(node) > 0;
+    return node_table.count(node) > 0;
 }
 
 
@@ -189,13 +189,13 @@ void XTreeDatabase::Build( XLink root_xlink )
 	
     // Clear everything 
     unordered_domain.clear();
-    depth_first_ordered_domain.clear();
-    category_ordered_domain.clear();
-    simple_compare_ordered_domain.clear();
+    depth_first_ordered_index.clear();
+    category_ordered_index.clear();
+    simple_compare_ordered_index.clear();
     domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
-    nuggets.clear();
-    node_nuggets.clear();    
-    current_index = 0;
+    xlink_table.clear();
+    node_table.clear();    
+    current_ordinal = 0;
     
     AddAtRoot( REQUIRE_SOLO, root_xlink );
     
@@ -206,8 +206,8 @@ void XTreeDatabase::Build( XLink root_xlink )
     if( Tracer::IsEnabled() ) 
     {        
         TRACE("X tree db rebuilt at ")(root_xlink)(":\n")
-             ( category_ordered_domain )("\n");
-        previous_category_ordered_domain = category_ordered_domain;
+             ( category_ordered_index )("\n");
+        previous_category_ordered_domain = category_ordered_index;
     }
 #endif    
 }
@@ -250,10 +250,10 @@ void XTreeDatabase::ExtendDomain( PatternLink plink )
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
         TRACE("Domain extended for ")(plink)(", new XLinks:\n")
-             ( DifferenceOf(category_ordered_domain, previous_category_ordered_domain) )
+             ( DifferenceOf(category_ordered_index, previous_category_ordered_domain) )
              ("\nRemoved XLinks:\n")
-             ( DifferenceOf(previous_category_ordered_domain, category_ordered_domain) )("\n");
-        previous_category_ordered_domain = category_ordered_domain;
+             ( DifferenceOf(previous_category_ordered_domain, category_ordered_index) )("\n");
+        previous_category_ordered_domain = category_ordered_index;
     }
 #endif
 
@@ -267,36 +267,36 @@ void XTreeDatabase::ExtendDomain( PatternLink plink )
 void XTreeDatabase::AddAtRoot( SubtreeMode mode, XLink root_xlink )
 {
     // Bootstrap the recursive process with initial (root) values
-    Nugget nugget;
-    nugget.containment_context = Nugget::ROOT;
-    nugget.my_container_front = root_xlink;
-    nugget.my_container_back = root_xlink;
+    Row row;
+    row.containment_context = Row::ROOT;
+    row.my_container_front = root_xlink;
+    row.my_container_back = root_xlink;
     
-    NodeNugget node_nugget;
-    AddLink( mode, root_xlink, nugget, node_nugget );
+    NodeRow node_row;
+    AddLink( mode, root_xlink, row, node_row );
 }
 
 
 void XTreeDatabase::AddLink( SubtreeMode mode, 
                             XLink xlink, 
-                            Nugget &nugget,
-                            NodeNugget &node_nugget )
+                            Row &row,
+                            NodeRow &node_row )
 {
     // This will also prevent recursion into xlink
-    if( mode==STOP_IF_ALREADY_IN && nuggets.count(xlink) > 0 )
+    if( mode==STOP_IF_ALREADY_IN && xlink_table.count(xlink) > 0 )
         return; // Terminate into the existing domain
     
     // Check for badness
-    if( nuggets.count(xlink) )
+    if( xlink_table.count(xlink) )
     {
-		Nugget old_nugget = nuggets.at(xlink);
-		// remember that nugget is incomplete because 
+		Row old_row = xlink_table.at(xlink);
+		// remember that row is incomplete because 
 		// we have not been able to fill everything in yet
-		if( nugget.parent_xlink != old_nugget.parent_xlink )
+		if( row.parent_xlink != old_row.parent_xlink )
 		{
 			ASSERT(false)
 			      ("Rule #217 violation or cycle: node with child should have only one parent\n")
-			      ("From parents: ")(nugget.parent_xlink)(" and ")(old_nugget.parent_xlink)
+			      ("From parents: ")(row.parent_xlink)(" and ")(old_row.parent_xlink)
 			      ("\nTo child: ")(xlink);
 		}
 		
@@ -306,16 +306,16 @@ void XTreeDatabase::AddLink( SubtreeMode mode,
     
     // Update domains
     InsertSolo( unordered_domain, xlink );
-    depth_first_ordered_domain.push_back( xlink );
-    category_ordered_domain.insert( xlink );
-    simple_compare_ordered_domain.insert( xlink );
+    depth_first_ordered_index.push_back( xlink );
+    category_ordered_index.insert( xlink );
+    simple_compare_ordered_index.insert( xlink );
     
-    DepthFirstOrderedIt it = depth_first_ordered_domain.end();
+    DepthFirstOrderedIt it = depth_first_ordered_index.end();
     --it; // I know this is OK because we just pushed to ordered_domain
-    nugget.depth_first_ordered_it = it;
-    nugget.depth_first_index = current_index++;  
+    row.depth_first_ordered_it = it;
+    row.depth_first_ordinal = current_ordinal++;  
         
-    node_nugget.parents.insert( xlink );    
+    node_row.parents.insert( xlink );    
         
     // Keep track of the last added on the way in.
     // AddChildren() may recuse back here and update last_link.
@@ -325,13 +325,13 @@ void XTreeDatabase::AddLink( SubtreeMode mode,
     AddChildren( mode, xlink );
 
     // Grab last link that was added during unwind    
-    nugget.last_descendant_xlink = last_xlink;
+    row.last_descendant_xlink = last_xlink;
     
-    // Add a nugget of x_tree_db
-    InsertSolo( nuggets, make_pair(xlink, nugget) );
+    // Add a row of x_tree_db
+    InsertSolo( xlink_table, make_pair(xlink, row) );
 
-	// Merge in the node nugget
-	node_nuggets[xlink.GetChildX()].Merge( node_nugget );	
+	// Merge in the node row
+	node_table[xlink.GetChildX()].Merge( node_row );	
 
     // Here, elements go into quotient set, but it does not 
     // uniquify: every link in the input X tree must appear 
@@ -371,18 +371,18 @@ void XTreeDatabase::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p
     XLink child_xlink( x, p_x_singular );        
     TreePtr<Node> child_x = child_xlink.GetChildX();
     
-    Nugget nugget;
-    nugget.containment_context = Nugget::SINGULAR;
-    nugget.parent_xlink = xlink;
-    nugget.my_container_front = child_xlink;
-    nugget.my_container_back = child_xlink;
+    Row row;
+    row.containment_context = Row::SINGULAR;
+    row.parent_xlink = xlink;
+    row.my_container_front = child_xlink;
+    row.my_container_back = child_xlink;
     
-    NodeNugget node_nugget;
+    NodeRow node_row;
     set<const TreePtrInterface *> declared = x->GetDeclared();
     if( declared.count( p_x_singular ) > 0 )
-		node_nugget.declarers.insert( child_xlink );
+		node_row.declarers.insert( child_xlink );
 		
-    AddLink( mode, child_xlink, nugget, node_nugget );
+    AddLink( mode, child_xlink, row, node_row );
 }
 
 
@@ -397,29 +397,29 @@ void XTreeDatabase::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLi
         XLink child_xlink( x, &*xit );
         TreePtr<Node> child_x = child_xlink.GetChildX();
         
-        Nugget nugget;
-        nugget.containment_context = Nugget::IN_SEQUENCE;
-        nugget.parent_xlink = xlink;
-        nugget.my_container_it = xit;        
-        nugget.my_container_front = XLink( x, &x_seq->front() );
-        nugget.my_container_back = XLink( x, &x_seq->back() );
+        Row row;
+        row.containment_context = Row::IN_SEQUENCE;
+        row.parent_xlink = xlink;
+        row.my_container_it = xit;        
+        row.my_container_front = XLink( x, &x_seq->front() );
+        row.my_container_back = XLink( x, &x_seq->back() );
         
         if( xit_predecessor != x_seq->end() )
-            nugget.my_sequence_predecessor = XLink( x, &*xit_predecessor );
+            row.my_sequence_predecessor = XLink( x, &*xit_predecessor );
 
         SequenceInterface::iterator xit_successor = xit;
         ++xit_successor;
         if( xit_successor != x_seq->end() )
-            nugget.my_sequence_successor = XLink( x, &*xit_successor );
+            row.my_sequence_successor = XLink( x, &*xit_successor );
         else
-            nugget.my_sequence_successor = XLink::OffEndXLink;        
+            row.my_sequence_successor = XLink::OffEndXLink;        
             
-        NodeNugget node_nugget;
+        NodeRow node_row;
         set<const TreePtrInterface *> declared = x->GetDeclared();
         if( declared.count( &*xit ) > 0 )
-			node_nugget.declarers.insert( child_xlink );
+			node_row.declarers.insert( child_xlink );
 
-        AddLink( mode, child_xlink, nugget, node_nugget );
+        AddLink( mode, child_xlink, row, node_row );
         
         xit_predecessor = xit;
     }
@@ -436,25 +436,25 @@ void XTreeDatabase::AddCollection( SubtreeMode mode, CollectionInterface *x_col,
         XLink child_xlink( x, &*xit );
         TreePtr<Node> child_x = child_xlink.GetChildX();
 
-        Nugget nugget;
-        nugget.containment_context = Nugget::IN_COLLECTION;
-        nugget.parent_xlink = xlink;
-        nugget.my_container_it = xit;
-        nugget.my_container_front = XLink( x, &*(x_col->begin()) );
+        Row row;
+        row.containment_context = Row::IN_COLLECTION;
+        row.parent_xlink = xlink;
+        row.my_container_it = xit;
+        row.my_container_front = XLink( x, &*(x_col->begin()) );
         // Note: in real STL containers, one would use *(x_col->rbegin())
-        nugget.my_container_back = XLink( x, &(x_col->back()) );
+        row.my_container_back = XLink( x, &(x_col->back()) );
         
-        NodeNugget node_nugget;
+        NodeRow node_row;
         set<const TreePtrInterface *> declared = x->GetDeclared();
         if( declared.count( &*xit ) > 0 )
-			node_nugget.declarers.insert( child_xlink );
+			node_row.declarers.insert( child_xlink );
 
-        AddLink( mode, child_xlink, nugget, node_nugget );
+        AddLink( mode, child_xlink, row, node_row );
     }
 }
 
 
-string XTreeDatabase::Nugget::GetTrace() const
+string XTreeDatabase::Row::GetTrace() const
 {
     string s = "(";
 
@@ -487,20 +487,20 @@ string XTreeDatabase::Nugget::GetTrace() const
         s += ", back=" + Trace(my_container_back);
     }
     if( idx )
-        s += SSPrintf(", dfi=%d", depth_first_index);
+        s += SSPrintf(", dfi=%d", depth_first_ordinal);
     s += ")";
     return s;
 }
 
 
-void XTreeDatabase::NodeNugget::Merge( const NodeNugget &nn )
+void XTreeDatabase::NodeRow::Merge( const NodeRow &nn )
 {
 	parents = UnionOf( parents, nn.parents );
 	declarers = UnionOf( declarers, nn.declarers );
 }
 
 
-string XTreeDatabase::NodeNugget::GetTrace() const
+string XTreeDatabase::NodeRow::GetTrace() const
 {
     string s = "(";
 	
@@ -516,10 +516,10 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    
-    if( node_nuggets.count(node)==0 ) // not found
+    if( node_table.count(node)==0 ) // not found
         throw UnknownNode();
         
-    NodeNugget nn = node_nuggets.at(node);
+    NodeRow nn = node_table.at(node);
     // Note that nn.declarers is "precise", i.e. the XLinks are the actual
     // declaring xlinks, not just arbitrary parent links to the declaree.
     // Also correct for parallel links where only some declare.
@@ -529,7 +529,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         
         // first is TreePtr to the declarer node. Loses info about which 
         // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = nuggets.at(declarer_xlink).parent_xlink.GetChildX();
+        info.first = xlink_table.at(declarer_xlink).parent_xlink.GetChildX();
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.

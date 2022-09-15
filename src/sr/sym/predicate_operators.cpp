@@ -139,7 +139,7 @@ unique_ptr<BooleanResult> IsEqualOperator::Evaluate( const EvalKit &kit,
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
-    // within the full arrowhead model (cf IndexComparisonOperator) .
+    // within the full arrowhead model (cf DepthFirstComparisonOperator) .
     bool res = ( ra->GetOnlyXLink() == rb->GetOnlyXLink() );
     return make_unique<BooleanResult>( res );   
 }
@@ -211,9 +211,9 @@ Over<BooleanExpression> SYM::operator!=( Over<SymbolExpression> a, Over<SymbolEx
     return ~(a==b);
 }
 
-// ------------------------- IndexComparisonOperator --------------------------
+// ------------------------- DepthFirstComparisonOperator --------------------------
 
-IndexComparisonOperator::IndexComparisonOperator( shared_ptr<SymbolExpression> a_, 
+DepthFirstComparisonOperator::DepthFirstComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                                   shared_ptr<SymbolExpression> b_ ) :
     a(a_),
     b(b_)
@@ -222,19 +222,19 @@ IndexComparisonOperator::IndexComparisonOperator( shared_ptr<SymbolExpression> a
 }    
     
 
-Expression::VariablesRequiringNuggets IndexComparisonOperator::GetVariablesRequiringNuggets() const
+Expression::VariablesRequiringRows DepthFirstComparisonOperator::GetVariablesRequiringRows() const
 {
     return GetRequiredVariables();
 }
 
 
-list<shared_ptr<SymbolExpression> *> IndexComparisonOperator::GetSymbolOperandPointers()
+list<shared_ptr<SymbolExpression> *> DepthFirstComparisonOperator::GetSymbolOperandPointers()
 {
     return {&a, &b};
 }
 
 
-unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
+unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit &kit,
                                                              list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
@@ -248,17 +248,17 @@ unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
 
     // For greater/less, we need to consult the x_tree_db. We use the 
     // overall depth-first ordering.
-    const SR::XTreeDatabase::Nugget &nugget_a( kit.x_tree_db->GetNugget(ra->GetOnlyXLink()) );   
-    const SR::XTreeDatabase::Nugget &nugget_b( kit.x_tree_db->GetNugget(rb->GetOnlyXLink()) );   
-    SR::XTreeDatabase::IndexType index_a = nugget_a.depth_first_index;
-    SR::XTreeDatabase::IndexType index_b = nugget_b.depth_first_index;
+    const SR::XTreeDatabase::Row &row_a( kit.x_tree_db->GetRow(ra->GetOnlyXLink()) );   
+    const SR::XTreeDatabase::Row &row_b( kit.x_tree_db->GetRow(rb->GetOnlyXLink()) );   
+    SR::XTreeDatabase::IndexType ordinal_a = row_a.depth_first_ordinal;
+    SR::XTreeDatabase::IndexType ordinal_b = row_b.depth_first_ordinal;
     
-    bool res = EvalBoolFromIndexes( index_a, index_b );
+    bool res = EvalBoolFromIndexes( ordinal_a, ordinal_b );
     return make_unique<BooleanResult>( res );  
 }
 
 
-shared_ptr<SymbolExpression> IndexComparisonOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
+shared_ptr<SymbolExpression> DepthFirstComparisonOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 { 
     auto ranges = GetRanges();
 
@@ -274,7 +274,7 @@ shared_ptr<SymbolExpression> IndexComparisonOperator::TrySolveFor( const SolveKi
 }
 
 
-Expression::Precedence IndexComparisonOperator::GetPrecedenceNF() const
+Expression::Precedence DepthFirstComparisonOperator::GetPrecedenceNF() const
 {
     return Precedence::COMPARE;
 }
@@ -543,7 +543,7 @@ unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
     {    
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
-        // within the full arrowhead model (cf IndexComparisonOperator).
+        // within the full arrowhead model (cf DepthFirstComparisonOperator).
         if( ra->GetOnlyXLink() == rb->GetOnlyXLink() )
         {
             m = false;
@@ -810,7 +810,7 @@ Expression::Precedence IsChildCollectionSizedOperator::GetPrecedenceNF() const
 // ------------------------- IsSimpleCompareEquivalentOperator --------------------------
 
 IsSimpleCompareEquivalentOperator::IsSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a_, 
-                                        shared_ptr<SymbolExpression> b_ ) :
+                                                                      shared_ptr<SymbolExpression> b_ ) :
     a(a_),
     b(b_)
 {
@@ -830,7 +830,7 @@ list<shared_ptr<SymbolExpression> *> IsSimpleCompareEquivalentOperator::GetSymbo
 
 
 unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                                       list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
@@ -843,7 +843,7 @@ unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const Eva
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
-    // within the full arrowhead model (cf IndexComparisonOperator).
+    // within the full arrowhead model (cf DepthFirstComparisonOperator).
     bool res = ( equivalence_relation.Compare(ra->GetOnlyXLink(), rb->GetOnlyXLink()) == EQUAL );
     return make_unique<BooleanResult>( res );    
 }
@@ -859,7 +859,7 @@ shared_ptr<SymbolExpression> IsSimpleCompareEquivalentOperator::TrySolveFor( con
         // Simulate multiset::equal_range() with our ordered domain as an
         // ordering in order to get to the set of equivalent elements without
         // having to iterate over the whole domain. We're still gaining entropy
-        // here though. It would be faster to get to the range via nuggets 
+        // here though. It would be faster to get to the range via xlink_table 
         // (because XLink native comparison will be faster than SimpleCompare)
         // but ar might be an arbitrary force, and not in the domain.
         // See #522 #525

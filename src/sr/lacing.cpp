@@ -32,14 +32,14 @@ const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> arche
 }
 
 
-int Lacing::GetIndexForNode( TreePtr<Node> target_node ) const
+int Lacing::GetOrdinalForNode( TreePtr<Node> target_node ) const
 {
     const Lacing::DecisionNode *decision_node = decision_tree_root.get();
     while(true) 
     {
         if( auto dn_leaf = dynamic_cast<const DecisionNodeLeaf *>(decision_node) )
         {
-            return dn_leaf->GetLacingIndex();
+            return dn_leaf->GetLacingOrdinal();
         }
         else if( auto dn_local_match = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node) )
         {
@@ -54,7 +54,7 @@ int Lacing::GetIndexForNode( TreePtr<Node> target_node ) const
 }
 
 
-bool Lacing::IsIndexLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
+bool Lacing::IsOrdinalLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
 {
     const Lacing::DecisionNode *decision_node_l = decision_tree_root.get();
     const Lacing::DecisionNode *decision_node_r = decision_tree_root.get();
@@ -71,7 +71,7 @@ bool Lacing::IsIndexLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
         else if( auto dn_leaf_l = dynamic_cast<const DecisionNodeLeaf *>(decision_node_l) )
         {
             if( lmin != lmax )
-                lmin = lmax = dn_leaf_l->GetLacingIndex();      
+                lmin = lmax = dn_leaf_l->GetLacingOrdinal();      
         }
         else 
         {
@@ -93,7 +93,7 @@ bool Lacing::IsIndexLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
         else if( auto dn_leaf_r = dynamic_cast<const DecisionNodeLeaf *>(decision_node_r) )
         {
             if( rmin != rmax )
-                rmin = rmax = dn_leaf_r->GetLacingIndex();
+                rmin = rmax = dn_leaf_r->GetLacingOrdinal();
         }
         else 
         {
@@ -304,7 +304,7 @@ void Lacing::BuildRanges()
 
 void Lacing::BuildDecisionTree()
 {
-    // Gather sets of lacing indexes.
+    // Gather sets of lacing ordinals.
     for( int i=0; i<ncats; i++ )
     {
         TreePtr<Node> cat_i = cats_in_lacing_order.at(i);
@@ -314,15 +314,15 @@ void Lacing::BuildDecisionTree()
     }    
     TRACE(cats_to_lacing_sets)("\n");
     
-    // Generate a decision tree that determines lacing index using just
+    // Generate a decision tree that determines lacing ordinal using just
     // IsSubcategory() on some X node (not necessarily seen here)
-    set<int> possible_lacing_indices;
+    set<int> possible_lacing_ordinals;
     for( int i=0; i<ncats; i++ )
-        possible_lacing_indices.insert(i);
+        possible_lacing_ordinals.insert(i);
         
-    decision_tree_root = MakeDecisionSubtree( possible_lacing_indices );
+    decision_tree_root = MakeDecisionSubtree( possible_lacing_ordinals );
     
-    TRACE("Decision tree to obtain lacing index given any X node\n")
+    TRACE("Decision tree to obtain lacing ordinal given any X node\n")
          ("\n"+decision_tree_root->Render());
 }
 
@@ -333,33 +333,33 @@ void Lacing::TestDecisionTree()
     for( int i=0; i<ncats; i++ ) 
     {
         TreePtr<Node> cat = cats_in_lacing_order.at(i);
-        ASSERT( GetIndexForNode( cat ) == i );
+        ASSERT( GetOrdinalForNode( cat ) == i );
     }
     TRACE("Lacing decision tree self-check OK\n");
 }
 
 
-shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &possible_lacing_indices )
+shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &possible_lacing_ordinals )
 {    
-    ASSERT( !possible_lacing_indices.empty() ); // Unexpected error: assert on best_cat should prevent this from failing
+    ASSERT( !possible_lacing_ordinals.empty() ); // Unexpected error: assert on best_cat should prevent this from failing
     
-    // Deal with termination scenarios first: only one possible lacing index
-    if( possible_lacing_indices.size()==1 )
+    // Deal with termination scenarios first: only one possible lacing ordinal
+    if( possible_lacing_ordinals.size()==1 )
     {
-        // Get that index
-        int index = OnlyElementOf( possible_lacing_indices );
+        // Get that ordinal
+        int ordinal = OnlyElementOf( possible_lacing_ordinals );
         
         // Generate leaf node during unwind
-        return make_shared<DecisionNodeLeaf>( index );
+        return make_shared<DecisionNodeLeaf>( ordinal );
     }
     
     // Find the category whose lacing set best halves the set of possible lacing indices
-    int target_inter_size = possible_lacing_indices.size(); // TIMES TWO!!
+    int target_inter_size = possible_lacing_ordinals.size(); // TIMES TWO!!
     int best_diff = target_inter_size+1; // TIMES TWO!!
     TreePtr<Node> best_cat;  
     set<int> best_inter;  
     bool found = false;
-    //TRACEC(possible_lacing_indices)(" target=%d\n", target_inter_size); 
+    //TRACEC(possible_lacing_ordinals)(" target=%d\n", target_inter_size); 
     for( TreePtr<Node> cat : categories )
     {
         // We don't want to test the NULL category, so hopefully the others
@@ -368,12 +368,12 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
             continue; 
             
         // size of intersection between current lacing set and possible indices
-        set<int> inter = IntersectionOf( possible_lacing_indices,
+        set<int> inter = IntersectionOf( possible_lacing_ordinals,
                                          cats_to_lacing_sets.at(cat) );
         //TRACEC(cat)(" intersection=")(inter)("\n");
         
         // Skip where cat didn't provide any useful split of possible indices
-        if( inter.empty() || inter.size()==possible_lacing_indices.size() )
+        if( inter.empty() || inter.size()==possible_lacing_ordinals.size() )
             continue;
                                          
         // Closer to the target is better
@@ -389,10 +389,10 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
         
     ASSERT( found )
           ("Problem with the lacing: no category can differentiate these possible indices:\n")
-          (possible_lacing_indices)("\n");
+          (possible_lacing_ordinals)("\n");
         
     // We'll also need a set of possible indices that are NOT in best lacing set
-    set<int> best_setdiff = DifferenceOf( possible_lacing_indices,
+    set<int> best_setdiff = DifferenceOf( possible_lacing_ordinals,
                                           cats_to_lacing_sets.at(best_cat) );
 
     // Recurse twice on the two hopefully-nearly-halves of the possible set
@@ -400,12 +400,12 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
     shared_ptr<DecisionNode> no = MakeDecisionSubtree( best_setdiff );
     
     // Use the set<int>'s ordering to get min and max elements easily
-    int min_lacing_index = FrontOf(possible_lacing_indices);
-    int max_lacing_index = BackOf(possible_lacing_indices);
+    int min_lacing_ordinal = FrontOf(possible_lacing_ordinals);
+    int max_lacing_ordinal = BackOf(possible_lacing_ordinals);
  
     // Generate a decision node that should decide based on IsSubcategory
     // during the unwind.
-   return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no, min_lacing_index, max_lacing_index );    
+   return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no, min_lacing_ordinal, max_lacing_ordinal );    
 }
 
 
@@ -429,13 +429,13 @@ Lacing::DecisionNode::~DecisionNode()
 Lacing::DecisionNodeLocalMatch::DecisionNodeLocalMatch( TreePtr<Node> category_, 
                                                         shared_ptr<DecisionNode> if_yes_,         
                                                         shared_ptr<DecisionNode> if_no_,
-                                                        int min_lacing_index_,
-                                                        int max_lacing_index_ ) :
+                                                        int min_lacing_ordinal_,
+                                                        int max_lacing_ordinal_ ) :
     category( category_ ),
     if_yes( if_yes_ ),
     if_no( if_no_ ),
-    min_lacing_index( min_lacing_index_ ),
-    max_lacing_index( max_lacing_index_ )
+    min_lacing_ordinal( min_lacing_ordinal_ ),
+    max_lacing_ordinal( max_lacing_ordinal_ )
 {
 }
     
@@ -448,7 +448,7 @@ const Lacing::DecisionNode *Lacing::DecisionNodeLocalMatch::GetNextDecisionNode(
 
 pair<int, int> Lacing::DecisionNodeLocalMatch::GetLacingRange() const 
 {
-    return make_pair( min_lacing_index, max_lacing_index );
+    return make_pair( min_lacing_ordinal, max_lacing_ordinal );
 }
 
 
@@ -461,20 +461,20 @@ string Lacing::DecisionNodeLocalMatch::Render(string pre)
 }
         
 
-Lacing::DecisionNodeLeaf::DecisionNodeLeaf( int lacing_index_ ) :
-    lacing_index( lacing_index_ )
+Lacing::DecisionNodeLeaf::DecisionNodeLeaf( int lacing_ordinal_ ) :
+    lacing_ordinal( lacing_ordinal_ )
 {
 }
 
 
-int Lacing::DecisionNodeLeaf::GetLacingIndex() const
+int Lacing::DecisionNodeLeaf::GetLacingOrdinal() const
 {
-    return lacing_index;
+    return lacing_ordinal;
 }
 
 
 string Lacing::DecisionNodeLeaf::Render(string pre)
 {
-    return SSPrintf("Your lacing index is %d\n", lacing_index );
+    return SSPrintf("Your lacing ordinal is %d\n", lacing_ordinal );
 }
         

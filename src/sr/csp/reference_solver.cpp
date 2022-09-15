@@ -78,9 +78,9 @@ void ReferenceSolver::Plan::DeduceVariables()
             if( arbitrary_forced_variables.count(v) == 1 )
             {
                 // Enforce rule #525 - the arbitrary forces can be outside the
-                // domain and won't have x_tree_db nuggets. This is OK as long
-                // as constraints that have to deal with them don't need nuggets.
-                ASSERT( c->GetVariablesRequiringNuggets().count(v) == 0 )
+                // domain and won't have x_tree_db xlink_table. This is OK as long
+                // as constraints that have to deal with them don't need xlink_table.
+                ASSERT( c->GetVariablesRequiringRows().count(v) == 0 )
                       ( "Constraint:\n")(c)("\nrequires NUGGETS but ")(v)(" is arbitrary\n");
             }
         }        

@@ -63,11 +63,11 @@ public:
         COMMA 
     };    
                 
-    typedef set<SR::PatternLink> VariablesRequiringNuggets;
+    typedef set<SR::PatternLink> VariablesRequiringRows;
                 
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<SR::PatternLink> GetRequiredVariables() const;
-    virtual VariablesRequiringNuggets GetVariablesRequiringNuggets() const;
+    virtual VariablesRequiringRows GetVariablesRequiringRows() const;
 
     void ForDepthFirstWalk( function<void(const Expression *)> f ) const;
     

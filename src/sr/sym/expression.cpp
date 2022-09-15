@@ -22,11 +22,11 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
-Expression::VariablesRequiringNuggets Expression::GetVariablesRequiringNuggets() const
+Expression::VariablesRequiringRows Expression::GetVariablesRequiringRows() const
 {
-    VariablesRequiringNuggets k;
+    VariablesRequiringRows k;
     for( shared_ptr<Expression> p : GetOperands() )
-        k = UnionOf( k, p->GetVariablesRequiringNuggets() );
+        k = UnionOf( k, p->GetVariablesRequiringRows() );
     return k;
 }
 

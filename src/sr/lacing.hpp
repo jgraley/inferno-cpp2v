@@ -24,7 +24,7 @@ class VNStep;
  * types or even all categories - just the ones we're likely to restrict against
  * during search. 
  * 
- * Methods are provided for building/updating the ordering (GetIndexForNode())
+ * Methods are provided for building/updating the ordering (GetOrdinalForNode())
  * and for generating ranges from categories for AllX operators to use with
  * eg upper_bound() etc (GetRangeListForCategory()).
  */
@@ -40,15 +40,15 @@ public:
     void Build( const CategorySet &categories );
 
     // Returns a list of non-overlapping pair(begin, end) ranges in increasing order.
-    // These are the possible values of lacing index that will match the category
+    // These are the possible values of lacing ordinal that will match the category
     // defined by the supplied archetype.
     const list<pair<int, int>> &GetRangeListForCategory( TreePtr<Node> archetype ) const;
     
-    // Returns the lacing index value for the candidate.
-    int GetIndexForNode( TreePtr<Node> node ) const;
+    // Returns the lacing ordinal value for the candidate.
+    int GetOrdinalForNode( TreePtr<Node> node ) const;
 
-    // Equivalent to GetIndexForNode(lnode) < GetIndexForNode(rnode)
-    bool IsIndexLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
+    // Equivalent to GetOrdinalForNode(lnode) < GetOrdinalForNode(rnode)
+    bool IsOrdinalLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
 
 private:    
     class DecisionNode;
@@ -60,7 +60,7 @@ private:
     void BuildRanges();
     void BuildDecisionTree();
     void TestDecisionTree();
-    shared_ptr<DecisionNode> MakeDecisionSubtree( const set<int> &possible_lacing_indices );
+    shared_ptr<DecisionNode> MakeDecisionSubtree( const set<int> &possible_lacing_ordinals );
     static bool LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r );
 
     class DecisionNode
@@ -76,8 +76,8 @@ private:
         DecisionNodeLocalMatch( TreePtr<Node> category, 
                                 shared_ptr<DecisionNode> if_yes,         
                                 shared_ptr<DecisionNode> if_no,
-                                int min_lacing_index,
-                                int max_lacing_index );
+                                int min_lacing_ordinal,
+                                int max_lacing_ordinal );
         const DecisionNode *GetNextDecisionNode( TreePtr<Node> node ) const;
         pair<int, int> GetLacingRange() const;
         string Render(string pre) override;
@@ -86,19 +86,19 @@ private:
         TreePtr<Node> category;
         shared_ptr<DecisionNode> if_yes;
         shared_ptr<DecisionNode> if_no;        
-        int min_lacing_index;
-        int max_lacing_index;
+        int min_lacing_ordinal;
+        int max_lacing_ordinal;
     };
     
     class DecisionNodeLeaf : public DecisionNode
     {
     public:
-        DecisionNodeLeaf( int lacing_index );
-        int GetLacingIndex() const;
+        DecisionNodeLeaf( int lacing_ordinal );
+        int GetLacingOrdinal() const;
         string Render(string pre) override;
         
     private:
-        int lacing_index;
+        int lacing_ordinal;
     };    
             
     set<TreePtr<Node>, SimpleCompare> unique_categories;
